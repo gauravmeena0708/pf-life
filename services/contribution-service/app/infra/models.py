@@ -4,6 +4,8 @@ from datetime import date, datetime
 from sqlalchemy import JSON, BigInteger, Date, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
+IdType = BigInteger().with_variant(Integer, "sqlite")  # SQLite only autoincrements INTEGER keys (unit tests)
+
 
 class Base(DeclarativeBase):
     pass
@@ -12,7 +14,7 @@ class Base(DeclarativeBase):
 class Outbox(Base):
     """Events written in the same transaction as the state change; a relay publishes them."""
     __tablename__ = "outbox"
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(IdType, primary_key=True, autoincrement=True)
     event_id: Mapped[str] = mapped_column(String(36), unique=True)
     event_type: Mapped[str] = mapped_column(String(120))
     aggregate_type: Mapped[str] = mapped_column(String(60))
@@ -36,7 +38,7 @@ class IdempotencyKey(Base):
     """Stored response of a command, so a retried command returns the original result."""
     __tablename__ = "idempotency_keys"
     __table_args__ = (UniqueConstraint("actor_subject", "operation", "key"),)
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(IdType, primary_key=True, autoincrement=True)
     actor_subject: Mapped[str] = mapped_column(String(80))
     operation: Mapped[str] = mapped_column(String(200))
     key: Mapped[str] = mapped_column(String(128))
@@ -49,7 +51,7 @@ class IdempotencyKey(Base):
 class AuditLocal(Base):
     """This service's audit records, shipped to audit-service through the outbox."""
     __tablename__ = "audit_local"
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(IdType, primary_key=True, autoincrement=True)
     at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     actor_subject: Mapped[str] = mapped_column(String(80))
     actor_stakeholder: Mapped[str] = mapped_column(String(60))
@@ -136,7 +138,7 @@ class Journal(Base):
 
 class JournalLine(Base):
     __tablename__ = "journal_lines"
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(IdType, primary_key=True, autoincrement=True)
     journal_id: Mapped[str] = mapped_column(ForeignKey("journals.id"))
     account_code: Mapped[str] = mapped_column(String(40))
     side: Mapped[str] = mapped_column(String(6))

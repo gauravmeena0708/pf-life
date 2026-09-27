@@ -17,7 +17,7 @@ from sqlalchemy import text
 
 from app.domain.ecr import FIELDS, parse, split, validate
 from app.infra.db import sessions
-from epfo_auth import Actor, require_actor
+from epfo_auth import Actor, require_actor, require_grant, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit, find_response, request_hash, store_response
 
@@ -56,9 +56,8 @@ class PublicTrrnLookup(BaseModel):
     answer: int = Field(ge=0, le=99)
 
 
-def _grant(actor: Actor, name: str) -> None:
-    if name not in actor.claims.get("grants", []):
-        raise Problem(403, "/problems/forbidden", "Not allowed", f"The {name} grant is required.")
+EMPLOYER = require_stakeholder("employer.owner", "employer.operator", "employer.signatory")
+MEMBER = require_stakeholder("member")
 
 
 def _establishment(actor: Actor) -> str:
@@ -95,7 +94,7 @@ async def _validation(session, filing: dict[str, Any]):
 
 
 async def _create(body: FilingInput, actor: Actor):
-    _grant(actor, "ecr.prepare")
+    require_grant(actor, "ecr.prepare")
     eid = _establishment(actor)
     if body.format not in ("ECR_TXT", "CSV"):
         raise Problem(400, "/problems/invalid-ecr-format", "Unsupported ECR format")
@@ -132,20 +131,18 @@ def _filing_json(f):
 
 
 @router.post("/api/v1/employers/me/ecr-filings", status_code=201)
-async def create_filing(body: FilingInput, actor: Actor = Depends(require_actor)):
+async def create_filing(body: FilingInput, actor: Actor = Depends(EMPLOYER)):
     return envelope(await _create(body, actor))
 
 
 @router.post("/api/v1/partners/sandbox/payroll/ecr-filings", status_code=201)
-async def partner_create(body: FilingInput, actor: Actor = Depends(require_actor)):
-    if actor.stakeholder != "payroll_provider":
-        raise Problem(403, "/problems/forbidden", "Not allowed")
+async def partner_create(body: FilingInput, actor: Actor = Depends(require_stakeholder("payroll_provider"))):
     return envelope(await _create(body, actor))
 
 
 @router.post("/api/v1/employers/me/ecr-filings/{filingId}/validations")
-async def validate_filing(filingId: str, actor: Actor = Depends(require_actor)):
-    _grant(actor, "ecr.prepare"); eid = _establishment(actor)
+async def validate_filing(filingId: str, actor: Actor = Depends(EMPLOYER)):
+    require_grant(actor, "ecr.prepare"); eid = _establishment(actor)
     async with sessions()() as session, session.begin():
         f = await _fetch_filing(session, filingId, eid)
         if f["state"] not in ("DRAFT", "VALIDATION_FAILED", "VALIDATED"):
@@ -160,8 +157,8 @@ async def validate_filing(filingId: str, actor: Actor = Depends(require_actor)):
 
 
 @router.post("/api/v1/employers/me/ecr-filings/{filingId}/approvals")
-async def approve_filing(filingId: str, body: ApprovalInput, actor: Actor = Depends(require_actor)):
-    _grant(actor, "ecr.approve"); eid = _establishment(actor)
+async def approve_filing(filingId: str, body: ApprovalInput, actor: Actor = Depends(EMPLOYER)):
+    require_grant(actor, "ecr.approve"); eid = _establishment(actor)
     async with sessions()() as session, session.begin():
         f = await _fetch_filing(session, filingId, eid)
         if f["state"] != "VALIDATED": raise Problem(409, "/problems/invalid-state", "Filing must be validated")
@@ -178,15 +175,20 @@ async def approve_filing(filingId: str, body: ApprovalInput, actor: Actor = Depe
 
 
 def _check_stepup(actor: Actor, action: str, filing: dict[str, Any], amount: int):
-    su = actor.step_up or actor.claims.get("step_up") or {}
-    expected = {"action": action, "resource_id": filing["id"], "resource_version": filing["version"], "amount_paise": amount}
-    if any(su.get(k) != v for k, v in expected.items()):
-        raise Problem(403, "/problems/step-up-mismatch", "Step-up confirmation does not match this transaction")
+    require_step_up(actor, action, filing["id"], filing["version"], amount)
+
+
+async def _next_trrn(session) -> str:
+    if session.bind.dialect.name == "postgresql":
+        n = (await session.execute(text("SELECT nextval('trrn_sequence')"))).scalar_one()
+    else:  # SQLite in unit tests has no sequences
+        n = (await session.execute(text("SELECT COUNT(*) FROM challans"))).scalar_one() + 1
+    return f"TRRN{n:013d}"
 
 
 @router.post("/api/v1/employers/me/ecr-filings/{filingId}/submissions", status_code=201)
-async def submit_filing(filingId: str, actor: Actor = Depends(require_actor), idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"), if_match: str | None = Header(default=None, alias="If-Match")):
-    _grant(actor, "ecr.submit"); eid = _establishment(actor)
+async def submit_filing(filingId: str, actor: Actor = Depends(EMPLOYER), idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"), if_match: str | None = Header(default=None, alias="If-Match")):
+    require_grant(actor, "ecr.submit"); eid = _establishment(actor)
     if not idempotency_key: raise Problem(400, "/problems/idempotency-key-required", "Idempotency-Key is required")
     async with sessions()() as session, session.begin():
         bodyhash = request_hash({"filing_id": filingId, "if_match": if_match})
@@ -198,8 +200,7 @@ async def submit_filing(filingId: str, actor: Actor = Depends(require_actor), id
         report = f["validation_report"] if isinstance(f["validation_report"], dict) else json.loads(f["validation_report"])
         total = report["summary"]["totals_paise"]["TOTAL"]
         _check_stepup(actor, "submit-ecr", f, total)
-        n = (await session.execute(text("SELECT nextval('trrn_sequence')"))).scalar_one()
-        trrn = f"TRRN{n:013d}"
+        trrn = await _next_trrn(session)
         breakdown = report["summary"]["totals_paise"]
         await session.execute(text("INSERT INTO challans (trrn, filing_id, establishment_id, status, total_paise, breakdown) VALUES (:t,:f,:e,'DUE',:a,:b)"), {"t": trrn, "f": filingId, "e": eid, "a": total, "b": json.dumps(breakdown)})
         await session.execute(text("UPDATE ecr_filings SET state='SUBMITTED', trrn=:t WHERE id=:f"), {"t": trrn, "f": filingId})
@@ -212,7 +213,7 @@ async def submit_filing(filingId: str, actor: Actor = Depends(require_actor), id
 
 
 @router.get("/api/v1/employers/me/ecr-filings/{filingId}")
-async def get_filing(filingId: str, actor: Actor = Depends(require_actor)):
+async def get_filing(filingId: str, actor: Actor = Depends(EMPLOYER)):
     eid = _establishment(actor)
     async with sessions()() as session:
         f = await _fetch_filing(session, filingId, eid)
@@ -220,7 +221,7 @@ async def get_filing(filingId: str, actor: Actor = Depends(require_actor)):
 
 
 @router.get("/api/v1/employers/me/ecr-filings")
-async def list_filings(actor: Actor = Depends(require_actor), wageMonth: str | None = Query(default=None), type: str | None = Query(default=None)):
+async def list_filings(actor: Actor = Depends(EMPLOYER), wageMonth: str | None = Query(default=None), type: str | None = Query(default=None)):
     eid = _establishment(actor)
     async with sessions()() as session:
         result = await session.execute(text("SELECT * FROM ecr_filings WHERE establishment_id=:e AND (:m IS NULL OR wage_month=:m) AND (:t IS NULL OR filing_type=:t) ORDER BY wage_month DESC,version DESC"), {"e": eid, "m": wageMonth, "t": type})
@@ -236,7 +237,7 @@ async def _challan(trrn: str, eid: str):
 
 
 @router.get("/api/v1/employers/me/challans")
-async def list_challans(actor: Actor = Depends(require_actor)):
+async def list_challans(actor: Actor = Depends(EMPLOYER)):
     eid = _establishment(actor)
     async with sessions()() as session:
         r = await session.execute(text("SELECT * FROM challans WHERE establishment_id=:e ORDER BY created_at DESC"), {"e": eid})
@@ -244,19 +245,19 @@ async def list_challans(actor: Actor = Depends(require_actor)):
 
 
 @router.get("/api/v1/employers/me/challans/{trrn}")
-async def get_challan(trrn: str, actor: Actor = Depends(require_actor)):
+async def get_challan(trrn: str, actor: Actor = Depends(EMPLOYER)):
     return envelope(await _challan(trrn, _establishment(actor)))
 
 
 @router.get("/api/v1/employers/me/challans/{trrn}/receipt")
-async def challan_receipt(trrn: str, actor: Actor = Depends(require_actor)):
+async def challan_receipt(trrn: str, actor: Actor = Depends(EMPLOYER)):
     row = await _challan(trrn, _establishment(actor))
     if row["status"] != "PAID": raise Problem(409, "/problems/challan-not-paid", "Challan is not paid", f"Current status: {row['status']}. Pay the challan and retry for a receipt.", current_status=row["status"], next="Pay the challan")
     return envelope({"trrn": trrn, "status": row["status"], "paid_at": row.get("paid_at"), "total_paise": row["total_paise"]})
 
 
 @router.post("/api/v1/public/demo-calculations/epf")
-async def calculate(body: CalculatorInput):
+async def calculate(body: CalculatorInput, actor: Actor = Depends(require_actor)):  # anonymous callers still pass the gateway
     rs = ruleset()
     out = split(body.epf_wages_paise, body.eps_wages_paise, body.age_years, rs)
     calc_id = str(uuid.uuid4())
@@ -267,7 +268,7 @@ async def calculate(body: CalculatorInput):
 
 
 @router.post("/api/v1/public/trrn-status-lookups")
-async def public_trrn_status(body: PublicTrrnLookup):
+async def public_trrn_status(body: PublicTrrnLookup, actor: Actor = Depends(require_actor)):
     """Expose only payment state; never disclose employer, member, or amount data."""
     async with sessions()() as session:
         row = (await session.execute(text("""SELECT c.status,c.created_at,c.paid_at,f.wage_month
@@ -284,14 +285,12 @@ async def public_trrn_status(body: PublicTrrnLookup):
 
 
 @router.get("/api/v1/members/me/passbook")
-async def passbook(actor: Actor = Depends(require_actor)):
-    if actor.stakeholder != "member": raise Problem(403, "/problems/forbidden", "Member access required")
+async def passbook(actor: Actor = Depends(MEMBER)):
     return envelope(await _passbook(actor.subject, None))
 
 
 @router.get("/api/v1/members/me/accounts/{accountLinkId}/passbook")
-async def account_passbook(accountLinkId: str, actor: Actor = Depends(require_actor)):
-    if actor.stakeholder != "member": raise Problem(403, "/problems/forbidden", "Member access required")
+async def account_passbook(accountLinkId: str, actor: Actor = Depends(MEMBER)):
     data = await _passbook(actor.subject, accountLinkId)
     if not data["accounts"]: raise Problem(404, "/problems/not-found", "Not found", "Account not found.")
     return envelope(data)

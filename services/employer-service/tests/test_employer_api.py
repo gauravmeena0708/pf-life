@@ -167,4 +167,6 @@ def test_public_search_minimal_fields(api):
     r = api.get("/api/v1/public/establishments", params={"query": "synthetic"}, headers=token("anonymous", "public", establishment=None))
     assert r.status_code == 200
     item = r.json()["data"][0]
-    assert set(item) == {"establishment_id", "legal_name", "office_id", "status"}
+    assert set(item) == {"establishment_id", "legal_name", "registration_number", "office_id", "pincode", "city",
+                         "district", "establishment_type", "industry_group", "exemption_status", "status"}
+    assert not {"pan", "gstin", "verified_at"} & set(item)  # public master fields only, never identifiers
