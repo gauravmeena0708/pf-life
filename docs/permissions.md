@@ -148,6 +148,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/higher-pension-options/{optionId}` | P | self — caller's own member record only |  |
 | `GET /members/me/kyc` | P | self — caller's own member record only |  |
 | `GET /members/me/nominations` | P | self — caller's own member record only |  |
+| `GET /members/me/pension-eligibility-preview` | P | self — caller's own member record only |  |
 | `GET /members/me/pension-scheme-certificate` | P | self — caller's own member record only |  |
 | `GET /members/me/tax/form-16a` | P | self — caller's own member record only |  |
 | `GET /members/me/tax/taxable-interest` | P | self — caller's own member record only |  |
@@ -158,6 +159,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /grievances/{grievanceId}/feedback` | P | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/reminders` | P | complainant or the assigned office |  |
 | `POST /members/me/claims/{claimId}/documents` | P | self — caller's own member record only |  |
+| `POST /members/me/claims/{claimId}/re-disbursement-requests` | P | self — caller's own member record only |  |
 | `POST /members/me/claims/{claimId}/withdrawals` | P | self — caller's own member record only |  |
 | `POST /members/me/exits` | P | self — caller's own member record only | yes |
 | `POST /members/me/higher-pension-options` | P | self — caller's own member record only | yes |
@@ -165,6 +167,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /members/me/nominations` | P | self — caller's own member record only | yes |
 | `POST /members/me/pension-applications` | P | self — caller's own member record only |  |
 | `POST /members/me/pension-scheme-certificates` | P | self — caller's own member record only | yes |
+| `POST /members/me/pension-scheme-certificates/{certId}/surrenders` | P | self — caller's own member record only | yes |
 | `POST /members/me/tax/form-15g-15h` | P | self — caller's own member record only |  |
 | `POST /members/me/transfers` | P | self — caller's own member record only |  |
 | `POST /members/me/transfers/auto/{transferId}/confirmations` | P | self — caller's own member record only | yes |
@@ -215,6 +218,13 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /claimants/death-claims/{claimId}` | P | self — claimant's own claims only |  |
 | `POST /claimants/death-claims` | P | self — claimant's own claims only |  |
+
+**`claimant.nominee`** — Co-beneficiary on a multi-beneficiary death claim (PF / EDLI / pension) holding an allocated percentage share, including shares already settled in the legacy system
+
+| Endpoint | Status | Scope | Step-up |
+|---|---|---|---|
+| `GET /claimants/death-claims/{claimId}` | P | self — claimant's own claims only |  |
+| `POST /claimants/death-claims/{claimId}/beneficiaries` | P | self — claimant's own claims only |  |
 
 **`intl_worker`** — International worker (inbound or outbound, CoC holder)
 
@@ -287,6 +297,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /employers/me/office-transfer-requests` | P | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/proceedings/{caseId}/submissions` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/transfer-requests/{transferId}/decisions` | P | own establishment (X-Establishment-Id validated against grants) | yes |
+| `POST /employers/me/vishwas-applications` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/voluntary-coverage-requests` | P | own registration request |  |
 | `POST /international/coc-applications/{id}/extensions` | P | own application (employer) or IWU role |  |
 | `POST /international/coc-applications/{id}/signed-uploads` | P | own application (employer) or IWU role |  |
@@ -372,6 +383,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /partners/liquidators/claims/{claimId}` | P | authenticated partner client, own records only |  |
+- `exempted.trust_liquidator` — Exemption surrender officer / liquidator of a PF trust — hands over past accumulations and member ledgers when an exemption is surrendered or cancelled: *no endpoints (acts through an adapter or through another role)*
 
 ### C. Field office — Regional Office (RO) and Sub-Regional Office
 
@@ -388,6 +400,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/member-change-requests` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/members/{uan}` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | P | office jurisdiction of the caller's posting |  |
+| `POST /office/cases/{caseId}/documents/{docId}/attestation-views` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/ecr-filings/{filingId}/rejections` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/freeze-cases/{caseId}/verifications` | P | office jurisdiction of the caller's posting |  |
@@ -399,6 +412,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/receipts/{receiptId}/trrn-adjustments` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/tds/computations` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/transfers/{transferId}/decisions` | P | office jurisdiction of the caller's posting | yes |
+| `POST /office/transfers/{transferId}/recredits` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/ledger-adjustments` | ? | office jurisdiction of the caller's posting | yes |
 | `POST /office/vdr-entries` | ? | office jurisdiction of the caller's posting | yes |
 | `POST /office/vdr-entries/{vdrId}/ecr-reconciliations` | ? | office jurisdiction of the caller's posting | yes |
@@ -438,12 +452,22 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/member-change-requests/{requestId}/verifications` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals` | P | office jurisdiction of the caller's posting | yes |
 
+**`fo.fa_accounts`** — DA / SS in the F&A (Accounts) wing — ledger debit posting, **Claim Authorization Document (CAD)** generation, reconciliation of rejected / returned payments
+
+| Endpoint | Status | Scope | Step-up |
+|---|---|---|---|
+| `GET /office/claims/{claimId}/cad` | P | office jurisdiction of the caller's posting |  |
+| `GET /office/system/cad-static-data` | P | office jurisdiction of the caller's posting |  |
+| `POST /office/claims/{claimId}/cad` | P | office jurisdiction of the caller's posting | yes |
+
 **`fo.apfc`** — APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `POST /office/cases/{caseId}/second-approvals` | W | office jurisdiction of the caller's posting | yes |
+| `GET /office/death-claims/{claimId}/shares-summary` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P | office jurisdiction of the caller's posting | yes |
+| `POST /office/claims/{claimId}/re-disbursement-approvals` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/cases/{caseId}/escaped-assessments-7c` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/cases/{caseId}/hearings` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/compliance/cases/{caseId}/notices` | P | office jurisdiction of the caller's posting | yes |
@@ -452,12 +476,14 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/compliance/cases/{caseId}/reviews-7b` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/inspections` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/compliance/membership-disputes` | P | office jurisdiction of the caller's posting | yes |
+| `POST /office/compliance/vishwas-applications/{applicationId}/decisions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishment-registrations/{reqId}/coverage-decisions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/freeze-cases/{caseId}/verifications` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/member-change-requests/{requestId}/decisions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/members/{uan}/freezes` | P | office jurisdiction of the caller's posting | yes |
+| `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/ledger-adjustments/{adjustmentId}/approvals` | ? | office jurisdiction of the caller's posting | yes |
 
 **`fo.rpfc1`** — RPFC-I — regional head of wings
@@ -477,11 +503,13 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/cases/{caseId}/second-approvals` | W | office jurisdiction of the caller's posting | yes |
 | `GET /office/accounts/inoperative` | P | office jurisdiction of the caller's posting |  |
+| `GET /office/members/{uan}/locks` | P | office jurisdiction of the caller's posting |  |
 | `POST /audit/concurrent/alerts/{alertId}/replies` | P | read-only for auditors; audit writes by audit roles only |  |
 | `POST /audit/internal/paras/{paraId}/replies` | P | read-only for auditors; audit writes by audit roles only |  |
 | `POST /office/establishments/{estId}/defreezes` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/freezes` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/members/{uan}/defreezes` | P | office jurisdiction of the caller's posting | yes |
+| `POST /office/system/locks/{lockId}/release` | P | office jurisdiction of the caller's posting | yes |
 
 **`fo.cash`** — Cashier / Cash branch
 
@@ -490,6 +518,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/claims/{claimId}/payment-instructions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/claims/{claimId}/reissues` | W | office jurisdiction of the caller's posting | yes |
 | `GET /office/receipts/unreconciled` | P | office jurisdiction of the caller's posting |  |
+| `POST /office/ecr-filings/{filingId}/payment-rejections` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/payment-scrolls` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/payment-scrolls/{scrollId}/return-reconciliations` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/vdr-entries` | ? | office jurisdiction of the caller's posting | yes |
@@ -500,12 +529,21 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `POST /office/physical-claims` | P | office jurisdiction of the caller's posting |  |
 
+**`fo.pro_intake`** — PRO counter inwarding officer — inwards claims at the PRO counter (physical dockets, death-certificate checks, UAN registration problems surfaced at intake)
+
+| Endpoint | Status | Scope | Step-up |
+|---|---|---|---|
+| `POST /office/physical-claims` | P | office jurisdiction of the caller's posting |  |
+| `POST /office/physical-claims/{intakeId}/identity-validations` | P | office jurisdiction of the caller's posting |  |
+
 **`fo.da_pension`** — DA (Pension) — worksheet, PPO, transfer-in, Special 10D
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `POST /office/pensions/ppo-issuances` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/ppos/{ppoId}/dispatches` | P | office jurisdiction of the caller's posting |  |
+| `POST /office/pensions/scheme-certificates/{certId}/surrender-adjudications` | P | office jurisdiction of the caller's posting | yes |
+| `POST /office/pensions/service-aggregations` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/special-10d-cases` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/pensions/transfers-in` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/pensions/worksheets` | P | office jurisdiction of the caller's posting |  |
@@ -521,6 +559,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /office/pensions/life-certificates/overdue` | P | office jurisdiction of the caller's posting |  |
+| `POST /office/pensions/brs-reconciliations` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/higher-pension-options/{optionId}/decisions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/ppos/{ppoId}/e-signatures` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/worksheets/{worksheetId}/approvals` | P | office jurisdiction of the caller's posting | yes |
@@ -575,6 +614,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /office/exempted/{estId}/audits` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/exempted/{estId}/returns` | P | office jurisdiction of the caller's posting |  |
+| `POST /office/exempted/{estId}/past-accumulation-ingestions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/{estId}/past-accumulation-transfers` | P | office jurisdiction of the caller's posting | yes |
 
 **`fo.edli`** — EDLI claims handling
@@ -870,6 +910,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /monitoring/claims` | W | role jurisdiction; aggregates with small-group suppression |  |
 | `GET /monitoring/contributions` | W | role jurisdiction; aggregates with small-group suppression |  |
 | `GET /public/statistics` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
+- `gov.pmvbry_admin` — Incentive-scheme reconciler for PMVBRY (and legacy PMRPY / ABRY) — validates employment-linked incentives computed from ECR data: *no endpoints (acts through an adapter or through another role)*
 - `gov.parliament` — Parliament (questions answered through MoLE): *no endpoints (acts through an adapter or through another role)*
 
 **`gov.cag`** — Comptroller & Auditor General
@@ -911,6 +952,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /cpps/disbursement-runs` | P | national (CPPS service role) | yes |
 | `POST /cpps/reconciliations` | P | national (CPPS service role) | yes |
 - `tech.epfo3` — EPFO 3.0 core-banking platform and auto-settlement engine (a system actor making automated decisions): *no endpoints (acts through an adapter or through another role)*
+- `tech.batch.annual_accounts` — Annual-accounts batch engine — year-end interest crediting; holds an exclusive lock on each member ledger while it runs (claims are blocked meanwhile): *no endpoints (acts through an adapter or through another role)*
 
 **`tech.ai_service`** — AI / analytics service account (advisory only)
 

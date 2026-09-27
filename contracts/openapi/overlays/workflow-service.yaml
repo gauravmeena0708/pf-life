@@ -1,0 +1,66 @@
+# Hand-written overlay for workflow-service. Merged by docs/tools/build_gate0.py.
+# Source: ../samadhan-setu files/PF_LIFE_INTEGRATION_SPECIFICATION.md §3.C. Path parameter renamed
+# {memberId} -> {uan} to match the existing /office/members/{uan} routes.
+
+paths:
+  /office/members/{uan}/locks:
+    get:
+      responses:
+        "200":
+          description: Active locks on the member ledger
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data: {type: array, items: {$ref: "#/components/schemas/LedgerLock"}}
+
+  /office/system/locks/{lockId}/release:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [reason]
+              properties:
+                reason: {type: string, minLength: 10}
+      responses:
+        "200":
+          description: Lock released; LockReleased.v1 emitted and audited
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Envelope"}
+        "409":
+          description: Lock is not stale (its owner is still alive); release refused
+          content:
+            application/problem+json:
+              schema: {$ref: "#/components/schemas/Problem"}
+
+  /office/cases/{caseId}/documents/{docId}/attestation-views:
+    post:
+      responses:
+        "201":
+          description: View recorded; the case's approve action is now enabled for this caseworker
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Envelope"}
+
+components:
+  schemas:
+    LedgerLock:
+      type: object
+      description: Locks are leases with a TTL; a crashed holder's lock expires on its own and can also be released under supervision.
+      required: [lock_id, lock_scope, resource_key, acquired_at, expires_at, acquired_by, is_stale]
+      properties:
+        lock_id: {type: string}
+        lock_scope: {enum: [ANNUAL_ACCOUNTING, CLAIM_ADJUDICATION, ECR_POSTING]}
+        resource_key: {type: string}
+        acquired_at: {type: string, format: date-time}
+        expires_at: {type: string, format: date-time}
+        acquired_by: {type: string, description: Actor or batch ID holding the lock}
+        is_stale: {type: boolean}

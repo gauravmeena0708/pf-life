@@ -216,6 +216,55 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/cases/{caseId}/documents/{docId}/attestation-views:
+    post:
+      operationId: postOfficeCasesCaseIdDocumentsDocIdAttestationViews
+      summary: 'Record that the caseworker opened the employer-signed PDF / DSC document; enables the approve action (tracker:
+        "View the'
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: docId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '201':
+          description: View recorded; the case's approve action is now enabled for this caseworker
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: workflow
+      x-callers:
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Record that the caseworker opened the employer-signed PDF / DSC document; enables the approve action (tracker:
+        "View the employer signed pdf first")'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/cases/{caseId}/recommendations:
     post:
       operationId: postOfficeCasesCaseIdRecommendations
@@ -339,6 +388,47 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/members/{uan}/locks:
+    get:
+      operationId: getOfficeMembersUanLocks
+      summary: Active locks on a member ledger (annual accounts, claim adjudication, ECR posting) with owner and expiry
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: uan
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '200':
+          description: Active locks on the member ledger
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Envelope'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/LedgerLock'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: workflow
+      x-callers:
+      - fo.oic
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
   /office/outreach-camps/{campId}/assisted-requests:
     post:
       operationId: postOfficeOutreachCampsCampIdAssistedRequests
@@ -374,6 +464,63 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/system/locks/{lockId}/release:
+    post:
+      operationId: postOfficeSystemLocksLockIdRelease
+      summary: 'Supervised release of an orphaned lock (reason required) → LockReleased.v1 (tracker: "Unable to lock process",
+        phantom "'
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: lockId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '200':
+          description: Lock released; LockReleased.v1 emitted and audited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '409':
+          description: Lock is not stale (its owner is still alive); release refused
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: workflow
+      x-callers:
+      - fo.oic
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Supervised release of an orphaned lock (reason required) → LockReleased.v1 (tracker: "Unable to lock process",
+        phantom "concurrent claims already under processing")'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+              - reason
+              properties:
+                reason:
+                  type: string
+                  minLength: 10
   /office/work-queue:
     get:
       operationId: getOfficeWorkQueue
@@ -684,6 +831,39 @@ components:
           description: Resource-specific; defined when the endpoint is implemented
         meta:
           $ref: '#/components/schemas/Meta'
+    LedgerLock:
+      type: object
+      description: Locks are leases with a TTL; a crashed holder's lock expires on its own and can also be released under
+        supervision.
+      required:
+      - lock_id
+      - lock_scope
+      - resource_key
+      - acquired_at
+      - expires_at
+      - acquired_by
+      - is_stale
+      properties:
+        lock_id:
+          type: string
+        lock_scope:
+          enum:
+          - ANNUAL_ACCOUNTING
+          - CLAIM_ADJUDICATION
+          - ECR_POSTING
+        resource_key:
+          type: string
+        acquired_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        acquired_by:
+          type: string
+          description: Actor or batch ID holding the lock
+        is_stale:
+          type: boolean
   responses:
     Ok:
       description: Success

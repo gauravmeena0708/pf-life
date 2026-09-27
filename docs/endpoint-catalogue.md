@@ -197,6 +197,14 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/vdr-entries/{vdrId}/eo-certifications` 🔐 | Enforcement Officer certifies a revised ECR in the VDR-ECR correction process | ? | 3 | contribution |
 | `PUT /ho/config/interest-rates/{financialYear}` 🔐 | Record the approved annual interest rate (CBT recommendation, Ministry concurrence) — illustrative in the POC | P | 2 | contribution |
 
+
+**Added from the Samadhan Setu integration spec** (`../samadhan-setu files/PF_LIFE_INTEGRATION_SPECIFICATION.md`, checked against the tracker issues)
+
+| Method & path | Function | Status | Phase | Owner |
+|---|---|---|---|---|
+| `POST /office/ecr-filings/{filingId}/payment-rejections` 🔐 | Cash / Accounts rejects an unpaid or erroneous challan stuck in pending bank status (tracker: "Unable to reject ecr payment") | P | 2 | contribution |
+| `POST /office/transfers/{transferId}/recredits` 💰🔐 | Recredit a rejected transfer-in back to the member ledger (VDR recredit; tracker: "Recredit of transfer-in rejected cases") | P | 2 | contribution |
+
 ## 6. Member self-service
 
 | Method & path | Function | Status | Phase | Owner |
@@ -271,6 +279,14 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/transfers/{transferId}/decisions` 🔐 | Process a Form 13 transfer between member IDs / offices | P | 2 | claim |
 | `POST /office/edli-claims/{claimId}/decisions` 💰🔐 | Decide EDLI assurance-benefit claim | P | 2 | claim |
 
+
+**Added from the Samadhan Setu integration spec** (`../samadhan-setu files/PF_LIFE_INTEGRATION_SPECIFICATION.md`, checked against the tracker issues)
+
+| Method & path | Function | Status | Phase | Owner |
+|---|---|---|---|---|
+| `POST /claimants/death-claims/{claimId}/beneficiaries` 💰 | Inward an additional co-beneficiary / legal heir on an open death claim | P | 2 | claim |
+| `POST /members/me/claims/{claimId}/re-disbursement-requests` 💰 | Member submits corrected bank details after a payment return, without re-filing the claim | P | 2 | claim |
+
 ## 8. Office claim processing and member accounts
 
 | Method & path | Function | Status | Phase | Owner |
@@ -310,6 +326,21 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/establishments/{estId}/defreezes` 🔐 | De-freeze an establishment, maker-checker | P | 2 | employer |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | Inoperative-account crowdsourcing verification through co-workers' logins | P | 3 | member |
 | `POST /office/outreach-camps/{campId}/assisted-requests` | Requests taken at Nidhi Aapke Nikat camps | P | 3 | workflow |
+
+
+**Added from the Samadhan Setu integration spec** (`../samadhan-setu files/PF_LIFE_INTEGRATION_SPECIFICATION.md`, checked against the tracker issues)
+
+| Method & path | Function | Status | Phase | Owner |
+|---|---|---|---|---|
+| `POST /office/claims/{claimId}/cad` 💰🔐 | Generate the **Claim Authorization Document (CAD)**: interest split, TDS and net payable, with the rule and static-data versions used | P | 2 | claim |
+| `GET /office/claims/{claimId}/cad` | View the generated CAD | P | 2 | claim |
+| `GET /office/system/cad-static-data` | Diagnostic view of CAD static reference data (interest tables, bank branch master) and its version (tracker: "Failed to load CAD static Data") | P | 2 | claim |
+| `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` 🔐 | Amend a beneficiary's share (nominee deceased, court order, share already settled in legacy, guardian appointment) | P | 2 | claim |
+| `GET /office/death-claims/{claimId}/shares-summary` | Allocated vs legacy-settled vs disbursed vs pending share of a death claim | P | 2 | claim |
+| `POST /office/claims/{claimId}/re-disbursement-approvals` 💰🔐 | APFC authorises a new payment after a return, without reopening adjudication | P | 2 | claim |
+| `GET /office/members/{uan}/locks` | Active locks on a member ledger (annual accounts, claim adjudication, ECR posting) with owner and expiry | P | 2 | workflow |
+| `POST /office/system/locks/{lockId}/release` 🔐 | Supervised release of an orphaned lock (reason required) → `LockReleased.v1` (tracker: "Unable to lock process", phantom "concurrent claims already under processing") | P | 2 | workflow |
+| `POST /office/cases/{caseId}/documents/{docId}/attestation-views` | Record that the caseworker opened the employer-signed PDF / DSC document; enables the approve action (tracker: "View the employer signed pdf first") | P | 2 | workflow |
 
 ## 9. Pension (EPS) and pensioners
 
@@ -355,6 +386,17 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | `POST /cpps/reconciliations` 🔐 | CPPS reconciliation of paid statements | P | 2 | pension |
 | `POST /integrations/mock-pension-bank/paid-statements` | Signed paid-statement callback from the pension bank | M | 2 | pension |
 | `GET /ho/actuarial/extracts` | EPS data extract for actuarial valuation (no direct identifiers) | P | 3 | pension |
+
+
+**Added from the Samadhan Setu integration spec** (`../samadhan-setu files/PF_LIFE_INTEGRATION_SPECIFICATION.md`, checked against the tracker issues)
+
+| Method & path | Function | Status | Phase | Owner |
+|---|---|---|---|---|
+| `GET /members/me/pension-eligibility-preview` | Pre-check pension eligibility across all member IDs under the UAN; flags untransferred service (threshold from illustrative config) | P | 2 | pension |
+| `POST /office/pensions/service-aggregations` 🔐 | DA (Pension) aggregates untransferred past service into the calculation sheet | P | 2 | pension |
+| `POST /members/me/pension-scheme-certificates/{certId}/surrenders` 💰🔐 | Surrender a Scheme Certificate to convert it to monthly pension (Form 10D) or withdrawal benefit (Form 10C) | P | 2 | pension |
+| `POST /office/pensions/scheme-certificates/{certId}/surrender-adjudications` 🔐 | DA (Pension) validates and cancels a surrendered Scheme Certificate | P | 2 | pension |
+| `POST /office/pensions/brs-reconciliations` 💰🔐 | Monthly Bank Reconciliation Statement (BRS) of pension scrolls vs bank debit advices | P | 2 | pension |
 
 ## 10. Compliance, e-proceedings and enforcement
 
@@ -402,6 +444,14 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | `GET /ho/reports/proceedings` | HO view of e-Proceedings (7A, 14B & 7Q, virtual hearings) | P | 3 | reporting |
 | `GET /ho/reports/recovery` | HO recovery monitoring | P | 3 | reporting |
 
+
+**Added from the Samadhan Setu integration spec** (`../samadhan-setu files/PF_LIFE_INTEGRATION_SPECIFICATION.md`, checked against the tracker issues)
+
+| Method & path | Function | Status | Phase | Owner |
+|---|---|---|---|---|
+| `POST /employers/me/vishwas-applications` 💰 | Apply under **VISHWAS** (one-time settlement of 14B damages / penalty disputes at reduced rates for past defaults) | P | 2 | compliance |
+| `POST /office/compliance/vishwas-applications/{applicationId}/decisions` 🔐 | Recalculate damages under VISHWAS and decide the application → `DemandRaised.v1` for the revised amount | P | 2 | compliance |
+
 ## 11. Exempted establishments (PF trusts)
 
 | Method & path | Function | Status | Phase | Owner |
@@ -423,6 +473,13 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | `GET /office/exempted/{estId}/returns` | Exemption cell reviews trust returns | P | 3 | contribution |
 | `GET /office/exempted/{estId}/audits` | Exemption cell reviews trust audit reports | P | 3 | employer |
 | `POST /ho/exemptions/{estId}/decisions` 🔐 | HO grants / cancels exemption | P | 3 | employer |
+
+
+**Added from the Samadhan Setu integration spec** (`../samadhan-setu files/PF_LIFE_INTEGRATION_SPECIFICATION.md`, checked against the tracker issues)
+
+| Method & path | Function | Status | Phase | Owner |
+|---|---|---|---|---|
+| `POST /office/exempted/{estId}/past-accumulation-ingestions` 💰🔐 | Bulk-ingest member ledgers and past accumulations of a surrendered PF trust | P | 2 | contribution |
 
 ## 12. International workers
 

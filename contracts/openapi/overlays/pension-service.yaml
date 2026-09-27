@@ -1,0 +1,44 @@
+# Hand-written overlay for pension-service. Merged by docs/tools/build_gate0.py.
+# Source: ../samadhan-setu files/PF_LIFE_INTEGRATION_SPECIFICATION.md §3.B, corrected: the service threshold
+# comes from illustrative configuration (init.md §0.5), not a hard-coded statutory figure; no raw UAN in the response.
+
+paths:
+  /members/me/pension-eligibility-preview:
+    get:
+      responses:
+        "200":
+          description: Eligibility preview across all member IDs linked to the caller's UAN
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties: {data: {$ref: "#/components/schemas/PensionEligibilityPreview"}}
+
+components:
+  schemas:
+    PensionEligibilityPreview:
+      type: object
+      additionalProperties: false
+      required: [rule_version, total_eligible_service_months, threshold_months, meets_threshold, recommended_form, service_breakdown]
+      properties:
+        rule_version: {type: string, description: Version of config/demo-rules.yaml used (ILLUSTRATIVE_ONLY)}
+        total_eligible_service_months: {type: integer, minimum: 0}
+        threshold_months: {type: integer, minimum: 0, description: Service threshold from the illustrative rule set}
+        meets_threshold: {type: boolean}
+        recommended_form: {enum: [FORM_10D, FORM_10C_WITHDRAWAL, SCHEME_CERTIFICATE]}
+        service_breakdown:
+          type: array
+          items:
+            type: object
+            required: [account_link_id, contributory_months, transferred_to_primary]
+            properties:
+              account_link_id: {type: string, description: Opaque link to one member ID}
+              member_id_masked: {type: string}
+              establishment_name: {type: string}
+              contributory_months: {type: integer, minimum: 0}
+              transferred_to_primary: {type: boolean}
+              action_required:
+                type: [string, "null"]
+                enum: [MEMBER_MUST_FILE_FORM_13_TRANSFER_FIRST, SERVICE_UNDER_AGGREGATION, null]

@@ -225,6 +225,12 @@ stakeholders:
     step_up: false
     via:
     - F04.claim_file
+  - endpoint: POST /members/me/claims/{claimId}/re-disbursement-requests
+    status: P
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F04.redisburse_request
   - endpoint: GET /members/me/tax/form-16a
     status: P
     scope: self — caller's own member record only
@@ -303,6 +309,18 @@ stakeholders:
     step_up: false
     via:
     - F05.apply
+  - endpoint: GET /members/me/pension-eligibility-preview
+    status: P
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F05.preview
+  - endpoint: POST /members/me/pension-scheme-certificates/{certId}/surrenders
+    status: P
+    scope: self — caller's own member record only
+    step_up: true
+    via:
+    - F05.sc_surrender
   - endpoint: POST /members/me/higher-pension-options
     status: P
     scope: self — caller's own member record only
@@ -518,6 +536,19 @@ stakeholders:
     step_up: false
     via:
     - F04.death_claim
+  claimant.nominee:
+  - endpoint: POST /claimants/death-claims/{claimId}/beneficiaries
+    status: P
+    scope: self — claimant's own claims only
+    step_up: false
+    via:
+    - F04.co_beneficiary
+  - endpoint: GET /claimants/death-claims/{claimId}
+    status: P
+    scope: self — claimant's own claims only
+    step_up: false
+    via:
+    - F04.co_beneficiary
   intl_worker:
   - endpoint: GET /members/me/international
     status: P
@@ -805,6 +836,12 @@ stakeholders:
     step_up: false
     via:
     - F06.employer_reply
+  - endpoint: POST /employers/me/vishwas-applications
+    status: P
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.vishwas_apply
   - endpoint: POST /international/coc-applications
     status: M
     scope: own application (employer) or IWU role
@@ -1089,6 +1126,7 @@ stakeholders:
     step_up: false
     via:
     - F01.liquidation
+  exempted.trust_liquidator: []
   fo.da_accounts:
   - endpoint: GET /office/member-change-requests
     status: P
@@ -1169,6 +1207,12 @@ stakeholders:
     step_up: false
     via:
     - F04.process
+  - endpoint: POST /office/cases/{caseId}/documents/{docId}/attestation-views
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attestation_view
   - endpoint: POST /office/tds/computations
     status: P
     scope: office jurisdiction of the caller's posting
@@ -1181,6 +1225,12 @@ stakeholders:
     step_up: true
     via:
     - F04.transfer_process
+  - endpoint: POST /office/transfers/{transferId}/recredits
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F04.transfer_recredit
   - endpoint: POST /office/pension-claims/{claimId}/input-data-sheets
     status: P
     scope: office jurisdiction of the caller's posting
@@ -1346,6 +1396,25 @@ stakeholders:
     step_up: true
     via:
     - F11.approve
+  fo.fa_accounts:
+  - endpoint: POST /office/claims/{claimId}/cad
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F04.cad
+  - endpoint: GET /office/claims/{claimId}/cad
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.cad
+  - endpoint: GET /office/system/cad-static-data
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.cad
   fo.apfc:
   - endpoint: POST /office/establishment-registrations/{reqId}/coverage-decisions
     status: P
@@ -1383,6 +1452,24 @@ stakeholders:
     step_up: true
     via:
     - F04.approve_apfc
+  - endpoint: POST /office/claims/{claimId}/re-disbursement-approvals
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F04.redisburse_approve
+  - endpoint: PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F04.shares
+  - endpoint: GET /office/death-claims/{claimId}/shares-summary
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.shares
   - endpoint: POST /office/compliance/inspections
     status: P
     scope: office jurisdiction of the caller's posting
@@ -1425,6 +1512,12 @@ stakeholders:
     step_up: true
     via:
     - F06.order
+  - endpoint: POST /office/compliance/vishwas-applications/{applicationId}/decisions
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F06.vishwas_decide
   - endpoint: POST /office/compliance/cases/{caseId}/prosecutions
     status: P
     scope: office jurisdiction of the caller's posting
@@ -1481,6 +1574,18 @@ stakeholders:
     step_up: true
     via:
     - F04.approve_oic
+  - endpoint: GET /office/members/{uan}/locks
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.lock_admin
+  - endpoint: POST /office/system/locks/{lockId}/release
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F04.lock_admin
   - endpoint: POST /office/establishments/{estId}/freezes
     status: P
     scope: office jurisdiction of the caller's posting
@@ -1542,6 +1647,12 @@ stakeholders:
     step_up: true
     via:
     - F03.receipts
+  - endpoint: POST /office/ecr-filings/{filingId}/payment-rejections
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F03.payment_reject
   - endpoint: POST /office/claims/{claimId}/payment-instructions
     status: W
     scope: office jurisdiction of the caller's posting
@@ -1573,6 +1684,19 @@ stakeholders:
     step_up: false
     via:
     - F04.physical
+  fo.pro_intake:
+  - endpoint: POST /office/physical-claims
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.pro_intake
+  - endpoint: POST /office/physical-claims/{intakeId}/identity-validations
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.pro_intake
   fo.da_pension:
   - endpoint: POST /office/pensions/worksheets
     status: P
@@ -1586,6 +1710,18 @@ stakeholders:
     step_up: false
     via:
     - F05.worksheet
+  - endpoint: POST /office/pensions/service-aggregations
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F05.aggregate
+  - endpoint: POST /office/pensions/scheme-certificates/{certId}/surrender-adjudications
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F05.sc_adjudicate
   - endpoint: POST /office/pensions/ppo-issuances
     status: P
     scope: office jurisdiction of the caller's posting
@@ -1654,6 +1790,12 @@ stakeholders:
     step_up: true
     via:
     - F05.dlc_monitor
+  - endpoint: POST /office/pensions/brs-reconciliations
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F05.brs
   fo.pension_disbursement:
   - endpoint: GET /office/pensions/disbursement-lists
     status: P
@@ -1756,6 +1898,12 @@ stakeholders:
     via:
     - F06.legal
   fo.exemption:
+  - endpoint: POST /office/exempted/{estId}/past-accumulation-ingestions
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F09.ingest
   - endpoint: POST /office/exempted/{estId}/past-accumulation-transfers
     status: P
     scope: office jurisdiction of the caller's posting
@@ -2306,6 +2454,7 @@ stakeholders:
     step_up: false
     via:
     - F13.mole
+  gov.pmvbry_admin: []
   gov.parliament: []
   gov.cag:
   - endpoint: GET /audit/events
@@ -2379,6 +2528,7 @@ stakeholders:
     via:
     - F05.cpps
   tech.epfo3: []
+  tech.batch.annual_accounts: []
   tech.ai_service:
   - endpoint: POST /ai/knowledge/search
     status: W

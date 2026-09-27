@@ -1,0 +1,210 @@
+# Hand-written overlay for claim-service. Merged into the generated spec by docs/tools/build_gate0.py.
+# Source: ../samadhan-setu files/PF_LIFE_INTEGRATION_SPECIFICATION.md §3.A, corrected for init.md §3:
+#   money in integer paise (not floats), shares in basis points (1% = 100), snake_case fields,
+#   responses wrapped in the standard envelope, RFC 9457 `Problem`, OpenAPI 3.1 null types.
+# Status, phase, callers and security stay generated from docs/endpoint-catalogue.md.
+
+paths:
+  /office/claims/{claimId}/cad:
+    post:
+      responses:
+        "201":
+          description: CAD generated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties: {data: {$ref: "#/components/schemas/ClaimCad"}}
+        "409":
+          description: CAD static reference data missing or stale, or the claim is not in an approvable state
+          content:
+            application/problem+json:
+              schema: {$ref: "#/components/schemas/Problem"}
+    get:
+      responses:
+        "200":
+          description: The generated CAD
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties: {data: {$ref: "#/components/schemas/ClaimCad"}}
+
+  /office/system/cad-static-data:
+    get:
+      responses:
+        "200":
+          description: Versions and load status of CAD static reference data
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties: {data: {$ref: "#/components/schemas/CadStaticDataStatus"}}
+
+  /claimants/death-claims/{claimId}/beneficiaries:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/BeneficiaryInwardRequest"}
+      responses:
+        "201":
+          description: Beneficiary registered on the claim
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties: {data: {$ref: "#/components/schemas/BeneficiaryRecord"}}
+        "409":
+          description: Proposed share would take the allocated total above 100%
+          content:
+            application/problem+json:
+              schema: {$ref: "#/components/schemas/Problem"}
+
+  /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares:
+    put:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/ShareAmendmentRequest"}
+      responses:
+        "200":
+          description: Share amended; summary rebalanced
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties: {data: {$ref: "#/components/schemas/SharesSummary"}}
+
+  /office/death-claims/{claimId}/shares-summary:
+    get:
+      responses:
+        "200":
+          description: Share summary of the death claim
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties: {data: {$ref: "#/components/schemas/SharesSummary"}}
+
+  /members/me/claims/{claimId}/re-disbursement-requests:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/ReDisbursementRequest"}
+      responses:
+        "201":
+          description: Request recorded; claim moves to CORRECTION_PENDING
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Envelope"}
+        "409":
+          description: Claim is not in PAYMENT_RETURNED
+          content:
+            application/problem+json:
+              schema: {$ref: "#/components/schemas/Problem"}
+
+components:
+  schemas:
+    ClaimCad:
+      type: object
+      additionalProperties: false
+      required: [cad_id, claim_id, generated_at, interest_paise, taxable_portion_paise, tds_paise, net_payable_paise, rule_version, static_data_version]
+      properties:
+        cad_id: {type: string}
+        claim_id: {type: string}
+        generated_at: {type: string, format: date-time}
+        closing_balance_paise: {type: integer, minimum: 0}
+        interest_paise: {type: integer, minimum: 0, description: Statutory interest component (illustrative rate from config)}
+        taxable_portion_paise: {type: integer, minimum: 0}
+        tds_paise: {type: integer, minimum: 0}
+        net_payable_paise: {type: integer, minimum: 0}
+        rule_version: {type: string}
+        static_data_version: {type: string}
+        rule_trace: {type: array, items: {type: string}}
+
+    CadStaticDataStatus:
+      type: object
+      required: [datasets]
+      properties:
+        datasets:
+          type: array
+          items:
+            type: object
+            required: [name, version, loaded_at, status]
+            properties:
+              name: {enum: [INTEREST_TABLES, TDS_SLABS, BANK_BRANCH_MASTER]}
+              version: {type: string}
+              loaded_at: {type: string, format: date-time}
+              status: {enum: [LOADED, STALE, FAILED]}
+
+    BeneficiaryInwardRequest:
+      type: object
+      additionalProperties: false
+      required: [full_name, relationship, bank_account_number, ifsc, proposed_share_bp]
+      properties:
+        full_name: {type: string, description: Synthetic data only}
+        relationship: {enum: [SPOUSE, SON, DAUGHTER, MOTHER, FATHER, DEPENDENT_BROTHER, DEPENDENT_SISTER, LEGAL_HEIR]}
+        date_of_birth: {type: string, format: date}
+        is_minor: {type: boolean}
+        guardian_name: {type: [string, "null"]}
+        bank_account_number: {type: string, description: Synthetic; validated by the mock bank adapter}
+        ifsc: {type: string, pattern: "^[A-Z]{4}0[A-Z0-9]{6}$"}
+        proposed_share_bp: {type: integer, minimum: 10, maximum: 10000, description: "Basis points: 100 = 1%"}
+        legacy_settled_reference: {type: [string, "null"], description: Reference of a share already settled in the legacy system}
+
+    BeneficiaryRecord:
+      type: object
+      required: [beneficiary_id, claim_id, relationship, share_bp, status]
+      properties:
+        beneficiary_id: {type: string}
+        claim_id: {type: string}
+        relationship: {type: string}
+        share_bp: {type: integer, minimum: 0, maximum: 10000}
+        status: {enum: [PENDING, LEGACY_SETTLED, APPROVED, DISBURSED, RETURNED]}
+        legacy_settled_reference: {type: [string, "null"]}
+
+    ShareAmendmentRequest:
+      type: object
+      additionalProperties: false
+      required: [new_share_bp, reason_code]
+      properties:
+        new_share_bp: {type: integer, minimum: 10, maximum: 10000}
+        reason_code: {enum: [NOMINEE_DECEASED, COURT_ORDER, LEGACY_SETTLEMENT_OFFSET, GUARDIAN_APPOINTMENT]}
+        justification_notes: {type: string}
+
+    SharesSummary:
+      type: object
+      description: Invariant — allocated_bp = legacy_settled_bp + disbursed_bp + pending_bp and allocated_bp ≤ 10000.
+      required: [claim_id, allocated_bp, legacy_settled_bp, disbursed_bp, pending_bp, beneficiaries]
+      properties:
+        claim_id: {type: string}
+        allocated_bp: {type: integer, minimum: 0, maximum: 10000}
+        legacy_settled_bp: {type: integer, minimum: 0, maximum: 10000}
+        disbursed_bp: {type: integer, minimum: 0, maximum: 10000}
+        pending_bp: {type: integer, minimum: 0, maximum: 10000}
+        beneficiaries: {type: array, items: {$ref: "#/components/schemas/BeneficiaryRecord"}}
+
+    ReDisbursementRequest:
+      type: object
+      additionalProperties: false
+      required: [bank_account_number, ifsc]
+      properties:
+        bank_account_number: {type: string, description: Synthetic; must pass the mock penny-drop check}
+        ifsc: {type: string, pattern: "^[A-Z]{4}0[A-Z0-9]{6}$"}

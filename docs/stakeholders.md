@@ -12,7 +12,7 @@
 | **Today** | How this stakeholder uses EPFO systems now, as far as public sources show. **Login** = has its own login/screens · **Via** = works through another party's system (e-Office file, email, paper) · **None** = no system role found |
 | **Future** | **Core** = must be modelled in the new system · **New** = new role or a role that exists on paper but needs system access · **Ext** = external system, integrated through an adapter · **Read** = read-only / aggregate consumer |
 | **POC** | Seeded persona in `init.md` §6.2 (✔), or a persona to add (➕) |
-| **Src** | Evidence: MAP = Manual of Accounting Procedure Part I · AUD = Audit Manual · CMP = Compliance Manual · REC = Recovery Manual · EXM = Exemption Manual · PEN = Pension Manual · EDLI = EDLI Manual · ICF = Manual for Inspector-cum-Facilitator · SOP-B = Part B SOPs & Service Standards · EC = 98th Executive Committee agenda · FIA / WSU / JD = SOPs on freezing, inoperative accounts and Joint Declaration · OUL = EPFO "Logins for Office Use" page · REF = PIB "EPFO Reforms", 12 Feb 2026 · FRM = RO Bengaluru fraud-risk note · IWU = IWU CoC circular · WEB = other public source |
+| **Src** | Evidence: MAP = Manual of Accounting Procedure Part I · AUD = Audit Manual · CMP = Compliance Manual · REC = Recovery Manual · EXM = Exemption Manual · PEN = Pension Manual · EDLI = EDLI Manual · ICF = Manual for Inspector-cum-Facilitator · SOP-B = Part B SOPs & Service Standards · EC = 98th Executive Committee agenda · FIA / WSU / JD = SOPs on freezing, inoperative accounts and Joint Declaration · OUL = EPFO "Logins for Office Use" page · REF = PIB "EPFO Reforms", 12 Feb 2026 · FRM = RO Bengaluru fraud-risk note · IWU = IWU CoC circular · SS = Samadhan Setu issue tracker · WEB = other public source |
 
 All sources are official EPFO documents downloaded in September 2026 (list at the end). Mentions were counted across roughly 80,000 lines of manual text; any stakeholder with no documentary hit is marked as such.
 
@@ -29,6 +29,7 @@ All sources are official EPFO documents downloaded in September 2026 (list at th
 | `pensioner` | Pensioner (member / early / disablement pension) | Public enquiries, UMANG, Jeevan Pramaan | Core | ➕ | PEN |
 | `family_pensioner` | Widow(er), child, orphan, dependent-parent pensioner | Via FO, Jeevan Pramaan | Core | ➕ | PEN |
 | `claimant` | Nominee / legal heir / guardian claiming PF, EDLI or pension on death | Via FO (paper) + online death claims | Core | ➕ | PEN, EDLI |
+| `claimant.nominee` | Co-beneficiary on a multi-beneficiary death claim (PF / EDLI / pension) holding an allocated percentage share, including shares already settled in the legacy system | Via FO / online death claims | Core | ➕ | EDLI, PEN, SS |
 | `intl_worker` | International worker (inbound or outbound, CoC holder) | Login (IWU portal via employer) | Core | ➕ | MAP, EC |
 | `complainant` | Grievance complainant who is not logged in (member, pensioner, employer, other) | Login-free (EPFiGMS) | Core | ➕ | WEB |
 | `rti_applicant` | RTI applicant | Via RTI portal / paper | Read | — | PEN, EC |
@@ -47,6 +48,7 @@ All sources are official EPFO documents downloaded in September 2026 (list at th
 | `payroll_provider` | Payroll software / HRMS vendor acting for employers | None (portal file uploads) | New (B2B API) | ✔ | — (`init.md` interface 13) |
 | `csc_operator` | Common Service Centre / assisted-access operator (e.g. DLC, UAN) | Via CSC systems | New | — | PEN, EC |
 | `liquidator` | Official liquidator / resolution professional of a closed or insolvent employer | Via FO correspondence | New | — | SOP-B, CMP (116 mentions) |
+| `exempted.trust_liquidator` | Exemption surrender officer / liquidator of a PF trust — hands over past accumulations and member ledgers when an exemption is surrendered or cancelled | Via trust / FO correspondence | Core | ➕ | EXM, SS |
 
 ## C. Field office — Regional Office (RO) and Sub-Regional Office
 
@@ -58,11 +60,13 @@ EPFO field offices run branches (Accounts, Pension, Cash, Compliance, Recovery, 
 | `fo.da_compliance` | Dealing Assistant (Compliance) — establishment files, inspections, 14B/7Q knock-off | Login | Core | ➕ | FIA, CMP |
 | `fo.ss` | Section Supervisor (Accounts / Compliance) | Login | Core | ➕ | FIA, WSU, MAP |
 | `fo.ao` | Accounts Officer | Login | Core | ➕ | PEN, FIA, MAP |
+| `fo.fa_accounts` | DA / SS in the F&A (Accounts) wing — ledger debit posting, **Claim Authorization Document (CAD)** generation, reconciliation of rejected / returned payments | Login (FO Interface, Accounts wing) | Core | ➕ | SS, FIA, FRM |
 | `fo.apfc` | APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q) | Login + e-Proceedings | Core | ✔ (approving officer) | CMP, FIA, PEN |
 | `fo.rpfc1` | RPFC-I — regional head of wings | Login | Core | ➕ | CMP, PEN, AUD |
 | `fo.oic` | Officer-in-Charge of the office | Login | Core | ➕ | FIA, WSU, AUD |
 | `fo.cash` | Cashier / Cash branch | Login | Core | ➕ | MAP (37), FRM |
 | `fo.diary` | Diary / Receipt section (physical documents, inter-section diary) | Login (diary module) | Core | — | PEN |
+| `fo.pro_intake` | PRO counter inwarding officer — inwards claims at the PRO counter (physical dockets, death-certificate checks, UAN registration problems surfaced at intake) | Login (PRO module of the field-office application) | Core | ➕ | SS, PEN |
 | `fo.da_pension` | DA (Pension) — worksheet, PPO, transfer-in, Special 10D | Login | Core | ➕ | PEN |
 | `fo.ss_pension` | SS (Pension) | Login | Core | ➕ | PEN |
 | `fo.apfc_pension` | APFC / AC (Pension) — PPO approval and e-sign, DLC monitoring | Login | Core | ➕ | PEN |
@@ -132,6 +136,7 @@ EPFO field offices run branches (Accounts, Pension, Cash, Compliance, Recovery, 
 | `gov.fiac` | Finance, Investment & Audit Committee | Board papers | Read | — | EC |
 | `gov.peic` | Pension & EDLI Implementation Committee | Board papers | Read | — | PEN |
 | `gov.mole` | Ministry of Labour & Employment | Reports, MIS | Read (aggregate, no PII) | ✔ (ministry viewer) | EC (49), MAP, REF |
+| `gov.pmvbry_admin` | Incentive-scheme reconciler for PMVBRY (and legacy PMRPY / ABRY) — validates employment-linked incentives computed from ECR data | Scheme portal / MIS | Core | ➕ | SS, WEB |
 | `gov.parliament` | Parliament (questions answered through MoLE) | Via MoLE | Read (aggregates) | — | MAP, REF |
 | `gov.cag` | Comptroller & Auditor General | Via Audit Division | Read (audit access) | — | AUD, EC |
 | `gov.statutory_auditor` | Statutory / attest auditors | Via Audit Division | Read | — | AUD |
@@ -144,6 +149,7 @@ EPFO field offices run branches (Accounts, Pension, Cash, Compliance, Recovery, 
 | `tech.adc` | **Alternate Data Centre**, Secunderabad (disaster recovery site; part of G-NOC with NDC) | Internal | **Core (DR operations)** | ➕ | MAP/AUD ("Alternate Data centre-Secunderabad"), WEB |
 | `tech.cpps` | **CPPS / Central Payment and Reconciliation Centre** at NDC (pan-India pension disbursement, sponsor-bank reconciliation) | Internal | Core | ➕ | PEN, REF |
 | `tech.epfo3` | EPFO 3.0 core-banking platform and auto-settlement engine (a system actor making automated decisions) | Rolling out | Core (system actor; every automated decision audited) | — | REF |
+| `tech.batch.annual_accounts` | Annual-accounts batch engine — year-end interest crediting; holds an exclusive lock on each member ledger while it runs (claims are blocked meanwhile) | Internal system actor | Core | ➕ | SS, MAP |
 | `tech.ai_service` | AI / analytics service account (advisory only) | None | New | ✔ | `init.md` §8 |
 
 ## I. Training
@@ -184,17 +190,17 @@ EPFO field offices run branches (Accounts, Pension, Cash, Compliance, Recovery, 
 
 | Group | Stakeholders | Of which new / future system roles |
 |---|---|---|
-| A. Members, beneficiaries, public | 10 | — |
-| B. Employers and intermediaries | 10 | trust auditor, payroll provider, CSC operator, liquidator |
-| C. Field office (RO / SRO) | 23 | Inspector-cum-Facilitator, NAN camp team |
+| A. Members, beneficiaries, public | 11 | — |
+| B. Employers and intermediaries | 11 | trust auditor, payroll provider, CSC operator, liquidator |
+| C. Field office (RO / SRO) | 25 | Inspector-cum-Facilitator, NAN camp team |
 | D. District Office | 2 | both |
 | E. Zonal Office | 7 | ACC dashboards, internal audit, zonal vigilance, fraud committee |
 | F. Head Office | 21 | CVO / vigilance, security / SOC, data protection |
-| G. Governance and oversight | 8 | read-only dashboards for all |
-| H. Technology and national ops | 5 | ADC DR operations, EPFO 3.0 system actor |
+| G. Governance and oversight | 9 | read-only dashboards for all |
+| H. Technology and national ops | 6 | ADC DR operations, EPFO 3.0 system actor |
 | I. Training | 2 | training sandbox |
 | J. External | 20 | adapters |
-| **Total** | **108** | |
+| **Total** | **114** | |
 
 The current POC (`init.md` §6.2) seeds 19 personas. The ➕ rows are the personas to add if the activity map shows they need their own endpoints.
 
@@ -227,4 +233,5 @@ The current POC (`init.md` §6.2) seeds 19 personas. The ➕ rows are the person
 | REF | PIB, *EPFO Reforms*, 12 Feb 2026 — `pmvbry-cdn.epfindia.gov.in/wp-content/uploads/2026/03/EPFO-REFORMS-Posted-On-12-Feb-2026.pdf` |
 | FRM | EPFO *Success stories* — RO Bengaluru Central, *Fraud risk mitigation* (VDR-ECR process) — `epfindia.gov.in/site_docs/PDFs/Updates/Success_Story_EPFO.pdf` (archived) |
 | IWU | EPFO circular, *International Workers online CoC system* — `epfindia.gov.in/site_docs/PDFs/Circulars/Y2017-2018/IWU_OnlineSystem_COC_10677.pdf` (read by Codex) |
+| SS | EPFO *Samadhan Setu* issue tracker extract, 24-Sep-2026 (`../samadhan-setu files/`: `samadhan_setu_parsed_issues.json`, `SAMADHAN_SETU_KNOWLEDGE_BASE.md`, `PF_LIFE_INTEGRATION_SPECIFICATION.md`). Module names and error texts are primary evidence; the knowledge base's narrative is secondary |
 | WEB | ADC: public listings for "Alternate Data Centre (ADC) EPFO, Begumpet, Hyderabad"; PIB release on EPFO's G-NOC (NDC Dwarka + ADC Secunderabad) |

@@ -48,6 +48,39 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /employers/me/vishwas-applications:
+    post:
+      operationId: postEmployersVishwasApplications
+      summary: Apply under VISHWAS (one-time settlement of 14B damages / penalty disputes at reduced rates for past defaults)
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/EstablishmentId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: compliance
+      x-callers:
+      - employer.signatory
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/compliance/cases:
     get:
       operationId: getOfficeComplianceCases
@@ -674,6 +707,42 @@ paths:
           $ref: '#/components/responses/Problem'
       x-status: planned
       x-phase: 3
+      x-owner-service: compliance
+      x-callers:
+      - fo.apfc
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/compliance/vishwas-applications/{applicationId}/decisions:
+    post:
+      operationId: postOfficeComplianceVishwasApplicationsApplicationIdDecisions
+      summary: Recalculate damages under VISHWAS and decide the application → DemandRaised.v1 for the revised amount
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: applicationId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
       x-owner-service: compliance
       x-callers:
       - fo.apfc

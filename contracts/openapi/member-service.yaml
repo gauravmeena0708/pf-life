@@ -1541,6 +1541,7 @@ paths:
       x-owner-service: member
       x-callers:
       - fo.da_accounts
+      - fo.pro_intake
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []

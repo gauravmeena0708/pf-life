@@ -909,6 +909,45 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/ecr-filings/{filingId}/payment-rejections:
+    post:
+      operationId: postOfficeEcrFilingsFilingIdPaymentRejections
+      summary: 'Cash / Accounts rejects an unpaid or erroneous challan stuck in pending bank status (tracker: "Unable to reject
+        ecr paym'
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: filingId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: contribution
+      x-callers:
+      - fo.cash
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Cash / Accounts rejects an unpaid or erroneous challan stuck in pending bank status (tracker: "Unable
+        to reject ecr payment")'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/ecr-filings/{filingId}/rejections:
     post:
       operationId: postOfficeEcrFilingsFilingIdRejections
@@ -973,6 +1012,44 @@ paths:
       x-owner-service: contribution
       x-callers:
       - fo.da_compliance
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/exempted/{estId}/past-accumulation-ingestions:
+    post:
+      operationId: postOfficeExemptedEstIdPastAccumulationIngestions
+      summary: Bulk-ingest member ledgers and past accumulations of a surrendered PF trust
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: estId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: contribution
+      x-callers:
+      - fo.exemption
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -1220,6 +1297,47 @@ paths:
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/transfers/{transferId}/recredits:
+    post:
+      operationId: postOfficeTransfersTransferIdRecredits
+      summary: 'Recredit a rejected transfer-in back to the member ledger (VDR recredit; tracker: "Recredit of transfer-in
+        rejected case'
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: transferId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: contribution
+      x-callers:
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Recredit a rejected transfer-in back to the member ledger (VDR recredit; tracker: "Recredit of transfer-in
+        rejected cases")'
       requestBody:
         required: false
         content:

@@ -617,9 +617,63 @@ paths:
       x-owner-service: claim
       x-callers:
       - claimant
+      - claimant.nominee
       x-scope: self — claimant's own claims only
       security:
       - bffSession: []
+  /claimants/death-claims/{claimId}/beneficiaries:
+    post:
+      operationId: postClaimantsDeathClaimsClaimIdBeneficiaries
+      summary: Inward an additional co-beneficiary / legal heir on an open death claim
+      tags:
+      - Member claims, transfers and pension applications
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: claimId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '201':
+          description: Beneficiary registered on the claim
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Envelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/BeneficiaryRecord'
+        '409':
+          description: Proposed share would take the allocated total above 100%
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: claim
+      x-callers:
+      - claimant.nominee
+      x-scope: self — claimant's own claims only
+      security:
+      - bffSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BeneficiaryInwardRequest'
   /claimants/family-pension-applications:
     post:
       operationId: postClaimantsFamilyPensionApplications
@@ -3091,6 +3145,39 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /employers/me/vishwas-applications:
+    post:
+      operationId: postEmployersVishwasApplications
+      summary: Apply under VISHWAS (one-time settlement of 14B damages / penalty disputes at reduced rates for past defaults)
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/EstablishmentId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: compliance
+      x-callers:
+      - employer.signatory
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /employers/registration-requests:
     post:
       operationId: postEmployersRegistrationRequests
@@ -5031,6 +5118,54 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /members/me/claims/{claimId}/re-disbursement-requests:
+    post:
+      operationId: postMembersClaimsClaimIdReDisbursementRequests
+      summary: Member submits corrected bank details after a payment return, without re-filing the claim
+      tags:
+      - Member claims, transfers and pension applications
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: claimId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '201':
+          description: Request recorded; claim moves to CORRECTION_PENDING
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '409':
+          description: Claim is not in PAYMENT_RETURNED
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: claim
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReDisbursementRequest'
   /members/me/claims/{claimId}/withdrawals:
     post:
       operationId: postMembersClaimsClaimIdWithdrawals
@@ -5621,6 +5756,43 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /members/me/pension-eligibility-preview:
+    get:
+      operationId: getMembersPensionEligibilityPreview
+      summary: Pre-check pension eligibility across all member IDs under the UAN; flags untransferred service (threshold from
+        illustrat
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '200':
+          description: Eligibility preview across all member IDs linked to the caller's UAN
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Envelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/PensionEligibilityPreview'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: pension
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+      description: Pre-check pension eligibility across all member IDs under the UAN; flags untransferred service (threshold
+        from illustrative config)
   /members/me/pension-scheme-certificate:
     get:
       operationId: getMembersPensionSchemeCertificate
@@ -5652,6 +5824,44 @@ paths:
       - Member claims, transfers and pension applications
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: pension
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /members/me/pension-scheme-certificates/{certId}/surrenders:
+    post:
+      operationId: postMembersPensionSchemeCertificatesCertIdSurrenders
+      summary: Surrender a Scheme Certificate to convert it to monthly pension (Form 10D) or withdrawal benefit (Form 10C)
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: certId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
         '501':
@@ -6700,6 +6910,55 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/cases/{caseId}/documents/{docId}/attestation-views:
+    post:
+      operationId: postOfficeCasesCaseIdDocumentsDocIdAttestationViews
+      summary: 'Record that the caseworker opened the employer-signed PDF / DSC document; enables the approve action (tracker:
+        "View the'
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: docId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '201':
+          description: View recorded; the case's approve action is now enabled for this caseworker
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: workflow
+      x-callers:
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Record that the caseworker opened the employer-signed PDF / DSC document; enables the approve action (tracker:
+        "View the employer signed pdf first")'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/cases/{caseId}/recommendations:
     post:
       operationId: postOfficeCasesCaseIdRecommendations
@@ -6784,6 +7043,102 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/claims/{claimId}/cad:
+    get:
+      operationId: getOfficeClaimsClaimIdCad
+      summary: View the generated CAD
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: claimId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '200':
+          description: The generated CAD
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Envelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/ClaimCad'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: claim
+      x-callers:
+      - fo.fa_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+    post:
+      operationId: postOfficeClaimsClaimIdCad
+      summary: 'Generate the Claim Authorization Document (CAD): interest split, TDS and net payable, with the rule and static-data
+        vers'
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: claimId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '201':
+          description: CAD generated
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Envelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/ClaimCad'
+        '409':
+          description: CAD static reference data missing or stale, or the claim is not in an approvable state
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: claim
+      x-callers:
+      - fo.fa_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Generate the Claim Authorization Document (CAD): interest split, TDS and net payable, with the rule and
+        static-data versions used'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/claims/{claimId}/payment-instructions:
     post:
       operationId: postOfficeClaimsClaimIdPaymentInstructions
@@ -6818,6 +7173,44 @@ paths:
       x-owner-service: claim
       x-callers:
       - fo.cash
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/claims/{claimId}/re-disbursement-approvals:
+    post:
+      operationId: postOfficeClaimsClaimIdReDisbursementApprovals
+      summary: APFC authorises a new payment after a return, without reopening adjudication
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: claimId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: claim
+      x-callers:
+      - fo.apfc
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -7534,6 +7927,42 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/compliance/vishwas-applications/{applicationId}/decisions:
+    post:
+      operationId: postOfficeComplianceVishwasApplicationsApplicationIdDecisions
+      summary: Recalculate damages under VISHWAS and decide the application → DemandRaised.v1 for the revised amount
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: applicationId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: compliance
+      x-callers:
+      - fo.apfc
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/damages-knock-offs/{knockOffId}/approvals:
     post:
       operationId: postOfficeDamagesKnockOffsKnockOffIdApprovals
@@ -7563,6 +7992,135 @@ paths:
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares:
+    put:
+      operationId: putOfficeDeathClaimsClaimIdBeneficiariesBeneficiaryIdShares
+      summary: Amend a beneficiary's share (nominee deceased, court order, share already settled in legacy, guardian appointment)
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: claimId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: beneficiaryId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '200':
+          description: Share amended; summary rebalanced
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Envelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/SharesSummary'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: claim
+      x-callers:
+      - fo.apfc
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShareAmendmentRequest'
+  /office/death-claims/{claimId}/shares-summary:
+    get:
+      operationId: getOfficeDeathClaimsClaimIdSharesSummary
+      summary: Allocated vs legacy-settled vs disbursed vs pending share of a death claim
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: claimId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '200':
+          description: Share summary of the death claim
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Envelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/SharesSummary'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: claim
+      x-callers:
+      - fo.apfc
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+  /office/ecr-filings/{filingId}/payment-rejections:
+    post:
+      operationId: postOfficeEcrFilingsFilingIdPaymentRejections
+      summary: 'Cash / Accounts rejects an unpaid or erroneous challan stuck in pending bank status (tracker: "Unable to reject
+        ecr paym'
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: filingId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: contribution
+      x-callers:
+      - fo.cash
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Cash / Accounts rejects an unpaid or erroneous challan stuck in pending bank status (tracker: "Unable
+        to reject ecr payment")'
       requestBody:
         required: false
         content:
@@ -8001,6 +8559,44 @@ paths:
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+  /office/exempted/{estId}/past-accumulation-ingestions:
+    post:
+      operationId: postOfficeExemptedEstIdPastAccumulationIngestions
+      summary: Bulk-ingest member ledgers and past accumulations of a surrendered PF trust
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: estId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: contribution
+      x-callers:
+      - fo.exemption
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/exempted/{estId}/past-accumulation-transfers:
     post:
       operationId: postOfficeExemptedEstIdPastAccumulationTransfers
@@ -8609,6 +9205,47 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/members/{uan}/locks:
+    get:
+      operationId: getOfficeMembersUanLocks
+      summary: Active locks on a member ledger (annual accounts, claim adjudication, ECR posting) with owner and expiry
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: uan
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '200':
+          description: Active locks on the member ledger
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Envelope'
+                - type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/LedgerLock'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: workflow
+      x-callers:
+      - fo.oic
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
   /office/outreach-camps/{campId}/assisted-requests:
     post:
       operationId: postOfficeOutreachCampsCampIdAssistedRequests
@@ -8781,6 +9418,39 @@ paths:
       x-owner-service: pension
       x-callers:
       - fo.ao
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/pensions/brs-reconciliations:
+    post:
+      operationId: postOfficePensionsBrsReconciliations
+      summary: Monthly Bank Reconciliation Statement (BRS) of pension scrolls vs bank debit advices
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: pension
+      x-callers:
+      - fo.apfc_pension
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -9050,6 +9720,73 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/pensions/scheme-certificates/{certId}/surrender-adjudications:
+    post:
+      operationId: postOfficePensionsSchemeCertificatesCertIdSurrenderAdjudications
+      summary: DA (Pension) validates and cancels a surrendered Scheme Certificate
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: certId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: pension
+      x-callers:
+      - fo.da_pension
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/pensions/service-aggregations:
+    post:
+      operationId: postOfficePensionsServiceAggregations
+      summary: DA (Pension) aggregates untransferred past service into the calculation sheet
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: pension
+      x-callers:
+      - fo.da_pension
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/pensions/special-10d-cases:
     post:
       operationId: postOfficePensionsSpecial10dCases
@@ -9306,6 +10043,7 @@ paths:
       x-owner-service: claim
       x-callers:
       - fo.diary
+      - fo.pro_intake
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -9341,6 +10079,7 @@ paths:
       x-owner-service: member
       x-callers:
       - fo.da_accounts
+      - fo.pro_intake
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -9591,6 +10330,100 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/system/cad-static-data:
+    get:
+      operationId: getOfficeSystemCadStaticData
+      summary: 'Diagnostic view of CAD static reference data (interest tables, bank branch master) and its version (tracker:
+        "Failed to '
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '200':
+          description: Versions and load status of CAD static reference data
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Envelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/CadStaticDataStatus'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: claim
+      x-callers:
+      - fo.fa_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Diagnostic view of CAD static reference data (interest tables, bank branch master) and its version (tracker:
+        "Failed to load CAD static Data")'
+  /office/system/locks/{lockId}/release:
+    post:
+      operationId: postOfficeSystemLocksLockIdRelease
+      summary: 'Supervised release of an orphaned lock (reason required) → LockReleased.v1 (tracker: "Unable to lock process",
+        phantom "'
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: lockId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '200':
+          description: Lock released; LockReleased.v1 emitted and audited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '409':
+          description: Lock is not stale (its owner is still alive); release refused
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: workflow
+      x-callers:
+      - fo.oic
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Supervised release of an orphaned lock (reason required) → LockReleased.v1 (tracker: "Unable to lock process",
+        phantom "concurrent claims already under processing")'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+              - reason
+              properties:
+                reason:
+                  type: string
+                  minLength: 10
   /office/tds/computations:
     post:
       operationId: postOfficeTdsComputations
@@ -9650,6 +10483,47 @@ paths:
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/transfers/{transferId}/recredits:
+    post:
+      operationId: postOfficeTransfersTransferIdRecredits
+      summary: 'Recredit a rejected transfer-in back to the member ledger (VDR recredit; tracker: "Recredit of transfer-in
+        rejected case'
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: transferId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: contribution
+      x-callers:
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Recredit a rejected transfer-in back to the member ledger (VDR recredit; tracker: "Recredit of transfer-in
+        rejected cases")'
       requestBody:
         required: false
         content:
@@ -11291,6 +12165,314 @@ components:
           description: Resource-specific; defined when the endpoint is implemented
         meta:
           $ref: '#/components/schemas/Meta'
+    ClaimCad:
+      type: object
+      additionalProperties: false
+      required:
+      - cad_id
+      - claim_id
+      - generated_at
+      - interest_paise
+      - taxable_portion_paise
+      - tds_paise
+      - net_payable_paise
+      - rule_version
+      - static_data_version
+      properties:
+        cad_id:
+          type: string
+        claim_id:
+          type: string
+        generated_at:
+          type: string
+          format: date-time
+        closing_balance_paise:
+          type: integer
+          minimum: 0
+        interest_paise:
+          type: integer
+          minimum: 0
+          description: Statutory interest component (illustrative rate from config)
+        taxable_portion_paise:
+          type: integer
+          minimum: 0
+        tds_paise:
+          type: integer
+          minimum: 0
+        net_payable_paise:
+          type: integer
+          minimum: 0
+        rule_version:
+          type: string
+        static_data_version:
+          type: string
+        rule_trace:
+          type: array
+          items:
+            type: string
+    CadStaticDataStatus:
+      type: object
+      required:
+      - datasets
+      properties:
+        datasets:
+          type: array
+          items:
+            type: object
+            required:
+            - name
+            - version
+            - loaded_at
+            - status
+            properties:
+              name:
+                enum:
+                - INTEREST_TABLES
+                - TDS_SLABS
+                - BANK_BRANCH_MASTER
+              version:
+                type: string
+              loaded_at:
+                type: string
+                format: date-time
+              status:
+                enum:
+                - LOADED
+                - STALE
+                - FAILED
+    BeneficiaryInwardRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - full_name
+      - relationship
+      - bank_account_number
+      - ifsc
+      - proposed_share_bp
+      properties:
+        full_name:
+          type: string
+          description: Synthetic data only
+        relationship:
+          enum:
+          - SPOUSE
+          - SON
+          - DAUGHTER
+          - MOTHER
+          - FATHER
+          - DEPENDENT_BROTHER
+          - DEPENDENT_SISTER
+          - LEGAL_HEIR
+        date_of_birth:
+          type: string
+          format: date
+        is_minor:
+          type: boolean
+        guardian_name:
+          type:
+          - string
+          - 'null'
+        bank_account_number:
+          type: string
+          description: Synthetic; validated by the mock bank adapter
+        ifsc:
+          type: string
+          pattern: ^[A-Z]{4}0[A-Z0-9]{6}$
+        proposed_share_bp:
+          type: integer
+          minimum: 10
+          maximum: 10000
+          description: 'Basis points: 100 = 1%'
+        legacy_settled_reference:
+          type:
+          - string
+          - 'null'
+          description: Reference of a share already settled in the legacy system
+    BeneficiaryRecord:
+      type: object
+      required:
+      - beneficiary_id
+      - claim_id
+      - relationship
+      - share_bp
+      - status
+      properties:
+        beneficiary_id:
+          type: string
+        claim_id:
+          type: string
+        relationship:
+          type: string
+        share_bp:
+          type: integer
+          minimum: 0
+          maximum: 10000
+        status:
+          enum:
+          - PENDING
+          - LEGACY_SETTLED
+          - APPROVED
+          - DISBURSED
+          - RETURNED
+        legacy_settled_reference:
+          type:
+          - string
+          - 'null'
+    ShareAmendmentRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - new_share_bp
+      - reason_code
+      properties:
+        new_share_bp:
+          type: integer
+          minimum: 10
+          maximum: 10000
+        reason_code:
+          enum:
+          - NOMINEE_DECEASED
+          - COURT_ORDER
+          - LEGACY_SETTLEMENT_OFFSET
+          - GUARDIAN_APPOINTMENT
+        justification_notes:
+          type: string
+    SharesSummary:
+      type: object
+      description: Invariant — allocated_bp = legacy_settled_bp + disbursed_bp + pending_bp and allocated_bp ≤ 10000.
+      required:
+      - claim_id
+      - allocated_bp
+      - legacy_settled_bp
+      - disbursed_bp
+      - pending_bp
+      - beneficiaries
+      properties:
+        claim_id:
+          type: string
+        allocated_bp:
+          type: integer
+          minimum: 0
+          maximum: 10000
+        legacy_settled_bp:
+          type: integer
+          minimum: 0
+          maximum: 10000
+        disbursed_bp:
+          type: integer
+          minimum: 0
+          maximum: 10000
+        pending_bp:
+          type: integer
+          minimum: 0
+          maximum: 10000
+        beneficiaries:
+          type: array
+          items:
+            $ref: '#/components/schemas/BeneficiaryRecord'
+    ReDisbursementRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - bank_account_number
+      - ifsc
+      properties:
+        bank_account_number:
+          type: string
+          description: Synthetic; must pass the mock penny-drop check
+        ifsc:
+          type: string
+          pattern: ^[A-Z]{4}0[A-Z0-9]{6}$
+    PensionEligibilityPreview:
+      type: object
+      additionalProperties: false
+      required:
+      - rule_version
+      - total_eligible_service_months
+      - threshold_months
+      - meets_threshold
+      - recommended_form
+      - service_breakdown
+      properties:
+        rule_version:
+          type: string
+          description: Version of config/demo-rules.yaml used (ILLUSTRATIVE_ONLY)
+        total_eligible_service_months:
+          type: integer
+          minimum: 0
+        threshold_months:
+          type: integer
+          minimum: 0
+          description: Service threshold from the illustrative rule set
+        meets_threshold:
+          type: boolean
+        recommended_form:
+          enum:
+          - FORM_10D
+          - FORM_10C_WITHDRAWAL
+          - SCHEME_CERTIFICATE
+        service_breakdown:
+          type: array
+          items:
+            type: object
+            required:
+            - account_link_id
+            - contributory_months
+            - transferred_to_primary
+            properties:
+              account_link_id:
+                type: string
+                description: Opaque link to one member ID
+              member_id_masked:
+                type: string
+              establishment_name:
+                type: string
+              contributory_months:
+                type: integer
+                minimum: 0
+              transferred_to_primary:
+                type: boolean
+              action_required:
+                type:
+                - string
+                - 'null'
+                enum:
+                - MEMBER_MUST_FILE_FORM_13_TRANSFER_FIRST
+                - SERVICE_UNDER_AGGREGATION
+                - null
+    LedgerLock:
+      type: object
+      description: Locks are leases with a TTL; a crashed holder's lock expires on its own and can also be released under
+        supervision.
+      required:
+      - lock_id
+      - lock_scope
+      - resource_key
+      - acquired_at
+      - expires_at
+      - acquired_by
+      - is_stale
+      properties:
+        lock_id:
+          type: string
+        lock_scope:
+          enum:
+          - ANNUAL_ACCOUNTING
+          - CLAIM_ADJUDICATION
+          - ECR_POSTING
+        resource_key:
+          type: string
+        acquired_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        acquired_by:
+          type: string
+          description: Actor or batch ID holding the lock
+        is_stale:
+          type: boolean
   responses:
     Ok:
       description: Success

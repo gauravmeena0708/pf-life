@@ -8,10 +8,10 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 
 | Measure | Count |
 |---|---|
-| Stakeholders | 108 |
-| Activities | 206 |
-| Stakeholders with at least one API | 94 |
-| Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 14 |
+| Stakeholders | 114 |
+| Activities | 227 |
+| Stakeholders with at least one API | 97 |
+| Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 0 |
 | **NEW endpoints to add to the catalogue** | **0** |
 | Catalogue endpoints no stakeholder calls | 0 |
@@ -41,7 +41,7 @@ Activities: **F13.public** Browse schemes, offices, statistics, circulars; searc
 
 #### `member` — Member — active contributor (UAN holder)
 
-Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP; **F02.kyc_seed** Seed KYC (Aadhaar, bank, PAN); **F02.self_service** View profile, service history, UAN card; change contact details; e-nomination; self-marked exit; **F02.jd_submit** Submit Joint Declaration to correct one of 12 profile parameters; **F03.passbook** View passbook, annual statement and taxable-interest split; **F04.claim_file** Check eligibility and file a claim (Form 31 / 19 / 10C); confirm intent; upload documents; **F04.track** Track claims and notifications; download Form 16A; **F04.transfer** Request Form 13 transfer; confirm auto-transfer; view Annexure K; **F05.apply** Apply for monthly pension (Form 10D) or scheme certificate; **F05.higher_member** Apply for pension on higher wages (joint option); track status; **F07.member_report** Report suspicious activity; account recovery; view sessions; **F08.member_file** Register, track, reopen, remind and give feedback on grievances; **F14.step_up** Complete step-up confirmation for sensitive actions
+Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP; **F02.kyc_seed** Seed KYC (Aadhaar, bank, PAN); **F02.self_service** View profile, service history, UAN card; change contact details; e-nomination; self-marked exit; **F02.jd_submit** Submit Joint Declaration to correct one of 12 profile parameters; **F03.passbook** View passbook, annual statement and taxable-interest split; **F04.claim_file** Check eligibility and file a claim (Form 31 / 19 / 10C); confirm intent; upload documents; **F04.redisburse_request** Submit corrected bank details after a payment return; **F04.track** Track claims and notifications; download Form 16A; **F04.transfer** Request Form 13 transfer; confirm auto-transfer; view Annexure K; **F05.apply** Apply for monthly pension (Form 10D) or scheme certificate; **F05.preview** Pre-check pension eligibility across all member IDs; see untransferred service to fix first (Form 13); **F05.sc_surrender** Surrender a Scheme Certificate for monthly pension or withdrawal benefit; **F05.higher_member** Apply for pension on higher wages (joint option); track status; **F07.member_report** Report suspicious activity; account recovery; view sessions; **F08.member_file** Register, track, reopen, remind and give feedback on grievances; **F14.step_up** Complete step-up confirmation for sensitive actions
 
 | Endpoint | Status |
 |---|---|
@@ -76,6 +76,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/higher-pension-options/{optionId}` | P |
 | `GET /members/me/kyc` | P |
 | `GET /members/me/nominations` | P |
+| `GET /members/me/pension-eligibility-preview` | P |
 | `GET /members/me/pension-scheme-certificate` | P |
 | `GET /members/me/tax/form-16a` | P |
 | `GET /members/me/tax/taxable-interest` | P |
@@ -86,6 +87,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /grievances/{grievanceId}/feedback` | P |
 | `POST /grievances/{grievanceId}/reminders` | P |
 | `POST /members/me/claims/{claimId}/documents` | P |
+| `POST /members/me/claims/{claimId}/re-disbursement-requests` | P |
 | `POST /members/me/claims/{claimId}/withdrawals` | P |
 | `POST /members/me/exits` | P |
 | `POST /members/me/higher-pension-options` | P |
@@ -93,6 +95,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/me/nominations` | P |
 | `POST /members/me/pension-applications` | P |
 | `POST /members/me/pension-scheme-certificates` | P |
+| `POST /members/me/pension-scheme-certificates/{certId}/surrenders` | P |
 | `POST /members/me/tax/form-15g-15h` | P |
 | `POST /members/me/transfers` | P |
 | `POST /members/me/transfers/auto/{transferId}/confirmations` | P |
@@ -158,6 +161,15 @@ Activities: **F04.death_claim** File PF (Form 20), EDLI (Form 5IF) or composite 
 | `GET /claimants/death-claims/{claimId}` | P |
 | `POST /claimants/death-claims` | P |
 
+#### `claimant.nominee` — Co-beneficiary on a multi-beneficiary death claim (PF / EDLI / pension) holding an allocated percentage share, including shares already settled in the legacy system
+
+Activities: **F04.co_beneficiary** Inward as an additional beneficiary on an open death claim and track own share
+
+| Endpoint | Status |
+|---|---|
+| `GET /claimants/death-claims/{claimId}` | P |
+| `POST /claimants/death-claims/{claimId}/beneficiaries` | P |
+
 #### `intl_worker` — International worker (inbound or outbound, CoC holder)
 
 Activities: **F10.worker** View own international-worker status and CoC (no direct IWU login found; member-portal view is a future option)
@@ -203,7 +215,7 @@ Activities: **F01.register** Register establishment online and submit verificati
 
 #### `employer.signatory` — Authorised signatory (registered DSC / e-sign)
 
-Activities: **F01.form5a** File / update Form 5A ownership return and branches (Form 2A), signed with DSC / e-sign; **F01.change_request** Request configuration change, closure / deregistration or office transfer; **F02.kyc_approve** Approve KYC seeded by member / pending for digital signature, with DSC or e-sign; **F02.employer_approvals** Approve queued member changes (Member > Approvals); **F02.jd_attest** Attest, return or reject the Joint Declaration; employer-initiated JD; **F03.ecr_approve** Approve and submit ECR (generates TRRN); cancel an unpaid TRRN; **F03.pay** Pay challan online (or via bank counter where allowed); **F03.direct_challan** Create a Direct Challan: administrative / inspection charges, or miscellaneous challan for 14B damages and 7Q interest; pay demands; **F04.attest** Attest claims that need employer attestation; **F04.transfer_attest** Attest pending transfer claims (Online Services > Transfer Claims); **F05.higher_employer** Validate joint options and upload wage details; **F06.employer_reply** Reply and submit evidence in proceedings; **F10.apply** Apply for / extend CoC for a posted worker (IWU portal EMPLOYER login); upload signed application; download CoC
+Activities: **F01.form5a** File / update Form 5A ownership return and branches (Form 2A), signed with DSC / e-sign; **F01.change_request** Request configuration change, closure / deregistration or office transfer; **F02.kyc_approve** Approve KYC seeded by member / pending for digital signature, with DSC or e-sign; **F02.employer_approvals** Approve queued member changes (Member > Approvals); **F02.jd_attest** Attest, return or reject the Joint Declaration; employer-initiated JD; **F03.ecr_approve** Approve and submit ECR (generates TRRN); cancel an unpaid TRRN; **F03.pay** Pay challan online (or via bank counter where allowed); **F03.direct_challan** Create a Direct Challan: administrative / inspection charges, or miscellaneous challan for 14B damages and 7Q interest; pay demands; **F04.attest** Attest claims that need employer attestation; **F04.transfer_attest** Attest pending transfer claims (Online Services > Transfer Claims); **F05.higher_employer** Validate joint options and upload wage details; **F06.employer_reply** Reply and submit evidence in proceedings; **F06.vishwas_apply** Apply under VISHWAS to settle a 14B damages / penalty dispute at reduced rates; **F10.apply** Apply for / extend CoC for a posted worker (IWU portal EMPLOYER login); upload signed application; download CoC
 
 | Endpoint | Status |
 |---|---|
@@ -241,6 +253,7 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `POST /employers/me/office-transfer-requests` | P |
 | `POST /employers/me/proceedings/{caseId}/submissions` | P |
 | `POST /employers/me/transfer-requests/{transferId}/decisions` | P |
+| `POST /employers/me/vishwas-applications` | P |
 | `POST /employers/voluntary-coverage-requests` | P |
 | `POST /international/coc-applications/{id}/extensions` | P |
 | `POST /international/coc-applications/{id}/signed-uploads` | P |
@@ -345,11 +358,15 @@ Activities: **F01.liquidation** Receive EPFO dues claim for an employer in liqui
 |---|---|
 | `GET /partners/liquidators/claims/{claimId}` | P |
 
+#### `exempted.trust_liquidator` — Exemption surrender officer / liquidator of a PF trust — hands over past accumulations and member ledgers when an exemption is surrendered or cancelled
+
+Activities: **F09.trust_handover** Hand over member ledgers and past accumulations of the surrendered trust
+
 ### C. Field office — Regional Office (RO) and Sub-Regional Office
 
 #### `fo.da_accounts` — Dealing Assistant / SSA (Accounts) — claims, IDS, member records, VDR, Appendix-E
 
-Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; **F03.vdr_reconcile** Reconcile VDR entries with ECRs; TRRN adjustment; Member VDR deposits; **F03.ledger_exception** Appendix-E adjustment (e.g. PF → EPS) or VDR (Special) credit — exceptional; **F03.ecr_reject** Reject an ECR before posting; reverse a posted journal; **F04.physical_validate** UAN allocation / Aadhaar validation of a physical claim; **F04.process** Scrutinise and process the claim (Claims > Transaction); recommend; **F04.tds** Compute TDS on withdrawals and file with Income Tax; **F04.transfer_process** Process transfer between member IDs / offices; **F05.ids** Prepare Input Data Sheet (Claims > Transaction > Form-10D/10C); update service history in FO Interface; **F05.higher_deposit** Book dues deposit through Member VDR ('Pension on Higher Wages'); Appendix-E code for PF → EPS diversion; **F07.verify_member** Open e-file and verify the frozen MID / UAN (member ledger, crowdsourcing); **F09.annexure_k_reconcile** Reconcile Annexure K with receipts and member records; **F11.verify** Verify inoperative account (digital records, crowdsourcing through co-workers' logins)
+Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; **F03.vdr_reconcile** Reconcile VDR entries with ECRs; TRRN adjustment; Member VDR deposits; **F03.ledger_exception** Appendix-E adjustment (e.g. PF → EPS) or VDR (Special) credit — exceptional; **F03.ecr_reject** Reject an ECR before posting; reverse a posted journal; **F04.physical_validate** UAN allocation / Aadhaar validation of a physical claim; **F04.process** Scrutinise and process the claim (Claims > Transaction); recommend; **F04.attestation_view** Open the employer-signed PDF / DSC document before the approve action is enabled; **F04.tds** Compute TDS on withdrawals and file with Income Tax; **F04.transfer_process** Process transfer between member IDs / offices; **F04.transfer_recredit** Recredit a rejected transfer-in to the member ledger; **F05.ids** Prepare Input Data Sheet (Claims > Transaction > Form-10D/10C); update service history in FO Interface; **F05.higher_deposit** Book dues deposit through Member VDR ('Pension on Higher Wages'); Appendix-E code for PF → EPS diversion; **F07.verify_member** Open e-file and verify the frozen MID / UAN (member ledger, crowdsourcing); **F09.annexure_k_reconcile** Reconcile Annexure K with receipts and member records; **F11.verify** Verify inoperative account (digital records, crowdsourcing through co-workers' logins)
 
 | Endpoint | Status |
 |---|---|
@@ -361,6 +378,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `GET /office/member-change-requests` | P |
 | `GET /office/members/{uan}` | P |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | P |
+| `POST /office/cases/{caseId}/documents/{docId}/attestation-views` | P |
 | `POST /office/ecr-filings/{filingId}/rejections` | P |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P |
 | `POST /office/freeze-cases/{caseId}/verifications` | P |
@@ -372,6 +390,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /office/receipts/{receiptId}/trrn-adjustments` | P |
 | `POST /office/tds/computations` | P |
 | `POST /office/transfers/{transferId}/decisions` | P |
+| `POST /office/transfers/{transferId}/recredits` | P |
 | `POST /office/ledger-adjustments` | ? |
 | `POST /office/vdr-entries` | ? |
 | `POST /office/vdr-entries/{vdrId}/ecr-reconciliations` | ? |
@@ -419,14 +438,26 @@ Activities: **F02.jd_verify_ao** Verifier (AO route): cross-check and recommend;
 | `POST /office/member-change-requests/{requestId}/verifications` | P |
 | `POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals` | P |
 
+#### `fo.fa_accounts` — DA / SS in the F&A (Accounts) wing — ledger debit posting, **Claim Authorization Document (CAD)** generation, reconciliation of rejected / returned payments
+
+Activities: **F04.cad** Generate the Claim Authorization Document (interest split, TDS, net payable) and post the ledger debit
+
+| Endpoint | Status |
+|---|---|
+| `GET /office/claims/{claimId}/cad` | P |
+| `GET /office/system/cad-static-data` | P |
+| `POST /office/claims/{claimId}/cad` | P |
+
 #### `fo.apfc` — APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)
 
-Activities: **F01.circle_review** Circle officer reviews coverage of the new establishment; **F01.dsc_approve** Approve the DSC / e-sign registration at the PF office; **F01.change_decide** Decide establishment change, closure or transfer requests; **F02.jd_approve** Approver for major changes (APFC / RPFC-II / RPFC-I per JD Table 3): approve / reject / return; **F03.ledger_exception_approve** Approve an exceptional ledger adjustment (RPFC-II F&A); **F04.approve_apfc** Approve claims in the APFC / RPFC-II band; **F06.schedule** Circle officer schedules inspection (incl. CAIU-allocated); **F06.proceed** Quasi-judicial authority: issue notice / summons, hold hearings (e-Proceedings Cause List, Daily Order); **F06.order** Pass 7A / 14B / 7Q order (e-Proceedings Final Order); 7B review; 7C; 26B disputes; **F06.prosecution** Initiate prosecution; **F07.freeze_ro_member** Order freezing of MID / UAN (Categories B / C); **F07.verify_apfc** Validate verification; **F11.approve_apfc** Approve inoperative-account settlement in higher amount bands
+Activities: **F01.circle_review** Circle officer reviews coverage of the new establishment; **F01.dsc_approve** Approve the DSC / e-sign registration at the PF office; **F01.change_decide** Decide establishment change, closure or transfer requests; **F02.jd_approve** Approver for major changes (APFC / RPFC-II / RPFC-I per JD Table 3): approve / reject / return; **F03.ledger_exception_approve** Approve an exceptional ledger adjustment (RPFC-II F&A); **F04.approve_apfc** Approve claims in the APFC / RPFC-II band; **F04.redisburse_approve** Authorise a new payment after a return without reopening adjudication; **F04.shares** Amend beneficiary shares (legacy-settled share, deceased nominee, court order) and check the share summary; **F06.schedule** Circle officer schedules inspection (incl. CAIU-allocated); **F06.proceed** Quasi-judicial authority: issue notice / summons, hold hearings (e-Proceedings Cause List, Daily Order); **F06.order** Pass 7A / 14B / 7Q order (e-Proceedings Final Order); 7B review; 7C; 26B disputes; **F06.vishwas_decide** Recalculate damages under VISHWAS and decide; revised demand is paid through a direct challan; **F06.prosecution** Initiate prosecution; **F07.freeze_ro_member** Order freezing of MID / UAN (Categories B / C); **F07.verify_apfc** Validate verification; **F11.approve_apfc** Approve inoperative-account settlement in higher amount bands
 
 | Endpoint | Status |
 |---|---|
 | `POST /office/cases/{caseId}/second-approvals` | W |
+| `GET /office/death-claims/{claimId}/shares-summary` | P |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P |
+| `POST /office/claims/{claimId}/re-disbursement-approvals` | P |
 | `POST /office/compliance/cases/{caseId}/escaped-assessments-7c` | P |
 | `POST /office/compliance/cases/{caseId}/hearings` | P |
 | `POST /office/compliance/cases/{caseId}/notices` | P |
@@ -435,12 +466,14 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/compliance/cases/{caseId}/reviews-7b` | P |
 | `POST /office/compliance/inspections` | P |
 | `POST /office/compliance/membership-disputes` | P |
+| `POST /office/compliance/vishwas-applications/{applicationId}/decisions` | P |
 | `POST /office/establishment-registrations/{reqId}/coverage-decisions` | P |
 | `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | P |
 | `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` | P |
 | `POST /office/freeze-cases/{caseId}/verifications` | P |
 | `POST /office/member-change-requests/{requestId}/decisions` | P |
 | `POST /office/members/{uan}/freezes` | P |
+| `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | P |
 | `POST /office/ledger-adjustments/{adjustmentId}/approvals` | ? |
 
 #### `fo.rpfc1` — RPFC-I — regional head of wings
@@ -456,7 +489,7 @@ Activities: **F02.jd_monitor** Monitor JD pendency across the RO; **F13.ro** RO-
 
 #### `fo.oic` — Officer-in-Charge of the office
 
-Activities: **F04.approve_oic** Approve claims above the top threshold; **F07.freeze_ro_est** Order freezing of an establishment (Category B); report to fraud committee; **F07.defreeze** Recommend / order de-freezing; post-defreeze claims use the higher chain; **F11.oic_monitor** Trigger verification of suspicious inoperative-account requests and monitor unblocking daily; **F12.reply** Reply to concurrent-audit alerts within 3 days; **F12.para_reply** Comply with audit paras; request dropping; **F13.oic** Office-level pendency and daily unblocking monitoring
+Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lock_admin** Inspect member-ledger locks and release an orphaned one with a recorded reason; **F07.freeze_ro_est** Order freezing of an establishment (Category B); report to fraud committee; **F07.defreeze** Recommend / order de-freezing; post-defreeze claims use the higher chain; **F11.oic_monitor** Trigger verification of suspicious inoperative-account requests and monitor unblocking daily; **F12.reply** Reply to concurrent-audit alerts within 3 days; **F12.para_reply** Comply with audit paras; request dropping; **F13.oic** Office-level pendency and daily unblocking monitoring
 
 | Endpoint | Status |
 |---|---|
@@ -464,21 +497,24 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F07.fr
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
 | `GET /office/accounts/inoperative` | P |
+| `GET /office/members/{uan}/locks` | P |
 | `POST /audit/concurrent/alerts/{alertId}/replies` | P |
 | `POST /audit/internal/paras/{paraId}/replies` | P |
 | `POST /office/establishments/{estId}/defreezes` | P |
 | `POST /office/establishments/{estId}/freezes` | P |
 | `POST /office/members/{uan}/defreezes` | P |
+| `POST /office/system/locks/{lockId}/release` | P |
 
 #### `fo.cash` — Cashier / Cash branch
 
-Activities: **F03.receipts** Handle cheques / DDs and receipts outside the online flow; record VDR entries; **F04.pay** Issue payment instruction / payment scroll; reconcile returns; re-issue
+Activities: **F03.receipts** Handle cheques / DDs and receipts outside the online flow; record VDR entries; **F03.payment_reject** Reject an unpaid or erroneous challan stuck in pending bank status; **F04.pay** Issue payment instruction / payment scroll; reconcile returns; re-issue
 
 | Endpoint | Status |
 |---|---|
 | `POST /office/claims/{claimId}/payment-instructions` | W |
 | `POST /office/claims/{claimId}/reissues` | W |
 | `GET /office/receipts/unreconciled` | P |
+| `POST /office/ecr-filings/{filingId}/payment-rejections` | P |
 | `POST /office/payment-scrolls` | P |
 | `POST /office/payment-scrolls/{scrollId}/return-reconciliations` | P |
 | `POST /office/vdr-entries` | ? |
@@ -493,14 +529,25 @@ Activities: **F04.physical** Diarise physical claims and documents
 |---|---|
 | `POST /office/physical-claims` | P |
 
+#### `fo.pro_intake` — PRO counter inwarding officer — inwards claims at the PRO counter (physical dockets, death-certificate checks, UAN registration problems surfaced at intake)
+
+Activities: **F04.pro_intake** Inward claims at the PRO counter; check death certificates; resolve UAN registration problems at intake
+
+| Endpoint | Status |
+|---|---|
+| `POST /office/physical-claims` | P |
+| `POST /office/physical-claims/{intakeId}/identity-validations` | P |
+
 #### `fo.da_pension` — DA (Pension) — worksheet, PPO, transfer-in, Special 10D
 
-Activities: **F05.worksheet** Generate pension worksheet (Pension > Transaction > Pension Worksheet); Special 10D for incomplete data; send errors back; **F05.ppo** Generate PPO; process transfer-in with / without PPO; **F05.dispatch** Dispatch PPO and scroll to the bank
+Activities: **F05.worksheet** Generate pension worksheet (Pension > Transaction > Pension Worksheet); Special 10D for incomplete data; send errors back; **F05.aggregate** Aggregate untransferred past service into the calculation sheet; **F05.sc_adjudicate** Validate and cancel a surrendered Scheme Certificate; **F05.ppo** Generate PPO; process transfer-in with / without PPO; **F05.dispatch** Dispatch PPO and scroll to the bank
 
 | Endpoint | Status |
 |---|---|
 | `POST /office/pensions/ppo-issuances` | P |
 | `POST /office/pensions/ppos/{ppoId}/dispatches` | P |
+| `POST /office/pensions/scheme-certificates/{certId}/surrender-adjudications` | P |
+| `POST /office/pensions/service-aggregations` | P |
 | `POST /office/pensions/special-10d-cases` | P |
 | `POST /office/pensions/transfers-in` | P |
 | `POST /office/pensions/worksheets` | P |
@@ -515,11 +562,12 @@ Activities: **F05.initial_arrear** Check initial arrear and forward
 
 #### `fo.apfc_pension` — APFC / AC (Pension) — PPO approval and e-sign, DLC monitoring
 
-Activities: **F05.ppo_approve** Approve worksheet, PPO and initial arrear; e-sign PPO; decide higher-pension options; **F05.dlc_monitor** Monitor overdue life certificates; suspend or resume pension
+Activities: **F05.ppo_approve** Approve worksheet, PPO and initial arrear; e-sign PPO; decide higher-pension options; **F05.dlc_monitor** Monitor overdue life certificates; suspend or resume pension; **F05.brs** Monthly Bank Reconciliation Statement of pension scrolls vs bank debit advices
 
 | Endpoint | Status |
 |---|---|
 | `GET /office/pensions/life-certificates/overdue` | P |
+| `POST /office/pensions/brs-reconciliations` | P |
 | `POST /office/pensions/higher-pension-options/{optionId}/decisions` | P |
 | `POST /office/pensions/ppos/{ppoId}/e-signatures` | P |
 | `POST /office/pensions/worksheets/{worksheetId}/approvals` | P |
@@ -582,12 +630,13 @@ Activities: **F06.legal** Record 7-I appeals, 7-O pre-deposits / waivers and cou
 
 #### `fo.exemption` — Exemption cell (supervising PF trusts)
 
-Activities: **F09.past_accum** Transfer past accumulations after surrender / cancellation; **F09.supervise** Supervise PF trusts: returns, investments, audit reports
+Activities: **F09.ingest** Bulk-ingest the surrendered trust's member ledgers and past accumulations; **F09.past_accum** Transfer past accumulations after surrender / cancellation; **F09.supervise** Supervise PF trusts: returns, investments, audit reports
 
 | Endpoint | Status |
 |---|---|
 | `GET /office/exempted/{estId}/audits` | P |
 | `GET /office/exempted/{estId}/returns` | P |
+| `POST /office/exempted/{estId}/past-accumulation-ingestions` | P |
 | `POST /office/exempted/{estId}/past-accumulation-transfers` | P |
 
 #### `fo.edli` — EDLI claims handling
@@ -962,6 +1011,12 @@ Activities: **F13.mole** Aggregate dashboards (no PII)
 | `GET /monitoring/contributions` | W |
 | `GET /public/statistics` | W |
 
+#### `gov.pmvbry_admin` — Incentive-scheme reconciler for PMVBRY (and legacy PMRPY / ABRY) — validates employment-linked incentives computed from ECR data
+
+Activities: **F13.pmvbry** Reconcile employment-linked incentives (PMVBRY, earlier PMRPY / ABRY) computed from ECR data
+
+Integration adapters: `pmvbry_portal`
+
 #### `gov.parliament` — Parliament (questions answered through MoLE)
 
 Activities: **F13.parliament** Receive answers to questions through the Ministry
@@ -1019,6 +1074,10 @@ Integration adapters: `pension_bank`
 #### `tech.epfo3` — EPFO 3.0 core-banking platform and auto-settlement engine (a system actor making automated decisions)
 
 Activities: **F03.post** Post balanced ledger entries and emit ContributionPosted; **F04.auto_settle** Auto-settle claims that clear risk checks; route the rest to the office
+
+#### `tech.batch.annual_accounts` — Annual-accounts batch engine — year-end interest crediting; holds an exclusive lock on each member ledger while it runs (claims are blocked meanwhile)
+
+Activities: **F03.annual_batch** Year-end interest crediting; locks each member ledger while it runs (claims wait)
 
 #### `tech.ai_service` — AI / analytics service account (advisory only)
 
@@ -1303,6 +1362,8 @@ flowchart LR
   F03_ledger_exception["fo.da_accounts<br/>Appendix-E adjustment (e.g. PF → EPS) or VDR (Special) credi"]
   F03_ledger_exception_approve["fo.apfc<br/>Approve an exceptional ledger adjustment (RPFC-II F&A)"]
   F03_ecr_reject["fo.da_accounts<br/>Reject an ECR before posting; reverse a posted journal"]
+  F03_payment_reject["fo.cash<br/>Reject an unpaid or erroneous challan stuck in pending bank "]
+  F03_annual_batch["tech.batch.annual_accounts<br/>Year-end interest crediting; locks each member ledger while "]
   F03_interest["ho.fa_cao<br/>Record the approved annual interest rate and run interest cr"]
   F03_interest_rate["gov.cbt<br/>Recommend the annual interest rate (notified with Ministry c"]
   F03_ecr_prepare --> F03_ecr_approve
@@ -1317,6 +1378,9 @@ flowchart LR
   F03_receipts --> F03_vdr_reconcile
   F03_vdr_reconcile --> F03_eo_certify
   F03_ledger_exception --> F03_ledger_exception_approve
+  F03_annual_batch --> F03_passbook
+  F04_lock_admin["fo.oic<br/>Inspect member-ledger locks and release an orphaned one with"]
+  F03_annual_batch --> F04_lock_admin
   F03_interest --> F03_passbook
   F03_interest_rate --> F03_interest
 ```
@@ -1336,12 +1400,21 @@ flowchart LR
   F04_approve_apfc["fo.apfc<br/>Approve claims in the APFC / RPFC-II band"]
   F04_approve_oic["fo.oic<br/>Approve claims above the top threshold"]
   F04_pay["fo.cash<br/>Issue payment instruction / payment scroll; reconcile return"]
+  F04_cad["fo.fa_accounts<br/>Generate the Claim Authorization Document (interest split, T"]
+  F04_redisburse_request["member<br/>Submit corrected bank details after a payment return"]
+  F04_redisburse_approve["fo.apfc<br/>Authorise a new payment after a return without reopening adj"]
+  F04_attestation_view["fo.da_accounts<br/>Open the employer-signed PDF / DSC document before the appro"]
+  F04_lock_admin["fo.oic<br/>Inspect member-ledger locks and release an orphaned one with"]
+  F04_pro_intake["fo.pro_intake<br/>Inward claims at the PRO counter; check death certificates; "]
   F04_track["member<br/>Track claims and notifications; download Form 16A"]
   F04_tds["fo.da_accounts<br/>Compute TDS on withdrawals and file with Income Tax"]
   F04_transfer["member<br/>Request Form 13 transfer; confirm auto-transfer; view Annexu"]
   F04_transfer_attest["employer.signatory<br/>Attest pending transfer claims (Online Services > Transfer C"]
   F04_transfer_process["fo.da_accounts<br/>Process transfer between member IDs / offices"]
+  F04_transfer_recredit["fo.da_accounts<br/>Recredit a rejected transfer-in to the member ledger"]
   F04_death_claim["claimant<br/>File PF (Form 20), EDLI (Form 5IF) or composite death claim"]
+  F04_co_beneficiary["claimant.nominee<br/>Inward as an additional beneficiary on an open death claim a"]
+  F04_shares["fo.apfc<br/>Amend beneficiary shares (legacy-settled share, deceased nom"]
   F04_edli["fo.edli<br/>Process EDLI assurance benefit"]
   F04_claim_file --> F04_auto_settle
   F04_claim_file --> F04_attest
@@ -1359,9 +1432,18 @@ flowchart LR
   F04_approve_apfc --> F04_pay
   F04_approve_oic --> F04_pay
   F04_pay --> F04_track
+  F04_cad --> F04_pay
+  F04_redisburse_request --> F04_redisburse_approve
+  F04_redisburse_approve --> F04_pay
+  F04_attestation_view --> F04_process
+  F04_lock_admin --> F04_process
+  F04_pro_intake --> F04_process
   F04_transfer --> F04_transfer_attest
   F04_transfer_attest --> F04_transfer_process
   F04_death_claim --> F04_edli
+  F04_co_beneficiary --> F04_shares
+  F04_shares --> F04_edli
+  F04_shares --> F04_cad
   F04_edli --> F04_pay
 ```
 
@@ -1370,11 +1452,15 @@ flowchart LR
 ```mermaid
 flowchart LR
   F05_apply["member<br/>Apply for monthly pension (Form 10D) or scheme certificate"]
+  F05_preview["member<br/>Pre-check pension eligibility across all member IDs; see unt"]
+  F05_sc_surrender["member<br/>Surrender a Scheme Certificate for monthly pension or withdr"]
   F05_disabled_apply["member.disabled<br/>Apply for disablement pension"]
   F05_family_apply["family_pensioner<br/>Apply for widow / child / orphan / dependent-parent pension"]
   F05_ids["fo.da_accounts<br/>Prepare Input Data Sheet (Claims > Transaction > Form-10D/10"]
   F05_ids_approve["fo.ao<br/>Approve the Input Data Sheet and send to the Pension section"]
   F05_worksheet["fo.da_pension<br/>Generate pension worksheet (Pension > Transaction > Pension "]
+  F05_aggregate["fo.da_pension<br/>Aggregate untransferred past service into the calculation sh"]
+  F05_sc_adjudicate["fo.da_pension<br/>Validate and cancel a surrendered Scheme Certificate"]
   F05_ppo["fo.da_pension<br/>Generate PPO; process transfer-in with / without PPO"]
   F05_initial_arrear["fo.ss_pension<br/>Check initial arrear and forward"]
   F05_ppo_approve["fo.apfc_pension<br/>Approve worksheet, PPO and initial arrear; e-sign PPO; decid"]
@@ -1388,6 +1474,7 @@ flowchart LR
   F05_dlc_event["ext.jeevan_pramaan<br/>Send the DLC result"]
   F05_dlc_doorstep["ext.ippb<br/>Doorstep DLC through India Post Payments Bank"]
   F05_dlc_monitor["fo.apfc_pension<br/>Monitor overdue life certificates; suspend or resume pension"]
+  F05_brs["fo.apfc_pension<br/>Monthly Bank Reconciliation Statement of pension scrolls vs "]
   F05_higher_member["member<br/>Apply for pension on higher wages (joint option); track stat"]
   F05_higher_employer["employer.signatory<br/>Validate joint options and upload wage details"]
   F05_higher_deposit["fo.da_accounts<br/>Book dues deposit through Member VDR ('Pension on Higher Wag"]
@@ -1396,11 +1483,17 @@ flowchart LR
   F05_policy["ho.pension<br/>Pension policy, monitoring of DLC / higher-pension / death-c"]
   F05_peic["gov.peic<br/>Review pension and EDLI implementation"]
   F05_apply --> F05_ids
+  F04_transfer["member<br/>Request Form 13 transfer; confirm auto-transfer; view Annexu"]
+  F05_preview --> F04_transfer
+  F05_preview --> F05_apply
+  F05_sc_surrender --> F05_sc_adjudicate
   F05_disabled_apply --> F05_ids
   F05_family_apply --> F05_ids
   F05_ids --> F05_ids_approve
   F05_ids_approve --> F05_worksheet
   F05_worksheet --> F05_ppo
+  F05_aggregate --> F05_worksheet
+  F05_sc_adjudicate --> F05_ids
   F05_ppo --> F05_ppo_approve
   F05_initial_arrear --> F05_ppo_approve
   F05_ppo_approve --> F05_dispatch
@@ -1430,6 +1523,8 @@ flowchart LR
   F06_proceed["fo.apfc<br/>Quasi-judicial authority: issue notice / summons, hold heari"]
   F06_order["fo.apfc<br/>Pass 7A / 14B / 7Q order (e-Proceedings Final Order); 7B rev"]
   F06_employer_reply["employer.signatory<br/>Reply and submit evidence in proceedings"]
+  F06_vishwas_apply["employer.signatory<br/>Apply under VISHWAS to settle a 14B damages / penalty disput"]
+  F06_vishwas_decide["fo.apfc<br/>Recalculate damages under VISHWAS and decide; revised demand"]
   F06_appeal["ext.cgit<br/>Tribunal hears 7-I appeals and decides 7-O pre-deposit / wai"]
   F06_courts["ext.courts<br/>Writs and orders on EPFO matters"]
   F06_legal["fo.legal<br/>Record 7-I appeals, 7-O pre-deposits / waivers and court / t"]
@@ -1457,6 +1552,8 @@ flowchart LR
   F06_order --> F06_appeal
   F06_order --> F06_recovery
   F06_employer_reply --> F06_order
+  F06_vishwas_apply --> F06_vishwas_decide
+  F06_vishwas_decide --> F03_direct_challan
   F06_appeal --> F06_legal
   F06_courts --> F06_legal
   F06_recovery --> F06_garnishee
@@ -1545,13 +1642,18 @@ flowchart LR
   F09_audit["trust_auditor<br/>Audit the PF trust and submit the audited statements"]
   style F09_audit stroke-dasharray: 5 5
   F09_surrender["exempted.trust<br/>Surrender exemption"]
+  F09_trust_handover["exempted.trust_liquidator<br/>Hand over member ledgers and past accumulations of the surre"]
+  F09_ingest["fo.exemption<br/>Bulk-ingest the surrendered trust's member ledgers and past "]
   F09_past_accum["fo.exemption<br/>Transfer past accumulations after surrender / cancellation"]
   F09_supervise["fo.exemption<br/>Supervise PF trusts: returns, investments, audit reports"]
   F09_ho["ho.exemption<br/>Grant / cancel exemption policy decisions"]
   F09_returns --> F09_supervise
   F09_annexure_k --> F09_annexure_k_reconcile
   F09_audit --> F09_supervise
+  F09_surrender --> F09_trust_handover
   F09_surrender --> F09_past_accum
+  F09_trust_handover --> F09_ingest
+  F09_ingest --> F09_past_accum
 ```
 
 ### F10 — International workers
@@ -1623,6 +1725,7 @@ flowchart LR
   F13_fund_feed["ext.fund_manager<br/>Send portfolio / custody positions"]
   F13_publicity["ho.publicity<br/>Publish circulars and awareness content"]
   F13_mole["gov.mole<br/>Aggregate dashboards (no PII)"]
+  F13_pmvbry["gov.pmvbry_admin<br/>Reconcile employment-linked incentives (PMVBRY, earlier PMRP"]
   F13_parliament["gov.parliament<br/>Receive answers to questions through the Ministry"]
   F13_cbt["gov.cbt<br/>Board dashboards; approve accounts, interest rate, policies"]
   F13_ec["gov.ec<br/>Executive Committee papers and decisions"]

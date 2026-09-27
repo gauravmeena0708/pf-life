@@ -366,6 +366,43 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /members/me/pension-eligibility-preview:
+    get:
+      operationId: getMembersPensionEligibilityPreview
+      summary: Pre-check pension eligibility across all member IDs under the UAN; flags untransferred service (threshold from
+        illustrat
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '200':
+          description: Eligibility preview across all member IDs linked to the caller's UAN
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Envelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/PensionEligibilityPreview'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: pension
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+      description: Pre-check pension eligibility across all member IDs under the UAN; flags untransferred service (threshold
+        from illustrative config)
   /members/me/pension-scheme-certificate:
     get:
       operationId: getMembersPensionSchemeCertificate
@@ -397,6 +434,44 @@ paths:
       - Member claims, transfers and pension applications
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: pension
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /members/me/pension-scheme-certificates/{certId}/surrenders:
+    post:
+      operationId: postMembersPensionSchemeCertificatesCertIdSurrenders
+      summary: Surrender a Scheme Certificate to convert it to monthly pension (Form 10D) or withdrawal benefit (Form 10C)
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: certId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
         '501':
@@ -486,6 +561,39 @@ paths:
       x-owner-service: pension
       x-callers:
       - fo.ao
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/pensions/brs-reconciliations:
+    post:
+      operationId: postOfficePensionsBrsReconciliations
+      summary: Monthly Bank Reconciliation Statement (BRS) of pension scrolls vs bank debit advices
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: pension
+      x-callers:
+      - fo.apfc_pension
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -745,6 +853,73 @@ paths:
       x-owner-service: pension
       x-callers:
       - fo.ss_pension
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/pensions/scheme-certificates/{certId}/surrender-adjudications:
+    post:
+      operationId: postOfficePensionsSchemeCertificatesCertIdSurrenderAdjudications
+      summary: DA (Pension) validates and cancels a surrendered Scheme Certificate
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: certId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: pension
+      x-callers:
+      - fo.da_pension
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/pensions/service-aggregations:
+    post:
+      operationId: postOfficePensionsServiceAggregations
+      summary: DA (Pension) aggregates untransferred past service into the calculation sheet
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: pension
+      x-callers:
+      - fo.da_pension
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -1468,6 +1643,63 @@ components:
           description: Resource-specific; defined when the endpoint is implemented
         meta:
           $ref: '#/components/schemas/Meta'
+    PensionEligibilityPreview:
+      type: object
+      additionalProperties: false
+      required:
+      - rule_version
+      - total_eligible_service_months
+      - threshold_months
+      - meets_threshold
+      - recommended_form
+      - service_breakdown
+      properties:
+        rule_version:
+          type: string
+          description: Version of config/demo-rules.yaml used (ILLUSTRATIVE_ONLY)
+        total_eligible_service_months:
+          type: integer
+          minimum: 0
+        threshold_months:
+          type: integer
+          minimum: 0
+          description: Service threshold from the illustrative rule set
+        meets_threshold:
+          type: boolean
+        recommended_form:
+          enum:
+          - FORM_10D
+          - FORM_10C_WITHDRAWAL
+          - SCHEME_CERTIFICATE
+        service_breakdown:
+          type: array
+          items:
+            type: object
+            required:
+            - account_link_id
+            - contributory_months
+            - transferred_to_primary
+            properties:
+              account_link_id:
+                type: string
+                description: Opaque link to one member ID
+              member_id_masked:
+                type: string
+              establishment_name:
+                type: string
+              contributory_months:
+                type: integer
+                minimum: 0
+              transferred_to_primary:
+                type: boolean
+              action_required:
+                type:
+                - string
+                - 'null'
+                enum:
+                - MEMBER_MUST_FILE_FORM_13_TRANSFER_FIRST
+                - SERVICE_UNDER_AGGREGATION
+                - null
   responses:
     Ok:
       description: Success
