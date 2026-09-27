@@ -518,7 +518,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 
 | Endpoint | Status | Owner | Called by |
 |---|---|---|---|
-| `GET /audit/correlations/{correlationId}` | W | audit | gov.cag, zo.internal_audit, zo.rpfc1_audit |
+| `GET /audit/correlations/{correlationId}` | W | audit | gov.cag, ho.audit, zo.internal_audit, zo.rpfc1_audit |
 | `GET /audit/events` | W | audit | gov.cag, gov.statutory_auditor, ho.audit, zo.rpfc1_audit |
 | `GET /audit/concurrent/extracts` | P | audit | zo.rpfc1_audit |
 | `GET /ho/finance/balance-sheet` | P | reporting | gov.statutory_auditor |

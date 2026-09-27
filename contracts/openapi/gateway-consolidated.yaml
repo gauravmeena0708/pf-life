@@ -307,6 +307,7 @@ paths:
       x-owner-service: audit
       x-callers:
       - gov.cag
+      - ho.audit
       - zo.internal_audit
       - zo.rpfc1_audit
       x-scope: read-only for auditors; audit writes by audit roles only

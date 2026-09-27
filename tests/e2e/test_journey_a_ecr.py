@@ -26,7 +26,11 @@ SHOTS = Path(__file__).resolve().parent / "screenshots"
 def login(page, persona: str, return_to: str = "/") -> None:
     page.goto(f"{WEB}/auth/login?persona={persona}&return_to={return_to}")
     page.wait_for_url(re.compile(r"localhost:8080/realms/epfo-demo/"))
-    if not page.locator("#username").input_value():
+    page.locator("#password").wait_for()
+    if not page.locator("#username").count() and page.locator("#reset-login").count():
+        page.click("#reset-login")            # a shared browser: Keycloak offers the previous user; start over
+        page.locator("#username").wait_for()
+    if page.locator("#username").input_value() != persona:
         page.fill("#username", persona)
     page.fill("#password", PASSWORD)
     page.click("#kc-login")

@@ -2445,6 +2445,12 @@ stakeholders:
     step_up: false
     via:
     - F12.ho
+  - endpoint: GET /audit/correlations/{correlationId}
+    status: W
+    scope: read-only for auditors; audit writes by audit roles only
+    step_up: false
+    via:
+    - F12.ho
   - endpoint: POST /audit/internal/paras/{paraId}/decisions
     status: P
     scope: read-only for auditors; audit writes by audit roles only

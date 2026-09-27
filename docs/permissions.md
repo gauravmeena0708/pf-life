@@ -827,6 +827,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /audit/correlations/{correlationId}` | W | read-only for auditors; audit writes by audit roles only |  |
 | `GET /audit/events` | W | read-only for auditors; audit writes by audit roles only |  |
 | `POST /audit/internal/paras/{paraId}/decisions` | P | read-only for auditors; audit writes by audit roles only | yes |
 

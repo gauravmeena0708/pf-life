@@ -276,6 +276,7 @@ async def test_oidc_code_callback_uses_pkce_and_validates_keycloak_jwks(client):
         auth_params = parse_qs(urlparse(login.headers["location"]).query)
         assert auth_params["login_hint"] == ["member-a"]
         assert auth_params["code_challenge_method"] == ["S256"]
+        assert auth_params["prompt"] == ["login"]
         state = auth_params["state"][0]
         saved = json.loads(await redis.get(f"oidc:state:{state}"))
         now = int(time.time())

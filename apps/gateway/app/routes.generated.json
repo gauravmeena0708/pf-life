@@ -2846,6 +2846,7 @@
     "step_up": false,
     "callers": [
       "gov.cag",
+      "ho.audit",
       "zo.internal_audit",
       "zo.rpfc1_audit"
     ],

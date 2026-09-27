@@ -78,7 +78,8 @@ async def login(request: Request, persona: str, return_to: str = "/"):
     params = {"client_id": request.app.state.settings.keycloak_client_id, "response_type": "code",
               "scope": "openid profile", "redirect_uri": f"{request.app.state.settings.gateway_public_origin.rstrip('/')}/auth/callback",
               "state": state, "nonce": nonce, "code_challenge": challenge, "code_challenge_method": "S256",
-              "login_hint": persona}
+              "login_hint": persona,
+              "prompt": "login"}   # always ask for credentials: a shared computer must never reuse the previous user's sign-in
     return RedirectResponse(f"{_issuer(request)}/protocol/openid-connect/auth?{urlencode(params)}", status_code=302)
 
 

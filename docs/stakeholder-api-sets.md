@@ -894,6 +894,7 @@ Activities: **F12.ho** Audit Division: plan audits, IT audit, pre-audit, drop pa
 
 | Endpoint | Status |
 |---|---|
+| `GET /audit/correlations/{correlationId}` | W |
 | `GET /audit/events` | W |
 | `POST /audit/internal/paras/{paraId}/decisions` | P |
 
