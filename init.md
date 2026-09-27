@@ -91,7 +91,7 @@ Choose stable, mutually compatible maintained releases and pin them in lockfiles
 - **Backend:** Python 3.12+ and FastAPI; Pydantic, SQLAlchemy 2.x, Alembic. Use typed interfaces, explicit error handling, and independent deployment units.
 - **Frontend:** React + TypeScript + Vite; accessible responsive components, route guards, typed API client generated from OpenAPI where practical.
 - **Data:** PostgreSQL; a separate logical database/user per microservice for the POC. An additional read-only reporting store or materialised projections; no shared writable schema.
-- **Authentication:** Keycloak with OIDC/OAuth 2.0, test realm imported from source control, short-lived access tokens, PKCE for browser clients. A BFF session/cookie approach is acceptable if documented and secured.
+- **Authentication:** Keycloak with OIDC/OAuth 2.0, test realm imported from source control. **Decision:** browsers use the BFF pattern — the gateway runs the authorisation-code + PKCE flow, keeps tokens server-side, and gives the browser only an `HttpOnly; Secure; SameSite=Strict` session cookie. Tokens never reach browser JavaScript. Machine clients (B2B sandbox, mock bank, service accounts) use client-credentials tokens. Session lifetimes and revocation are in §6.6.
 - **Gateway/BFF:** a single lightweight FastAPI service in `apps/gateway/` that validates Keycloak tokens, resolves the server-side actor context (§6.1), and reverse-proxies by path to the owning service using a published route table (sub-path routing, e.g. `/api/v1/employers/me/ecr-filings/**` → `contribution-service`). Do not add Traefik, Kong or a second gateway.
 - **Asynchronous messaging:** RabbitMQ with topic exchanges, durable queues, delivery acknowledgements, retries, DLQ, and a transactional outbox per event-producing service.
 - **Caching/rate limit:** Redis if needed; never use it as the source of financial truth.
@@ -154,6 +154,27 @@ Expose separate frontend routes and API route groups as appropriate, backed by t
 
 **Rule:** The app should clearly label interface actions as `Working POC`, `Mock integration`, or `Planned contract`. Never present dummy records as genuine official information.
 
+### 2.4 Local runtime: ports, networks and databases
+
+All host ports bind to `127.0.0.1` only. Business services are **not** published to the host; clients reach them through the gateway. A `dev-direct` Compose profile may publish them on the ports below for debugging.
+
+| Component | Host port (127.0.0.1) | Notes |
+|---|---|---|
+| Gateway / BFF | 8000 | The only API entry point: `/api/v1/**`, OpenAPI at `/docs` |
+| Web app (Vite dev server) | 5173 | Calls the gateway only |
+| Keycloak | 8080 | Admin console is development-only |
+| PostgreSQL | 5432 | One database and one login role per service (below) |
+| RabbitMQ | 5672 · 15672 | AMQP · management UI |
+| MinIO | 9000 · 9001 | S3 API · console |
+| Redis | not published | Rate limits and the revocation set (§6.6); never financial truth |
+| Ollama (profile `ai`) | 11434 | Optional local model |
+| Prometheus · Grafana · Jaeger (profile `observability`) | 9090 · 3000 · 16686 | Optional |
+| Services (profile `dev-direct` only) | 8101 employer · 8102 member · 8103 contribution · 8104 claim · 8105 payment-simulator · 8106 workflow · 8107 grievance · 8108 audit · 8109 reporting · 8110 intelligence · 8111 pension · 8112 compliance (reserved) · 8113 international (reserved) | Inside the network every service listens on 8000 |
+
+**Networks:** `edge` (web, gateway, Keycloak), `services` (gateway and business services), `data` (each service and only its own datastores). Business services cannot reach each other's databases at the network level either.
+
+**Databases:** `infra/database/init/01-create-databases.sh` is mounted into `/docker-entrypoint-initdb.d/`. It creates, for each service, a database `<service>_db` and a login role `<service>_app` whose password comes from `.env` (`<SERVICE>_DB_PASSWORD`). Each role owns only its own database; `CONNECT` on every database is revoked from `PUBLIC`. A separate `reporting_ro` role has read access to the reporting database only. Schema migrations belong to each service and run with `make migrate` (Gate 2), not in the init script. §12.1 requires a test showing one service cannot connect with another service's credentials.
+
 ---
 
 ## 3. Canonical API conventions
@@ -163,6 +184,17 @@ Base: `/api/v1`. Keep internal service paths private where possible; route exter
 ### 3.1 Minimum working endpoints
 
 This section is the **minimum** set. The full list of EPFO functions (establishment search and configuration, arrear/supplementary ECR, 14B/7Q, Appendix E, VDR, VDR Special, cash payments, TRRN adjustment, pension/PPO/Jeevan Pramaan, Form 13/19/10C/10D/20/5IF, compliance proceedings, exempted trusts, international workers, etc.) with a Working / Mock / Planned status per endpoint is in **`docs/endpoint-catalogue.md`**. Every row there marked **W** or **M** with phase 1 is in scope for this POC; every **P** row needs a contract in `contracts/planned/`; every **?** row must not be built until an EPFO domain owner confirms its definition.
+
+**Design references (read before building).** These files are the source of truth for who calls what; regenerate the derived files after any change.
+
+| File | What it is | Maintained |
+|---|---|---|
+| `docs/stakeholders.md` | 108 stakeholders (members, employers, field-office roles, DO / ZO / HO, NDC / ADC, vigilance, audit, external bodies) with stable IDs | By hand |
+| `docs/stakeholder-activities.yaml` | 206 activities: actor, endpoints, hand-offs, approval chains, source evidence | By hand |
+| `docs/portal-functions-by-login.md` | Real EPFO portal functions by login type, with sources | By hand |
+| `docs/stakeholder-api-sets.md` | API set per stakeholder, gap lists, Mermaid flow diagrams | Generated: `python3 docs/tools/build_stakeholder_views.py` |
+| `docs/stakeholder-atlas.html` | Interactive explorer of stakeholders, lifecycles and approval chains | Generated: `python3 docs/tools/build_stakeholder_atlas.py` |
+| `docs/permissions.md`, `docs/api-matrix.md`, `contracts/openapi/*.yaml`, `contracts/events/*.json` | Gate 0 design-freeze package | Generated: `python3 docs/tools/build_gate0.py` |
 
 **Public**
 
@@ -308,6 +340,34 @@ Create ERDs and actual migrations. The list below is a minimum; evolve it only t
 
 Every service should generate its own IDs, publish stable references, and avoid hardcoded dependency on another service's internal tables.
 
+### 4.1 Demo chart of accounts
+
+`contribution-service` owns the journal. Account names follow EPFO's own account numbering so the demo reads naturally to EPFO staff, but **every split, rate and amount is illustrative configuration** (`config/demo-rules.yaml`). Only these accounts exist in the POC; adding one needs an ADR.
+
+| Code | Account | Type | Sub-ledger |
+|---|---|---|---|
+| `AC01_EPF` | EPF — member accumulations (A/c 1), split into employee and employer share | Liability | Per member account, per share |
+| `AC02_ADMIN` | EPF administrative charges (A/c 2) | Income | Per establishment |
+| `AC10_EPS` | Employees' Pension Fund (A/c 10) — pooled; members hold service records, not balances | Liability | None |
+| `AC21_EDLI` | EDLI contributions (A/c 21) | Liability | None |
+| `AC22_EDLI_ADMIN` | EDLI administrative charges (A/c 22) | Income | Per establishment |
+| `BANK_COLLECTION` | Collection bank clearing | Asset | Per TRRN |
+| `SUSPENSE_RECEIPTS` | Receipts not yet matched to a return | Liability | Per receipt |
+| `CLAIMS_PAYABLE` | Approved claims awaiting bank settlement | Liability | Per claim |
+| `BANK_SETTLEMENT` | Outgoing settlement bank clearing | Asset | Per payment |
+| `DAMAGES_INTEREST` | 14B damages and 7Q interest receivable / received | Income | Per establishment, per demand |
+
+Posting rules (each is one balanced journal; corrections are new reversing journals, never edits):
+
+| Business event | Debit | Credit |
+|---|---|---|
+| Challan payment confirmed (`PaymentConfirmed` → `ContributionPosted`) | `BANK_COLLECTION` (challan total) | `AC01_EPF` per member and share · `AC10_EPS` · `AC02_ADMIN` · `AC21_EDLI` · `AC22_EDLI_ADMIN` |
+| Payment received that matches no return | `BANK_COLLECTION` | `SUSPENSE_RECEIPTS` |
+| Claim approved | `AC01_EPF` (member, per share) | `CLAIMS_PAYABLE` |
+| Claim paid (bank confirms) | `CLAIMS_PAYABLE` | `BANK_SETTLEMENT` |
+| Claim payment returned | `BANK_SETTLEMENT` | `CLAIMS_PAYABLE` (re-issue later) |
+| Direct challan for 14B / 7Q confirmed | `BANK_COLLECTION` | `DAMAGES_INTEREST` |
+
 ---
 
 ## 5. Mandatory demonstrated end-to-end user journeys
@@ -322,7 +382,7 @@ Every service should generate its own IDs, publish stable references, and avoid 
 6. Simulate authenticated bank payment confirmation; post balanced immutable ledger entries and emit `ContributionPosted`.
 7. Log in as a member; verify that their passbook reflects only their own contribution.
 8. Re-submit with the same idempotency key; ensure no duplicate challan, ledger posting or event side effect.
-9. Revoke the payroll operator and demonstrate immediate denial even for an existing browser session where introspection/policy freshness permits.
+9. Revoke the payroll operator and show that their next request is denied within 5 seconds, including from a browser session that is already open (mechanism in §6.6).
 
 ### Journey B — Member identity and claim
 
@@ -385,9 +445,39 @@ This JSON is illustrative **internal context**, not a client-trusted body. Do no
 
 ### 6.2 Roles and permissions
 
-Seed example personas: public visitor, member A, member B, employer owner, payroll preparer, authorised signatory, district caseworker, regional approving officer, zonal supervisor, Head Office analyst, NDC operator, ministry aggregate viewer, B2B payroll client, CAIU investigator, HRM employee, security analyst, vigilance investigator, independent auditor, and AI service account.
+Seed the personas listed in §6.2.1 (24 personas, each mapped to a stakeholder ID).
 
 Create a machine-readable permission matrix and negative tests for: cross-UAN reads; cross-establishment ECR reads; payroll self-approval; revoked signatory; cross-jurisdiction claims; ministry access to raw PII; NDC operations access to financial data; auditor writes; AI issuing payment or approving claims; and partner bulk member enumeration.
+
+### 6.2.1 Personas and stakeholder IDs
+
+Every seeded persona maps to a stakeholder ID in `docs/stakeholders.md`; Keycloak roles and the permission matrix (`docs/permissions.md`, generated from `docs/stakeholder-activities.yaml`) use the same IDs.
+
+| Persona | Stakeholder ID | Journeys |
+|---|---|---|
+| Public visitor | `public` | — |
+| Member A, Member B | `member` | A, B, C, D, E |
+| Employer owner | `employer.owner` | A |
+| Payroll preparer | `employer.operator` | A |
+| Authorised signatory | `employer.signatory` | A, D |
+| District caseworker | `fo.da_accounts` (district office posting) | B |
+| **Section supervisor** *(added)* | `fo.ss` | B |
+| **Accounts officer** *(added)* | `fo.ao` | B |
+| Regional approving officer | `fo.apfc` | B |
+| **Officer-in-charge** *(added)* | `fo.oic` | B (top amount band) |
+| **Cashier** *(added)* | `fo.cash` | B (payment instruction, re-issue) |
+| **Grievance officer / PRO** *(added)* | `fo.pro` | C |
+| Zonal supervisor | `zo.acc` | C (escalation) |
+| Head Office analyst | `ho.cpfc` | — |
+| NDC operator | `tech.ndc` | — |
+| Ministry aggregate viewer | `gov.mole` | — |
+| B2B payroll client | `payroll_provider` | A |
+| CAIU investigator | `ho.caiu` | D |
+| HRM employee | `ho.hr` | — |
+| Security analyst | `ho.security` | A (revocation), D |
+| Vigilance investigator | `ho.cvo` | — |
+| Independent auditor | `ho.audit` | — |
+| AI service account | `tech.ai_service` | E |
 
 ### 6.3 Sensitive actions
 
@@ -401,33 +491,97 @@ Only synthetic data. Field-level response filtering, fixed-scope service identit
 
 Create `docs/threat-model.md` covering STRIDE-style threats: IDOR/BOLA, JWT misuse, shared employer credentials, signatory replay, malicious payroll uploads, duplicate submission, falsified bank callbacks, insider abuse, compromised officer accounts, data exfiltration, SSRF, event replay, queue poisoning, RAG prompt injection, model output misuse, and insecure account recovery. Include concrete mitigations and at least one negative test per high-risk category.
 
+### 6.6 Session lifetime and revocation
+
+"Immediate" revocation is defined as: **the revoked actor's next request is denied within 5 seconds of the revoke command**, whatever tokens or sessions they hold. Mechanism:
+
+1. Access tokens live at most 5 minutes; refresh tokens at most 30 minutes idle. The browser holds only the gateway session cookie (§2.1).
+2. A revoke command (operator revocation, signatory revocation, role removal, session revocation, account freeze) commits in the owning service and emits an event through its outbox (`EmployerOperatorRevoked.v1`, `SignatoryRevoked.v1`, `SecurityEventRecorded.v1`).
+3. The gateway consumes these events and writes the subject (and establishment, where scoped) to a **revocation set in Redis** with a TTL longer than the longest token lifetime. It also ends the subject's Keycloak sessions through the admin API.
+4. The gateway checks the revocation set on **every** request. If Redis is unavailable, it fails closed for authenticated writes and sensitive reads, and keeps serving public pages.
+5. Defence in depth: the owning service re-checks the actor's grant from its own data on every write (e.g. `employer-service` verifies the operator grant is still active before an ECR command is accepted).
+6. `tests/security/` measures the time from revoke command to denial and fails above 5 seconds.
+
 ---
 
 ## 7. Domain rules, state machines and events
 
 Maintain `config/demo-rules.yaml` with obvious `ILLUSTRATIVE_ONLY` labels and effective dates. Have the claims and contribution services load a frozen rule version per decision or filing. Store the evaluated input snapshot, evidence, calculation trace and rule version; allow independent deterministic reproduction.
 
-Suggested state machines:
+State machines. Each table lists every allowed transition; anything not listed is denied with `409 Conflict` (Problem Details). Actors are stakeholder IDs; "system" is the owning service acting on an event. Every transition checks the aggregate version (`If-Match`) and is idempotent.
 
-```text
-Employer registration:
-DRAFT -> SUBMITTED -> MOCK_VERIFICATION_PENDING -> VERIFIED / REJECTED
+**Employer registration** (`employer-service`)
 
-ECR:
-DRAFT -> VALIDATED -> AWAITING_SIGNATORY -> APPROVED -> SUBMITTED
-     -> PAYMENT_PENDING -> PAYMENT_CONFIRMED -> POSTED
-     \-> VALIDATION_FAILED              \-> PAYMENT_FAILED
+| From | Command / event | To | Actor | Guard | Emits |
+|---|---|---|---|---|---|
+| — | submit registration | SUBMITTED | `employer.owner` | — | — |
+| SUBMITTED | send to mock verification | MOCK_VERIFICATION_PENDING | system | evidence attached | — |
+| MOCK_VERIFICATION_PENDING | adapter result | VERIFIED / REJECTED | system | signed adapter response | `EmployerVerified.v1` on VERIFIED |
 
-Claim:
-DRAFT -> IDENTITY_CHECKED -> SUBMITTED -> UNDER_REVIEW
-      -> APPROVED -> PAYMENT_PENDING -> SETTLED
-      -> REJECTED_WITH_REASON
-      -> PAYMENT_RETURNED -> CORRECTION_PENDING -> REISSUED
+**ECR filing** (`contribution-service`)
 
-Grievance:
-REGISTERED -> ROUTED -> IN_PROGRESS -> ESCALATED -> RESOLVED
-                                           \-> REOPEN_REQUESTED
-```
+| From | Command / event | To | Actor | Guard | Emits |
+|---|---|---|---|---|---|
+| — | create filing | DRAFT | `employer.operator` | active grant `ecr.prepare` | — |
+| DRAFT | validate | VALIDATED / VALIDATION_FAILED | `employer.operator` | — | `ECRValidated.v1` on VALIDATED |
+| VALIDATION_FAILED | edit | DRAFT | `employer.operator` | — | — |
+| VALIDATED | request approval | AWAITING_SIGNATORY | `employer.operator` | — | — |
+| AWAITING_SIGNATORY | approve | APPROVED | `employer.signatory` | signatory ≠ preparer; step-up done | — |
+| AWAITING_SIGNATORY | return | DRAFT | `employer.signatory` | reason given | — |
+| APPROVED | submit (Idempotency-Key) | SUBMITTED | `employer.signatory` | — | `ECRSubmitted.v1` (TRRN issued) |
+| SUBMITTED | create payment intent | PAYMENT_PENDING | `employer.signatory` | — | — |
+| SUBMITTED | cancel unpaid TRRN (phase 2) | CANCELLED | `employer.signatory` | no payment attempt succeeded | — |
+| PAYMENT_PENDING | bank confirmation | PAYMENT_CONFIRMED | system | signed, non-replayed callback | `PaymentConfirmed.v1` |
+| PAYMENT_PENDING | bank failure | PAYMENT_FAILED | system | signed callback | — |
+| PAYMENT_FAILED | retry payment | PAYMENT_PENDING | `employer.signatory` | — | — |
+| PAYMENT_CONFIRMED | journal committed | POSTED | system | journal balanced (§4.1) | `ContributionPosted.v1` |
+
+POSTED is final. Corrections are supplementary filings or reversing journals, never edits.
+
+**Claim** (`claim-service`; approval bands from `docs/stakeholder-activities.yaml` → `claim_settlement`, loaded from `config/demo-rules.yaml`)
+
+| From | Command / event | To | Actor | Guard | Emits |
+|---|---|---|---|---|---|
+| — | create claim | DRAFT | `member` | eligible type for the rule version | — |
+| DRAFT | submit | AWAITING_CONFIRMATION | `member` | documents complete | — |
+| AWAITING_CONFIRMATION | confirm intent | SUBMITTED | `member` | step-up done; summary shown | `ClaimSubmitted.v1` |
+| DRAFT / AWAITING_CONFIRMATION / SUBMITTED | withdraw (phase 2) | WITHDRAWN | `member` | no decision yet | — |
+| SUBMITTED | risk checks pass | AUTO_APPROVED | system | rule version allows auto-settlement; no risk signal | `ClaimDecisionRecorded.v1` |
+| SUBMITTED | risk check fails or rule requires review | UNDER_REVIEW | system | case opened in `workflow-service` | — |
+| UNDER_REVIEW | recommendation recorded | RECOMMENDED | `fo.da_accounts` | — | — |
+| RECOMMENDED | decision (`CaseDecisionSubmitted.v1`) | APPROVED / REJECTED_WITH_REASON | `fo.ss` / `fo.ao` / `fo.apfc` / `fo.oic` by amount band | approver authorised for the band and jurisdiction; approver ≠ recommender | `ClaimDecisionRecorded.v1` |
+| RECOMMENDED | band needs a second approver | AWAITING_SECOND_APPROVAL | system | chain has more than one checker | — |
+| AWAITING_SECOND_APPROVAL | second approval | APPROVED / REJECTED_WITH_REASON | next approver in the chain | different person from first approver | `ClaimDecisionRecorded.v1` |
+| APPROVED / AUTO_APPROVED | payment instruction | PAYMENT_PENDING | `fo.cash` or system | journal "claim approved" committed | `PaymentInstructed.v1` |
+| PAYMENT_PENDING | bank confirmation | SETTLED | system | signed callback | `NotificationRequested.v1` |
+| PAYMENT_PENDING | bank return | PAYMENT_RETURNED | system | signed callback | `PaymentReturned.v1`, `NotificationRequested.v1` |
+| PAYMENT_RETURNED | member corrects bank details | CORRECTION_PENDING | `member` | KYC change approved | — |
+| CORRECTION_PENDING | re-issue | PAYMENT_PENDING | `fo.cash` | — | `PaymentInstructed.v1` |
+| any state before PAYMENT_PENDING | account frozen | ON_HOLD_FROZEN | system | freeze order | — |
+| ON_HOLD_FROZEN | account de-frozen | previous state, re-routed through `claim_settlement_after_defreeze` | system | de-freeze order | — |
+
+**Grievance** (`grievance-service`)
+
+| From | Command / event | To | Actor | Guard | Emits |
+|---|---|---|---|---|---|
+| — | register | REGISTERED | `member` / `complainant` / `pensioner` | — | `GrievanceRegistered.v1` |
+| REGISTERED | route | ROUTED | system | competent office found | — |
+| ROUTED | assign | IN_PROGRESS | `fo.pro` | officer in the assigned office | — |
+| ROUTED / IN_PROGRESS | transfer to another office (phase 2) | ROUTED | `fo.pro` | reason given | — |
+| IN_PROGRESS | escalate | ESCALATED | complainant, SLA timer or `fo.pro` | — | `GrievanceEscalated.v1` |
+| ESCALATED | taken up by next tier | IN_PROGRESS | `zo.acc` (or next tier) | — | — |
+| IN_PROGRESS | resolve | RESOLVED | assigned officer | resolution text and evidence | `NotificationRequested.v1` |
+| RESOLVED | request reopen | REOPEN_REQUESTED | complainant | within the reopen window (config) | — |
+| REOPEN_REQUESTED | accept / reject | IN_PROGRESS / CLOSED | assigned office | — | — |
+| RESOLVED | feedback given or window lapses | CLOSED | complainant or system | — | — |
+
+**Contract only, phase 2** — publish these in `contracts/planned/` so agents do not invent them:
+
+| Machine | States (in order) |
+|---|---|
+| Joint Declaration (`member-service`) | SUBMITTED → EMPLOYER_ATTESTED / RETURNED_BY_EMPLOYER / REJECTED_BY_EMPLOYER → INITIATED (`fo.da_accounts`) → VERIFIED (`fo.ss` or `fo.ao`) → APPROVED / REJECTED / RETURNED (approver per JD SOP Table 3) |
+| Freeze (`member-service`, `employer-service`) | ACTIVE → FROZEN (authorised officer) → UNDER_VERIFICATION (DA → SS/AO → APFC → OIC) → DEFREEZE_RECOMMENDED → ACTIVE, or → CONFIRMED_FRAUD |
+| Pension claim (`pension-service`) | APPLIED → IDS_PREPARED → IDS_APPROVED → WORKSHEET_GENERATED (↺ RETURNED_TO_ACCOUNTS) → WORKSHEET_APPROVED → PPO_GENERATED → PPO_APPROVED → ARREAR_APPROVED → E_SIGNED → DISPATCHED → IN_PAYMENT ⇄ SUSPENDED (life certificate) |
 
 Protect transitions with state versioning and permission checks. Deny invalid jumps and repeated side effects.
 
@@ -447,9 +601,10 @@ Minimum versioned event contracts (JSON Schema or AsyncAPI):
 - `GrievanceEscalated.v1`
 - `RiskSignalRaised.v1`
 - `SecurityEventRecorded.v1`
+- `SignatoryRevoked.v1`
 - `PaymentInstructed.v1`
 - `NotificationRequested.v1`
-- Phase 2 (contract only): `DemandRaised.v1`, `LedgerReversed.v1`, `PaymentScrollGenerated.v1`
+- Phase 2 (contract only): `DemandRaised.v1`, `LedgerReversed.v1`, `PaymentScrollGenerated.v1`, `MemberChangeApproved.v1`, `AccountFrozen.v1`, `AccountDefrozen.v1`, `PpoIssued.v1`, `LifeCertificateRecorded.v1`
 
 Include event ID, aggregate ID, producer, occurred-at UTC, event schema version, correlation ID and minimum necessary payload. Document publisher/subscriber ownership, backoff, DLQ replay and consumer idempotency.
 
@@ -598,6 +753,8 @@ tests/security/
 tests/resilience/
 ```
 
+`docs/` includes `docs/tools/` (the generators) and the stakeholder files. Planned services `compliance-service` and `international-service` exist only as contracts in `contracts/planned/` in phase 1; their implementation owner is assigned at phase 2.
+
 Each service's own unit tests live inside its service directory and belong to that service's owner. Changes to another agent's paths go through a proposal in your status file or a reviewed PR, never a direct edit.
 
 Responsibilities:
@@ -616,9 +773,9 @@ Responsibilities:
 
 The human operator (or designated lead agent) controls merges. Suggested stages:
 
-1. **Gate 0 — Design freeze:** `docs/architecture.md`, `docs/api-matrix.md`, `docs/permissions.md`, service contract/OpenAPI skeletons, event schemas and ADRs agreed by all agents.
-2. **Gate 1 — Platform:** Compose + Keycloak + gateway + migrations + seeds start successfully. CI performs lint/typecheck/test.
-3. **Gate 2 — Domain:** Employer, member, ECR, contribution journal, claims and payment simulator complete.
+1. **Gate 0 — Design freeze:** `docs/architecture.md`, `docs/api-matrix.md`, `docs/permissions.md` (+ `docs/permissions.yaml`), service contract/OpenAPI skeletons (`contracts/openapi/`), event schemas (`contracts/events/`, `docs/event-catalogue.md`) and ADRs agreed by all agents. The matrix, permissions, OpenAPI skeletons and event schemas are generated by `docs/tools/build_gate0.py` from the catalogue and activity map. After sign-off, each owner fills request/response schemas in its own service spec by hand and keeps paths, statuses and callers in sync with `docs/endpoint-catalogue.md`; `gateway-consolidated.yaml` stays generated.
+2. **Gate 1 — Platform:** Compose starts every infrastructure container healthy (PostgreSQL with per-service databases and roles from §2.4, RabbitMQ, MinIO, Redis, Keycloak); the gateway runs; seeded Keycloak personas (§6.2.1) can log in through the BFF. CI performs lint/typecheck/test. No domain schema is required yet.
+3. **Gate 2 — Domain:** Service migrations and domain seeds run (`make migrate`, `make seed`); employer, member, ECR, contribution journal (§4.1), claims and payment simulator complete.
 4. **Gate 3 — Operations:** Officer assignments, grievances, event-driven reporting, audit and authorisation integrated.
 5. **Gate 4 — Intelligence and UI:** Optional AI, risk review, full frontend and working demo script.
 6. **Gate 5 — Hardening:** End-to-end tests, threat-model test cases, failure/restart tests, docs and final implemented/planned coverage matrix.
@@ -628,6 +785,8 @@ At each gate, exchange the updated OpenAPI and event contracts, review breaking 
 ---
 
 ## 11. Repository structure (target)
+
+The repository root is this repository (currently named `pf-life`); `epfo-microservices-poc/` below stands for it. Do not create a nested project folder.
 
 ```text
 epfo-microservices-poc/
@@ -665,6 +824,7 @@ epfo-microservices-poc/
 │   ├── rabbitmq/
 │   ├── monitoring/
 │   └── database/
+│       └── init/01-create-databases.sh
 ├── config/
 │   └── demo-rules.yaml
 ├── scripts/
@@ -682,6 +842,12 @@ epfo-microservices-poc/
 │   ├── service-boundaries.md
 │   ├── api-matrix.md
 │   ├── endpoint-catalogue.md
+│   ├── stakeholders.md
+│   ├── stakeholder-activities.yaml
+│   ├── stakeholder-api-sets.md        (generated)
+│   ├── stakeholder-atlas.html         (generated)
+│   ├── portal-functions-by-login.md
+│   ├── tools/                         (generators)
 │   ├── permissions.md
 │   ├── threat-model.md
 │   ├── data-classification.md
