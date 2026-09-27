@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /members/me', 'GET /security/account-recovery-requests', 'GET /employers/me/members', 'POST /members/me/account-recovery-requests', 'PATCH /members/me/contact-details', 'GET /members/me/employment-history', 'GET /members/me/identity-assurance', 'GET /members/me/notifications', 'POST /members/me/security-reports', 'GET /members/me/sessions', 'POST /security/account-recovery-requests/{requestId}/decisions']
+OPERATIONS = ['GET /members/me', 'GET /security/account-recovery-requests', 'GET /employers/me/members', 'POST /members/me/account-recovery-requests', 'PATCH /members/me/contact-details', 'GET /members/me/employment-history', 'GET /members/me/identity-assurance', 'GET /members/me/notifications', 'POST /members/me/security-reports', 'POST /security/account-recovery-requests/{requestId}/decisions']
 
 @router.api_route("/api/v1/members/me", methods=["GET"], include_in_schema=False)
 async def get_members_me(actor: Actor = Depends(require_actor)) -> None:
@@ -55,11 +55,6 @@ async def get_members_me_notifications(actor: Actor = Depends(require_actor)) ->
 @router.api_route("/api/v1/members/me/security-reports", methods=["POST"], include_in_schema=False)
 async def post_members_me_security_reports(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Report suspicious activity")
-
-
-@router.api_route("/api/v1/members/me/sessions", methods=["GET"], include_in_schema=False)
-async def get_members_me_sessions(actor: Actor = Depends(require_actor)) -> None:
-    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Session history")
 
 
 @router.api_route("/api/v1/security/account-recovery-requests/{requestId}/decisions", methods=["POST"], include_in_schema=False)

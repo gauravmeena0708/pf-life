@@ -1,14 +1,18 @@
 """Member profile, employment and notification routes (Journey B)."""
+import secrets
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import select
+from pydantic import BaseModel, Field
+from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra.db import sessions
-from app.infra.tables import employments, members, notifications
-from epfo_auth import Actor, require_grant, require_stakeholder
+from app.infra.tables import contact_history, employments, members, notifications, recovery_requests, security_reports
+from epfo_auth import Actor, require_grant, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
+from epfo_persistence import add_event, audit
 
 router = APIRouter()
 
@@ -92,3 +96,141 @@ async def employer_members(actor: Actor = Depends(require_stakeholder(
                       "date_of_joining": row["date_of_joining"].isoformat(),
                       "date_of_exit": row["date_of_exit"].isoformat() if row["date_of_exit"] else None,
                       "status": "EXITED" if row["date_of_exit"] else "ACTIVE"} for row in rows])
+
+
+# ── security self-service and reviewed account recovery (Journey D) ─────────────────────────────
+
+class ContactInput(BaseModel):
+    mobile: str = Field(pattern=r"^[6-9][0-9]{9}$")
+    email: str = Field(pattern=r"^[^@\s]{1,64}@[^@\s]{1,120}\.[a-z]{2,10}$")
+
+
+class SecurityReportInput(BaseModel):
+    kind: str                                              # NOT_ME | SUSPICIOUS_MESSAGE | OTHER
+    description: str = Field(min_length=10, max_length=2000)
+
+
+class RecoveryInput(BaseModel):
+    reason: str = Field(min_length=10, max_length=2000)
+
+
+class RecoveryDecisionInput(BaseModel):
+    decision: str                                          # APPROVE | REJECT
+    note: str = Field(min_length=10, max_length=2000)
+
+
+def mask_mobile(mobile: str) -> str:
+    return "******" + mobile[-4:]
+
+
+def mask_email(email: str) -> str:
+    local, domain = email.split("@", 1)
+    return f"{local[0]}***@{domain}"
+
+
+async def _notify(session: AsyncSession, subject: str, template: str, reference_id: str, correlation_id: str) -> None:
+    await add_event(session, producer="member-service", event_type="NotificationRequested.v1", aggregate_type="notification",
+                    aggregate_id=reference_id, correlation_id=correlation_id, payload={
+                        "recipient_subject": subject, "template": template, "reference_id": reference_id, "params": {}})
+
+
+@router.patch("/api/v1/members/me/contact-details")
+async def change_contact(body: ContactInput, actor: Actor = Depends(require_stakeholder("member")),
+                         session: AsyncSession = Depends(db)) -> dict:
+    async with session.begin():
+        member = await _member(session, actor.subject)
+        require_step_up(actor, "change-contact", member["member_id"])
+        mobile, email = mask_mobile(body.mobile), mask_email(body.email)     # the raw values are not stored
+        await session.execute(update(members).where(members.c.member_id == member["member_id"]).values(
+            mobile_masked=mobile, email_masked=email))
+        await session.execute(insert(contact_history).values(member_id=member["member_id"], mobile_masked=mobile,
+                                                             email_masked=email, source="MEMBER_CHANGE", verified=False))
+        await _notify(session, actor.subject, "CONTACT_DETAILS_CHANGED", member["member_id"], actor.correlation_id)
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="member.contact_change",
+                    target_type="member", target_id=member["member_id"])
+    return envelope({"mobile_masked": mobile, "email_masked": email,
+                     "notice": "If you did not make this change, report it from your security page straight away."})
+
+
+@router.post("/api/v1/members/me/security-reports", status_code=201)
+async def security_report(body: SecurityReportInput, actor: Actor = Depends(require_stakeholder("member")),
+                          session: AsyncSession = Depends(db)) -> dict:
+    if body.kind not in ("NOT_ME", "SUSPICIOUS_MESSAGE", "OTHER"):
+        raise Problem(422, "/problems/validation", "kind must be NOT_ME, SUSPICIOUS_MESSAGE or OTHER")
+    async with session.begin():
+        await _member(session, actor.subject)
+        report_id = f"SEC-{secrets.token_hex(4).upper()}"
+        await session.execute(insert(security_reports).values(report_id=report_id, subject=actor.subject, kind=body.kind,
+                                                              description=body.description))
+    return envelope({"report_id": report_id, "next_step": "The security team will review it. If you think someone "
+                     "has your password, also ask for account recovery."})
+
+
+@router.post("/api/v1/members/me/account-recovery-requests", status_code=201)
+async def request_recovery(body: RecoveryInput, actor: Actor = Depends(require_stakeholder("member")),
+                           session: AsyncSession = Depends(db)) -> dict:
+    async with session.begin():
+        member = await _member(session, actor.subject)
+        require_step_up(actor, "request-recovery", member["member_id"])
+        pending = (await session.execute(select(recovery_requests.c.request_id).where(
+            recovery_requests.c.subject == actor.subject, recovery_requests.c.state == "PENDING_REVIEW"))).first()
+        if pending:
+            raise Problem(409, "/problems/recovery-pending", "A recovery request is already waiting for review",
+                          request_id=pending[0])
+        verified = (await session.execute(select(contact_history).where(
+            contact_history.c.member_id == member["member_id"], contact_history.c.verified.is_(True))
+            .order_by(contact_history.c.id.desc()).limit(1))).mappings().first()
+        if not verified:
+            raise Problem(409, "/problems/no-verified-contact", "There are no verified contact details to restore",
+                          "Visit your regional office with identity proof.")
+        request_id = f"REC-{secrets.token_hex(4).upper()}"
+        await session.execute(insert(recovery_requests).values(
+            request_id=request_id, member_id=member["member_id"], subject=actor.subject, reason=body.reason,
+            state="PENDING_REVIEW", restore_to={"mobile_masked": verified["mobile_masked"],
+                                                "email_masked": verified["email_masked"]}))
+    return envelope({"request_id": request_id, "state": "PENDING_REVIEW",
+                     "next_step": "A security analyst will review the request. Nothing changes until then."})
+
+
+@router.get("/api/v1/security/account-recovery-requests")
+async def recovery_queue(actor: Actor = Depends(require_stakeholder("ho.security")),
+                         session: AsyncSession = Depends(db)) -> dict:
+    rows = (await session.execute(select(recovery_requests, members.c.mobile_masked, members.c.email_masked).join(
+        members, members.c.member_id == recovery_requests.c.member_id).order_by(recovery_requests.c.created_at.desc()))).mappings().all()
+    return envelope([{"request_id": r["request_id"], "member_id": r["member_id"], "reason": r["reason"], "state": r["state"],
+                      "current": {"mobile_masked": r["mobile_masked"], "email_masked": r["email_masked"]},
+                      "restore_to": r["restore_to"], "decision_note": r["decision_note"],
+                      "created_at": r["created_at"].isoformat() if r["created_at"] else None} for r in rows])
+
+
+@router.post("/api/v1/security/account-recovery-requests/{request_id}/decisions")
+async def decide_recovery(request_id: str, body: RecoveryDecisionInput,
+                          actor: Actor = Depends(require_stakeholder("ho.security")),
+                          session: AsyncSession = Depends(db)) -> dict:
+    if body.decision not in ("APPROVE", "REJECT"):
+        raise Problem(422, "/problems/validation", "decision must be APPROVE or REJECT")
+    async with session.begin():
+        r = (await session.execute(select(recovery_requests).where(recovery_requests.c.request_id == request_id))).mappings().first()
+        if not r:
+            raise Problem(404, "/problems/not-found", "Recovery request not found")
+        require_step_up(actor, "decide-recovery", request_id)
+        if r["state"] != "PENDING_REVIEW":
+            raise Problem(409, "/problems/already-decided", "This request was already decided", f"State: {r['state']}.")
+        if r["subject"] == actor.subject:
+            raise Problem(403, "/problems/separation-of-duties", "You cannot decide your own recovery request")
+        state = "APPROVED" if body.decision == "APPROVE" else "REJECTED"
+        await session.execute(update(recovery_requests).where(recovery_requests.c.request_id == request_id).values(
+            state=state, reviewer_subject=actor.subject, decision_note=body.note, decided_at=datetime.now(UTC)))
+        if state == "APPROVED":
+            restore = r["restore_to"]
+            await session.execute(update(members).where(members.c.member_id == r["member_id"]).values(
+                mobile_masked=restore["mobile_masked"], email_masked=restore["email_masked"]))
+            await session.execute(insert(contact_history).values(member_id=r["member_id"], source="RECOVERY", verified=True,
+                                                                 mobile_masked=restore["mobile_masked"],
+                                                                 email_masked=restore["email_masked"]))
+        await _notify(session, r["subject"], f"ACCOUNT_RECOVERY_{state}", request_id, actor.correlation_id)
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action=f"recovery.{state.lower()}",
+                    target_type="recovery_request", target_id=request_id)
+    return envelope({"request_id": request_id, "state": state,
+                     "next_step": "Revoke the member's other sessions from the sessions page if the account was used by someone else."
+                     if state == "APPROVED" else "The member's details are unchanged."})

@@ -230,7 +230,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /members/me/tax/form-15g-15h` | Upload Form 15G / 15H | P | 2 | claim |
 | `GET /members/me/nominations` | e-Nomination (Form 2) — view | P | 2 | member |
 | `POST /members/me/nominations` 🔐 | e-Nomination — submit with mock e-sign | P | 2 | member |
-| `GET /members/me/sessions` | Session history | W | 1 | member |
+| `GET /members/me/sessions` | Session history | W | 1 | gateway |
 | `POST /members/me/security-reports` | Report suspicious activity | W | 1 | member |
 | `POST /members/me/account-recovery-requests` 🔐 | Controlled, reviewed account recovery (Journey D5) | W | 1 | member |
 | `GET /security/account-recovery-requests` | Review queue of account-recovery requests (Journey D5) | W | 1 | member |

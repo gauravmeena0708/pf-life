@@ -28,6 +28,7 @@ cases = Table(
     Column("case_id", String(40), primary_key=True),
     Column("claim_id", String(40), unique=True),             # set for claim cases
     Column("grievance_id", String(40), unique=True),         # set for grievance cases
+    Column("advisory_signal_id", String(40)),                # an open advisory risk signal the officer should see
     Column("office_id", String(40), nullable=False, index=True),
     Column("kind", String(40), nullable=False),
     Column("form_type", String(10), nullable=False),

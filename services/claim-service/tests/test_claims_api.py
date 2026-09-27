@@ -256,3 +256,24 @@ def test_cashier_of_other_office_sees_not_found(ctx):
     stranger = hdr(str(uuid.uuid4()), "fo.cash", {"action": "instruct-payment", "resource_id": claim_id,
                                                    "amount_paise": JOURNEY_B_AMOUNT}, **{"Idempotency-Key": "z"})
     assert client.post(f"/api/v1/office/claims/{claim_id}/payment-instructions", json={}, headers=stranger).status_code == 403
+
+
+def test_open_risk_signal_sends_small_claim_to_officer_without_accusing(ctx):
+    client, q, deliver = ctx
+    deliver("RiskSignalRaised.v1", {"signal_id": "RSK-1", "detection_type": "NEW_DEVICE_CONTACT_CHANGE_CLAIM",
+                                    "rule_version": "r", "evidence_refs": ["e1"], "subject_ref": MEMBER_A,
+                                    "explanation": "x"}, "intelligence-service")
+    r = confirm(client, create(client, amount=5000000).json()["data"])          # ₹50,000 would normally be automatic
+    d = r.json()["data"]
+    assert d["state"] == "UNDER_REVIEW" and "not an accusation" in d["timeline"][-1]["note"]
+    assert events(q, "ClaimSubmitted.v1")[0]["advisory_signal_id"] == "RSK-1"
+
+
+def test_benign_review_restores_automatic_settlement(ctx):
+    client, q, deliver = ctx
+    deliver("RiskSignalRaised.v1", {"signal_id": "RSK-2", "detection_type": "X", "rule_version": "r", "evidence_refs": [],
+                                    "subject_ref": MEMBER_A, "explanation": "x"}, "intelligence-service")
+    deliver("RiskSignalReviewed.v1", {"signal_id": "RSK-2", "subject_ref": MEMBER_A, "outcome": "BENIGN"}, "intelligence-service")
+    r = confirm(client, create(client, amount=5000000).json()["data"])
+    assert r.json()["data"]["state"] == "AUTO_APPROVED"
+    assert events(q, "ClaimSubmitted.v1")[0]["advisory_signal_id"] is None

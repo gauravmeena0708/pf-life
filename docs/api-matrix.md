@@ -158,7 +158,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /members/me/identity-assurance` | W | member | member |
 | `GET /members/me/notifications` | W | member | member |
 | `GET /members/me/passbook` | W | contribution | member |
-| `GET /members/me/sessions` | W | member | member |
+| `GET /members/me/sessions` | W | gateway | member |
 | `PATCH /members/me/contact-details` | W | member | member |
 | `POST /grievances/{grievanceId}/documents` | W | grievance | member |
 | `POST /grievances/{grievanceId}/escalations` | W | grievance | member |

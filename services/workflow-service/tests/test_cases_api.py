@@ -74,10 +74,10 @@ def hdr(subject, stakeholder, step_up=None):
     return {"Authorization": "Bearer " + jwt.encode(claims, KEY, algorithm="EdDSA", headers={"kid": KID})}
 
 
-def submitted(deliver, amount=AMOUNT, route="REVIEW", office="RO-DEMO-01", claim_id="CLM-0001"):
+def submitted(deliver, amount=AMOUNT, route="REVIEW", office="RO-DEMO-01", claim_id="CLM-0001", signal=None):
     deliver("ClaimSubmitted.v1", {"claim_id": claim_id, "form_type": "31", "amount_paise": amount,
                                   "rule_version": "demo-rules-2026.1", "office_id": office,
-                                  "account_link_id": "AL-0001", "route": route})
+                                  "account_link_id": "AL-0001", "route": route, "advisory_signal_id": signal})
 
 
 def queue(client, subject, role):
@@ -222,3 +222,10 @@ def test_grievance_case_follows_registration_escalation_and_resolution(ctx):
     deliver("GrievanceResolved.v1", {"grievance_id": "GRV-1", "office_id": "RO-DEMO-01", "tier": "ZO",
                                      "within_sla": True}, "grievance-service")
     assert queue(client, ZO_ACC, "zo.acc") == []
+
+
+def test_case_shows_advisory_signal(ctx):
+    client, _, deliver = ctx
+    submitted(deliver, amount=1000000, signal="RSK-1")
+    [case] = queue(client, DA, "fo.da_accounts")
+    assert case["advisory_signal_id"] == "RSK-1"

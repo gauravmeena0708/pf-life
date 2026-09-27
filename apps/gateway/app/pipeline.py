@@ -1,5 +1,6 @@
 import json
 import secrets
+from datetime import UTC, datetime
 
 import httpx
 from fastapi import Request
@@ -14,6 +15,7 @@ from .public_access import create_demo_challenge, limit_public, verify_demo_chal
 from .request_activity import get_request_activity, lookup_fingerprint, summarize_body
 from .revocation import is_revoked, record_revocation
 from .routing import match_route
+from .security_events import after_action, list_sessions, revoke_session
 
 import structlog
 
@@ -125,6 +127,19 @@ async def handle_api(request: Request, path: str):
                     "meta": {"correlation_id": request.state.correlation_id, "api_version": "v1",
                              "source": "synthetic-poc",
                              "as_of": __import__("datetime").datetime.now(__import__("datetime").UTC).isoformat()}}
+        if route["path_template"] == "/members/me/sessions" and method == "GET":
+            return enveloped(request, await list_sessions(request, principal["subject"], sid_of(request)))
+        if route["path_template"] == "/security/sessions" and method == "GET":
+            return enveloped(request, await list_sessions(request, None, sid_of(request)))
+        if route["path_template"] == "/security/sessions/{sessionId}/revocations" and method == "POST":
+            handle = request.url.path.rstrip("/").split("/")[-2]
+            if not step_up or step_up.get("action") != "revoke-session" or step_up.get("resource_id") != handle:
+                return problem(request, 403, "step-up-mismatch", "The confirmation does not match this action",
+                               "Confirm the revocation of this session again.")
+            revoked = await revoke_session(request, handle, principal["subject"])
+            if not revoked:
+                return problem(request, 404, "not-found", "Session not found")
+            return enveloped(request, revoked)
         if route["path_template"] == "/security/step-up-challenges" and method == "POST":
             return await create_challenge(request, principal)
         if route["path_template"] == "/security/step-up-challenges/{challengeId}/verifications" and method == "POST":
@@ -158,6 +173,8 @@ async def handle_api(request: Request, path: str):
     except httpx.RequestError:
         return problem(request, 502, "upstream-unavailable", "Upstream service unavailable")
 
+    if 200 <= upstream.status_code < 300:
+        after_action(request, method, route["path_template"], principal)
     if route.get("revocation") and 200 <= upstream.status_code < 300:
         try:
             data = upstream.json().get("data", {}).get("revocation")
@@ -193,3 +210,12 @@ async def handle_api(request: Request, path: str):
 def planned(request: Request, route: dict):
     return problem(request, 501, "planned", "Planned contract — not implemented in this POC",
                    route.get("summary", "Contract defined in the catalogue"))
+
+
+def sid_of(request: Request) -> str | None:
+    return request.cookies.get("__Host-epfo-session")
+
+
+def enveloped(request: Request, data) -> dict:
+    return {"data": data, "meta": {"correlation_id": request.state.correlation_id, "api_version": "v1",
+                                   "source": "synthetic-poc", "as_of": datetime.now(UTC).isoformat()}}

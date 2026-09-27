@@ -105,7 +105,7 @@ async def history(session: AsyncSession, case_id: str) -> list[dict[str, Any]]:
 
 def case_json(case: dict[str, Any]) -> dict[str, Any]:
     return {"case_id": case["case_id"], "claim_id": case["claim_id"], "grievance_id": case.get("grievance_id"),
-            "kind": case["kind"], "office_id": case["office_id"],
+            "kind": case["kind"], "office_id": case["office_id"], "advisory_signal_id": case.get("advisory_signal_id"),
             "form_type": case["form_type"], "account_link_id": case["account_link_id"],
             "amount_paise": case["amount_paise"], "rule_version": case["rule_version"], "chain": case["chain"],
             "step": case["step"], "round": case["round"], "state": case["state"], "current_role": case["current_role"],
@@ -280,6 +280,7 @@ async def open_case(session: AsyncSession, payload: dict[str, Any], state: str) 
         case_id=f"CASE-{secrets.token_hex(4).upper()}", claim_id=payload["claim_id"], office_id=payload["office_id"],
         kind="CLAIM_SETTLEMENT", form_type=payload["form_type"], account_link_id=payload["account_link_id"],
         amount_paise=payload["amount_paise"], rule_version=payload["rule_version"], chain=chain, step=0, round=1,
+        advisory_signal_id=payload.get("advisory_signal_id"),
         state=state, current_role=chain[0] if state == "IN_REVIEW" else None, version=1,
         sla_due_at=datetime.now(UTC) + timedelta(days=SLA_DAYS)))
 

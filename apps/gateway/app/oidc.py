@@ -12,6 +12,7 @@ from fastapi.responses import RedirectResponse
 from jwt import PyJWK
 
 from .problems import problem
+from .security_events import device_hash, ensure_device_cookie, on_login
 from .session import SessionStore
 
 router = APIRouter()
@@ -123,8 +124,10 @@ async def callback(request: Request, code: str | None = None, state: str | None 
                "persona_label": identity.get("name") or identity.get("preferred_username") or stakeholder,
                "expires_at": int(time()) + int(tokens.get("expires_in", 300)),
                "issuer": _issuer(request)}
-    sid, saved_session = await _session_store(request).create(session)
     response = RedirectResponse(saved["return_to"], status_code=303)
+    session["device"] = device_hash(request, ensure_device_cookie(request, response))
+    sid, saved_session = await _session_store(request).create(session)
+    await on_login(request, sid, saved_session)
     response.set_cookie("__Host-epfo-session", sid, httponly=True, secure=True, samesite="strict", path="/")
     response.set_cookie("epfo-csrf", saved_session["csrf"], httponly=False, secure=True, samesite="strict", path="/")
     return response

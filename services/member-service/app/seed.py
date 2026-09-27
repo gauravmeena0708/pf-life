@@ -4,11 +4,12 @@ import json
 import os
 from datetime import date
 
+from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
 from app.infra.db import sessions
-from app.infra.tables import employments, members
+from app.infra.tables import contact_history, employments, members
 
 SEED_FILE = os.environ.get("SEED_FILE", "/srv/seed/synthetic.json")
 
@@ -30,7 +31,15 @@ async def main() -> None:
                 statement = insert(members).values(**values)
                 await session.execute(statement.on_conflict_do_update(
                     index_elements=[members.c.member_id],
-                    set_={key: statement.excluded[key] for key in values if key != "member_id"}))
+                    # contact details belong to the member after the first load; a re-seed must not undo a change
+                    set_={key: statement.excluded[key] for key in values
+                          if key not in ("member_id", "mobile_masked", "email_masked")}))
+                has_history = (await session.execute(select(contact_history.c.id).where(
+                    contact_history.c.member_id == member["member_id"]).limit(1))).first()
+                if not has_history:
+                    await session.execute(contact_history.insert().values(
+                        member_id=member["member_id"], mobile_masked=member["mobile_masked"],
+                        email_masked=member["email_masked"], source="SEED", verified=True))
                 employment = {"account_link_id": member["account_link_id"], "member_id": member["member_id"],
                               "establishment_id": establishment["establishment_id"],
                               "establishment_name": establishment["legal_name"],

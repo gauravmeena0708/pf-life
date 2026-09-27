@@ -1145,35 +1145,6 @@ paths:
       - bffSession: []
       description: 'Pre-flight: service per member ID — contributory months, NCP days, pension-service months, transfer status
         — for pension and final-settlement decisions'
-  /members/me/sessions:
-    get:
-      operationId: getMembersSessions
-      summary: Session history
-      tags:
-      - Member self-service
-      parameters:
-      - $ref: '#/components/parameters/CorrelationId'
-      responses:
-        '200':
-          $ref: '#/components/responses/Ok'
-        '400':
-          $ref: '#/components/responses/Problem'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
-        '404':
-          $ref: '#/components/responses/Problem'
-        '409':
-          $ref: '#/components/responses/Problem'
-      x-status: working
-      x-phase: 1
-      x-owner-service: member
-      x-callers:
-      - member
-      x-scope: self — caller's own member record only
-      security:
-      - bffSession: []
   /members/me/uan-card:
     get:
       operationId: getMembersUanCard

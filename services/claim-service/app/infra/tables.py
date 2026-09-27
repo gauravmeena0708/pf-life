@@ -59,3 +59,12 @@ claim_timeline = Table(
     Column("actor_role", String(60), nullable=False),
     Column("note", Text, nullable=False),
 )
+
+# Open advisory risk signals per member (from RiskSignalRaised.v1 / RiskSignalReviewed.v1). A flag never
+# blocks or rejects a claim; it only sends the claim to an officer instead of automatic approval.
+risk_flags = Table(
+    "risk_flags", metadata,
+    Column("signal_id", String(40), primary_key=True),
+    Column("subject", String(80), nullable=False, index=True),
+    Column("status", String(30), nullable=False),        # OPEN | NEEDS_MORE_EVIDENCE | CONFIRMED | BENIGN
+)

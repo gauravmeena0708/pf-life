@@ -5268,8 +5268,8 @@
     "regex": "^/members/me/sessions$",
     "status": "W",
     "phase": 1,
-    "owner": "member",
-    "upstream": "http://member-service:8000",
+    "owner": "gateway",
+    "upstream": null,
     "money": false,
     "step_up": false,
     "callers": [

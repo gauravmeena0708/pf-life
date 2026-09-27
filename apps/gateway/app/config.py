@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     session_idle_seconds: int = 1800
     session_max_seconds: int = 28800
     gateway_public_origin: str = "http://localhost:8000"
+    device_hash_salt: str = "dev-device-salt"      # salts the device-cookie hash reported in security events
 
 
 @lru_cache
