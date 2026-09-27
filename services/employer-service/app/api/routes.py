@@ -64,6 +64,7 @@ class RegistrationRequest(BaseModel):
     pan: str = Field(pattern=r"^[A-Z]{5}[0-9]{4}[A-Z]$")
     gstin: str | None = None
     office_id: str = "RO-DEMO-01"
+    pincode: str | None = Field(default=None, pattern=r"^[0-9]{6}$")
 
 
 @router.post("/api/v1/employers/registration-requests", status_code=201)
@@ -73,7 +74,7 @@ async def create_registration(body: RegistrationRequest, actor: Actor = Depends(
     async with session.begin():
         await session.execute(establishments.insert().values(
             establishment_id=est_id, registration_number=f"DEMO/{est_id[-5:]}/000", legal_name=body.legal_name,
-            office_id=body.office_id, pan=body.pan, gstin=body.gstin, status="REGISTERED"))
+            office_id=body.office_id, pincode=body.pincode, pan=body.pan, gstin=body.gstin, status="REGISTERED"))
         await session.execute(registration_requests.insert().values(
             request_id=req_id, establishment_id=est_id, owner_subject=actor.subject, state="SUBMITTED"))
         await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder,
@@ -287,21 +288,32 @@ async def revoke_signatory(signatoryId: str, body: Revocation, actor: Actor = De
 # ── Public establishment search ──────────────────────────────────────────────────────────────
 
 @router.get("/api/v1/public/establishments")
-async def search_establishments(query: str = Query(min_length=3, max_length=60), actor: Actor = Depends(require_actor),
+async def search_establishments(query: str = Query(min_length=3, max_length=60), page: int = Query(default=1, ge=1, le=5),
+                                actor: Actor = Depends(require_actor),
                                 session: AsyncSession = Depends(db)) -> dict:
-    like = f"%{query.lower()}%"
+    term = query.strip().lower()
+    if len(term) < 3:
+        raise Problem(400, "/problems/invalid-query", "Enter at least three characters")
+    escaped = term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    like = f"%{escaped}%"
     rows = (await session.execute(select(establishments).where(or_(
-        func.lower(establishments.c.legal_name).like(like), func.lower(establishments.c.establishment_id).like(like)))
-        .order_by(establishments.c.legal_name).limit(20))).mappings().all()
+        func.lower(establishments.c.legal_name).like(like, escape="\\"),
+        func.lower(establishments.c.registration_number).like(like, escape="\\"),
+        func.lower(establishments.c.establishment_id).like(like, escape="\\"),
+        establishments.c.pincode == term if term.isdigit() and len(term) == 6 else False))
+        .order_by(establishments.c.legal_name, establishments.c.establishment_id)
+        .limit(20).offset((page - 1) * 20))).mappings().all()
     return envelope([{"establishment_id": r["establishment_id"], "legal_name": r["legal_name"],
-                      "office_id": r["office_id"], "status": r["status"]} for r in rows])
+                      "office_id": r["office_id"], "pincode": r["pincode"],
+                      "status": r["status"]} for r in rows])
 
 
 @router.get("/api/v1/public/establishments/{estId}")
 async def public_establishment(estId: str, actor: Actor = Depends(require_actor), session: AsyncSession = Depends(db)) -> dict:
     est = await _load_establishment(session, estId)
     return envelope({"establishment_id": est["establishment_id"], "legal_name": est["legal_name"],
-                     "office_id": est["office_id"], "coverage_status": est["status"], "exemption_status": "UN_EXEMPTED"})
+                     "office_id": est["office_id"], "pincode": est["pincode"],
+                     "coverage_status": est["status"], "exemption_status": "NOT_MODELLED"})
 
 
 # ── Internal: grant resolution for the gateway (not public; architecture §3 step 2) ─────────

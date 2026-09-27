@@ -1,3 +1,13 @@
 #!/usr/bin/env python3
-"""Deterministic synthetic seed data (docs/architecture.md §6). Arrives in slice 2 with the first domain services."""
-print("Seed data arrives in slice 2 (Journey A). Nothing to seed in the walking skeleton.")
+"""Load the idempotent synthetic seed into each implemented domain service."""
+import subprocess
+
+
+def main() -> None:
+    for service in ("employer-service", "contribution-service"):
+        print(f"== {service} synthetic seed", flush=True)
+        subprocess.run(["docker", "compose", "exec", "-T", service, "python", "-m", "app.seed"], check=True)
+
+
+if __name__ == "__main__":
+    main()

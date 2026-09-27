@@ -61,3 +61,34 @@ export const getSession = () => api<Session>("/auth/session");
 export const logout = () => api<unknown>("/auth/logout", { method: "POST" });
 export const getMyPermissions = () =>
   api<{ data: { stakeholder: string; endpoints: Grant[] } }>("/api/v1/security/me/permissions");
+
+export interface CommandOptions {
+  stepUpToken?: string;
+  idempotencyKey?: string;
+  ifMatch?: string | number;
+  establishmentId?: string;
+}
+
+/** POST/PUT/PATCH with the headers commands need (init.md §3.3, §6.3). */
+export function command<T>(method: string, path: string, body?: unknown, opts: CommandOptions = {}): Promise<T> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (opts.stepUpToken) headers["X-Step-Up-Token"] = opts.stepUpToken;
+  if (opts.idempotencyKey) headers["Idempotency-Key"] = opts.idempotencyKey;
+  if (opts.ifMatch !== undefined) headers["If-Match"] = String(opts.ifMatch);
+  if (opts.establishmentId) headers["X-Establishment-Id"] = opts.establishmentId;
+  return api<T>(path, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+}
+
+export interface Envelope<T> {
+  data: T;
+  meta: { correlation_id: string; as_of: string };
+}
+
+export function rupees(paise: number | null | undefined): string {
+  if (paise === null || paise === undefined) return "—";
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 }).format(paise / 100);
+}
+
+export function newIdempotencyKey(): string {
+  return crypto.randomUUID();
+}

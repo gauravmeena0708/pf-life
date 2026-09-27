@@ -3,8 +3,11 @@ import { Route, Routes } from "react-router-dom";
 
 import { DemoBanner } from "./components/DemoBanner";
 import { PersonaSwitcher } from "./components/PersonaSwitcher";
+import { EcrPage } from "./features/employer/EcrPage";
+import { EmployerHome } from "./features/employer/EmployerHome";
 import { Home } from "./pages/Home";
 import { InterfacePage } from "./pages/InterfacePage";
+import { PublicLookups } from "./pages/PublicLookups";
 
 export function App() {
   const { t, i18n } = useTranslation();
@@ -37,6 +40,9 @@ export function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/i/:slug" element={<InterfacePage />} />
+            <Route path="/employer" element={<EmployerHome />} />
+            <Route path="/employer/ecr" element={<EcrPage />} />
+            <Route path="/public" element={<PublicLookups />} />
           </Routes>
         </main>
       </div>

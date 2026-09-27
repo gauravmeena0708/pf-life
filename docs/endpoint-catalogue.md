@@ -38,8 +38,9 @@ Rules that apply to every row:
 | `POST /public/demo-calculations/pension` | Illustrative pension estimate calculator | P | 2 | pension |
 | `GET /public/establishments?query=` | **Establishment search** by name / code / pincode (rate-limited, paged, no bulk enumeration) | W | 1 | employer |
 | `GET /public/establishments/{estId}` | Establishment public profile: name, office, coverage and exemption status | W | 1 | employer |
+| `GET /public/demo-challenges` | One-use arithmetic proof for synthetic public lookup demo | M | 1 | gateway |
 | `GET /public/establishments/{estId}/e-report-card` | Establishment **e-Report Card**: wage-month filing/payment history, counts and totals only | P | 2 | reporting |
-| `POST /public/trrn-status-lookups` | **TRRN / challan status** lookup (CAPTCHA) | P | 2 | contribution |
+| `POST /public/trrn-status-lookups` | **TRRN / challan status** lookup with one-use synthetic demo proof (production CAPTCHA pending) | M | 1 | contribution |
 | `GET /public/defaulting-establishments` | Published defaulter list (synthetic) | P | 2 | compliance |
 | `GET /public/circulars` | Circulars / notifications catalogue (synthetic, versioned documents) | P | 2 | intelligence |
 | `POST /public/pension/life-certificate-lookups` | **Jeevan Pramaan / life-certificate status** by PPO number or Jeevan Pramaan transaction ID (CAPTCHA, minimal disclosure) | M | 1 | pension |

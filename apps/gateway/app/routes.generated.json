@@ -2631,7 +2631,8 @@
     "money": false,
     "step_up": false,
     "callers": [
-      "employer.operator"
+      "employer.operator",
+      "employer.signatory"
     ],
     "summary": "Filing detail and status",
     "revocation": false
@@ -4074,8 +4075,8 @@
     "method": "POST",
     "path_template": "/public/trrn-status-lookups",
     "regex": "^/public/trrn\\-status\\-lookups$",
-    "status": "P",
-    "phase": 2,
+    "status": "M",
+    "phase": 1,
     "owner": "contribution",
     "upstream": "http://contribution-service:8000",
     "money": false,
@@ -4083,7 +4084,7 @@
     "callers": [
       "public"
     ],
-    "summary": "TRRN / challan status lookup (CAPTCHA)",
+    "summary": "TRRN / challan status lookup with one-use synthetic demo proof (production CAPTCHA pending)",
     "revocation": false
   },
   {
@@ -4273,7 +4274,8 @@
     "money": false,
     "step_up": false,
     "callers": [
-      "employer.operator"
+      "employer.operator",
+      "employer.signatory"
     ],
     "summary": "Return filing history",
     "revocation": false
@@ -4895,6 +4897,22 @@
       "pensioner"
     ],
     "summary": "Pension payment history",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/public/demo-challenges",
+    "regex": "^/public/demo\\-challenges$",
+    "status": "M",
+    "phase": 1,
+    "owner": "gateway",
+    "upstream": null,
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "public"
+    ],
+    "summary": "One-use arithmetic proof for synthetic public lookup demo",
     "revocation": false
   },
   {
@@ -5794,7 +5812,9 @@
     "money": false,
     "step_up": false,
     "callers": [
-      "employer.operator"
+      "employer.operator",
+      "employer.owner",
+      "employer.signatory"
     ],
     "summary": "Establishment profile (active establishment chosen via X-Establishment-Id, validated server-side)",
     "revocation": false

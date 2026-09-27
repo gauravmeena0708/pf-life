@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 230 |
+| Activities | 231 |
 | Stakeholders with at least one API | 97 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 0 |
@@ -33,11 +33,12 @@ Activities: **F13.public** Browse schemes, offices, statistics, circulars; searc
 | `GET /public/statistics` | W |
 | `POST /ai/knowledge/search` | W |
 | `POST /public/demo-calculations/epf` | W |
+| `GET /public/demo-challenges` | M |
+| `POST /public/trrn-status-lookups` | M |
 | `GET /public/circulars` | P |
 | `GET /public/defaulting-establishments` | P |
 | `GET /public/establishments/{estId}/e-report-card` | P |
 | `POST /public/demo-calculations/pension` | P |
-| `POST /public/trrn-status-lookups` | P |
 
 #### `member` — Member — active contributor (UAN holder)
 
@@ -202,10 +203,11 @@ Integration adapters: `rti_portal`
 
 #### `employer.owner` — Establishment owner / employer (legal entity)
 
-Activities: **F01.register** Register establishment online and submit verification evidence; **F01.dsc_register** Register DSC or e-sign of an authorised signatory and submit the request letter; **F01.signatories** Authorise or revoke signatories; **F01.operators** Invite, scope and revoke employer sub-users (User / Admin menus)
+Activities: **F01.register** Register establishment online and submit verification evidence; **F01.dsc_register** Register DSC or e-sign of an authorised signatory and submit the request letter; **F01.signatories** View the establishment; authorise or revoke signatories; **F01.operators** Invite, scope and revoke employer sub-users (User / Admin menus)
 
 | Endpoint | Status |
 |---|---|
+| `GET /employers/me` | W |
 | `GET /employers/me/operators` | W |
 | `GET /employers/me/signatories` | W |
 | `GET /employers/registration-requests/{reqId}` | W |
@@ -220,12 +222,15 @@ Activities: **F01.register** Register establishment online and submit verificati
 
 #### `employer.signatory` — Authorised signatory (registered DSC / e-sign)
 
-Activities: **F01.form5a** File / update Form 5A ownership return and branches (Form 2A), signed with DSC / e-sign; **F01.change_request** Request configuration change, closure / deregistration or office transfer; **F02.kyc_approve** Approve KYC seeded by member / pending for digital signature, with DSC or e-sign; **F02.employer_approvals** Approve queued member changes (Member > Approvals); **F02.jd_attest** Attest, return or reject the Joint Declaration; employer-initiated JD; **F03.ecr_approve** Approve and submit ECR (generates TRRN); cancel an unpaid TRRN; **F03.pay** Pay challan online (or via bank counter where allowed); **F03.direct_challan** Create a Direct Challan: administrative / inspection charges, or miscellaneous challan for 14B damages and 7Q interest; pay demands; **F04.attest** Attest claims that need employer attestation; **F04.transfer_attest** Attest pending transfer claims (Online Services > Transfer Claims); **F05.higher_employer** Validate joint options and upload wage details; **F06.employer_reply** Reply and submit evidence in proceedings; **F06.vishwas_apply** Apply under VISHWAS to settle a 14B damages / penalty dispute at reduced rates; **F10.apply** Apply for / extend CoC for a posted worker (IWU portal EMPLOYER login); upload signed application; download CoC
+Activities: **F01.form5a** File / update Form 5A ownership return and branches (Form 2A), signed with DSC / e-sign; **F01.signatory_profile** View the establishment before approving returns and payments; **F01.change_request** Request configuration change, closure / deregistration or office transfer; **F02.kyc_approve** Approve KYC seeded by member / pending for digital signature, with DSC or e-sign; **F02.employer_approvals** Approve queued member changes (Member > Approvals); **F02.jd_attest** Attest, return or reject the Joint Declaration; employer-initiated JD; **F03.ecr_approve** Review, approve and submit ECR (generates TRRN); cancel an unpaid TRRN; **F03.pay** Pay challan online (or via bank counter where allowed); **F03.direct_challan** Create a Direct Challan: administrative / inspection charges, or miscellaneous challan for 14B damages and 7Q interest; pay demands; **F04.attest** Attest claims that need employer attestation; **F04.transfer_attest** Attest pending transfer claims (Online Services > Transfer Claims); **F05.higher_employer** Validate joint options and upload wage details; **F06.employer_reply** Reply and submit evidence in proceedings; **F06.vishwas_apply** Apply under VISHWAS to settle a 14B damages / penalty dispute at reduced rates; **F10.apply** Apply for / extend CoC for a posted worker (IWU portal EMPLOYER login); upload signed application; download CoC
 
 | Endpoint | Status |
 |---|---|
+| `GET /employers/me` | W |
 | `GET /employers/me/challans` | W |
 | `GET /employers/me/challans/{trrn}` | W |
+| `GET /employers/me/ecr-filings` | W |
+| `GET /employers/me/ecr-filings/{filingId}` | W |
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W |
 | `POST /employers/me/ecr-filings/{filingId}/submissions` | W |
 | `GET /international/coc-applications/{id}` | M |
@@ -1295,8 +1300,9 @@ flowchart LR
   F01_form5a["employer.signatory<br/>File / update Form 5A ownership return and branches (Form 2A"]
   F01_dsc_register["employer.owner<br/>Register DSC or e-sign of an authorised signatory and submit"]
   F01_dsc_approve["fo.apfc<br/>Approve the DSC / e-sign registration at the PF office"]
-  F01_signatories["employer.owner<br/>Authorise or revoke signatories"]
+  F01_signatories["employer.owner<br/>View the establishment; authorise or revoke signatories"]
   F01_operators["employer.owner<br/>Invite, scope and revoke employer sub-users (User / Admin me"]
+  F01_signatory_profile["employer.signatory<br/>View the establishment before approving returns and payments"]
   F01_profile["employer.operator<br/>View establishment profile, configuration, KYC and home-page"]
   F01_change_request["employer.signatory<br/>Request configuration change, closure / deregistration or of"]
   F01_change_decide["fo.apfc<br/>Decide establishment change, closure or transfer requests"]
@@ -1309,6 +1315,8 @@ flowchart LR
   F01_ssp_reg --> F01_olre_scrutiny
   F01_olre_scrutiny --> F01_circle_review
   F01_dsc_register --> F01_dsc_approve
+  F03_ecr_approve["employer.signatory<br/>Review, approve and submit ECR (generates TRRN); cancel an u"]
+  F01_signatory_profile --> F03_ecr_approve
   F01_change_request --> F01_change_decide
   F01_contractor_tag --> F01_contractors
   F06_recovery["fo.recovery_officer<br/>Take up recovery certificate for unpaid assessed dues"]
@@ -1362,7 +1370,7 @@ flowchart LR
   F03_ecr_prepare["employer.operator<br/>Prepare regular / arrear / supplementary ECR and validate"]
   F03_b2b_upload["payroll_provider<br/>Upload ECR through the B2B payroll API on behalf of an emplo"]
   style F03_b2b_upload stroke-dasharray: 5 5
-  F03_ecr_approve["employer.signatory<br/>Approve and submit ECR (generates TRRN); cancel an unpaid TR"]
+  F03_ecr_approve["employer.signatory<br/>Review, approve and submit ECR (generates TRRN); cancel an u"]
   F03_pay["employer.signatory<br/>Pay challan online (or via bank counter where allowed)"]
   F03_bank_confirm["ext.collecting_bank<br/>Confirm or return the payment"]
   F03_post["tech.epfo3<br/>Post balanced ledger entries and emit ContributionPosted"]

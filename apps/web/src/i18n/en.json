@@ -13,7 +13,9 @@
   },
   "home": {
     "heading": "Interfaces",
-    "intro": "All 21 interfaces of the platform. Status shows what works in this proof of concept: Working, Mock (simulated outside system) or Planned (contract only)."
+    "intro": "All 21 interfaces of the platform. Status shows what works in this proof of concept: Working, Mock (simulated outside system) or Planned (contract only).",
+    "employerWorkspace": "Employer workspace",
+    "publicLookups": "Public lookups"
   },
   "interface": {
     "unknown": "Unknown interface.",

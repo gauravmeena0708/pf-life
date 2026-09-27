@@ -11,6 +11,7 @@ COPY services/contribution-service/pyproject.toml /srv/pyproject.toml
 COPY services/contribution-service/app /srv/app
 COPY services/contribution-service/migrations /srv/migrations
 COPY services/contribution-service/alembic.ini /srv/alembic.ini
+COPY config/demo-rules.yaml /srv/demo-rules.yaml
 RUN pip install /srv
 COPY scripts/seed /srv/seed
 USER app

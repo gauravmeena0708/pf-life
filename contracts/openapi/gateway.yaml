@@ -12,6 +12,34 @@ servers:
 - url: http://localhost:8000/api/v1
   description: Gateway (init.md §2.4)
 paths:
+  /public/demo-challenges:
+    get:
+      operationId: getPublicDemoChallenges
+      summary: One-use arithmetic proof for synthetic public lookup demo
+      tags:
+      - Public information and establishment search
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: mock
+      x-phase: 1
+      x-owner-service: gateway
+      x-callers:
+      - public
+      x-scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
+      security: []
   /security/me/permissions:
     get:
       operationId: getSecurityPermissions

@@ -13,7 +13,9 @@
   },
   "home": {
     "heading": "Interfaces [TODO-translate]",
-    "intro": "All 21 interfaces of the platform. Status shows what works in this proof of concept: Working, Mock (simulated outside system) or Planned (contract only). [TODO-translate]"
+    "intro": "All 21 interfaces of the platform. Status shows what works in this proof of concept: Working, Mock (simulated outside system) or Planned (contract only). [TODO-translate]",
+    "employerWorkspace": "नियोक्ता कार्यक्षेत्र",
+    "publicLookups": "सार्वजनिक खोज"
   },
   "interface": {
     "unknown": "Unknown interface. [TODO-translate]",

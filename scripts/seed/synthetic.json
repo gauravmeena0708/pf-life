@@ -10,9 +10,16 @@
     "registration_number": "DEMO/00001/000",
     "legal_name": "Synthetic Textiles Pvt Ltd (DEMO)",
     "office_id": "RO-DEMO-01",
+    "pincode": "110001",
     "status": "REGISTERED",
     "pan": "AAAPD0000D",
     "gstin": "07AAAPD0000D1Z5"
+  },
+  "public_lookup_challan": {
+    "trrn": "TRRN0000000000000",
+    "filing_id": "00000000-0000-4000-8000-000000000000",
+    "wage_month": "2026-04",
+    "status": "DUE"
   },
   "employer_users": [
     {

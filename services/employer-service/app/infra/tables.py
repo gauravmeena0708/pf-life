@@ -9,6 +9,7 @@ establishments = Table(
     Column("registration_number", String(40), nullable=False),
     Column("legal_name", String(200), nullable=False),
     Column("office_id", String(40), nullable=False),
+    Column("pincode", String(6)),
     Column("pan", String(10), nullable=False),
     Column("gstin", String(15)),
     Column("status", String(30), nullable=False),        # REGISTERED | VERIFIED | REJECTED

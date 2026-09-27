@@ -39,6 +39,8 @@ paths:
       x-owner-service: employer
       x-callers:
       - employer.operator
+      - employer.owner
+      - employer.signatory
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []

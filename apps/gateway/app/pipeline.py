@@ -10,6 +10,7 @@ from .internal_jwt import mint
 from .stepup import consume_token, create_challenge, verify_challenge
 from .oidc import session_context, verify_token
 from .problems import problem
+from .public_access import create_demo_challenge, limit_public, verify_demo_challenge
 from .revocation import is_revoked, record_revocation
 from .routing import match_route
 
@@ -26,6 +27,11 @@ async def handle_api(request: Request, path: str):
     is_public = route["path_template"].startswith("/public/")
     principal = None
     sid = None
+
+    if is_public:
+        limited = await limit_public(request, route)
+        if limited is not None:
+            return limited
 
     # Public planned contracts are intentionally visible without a session.
     if (route["status"] in ("P", "?") or int(route.get("phase", 1)) > 1) and is_public:
@@ -76,6 +82,10 @@ async def handle_api(request: Request, path: str):
 
     if route["status"] in ("P", "?") or int(route.get("phase", 1)) > 1:
         return planned(request, route)
+    if route["path_template"] == "/public/trrn-status-lookups":
+        rejected = await verify_demo_challenge(request)
+        if rejected is not None:
+            return rejected
     step_up = None
     if route["step_up"]:
         supplied = request.headers.get("x-step-up-token")
@@ -88,6 +98,8 @@ async def handle_api(request: Request, path: str):
                            "Confirm the action again.")
 
     if route["owner"] == "gateway":
+        if route["path_template"] == "/public/demo-challenges" and method == "GET":
+            return await create_demo_challenge(request)
         if route["path_template"] == "/security/me/permissions" and method == "GET":
             grants = [g for g in request.app.state.permissions.get(principal["stakeholder"], [])]
             endpoints = [{"endpoint": g["endpoint"], "status": g["status"], "scope": g.get("scope", ""),

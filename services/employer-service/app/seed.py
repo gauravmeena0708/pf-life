@@ -3,7 +3,7 @@ import asyncio
 import json
 import os
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from app.infra.db import sessions
 from app.infra.tables import directory, establishments, grants, registration_requests
@@ -20,7 +20,8 @@ async def main() -> None:
                     establishments.c.establishment_id == est["establishment_id"]))).first():
                 await s.execute(establishments.insert().values(
                     establishment_id=est["establishment_id"], registration_number=est["registration_number"],
-                    legal_name=est["legal_name"], office_id=est["office_id"], pan=est["pan"], gstin=est.get("gstin"),
+                    legal_name=est["legal_name"], office_id=est["office_id"], pincode=est.get("pincode"),
+                    pan=est["pan"], gstin=est.get("gstin"),
                     status=est["status"]))
                 owner = next(u for u in seed["employer_users"] if u["role"] == "employer.owner")
                 await s.execute(registration_requests.insert().values(
@@ -31,6 +32,10 @@ async def main() -> None:
                     grant_id="GR-OWNER-0001", establishment_id=est["establishment_id"], subject=owner["subject"],
                     username=owner["username"], kind="OWNER", grants=owner["grants"], status="ACTIVE",
                     granted_by="seed"))
+            else:
+                await s.execute(update(establishments).where(
+                    establishments.c.establishment_id == est["establishment_id"],
+                    establishments.c.pincode.is_(None)).values(pincode=est.get("pincode")))
             for username, subject in seed["keycloak_subjects"].items():
                 if not (await s.execute(select(directory.c.username).where(directory.c.username == username))).first():
                     role = next((u["role"] for u in seed["employer_users"] if u["username"] == username), "other")
