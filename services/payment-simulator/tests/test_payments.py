@@ -146,3 +146,38 @@ def test_return_scenario_emits_payment_returned(ctx):
     asyncio.run(routes.process_due_payments())
     assert [e[0] for e in q("SELECT event_type FROM outbox")] == ["PaymentReturned.v1"]
     assert q("SELECT status FROM payables")[0][0] == "FAILED"
+
+
+def test_claim_settlement_from_payment_instruction_confirms_once(ctx):
+    client, routes, q, _ = ctx
+    event = {"event_type": "PaymentInstructed.v1", "payload": {
+        "claim_id": "CLM-1", "payment_id": "PAY-CLM-1-1", "amount_paise": 60000000, "attempt": 1, "demo_scenario": "SUCCESS"}}
+
+    async def deliver():
+        import app.infra.db as db
+        async with db.sessions()() as s, s.begin():
+            await routes.dispatch(s, event)
+    asyncio.run(deliver())
+    asyncio.run(deliver())                              # duplicate instruction: still one intent
+    assert len(q("SELECT * FROM payment_intents")) == 1
+    assert asyncio.run(routes.process_due_payments()) == 1
+    [(payload,)] = q("SELECT payload FROM outbox")
+    p = json.loads(payload)["envelope"]["payload"]
+    assert (p["purpose"], p["reference_type"], p["reference_id"], p["amount_paise"]) == (
+        "CLAIM_SETTLEMENT", "claim", "CLM-1", 60000000)
+    assert q("SELECT status FROM payables")[0][0] == "DUE"   # challans untouched
+
+
+def test_claim_return_names_the_claim(ctx):
+    client, routes, q, _ = ctx
+
+    async def deliver():
+        import app.infra.db as db
+        async with db.sessions()() as s, s.begin():
+            await routes.dispatch(s, {"event_type": "PaymentInstructed.v1", "payload": {
+                "claim_id": "CLM-2", "payment_id": "PAY-CLM-2-1", "amount_paise": 100, "attempt": 1, "demo_scenario": "RETURN"}})
+    asyncio.run(deliver())
+    routes_done = asyncio.run(routes.process_due_payments())
+    [(payload,)] = q("SELECT payload FROM outbox")
+    p = json.loads(payload)["envelope"]["payload"]
+    assert routes_done == 1 and p["reference"] == "CLM-2" and p["purpose"] == "CLAIM_SETTLEMENT"

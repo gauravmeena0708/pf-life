@@ -1768,6 +1768,18 @@ stakeholders:
     step_up: true
     via:
     - F03.payment_reject
+  - endpoint: GET /office/work-queue
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.pay
+  - endpoint: GET /office/cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.pay
   - endpoint: POST /office/claims/{claimId}/payment-instructions
     status: W
     scope: office jurisdiction of the caller's posting

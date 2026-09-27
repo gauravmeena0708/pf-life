@@ -56,7 +56,8 @@
       "required": [
         "recipient_subject",
         "template",
-        "reference_id"
+        "reference_id",
+        "params"
       ],
       "properties": {
         "recipient_subject": {
@@ -67,6 +68,9 @@
         },
         "reference_id": {
           "type": "string"
+        },
+        "params": {
+          "type": "object"
         }
       }
     }

@@ -11,7 +11,7 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `SignatoryRevoked.v1` | employer | gateway, audit | establishment | 1 |
 | `ECRValidated.v1` | contribution | reporting | ecr_filing | 1 |
 | `ECRSubmitted.v1` | contribution | payment-simulator, reporting, audit | ecr_filing | 1 |
-| `PaymentConfirmed.v1` | payment-simulator | contribution, claim, audit | payment | 1 |
+| `PaymentConfirmed.v1` | payment-simulator | contribution, claim, workflow, audit | payment | 1 |
 | `ContributionPosted.v1` | contribution | member, reporting, audit | ledger_journal | 1 |
 | `ClaimDebitPosted.v1` | contribution | claim, member, audit | ledger_journal | 1 |
 | `ClaimSubmitted.v1` | claim | workflow, intelligence, reporting, audit | claim | 1 |

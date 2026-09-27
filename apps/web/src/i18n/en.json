@@ -36,15 +36,15 @@
       },
       "member": {
         "title": "Member",
-        "description": "Review credited contributions in a demo passbook."
+        "description": "Start and track a synthetic member claim."
       },
       "public": {
         "title": "Public lookups",
         "description": "Search the public establishment register and check a TRRN."
       },
       "office": {
-        "title": "Field office",
-        "description": "Explore office roles and the interfaces available to them."
+        "title": "Regional office",
+        "description": "Review claims and complete assigned office actions."
       },
       "security": {
         "title": "Security",
@@ -77,7 +77,10 @@
     "security": "Security activity",
     "primary": "Primary navigation",
     "footer": "Footer navigation",
-    "breadcrumb": "Breadcrumb"
+    "breadcrumb": "Breadcrumb",
+    "claims": "My claims",
+    "profile": "Profile & notices",
+    "workQueue": "Work queue"
   },
   "passbook": {
     "eyebrow": "Member services · contributions",
@@ -99,5 +102,181 @@
     "employerShare": "Employer share",
     "runningBalance": "Running balance",
     "trrn": "TRRN"
+  },
+  "claims": {
+    "eyebrow": "Member services · Journey B",
+    "title": "My claims",
+    "description": "Explore illustrative eligibility, start a claim, and follow its progress.",
+    "memberService": "Member service",
+    "start": "Start a claim",
+    "illustrativeNotice": "DEMO · Claim rules and amounts are illustrative. No real claim or payment is made.",
+    "loadingEligibility": "Loading claim options…",
+    "noAccounts": "No linked accounts are available for a claim.",
+    "account": "Linked account",
+    "employeeBalance": "Employee share",
+    "employerBalance": "Employer share",
+    "totalBalance": "Total balance",
+    "form": "Form",
+    "maxAmount": "Maximum amount",
+    "notEligible": "Not eligible",
+    "amountRupees": "Amount (whole rupees)",
+    "wholeRupees": "Enter a whole number of rupees.",
+    "invalidAmount": "Enter a whole rupee amount above zero and within the maximum for this claim.",
+    "createReview": "Create claim for review",
+    "reviewEyebrow": "Review before confirmation",
+    "reviewTitle": "Review your claim",
+    "howDecided": "How this will be decided",
+    "automaticApproval": "Automatic approval",
+    "illustrative": "ILLUSTRATIVE",
+    "ruleVersion": "Rule version",
+    "confirmOtp": "Confirm with one-time code",
+    "yourClaims": "Your claims",
+    "loadingClaims": "Loading claims…",
+    "noClaims": "You have no claims yet.",
+    "claimId": "Claim ID",
+    "type": "Type",
+    "amount": "Amount",
+    "status": "Status",
+    "nextStep": "Next step",
+    "created": "Created"
+  },
+  "claimDetail": {
+    "eyebrow": "Member services · claim progress",
+    "title": "Claim details",
+    "description": "Loading claim status and timeline.",
+    "loading": "Loading claim…",
+    "summary": "Claim summary",
+    "paymentId": "Payment ID",
+    "decisionReason": "Decision reason",
+    "timeline": "Claim timeline",
+    "by": "By"
+  },
+  "profile": {
+    "eyebrow": "Member services · identity",
+    "title": "Profile & notices",
+    "description": "Your masked details, identity status, employment, and notices.",
+    "memberDetails": "Member profile",
+    "loading": "Loading profile…",
+    "name": "Name",
+    "uan": "UAN",
+    "dob": "Date of birth",
+    "gender": "Gender",
+    "mobile": "Masked mobile",
+    "email": "Masked email",
+    "ifsc": "Bank IFSC",
+    "bankEnding": "Bank account ending",
+    "identity": "Identity assurance",
+    "loadingIdentity": "Loading identity status…",
+    "aadhaar": "Aadhaar KYC",
+    "pan": "PAN KYC",
+    "bankKyc": "Bank KYC",
+    "employment": "Employment history",
+    "loadingEmployment": "Loading employment history…",
+    "noEmployment": "No employment history is available.",
+    "establishment": "Establishment",
+    "joined": "Joined",
+    "exited": "Exited",
+    "notices": "Notifications",
+    "loadingNotices": "Loading notifications…",
+    "noNotices": "No notifications yet."
+  },
+  "office": {
+    "eyebrow": "Regional office · Journey B",
+    "queueTitle": "Work queue",
+    "queueDescription": "Cases assigned to your office role.",
+    "cases": "Cases waiting for action",
+    "loadingQueue": "Loading work queue…",
+    "emptyQueue": "Nothing is waiting for you.",
+    "caseId": "Case ID",
+    "chainProgress": "Approval progress",
+    "slaDue": "SLA due",
+    "nextAction": "Next action",
+    "stepOf": "Step {{step}} of {{total}}",
+    "caseTitle": "Case details",
+    "caseDescription": "Review the case and its approval history.",
+    "loadingCase": "Loading case…",
+    "actionSaved": "Action recorded. The case and work queue have been refreshed.",
+    "caseSummary": "Case summary",
+    "kind": "Kind",
+    "round": "Round",
+    "approvalChain": "Approval chain",
+    "history": "Action history",
+    "noHistory": "No actions have been recorded.",
+    "when": "When",
+    "officer": "Officer",
+    "action": "Action",
+    "reasonChecks": "Reason and checks",
+    "checksTitle": "Checks completed",
+    "checks": {
+      "kyc": "KYC verified",
+      "bank": "Bank account verified",
+      "balance": "Balance sufficient",
+      "freeze": "No open grievance or freeze"
+    },
+    "note": "Note",
+    "decision": "Decision",
+    "decisions": {
+      "APPROVE": "Approve",
+      "RETURN": "Return",
+      "REJECT": "Reject"
+    },
+    "reason": "Reason",
+    "reasonRequired": "Enter a reason for return or rejection.",
+    "decisionSummary": "{{decision}} case {{caseId}}",
+    "paymentSummary": "Instruct demo payment for claim {{claimId}}: {{scenario}}",
+    "reissueSummary": "Reissue demo payment for claim {{claimId}}: {{scenario}}",
+    "demoPaymentNotice": "DEMO · This simulates a bank outcome. No funds move.",
+    "demoScenario": "Demo payment scenario",
+    "scenarios": {
+      "SUCCESS": "Pay successfully",
+      "RETURN": "Simulate bank return"
+    },
+    "submitAction": "Submit action",
+    "actions": {
+      "recommend": "Recommend",
+      "decide": "Decide",
+      "second-approve": "Second approval",
+      "instruct-payment": "Instruct payment",
+      "reissue": "Reissue payment"
+    },
+    "chainStates": {
+      "done": "Done",
+      "current": "Current",
+      "pending": "Pending"
+    }
+  },
+  "journeyB": {
+    "roles": {
+      "fo.da_accounts": "Dealing assistant (accounts)",
+      "fo.ss": "Section supervisor",
+      "fo.ao": "Accounts officer",
+      "fo.apfc": "Assistant PF commissioner",
+      "fo.oic": "Officer in charge",
+      "fo.cash": "Cash section",
+      "fo.pro": "Public relations officer"
+    },
+    "states": {
+      "FULL": "Full",
+      "PARTIAL": "Partial",
+      "AWAITING_CONFIRMATION": "Awaiting confirmation",
+      "SUBMITTED": "Submitted",
+      "UNDER_REVIEW": "Under review",
+      "APPROVED": "Approved",
+      "REJECTED_WITH_REASON": "Rejected with reason",
+      "SETTLED": "Settled",
+      "PAYMENT_PENDING": "Payment pending",
+      "PAYMENT_RETURNED": "Payment returned",
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive",
+      "RECOMMENDED": "Recommended",
+      "AWAITING_NEXT_APPROVAL": "Awaiting next approval",
+      "AUTO_APPROVED": "Automatically approved",
+      "IN_REVIEW": "In review",
+      "AWAITING_PAYMENT": "Awaiting payment",
+      "PAYMENT_ISSUED": "Payment issued",
+      "CLOSED": "Closed",
+      "REJECTED": "Rejected",
+      "AUTO_PENDING": "Automatic review pending"
+    }
   }
 }

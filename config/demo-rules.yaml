@@ -14,3 +14,26 @@ contribution:
 rounding: nearest_rupee_half_up
 validation:
   headcount_change_warning_pct: 20
+claims:
+  # ILLUSTRATIVE limits, not the EPF Scheme's. Amounts in paise.
+  auto_settlement_limit_paise: 10000000        # ₹1,00,000: above this a claim always goes to an officer
+  types:
+    ADVANCE_ILLNESS:
+      form_type: "31"
+      label: Advance for medical treatment
+      plain_rule: You can withdraw up to your own (employee) share, capped at ₹10,00,000, while still employed.
+      requires_active_employment: true
+      max_from: employee_share
+      cap_paise: 100000000
+    FINAL_SETTLEMENT:
+      form_type: "19"
+      label: Final settlement after leaving employment
+      plain_rule: After leaving employment for at least two months you can withdraw your full balance.
+      requires_exit_months: 2
+      max_from: total_balance
+  # Approval chain by amount (docs/stakeholder-activities.yaml → claim_settlement, rupees converted to paise).
+  approval_bands:
+    - {upto_paise: 5000000, chain: [fo.da_accounts, fo.ss]}
+    - {upto_paise: 50000000, chain: [fo.da_accounts, fo.ao]}
+    - {upto_paise: 250000000, chain: [fo.da_accounts, fo.ss, fo.apfc]}
+    - {upto_paise: null, chain: [fo.da_accounts, fo.ao, fo.oic]}

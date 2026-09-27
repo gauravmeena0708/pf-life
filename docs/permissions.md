@@ -534,6 +534,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/claims/{claimId}/payment-instructions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/claims/{claimId}/reissues` | W | office jurisdiction of the caller's posting | yes |
 | `GET /office/receipts/unreconciled` | P | office jurisdiction of the caller's posting |  |

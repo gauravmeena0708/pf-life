@@ -8,6 +8,11 @@ import { PersonaSwitcher } from "./components/PersonaSwitcher";
 import { EcrPage } from "./features/employer/EcrPage";
 import { EmployerHome } from "./features/employer/EmployerHome";
 import { PassbookPage } from "./features/member/PassbookPage";
+import { ClaimsPage } from "./features/member/ClaimsPage";
+import { ClaimDetailPage } from "./features/member/ClaimDetailPage";
+import { ProfilePage } from "./features/member/ProfilePage";
+import { WorkQueuePage } from "./features/office/WorkQueuePage";
+import { CasePage } from "./features/office/CasePage";
 import { Home } from "./pages/Home";
 import { InterfacePage } from "./pages/InterfacePage";
 import { PublicLookups } from "./pages/PublicLookups";
@@ -46,7 +51,8 @@ export function App() {
         <NavLink end to="/">{t("navigation.home")}</NavLink>
         <NavLink to="/public">{t("navigation.public")}</NavLink>
         {role?.startsWith("employer.") ? <><NavLink end to="/employer">{t("navigation.employer")}</NavLink><NavLink to="/employer/ecr">{t("navigation.ecr")}</NavLink></> : null}
-        {role === "member" ? <NavLink to="/member/passbook">{t("navigation.passbook")}</NavLink> : null}
+        {role === "member" ? <><NavLink to="/member/passbook">{t("navigation.passbook")}</NavLink><NavLink end to="/member/claims">{t("navigation.claims")}</NavLink><NavLink to="/member/profile">{t("navigation.profile")}</NavLink></> : null}
+        {role?.startsWith("fo.") ? <NavLink to="/office/work-queue">{t("navigation.workQueue")}</NavLink> : null}
         {role === "ho.security" ? <NavLink to="/security/activity">{t("navigation.security")}</NavLink> : null}
       </div></nav>
       <div className="shell-width layout">
@@ -57,6 +63,11 @@ export function App() {
             <Route path="/employer" element={<EmployerHome />} />
             <Route path="/employer/ecr" element={<EcrPage />} />
             <Route path="/member/passbook" element={<PassbookPage />} />
+            <Route path="/member/claims" element={<ClaimsPage />} />
+            <Route path="/member/claims/:claimId" element={<ClaimDetailPage />} />
+            <Route path="/member/profile" element={<ProfilePage />} />
+            <Route path="/office/work-queue" element={<WorkQueuePage />} />
+            <Route path="/office/cases/:caseId" element={<CasePage />} />
             <Route path="/public" element={<PublicLookups />} />
             <Route path="/security/activity" element={<SecurityActivity />} />
           </Routes>

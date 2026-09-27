@@ -68,6 +68,7 @@ export function PersonaSwitcher() {
   function switchTo(username: string) {
     const role = PERSONAS.find((persona) => persona.username === username)?.role;
     const returnTo = role === "ho.security" ? "/security/activity" : role === "member" ? "/member/passbook"
+      : role?.startsWith("fo.") ? "/office/work-queue"
       : role?.startsWith("employer.") ? (location.pathname.startsWith("/employer") ? location.pathname : "/employer")
         : "/";
     if (session.data?.authenticated) {

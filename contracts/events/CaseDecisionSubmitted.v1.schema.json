@@ -58,7 +58,11 @@
         "claim_id",
         "decision",
         "officer_subject",
-        "approval_level"
+        "officer_role",
+        "approval_level",
+        "final",
+        "next_role",
+        "reason"
       ],
       "properties": {
         "case_id": {
@@ -68,13 +72,36 @@
           "type": "string"
         },
         "decision": {
-          "type": "string"
+          "enum": [
+            "RECOMMEND",
+            "APPROVE",
+            "REJECT",
+            "RETURN"
+          ]
         },
         "officer_subject": {
           "type": "string"
         },
+        "officer_role": {
+          "type": "string"
+        },
         "approval_level": {
           "type": "number"
+        },
+        "final": {
+          "type": "boolean"
+        },
+        "next_role": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
         }
       }
     }

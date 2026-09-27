@@ -9,6 +9,7 @@ from app.api import catalogue_routes, routes
 from app.config import settings
 from app.infra.db import database_ready
 from app.infra.db import engine
+from app.infra.claims_ledger import on_claim_decision, on_claim_paid
 from app.infra.messaging import handle_employer_verified, handle_payment_confirmed, handle_payment_returned
 from epfo_persistence import Consumer, OutboxRelay
 from epfo_observability import health_router, install
@@ -25,6 +26,8 @@ def create_app() -> FastAPI:
                          ["payment-simulator.PaymentConfirmed.v1", "payment-simulator.PaymentReturned.v1"], _payment_router),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.employers",
                          ["employer-service.EmployerVerified.v1"], handle_employer_verified),
+                Consumer(engine(), settings.rabbitmq_url, "contribution-service.claims",
+                         ["claim-service.ClaimDecisionRecorded.v1"], on_claim_decision),
             ]
             relay.start()
             for consumer in consumers: consumer.start()
@@ -49,7 +52,9 @@ def create_app() -> FastAPI:
 
 
 async def _payment_router(session, event):
-    if event.get("event_type") == "PaymentConfirmed.v1":
+    if event.get("event_type") == "PaymentConfirmed.v1" and event["payload"].get("purpose") == "CLAIM_SETTLEMENT":
+        await on_claim_paid(session, event)
+    elif event.get("event_type") == "PaymentConfirmed.v1":
         await handle_payment_confirmed(session, event)
     elif event.get("event_type") == "PaymentReturned.v1":
         await handle_payment_returned(session, event)

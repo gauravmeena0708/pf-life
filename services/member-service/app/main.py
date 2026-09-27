@@ -1,15 +1,37 @@
 """member-service — EPFO POC (SYNTHETIC DEMONSTRATION, NOT AN OFFICIAL EPFO SYSTEM)."""
+import os
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
 import epfo_auth
 from app.api import catalogue_routes, routes
 from app.config import settings
-from app.infra.db import database_ready
+from app.domain.notifications import handle_notification_requested
+from app.infra.db import database_ready, engine
 from epfo_observability import health_router, install
+from epfo_persistence import Consumer, OutboxRelay
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    relay = None
+    consumer = None
+    if os.environ.get("DISABLE_MESSAGING") != "1":
+        relay = OutboxRelay(engine(), settings.rabbitmq_url)
+        consumer = Consumer(engine(), settings.rabbitmq_url, "member-service.notifications",
+                            ["*.NotificationRequested.v1"], handle_notification_requested)
+        relay.start()
+        consumer.start()
+    yield
+    if relay:
+        await relay.stop()
+    if consumer:
+        await consumer.stop()
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title=settings.service_name, version="0.1.0", docs_url="/docs", redoc_url=None)
+    app = FastAPI(title=settings.service_name, version="0.1.0", docs_url="/docs", redoc_url=None, lifespan=lifespan)
     install(app, settings.service_name)
     epfo_auth.configure(audience=settings.service_name,
                         jwks=epfo_auth.JwksCache(settings.gateway_jwks_url))

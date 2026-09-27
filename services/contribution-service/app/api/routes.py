@@ -296,23 +296,39 @@ async def account_passbook(accountLinkId: str, actor: Actor = Depends(MEMBER)):
     return envelope(data)
 
 
+def _month(at) -> str:
+    return at.strftime("%Y-%m") if hasattr(at, "strftime") else str(at)[:7]
+
+
 async def _passbook(subject: str, account_link_id: str | None):
     async with sessions()() as session:
         q = text("SELECT account_link_id, establishment_id FROM establishment_members WHERE member_subject=:s AND (CAST(:a AS TEXT) IS NULL OR account_link_id=:a)")
         accounts = (await session.execute(q, {"s": subject, "a": account_link_id})).mappings().all()
         out=[]; pending=[]
         for a in accounts:
-            lines = (await session.execute(text("SELECT j.occurred_at,f.wage_month,c.trrn, jl.side,jl.amount_paise,jl.share,e.legal_name FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id JOIN ecr_filings f ON f.id=j.filing_id JOIN challans c ON c.trrn=f.trrn JOIN establishments e ON e.id=f.establishment_id WHERE jl.account_link_id=:a ORDER BY f.wage_month,j.occurred_at"), {"a": a["account_link_id"]})).mappings().all()
-            grouped={}
+            lines = (await session.execute(text(
+                "SELECT j.id AS journal_id, j.kind, j.occurred_at, j.claim_id, f.wage_month, f.trrn, jl.side, jl.amount_paise, jl.share "
+                "FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id LEFT JOIN ecr_filings f ON f.id=j.filing_id "
+                "WHERE jl.account_link_id=:a AND jl.account_code='AC01_EPF' ORDER BY j.occurred_at, j.id"),
+                {"a": a["account_link_id"]})).mappings().all()
+            name = (await session.execute(text("SELECT legal_name FROM establishments WHERE id=:e"),
+                                          {"e": a["establishment_id"]})).scalar_one_or_none()
+            grouped = {}
             for ln in lines:
-                key=(ln["wage_month"],ln["trrn"])
-                ent=grouped.setdefault(key,{"wage_month":ln["wage_month"],"employee_share_paise":0,"employer_share_paise":0,"establishment_name":ln["legal_name"],"trrn":ln["trrn"],"posted_at":ln["occurred_at"]})
-                if ln["side"] == "credit" and ln["share"] in ("employee","employer"):
-                    ent[f"{ln['share']}_share_paise"] += ln["amount_paise"]
-            balance=0; entries=[]
+                kind = {"CONTRIBUTION": "CONTRIBUTION", "OPENING_BALANCE": "OPENING_BALANCE", "CLAIM_DEBIT": "WITHDRAWAL"}.get(ln["kind"], ln["kind"])
+                ent = grouped.setdefault(ln["journal_id"], {
+                    "kind": kind, "wage_month": ln["wage_month"] or _month(ln["occurred_at"]),
+                    "description": {"CONTRIBUTION": "Monthly contribution", "OPENING_BALANCE": "Balance brought forward",
+                                    "WITHDRAWAL": f"Claim {ln['claim_id']} paid out"}.get(kind, kind),
+                    "employee_share_paise": 0, "employer_share_paise": 0, "establishment_name": name,
+                    "trrn": ln["trrn"], "claim_id": ln["claim_id"], "posted_at": ln["occurred_at"]})
+                if ln["share"] in ("employee", "employer"):
+                    ent[f"{ln['share']}_share_paise"] += ln["amount_paise"] if ln["side"] == "credit" else -ln["amount_paise"]
+            balance = 0
+            entries = []
             for ent in grouped.values():
                 balance += ent["employee_share_paise"] + ent["employer_share_paise"]
-                entries.append({**ent,"running_balance_paise":balance})
+                entries.append({**ent, "running_balance_paise": balance})
             out.append({"account_link_id": a["account_link_id"], "entries": entries})
         pending_rows=(await session.execute(text("SELECT f.wage_month,f.state,f.content,f.format,c.trrn,m.uan,m.account_link_id FROM ecr_filings f LEFT JOIN challans c ON c.filing_id=f.id JOIN establishment_members m ON m.establishment_id=f.establishment_id WHERE m.member_subject=:s AND (CAST(:a AS TEXT) IS NULL OR m.account_link_id=:a) AND f.state IN ('SUBMITTED','PAYMENT_PENDING')"), {"s":subject,"a":account_link_id})).mappings().all()
         for x in pending_rows:
