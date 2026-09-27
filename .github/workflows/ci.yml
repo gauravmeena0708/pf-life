@@ -31,8 +31,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
-      - run: pip install -e "packages/common-observability[test]" -e "packages/common-auth-client[test]"
-      - run: pip install "uvicorn[standard]==0.32.0" "pydantic-settings==2.6.1" "sqlalchemy[asyncio]==2.0.36" "asyncpg==0.30.0" "alembic==1.14.0"
+      - run: pip install -e "packages/common-observability[test]" -e "packages/common-auth-client[test]" -e "packages/common-persistence[test]"
+      # Service dependencies only: every service is an `app` package, so the services themselves are not installed.
+      - run: pip install "uvicorn[standard]==0.32.0" "pydantic-settings==2.6.1" "sqlalchemy[asyncio]==2.0.36" "asyncpg==0.30.0" "alembic==1.14.0" "PyYAML==6.0.2"
       - run: test ! -f apps/gateway/pyproject.toml || pip install -e "apps/gateway[test]"
       - run: make test
 
