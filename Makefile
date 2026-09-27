@@ -62,7 +62,7 @@ demo:
 	@echo "Gateway / API:  http://localhost:8000   (OpenAPI contracts in contracts/openapi/)"
 	@echo "Keycloak admin: http://localhost:8080   (admin / see .env — development only)"
 	@echo "RabbitMQ UI:    http://localhost:15672"
-	@echo "MinIO console:  http://localhost:9001"
+	@echo "Object store:   http://localhost:8333   (S3 API, SeaweedFS)"
 	@echo "Personas: member-a member-b emp-owner emp-preparer emp-signatory do-caseworker ro-ss ro-ao ro-apfc ro-oic"
 	@echo "          ro-cashier ro-pro zo-acc ho-analyst ndc-operator ministry-viewer b2b-client caiu-investigator"
 	@echo "          hrm-employee security-analyst vigilance-investigator auditor   (password Demo@2026! — demo only)"

@@ -1,0 +1,10 @@
+{
+  "_comment": "DEVELOPMENT ONLY — synthetic demo. SeaweedFS S3 identities; change the keys outside localhost.",
+  "identities": [
+    {
+      "name": "epfo-services",
+      "credentials": [{"accessKey": "epfo-dev-access", "secretKey": "epfo-dev-secret-change-me"}],
+      "actions": ["Read", "Write", "List", "Tagging", "Admin"]
+    }
+  ]
+}

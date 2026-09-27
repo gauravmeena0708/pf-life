@@ -181,7 +181,7 @@ Client-credentials tokens plus HMAC-signed bodies with timestamp and nonce; repl
 ## 6. Data
 
 - One PostgreSQL 16 container; one database and one login role per service; `pg_hba.conf` restricts each role to its own database and its own network subnet (`init.md` §2.4).
-- MinIO: private buckets per service (`claim-docs`, `grievance-docs`, `ai-corpus`); presigned URLs issued only after an authorisation check; malware-scan adapter stub, fail-closed when enabled.
+- Object store (SeaweedFS, S3 API — ADR-0008): private buckets per service (`claim-docs`, `grievance-docs`, `ai-corpus`); presigned URLs issued only after an authorisation check; malware-scan adapter stub, fail-closed when enabled.
 - Redis: sessions, revocation set, step-up tokens, lock leases, rate limits, replay nonces. Never financial truth.
 - Seed data: `scripts/seed_synthetic_data.py`, deterministic (fixed seed and IDs) so the guided tour always finds the same member, filing and claim. No real PII; names and numbers are generated and marked synthetic.
 
@@ -189,7 +189,7 @@ Client-credentials tokens plus HMAC-signed bodies with timestamp and nonce; repl
 
 | Mode | Command | Contents | Approx. memory |
 |---|---|---|---|
-| Full | `make up` | Every service in its own container + Keycloak, PostgreSQL, RabbitMQ, Redis, MinIO, mock-integrations, gateway, web | ~3 GB |
+| Full | `make up` | Every service in its own container + Keycloak, PostgreSQL, RabbitMQ, Redis, object store, mock-integrations, gateway, web | ~3 GB |
 | Lite | `make up-lite` | Same images; Python services run with one worker and low connection pools; observability and AI profiles off | ~2 GB |
 | AI | `COMPOSE_PROFILES=ai` | Adds Ollama | + model size |
 | Observability | `COMPOSE_PROFILES=observability` | Prometheus, Grafana, Jaeger | + ~0.7 GB |
@@ -228,3 +228,4 @@ Ports and networks: `init.md` §2.4. Health: `/health/live`, `/health/ready` on 
 | [0005](adr/0005-process-engine.md) | Declarative process engine for maker-checker office processes |
 | [0006](adr/0006-contract-generation.md) | Contracts generated from the catalogue, hand detail through overlays |
 | [0007](adr/0007-local-runtime.md) | Local Docker Compose runtime on one laptop; full and lite modes |
+| [0008](adr/0008-object-store.md) | SeaweedFS as the S3-compatible object store (MinIO images unavailable) |

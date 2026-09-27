@@ -267,7 +267,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /members/me/claims/{claimId}` | Claim detail + timeline (Journey B7) | W | 1 | claim |
 | `POST /members/me/claims/{claimId}/confirmations` 🔐 | Transaction-intent confirmation (Journey B3) | W | 1 | claim |
 | `POST /members/me/claims/{claimId}/cancellations` 🔐 | **Cancel** an unsettled claim (renamed from `…/withdrawals`; allowed only before a checker decision — see `ClaimStateMachine` in `claim-service.yaml`) | P | 2 | claim |
-| `POST /members/me/claims/{claimId}/documents` | Upload supporting document (MinIO, scanned) | P | 2 | claim |
+| `POST /members/me/claims/{claimId}/documents` | Upload supporting document (object store, scanned) | P | 2 | claim |
 
 **Death and EDLI (claimant ≠ member)**
 
@@ -534,7 +534,7 @@ Monitoring (`/monitoring/**`), AI (`/ai/**`), audit (`/audit/**`) and NDC (`/ndc
 |---|---|---|---|---|
 | `POST /members/me/grievances` | Member registers grievance linked to a claim (Journey C1) | W | 1 | grievance |
 | `GET /members/me/grievances` | List own grievances | W | 1 | grievance |
-| `POST /grievances/{grievanceId}/documents` | Attach a synthetic document (MinIO, malware-scan stub, Journey C1) | W | 1 | grievance |
+| `POST /grievances/{grievanceId}/documents` | Attach a synthetic document (object store, malware-scan stub, Journey C1) | W | 1 | grievance |
 | `GET /grievances/{grievanceId}` | Grievance detail (only the assigned office can read the body — Journey C2) | W | 1 | grievance |
 | `POST /grievances/{grievanceId}/messages` | Reply / message | W | 1 | grievance |
 | `POST /grievances/{grievanceId}/evidence-links` | Officer attaches case-linked evidence (Journey C3) | W | 1 | grievance |

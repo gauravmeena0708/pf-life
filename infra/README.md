@@ -28,7 +28,7 @@ Needs Docker with the Compose v2 plugin (`docker compose version`). On Ubuntu: `
 | Gateway | http://localhost:8000 |
 | Keycloak | http://localhost:8080 (admin password in `.env`) |
 | RabbitMQ | http://localhost:15672 |
-| MinIO | http://localhost:9001 |
+| Object store (S3 API) | http://localhost:8333 |
 
 ## Personas
 
