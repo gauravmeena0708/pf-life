@@ -8,8 +8,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 |---|---|---|---|---|---|---|---|
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 7 | 0 | 7 | 0 |
 | 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 20 | 8 | 60 | 0 |
-| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 23 | 7 | 43 | 0 |
-| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 8 | 0 | 72 | 5 |
+| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 23 | 7 | 48 | 0 |
+| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 8 | 0 | 73 | 5 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 6 | 1 | 2 | 0 |
 | 6 | International worker | **Mock** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 0 | 1 | 4 | 0 |
 | 7 | District office | **Working** | `do.incharge`, `do.staff` | 1 | 0 | 2 | 0 |
@@ -24,7 +24,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | 16 | Reporting and monitoring | **Working** | `gov.cbt`, `gov.ec`, `gov.fiac`, `gov.peic` | 1 | 0 | 2 | 0 |
 | 17 | Security | **Working** | `ho.security`, `ho.data_protection` | 4 | 0 | 3 | 0 |
 | 18 | Vigilance | **Planned** | `ho.cvo`, `zo.vigilance` | 0 | 0 | 3 | 0 |
-| 19 | Audit | **Working** | `ho.audit`, `zo.rpfc1_audit`, `zo.internal_audit`, `gov.cag`, `gov.statutory_auditor` | 2 | 0 | 6 | 0 |
+| 19 | Audit | **Working** | `ho.audit`, `zo.rpfc1_audit`, `zo.internal_audit`, `gov.cag`, `gov.statutory_auditor` | 2 | 0 | 7 | 0 |
 | 20 | UMANG | **Working** | `ext.umang` | 3 | 0 | 0 | 0 |
 | 21 | AI model / local LLM | **Working** | `tech.ai_service` | 5 | 0 | 0 | 0 |
 
@@ -177,12 +177,16 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /pensioners/me/life-certificate/submissions` | M | pension | csc_operator, pensioner |
 | `POST /public/pension/life-certificate-lookups` | M | pension | pensioner |
 | `GET /claimants/death-claims/{claimId}` | P | claim | claimant |
+| `GET /members/me/account-status` | P | member | member |
 | `GET /members/me/annual-statements/{financialYear}` | P | contribution | member |
+| `GET /members/me/claims/eligibility-preview` | P | claim | member |
+| `GET /members/me/claims/{claimId}/audit-trail` | P | claim | member |
 | `GET /members/me/higher-pension-options/{optionId}` | P | pension | member |
 | `GET /members/me/kyc` | P | member | member |
 | `GET /members/me/nominations` | P | member | member |
 | `GET /members/me/pension-eligibility-preview` | P | pension | member |
 | `GET /members/me/pension-scheme-certificate` | P | pension | member |
+| `GET /members/me/service-history` | P | member | member |
 | `GET /members/me/tax/form-16a` | P | claim | member |
 | `GET /members/me/tax/taxable-interest` | P | contribution | member |
 | `GET /members/me/transfers/auto` | P | claim | member |
@@ -197,9 +201,9 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /claimants/family-pension-applications` | P | pension | family_pensioner |
 | `POST /grievances/{grievanceId}/feedback` | P | grievance | member |
 | `POST /grievances/{grievanceId}/reminders` | P | grievance | member |
+| `POST /members/me/claims/{claimId}/cancellations` | P | claim | member |
 | `POST /members/me/claims/{claimId}/documents` | P | claim | member |
 | `POST /members/me/claims/{claimId}/re-disbursement-requests` | P | claim | member |
-| `POST /members/me/claims/{claimId}/withdrawals` | P | claim | member |
 | `POST /members/me/exits` | P | member | member |
 | `POST /members/me/higher-pension-options` | P | pension | member |
 | `POST /members/me/joint-declarations` | P | member | member |
@@ -219,6 +223,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /public/pension/payment-enquiries` | P | pension | pensioner |
 | `POST /public/pension/ppo-lookups` | P | pension | pensioner |
 | `POST /public/pension/status-enquiries` | P | pension | pensioner |
+| `PUT /members/me/claims/{claimId}/bank-details` | P | claim | member |
 
 ### 4. Office — Working
 
@@ -233,6 +238,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/claims/{claimId}/payment-instructions` | W | claim | fo.cash |
 | `POST /office/claims/{claimId}/reissues` | W | claim | fo.cash |
 | `GET /office/accounts/inoperative` | P | contribution | fo.da_accounts |
+| `GET /office/claims/{claimId}/audit-trail` | P | claim | fo.da_accounts |
 | `GET /office/compliance/cases` | P | compliance | fo.da_compliance |
 | `GET /office/compliance/cases/{caseId}` | P | compliance | fo.da_compliance |
 | `GET /office/compliance/defaulters` | P | reporting | fo.da_compliance |
@@ -497,10 +503,11 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 
 | Endpoint | Status | Owner | Called by |
 |---|---|---|---|
-| `GET /audit/correlations/{correlationId}` | W | audit | gov.cag, zo.internal_audit |
+| `GET /audit/correlations/{correlationId}` | W | audit | gov.cag, zo.internal_audit, zo.rpfc1_audit |
 | `GET /audit/events` | W | audit | gov.cag, gov.statutory_auditor, ho.audit, zo.rpfc1_audit |
 | `GET /audit/concurrent/extracts` | P | audit | zo.rpfc1_audit |
 | `GET /ho/finance/balance-sheet` | P | reporting | gov.statutory_auditor |
+| `GET /office/claims/{claimId}/audit-trail` | P | claim | zo.rpfc1_audit |
 | `POST /audit/concurrent/alerts` | P | audit | zo.rpfc1_audit |
 | `POST /audit/internal/paras/{paraId}/decisions` | P | audit | ho.audit |
 | `POST /audit/internal/reports` | P | audit | zo.internal_audit |

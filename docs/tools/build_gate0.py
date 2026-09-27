@@ -223,6 +223,7 @@ EVENTS = [
     # From the Samadhan Setu integration spec (payloads converted to paise / basis points, no member identifiers)
     ("CADGenerated", "claim", ["contribution", "payment-simulator", "audit"], "claim", 2, {"claim_id": S, "cad_id": S, "net_payable_paise": N, "tds_paise": N, "rule_version": S, "static_data_version": S}),
     ("BeneficiaryShareAmended", "claim", ["reporting", "audit"], "claim", 2, {"claim_id": S, "beneficiary_id": S, "previous_share_bp": {"type": "integer", "minimum": 0, "maximum": 10000}, "new_share_bp": {"type": "integer", "minimum": 0, "maximum": 10000}, "reason_code": {"enum": ["NOMINEE_DECEASED", "COURT_ORDER", "LEGACY_SETTLEMENT_OFFSET", "GUARDIAN_APPOINTMENT"]}, "amended_by": S}),
+    ("SupplementaryClaimEligible", "contribution", ["member", "claim", "audit"], "ledger_journal", 2, {"account_link_id": S, "settled_claim_id": S, "late_credit_paise": N, "credit_source": {"enum": ["TRANSFER_IN", "CONTRIBUTION", "RECREDIT"]}}),
     ("LockReleased", "workflow", ["audit", "reporting"], "ledger_lock", 2, {"lock_id": S, "lock_scope": {"enum": ["ANNUAL_ACCOUNTING", "CLAIM_ADJUDICATION", "ECR_POSTING"]}, "resource_key": S, "released_by": S, "reason": {"type": "string", "minLength": 10}}),
 ]
 

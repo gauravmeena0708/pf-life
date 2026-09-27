@@ -189,6 +189,24 @@ stakeholders:
     step_up: false
     via:
     - F03.passbook
+  - endpoint: GET /members/me/account-status
+    status: P
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F04.preflight
+  - endpoint: GET /members/me/service-history
+    status: P
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F04.preflight
+  - endpoint: GET /members/me/claims/eligibility-preview
+    status: P
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F04.preflight
   - endpoint: GET /members/me/claims/eligible-types
     status: W
     scope: self — caller's own member record only
@@ -213,18 +231,30 @@ stakeholders:
     step_up: false
     via:
     - F04.claim_file
-  - endpoint: POST /members/me/claims/{claimId}/withdrawals
-    status: P
-    scope: self — caller's own member record only
-    step_up: false
-    via:
-    - F04.claim_file
   - endpoint: POST /members/me/tax/form-15g-15h
     status: P
     scope: self — caller's own member record only
     step_up: false
     via:
     - F04.claim_file
+  - endpoint: GET /members/me/claims/{claimId}/audit-trail
+    status: P
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F04.post_submission
+  - endpoint: POST /members/me/claims/{claimId}/cancellations
+    status: P
+    scope: self — caller's own member record only
+    step_up: true
+    via:
+    - F04.post_submission
+  - endpoint: PUT /members/me/claims/{claimId}/bank-details
+    status: P
+    scope: self — caller's own member record only
+    step_up: true
+    via:
+    - F04.post_submission
   - endpoint: POST /members/me/claims/{claimId}/re-disbursement-requests
     status: P
     scope: self — caller's own member record only
@@ -1195,6 +1225,12 @@ stakeholders:
     step_up: false
     via:
     - F04.process
+  - endpoint: GET /office/claims/{claimId}/audit-trail
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.process
   - endpoint: POST /office/cases/{caseId}/recommendations
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2088,6 +2124,18 @@ stakeholders:
     step_up: false
     via:
     - F12.concurrent
+  - endpoint: GET /office/claims/{claimId}/audit-trail
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F12.claim_trail
+  - endpoint: GET /audit/correlations/{correlationId}
+    status: W
+    scope: read-only for auditors; audit writes by audit roles only
+    step_up: false
+    via:
+    - F12.claim_trail
   zo.internal_audit:
   - endpoint: POST /audit/internal/reports
     status: P

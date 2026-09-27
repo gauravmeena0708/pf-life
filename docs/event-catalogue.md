@@ -34,4 +34,5 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `LifeCertificateRecorded.v1` | pension | reporting, audit | pensioner | 2 (contract only) |
 | `CADGenerated.v1` | claim | contribution, payment-simulator, audit | claim | 2 (contract only) |
 | `BeneficiaryShareAmended.v1` | claim | reporting, audit | claim | 2 (contract only) |
+| `SupplementaryClaimEligible.v1` | contribution | member, claim, audit | ledger_journal | 2 (contract only) |
 | `LockReleased.v1` | workflow | audit, reporting | ledger_lock | 2 (contract only) |

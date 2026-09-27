@@ -63,4 +63,33 @@ components:
         acquired_at: {type: string, format: date-time}
         expires_at: {type: string, format: date-time}
         acquired_by: {type: string, description: Actor or batch ID holding the lock}
-        is_stale: {type: boolean}
+        is_stale: {type: boolean, description: True when the lease has expired or its holder's heartbeat stopped}
+        state: {$ref: "#/components/schemas/LockState"}
+        lease_seconds: {type: integer, minimum: 1, default: 600, description: TTL of the lease (knowledge base §6.1 suggests 10 minutes for claim adjudication)}
+        renew_count: {type: integer, minimum: 0}
+        key_pattern: {$ref: "#/components/schemas/LockKeyPattern"}
+
+    LockState:
+      enum: [ACQUIRED, RENEWED, RELEASED, EXPIRED, FORCE_RELEASED]
+
+    LockKeyPattern:
+      description: >-
+        Hierarchical lock keys (knowledge base §6.1). The annual-accounts lock is exclusive on the member ledger;
+        claim locks are scoped per claim so one claim never blocks queries or unrelated claims.
+      enum:
+        - "LOCK:MEMBER:ANNUAL_ACCOUNTING:{member_id}"
+        - "LOCK:MEMBER:CLAIM:{member_id}:{claim_id}"
+        - "LOCK:ESTABLISHMENT:ECR:{establishment_id}:{wage_month}"
+
+    LockLifecycle:
+      description: Allowed lock transitions. Leases are held in Redis with a TTL; every transition is audited.
+      type: object
+      x-transitions:
+        - {from: [none], to: ACQUIRED, actor: "owning service or batch", trigger: "SET key NX PX lease_seconds", guard: no live lease on the same key}
+        - {from: [ACQUIRED, RENEWED], to: RENEWED, actor: holder, trigger: heartbeat before expiry, guard: caller still holds the fencing token}
+        - {from: [ACQUIRED, RENEWED], to: RELEASED, actor: holder, trigger: work committed or abandoned}
+        - {from: [ACQUIRED, RENEWED], to: EXPIRED, actor: system, trigger: TTL elapsed without renewal, emits: audit entry LOCK_EXPIRED}
+        - {from: [ACQUIRED, RENEWED], to: FORCE_RELEASED, actor: "fo.oic or ho.is", trigger: "POST /office/system/locks/{lockId}/release", guard: "is_stale = true; reason ≥ 10 characters", emits: LockReleased.v1}
+      x-invariants:
+        - Every write under a lock carries the lock's fencing token; a write with an older token is rejected, so a holder that lost its lease cannot corrupt the ledger.
+        - The annual-accounts batch takes one member ledger at a time; claims on other members are never blocked.

@@ -144,12 +144,16 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /members/me/kyc/{kycType}` | M | self — caller's own member record only | yes |
 | `POST /members/uan-activations` | M | unauthenticated with OTP / face-auth proof |  |
 | `POST /members/uan-allotments` | M | unauthenticated with OTP / face-auth proof |  |
+| `GET /members/me/account-status` | P | self — caller's own member record only |  |
 | `GET /members/me/annual-statements/{financialYear}` | P | self — caller's own member record only |  |
+| `GET /members/me/claims/eligibility-preview` | P | self — caller's own member record only |  |
+| `GET /members/me/claims/{claimId}/audit-trail` | P | self — caller's own member record only |  |
 | `GET /members/me/higher-pension-options/{optionId}` | P | self — caller's own member record only |  |
 | `GET /members/me/kyc` | P | self — caller's own member record only |  |
 | `GET /members/me/nominations` | P | self — caller's own member record only |  |
 | `GET /members/me/pension-eligibility-preview` | P | self — caller's own member record only |  |
 | `GET /members/me/pension-scheme-certificate` | P | self — caller's own member record only |  |
+| `GET /members/me/service-history` | P | self — caller's own member record only |  |
 | `GET /members/me/tax/form-16a` | P | self — caller's own member record only |  |
 | `GET /members/me/tax/taxable-interest` | P | self — caller's own member record only |  |
 | `GET /members/me/transfers/auto` | P | self — caller's own member record only |  |
@@ -158,9 +162,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/uan-card` | P | self — caller's own member record only |  |
 | `POST /grievances/{grievanceId}/feedback` | P | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/reminders` | P | complainant or the assigned office |  |
+| `POST /members/me/claims/{claimId}/cancellations` | P | self — caller's own member record only | yes |
 | `POST /members/me/claims/{claimId}/documents` | P | self — caller's own member record only |  |
 | `POST /members/me/claims/{claimId}/re-disbursement-requests` | P | self — caller's own member record only |  |
-| `POST /members/me/claims/{claimId}/withdrawals` | P | self — caller's own member record only |  |
 | `POST /members/me/exits` | P | self — caller's own member record only | yes |
 | `POST /members/me/higher-pension-options` | P | self — caller's own member record only | yes |
 | `POST /members/me/joint-declarations` | P | self — caller's own member record only | yes |
@@ -173,6 +177,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /members/me/transfers/auto/{transferId}/confirmations` | P | self — caller's own member record only | yes |
 | `POST /members/uan-lookups` | P | unauthenticated with OTP / face-auth proof |  |
 | `POST /public/claims/status-lookups` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
+| `PUT /members/me/claims/{claimId}/bank-details` | P | self — caller's own member record only | yes |
 
 **`member.exited`** — Member — exited / inoperative account holder
 
@@ -397,6 +402,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /ai/claims/analyse` | W | caller's own permissions; advisory output only |  |
 | `POST /office/cases/{caseId}/recommendations` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/accounts/inoperative` | P | office jurisdiction of the caller's posting |  |
+| `GET /office/claims/{claimId}/audit-trail` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/member-change-requests` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/members/{uan}` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | P | office jurisdiction of the caller's posting |  |
@@ -695,8 +701,10 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /audit/correlations/{correlationId}` | W | read-only for auditors; audit writes by audit roles only |  |
 | `GET /audit/events` | W | read-only for auditors; audit writes by audit roles only |  |
 | `GET /audit/concurrent/extracts` | P | read-only for auditors; audit writes by audit roles only |  |
+| `GET /office/claims/{claimId}/audit-trail` | P | office jurisdiction of the caller's posting |  |
 | `POST /audit/concurrent/alerts` | P | read-only for auditors; audit writes by audit roles only |  |
 
 **`zo.internal_audit`** — Internal audit parties auditing ROs

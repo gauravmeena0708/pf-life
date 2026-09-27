@@ -241,6 +241,14 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /members/me/higher-pension-options` 🔐 | Submit joint option for higher pension | P | 2 | pension |
 | `GET /members/me/higher-pension-options/{optionId}` | Higher-pension application status | P | 2 | pension |
 
+
+**Designed from the Samadhan Setu analysis** (not in the spec files; see `docs/samadhan-setu-mapping.md`)
+
+| Method & path | Function | Status | Phase | Owner |
+|---|---|---|---|---|
+| `GET /members/me/account-status` | **Pre-flight:** readiness of each linked member account before filing — KYC, UAN–member-ID link, exit date, freeze, active ledger locks, unmigrated legacy transactions — as explicit blocker codes | P | 2 | member |
+| `GET /members/me/service-history` | **Pre-flight:** service per member ID — contributory months, NCP days, pension-service months, transfer status — for pension and final-settlement decisions | P | 2 | member |
+
 ## 7. Member claims, transfers and pension applications
 
 `claim-service` owns PF withdrawals, settlements and transfers; `pension-service` owns pension applications and the scheme certificate. Eligibility comes from the illustrative rule engine, never hard-coded.
@@ -258,7 +266,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /members/me/claims` | List own claims | W | 1 | claim |
 | `GET /members/me/claims/{claimId}` | Claim detail + timeline (Journey B7) | W | 1 | claim |
 | `POST /members/me/claims/{claimId}/confirmations` 🔐 | Transaction-intent confirmation (Journey B3) | W | 1 | claim |
-| `POST /members/me/claims/{claimId}/withdrawals` | Withdraw an unsettled claim | P | 2 | claim |
+| `POST /members/me/claims/{claimId}/cancellations` 🔐 | **Cancel** an unsettled claim (renamed from `…/withdrawals`; allowed only before a checker decision — see `ClaimStateMachine` in `claim-service.yaml`) | P | 2 | claim |
 | `POST /members/me/claims/{claimId}/documents` | Upload supporting document (MinIO, scanned) | P | 2 | claim |
 
 **Death and EDLI (claimant ≠ member)**
@@ -286,6 +294,15 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 |---|---|---|---|---|
 | `POST /claimants/death-claims/{claimId}/beneficiaries` 💰 | Inward an additional co-beneficiary / legal heir on an open death claim | P | 2 | claim |
 | `POST /members/me/claims/{claimId}/re-disbursement-requests` 💰 | Member submits corrected bank details after a payment return, without re-filing the claim | P | 2 | claim |
+
+
+**Designed from the Samadhan Setu analysis** (not in the spec files; see `docs/samadhan-setu-mapping.md`)
+
+| Method & path | Function | Status | Phase | Owner |
+|---|---|---|---|---|
+| `GET /members/me/claims/eligibility-preview?formType=` | **Pre-flight:** evaluate one form type before filing — eligible or not, blockers from account status, maximum amount, required documents, rule version | P | 2 | claim |
+| `GET /members/me/claims/{claimId}/audit-trail` | **Post-submission:** member's view of every state change on own claim (time, state, role, reason; officer names withheld) | P | 2 | claim |
+| `PUT /members/me/claims/{claimId}/bank-details` 🔐 | **Post-submission:** switch a claim not yet in payment to another **KYC-verified** bank account of the member (after a return, use `…/re-disbursement-requests`) | P | 2 | claim |
 
 ## 8. Office claim processing and member accounts
 
@@ -341,6 +358,13 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /office/members/{uan}/locks` | Active locks on a member ledger (annual accounts, claim adjudication, ECR posting) with owner and expiry | P | 2 | workflow |
 | `POST /office/system/locks/{lockId}/release` 🔐 | Supervised release of an orphaned lock (reason required) → `LockReleased.v1` (tracker: "Unable to lock process", phantom "concurrent claims already under processing") | P | 2 | workflow |
 | `POST /office/cases/{caseId}/documents/{docId}/attestation-views` | Record that the caseworker opened the employer-signed PDF / DSC document; enables the approve action (tracker: "View the employer signed pdf first") | P | 2 | workflow |
+
+
+**Designed from the Samadhan Setu analysis** (not in the spec files; see `docs/samadhan-setu-mapping.md`)
+
+| Method & path | Function | Status | Phase | Owner |
+|---|---|---|---|---|
+| `GET /office/claims/{claimId}/audit-trail` | Full claim audit trail for officers and auditors: transitions, actor IDs, approval level, rule version, lock events, CAD versions | P | 2 | claim |
 
 ## 9. Pension (EPS) and pensioners
 

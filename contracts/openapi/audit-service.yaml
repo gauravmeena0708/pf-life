@@ -132,6 +132,7 @@ paths:
       x-callers:
       - gov.cag
       - zo.internal_audit
+      - zo.rpfc1_audit
       x-scope: read-only for auditors; audit writes by audit roles only
       security:
       - bffSession: []

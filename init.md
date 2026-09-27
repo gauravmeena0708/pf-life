@@ -201,8 +201,9 @@ This section is the **minimum** set. The full list of EPFO functions (establishm
 | File | What it is | Maintained |
 |---|---|---|
 | `docs/stakeholders.md` | 114 stakeholders (members, employers, field-office roles, DO / ZO / HO, NDC / ADC, vigilance, audit, external bodies) with stable IDs | By hand |
-| `docs/stakeholder-activities.yaml` | 227 activities: actor, endpoints, hand-offs, approval chains, source evidence | By hand |
+| `docs/stakeholder-activities.yaml` | 230 activities: actor, endpoints, hand-offs, approval chains, source evidence | By hand |
 | `docs/portal-functions-by-login.md` | Real EPFO portal functions by login type, with sources | By hand |
+| `docs/samadhan-setu-mapping.md` | Every Samadhan Setu spec / knowledge-base item → contract, with each deviation explained | By hand |
 | `docs/stakeholder-api-sets.md` | API set per stakeholder, gap lists, Mermaid flow diagrams | Generated: `python3 docs/tools/build_stakeholder_views.py` |
 | `docs/stakeholder-atlas.html` | Interactive explorer of stakeholders, lifecycles and approval chains | Generated: `python3 docs/tools/build_stakeholder_atlas.py` |
 | `docs/permissions.md`, `docs/api-matrix.md`, `contracts/openapi/*.yaml`, `contracts/events/*.json` | Gate 0 design-freeze package | Generated: `python3 docs/tools/build_gate0.py` |
@@ -320,7 +321,7 @@ Use RFC 9457 Problem Details for errors with stable `type`, `title`, `status`, `
 - Journal entries are append-only. Correct financial mistakes through explicit reversals or adjustments; do not edit posted entries in place.
 - Do not publish `ContributionPosted` before bank-simulator confirmation **and** durable ledger posting.
 - Use an outbox + consumer deduplication; consumers must tolerate at-least-once delivery and out-of-order events.
-- Member-ledger locks (annual accounts, claim adjudication, ECR posting) are **leases with a TTL**, never permanent flags: a crashed holder's lock expires on its own, and a supervisor can release a stale lock with a recorded reason (`POST /office/system/locks/{lockId}/release`). This prevents the production errors "concurrent claims already under processing" and "Unable to lock process" seen in EPFO's Samadhan Setu tracker.
+- Member-ledger locks (annual accounts, claim adjudication, ECR posting) are **leases with a TTL**, never permanent flags: a crashed holder's lock expires on its own, and a supervisor can release a stale lock with a recorded reason (`POST /office/system/locks/{lockId}/release`). Keys are hierarchical — `LOCK:MEMBER:ANNUAL_ACCOUNTING:{member_id}`, `LOCK:MEMBER:CLAIM:{member_id}:{claim_id}`, `LOCK:ESTABLISHMENT:ECR:{establishment_id}:{wage_month}` — and writes carry a fencing token (lifecycle in `contracts/openapi/workflow-service.yaml` → `LockLifecycle`). This prevents the production errors "concurrent claims already under processing" and "Unable to lock process" seen in EPFO's Samadhan Setu tracker.
 - For multi-service workflows, use an explicit saga/state machine with compensating events, never pretend a distributed ACID transaction exists.
 - Log request IDs, actor IDs, scopes, correlation IDs, rule versions and decision provenance without storing unnecessary secrets or PII.
 
@@ -563,7 +564,7 @@ POSTED is final. Corrections are supplementary filings or reversing journals, ne
 | — | create claim | DRAFT | `member` | eligible type for the rule version | — |
 | DRAFT | submit | AWAITING_CONFIRMATION | `member` | documents complete | — |
 | AWAITING_CONFIRMATION | confirm intent | SUBMITTED | `member` | step-up done; summary shown | `ClaimSubmitted.v1` |
-| DRAFT / AWAITING_CONFIRMATION / SUBMITTED | withdraw (phase 2) | WITHDRAWN | `member` | no decision yet | — |
+| DRAFT / AWAITING_CONFIRMATION / SUBMITTED / UNDER_REVIEW | cancel (`…/cancellations`, phase 2) | CANCELLED | `member` | no recommendation recorded yet | — |
 | SUBMITTED | risk checks pass | AUTO_APPROVED | system | rule version allows auto-settlement for this type and amount; no open risk signal. The Journey B demo claim is seeded above the auto-settlement limit, so it always takes the officer route | `ClaimDecisionRecorded.v1` |
 | SUBMITTED | risk check fails or rule requires review | UNDER_REVIEW | system | case opened in `workflow-service` | — |
 | UNDER_REVIEW | reassign / SLA breach | UNDER_REVIEW | `fo.oic` or system timer | new assignee in the same jurisdiction | — |
@@ -573,6 +574,7 @@ POSTED is final. Corrections are supplementary filings or reversing journals, ne
 | RECOMMENDED / AWAITING_NEXT_APPROVAL | checker returns for rework | UNDER_REVIEW | any checker | reason given; earlier approvals in this round are void | — |
 | APPROVED / AUTO_APPROVED | payment instruction | PAYMENT_PENDING | `fo.cash` or system | `ClaimDebitPosted.v1` received (journal "claim approved" committed); account not frozen | `PaymentInstructed.v1` |
 | PAYMENT_PENDING | bank confirmation | SETTLED | system | signed callback | `NotificationRequested.v1` |
+| SETTLED | late credit (transfer-in, contribution, recredit) | SETTLED | system | never lock the ledger | `SupplementaryClaimEligible.v1` |
 | PAYMENT_PENDING | bank return | PAYMENT_RETURNED | system | signed callback | `PaymentReturned.v1`, `NotificationRequested.v1` |
 | PAYMENT_RETURNED | member submits corrected bank details (`…/re-disbursement-requests`) | CORRECTION_PENDING | `member` | new account passes the mock penny-drop check | — |
 | CORRECTION_PENDING | APFC authorises re-disbursement (`…/re-disbursement-approvals`) | REISSUE_APPROVED | `fo.apfc` | adjudication is **not** reopened | — |
@@ -626,7 +628,7 @@ Minimum versioned event contracts (JSON Schema or AsyncAPI):
 - `ClaimDebitPosted.v1` (contribution → claim, member: claim journal committed)
 - `PaymentInstructed.v1`
 - `NotificationRequested.v1`
-- Phase 2 (contract only): `CADGenerated.v1`, `BeneficiaryShareAmended.v1`, `LockReleased.v1`, `DemandRaised.v1`, `LedgerReversed.v1`, `PaymentScrollGenerated.v1`, `MemberChangeApproved.v1`, `AccountFrozen.v1`, `AccountDefrozen.v1`, `PpoIssued.v1`, `LifeCertificateRecorded.v1`
+- Phase 2 (contract only): `SupplementaryClaimEligible.v1`, `CADGenerated.v1`, `BeneficiaryShareAmended.v1`, `LockReleased.v1`, `DemandRaised.v1`, `LedgerReversed.v1`, `PaymentScrollGenerated.v1`, `MemberChangeApproved.v1`, `AccountFrozen.v1`, `AccountDefrozen.v1`, `PpoIssued.v1`, `LifeCertificateRecorded.v1`
 
 Include event ID, aggregate ID, producer, occurred-at UTC, event schema version, correlation ID and minimum necessary payload. Document publisher/subscriber ownership, backoff, DLQ replay and consumer idempotency.
 

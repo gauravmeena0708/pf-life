@@ -693,6 +693,44 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /members/me/account-status:
+    get:
+      operationId: getMembersAccountStatus
+      summary: 'Pre-flight: readiness of each linked member account before filing — KYC, UAN–member-ID link, exit date, freeze,
+        active l'
+      tags:
+      - Member self-service
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '200':
+          description: Readiness per linked account
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Envelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/AccountStatus'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: member
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+      description: Pre-flight readiness of every member account linked to the caller's UAN. Composed by member-service from
+        its own data plus read-only lookups of active ledger locks (workflow-service) and open claims (claim-service). Returns
+        blocker codes instead of letting a later claim submission fail.
   /members/me/contact-details:
     patch:
       operationId: patchMembersContactDetails
@@ -1070,6 +1108,43 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /members/me/service-history:
+    get:
+      operationId: getMembersServiceHistory
+      summary: 'Pre-flight: service per member ID — contributory months, NCP days, pension-service months, transfer status
+        — for pension'
+      tags:
+      - Member self-service
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '200':
+          description: Service per member ID under the caller's UAN
+          content:
+            application/json:
+              schema:
+                allOf:
+                - $ref: '#/components/schemas/Envelope'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/ServiceHistory'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: member
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+      description: 'Pre-flight: service per member ID — contributory months, NCP days, pension-service months, transfer status
+        — for pension and final-settlement decisions'
   /members/me/sessions:
     get:
       operationId: getMembersSessions
@@ -1653,6 +1728,204 @@ components:
           description: Resource-specific; defined when the endpoint is implemented
         meta:
           $ref: '#/components/schemas/Meta'
+    BlockerCode:
+      description: 'Why a claim on this account would fail today. Source error texts (Samadhan Setu): UAN_NOT_LINKED_TO_MEMBER_ID
+        ← "UAN is not registered against this member ID"; MEMBER_RECORD_NOT_FOUND ← "No member record found for the provided
+        UAN / member ID"; ANNUAL_ACCOUNTING_IN_PROGRESS ← "Annual accounting is under process for this member"; CLAIM_ALREADY_IN_PROCESS
+        ← "concurrent claims already under processing" (only when a live lock or open claim really exists); LEGACY_TRANSACTION_NOT_MIGRATED
+        ← "legacy system transaction is not migrated in ledger"; PRIMARY_MEMBER_ID_INCORRECT ← "incorrect Primary Member ID
+        marked"; TRANSFER_IN_SERVICE_NOT_CALCULATED ← "tr-in service not calculating".'
+      enum:
+      - KYC_AADHAAR_MISSING
+      - KYC_BANK_NOT_VERIFIED
+      - UAN_NOT_ACTIVATED
+      - UAN_NOT_LINKED_TO_MEMBER_ID
+      - MEMBER_RECORD_NOT_FOUND
+      - EXIT_DATE_NOT_MARKED
+      - ACCOUNT_FROZEN
+      - ACCOUNT_INOPERATIVE
+      - ANNUAL_ACCOUNTING_IN_PROGRESS
+      - CLAIM_ALREADY_IN_PROCESS
+      - LEGACY_TRANSACTION_NOT_MIGRATED
+      - PRIMARY_MEMBER_ID_INCORRECT
+      - TRANSFER_PENDING
+      - TRANSFER_IN_SERVICE_NOT_CALCULATED
+    AccountStatus:
+      type: object
+      additionalProperties: false
+      required:
+      - as_of
+      - uan_activated
+      - kyc
+      - accounts
+      properties:
+        as_of:
+          type: string
+          format: date-time
+        uan_activated:
+          type: boolean
+        kyc:
+          type: object
+          required:
+          - aadhaar
+          - bank
+          - pan
+          properties:
+            aadhaar:
+              enum:
+              - VERIFIED
+              - PENDING_EMPLOYER_APPROVAL
+              - MISSING
+            bank:
+              enum:
+              - VERIFIED
+              - PENDING_EMPLOYER_APPROVAL
+              - REJECTED
+              - MISSING
+            pan:
+              enum:
+              - VERIFIED
+              - PENDING_EMPLOYER_APPROVAL
+              - MISSING
+        accounts:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - account_link_id
+            - member_id_masked
+            - status
+            - exit_date_marked
+            - frozen
+            - active_locks
+            - open_claim_ids
+            - blockers
+            - ready_for
+            properties:
+              account_link_id:
+                type: string
+              member_id_masked:
+                type: string
+              is_primary:
+                type: boolean
+              status:
+                enum:
+                - ACTIVE
+                - EXITED
+                - INOPERATIVE
+                - TRANSFERRED_OUT
+              exit_date_marked:
+                type: boolean
+              frozen:
+                type: boolean
+              active_locks:
+                type: array
+                description: Summary of live leases on this ledger (full detail at GET /office/members/{uan}/locks for officers)
+                items:
+                  type: object
+                  required:
+                  - lock_scope
+                  - expires_at
+                  properties:
+                    lock_scope:
+                      enum:
+                      - ANNUAL_ACCOUNTING
+                      - CLAIM_ADJUDICATION
+                      - ECR_POSTING
+                    expires_at:
+                      type: string
+                      format: date-time
+              open_claim_ids:
+                type: array
+                items:
+                  type: string
+              blockers:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BlockerCode'
+              ready_for:
+                type: array
+                description: Claim form types that can be filed on this account now (empty when any blocker applies to all
+                  forms)
+                items:
+                  enum:
+                  - FORM_31
+                  - FORM_19
+                  - FORM_10C
+                  - FORM_10D
+                  - FORM_13
+    ServiceHistory:
+      type: object
+      additionalProperties: false
+      required:
+      - rule_version
+      - total_contributory_months
+      - total_pension_service_months
+      - periods
+      properties:
+        rule_version:
+          type: string
+          description: Illustrative rule set used to count service (config/demo-rules.yaml)
+        total_contributory_months:
+          type: integer
+          minimum: 0
+        total_pension_service_months:
+          type: integer
+          minimum: 0
+        periods:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - account_link_id
+            - establishment_name
+            - date_of_joining
+            - contributory_months
+            - ncp_days
+            - pension_service_months
+            - transfer_status
+            properties:
+              account_link_id:
+                type: string
+              member_id_masked:
+                type: string
+              establishment_name:
+                type: string
+              date_of_joining:
+                type: string
+                format: date
+              date_of_exit:
+                type:
+                - string
+                - 'null'
+                format: date
+              contributory_months:
+                type: integer
+                minimum: 0
+              ncp_days:
+                type: integer
+                minimum: 0
+                description: Non-contributory days
+              pension_service_months:
+                type: integer
+                minimum: 0
+              transfer_status:
+                enum:
+                - PRIMARY
+                - TRANSFERRED_TO_PRIMARY
+                - TRANSFER_PENDING
+                - NOT_TRANSFERRED
+                - SETTLED
+              action_required:
+                type:
+                - string
+                - 'null'
+                enum:
+                - MEMBER_MUST_FILE_FORM_13_TRANSFER_FIRST
+                - EXIT_DATE_TO_BE_MARKED
+                - null
   responses:
     Ok:
       description: Success

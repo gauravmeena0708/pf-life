@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 227 |
+| Activities | 230 |
 | Stakeholders with at least one API | 97 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 0 |
@@ -41,7 +41,7 @@ Activities: **F13.public** Browse schemes, offices, statistics, circulars; searc
 
 #### `member` — Member — active contributor (UAN holder)
 
-Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP; **F02.kyc_seed** Seed KYC (Aadhaar, bank, PAN); **F02.self_service** View profile, service history, UAN card; change contact details; e-nomination; self-marked exit; **F02.jd_submit** Submit Joint Declaration to correct one of 12 profile parameters; **F03.passbook** View passbook, annual statement and taxable-interest split; **F04.claim_file** Check eligibility and file a claim (Form 31 / 19 / 10C); confirm intent; upload documents; **F04.redisburse_request** Submit corrected bank details after a payment return; **F04.track** Track claims and notifications; download Form 16A; **F04.transfer** Request Form 13 transfer; confirm auto-transfer; view Annexure K; **F05.apply** Apply for monthly pension (Form 10D) or scheme certificate; **F05.preview** Pre-check pension eligibility across all member IDs; see untransferred service to fix first (Form 13); **F05.sc_surrender** Surrender a Scheme Certificate for monthly pension or withdrawal benefit; **F05.higher_member** Apply for pension on higher wages (joint option); track status; **F07.member_report** Report suspicious activity; account recovery; view sessions; **F08.member_file** Register, track, reopen, remind and give feedback on grievances; **F14.step_up** Complete step-up confirmation for sensitive actions
+Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP; **F02.kyc_seed** Seed KYC (Aadhaar, bank, PAN); **F02.self_service** View profile, service history, UAN card; change contact details; e-nomination; self-marked exit; **F02.jd_submit** Submit Joint Declaration to correct one of 12 profile parameters; **F03.passbook** View passbook, annual statement and taxable-interest split; **F04.preflight** Pre-flight before filing: check account readiness (blockers), service history and eligibility for the chosen form; **F04.claim_file** Check eligibility and file a claim (Form 31 / 19 / 10C); confirm intent; upload documents; **F04.post_submission** After filing: follow the claim's audit trail, cancel it before a decision, or switch to another KYC-verified bank account before payment; **F04.redisburse_request** Submit corrected bank details after a payment return; **F04.track** Track claims and notifications; download Form 16A; **F04.transfer** Request Form 13 transfer; confirm auto-transfer; view Annexure K; **F05.apply** Apply for monthly pension (Form 10D) or scheme certificate; **F05.preview** Pre-check pension eligibility across all member IDs; see untransferred service to fix first (Form 13); **F05.sc_surrender** Surrender a Scheme Certificate for monthly pension or withdrawal benefit; **F05.higher_member** Apply for pension on higher wages (joint option); track status; **F07.member_report** Report suspicious activity; account recovery; view sessions; **F08.member_file** Register, track, reopen, remind and give feedback on grievances; **F14.step_up** Complete step-up confirmation for sensitive actions
 
 | Endpoint | Status |
 |---|---|
@@ -72,12 +72,16 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/me/kyc/{kycType}` | M |
 | `POST /members/uan-activations` | M |
 | `POST /members/uan-allotments` | M |
+| `GET /members/me/account-status` | P |
 | `GET /members/me/annual-statements/{financialYear}` | P |
+| `GET /members/me/claims/eligibility-preview` | P |
+| `GET /members/me/claims/{claimId}/audit-trail` | P |
 | `GET /members/me/higher-pension-options/{optionId}` | P |
 | `GET /members/me/kyc` | P |
 | `GET /members/me/nominations` | P |
 | `GET /members/me/pension-eligibility-preview` | P |
 | `GET /members/me/pension-scheme-certificate` | P |
+| `GET /members/me/service-history` | P |
 | `GET /members/me/tax/form-16a` | P |
 | `GET /members/me/tax/taxable-interest` | P |
 | `GET /members/me/transfers/auto` | P |
@@ -86,9 +90,9 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/uan-card` | P |
 | `POST /grievances/{grievanceId}/feedback` | P |
 | `POST /grievances/{grievanceId}/reminders` | P |
+| `POST /members/me/claims/{claimId}/cancellations` | P |
 | `POST /members/me/claims/{claimId}/documents` | P |
 | `POST /members/me/claims/{claimId}/re-disbursement-requests` | P |
-| `POST /members/me/claims/{claimId}/withdrawals` | P |
 | `POST /members/me/exits` | P |
 | `POST /members/me/higher-pension-options` | P |
 | `POST /members/me/joint-declarations` | P |
@@ -101,6 +105,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/me/transfers/auto/{transferId}/confirmations` | P |
 | `POST /members/uan-lookups` | P |
 | `POST /public/claims/status-lookups` | P |
+| `PUT /members/me/claims/{claimId}/bank-details` | P |
 
 Integration adapters: `uidai`
 
@@ -375,6 +380,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /ai/claims/analyse` | W |
 | `POST /office/cases/{caseId}/recommendations` | W |
 | `GET /office/accounts/inoperative` | P |
+| `GET /office/claims/{claimId}/audit-trail` | P |
 | `GET /office/member-change-requests` | P |
 | `GET /office/members/{uan}` | P |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | P |
@@ -731,12 +737,14 @@ Activities: **F07.freeze_zo** Order freezing (Categories B / C) at zone level
 
 #### `zo.rpfc1_audit` — RPFC-I (Audit) and **Zonal Concurrent Audit Cell (CAC)** — daily download from the Audit Portal, alerts to ROs
 
-Activities: **F12.concurrent** Download daily functionality data from the Audit Portal; flag suspicious cases; alert ROs; review replies
+Activities: **F12.concurrent** Download daily functionality data from the Audit Portal; flag suspicious cases; alert ROs; review replies; **F12.claim_trail** Inspect a claim's full audit trail (transitions, approval levels, rule and CAD versions, lock events)
 
 | Endpoint | Status |
 |---|---|
+| `GET /audit/correlations/{correlationId}` | W |
 | `GET /audit/events` | W |
 | `GET /audit/concurrent/extracts` | P |
+| `GET /office/claims/{claimId}/audit-trail` | P |
 | `POST /audit/concurrent/alerts` | P |
 
 #### `zo.internal_audit` — Internal audit parties auditing ROs
@@ -1389,6 +1397,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
+  F04_preflight["member<br/>Pre-flight before filing: check account readiness (blockers)"]
   F04_claim_file["member<br/>Check eligibility and file a claim (Form 31 / 19 / 10C); con"]
   F04_auto_settle["tech.epfo3<br/>Auto-settle claims that clear risk checks; route the rest to"]
   F04_attest["employer.signatory<br/>Attest claims that need employer attestation"]
@@ -1401,6 +1410,7 @@ flowchart LR
   F04_approve_oic["fo.oic<br/>Approve claims above the top threshold"]
   F04_pay["fo.cash<br/>Issue payment instruction / payment scroll; reconcile return"]
   F04_cad["fo.fa_accounts<br/>Generate the Claim Authorization Document (interest split, T"]
+  F04_post_submission["member<br/>After filing: follow the claim's audit trail, cancel it befo"]
   F04_redisburse_request["member<br/>Submit corrected bank details after a payment return"]
   F04_redisburse_approve["fo.apfc<br/>Authorise a new payment after a return without reopening adj"]
   F04_attestation_view["fo.da_accounts<br/>Open the employer-signed PDF / DSC document before the appro"]
@@ -1416,6 +1426,10 @@ flowchart LR
   F04_co_beneficiary["claimant.nominee<br/>Inward as an additional beneficiary on an open death claim a"]
   F04_shares["fo.apfc<br/>Amend beneficiary shares (legacy-settled share, deceased nom"]
   F04_edli["fo.edli<br/>Process EDLI assurance benefit"]
+  F04_preflight --> F04_claim_file
+  F04_preflight --> F04_transfer
+  F02_kyc_seed["member<br/>Seed KYC (Aadhaar, bank, PAN)"]
+  F04_preflight --> F02_kyc_seed
   F04_claim_file --> F04_auto_settle
   F04_claim_file --> F04_attest
   F04_auto_settle --> F04_process
@@ -1700,11 +1714,13 @@ flowchart LR
   style F12_internal stroke-dasharray: 5 5
   F12_para_reply["fo.oic<br/>Comply with audit paras; request dropping"]
   F12_ho["ho.audit<br/>Audit Division: plan audits, IT audit, pre-audit, drop paras"]
+  F12_claim_trail["zo.rpfc1_audit<br/>Inspect a claim's full audit trail (transitions, approval le"]
   F12_cag["gov.cag<br/>External audit with read-only access"]
   F12_statutory["gov.statutory_auditor<br/>Attest audit of accounts (read-only)"]
   F12_concurrent --> F12_reply
   F12_internal --> F12_para_reply
   F12_para_reply --> F12_ho
+  F12_claim_trail --> F12_reply
 ```
 
 ### F13 — Monitoring, governance and reporting

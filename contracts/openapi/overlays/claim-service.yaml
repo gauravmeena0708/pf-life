@@ -3,6 +3,8 @@
 #   money in integer paise (not floats), shares in basis points (1% = 100), snake_case fields,
 #   responses wrapped in the standard envelope, RFC 9457 `Problem`, OpenAPI 3.1 null types.
 # Status, phase, callers and security stay generated from docs/endpoint-catalogue.md.
+# Pre-flight / post-submission operations and ClaimStateMachine are DESIGNED (not in the spec files) — see
+# docs/samadhan-setu-mapping.md.
 
 paths:
   /office/claims/{claimId}/cad:
@@ -120,8 +122,223 @@ paths:
             application/problem+json:
               schema: {$ref: "#/components/schemas/Problem"}
 
+  # ── Pre-flight and post-submission APIs, DESIGNED from the Samadhan Setu analysis ──
+  /members/me/claims/eligibility-preview:
+    get:
+      parameters:
+        - {name: formType, in: query, required: true, schema: {enum: [FORM_31, FORM_19, FORM_10C, FORM_10D, FORM_13]}}
+        - {name: accountLinkId, in: query, required: false, schema: {type: string}, description: Account to evaluate; defaults to the primary account}
+      responses:
+        "200":
+          description: Eligibility of one form type, evaluated before filing
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties: {data: {$ref: "#/components/schemas/ClaimEligibilityPreview"}}
+
+  /members/me/claims/{claimId}/audit-trail:
+    get:
+      responses:
+        "200":
+          description: Member view of every state change on the caller's own claim
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data: {type: array, items: {$ref: "#/components/schemas/ClaimAuditEntryMemberView"}}
+
+  /office/claims/{claimId}/audit-trail:
+    get:
+      responses:
+        "200":
+          description: Full audit trail for officers and auditors
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties:
+                      data: {type: array, items: {$ref: "#/components/schemas/ClaimAuditEntry"}}
+
+  /members/me/claims/{claimId}/cancellations:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/ClaimCancellationRequest"}
+      responses:
+        "201":
+          description: Claim moved to CANCELLED; ClaimCancelled audit entry written
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Envelope"}
+        "409":
+          description: Claim is past the cancellable states (see ClaimStateMachine)
+          content:
+            application/problem+json:
+              schema: {$ref: "#/components/schemas/Problem"}
+
+  /members/me/claims/{claimId}/bank-details:
+    put:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/ClaimBankDetailsChange"}
+      responses:
+        "200":
+          description: Payment account on the claim replaced; state unchanged; audit entry written
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Envelope"}
+        "409":
+          description: Claim is in or past PAYMENT_PENDING, or the bank account is not KYC-verified
+          content:
+            application/problem+json:
+              schema: {$ref: "#/components/schemas/Problem"}
+
+  /claimants/death-claims/{claimId}:
+    get:
+      responses:
+        "200":
+          description: Composite death claim with each beneficiary's share and payment status
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Envelope"
+                  - type: object
+                    properties: {data: {$ref: "#/components/schemas/DeathClaimRecord"}}
+
 components:
   schemas:
+    # ── Claim state machine (mirrors init.md §7; the service must reject anything not listed) ──
+    ClaimState:
+      enum: [DRAFT, AWAITING_CONFIRMATION, SUBMITTED, CANCELLED, AUTO_APPROVED, UNDER_REVIEW, RECOMMENDED,
+             AWAITING_NEXT_APPROVAL, APPROVED, REJECTED_WITH_REASON, PAYMENT_PENDING, SETTLED, PAYMENT_RETURNED,
+             CORRECTION_PENDING, REISSUE_APPROVED, ON_HOLD_FROZEN]
+
+    ClaimStateMachine:
+      description: >-
+        Allowed transitions of a claim. Anything not listed returns 409. `endpoint` is the API that triggers
+        the transition ("event" when a consumed domain event triggers it). The knowledge base's
+        RETURNED_TO_OFFICE state is PAYMENT_RETURNED here.
+      type: object
+      x-transitions:
+        - {from: [none], to: DRAFT, actor: member, endpoint: "POST /members/me/claims"}
+        - {from: [DRAFT], to: AWAITING_CONFIRMATION, actor: member, endpoint: "POST /members/me/claims (submit)"}
+        - {from: [AWAITING_CONFIRMATION], to: SUBMITTED, actor: member, endpoint: "POST /members/me/claims/{claimId}/confirmations", guard: step-up bound to this claim, emits: ClaimSubmitted.v1}
+        - {from: [DRAFT, AWAITING_CONFIRMATION, SUBMITTED, UNDER_REVIEW], to: CANCELLED, actor: member, endpoint: "POST /members/me/claims/{claimId}/cancellations", guard: no recommendation recorded yet}
+        - {from: [SUBMITTED], to: AUTO_APPROVED, actor: system, endpoint: event, guard: auto-settlement allowed for type and amount; no open risk signal, emits: ClaimDecisionRecorded.v1}
+        - {from: [SUBMITTED], to: UNDER_REVIEW, actor: system, endpoint: event, guard: case opened in workflow-service (transactional outbox)}
+        - {from: [UNDER_REVIEW], to: UNDER_REVIEW, actor: "fo.oic or SLA timer", endpoint: "POST /office/cases/{caseId}/assignments", guard: same jurisdiction}
+        - {from: [UNDER_REVIEW], to: RECOMMENDED, actor: fo.da_accounts, endpoint: "POST /office/cases/{caseId}/recommendations", guard: "employer-signed documents viewed (POST …/attestation-views); claim-adjudication lock held"}
+        - {from: [RECOMMENDED], to: "AWAITING_NEXT_APPROVAL | APPROVED | REJECTED_WITH_REASON", actor: first checker of the amount band, endpoint: "POST /office/cases/{caseId}/decisions", guard: approver ≠ recommender; authorised for band and jurisdiction, emits: CaseDecisionSubmitted.v1}
+        - {from: [AWAITING_NEXT_APPROVAL], to: "AWAITING_NEXT_APPROVAL | APPROVED | REJECTED_WITH_REASON", actor: next checker of the band, endpoint: "POST /office/cases/{caseId}/second-approvals", guard: different person from every earlier checker}
+        - {from: [RECOMMENDED, AWAITING_NEXT_APPROVAL], to: UNDER_REVIEW, actor: any checker, endpoint: "POST /office/cases/{caseId}/decisions (return)", guard: reason given; earlier approvals void}
+        - {from: [APPROVED, AUTO_APPROVED], to: PAYMENT_PENDING, actor: "fo.cash or system", endpoint: "POST /office/claims/{claimId}/payment-instructions", guard: "CAD generated (POST …/cad); ClaimDebitPosted.v1 received; account not frozen", emits: PaymentInstructed.v1}
+        - {from: [PAYMENT_PENDING], to: SETTLED, actor: system, endpoint: event, guard: signed bank confirmation, emits: NotificationRequested.v1}
+        - {from: [SETTLED], to: SETTLED, actor: system, endpoint: event, guard: "late credit (transfer-in or contribution) on a settled account: never lock the ledger", emits: SupplementaryClaimEligible.v1}
+        - {from: [PAYMENT_PENDING], to: PAYMENT_RETURNED, actor: system, endpoint: event, guard: signed bank return, emits: "PaymentReturned.v1, NotificationRequested.v1"}
+        - {from: [PAYMENT_RETURNED], to: CORRECTION_PENDING, actor: member, endpoint: "POST /members/me/claims/{claimId}/re-disbursement-requests", guard: new account passes mock penny-drop}
+        - {from: [CORRECTION_PENDING], to: REISSUE_APPROVED, actor: fo.apfc, endpoint: "POST /office/claims/{claimId}/re-disbursement-approvals", guard: adjudication not reopened}
+        - {from: [REISSUE_APPROVED], to: PAYMENT_PENDING, actor: fo.cash, endpoint: "POST /office/claims/{claimId}/reissues", emits: PaymentInstructed.v1}
+        - {from: [SUBMITTED, UNDER_REVIEW, RECOMMENDED, AWAITING_NEXT_APPROVAL, APPROVED, AUTO_APPROVED], to: same state, actor: member, endpoint: "PUT /members/me/claims/{claimId}/bank-details", guard: target account is KYC-verified; audit entry only}
+        - {from: [DRAFT, AWAITING_CONFIRMATION, SUBMITTED, UNDER_REVIEW, RECOMMENDED, AWAITING_NEXT_APPROVAL, APPROVED, AUTO_APPROVED], to: ON_HOLD_FROZEN, actor: system, endpoint: event, guard: freeze order; prior state stored}
+        - {from: [ON_HOLD_FROZEN], to: "SUBMITTED | UNDER_REVIEW", actor: system, endpoint: event, guard: "de-freeze order; SUBMITTED if frozen before any recommendation, else UNDER_REVIEW with approvals void and the after-defreeze chain"}
+
+    ClaimEligibilityPreview:
+      type: object
+      additionalProperties: false
+      required: [form_type, eligible, rule_version, blockers, required_documents]
+      properties:
+        form_type: {enum: [FORM_31, FORM_19, FORM_10C, FORM_10D, FORM_13]}
+        account_link_id: {type: string}
+        eligible: {type: boolean}
+        rule_version: {type: string, description: Illustrative rule set (config/demo-rules.yaml)}
+        max_amount_paise: {type: [integer, "null"], minimum: 0, description: Upper limit for this form under the rule version, where one applies}
+        purposes:
+          type: array
+          description: Allowed advance purposes (Form 31 only)
+          items: {type: string}
+        blockers:
+          type: array
+          description: Same codes as member-service AccountStatus, plus rule failures
+          items:
+            enum: [KYC_AADHAAR_MISSING, KYC_BANK_NOT_VERIFIED, UAN_NOT_ACTIVATED, UAN_NOT_LINKED_TO_MEMBER_ID,
+                   MEMBER_RECORD_NOT_FOUND, EXIT_DATE_NOT_MARKED, ACCOUNT_FROZEN, ACCOUNT_INOPERATIVE,
+                   ANNUAL_ACCOUNTING_IN_PROGRESS, CLAIM_ALREADY_IN_PROCESS, LEGACY_TRANSACTION_NOT_MIGRATED,
+                   PRIMARY_MEMBER_ID_INCORRECT, TRANSFER_PENDING, TRANSFER_IN_SERVICE_NOT_CALCULATED,
+                   SERVICE_BELOW_THRESHOLD, WAITING_PERIOD_NOT_MET, PURPOSE_LIMIT_REACHED]
+        required_documents: {type: array, items: {type: string}}
+        recommended_action: {type: [string, "null"]}
+
+    ClaimAuditEntryMemberView:
+      type: object
+      additionalProperties: false
+      required: [at, from_state, to_state, actor_role]
+      properties:
+        at: {type: string, format: date-time}
+        from_state: {oneOf: [{$ref: "#/components/schemas/ClaimState"}, {type: "null"}]}
+        to_state: {$ref: "#/components/schemas/ClaimState"}
+        actor_role: {type: string, description: "Role only (e.g. SECTION_SUPERVISOR); officer identities are withheld from members"}
+        reason_code: {type: [string, "null"]}
+        note: {type: [string, "null"], description: Member-safe explanation}
+
+    ClaimAuditEntry:
+      type: object
+      additionalProperties: false
+      required: [at, action, actor_id, actor_role, correlation_id]
+      properties:
+        at: {type: string, format: date-time}
+        action: {enum: [STATE_CHANGE, LOCK_ACQUIRED, LOCK_RELEASED, LOCK_EXPIRED, CAD_GENERATED, DOCUMENT_VIEWED, BANK_DETAILS_CHANGED, SHARE_AMENDED, PAYMENT_EVENT]}
+        from_state: {oneOf: [{$ref: "#/components/schemas/ClaimState"}, {type: "null"}]}
+        to_state: {oneOf: [{$ref: "#/components/schemas/ClaimState"}, {type: "null"}]}
+        actor_id: {type: string}
+        actor_role: {type: string}
+        approval_level: {type: [integer, "null"], minimum: 1}
+        rule_version: {type: [string, "null"]}
+        cad_id: {type: [string, "null"]}
+        reason_code: {type: [string, "null"]}
+        correlation_id: {type: string}
+        audit_hash: {type: string, description: Link in the audit-service hash chain}
+
+    ClaimCancellationRequest:
+      type: object
+      additionalProperties: false
+      required: [reason_code]
+      properties:
+        reason_code: {enum: [FILED_IN_ERROR, WRONG_FORM_TYPE, WRONG_AMOUNT, WILL_REFILE_LATER, OTHER]}
+        note: {type: string, maxLength: 500}
+
+    ClaimBankDetailsChange:
+      type: object
+      additionalProperties: false
+      required: [kyc_bank_account_id]
+      properties:
+        kyc_bank_account_id:
+          type: string
+          description: ID of a bank account already seeded and verified in member KYC (POST /members/me/kyc/bank-accounts); raw account numbers are not accepted here, so this cannot bypass employer KYC approval
+
+    DeathClaimRecord:
+      type: object
+      additionalProperties: false
+      required: [claim_id, form_type, state, total_approved_share_bp, beneficiaries]
+      properties:
+        claim_id: {type: string}
+        form_type: {enum: [FORM_20, FORM_5IF, CCF_DEATH]}
+        state: {$ref: "#/components/schemas/ClaimState"}
+        total_approved_share_bp: {type: integer, minimum: 0, maximum: 10000}
+        beneficiaries: {type: array, items: {$ref: "#/components/schemas/BeneficiaryRecord"}}
+
     ClaimCad:
       type: object
       additionalProperties: false
@@ -138,6 +355,14 @@ components:
         rule_version: {type: string}
         static_data_version: {type: string}
         rule_trace: {type: array, items: {type: string}}
+        rules_source:
+          enum: [LIVE_STATIC_DATA, CACHED_FALLBACK]
+          description: >-
+            CACHED_FALLBACK when static reference data was unreachable and the last good cached version was used
+            (knowledge base §6.5). The CAD then carries audit tag CAD_GENERATED_FALLBACK_RULES and the approver must
+            acknowledge the warning before payment instruction.
+        audit_tags: {type: array, items: {enum: [CAD_GENERATED_FALLBACK_RULES]}}
+        warnings: {type: array, items: {type: string}}
 
     CadStaticDataStatus:
       type: object
@@ -177,7 +402,7 @@ components:
         claim_id: {type: string}
         relationship: {type: string}
         share_bp: {type: integer, minimum: 0, maximum: 10000}
-        status: {enum: [PENDING, LEGACY_SETTLED, APPROVED, DISBURSED, RETURNED]}
+        status: {enum: [PENDING, LEGACY_SETTLED, APPROVED, CAD_GENERATED, DISBURSED, RETURNED]}
         legacy_settled_reference: {type: [string, "null"]}
 
     ShareAmendmentRequest:
