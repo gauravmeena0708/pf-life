@@ -202,16 +202,18 @@ EVENTS = [
     ("PaymentConfirmed", "payment-simulator", ["contribution", "claim", "workflow", "audit"], "payment", 1, {"payment_id": S, "purpose": {"enum": ["CHALLAN", "CLAIM_SETTLEMENT", "DEMAND"]}, "reference_type": {"enum": ["trrn", "claim", "demand"]}, "reference_id": S, "amount_paise": N, "mock": B}),
     ("ContributionPosted", "contribution", ["member", "reporting", "audit"], "ledger_journal", 1, {"journal_id": S, "payment_id": S, "filing_id": S, "establishment_id": S, "wage_month": S, "postings": POSTINGS}),
     ("ClaimDebitPosted", "contribution", ["claim", "member", "audit"], "ledger_journal", 1, {"journal_id": S, "claim_id": S, "postings": POSTINGS}),
-    ("ClaimSubmitted", "claim", ["workflow", "intelligence", "reporting", "audit"], "claim", 1, {"claim_id": S, "form_type": S, "amount_paise": N, "rule_version": S, "office_id": S, "account_link_id": S, "route": {"enum": ["AUTO", "REVIEW"]}}),
+    ("ClaimSubmitted", "claim", ["workflow", "intelligence", "reporting", "audit"], "claim", 1, {"claim_id": S, "form_type": S, "amount_paise": N, "rule_version": S, "office_id": S, "account_link_id": S, "route": {"enum": ["AUTO", "REVIEW"]}, "advisory_signal_id": {"type": ["string", "null"]}}),
     ("CaseDecisionSubmitted", "workflow", ["claim", "audit"], "case", 1, {"case_id": S, "claim_id": S, "decision": {"enum": ["RECOMMEND", "APPROVE", "REJECT", "RETURN"]}, "officer_subject": S, "officer_role": S, "approval_level": N, "final": B, "next_role": {"type": ["string", "null"]}, "reason": {"type": ["string", "null"]}}),
     ("ClaimDecisionRecorded", "claim", ["member", "reporting", "audit"], "claim", 1, {"claim_id": S, "decision": {"enum": ["APPROVED", "AUTO_APPROVED", "REJECTED"]}, "reason_code": S, "rule_version": S, "amount_paise": N, "account_link_id": S}),
     ("PaymentInstructed", "claim", ["payment-simulator", "audit"], "claim", 1, {"claim_id": S, "payment_id": S, "amount_paise": N, "attempt": N, "demo_scenario": {"enum": ["SUCCESS", "RETURN"]}}),
     ("PaymentReturned", "payment-simulator", ["claim", "audit"], "payment", 1, {"payment_id": S, "purpose": {"enum": ["CHALLAN", "CLAIM_SETTLEMENT", "DEMAND"]}, "reference_type": {"enum": ["trrn", "claim", "demand"]}, "reference": S, "return_reason": S, "mock": B}),
     ("GrievanceRegistered", "grievance", ["workflow", "reporting", "intelligence", "audit"], "grievance", 1, {"grievance_id": S, "category": S, "office_id": S, "linked_claim_id": S}),
-    ("GrievanceEscalated", "grievance", ["workflow", "reporting", "audit"], "grievance", 1, {"grievance_id": S, "from_tier": S, "to_tier": S}),
-    ("RiskSignalRaised", "intelligence", ["workflow", "reporting", "audit"], "risk_signal", 1, {"signal_id": S, "detection_type": S, "rule_version": S, "evidence_refs": "array"}),
+    ("GrievanceEscalated", "grievance", ["workflow", "reporting", "audit"], "grievance", 1, {"grievance_id": S, "from_tier": S, "to_tier": S, "office_id": S}),
+    ("GrievanceResolved", "grievance", ["workflow", "reporting", "audit"], "grievance", 1, {"grievance_id": S, "office_id": S, "tier": {"enum": ["RO", "ZO", "HO"]}, "within_sla": B}),
+    ("RiskSignalRaised", "intelligence", ["claim", "workflow", "reporting", "audit"], "risk_signal", 1, {"signal_id": S, "detection_type": S, "rule_version": S, "evidence_refs": "array", "subject_ref": S, "explanation": S}),
+    ("RiskSignalReviewed", "intelligence", ["claim", "reporting", "audit"], "risk_signal", 1, {"signal_id": S, "subject_ref": S, "outcome": {"enum": ["CONFIRMED", "BENIGN", "NEEDS_MORE_EVIDENCE"]}}),
     ("SecurityEventRecorded", "audit", ["intelligence", "member", "gateway"], "security_event", 1, {"subject": S, "event_type": S, "device_fingerprint_hash": S}),
-    ("NotificationRequested", "claim", ["member"], "notification", 1, {"recipient_subject": S, "template": S, "reference_id": S, "params": {"type": "object"}}),
+    ("NotificationRequested", ["claim", "grievance", "member"], ["member"], "notification", 1, {"recipient_subject": S, "template": S, "reference_id": S, "params": {"type": "object"}}),
     ("DemandRaised", "compliance", ["contribution", "audit"], "compliance_case", 2, {"demand_id": S, "establishment_id": S, "demand_type": S, "amount_paise": N}),
     ("LedgerReversed", "contribution", ["reporting", "audit"], "ledger_journal", 2, {"journal_id": S, "reverses_journal_id": S, "reason": S}),
     ("PaymentScrollGenerated", "claim", ["payment-simulator", "audit"], "payment_scroll", 2, {"scroll_id": S, "claim_ids": "array", "total_paise": N}),
@@ -252,7 +254,8 @@ def event_schema(name, producer, aggregate, payload):
             "schema_version": {"const": 1},
             "aggregate_type": {"const": aggregate},
             "aggregate_id": {"type": "string"},
-            "producer": {"const": f"{producer}-service" if producer not in ("payment-simulator",) else producer},
+            "producer": ({"enum": [f"{p}-service" for p in producer]} if isinstance(producer, list) else
+                         {"const": f"{producer}-service" if producer not in ("payment-simulator",) else producer}),
             "occurred_at": {"type": "string", "format": "date-time", "description": "UTC"},
             "correlation_id": {"type": "string", "format": "uuid"},
             "causation_id": {"type": "string", "format": "uuid", "description": "Optional: the event that caused this one, when there is one"},
@@ -519,7 +522,7 @@ def main():
     for name, producer, consumers, aggregate, phase, payload in EVENTS:
         (EVENTS_DIR / f"{name}.v1.schema.json").write_text(
             json.dumps(event_schema(name, producer, aggregate, payload), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-        rows.append(f"| `{name}.v1` | {producer} | {', '.join(consumers)} | {aggregate} | {phase}{' (contract only)' if phase > 1 else ''} |")
+        rows.append(f"| `{name}.v1` | {', '.join(producer) if isinstance(producer, list) else producer} | {', '.join(consumers)} | {aggregate} | {phase}{' (contract only)' if phase > 1 else ''} |")
     (DOCS / "event-catalogue.md").write_text("\n".join(rows) + "\n", encoding="utf-8")
 
     print(f"permissions: {sum(len(v) for v in grants.values())} grants, {len(deny)} must-deny tests")

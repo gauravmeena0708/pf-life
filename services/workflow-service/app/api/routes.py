@@ -32,7 +32,9 @@ RULES_PATH = Path(os.getenv("RULES_FILE", "/srv/demo-rules.yaml"))
 SLA_DAYS = 20     # illustrative service standard for claim settlement
 FIRST_CHECKERS, SECOND_CHECKERS = ("fo.ss", "fo.ao"), ("fo.apfc", "fo.oic")
 OFFICERS = require_stakeholder("fo.da_accounts", "fo.ss", "fo.ao", "fo.apfc", "fo.oic", "fo.cash", "fo.pro",
-                               "do.incharge", "do.staff")
+                               "do.incharge", "do.staff", "zo.acc")
+GRIEVANCE_HANDLER = {"RO": "fo.pro", "ZO": "zo.acc", "HO": "ho.customer_service"}
+GRIEVANCE_SLA_DAYS = {"RO": 15, "ZO": 10, "HO": 7}     # same illustrative standards as grievance-service
 
 
 @lru_cache(maxsize=1)
@@ -90,7 +92,7 @@ async def load_case(session: AsyncSession, case_id: str, office_id: str, lock: b
 def next_action(case: dict[str, Any]) -> str | None:
     if case["state"] == "IN_REVIEW":
         return "recommend" if case["step"] == 0 else "decide" if case["step"] == 1 else "second-approve"
-    return {"AWAITING_PAYMENT": "instruct-payment", "PAYMENT_RETURNED": "reissue"}.get(case["state"])
+    return {"AWAITING_PAYMENT": "instruct-payment", "PAYMENT_RETURNED": "reissue", "OPEN": "handle-grievance"}.get(case["state"])
 
 
 async def history(session: AsyncSession, case_id: str) -> list[dict[str, Any]]:
@@ -102,7 +104,8 @@ async def history(session: AsyncSession, case_id: str) -> list[dict[str, Any]]:
 
 
 def case_json(case: dict[str, Any]) -> dict[str, Any]:
-    return {"case_id": case["case_id"], "claim_id": case["claim_id"], "kind": case["kind"], "office_id": case["office_id"],
+    return {"case_id": case["case_id"], "claim_id": case["claim_id"], "grievance_id": case.get("grievance_id"),
+            "kind": case["kind"], "office_id": case["office_id"], "advisory_signal_id": case.get("advisory_signal_id"),
             "form_type": case["form_type"], "account_link_id": case["account_link_id"],
             "amount_paise": case["amount_paise"], "rule_version": case["rule_version"], "chain": case["chain"],
             "step": case["step"], "round": case["round"], "state": case["state"], "current_role": case["current_role"],
@@ -192,7 +195,7 @@ async def work_queue(actor: Actor = Depends(OFFICERS), session: AsyncSession = D
     staff = await posting(session, actor)
     rows = (await session.execute(select(cases).where(and_(
         cases.c.office_id == staff["office_id"], cases.c.current_role == actor.stakeholder,
-        cases.c.state.in_(("IN_REVIEW", "AWAITING_PAYMENT", "PAYMENT_RETURNED")),
+        cases.c.state.in_(("IN_REVIEW", "AWAITING_PAYMENT", "PAYMENT_RETURNED", "OPEN")),
         or_(cases.c.assignee_subject.is_(None), cases.c.assignee_subject == actor.subject))).order_by(cases.c.created_at))).mappings().all()
     return envelope({"office_id": staff["office_id"], "role": actor.stakeholder, "items": [case_json(dict(r)) for r in rows]})
 
@@ -277,5 +280,24 @@ async def open_case(session: AsyncSession, payload: dict[str, Any], state: str) 
         case_id=f"CASE-{secrets.token_hex(4).upper()}", claim_id=payload["claim_id"], office_id=payload["office_id"],
         kind="CLAIM_SETTLEMENT", form_type=payload["form_type"], account_link_id=payload["account_link_id"],
         amount_paise=payload["amount_paise"], rule_version=payload["rule_version"], chain=chain, step=0, round=1,
+        advisory_signal_id=payload.get("advisory_signal_id"),
         state=state, current_role=chain[0] if state == "IN_REVIEW" else None, version=1,
         sla_due_at=datetime.now(UTC) + timedelta(days=SLA_DAYS)))
+
+
+async def grievance_case(session: AsyncSession, grievance_id: str, office_id: str, tier: str) -> None:
+    """Open the grievance's case, or move it to the tier (and office) now handling it."""
+    role = GRIEVANCE_HANDLER[tier]
+    existing = (await session.execute(select(cases).where(cases.c.grievance_id == grievance_id))).mappings().first()
+    if existing:
+        await session.execute(update(cases).where(cases.c.case_id == existing["case_id"]).values(
+            office_id=office_id, current_role=role, state="OPEN", assignee_subject=None, version=existing["version"] + 1,
+            chain=[*existing["chain"], role], step=existing["step"] + 1,
+            sla_due_at=datetime.now(UTC) + timedelta(days=GRIEVANCE_SLA_DAYS[tier])))
+        return
+    await session.execute(insert(cases).values(
+        case_id=f"CASE-{secrets.token_hex(4).upper()}", grievance_id=grievance_id, office_id=office_id, kind="GRIEVANCE",
+        form_type="-", account_link_id="-", amount_paise=0, rule_version="-", chain=[role], step=0, round=1,
+        state="OPEN", current_role=role, version=1,
+        sla_due_at=datetime.now(UTC) + timedelta(days=GRIEVANCE_SLA_DAYS[tier])))
+

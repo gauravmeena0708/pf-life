@@ -1,15 +1,33 @@
 """audit-service — EPFO POC (SYNTHETIC DEMONSTRATION, NOT AN OFFICIAL EPFO SYSTEM)."""
+import os
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
 import epfo_auth
 from app.api import catalogue_routes, routes
 from app.config import settings
-from app.infra.db import database_ready
+from app.api.routes import record
+from app.infra.db import database_ready, engine
 from epfo_observability import health_router, install
+from epfo_persistence import Consumer, OutboxRelay
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    workers = []
+    if os.environ.get("DISABLE_MESSAGING") != "1":
+        workers = [OutboxRelay(engine(), settings.rabbitmq_url),
+                   Consumer(engine(), settings.rabbitmq_url, "audit-service.all", ["#"], record)]
+        for w in workers:
+            w.start()
+    yield
+    for w in workers:
+        await w.stop()
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title=settings.service_name, version="0.1.0", docs_url="/docs", redoc_url=None)
+    app = FastAPI(title=settings.service_name, version="0.1.0", docs_url="/docs", redoc_url=None, lifespan=lifespan)
     install(app, settings.service_name)
     epfo_auth.configure(audience=settings.service_name,
                         jwks=epfo_auth.JwksCache(settings.gateway_jwks_url))

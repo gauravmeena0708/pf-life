@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.domain.claims import (NEXT_STEP, OPEN_STATES, ROLE_LABELS, approval_chain, eligibility, route, ruleset,
                                summary)
 from app.infra.db import sessions
-from app.infra.tables import accounts, claim_timeline, claims, office_staff
+from app.infra.tables import accounts, claim_timeline, claims, office_staff, risk_flags
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit, find_response, request_hash, store_response
@@ -192,12 +192,15 @@ async def confirm_claim(claim_id: str, actor: Actor = Depends(MEMBER), session: 
             raise Problem(409, "/problems/invalid-state", "This claim is already confirmed",
                           f"Current status: {claim['state']}.")
         claim = await transition(session, claim, "SUBMITTED", "member", "You confirmed the claim.")
-        path = route(claim["amount_paise"], rules)
+        signal = (await session.execute(select(risk_flags.c.signal_id).where(
+            risk_flags.c.subject == actor.subject, risk_flags.c.status != "BENIGN"))).scalars().first()
+        path = "REVIEW" if signal else route(claim["amount_paise"], rules)
         await add_event(session, producer=PRODUCER, event_type="ClaimSubmitted.v1", aggregate_type="claim",
                         aggregate_id=claim_id, correlation_id=actor.correlation_id, payload={
                             "claim_id": claim_id, "form_type": claim["form_type"], "amount_paise": claim["amount_paise"],
                             "rule_version": claim["rule_version"], "office_id": claim["office_id"],
-                            "account_link_id": claim["account_link_id"], "route": path})
+                            "account_link_id": claim["account_link_id"], "route": path,
+                            "advisory_signal_id": signal})
         await notify(session, claim, "CLAIM_SUBMITTED", actor.correlation_id)
         if path == "AUTO":
             claim = await transition(session, claim, "AUTO_APPROVED", "system",
@@ -206,9 +209,11 @@ async def confirm_claim(claim_id: str, actor: Actor = Depends(MEMBER), session: 
             await notify(session, claim, "CLAIM_APPROVED", actor.correlation_id)
         else:
             chain = approval_chain(claim["amount_paise"], rules)
+            why = (" A routine security check on recent account activity asks an officer to look at this claim; "
+                   "this is not an accusation and does not change what you are entitled to.") if signal else ""
             claim = await transition(session, claim, "UNDER_REVIEW", "system",
                                      "Sent to your regional office for review: "
-                                     + " → ".join(ROLE_LABELS[r] for r in chain) + ".")
+                                     + " → ".join(ROLE_LABELS[r] for r in chain) + "." + why)
             await notify(session, claim, "CLAIM_UNDER_REVIEW", actor.correlation_id)
         await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="claim.confirm",
                     target_type="claim", target_id=claim_id, detail=path)

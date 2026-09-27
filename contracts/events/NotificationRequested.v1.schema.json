@@ -34,7 +34,11 @@
       "type": "string"
     },
     "producer": {
-      "const": "claim-service"
+      "enum": [
+        "claim-service",
+        "grievance-service",
+        "member-service"
+      ]
     },
     "occurred_at": {
       "type": "string",

@@ -60,7 +60,8 @@
         "rule_version",
         "office_id",
         "account_link_id",
-        "route"
+        "route",
+        "advisory_signal_id"
       ],
       "properties": {
         "claim_id": {
@@ -87,6 +88,12 @@
           "enum": [
             "AUTO",
             "REVIEW"
+          ]
+        },
+        "advisory_signal_id": {
+          "type": [
+            "string",
+            "null"
           ]
         }
       }

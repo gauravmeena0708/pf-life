@@ -60,6 +60,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/sessions` | W |
 | `PATCH /members/me/contact-details` | W |
 | `POST /grievances/{grievanceId}/documents` | W |
+| `POST /grievances/{grievanceId}/escalations` | W |
 | `POST /grievances/{grievanceId}/messages` | W |
 | `POST /grievances/{grievanceId}/reopen-requests` | W |
 | `POST /members/me/account-recovery-requests` | W |
@@ -682,7 +683,11 @@ Activities: **F08.triage** Triage, assign, reply with evidence, lodge local grie
 
 | Endpoint | Status |
 |---|---|
+| `GET /grievances/{grievanceId}` | W |
+| `GET /office/cases/{caseId}` | W |
+| `GET /office/work-queue` | W |
 | `POST /ai/grievances/classify` | W |
+| `POST /grievances/{grievanceId}/escalations` | W |
 | `POST /grievances/{grievanceId}/evidence-links` | W |
 | `POST /grievances/{grievanceId}/messages` | W |
 | `POST /grievances/{grievanceId}/resolution` | W |
@@ -738,8 +743,12 @@ Activities: **F08.escalate** Handle grievances escalated to the zone; **F13.zo**
 | `GET /grievances/{grievanceId}` | W |
 | `GET /monitoring/claims` | W |
 | `GET /monitoring/grievances` | W |
+| `GET /office/cases/{caseId}` | W |
+| `GET /office/work-queue` | W |
 | `GET /zo/dashboards` | W |
 | `POST /grievances/{grievanceId}/escalations` | W |
+| `POST /grievances/{grievanceId}/messages` | W |
+| `POST /grievances/{grievanceId}/resolution` | W |
 
 #### `zo.rpfc1` — RPFC-I at the Zonal Office (zonal authority for freezing categories B and C; zone-level monitoring)
 
@@ -885,6 +894,7 @@ Activities: **F12.ho** Audit Division: plan audits, IT audit, pre-audit, drop pa
 
 | Endpoint | Status |
 |---|---|
+| `GET /audit/correlations/{correlationId}` | W |
 | `GET /audit/events` | W |
 | `POST /audit/internal/paras/{paraId}/decisions` | P |
 
@@ -972,10 +982,13 @@ Activities: **F14.security** Inspect recent request rates and redacted activity;
 
 | Endpoint | Status |
 |---|---|
+| `GET /audit/events` | W |
+| `GET /security/account-recovery-requests` | W |
 | `GET /security/me/permissions` | W |
 | `GET /security/request-activity` | W |
 | `GET /security/sessions` | W |
 | `POST /internal/security-events` | W |
+| `POST /security/account-recovery-requests/{requestId}/decisions` | W |
 | `POST /security/sessions/{sessionId}/revocations` | W |
 | `POST /security/incidents` | P |
 

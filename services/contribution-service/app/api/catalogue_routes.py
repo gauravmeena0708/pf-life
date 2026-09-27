@@ -10,7 +10,12 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /employers/me/challans', 'GET /employers/me/ecr-filings', 'POST /employers/me/ecr-filings', 'GET /members/me/passbook', 'POST /public/demo-calculations/epf', 'POST /partners/sandbox/payroll/ecr-filings', 'GET /employers/me/challans/{trrn}', 'GET /employers/me/ecr-filings/{filingId}', 'GET /employers/me/challans/{trrn}/receipt', 'POST /employers/me/ecr-filings/{filingId}/approvals', 'POST /employers/me/ecr-filings/{filingId}/submissions', 'POST /employers/me/ecr-filings/{filingId}/validations', 'GET /members/me/accounts/{accountLinkId}/passbook']
+OPERATIONS = ['POST /public/trrn-status-lookups', 'GET /employers/me/challans', 'GET /employers/me/ecr-filings', 'POST /employers/me/ecr-filings', 'GET /members/me/passbook', 'POST /public/demo-calculations/epf', 'POST /partners/sandbox/payroll/ecr-filings', 'GET /employers/me/challans/{trrn}', 'GET /employers/me/ecr-filings/{filingId}', 'GET /employers/me/challans/{trrn}/receipt', 'POST /employers/me/ecr-filings/{filingId}/approvals', 'POST /employers/me/ecr-filings/{filingId}/submissions', 'POST /employers/me/ecr-filings/{filingId}/validations', 'GET /members/me/accounts/{accountLinkId}/passbook']
+
+@router.api_route("/api/v1/public/trrn-status-lookups", methods=["POST"], include_in_schema=False)
+async def post_public_trrn_status_lookups(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "TRRN / challan status lookup with wage month, issue/payment times and next step; one-use synthetic d")
+
 
 @router.api_route("/api/v1/employers/me/challans", methods=["GET"], include_in_schema=False)
 async def get_employers_me_challans(actor: Actor = Depends(require_actor)) -> None:

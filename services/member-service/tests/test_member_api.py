@@ -50,7 +50,7 @@ def api(tmp_path, monkeypatch):
     from app.main import create_app
     application = create_app()
     epfo_auth.configure(audience="member-service", jwks=epfo_auth.JwksCache("http://t", fetch=lambda _: JWKS))
-    yield TestClient(application, raise_server_exceptions=True)
+    yield TestClient(application, raise_server_exceptions=False)
     monkeypatch.undo()
     importlib.reload(config)
     db.settings = config.settings

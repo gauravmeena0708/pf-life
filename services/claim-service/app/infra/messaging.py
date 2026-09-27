@@ -2,11 +2,11 @@
 redelivered event is applied once; state guards make an out-of-order event a logged no-op."""
 from typing import Any
 
-from sqlalchemy import update
+from sqlalchemy import insert, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import load_claim, notify, record_decision, transition
-from app.infra.tables import accounts, claims
+from app.infra.tables import accounts, claims, risk_flags
 from epfo_observability import Problem, get_logger
 
 log = get_logger("claim-service")
@@ -17,6 +17,8 @@ BINDINGS = [
     "workflow-service.CaseDecisionSubmitted.v1",
     "payment-simulator.PaymentConfirmed.v1",
     "payment-simulator.PaymentReturned.v1",
+    "intelligence-service.RiskSignalRaised.v1",
+    "intelligence-service.RiskSignalReviewed.v1",
 ]
 
 
@@ -94,7 +96,17 @@ async def on_payment_result(session: AsyncSession, event: dict[str, Any]) -> Non
         await notify(session, claim, "CLAIM_PAYMENT_RETURNED", cid, reason=p.get("return_reason"))
 
 
+async def on_risk_signal(session: AsyncSession, event: dict[str, Any]) -> None:
+    p = event["payload"]
+    status = "OPEN" if event["event_type"] == "RiskSignalRaised.v1" else p["outcome"]
+    updated = await session.execute(update(risk_flags).where(risk_flags.c.signal_id == p["signal_id"]).values(status=status))
+    if not updated.rowcount:
+        await session.execute(insert(risk_flags).values(signal_id=p["signal_id"], subject=p["subject_ref"], status=status))
+
+
 HANDLERS = {
+    "RiskSignalRaised.v1": on_risk_signal,
+    "RiskSignalReviewed.v1": on_risk_signal,
     "ContributionPosted.v1": on_contribution_posted,
     "ClaimDebitPosted.v1": on_claim_debit_posted,
     "CaseDecisionSubmitted.v1": on_case_decision,

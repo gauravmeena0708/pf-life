@@ -57,7 +57,9 @@
         "signal_id",
         "detection_type",
         "rule_version",
-        "evidence_refs"
+        "evidence_refs",
+        "subject_ref",
+        "explanation"
       ],
       "properties": {
         "signal_id": {
@@ -74,6 +76,12 @@
           "items": {
             "type": "string"
           }
+        },
+        "subject_ref": {
+          "type": "string"
+        },
+        "explanation": {
+          "type": "string"
         }
       }
     }

@@ -204,6 +204,7 @@
     {"username": "ro-apfc", "subject": "00000000-0000-4000-8000-000000000009", "stakeholder": "fo.apfc", "office_id": "RO-DEMO-01"},
     {"username": "ro-oic", "subject": "00000000-0000-4000-8000-000000000010", "stakeholder": "fo.oic", "office_id": "RO-DEMO-01"},
     {"username": "ro-cashier", "subject": "00000000-0000-4000-8000-000000000011", "stakeholder": "fo.cash", "office_id": "RO-DEMO-01"},
-    {"username": "ro-pro", "subject": "00000000-0000-4000-8000-000000000012", "stakeholder": "fo.pro", "office_id": "RO-DEMO-01"}
+    {"username": "ro-pro", "subject": "00000000-0000-4000-8000-000000000012", "stakeholder": "fo.pro", "office_id": "RO-DEMO-01"},
+    {"username": "zo-acc", "subject": "00000000-0000-4000-8000-000000000013", "stakeholder": "zo.acc", "office_id": "ZO-DEMO-01"}
   ]
 }

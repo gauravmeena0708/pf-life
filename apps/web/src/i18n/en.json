@@ -80,7 +80,13 @@
     "breadcrumb": "Breadcrumb",
     "claims": "My claims",
     "profile": "Profile & notices",
-    "workQueue": "Work queue"
+    "workQueue": "Work queue",
+    "grievances": "Grievances",
+    "accountSecurity": "Account security",
+    "grievanceMetrics": "Grievance metrics",
+    "sessions": "Sessions & recovery",
+    "audit": "Audit log",
+    "riskSignals": "Risk signals"
   },
   "passbook": {
     "eyebrow": "Member services · contributions",
@@ -243,7 +249,10 @@
       "done": "Done",
       "current": "Current",
       "pending": "Pending"
-    }
+    },
+    "advisory": "Advisory security check",
+    "advisoryHelp": "A routine check on recent account activity asks you to review this claim normally. It is not evidence and must not decide the outcome.",
+    "grievanceKind": "Grievance"
   },
   "journeyB": {
     "roles": {
@@ -253,7 +262,8 @@
       "fo.apfc": "Assistant PF commissioner",
       "fo.oic": "Officer in charge",
       "fo.cash": "Cash section",
-      "fo.pro": "Public relations officer"
+      "fo.pro": "Public relations officer",
+      "zo.acc": "Zonal grievance officer"
     },
     "states": {
       "FULL": "Full",
@@ -276,7 +286,110 @@
       "PAYMENT_ISSUED": "Payment issued",
       "CLOSED": "Closed",
       "REJECTED": "Rejected",
-      "AUTO_PENDING": "Automatic review pending"
+      "AUTO_PENDING": "Automatic review pending",
+      "REGISTERED": "Registered",
+      "ROUTED": "Sent to your office",
+      "IN_PROGRESS": "In progress",
+      "ESCALATED": "Escalated",
+      "RESOLVED": "Resolved",
+      "REOPEN_REQUESTED": "Reopen requested",
+      "OPEN": "Open"
     }
+  },
+  "grievances": {
+    "eyebrow": "Member services · grievances",
+    "title": "Grievances",
+    "description": "Tell us what went wrong. Your regional office replies; you can escalate if it takes too long.",
+    "new": "File a grievance",
+    "category": "What is it about?",
+    "linkedClaim": "Related claim",
+    "noClaim": "Not about a claim",
+    "subject": "Subject",
+    "details": "What happened",
+    "document": "Supporting document (optional)",
+    "documentHelp": "PDF, PNG, JPEG or text, up to 256 KB. Use synthetic documents only in this demo.",
+    "submit": "Submit grievance",
+    "yours": "Your grievances",
+    "none": "You have not filed any grievances.",
+    "id": "Grievance",
+    "status": "Status",
+    "level": "Handled by",
+    "dueBy": "Reply due by",
+    "fileTooLarge": "The file is larger than 256 KB.",
+    "thread": "Conversation and status",
+    "evidence": "Evidence",
+    "documents": "Documents",
+    "whereItIs": "Where it is now",
+    "withTier": "With the {{tier}}; a reply is due by {{due}}.",
+    "resolution": "Resolution",
+    "addMessage": "Add a message",
+    "message": "Message",
+    "send": "Send",
+    "sent": "Message sent.",
+    "escalate": "Escalate",
+    "escalateHelp": "If the office has not helped, send the grievance to the next level.",
+    "reason": "Reason",
+    "escalateButton": "Escalate grievance",
+    "escalated": "Escalated to the next level.",
+    "reopen": "Not solved?",
+    "reopenHelp": "You can reopen a resolved grievance within 30 days.",
+    "reopenButton": "Reopen grievance",
+    "reopened": "Reopen requested.",
+    "kinds": {
+      "MESSAGE": "Message",
+      "STATUS": "Status",
+      "EVIDENCE": "Evidence linked",
+      "DOCUMENT": "Document"
+    },
+    "tiers": {
+      "RO": "regional office",
+      "ZO": "zonal office",
+      "HO": "head office"
+    },
+    "categories": {
+      "CLAIM_DELAY": "Claim delayed",
+      "CLAIM_REJECTION": "Claim rejected",
+      "PASSBOOK": "Passbook entry",
+      "KYC": "KYC / identity",
+      "EMPLOYER": "Employer not paying",
+      "OTHER": "Something else"
+    },
+    "resolvedBy": "Resolved by the {{tier}} on {{when}}."
+  },
+  "security": {
+    "eyebrow": "Member services · security",
+    "title": "Account security",
+    "description": "Keep your contact details right, see where you are signed in, and tell us if something looks wrong.",
+    "contact": "Contact details",
+    "currentContact": "Now: {{mobile}} · {{email}}",
+    "mobile": "New mobile number",
+    "email": "New email",
+    "contactHelp": "Needs a one-time code. We keep only masked values.",
+    "change": "Change contact details",
+    "changed": "Contact details changed. If this was not you, report it below.",
+    "changeSummary": "Change the mobile number and email on your account.",
+    "sessions": "Where you are signed in",
+    "thisSession": "This browser",
+    "otherSession": "Another browser",
+    "device": "Device",
+    "signedIn": "signed in",
+    "lastSeen": "last seen",
+    "sessionsHelp": "If you see a session you do not recognise, report it and ask for account recovery.",
+    "report": "Report something suspicious",
+    "whatHappened": "What happened",
+    "details": "Details",
+    "sendReport": "Send report",
+    "reported": "Thank you. The security team will review it.",
+    "kinds": {
+      "NOT_ME": "Activity I did not do",
+      "SUSPICIOUS_MESSAGE": "A suspicious call or message",
+      "OTHER": "Something else"
+    },
+    "recovery": "Account recovery",
+    "recoveryHelp": "A security analyst reviews the request and can restore your last verified contact details. Nothing changes until then.",
+    "reason": "Why you need it",
+    "requestRecovery": "Request account recovery",
+    "recoveryRequested": "Recovery requested. A security analyst will review it.",
+    "recoverySummary": "Ask EPFO to review your account and restore your last verified contact details."
   }
 }

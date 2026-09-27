@@ -132,6 +132,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/sessions` | W | self — caller's own member record only |  |
 | `PATCH /members/me/contact-details` | W | self — caller's own member record only | yes |
 | `POST /grievances/{grievanceId}/documents` | W | complainant or the assigned office |  |
+| `POST /grievances/{grievanceId}/escalations` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/messages` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/reopen-requests` | W | complainant or the assigned office |  |
 | `POST /members/me/account-recovery-requests` | W | self — caller's own member record only | yes |
@@ -654,7 +655,11 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /grievances/{grievanceId}` | W | complainant or the assigned office |  |
+| `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /ai/grievances/classify` | W | caller's own permissions; advisory output only |  |
+| `POST /grievances/{grievanceId}/escalations` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/evidence-links` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/messages` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/resolution` | W | complainant or the assigned office | yes |
@@ -702,8 +707,12 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /grievances/{grievanceId}` | W | complainant or the assigned office |  |
 | `GET /monitoring/claims` | W | role jurisdiction; aggregates with small-group suppression |  |
 | `GET /monitoring/grievances` | W | role jurisdiction; aggregates with small-group suppression |  |
+| `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `GET /zo/dashboards` | W | zone jurisdiction |  |
 | `POST /grievances/{grievanceId}/escalations` | W | complainant or the assigned office |  |
+| `POST /grievances/{grievanceId}/messages` | W | complainant or the assigned office |  |
+| `POST /grievances/{grievanceId}/resolution` | W | complainant or the assigned office | yes |
 
 **`zo.rpfc1`** — RPFC-I at the Zonal Office (zonal authority for freezing categories B and C; zone-level monitoring)
 
@@ -818,6 +827,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /audit/correlations/{correlationId}` | W | read-only for auditors; audit writes by audit roles only |  |
 | `GET /audit/events` | W | read-only for auditors; audit writes by audit roles only |  |
 | `POST /audit/internal/paras/{paraId}/decisions` | P | read-only for auditors; audit writes by audit roles only | yes |
 
@@ -885,10 +895,13 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /audit/events` | W | read-only for auditors; audit writes by audit roles only |  |
+| `GET /security/account-recovery-requests` | W | security analyst |  |
 | `GET /security/me/permissions` | W | self — open to every authenticated caller (own data only) |  |
 | `GET /security/request-activity` | W | security analyst |  |
 | `GET /security/sessions` | W | security analyst |  |
 | `POST /internal/security-events` | W | service-to-service only (client credentials) |  |
+| `POST /security/account-recovery-requests/{requestId}/decisions` | W | security analyst | yes |
 | `POST /security/sessions/{sessionId}/revocations` | W | security analyst | yes |
 | `POST /security/incidents` | P | security analyst | yes |
 

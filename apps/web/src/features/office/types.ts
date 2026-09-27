@@ -1,6 +1,8 @@
 export interface OfficeCase {
   case_id: string;
-  claim_id: string;
+  claim_id: string | null;
+  grievance_id: string | null;
+  advisory_signal_id: string | null;
   kind: string;
   office_id: string;
   form_type: string;
@@ -15,7 +17,7 @@ export interface OfficeCase {
   assignee_subject: string | null;
   version: number;
   sla_due_at: string | null;
-  next_action: "recommend" | "decide" | "second-approve" | "instruct-payment" | "reissue" | null;
+  next_action: "recommend" | "decide" | "second-approve" | "instruct-payment" | "reissue" | "handle-grievance" | null;
 }
 export interface CaseDetail extends OfficeCase {
   history: { at: string; round: number; officer_role: string; officer_subject: string; action: string; approval_level: string | null; reason: string | null; checks: string[] }[];

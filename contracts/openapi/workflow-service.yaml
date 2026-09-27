@@ -133,7 +133,9 @@ paths:
       - fo.cash
       - fo.da_accounts
       - fo.oic
+      - fo.pro
       - fo.ss
+      - zo.acc
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -558,7 +560,9 @@ paths:
       - fo.cash
       - fo.da_accounts
       - fo.oic
+      - fo.pro
       - fo.ss
+      - zo.acc
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []

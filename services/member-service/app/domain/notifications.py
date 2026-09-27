@@ -16,6 +16,13 @@ TEMPLATES = {
     "CLAIM_SETTLED": ("Claim paid", "Your claim {reference_id}{amount} was paid into your bank account{bank_ending}."),
     "CLAIM_PAYMENT_RETURNED": ("Claim payment returned", "The payment for your claim {reference_id} was returned by the bank. {reason}"),
     "CLAIM_REISSUED": ("Claim payment reissued", "Payment for your claim {reference_id} was reissued."),
+    "GRIEVANCE_REGISTERED": ("Grievance registered", "Your grievance {reference_id} was registered and sent to your regional office."),
+    "GRIEVANCE_REPLY": ("Reply to your grievance", "There is a new reply on your grievance {reference_id}."),
+    "GRIEVANCE_ESCALATED": ("Grievance escalated", "Your grievance {reference_id} was escalated to the next level."),
+    "GRIEVANCE_RESOLVED": ("Grievance resolved", "Your grievance {reference_id} was resolved. You can reopen it within 30 days if the problem remains."),
+    "CONTACT_DETAILS_CHANGED": ("Contact details changed", "Your mobile number and email were changed. If this was not you, report it and ask for account recovery straight away."),
+    "ACCOUNT_RECOVERY_APPROVED": ("Account recovered", "Your account recovery {reference_id} was approved and your verified contact details were restored."),
+    "ACCOUNT_RECOVERY_REJECTED": ("Account recovery not approved", "Your account recovery request {reference_id} was not approved. Please contact your regional office."),
 }
 
 
@@ -33,7 +40,7 @@ def rupees(paise: int) -> str:
 
 
 def render(template: str, reference_id: str, params: dict[str, Any] | None = None) -> tuple[str, str]:
-    title, body = TEMPLATES.get(template, ("Claim update", "There is an update about your claim {reference_id}."))
+    title, body = TEMPLATES.get(template, ("Update", "There is an update about {reference_id}."))
     values = params or {}
     ending = values.get("bank_account_last4")
     reason = str(values.get("reason") or "Check your claim details for more information.")

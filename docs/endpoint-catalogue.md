@@ -230,9 +230,11 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /members/me/tax/form-15g-15h` | Upload Form 15G / 15H | P | 2 | claim |
 | `GET /members/me/nominations` | e-Nomination (Form 2) — view | P | 2 | member |
 | `POST /members/me/nominations` 🔐 | e-Nomination — submit with mock e-sign | P | 2 | member |
-| `GET /members/me/sessions` | Session history | W | 1 | member |
+| `GET /members/me/sessions` | Session history | W | 1 | gateway |
 | `POST /members/me/security-reports` | Report suspicious activity | W | 1 | member |
 | `POST /members/me/account-recovery-requests` 🔐 | Controlled, reviewed account recovery (Journey D5) | W | 1 | member |
+| `GET /security/account-recovery-requests` | Review queue of account-recovery requests (Journey D5) | W | 1 | member |
+| `POST /security/account-recovery-requests/{requestId}/decisions` 🔐 | Approve or reject an account-recovery request; approval restores the verified contact details (Journey D5) | W | 1 | member |
 | `GET /members/me/notifications` | Notifications (projection fed by claim / payment / grievance events — see §14) | W | 1 | member |
 | `GET /members/me/uan-card` | UAN card | P | 2 | member |
 | `GET /members/me/transfers/auto` | Auto-transfer status on job change | P | 2 | claim |

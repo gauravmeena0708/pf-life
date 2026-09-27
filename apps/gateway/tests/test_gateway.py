@@ -276,6 +276,7 @@ async def test_oidc_code_callback_uses_pkce_and_validates_keycloak_jwks(client):
         auth_params = parse_qs(urlparse(login.headers["location"]).query)
         assert auth_params["login_hint"] == ["member-a"]
         assert auth_params["code_challenge_method"] == ["S256"]
+        assert auth_params["prompt"] == ["login"]
         state = auth_params["state"][0]
         saved = json.loads(await redis.get(f"oidc:state:{state}"))
         now = int(time.time())
@@ -343,3 +344,67 @@ async def test_phase_2_mock_route_answers_planned_not_502(client):
                                headers={"X-CSRF-Token": session["csrf"]})
     assert response.status_code == 501
     assert response.json()["type"] == "/problems/planned"
+
+
+async def _step_up(http, cookies, csrf, action, resource_id):
+    c = (await http.post("/api/v1/security/step-up-challenges", cookies=cookies, headers={"X-CSRF-Token": csrf},
+                         json={"action": action, "resource_id": resource_id, "summary": "test"})).json()["data"]
+    return (await http.post(f"/api/v1/security/step-up-challenges/{c['challenge_id']}/verifications", cookies=cookies,
+                            headers={"X-CSRF-Token": csrf}, json={"otp": c["demo_otp"]})).json()["data"]["step_up_token"]
+
+
+@pytest.mark.asyncio
+async def test_login_reports_new_device_once_and_member_actions_are_reported(client, monkeypatch):
+    from app import security_events
+    http, app, redis = client
+    seen = []
+    monkeypatch.setattr(security_events, "report", lambda request, subject, event_type, device: seen.append((subject, event_type, device)))
+    sid, session = await login_as(app, "member", subject="member-a")
+    session["device"] = "d" * 32
+    await security_events.on_login(_Req(app), sid, session)
+    await security_events.on_login(_Req(app), sid, session)
+    assert [e[1] for e in seen] == ["LOGIN_NEW_DEVICE", "LOGIN"]
+    await app.state.sessions.update(sid, session)
+    cookies = {"__Host-epfo-session": sid, "epfo-csrf": session["csrf"]}
+    with respx.mock() as router:
+        router.post("http://member-service:8000/api/v1/members/me/security-reports").mock(return_value=Response(201, json={"data": {}}))
+        r = await http.post("/api/v1/members/me/security-reports", cookies=cookies, headers={"X-CSRF-Token": session["csrf"]}, json={})
+    assert r.status_code == 201 and seen[-1] == ("member-a", "MEMBER_SECURITY_REPORT", "d" * 32)
+
+
+class _Req:
+    """Minimal stand-in for a request inside on_login (only app state and a correlation ID are used)."""
+    def __init__(self, app):
+        self.app = app
+        self.state = type("S", (), {"correlation_id": "c-1"})()
+
+
+@pytest.mark.asyncio
+async def test_sessions_are_listed_by_handle_and_revoked_with_step_up(client, monkeypatch):
+    from app import security_events
+    http, app, redis = client
+    monkeypatch.setattr(security_events, "report", lambda *a: None)
+    sid_a, sa = await login_as(app, "member", subject="member-a")
+    sid_b, sb = await login_as(app, "member", subject="member-b")
+    sid_s, ss = await login_as(app, "ho.security", subject="analyst")
+    for sid, s in ((sid_a, sa), (sid_b, sb), (sid_s, ss)):
+        s["device"] = "e" * 32
+        await security_events.on_login(_Req(app), sid, s)
+    ca = {"__Host-epfo-session": sid_a, "epfo-csrf": sa["csrf"]}
+    mine = (await http.get("/api/v1/members/me/sessions", cookies=ca)).json()["data"]
+    assert [s["subject"] for s in mine] == ["member-a"] and mine[0]["current"] is True
+    assert sid_a not in json.dumps(mine)                                   # never the session ID itself
+    cs = {"__Host-epfo-session": sid_s, "epfo-csrf": ss["csrf"]}
+    everyone = (await http.get("/api/v1/security/sessions", cookies=cs)).json()["data"]
+    assert {s["subject"] for s in everyone} == {"member-a", "member-b", "analyst"}
+    assert (await http.get("/api/v1/security/sessions", cookies=ca)).status_code == 403
+    handle = next(s["session_id"] for s in everyone if s["subject"] == "member-b")
+    url = f"/api/v1/security/sessions/{handle}/revocations"
+    assert (await http.post(url, cookies=cs, headers={"X-CSRF-Token": ss["csrf"]})).status_code == 428
+    wrong = await _step_up(http, cs, ss["csrf"], "revoke-session", "some-other-handle")
+    assert (await http.post(url, cookies=cs, headers={"X-CSRF-Token": ss["csrf"], "X-Step-Up-Token": wrong})).status_code == 403
+    token = await _step_up(http, cs, ss["csrf"], "revoke-session", handle)
+    r = await http.post(url, cookies=cs, headers={"X-CSRF-Token": ss["csrf"], "X-Step-Up-Token": token})
+    assert r.status_code == 200 and r.json()["data"]["subject"] == "member-b"
+    cb = {"__Host-epfo-session": sid_b, "epfo-csrf": sb["csrf"]}
+    assert (await http.get("/api/v1/members/me/sessions", cookies=cb)).status_code == 401   # member B is signed out

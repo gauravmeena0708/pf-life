@@ -13,6 +13,14 @@ import { ClaimDetailPage } from "./features/member/ClaimDetailPage";
 import { ProfilePage } from "./features/member/ProfilePage";
 import { WorkQueuePage } from "./features/office/WorkQueuePage";
 import { CasePage } from "./features/office/CasePage";
+import { GrievanceDetailPage } from "./features/grievance/GrievanceDetailPage";
+import { GrievanceOfficePage } from "./features/grievance/GrievanceOfficePage";
+import { GrievancesPage } from "./features/grievance/GrievancesPage";
+import { SecurityPage } from "./features/member/SecurityPage";
+import { AuditLogPage } from "./features/oversight/AuditLogPage";
+import { GrievanceMetricsPage } from "./features/oversight/GrievanceMetricsPage";
+import { RiskSignalsPage } from "./features/oversight/RiskSignalsPage";
+import { SessionsRecoveryPage } from "./features/oversight/SessionsRecoveryPage";
 import { Home } from "./pages/Home";
 import { InterfacePage } from "./pages/InterfacePage";
 import { PublicLookups } from "./pages/PublicLookups";
@@ -51,9 +59,12 @@ export function App() {
         <NavLink end to="/">{t("navigation.home")}</NavLink>
         <NavLink to="/public">{t("navigation.public")}</NavLink>
         {role?.startsWith("employer.") ? <><NavLink end to="/employer">{t("navigation.employer")}</NavLink><NavLink to="/employer/ecr">{t("navigation.ecr")}</NavLink></> : null}
-        {role === "member" ? <><NavLink to="/member/passbook">{t("navigation.passbook")}</NavLink><NavLink end to="/member/claims">{t("navigation.claims")}</NavLink><NavLink to="/member/profile">{t("navigation.profile")}</NavLink></> : null}
-        {role?.startsWith("fo.") ? <NavLink to="/office/work-queue">{t("navigation.workQueue")}</NavLink> : null}
-        {role === "ho.security" ? <NavLink to="/security/activity">{t("navigation.security")}</NavLink> : null}
+        {role === "member" ? <><NavLink to="/member/passbook">{t("navigation.passbook")}</NavLink><NavLink end to="/member/claims">{t("navigation.claims")}</NavLink><NavLink to="/member/grievances">{t("navigation.grievances")}</NavLink><NavLink to="/member/profile">{t("navigation.profile")}</NavLink><NavLink to="/member/security">{t("navigation.accountSecurity")}</NavLink></> : null}
+        {role?.startsWith("fo.") || role === "zo.acc" ? <NavLink to="/office/work-queue">{t("navigation.workQueue")}</NavLink> : null}
+        {role === "zo.acc" || role === "ho.cpfc" ? <NavLink to="/monitoring/grievances">{t("navigation.grievanceMetrics")}</NavLink> : null}
+        {role === "ho.security" ? <><NavLink to="/security/activity">{t("navigation.security")}</NavLink><NavLink to="/security/sessions">{t("navigation.sessions")}</NavLink><NavLink to="/audit/log">{t("navigation.audit")}</NavLink></> : null}
+        {role === "ho.caiu" ? <NavLink to="/caiu/signals">{t("navigation.riskSignals")}</NavLink> : null}
+        {role === "ho.audit" ? <NavLink to="/audit/log">{t("navigation.audit")}</NavLink> : null}
       </div></nav>
       <div className="shell-width layout">
         <main id="main">
@@ -70,6 +81,14 @@ export function App() {
             <Route path="/office/cases/:caseId" element={<CasePage />} />
             <Route path="/public" element={<PublicLookups />} />
             <Route path="/security/activity" element={<SecurityActivity />} />
+            <Route path="/member/grievances" element={<GrievancesPage />} />
+            <Route path="/member/grievances/:grievanceId" element={<GrievanceDetailPage />} />
+            <Route path="/member/security" element={<SecurityPage />} />
+            <Route path="/office/grievances/:grievanceId" element={<GrievanceOfficePage />} />
+            <Route path="/caiu/signals" element={<RiskSignalsPage />} />
+            <Route path="/security/sessions" element={<SessionsRecoveryPage />} />
+            <Route path="/audit/log" element={<AuditLogPage />} />
+            <Route path="/monitoring/grievances" element={<GrievanceMetricsPage />} />
           </Routes>
         </main>
       </div>

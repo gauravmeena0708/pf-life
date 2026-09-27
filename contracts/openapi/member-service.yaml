@@ -1145,35 +1145,6 @@ paths:
       - bffSession: []
       description: 'Pre-flight: service per member ID — contributory months, NCP days, pension-service months, transfer status
         — for pension and final-settlement decisions'
-  /members/me/sessions:
-    get:
-      operationId: getMembersSessions
-      summary: Session history
-      tags:
-      - Member self-service
-      parameters:
-      - $ref: '#/components/parameters/CorrelationId'
-      responses:
-        '200':
-          $ref: '#/components/responses/Ok'
-        '400':
-          $ref: '#/components/responses/Problem'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
-        '404':
-          $ref: '#/components/responses/Problem'
-        '409':
-          $ref: '#/components/responses/Problem'
-      x-status: working
-      x-phase: 1
-      x-owner-service: member
-      x-callers:
-      - member
-      x-scope: self — caller's own member record only
-      security:
-      - bffSession: []
   /members/me/uan-card:
     get:
       operationId: getMembersUanCard
@@ -1618,6 +1589,77 @@ paths:
       - fo.da_accounts
       - fo.pro_intake
       x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /security/account-recovery-requests:
+    get:
+      operationId: getSecurityAccountRecoveryRequests
+      summary: Review queue of account-recovery requests (Journey D5)
+      tags:
+      - Member self-service
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: member
+      x-callers:
+      - ho.security
+      x-scope: security analyst
+      security:
+      - bffSession: []
+  /security/account-recovery-requests/{requestId}/decisions:
+    post:
+      operationId: postSecurityAccountRecoveryRequestsRequestIdDecisions
+      summary: Approve or reject an account-recovery request; approval restores the verified contact details (Journey D5)
+      tags:
+      - Member self-service
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: requestId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: member
+      x-callers:
+      - ho.security
+      x-scope: security analyst
       security:
       - bffSession: []
       requestBody:
