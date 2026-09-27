@@ -1,0 +1,574 @@
+{
+  "realm": "epfo-demo",
+  "enabled": true,
+  "displayName": "EPFO POC \u2014 synthetic demonstration",
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 28800,
+  "revokeRefreshToken": true,
+  "refreshTokenMaxReuse": 0,
+  "bruteForceProtected": true,
+  "failureFactor": 10,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": false,
+  "roles": {
+    "realm": [
+      {
+        "name": "employer.operator",
+        "description": "Stakeholder employer.operator (docs/stakeholders.md)"
+      },
+      {
+        "name": "employer.owner",
+        "description": "Stakeholder employer.owner (docs/stakeholders.md)"
+      },
+      {
+        "name": "employer.signatory",
+        "description": "Stakeholder employer.signatory (docs/stakeholders.md)"
+      },
+      {
+        "name": "fo.ao",
+        "description": "Stakeholder fo.ao (docs/stakeholders.md)"
+      },
+      {
+        "name": "fo.apfc",
+        "description": "Stakeholder fo.apfc (docs/stakeholders.md)"
+      },
+      {
+        "name": "fo.cash",
+        "description": "Stakeholder fo.cash (docs/stakeholders.md)"
+      },
+      {
+        "name": "fo.da_accounts",
+        "description": "Stakeholder fo.da_accounts (docs/stakeholders.md)"
+      },
+      {
+        "name": "fo.oic",
+        "description": "Stakeholder fo.oic (docs/stakeholders.md)"
+      },
+      {
+        "name": "fo.pro",
+        "description": "Stakeholder fo.pro (docs/stakeholders.md)"
+      },
+      {
+        "name": "fo.ss",
+        "description": "Stakeholder fo.ss (docs/stakeholders.md)"
+      },
+      {
+        "name": "gov.mole",
+        "description": "Stakeholder gov.mole (docs/stakeholders.md)"
+      },
+      {
+        "name": "ho.audit",
+        "description": "Stakeholder ho.audit (docs/stakeholders.md)"
+      },
+      {
+        "name": "ho.caiu",
+        "description": "Stakeholder ho.caiu (docs/stakeholders.md)"
+      },
+      {
+        "name": "ho.cpfc",
+        "description": "Stakeholder ho.cpfc (docs/stakeholders.md)"
+      },
+      {
+        "name": "ho.cvo",
+        "description": "Stakeholder ho.cvo (docs/stakeholders.md)"
+      },
+      {
+        "name": "ho.hr",
+        "description": "Stakeholder ho.hr (docs/stakeholders.md)"
+      },
+      {
+        "name": "ho.security",
+        "description": "Stakeholder ho.security (docs/stakeholders.md)"
+      },
+      {
+        "name": "member",
+        "description": "Stakeholder member (docs/stakeholders.md)"
+      },
+      {
+        "name": "payroll_provider",
+        "description": "Stakeholder payroll_provider (docs/stakeholders.md)"
+      },
+      {
+        "name": "tech.ai_service",
+        "description": "Stakeholder tech.ai_service (docs/stakeholders.md)"
+      },
+      {
+        "name": "tech.ndc",
+        "description": "Stakeholder tech.ndc (docs/stakeholders.md)"
+      },
+      {
+        "name": "zo.acc",
+        "description": "Stakeholder zo.acc (docs/stakeholders.md)"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "epfo-bff",
+      "name": "EPFO gateway (BFF)",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "change-me-bff-secret",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:5173/auth/callback",
+        "http://localhost:8000/auth/callback"
+      ],
+      "webOrigins": [
+        "http://localhost:5173"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:5173/*",
+        "backchannel.logout.session.required": "true"
+      }
+    },
+    {
+      "clientId": "b2b-sandbox",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "change-me-b2b-secret",
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": false
+    },
+    {
+      "clientId": "mock-integrations",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "change-me-mock-secret",
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": false
+    },
+    {
+      "clientId": "svc-ai",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "change-me-ai-secret",
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": false
+    }
+  ],
+  "users": [
+    {
+      "username": "member-a",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Member A",
+      "lastName": "Demo",
+      "email": "member-a@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "member"
+      ]
+    },
+    {
+      "username": "member-b",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Member B",
+      "lastName": "Demo",
+      "email": "member-b@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "member"
+      ]
+    },
+    {
+      "username": "emp-owner",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Employer owner",
+      "lastName": "Demo",
+      "email": "emp-owner@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "employer.owner"
+      ]
+    },
+    {
+      "username": "emp-preparer",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Payroll preparer",
+      "lastName": "Demo",
+      "email": "emp-preparer@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "employer.operator"
+      ]
+    },
+    {
+      "username": "emp-signatory",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Authorised signatory",
+      "lastName": "Demo",
+      "email": "emp-signatory@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "employer.signatory"
+      ]
+    },
+    {
+      "username": "do-caseworker",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "District caseworker DA",
+      "lastName": "Demo",
+      "email": "do-caseworker@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.da_accounts"
+      ]
+    },
+    {
+      "username": "ro-ss",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Section supervisor",
+      "lastName": "Demo",
+      "email": "ro-ss@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.ss"
+      ]
+    },
+    {
+      "username": "ro-ao",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Accounts officer",
+      "lastName": "Demo",
+      "email": "ro-ao@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.ao"
+      ]
+    },
+    {
+      "username": "ro-apfc",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Regional approving officer APFC",
+      "lastName": "Demo",
+      "email": "ro-apfc@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.apfc"
+      ]
+    },
+    {
+      "username": "ro-oic",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Officer-in-charge",
+      "lastName": "Demo",
+      "email": "ro-oic@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.oic"
+      ]
+    },
+    {
+      "username": "ro-cashier",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Cashier",
+      "lastName": "Demo",
+      "email": "ro-cashier@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.cash"
+      ]
+    },
+    {
+      "username": "ro-pro",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Grievance officer - PRO",
+      "lastName": "Demo",
+      "email": "ro-pro@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.pro"
+      ]
+    },
+    {
+      "username": "zo-acc",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Zonal supervisor ACC",
+      "lastName": "Demo",
+      "email": "zo-acc@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "zo.acc"
+      ]
+    },
+    {
+      "username": "ho-analyst",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Head Office analyst",
+      "lastName": "Demo",
+      "email": "ho-analyst@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ho.cpfc"
+      ]
+    },
+    {
+      "username": "ndc-operator",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "NDC operator",
+      "lastName": "Demo",
+      "email": "ndc-operator@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "tech.ndc"
+      ]
+    },
+    {
+      "username": "ministry-viewer",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Ministry aggregate viewer",
+      "lastName": "Demo",
+      "email": "ministry-viewer@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "gov.mole"
+      ]
+    },
+    {
+      "username": "b2b-client",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "B2B payroll client",
+      "lastName": "Demo",
+      "email": "b2b-client@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "payroll_provider"
+      ]
+    },
+    {
+      "username": "caiu-investigator",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "CAIU investigator",
+      "lastName": "Demo",
+      "email": "caiu-investigator@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ho.caiu"
+      ]
+    },
+    {
+      "username": "hrm-employee",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "HRM employee",
+      "lastName": "Demo",
+      "email": "hrm-employee@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ho.hr"
+      ]
+    },
+    {
+      "username": "security-analyst",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Security analyst",
+      "lastName": "Demo",
+      "email": "security-analyst@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ho.security"
+      ]
+    },
+    {
+      "username": "vigilance-investigator",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Vigilance investigator",
+      "lastName": "Demo",
+      "email": "vigilance-investigator@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ho.cvo"
+      ]
+    },
+    {
+      "username": "auditor",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Independent auditor",
+      "lastName": "Demo",
+      "email": "auditor@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ho.audit"
+      ]
+    },
+    {
+      "username": "service-account-b2b-sandbox",
+      "enabled": true,
+      "serviceAccountClientId": "b2b-sandbox",
+      "realmRoles": [
+        "payroll_provider"
+      ]
+    },
+    {
+      "username": "service-account-svc-ai",
+      "enabled": true,
+      "serviceAccountClientId": "svc-ai",
+      "realmRoles": [
+        "tech.ai_service"
+      ]
+    }
+  ]
+}

@@ -13,7 +13,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 6 | 1 | 2 | 0 |
 | 6 | International worker | **Mock** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 0 | 1 | 4 | 0 |
 | 7 | District office | **Working** | `do.incharge`, `do.staff` | 1 | 0 | 2 | 0 |
-| 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 5 | 0 | 28 | 1 |
+| 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 6 | 0 | 28 | 1 |
 | 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 5 | 0 | 4 | 0 |
 | 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 4 | 0 | 14 | 0 |
 | 11 | NDC | **Working** | `tech.ndc`, `tech.adc`, `tech.cpps`, `tech.epfo3` | 3 | 0 | 4 | 0 |
@@ -230,8 +230,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | Endpoint | Status | Owner | Called by |
 |---|---|---|---|
 | `GET /hrm/me` | W | workflow | fo.admin |
-| `GET /office/cases/{caseId}` | W | workflow | fo.da_accounts |
-| `GET /office/work-queue` | W | workflow | fo.da_accounts |
+| `GET /office/cases/{caseId}` | W | workflow | fo.ao, fo.da_accounts, fo.ss |
+| `GET /office/work-queue` | W | workflow | fo.ao, fo.da_accounts, fo.ss |
 | `POST /ai/claims/analyse` | W | intelligence | fo.da_accounts |
 | `POST /office/cases/{caseId}/decisions` | W | workflow | fo.ao, fo.ss |
 | `POST /office/cases/{caseId}/recommendations` | W | workflow | fo.da_accounts |
@@ -355,7 +355,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /monitoring/claims` | W | reporting | fo.oic, fo.rpfc1 |
 | `GET /monitoring/contributions` | W | reporting | fo.rpfc1 |
 | `GET /monitoring/grievances` | W | reporting | fo.rpfc1 |
-| `GET /office/work-queue` | W | workflow | fo.oic |
+| `GET /office/cases/{caseId}` | W | workflow | fo.apfc, fo.oic |
+| `GET /office/work-queue` | W | workflow | fo.apfc, fo.oic |
 | `POST /office/cases/{caseId}/second-approvals` | W | workflow | fo.apfc, fo.oic |
 | `GET /office/accounts/inoperative` | P | contribution | fo.oic |
 | `GET /office/death-claims/{claimId}/shares-summary` | P | claim | fo.apfc |

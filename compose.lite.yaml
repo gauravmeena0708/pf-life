@@ -1,0 +1,54 @@
+# Lite mode (~2 GB): one worker, small pools (docs/architecture.md §7).
+services:
+  employer-service:
+    environment:
+      WEB_CONCURRENCY: '1'
+      DB_POOL_SIZE: '2'
+  member-service:
+    environment:
+      WEB_CONCURRENCY: '1'
+      DB_POOL_SIZE: '2'
+  contribution-service:
+    environment:
+      WEB_CONCURRENCY: '1'
+      DB_POOL_SIZE: '2'
+  claim-service:
+    environment:
+      WEB_CONCURRENCY: '1'
+      DB_POOL_SIZE: '2'
+  payment-simulator:
+    environment:
+      WEB_CONCURRENCY: '1'
+      DB_POOL_SIZE: '2'
+  workflow-service:
+    environment:
+      WEB_CONCURRENCY: '1'
+      DB_POOL_SIZE: '2'
+  grievance-service:
+    environment:
+      WEB_CONCURRENCY: '1'
+      DB_POOL_SIZE: '2'
+  audit-service:
+    environment:
+      WEB_CONCURRENCY: '1'
+      DB_POOL_SIZE: '2'
+  reporting-service:
+    environment:
+      WEB_CONCURRENCY: '1'
+      DB_POOL_SIZE: '2'
+  intelligence-service:
+    environment:
+      WEB_CONCURRENCY: '1'
+      DB_POOL_SIZE: '2'
+  pension-service:
+    environment:
+      WEB_CONCURRENCY: '1'
+      DB_POOL_SIZE: '2'
+  platform-service:
+    environment:
+      WEB_CONCURRENCY: '1'
+      DB_POOL_SIZE: '2'
+  mock-integrations:
+    environment:
+      WEB_CONCURRENCY: '1'
+      DB_POOL_SIZE: '2'

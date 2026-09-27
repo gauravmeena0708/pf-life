@@ -98,7 +98,7 @@ SCOPE_RULES = [
         ("/audit/", "read-only for auditors; audit writes by audit roles only"),
         ("/vigilance/", "restricted — vigilance roles only, case-by-case"),
         ("/privacy/", "data-protection officer only"),
-        ("/security/me", "self"),
+        ("/security/me", "self — open to every authenticated caller (own data only)"),
         ("/security/step-up", "self — challenge bound to one action and resource version"),
         ("/security/", "security analyst"),
         ("/internal/", "service-to-service only (client credentials)"),

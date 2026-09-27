@@ -426,6 +426,8 @@ Activities: **F02.jd_verify** Verifier (SS route): cross-check and recommend; **
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/cases/{caseId}` | W |
+| `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/decisions` | W |
 | `POST /office/damages-knock-offs/{knockOffId}/approvals` | P |
 | `POST /office/freeze-cases/{caseId}/verifications` | P |
@@ -437,6 +439,8 @@ Activities: **F02.jd_verify_ao** Verifier (AO route): cross-check and recommend;
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/cases/{caseId}` | W |
+| `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/decisions` | W |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P |
 | `POST /office/freeze-cases/{caseId}/verifications` | P |
@@ -460,6 +464,8 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/cases/{caseId}` | W |
+| `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
 | `GET /office/death-claims/{claimId}/shares-summary` | P |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P |
@@ -500,6 +506,7 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | Endpoint | Status |
 |---|---|
 | `GET /monitoring/claims` | W |
+| `GET /office/cases/{caseId}` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
 | `GET /office/accounts/inoperative` | P |

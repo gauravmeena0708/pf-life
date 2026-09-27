@@ -1,0 +1,5932 @@
+[
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposit-waivers",
+    "regex": "^/office/compliance/cases/[^/]+/appeals/[^/]+/pre\\-deposit\\-waivers$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.legal"
+    ],
+    "summary": "7-O waiver / reduction decision record",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/establishments/{estId}/signature-registrations/{regId}/decisions",
+    "regex": "^/office/establishments/[^/]+/signature\\-registrations/[^/]+/decisions$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "Field office approval of DSC / e-sign registration",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/pensions/scheme-certificates/{certId}/surrender-adjudications",
+    "regex": "^/office/pensions/scheme\\-certificates/[^/]+/surrender\\-adjudications$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.da_pension"
+    ],
+    "summary": "DA (Pension) validates and cancels a surrendered Scheme Certificate",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/pensions/higher-pension-options/{optionId}/ledger-transfers",
+    "regex": "^/office/pensions/higher\\-pension\\-options/[^/]+/ledger\\-transfers$",
+    "status": "P",
+    "phase": 3,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "PF→pension fund transfer after dues are paid → journal via contribution-service event",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/establishments/{estId}/change-requests/{requestId}/decisions",
+    "regex": "^/office/establishments/[^/]+/change\\-requests/[^/]+/decisions$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "Decide configuration change / closure / office-transfer requests",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals",
+    "regex": "^/office/pension\\-claims/[^/]+/input\\-data\\-sheets/[^/]+/approvals$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.ao"
+    ],
+    "summary": "AO approves the IDS",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/vishwas-applications/{applicationId}/decisions",
+    "regex": "^/office/compliance/vishwas\\-applications/[^/]+/decisions$",
+    "status": "P",
+    "phase": 2,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "Recalculate damages under VISHWAS and decide the application → DemandRaised.v1 for the revised amount",
+    "revocation": false
+  },
+  {
+    "method": "PUT",
+    "path_template": "/office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares",
+    "regex": "^/office/death\\-claims/[^/]+/beneficiaries/[^/]+/shares$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "Amend a beneficiary's share (nominee deceased, court order, share already settled in legacy, guardian appointment)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposits",
+    "regex": "^/office/compliance/cases/[^/]+/appeals/[^/]+/pre\\-deposits$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": true,
+    "step_up": false,
+    "callers": [
+      "fo.legal"
+    ],
+    "summary": "7-O pre-deposit evidence",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/registration-requests/{reqId}/verification-evidence",
+    "regex": "^/employers/registration\\-requests/[^/]+/verification\\-evidence$",
+    "status": "M",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.owner"
+    ],
+    "summary": "Submit demo verification evidence (PAN/CIN/GSTIN/LIN) to mock registry adapter (Journey A1)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/inspections/{inspectionId}/processing-notes",
+    "regex": "^/office/compliance/inspections/[^/]+/processing\\-notes$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_compliance"
+    ],
+    "summary": "DA (Compliance) processes the inspection report in the e-file",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/establishment-registrations/{reqId}/coverage-decisions",
+    "regex": "^/office/establishment\\-registrations/[^/]+/coverage\\-decisions$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "Circle officer's coverage decision on a new establishment",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/ecr-filings/{filingId}/principal-employer-tags",
+    "regex": "^/employers/me/ecr\\-filings/[^/]+/principal\\-employer\\-tags$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "contractor"
+    ],
+    "summary": "Contractor: tag ECR members to a principal employer",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/pensions/higher-pension-options/{optionId}/decisions",
+    "regex": "^/office/pensions/higher\\-pension\\-options/[^/]+/decisions$",
+    "status": "P",
+    "phase": 3,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc_pension"
+    ],
+    "summary": "Decide on a validated option → dues demand event",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/higher-pension-options/{optionId}/validations",
+    "regex": "^/employers/me/higher\\-pension\\-options/[^/]+/validations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Validate option and upload wage details",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/signatories/{signatoryId}/esign-registrations",
+    "regex": "^/employers/me/signatories/[^/]+/esign\\-registrations$",
+    "status": "M",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.owner"
+    ],
+    "summary": "Register Aadhaar e-sign for signatory",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/pension-scheme-certificates/{certId}/surrenders",
+    "regex": "^/members/me/pension\\-scheme\\-certificates/[^/]+/surrenders$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "member"
+    ],
+    "summary": "Surrender a Scheme Certificate to convert it to monthly pension (Form 10D) or withdrawal benefit (Form 10C)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/accounts/{accountLinkId}/crowdsource-verifications",
+    "regex": "^/office/accounts/[^/]+/crowdsource\\-verifications$",
+    "status": "P",
+    "phase": 3,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "Inoperative-account crowdsourcing verification through co-workers' logins",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/establishment-registrations/{reqId}/scrutiny-notes",
+    "regex": "^/office/establishment\\-registrations/[^/]+/scrutiny\\-notes$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_compliance"
+    ],
+    "summary": "DA (Compliance) records scrutiny and opens the compliance e-file",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/member-change-requests/{requestId}/recommendations",
+    "regex": "^/office/member\\-change\\-requests/[^/]+/recommendations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "JD initiator (DA) recommends",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/signatories/{signatoryId}/dsc-registrations",
+    "regex": "^/employers/me/signatories/[^/]+/dsc\\-registrations$",
+    "status": "M",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.owner"
+    ],
+    "summary": "Register DSC for signatory",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/payment-scrolls/{scrollId}/return-reconciliations",
+    "regex": "^/office/payment\\-scrolls/[^/]+/return\\-reconciliations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.cash"
+    ],
+    "summary": "Reconcile a bank return scroll, open re-settlement cases",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/cases/{caseId}/documents/{docId}/attestation-views",
+    "regex": "^/office/cases/[^/]+/documents/[^/]+/attestation\\-views$",
+    "status": "P",
+    "phase": 2,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "Record that the caseworker opened the employer-signed PDF / DSC document; enables the approve action (tracker: \"View the employer signed pdf first\")",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/cases/{caseId}/escaped-assessments-7c",
+    "regex": "^/office/compliance/cases/[^/]+/escaped\\-assessments\\-7c$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "7C escaped-assessment proceeding",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/exempted/annexure-k/{annexureId}/reconciliations",
+    "regex": "^/office/exempted/annexure\\-k/[^/]+/reconciliations$",
+    "status": "P",
+    "phase": 3,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "Match Annexure K to receipt / member records",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/member-change-requests/{requestId}/verifications",
+    "regex": "^/office/member\\-change\\-requests/[^/]+/verifications$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.ao",
+      "fo.ss"
+    ],
+    "summary": "JD verifier (SS or AO) verifies",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/security/step-up-challenges/{challengeId}/verifications",
+    "regex": "^/security/step\\-up\\-challenges/[^/]+/verifications$",
+    "status": "W",
+    "phase": 1,
+    "owner": "gateway",
+    "upstream": null,
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Complete step-up",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/cases/{caseId}/recovery-certificates",
+    "regex": "^/office/compliance/cases/[^/]+/recovery\\-certificates$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.recovery_officer"
+    ],
+    "summary": "8B–8E recovery certificate execution (demo record only)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/physical-claims/{intakeId}/identity-validations",
+    "regex": "^/office/physical\\-claims/[^/]+/identity\\-validations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_accounts",
+      "fo.pro_intake"
+    ],
+    "summary": "UAN allocation / Aadhaar validation before settlement (mock)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/transfer-requests/{transferId}/decisions",
+    "regex": "^/employers/me/transfer\\-requests/[^/]+/decisions$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Attest / reject transfer",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/claims/{claimId}/re-disbursement-requests",
+    "regex": "^/members/me/claims/[^/]+/re\\-disbursement\\-requests$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": true,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Member submits corrected bank details after a payment return, without re-filing the claim",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/transfers/auto/{transferId}/confirmations",
+    "regex": "^/members/me/transfers/auto/[^/]+/confirmations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "member"
+    ],
+    "summary": "Confirm auto-transfer",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/inspections/{inspectionId}/reports",
+    "regex": "^/office/compliance/inspections/[^/]+/reports$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.eo",
+      "fo.icf"
+    ],
+    "summary": "Enforcement officer inspection report",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/establishment-registrations/{reqId}/documents",
+    "regex": "^/office/establishment\\-registrations/[^/]+/documents$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_compliance"
+    ],
+    "summary": "DA (Compliance) views documents of a new registration (FO-interface >> OLRE >> View Documents)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/exempted/{estId}/past-accumulation-ingestions",
+    "regex": "^/office/exempted/[^/]+/past\\-accumulation\\-ingestions$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.exemption"
+    ],
+    "summary": "Bulk-ingest member ledgers and past accumulations of a surrendered PF trust",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/international/coc-applications/{id}/decisions",
+    "regex": "^/office/international/coc\\-applications/[^/]+/decisions$",
+    "status": "M",
+    "phase": 2,
+    "owner": "international",
+    "upstream": "http://international-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.iw"
+    ],
+    "summary": "IW cell verification and CoC issuance (mock)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/claim-attestations/{claimId}/decisions",
+    "regex": "^/employers/me/claim\\-attestations/[^/]+/decisions$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Attest / reject claim",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/exempted/{estId}/past-accumulation-transfers",
+    "regex": "^/office/exempted/[^/]+/past\\-accumulation\\-transfers$",
+    "status": "P",
+    "phase": 3,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.exemption"
+    ],
+    "summary": "Transfer past accumulations to EPFO after surrender / cancellation",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/member-change-requests/{requestId}/decisions",
+    "regex": "^/office/member\\-change\\-requests/[^/]+/decisions$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.ao",
+      "fo.apfc"
+    ],
+    "summary": "JD approver decides (competent authority by change type)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/contractors/{contractorId}/compliance",
+    "regex": "^/employers/me/contractors/[^/]+/compliance$",
+    "status": "P",
+    "phase": 2,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "principal_employer"
+    ],
+    "summary": "Principal employer: contractor remittance compliance",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/signatories/{signatoryId}/revocations",
+    "regex": "^/employers/me/signatories/[^/]+/revocations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.owner"
+    ],
+    "summary": "Revoke / replace signatory (Journey D5)",
+    "revocation": true
+  },
+  {
+    "method": "POST",
+    "path_template": "/international/coc-applications/{id}/signed-uploads",
+    "regex": "^/international/coc\\-applications/[^/]+/signed\\-uploads$",
+    "status": "P",
+    "phase": 2,
+    "owner": "international",
+    "upstream": "http://international-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Employer uploads signed CoC application",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/ledger-adjustments/{adjustmentId}/approvals",
+    "regex": "^/office/ledger\\-adjustments/[^/]+/approvals$",
+    "status": "?",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "Second approval of a ledger adjustment",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/pensions/worksheets/{worksheetId}/approvals",
+    "regex": "^/office/pensions/worksheets/[^/]+/approvals$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc_pension"
+    ],
+    "summary": "APFC (Pension) approves the worksheet",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/ecr-filings/{filingId}/cancellations",
+    "regex": "^/employers/me/ecr\\-filings/[^/]+/cancellations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Cancel an unpaid TRRN and release the wage-month lock",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/ndc/issue-tracker/requests/{requestId}/executions",
+    "regex": "^/ndc/issue\\-tracker/requests/[^/]+/executions$",
+    "status": "P",
+    "phase": 2,
+    "owner": "platform",
+    "upstream": "http://platform-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "ho.is"
+    ],
+    "summary": "IS Division executes the block / unblock",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/claims/{claimId}/re-disbursement-approvals",
+    "regex": "^/office/claims/[^/]+/re\\-disbursement\\-approvals$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "APFC authorises a new payment after a return, without reopening adjudication",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/pension-claims/{claimId}/input-data-sheets",
+    "regex": "^/office/pension\\-claims/[^/]+/input\\-data\\-sheets$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "DA (Accounts) prepares the Input Data Sheet (Claims > Transaction > Form-10D/10C)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/joint-declarations/{jdId}/decisions",
+    "regex": "^/employers/me/joint\\-declarations/[^/]+/decisions$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Attest / reject Joint Declaration",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/kyc-approvals/{requestId}/decisions",
+    "regex": "^/employers/me/kyc\\-approvals/[^/]+/decisions$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Approve / reject member KYC (bank, PAN, Aadhaar seeding)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/integrations/mock-pension-bank/paid-statements",
+    "regex": "^/integrations/mock\\-pension\\-bank/paid\\-statements$",
+    "status": "M",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ext.pension_bank"
+    ],
+    "summary": "Signed paid-statement callback from the pension bank",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/damages-knock-offs/{knockOffId}/approvals",
+    "regex": "^/office/damages\\-knock\\-offs/[^/]+/approvals$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.ss"
+    ],
+    "summary": "SS approves the knock-off",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/ecr-filings/{filingId}/payment-rejections",
+    "regex": "^/office/ecr\\-filings/[^/]+/payment\\-rejections$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.cash"
+    ],
+    "summary": "Cash / Accounts rejects an unpaid or erroneous challan stuck in pending bank status (tracker: \"Unable to reject ecr payment\")",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/establishments/{estId}/damages-knock-offs",
+    "regex": "^/office/establishments/[^/]+/damages\\-knock\\-offs$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.da_compliance"
+    ],
+    "summary": "Knock off auto-calculated 14B / 7Q against a miscellaneous challan (FO INTERFACE >> 14B/7Q Knock Off)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/outreach-camps/{campId}/assisted-requests",
+    "regex": "^/office/outreach\\-camps/[^/]+/assisted\\-requests$",
+    "status": "P",
+    "phase": 3,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.nan"
+    ],
+    "summary": "Requests taken at Nidhi Aapke Nikat camps",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/demands/{demandId}/payment-intents",
+    "regex": "^/employers/me/demands/[^/]+/payment\\-intents$",
+    "status": "P",
+    "phase": 2,
+    "owner": "payment-simulator",
+    "upstream": "http://payment-simulator:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Pay a demand (14B / 7Q / admin charges)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/ecr-filings/{filingId}/submissions",
+    "regex": "^/employers/me/ecr\\-filings/[^/]+/submissions$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Submit → generate TRRN",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/ecr-filings/{filingId}/validations",
+    "regex": "^/employers/me/ecr\\-filings/[^/]+/validations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Schema + business validation",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/kyc-bulk-uploads/{uploadId}/errors",
+    "regex": "^/employers/me/kyc\\-bulk\\-uploads/[^/]+/errors$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Bulk KYC error list",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/operators/{operatorId}/revocations",
+    "regex": "^/employers/me/operators/[^/]+/revocations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.owner"
+    ],
+    "summary": "Revoke operator (Journey A9)",
+    "revocation": true
+  },
+  {
+    "method": "GET",
+    "path_template": "/international/coc-applications/{id}/certificate",
+    "regex": "^/international/coc\\-applications/[^/]+/certificate$",
+    "status": "P",
+    "phase": 2,
+    "owner": "international",
+    "upstream": "http://international-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Download issued Certificate of Coverage",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/partners/foreign-agencies/coc-certificates/{id}",
+    "regex": "^/partners/foreign\\-agencies/coc\\-certificates/[^/]+$",
+    "status": "P",
+    "phase": 3,
+    "owner": "international",
+    "upstream": "http://international-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ext.foreign_ss"
+    ],
+    "summary": "Foreign agency verifies a CoC (FOREIGN AGENCIES login)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/caiu/synthetic-risk-signals/{signalId}/reviews",
+    "regex": "^/caiu/synthetic\\-risk\\-signals/[^/]+/reviews$",
+    "status": "W",
+    "phase": 1,
+    "owner": "intelligence",
+    "upstream": "http://intelligence-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.caiu"
+    ],
+    "summary": "Investigator disposition (Journey D4)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/claimants/death-claims/{claimId}/beneficiaries",
+    "regex": "^/claimants/death\\-claims/[^/]+/beneficiaries$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": true,
+    "step_up": false,
+    "callers": [
+      "claimant.nominee"
+    ],
+    "summary": "Inward an additional co-beneficiary / legal heir on an open death claim",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/members/{uan}/contribution-ledger",
+    "regex": "^/employers/me/members/[^/]+/contribution\\-ledger$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Wage and contribution ledger for own employee",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/integrations/mock-bank/payment-confirmations",
+    "regex": "^/integrations/mock\\-bank/payment\\-confirmations$",
+    "status": "M",
+    "phase": 1,
+    "owner": "payment-simulator",
+    "upstream": "http://payment-simulator:8000",
+    "money": true,
+    "step_up": false,
+    "callers": [
+      "ext.collecting_bank"
+    ],
+    "summary": "Signed bank confirmation callback",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/international/coc-applications/{id}/extensions",
+    "regex": "^/international/coc\\-applications/[^/]+/extensions$",
+    "status": "P",
+    "phase": 2,
+    "owner": "international",
+    "upstream": "http://international-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "CoC extension / renewal",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/vdr-entries/{vdrId}/ecr-reconciliations",
+    "regex": "^/office/vdr\\-entries/[^/]+/ecr\\-reconciliations$",
+    "status": "?",
+    "phase": 3,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "Reconcile a VDR entry with the corresponding ECR, and flag late payment for 14B / 7Q",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/approvals/{approvalId}/decisions",
+    "regex": "^/employers/me/approvals/[^/]+/decisions$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Approve / reject a queued member change",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/ecr-filings/{filingId}/approvals",
+    "regex": "^/employers/me/ecr\\-filings/[^/]+/approvals$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Signatory approval",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/proceedings/{caseId}/submissions",
+    "regex": "^/employers/me/proceedings/[^/]+/submissions$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Employer reply / evidence submission",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/integrations/mock-jeevan-pramaan/dlc-events",
+    "regex": "^/integrations/mock\\-jeevan\\-pramaan/dlc\\-events$",
+    "status": "M",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ext.jeevan_pramaan"
+    ],
+    "summary": "Signed callback from mock Jeevan Pramaan",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/accounts/{accountLinkId}/reactivations",
+    "regex": "^/office/accounts/[^/]+/reactivations$",
+    "status": "P",
+    "phase": 3,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.ao",
+      "fo.apfc"
+    ],
+    "summary": "Inoperative account reactivation",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/cases/{caseId}/prosecutions",
+    "regex": "^/office/compliance/cases/[^/]+/prosecutions$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "Prosecution / legal referral record",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/challans/{trrn}/payment-intents",
+    "regex": "^/employers/me/challans/[^/]+/payment\\-intents$",
+    "status": "M",
+    "phase": 1,
+    "owner": "payment-simulator",
+    "upstream": "http://payment-simulator:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Pay challan via mock bank",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/configuration/change-requests",
+    "regex": "^/employers/me/configuration/change\\-requests$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Request configuration change (office-approved)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/members/{uan}/location-mappings",
+    "regex": "^/employers/me/members/[^/]+/location\\-mappings$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Member Location Mapping to branches",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/accounts/{accountLinkId}/passbook",
+    "regex": "^/members/me/accounts/[^/]+/passbook$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Passbook for one linked account; accountLinkId is an opaque ID validated against the caller",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/annual-statements/{financialYear}",
+    "regex": "^/members/me/annual\\-statements/[^/]+$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Annual account slip",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/higher-pension-options/{optionId}",
+    "regex": "^/members/me/higher\\-pension\\-options/[^/]+$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Higher-pension application status",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/transfers/{transferId}/annexure-k",
+    "regex": "^/members/me/transfers/[^/]+/annexure\\-k$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Annexure K transfer statement",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/claims/{claimId}/payment-instructions",
+    "regex": "^/office/claims/[^/]+/payment\\-instructions$",
+    "status": "W",
+    "phase": 1,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.cash"
+    ],
+    "summary": "Settlement payment instruction → PaymentInstructed.v1 (Journey B6)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/cases/{caseId}/recovery-8f",
+    "regex": "^/office/compliance/cases/[^/]+/recovery\\-8f$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.recovery_officer"
+    ],
+    "summary": "8F recovery / attachment (demo record only)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/death-claims/{claimId}/shares-summary",
+    "regex": "^/office/death\\-claims/[^/]+/shares\\-summary$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "Allocated vs legacy-settled vs disbursed vs pending share of a death claim",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/ledger-journals/{journalId}/reversals",
+    "regex": "^/office/ledger\\-journals/[^/]+/reversals$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "Reverse an already posted journal (new reversing entries; never edit in place) → LedgerReversed.v1",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/pensions/ppos/{ppoId}/initial-arrears",
+    "regex": "^/office/pensions/ppos/[^/]+/initial\\-arrears$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": true,
+    "step_up": false,
+    "callers": [
+      "fo.ss_pension"
+    ],
+    "summary": "Initial arrear (DA(P) → SS(P) → APFC(P))",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/receipts/{receiptId}/trrn-adjustments",
+    "regex": "^/office/receipts/[^/]+/trrn\\-adjustments$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "TRRN adjustment: allocate an excess / unallocated amount against a future TRRN",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/vdr-entries/{vdrId}/eo-certifications",
+    "regex": "^/office/vdr\\-entries/[^/]+/eo\\-certifications$",
+    "status": "?",
+    "phase": 3,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.eo"
+    ],
+    "summary": "Enforcement Officer certifies a revised ECR in the VDR-ECR correction process",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/pensioners/me/life-certificate/submissions",
+    "regex": "^/pensioners/me/life\\-certificate/submissions$",
+    "status": "M",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "csc_operator",
+      "pensioner"
+    ],
+    "summary": "Record DLC submission (mock Jeevan Pramaan / face-auth adapter)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/members/{uan}/exit-corrections",
+    "regex": "^/employers/me/members/[^/]+/exit\\-corrections$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Date-of-exit correction",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/cases/{caseId}/reviews-7b",
+    "regex": "^/office/compliance/cases/[^/]+/reviews\\-7b$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "7B review of an order",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/pensions/life-certificates/overdue",
+    "regex": "^/office/pensions/life\\-certificates/overdue$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc_pension"
+    ],
+    "summary": "Pensioners with expired life certificates",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/public/establishments/{estId}/e-report-card",
+    "regex": "^/public/establishments/[^/]+/e\\-report\\-card$",
+    "status": "P",
+    "phase": 2,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "public"
+    ],
+    "summary": "Establishment e-Report Card: wage-month filing/payment history, counts and totals only",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/integrations/shram-suvidha/registrations",
+    "regex": "^/integrations/shram\\-suvidha/registrations$",
+    "status": "M",
+    "phase": 3,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ext.shram_suvidha"
+    ],
+    "summary": "Shram Suvidha common-registration feed (signed)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/freeze-cases/{caseId}/verifications",
+    "regex": "^/office/freeze\\-cases/[^/]+/verifications$",
+    "status": "P",
+    "phase": 2,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.ao",
+      "fo.apfc",
+      "fo.da_accounts",
+      "fo.da_compliance",
+      "fo.ss"
+    ],
+    "summary": "Freeze-case verification step (DA → SS/AO → APFC/RPFC-II → OIC)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/vdr-entries/{vdrId}/special-credits",
+    "regex": "^/office/vdr\\-entries/[^/]+/special\\-credits$",
+    "status": "?",
+    "phase": 3,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "VDR Special — exceptional direct credit to a member account, with evidence and competent-authority approval. EPFO treats it as a high-risk process; semantics unconfirmed",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/audit/concurrent/alerts/{alertId}/replies",
+    "regex": "^/audit/concurrent/alerts/[^/]+/replies$",
+    "status": "P",
+    "phase": 2,
+    "owner": "audit",
+    "upstream": "http://audit-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.oic"
+    ],
+    "summary": "OIC replies to a concurrent-audit alert",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/members/bulk-registrations",
+    "regex": "^/employers/me/members/bulk\\-registrations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Bulk registration file",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/signatories/authorisations",
+    "regex": "^/employers/me/signatories/authorisations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.owner"
+    ],
+    "summary": "Authorise signatory",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/grievances/{grievanceId}/office-transfers",
+    "regex": "^/grievances/[^/]+/office\\-transfers$",
+    "status": "P",
+    "phase": 2,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.pro"
+    ],
+    "summary": "Transfer a grievance to another office",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/claims/{claimId}/cancellations",
+    "regex": "^/members/me/claims/[^/]+/cancellations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "member"
+    ],
+    "summary": "Cancel an unsettled claim (renamed from …/withdrawals; allowed only before a checker decision — see ClaimStateMachine in claim-service.yaml)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/claims/{claimId}/confirmations",
+    "regex": "^/members/me/claims/[^/]+/confirmations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "member"
+    ],
+    "summary": "Transaction-intent confirmation (Journey B3)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/cases/{caseId}/hearings",
+    "regex": "^/office/compliance/cases/[^/]+/hearings$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "Schedule / record hearing",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/pensions/ppos/{ppoId}/e-signatures",
+    "regex": "^/office/pensions/ppos/[^/]+/e\\-signatures$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc_pension"
+    ],
+    "summary": "APFC (Pension) e-signs the PPO",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/public/pension/life-certificate-lookups",
+    "regex": "^/public/pension/life\\-certificate\\-lookups$",
+    "status": "M",
+    "phase": 1,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "pensioner"
+    ],
+    "summary": "Jeevan Pramaan / life-certificate status by PPO number or Jeevan Pramaan transaction ID (CAPTCHA, minimal disclosure)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/security/sessions/{sessionId}/revocations",
+    "regex": "^/security/sessions/[^/]+/revocations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "gateway",
+    "upstream": null,
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "ho.security"
+    ],
+    "summary": "Revoke session (Journey A9)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/members/exit-bulk-uploads",
+    "regex": "^/employers/me/members/exit\\-bulk\\-uploads$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Member > Exit-Bulk upload",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/grievances/{grievanceId}/reopen-requests",
+    "regex": "^/grievances/[^/]+/reopen\\-requests$",
+    "status": "W",
+    "phase": 1,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Complainant requests reopening",
+    "revocation": false
+  },
+  {
+    "method": "PUT",
+    "path_template": "/ho/config/interest-rates/{financialYear}",
+    "regex": "^/ho/config/interest\\-rates/[^/]+$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "ho.fa_cao"
+    ],
+    "summary": "Record the approved annual interest rate (CBT recommendation, Ministry concurrence) — illustrative in the POC",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/integrations/mock-bank/payment-returns",
+    "regex": "^/integrations/mock\\-bank/payment\\-returns$",
+    "status": "M",
+    "phase": 1,
+    "owner": "payment-simulator",
+    "upstream": "http://payment-simulator:8000",
+    "money": true,
+    "step_up": false,
+    "callers": [
+      "ext.collecting_bank"
+    ],
+    "summary": "Signed bank return / failure callback",
+    "revocation": false
+  },
+  {
+    "method": "PUT",
+    "path_template": "/members/me/claims/{claimId}/bank-details",
+    "regex": "^/members/me/claims/[^/]+/bank\\-details$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "member"
+    ],
+    "summary": "Post-submission: switch a claim not yet in payment to another KYC-verified bank account of the member (after a return, use …/re-disbursement-requests)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/pension-eligibility-preview",
+    "regex": "^/members/me/pension\\-eligibility\\-preview$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Pre-check pension eligibility across all member IDs under the UAN; flags untransferred service (threshold from illustrative config)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/pension-scheme-certificates",
+    "regex": "^/members/me/pension\\-scheme\\-certificates$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "member"
+    ],
+    "summary": "Scheme certificate request (Form 10C option)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/cases/{caseId}/appeals",
+    "regex": "^/office/compliance/cases/[^/]+/appeals$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.legal"
+    ],
+    "summary": "7-I appeal record (filed before the tribunal)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/cases/{caseId}/notices",
+    "regex": "^/office/compliance/cases/[^/]+/notices$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "Issue and serve notice / summons",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/ecr-filings/{filingId}/rejections",
+    "regex": "^/office/ecr\\-filings/[^/]+/rejections$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "Reject an ECR before posting",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/member-change-requests/pendency",
+    "regex": "^/office/member\\-change\\-requests/pendency$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.rpfc1"
+    ],
+    "summary": "RPFC-I monitors JD pendency",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/recovery/{caseId}/arrest-warrants",
+    "regex": "^/office/recovery/[^/]+/arrest\\-warrants$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.recovery_officer"
+    ],
+    "summary": "Arrest and detention of defaulter (demo record only)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/audit/internal/paras/{paraId}/decisions",
+    "regex": "^/audit/internal/paras/[^/]+/decisions$",
+    "status": "P",
+    "phase": 3,
+    "owner": "audit",
+    "upstream": "http://audit-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "ho.audit"
+    ],
+    "summary": "Audit Division drops / keeps a para",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/audit/internal/reports/{reportId}/paras",
+    "regex": "^/audit/internal/reports/[^/]+/paras$",
+    "status": "P",
+    "phase": 3,
+    "owner": "audit",
+    "upstream": "http://audit-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "zo.internal_audit"
+    ],
+    "summary": "Raise an audit para",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/claimants/family-pension-applications",
+    "regex": "^/claimants/family\\-pension\\-applications$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": true,
+    "step_up": false,
+    "callers": [
+      "family_pensioner"
+    ],
+    "summary": "Widow / child / orphan pension",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/members/{uan}/declarations",
+    "regex": "^/employers/me/members/[^/]+/declarations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Form 11 new-joinee declaration",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/office-transfer-requests",
+    "regex": "^/employers/me/office\\-transfer\\-requests$",
+    "status": "P",
+    "phase": 3,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Transfer establishment to another office jurisdiction",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/registration-requests/{reqId}",
+    "regex": "^/employers/registration\\-requests/[^/]+$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.owner"
+    ],
+    "summary": "Registration status",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/voluntary-coverage-requests",
+    "regex": "^/employers/voluntary\\-coverage\\-requests$",
+    "status": "P",
+    "phase": 3,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Voluntary coverage request",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/grievances/{grievanceId}/evidence-links",
+    "regex": "^/grievances/[^/]+/evidence\\-links$",
+    "status": "W",
+    "phase": 1,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.pro"
+    ],
+    "summary": "Officer attaches case-linked evidence (Journey C3)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/claims/eligibility-preview",
+    "regex": "^/members/me/claims/eligibility\\-preview$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Pre-flight: evaluate one form type before filing — eligible or not, blockers from account status, maximum amount, required documents, rule version",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/claims/{claimId}/audit-trail",
+    "regex": "^/members/me/claims/[^/]+/audit\\-trail$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Post-submission: member's view of every state change on own claim (time, state, role, reason; officer names withheld)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/pension-scheme-certificate",
+    "regex": "^/members/me/pension\\-scheme\\-certificate$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Scheme certificate status",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/cases/{caseId}/orders",
+    "regex": "^/office/compliance/cases/[^/]+/orders$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "7A dues-determination order",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/membership-disputes",
+    "regex": "^/office/compliance/membership\\-disputes$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "26B coverage / membership dispute",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/establishments/{estId}/defreezes",
+    "regex": "^/office/establishments/[^/]+/defreezes$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.oic"
+    ],
+    "summary": "De-freeze an establishment, maker-checker",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/pensions/ppos/{ppoId}/dispatches",
+    "regex": "^/office/pensions/ppos/[^/]+/dispatches$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_pension"
+    ],
+    "summary": "Dispatch PPO and scroll",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/rti-requests/{requestId}/replies",
+    "regex": "^/office/rti\\-requests/[^/]+/replies$",
+    "status": "P",
+    "phase": 3,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.pro"
+    ],
+    "summary": "Record RTI replies",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/transfers/{transferId}/decisions",
+    "regex": "^/office/transfers/[^/]+/decisions$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "Process a Form 13 transfer between member IDs / offices",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/transfers/{transferId}/recredits",
+    "regex": "^/office/transfers/[^/]+/recredits$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "Recredit a rejected transfer-in back to the member ledger (VDR recredit; tracker: \"Recredit of transfer-in rejected cases\")",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/integrations/fund-managers/positions",
+    "regex": "^/integrations/fund\\-managers/positions$",
+    "status": "M",
+    "phase": 3,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ext.fund_manager"
+    ],
+    "summary": "Fund manager / custodian position feed (signed)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/account-recovery-requests",
+    "regex": "^/members/me/account\\-recovery\\-requests$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "member"
+    ],
+    "summary": "Controlled, reviewed account recovery (Journey D5)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/cases/{caseId}/second-approvals",
+    "regex": "^/office/cases/[^/]+/second\\-approvals$",
+    "status": "W",
+    "phase": 1,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc",
+      "fo.oic"
+    ],
+    "summary": "Dual control for high-value / high-risk cases",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/edli-claims/{claimId}/decisions",
+    "regex": "^/office/edli\\-claims/[^/]+/decisions$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.edli"
+    ],
+    "summary": "Decide EDLI assurance-benefit claim",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/pensions/service-aggregations",
+    "regex": "^/office/pensions/service\\-aggregations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.da_pension"
+    ],
+    "summary": "DA (Pension) aggregates untransferred past service into the calculation sheet",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/partners/sandbox/payroll/ecr-filings",
+    "regex": "^/partners/sandbox/payroll/ecr\\-filings$",
+    "status": "M",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": false,
+    "callers": [
+      "payroll_provider"
+    ],
+    "summary": "B2B payroll API ECR upload",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/privacy/requests/{requestId}/decisions",
+    "regex": "^/privacy/requests/[^/]+/decisions$",
+    "status": "P",
+    "phase": 3,
+    "owner": "audit",
+    "upstream": "http://audit-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "ho.data_protection"
+    ],
+    "summary": "Decide a data-principal request",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/public/inoperative-accounts/searches",
+    "regex": "^/public/inoperative\\-accounts/searches$",
+    "status": "P",
+    "phase": 3,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member.exited"
+    ],
+    "summary": "Inoperative-account helpdesk search (step-up before any balance is shown)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/audit/internal/paras/{paraId}/replies",
+    "regex": "^/audit/internal/paras/[^/]+/replies$",
+    "status": "P",
+    "phase": 3,
+    "owner": "audit",
+    "upstream": "http://audit-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.oic"
+    ],
+    "summary": "Office compliance reply to a para",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/higher-pension-options",
+    "regex": "^/employers/me/higher\\-pension\\-options$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Member joint options for higher pension awaiting validation",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/claims/{claimId}/documents",
+    "regex": "^/members/me/claims/[^/]+/documents$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Upload supporting document (object store, scanned)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/cases/{caseId}/recommendations",
+    "regex": "^/office/cases/[^/]+/recommendations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "Dealing-hand recommendation",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/establishments/{estId}/freezes",
+    "regex": "^/office/establishments/[^/]+/freezes$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.oic",
+      "ho.fa_cao",
+      "zo.rpfc1"
+    ],
+    "summary": "Freeze an establishment",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/pensions/brs-reconciliations",
+    "regex": "^/office/pensions/brs\\-reconciliations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.apfc_pension"
+    ],
+    "summary": "Monthly Bank Reconciliation Statement (BRS) of pension scrolls vs bank debit advices",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/partners/liquidators/claims/{claimId}",
+    "regex": "^/partners/liquidators/claims/[^/]+$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "liquidator"
+    ],
+    "summary": "Liquidator / resolution professional views EPFO dues claim",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/challans/{trrn}/receipt",
+    "regex": "^/employers/me/challans/[^/]+/receipt$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Payment receipt / CRN",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/members/active-export",
+    "regex": "^/employers/me/members/active\\-export$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Download active members with UAN and KYC (Dashboards > Active Members)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/operators/invitations",
+    "regex": "^/employers/me/operators/invitations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.owner"
+    ],
+    "summary": "Invite operator with scoped permissions (a privileged grant)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/ownership-declaration",
+    "regex": "^/employers/me/ownership\\-declaration$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Form 5A ownership / management declaration — view",
+    "revocation": false
+  },
+  {
+    "method": "PUT",
+    "path_template": "/employers/me/ownership-declaration",
+    "regex": "^/employers/me/ownership\\-declaration$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Form 5A — submit / amend",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/exempted/me/annexure-k-submissions",
+    "regex": "^/exempted/me/annexure\\-k\\-submissions$",
+    "status": "P",
+    "phase": 3,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": true,
+    "step_up": false,
+    "callers": [
+      "exempted.trust"
+    ],
+    "summary": "Submit Annexure K with the transfer amount",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/grievances/{grievanceId}/escalations",
+    "regex": "^/grievances/[^/]+/escalations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "zo.acc"
+    ],
+    "summary": "Escalate to next supervisory tier (Journey C4)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/ndc/event-failures/{eventId}/replays",
+    "regex": "^/ndc/event\\-failures/[^/]+/replays$",
+    "status": "W",
+    "phase": 1,
+    "owner": "platform",
+    "upstream": "http://platform-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "tech.ndc"
+    ],
+    "summary": "Replay a dead-lettered event (idempotent consumers)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/pensions/disbursement-lists",
+    "regex": "^/office/pensions/disbursement\\-lists$",
+    "status": "P",
+    "phase": 3,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.pension_disbursement"
+    ],
+    "summary": "Legacy bank-wise disbursement lists (until CPPS)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/recovery/{caseId}/attachments",
+    "regex": "^/office/recovery/[^/]+/attachments$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.recovery_officer"
+    ],
+    "summary": "Attachment of movable / immovable property (demo record only)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/system/locks/{lockId}/release",
+    "regex": "^/office/system/locks/[^/]+/release$",
+    "status": "P",
+    "phase": 2,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.oic"
+    ],
+    "summary": "Supervised release of an orphaned lock (reason required) → LockReleased.v1 (tracker: \"Unable to lock process\", phantom \"concurrent claims already under processing\")",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/pensioners/me/bank-change-requests",
+    "regex": "^/pensioners/me/bank\\-change\\-requests$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "pensioner"
+    ],
+    "summary": "Change disbursing bank",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/ecr-filings/{filingId}",
+    "regex": "^/employers/me/ecr\\-filings/[^/]+$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Filing detail and status",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/vishwas-applications",
+    "regex": "^/employers/me/vishwas\\-applications$",
+    "status": "P",
+    "phase": 2,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": true,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Apply under VISHWAS (one-time settlement of 14B damages / penalty disputes at reduced rates for past defaults)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/grievances/{grievanceId}/resolution",
+    "regex": "^/grievances/[^/]+/resolution$",
+    "status": "W",
+    "phase": 1,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.pro"
+    ],
+    "summary": "Resolve with reason (Journey C4)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/international/coc-applications/{id}",
+    "regex": "^/international/coc\\-applications/[^/]+$",
+    "status": "M",
+    "phase": 2,
+    "owner": "international",
+    "upstream": "http://international-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "CoC status",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/international/totalisation-claims",
+    "regex": "^/international/totalisation\\-claims$",
+    "status": "P",
+    "phase": 3,
+    "owner": "international",
+    "upstream": "http://international-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.iwu"
+    ],
+    "summary": "Route a benefit claim under a social-security agreement",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/higher-pension-options",
+    "regex": "^/members/me/higher\\-pension\\-options$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "member"
+    ],
+    "summary": "Submit joint option for higher pension",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/accounts/interest-postings",
+    "regex": "^/office/accounts/interest\\-postings$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "ho.fa_cao"
+    ],
+    "summary": "Annual interest crediting run (illustrative rate)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/claims/{claimId}/audit-trail",
+    "regex": "^/office/claims/[^/]+/audit\\-trail$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_accounts",
+      "zo.rpfc1_audit"
+    ],
+    "summary": "Full claim audit trail for officers and auditors: transitions, actor IDs, approval level, rule version, lock events, CAD versions",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/pensions/special-10d-cases",
+    "regex": "^/office/pensions/special\\-10d\\-cases$",
+    "status": "P",
+    "phase": 3,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_pension"
+    ],
+    "summary": "Special 10D module for incomplete service / wage data",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/pensions/{ppoId}/resumptions",
+    "regex": "^/office/pensions/[^/]+/resumptions$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc_pension"
+    ],
+    "summary": "Resume pension",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/pensions/{ppoId}/suspensions",
+    "regex": "^/office/pensions/[^/]+/suspensions$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc_pension"
+    ],
+    "summary": "Suspend pension on missing life certificate",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/audit/correlations/{correlationId}",
+    "regex": "^/audit/correlations/[^/]+$",
+    "status": "W",
+    "phase": 1,
+    "owner": "audit",
+    "upstream": "http://audit-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "gov.cag",
+      "zo.internal_audit",
+      "zo.rpfc1_audit"
+    ],
+    "summary": "Platform endpoint defined in init.md §3.1",
+    "revocation": false
+  },
+  {
+    "method": "PATCH",
+    "path_template": "/employers/me/members/{uan}/profile",
+    "regex": "^/employers/me/members/[^/]+/profile$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Fill missing member details (creates a change request)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/grievances/{grievanceId}/documents",
+    "regex": "^/grievances/[^/]+/documents$",
+    "status": "W",
+    "phase": 1,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Attach a synthetic document (object store, malware-scan stub, Journey C1)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/grievances/{grievanceId}/reminders",
+    "regex": "^/grievances/[^/]+/reminders$",
+    "status": "P",
+    "phase": 2,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Complainant reminder on an overdue grievance",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/claims/eligible-types",
+    "regex": "^/members/me/claims/eligible\\-types$",
+    "status": "W",
+    "phase": 1,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Available claim types with rule version and reasons (Journey B3)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/legal/cases/{caseId}/orders",
+    "regex": "^/office/legal/cases/[^/]+/orders$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.legal"
+    ],
+    "summary": "Record a court / tribunal order",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/recovery/{caseId}/receivers",
+    "regex": "^/office/recovery/[^/]+/receivers$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.recovery_officer"
+    ],
+    "summary": "Appointment of receiver (demo record only)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/public/defaulting-establishments",
+    "regex": "^/public/defaulting\\-establishments$",
+    "status": "P",
+    "phase": 2,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "public"
+    ],
+    "summary": "Published defaulter list (synthetic)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/public/demo-calculations/pension",
+    "regex": "^/public/demo\\-calculations/pension$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "public"
+    ],
+    "summary": "Illustrative pension estimate calculator",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/public/grievances/status-lookups",
+    "regex": "^/public/grievances/status\\-lookups$",
+    "status": "P",
+    "phase": 2,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "complainant"
+    ],
+    "summary": "Grievance status by registration number (OTP proof)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/public/pension/payment-enquiries",
+    "regex": "^/public/pension/payment\\-enquiries$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "pensioner"
+    ],
+    "summary": "Pension payment enquiry (month-wise credited / not credited)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/vigilance/cases/{caseId}/decisions",
+    "regex": "^/vigilance/cases/[^/]+/decisions$",
+    "status": "P",
+    "phase": 3,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "ho.cvo"
+    ],
+    "summary": "CVO / Director (Vigilance) decision",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/claim-attestations",
+    "regex": "^/employers/me/claim\\-attestations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Claims awaiting employer attestation",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/compliance-summary",
+    "regex": "^/employers/me/compliance\\-summary$",
+    "status": "P",
+    "phase": 2,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Month-wise filing / payment compliance for this establishment",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/joint-declarations",
+    "regex": "^/employers/me/joint\\-declarations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Joint Declarations awaiting attestation",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/joint-declarations",
+    "regex": "^/employers/me/joint\\-declarations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Employer-initiated Joint Declaration",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/registration-requests",
+    "regex": "^/employers/registration\\-requests$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.owner"
+    ],
+    "summary": "New establishment registration request",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/exempted/me/annexure-k-requests",
+    "regex": "^/exempted/me/annexure\\-k\\-requests$",
+    "status": "P",
+    "phase": 3,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "exempted.trust"
+    ],
+    "summary": "Annexure K requests from the field office (transfers in / out)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/grievances/{grievanceId}/feedback",
+    "regex": "^/grievances/[^/]+/feedback$",
+    "status": "P",
+    "phase": 2,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Closure feedback / satisfaction",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/grievances/{grievanceId}/messages",
+    "regex": "^/grievances/[^/]+/messages$",
+    "status": "W",
+    "phase": 1,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.pro",
+      "member"
+    ],
+    "summary": "Reply / message",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/integrations/cpgrams/grievances",
+    "regex": "^/integrations/cpgrams/grievances$",
+    "status": "M",
+    "phase": 3,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ext.cpgrams"
+    ],
+    "summary": "CPGRAMS grievance feed (signed)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/pension-applications",
+    "regex": "^/members/me/pension\\-applications$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": true,
+    "step_up": false,
+    "callers": [
+      "member",
+      "member.disabled"
+    ],
+    "summary": "Monthly pension application",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/tax/taxable-interest",
+    "regex": "^/members/me/tax/taxable\\-interest$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Taxable vs non-taxable interest split",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/transfers/{transferId}",
+    "regex": "^/members/me/transfers/[^/]+$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Transfer status",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/cases/{caseId}/assignments",
+    "regex": "^/office/cases/[^/]+/assignments$",
+    "status": "W",
+    "phase": 1,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.pro"
+    ],
+    "summary": "Assign",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/pensions/{ppoId}/revisions",
+    "regex": "^/office/pensions/[^/]+/revisions$",
+    "status": "P",
+    "phase": 3,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.apfc_pension"
+    ],
+    "summary": "Pension revision (incl. higher-pension outcome)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/public/pension/status-enquiries",
+    "regex": "^/public/pension/status\\-enquiries$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "pensioner"
+    ],
+    "summary": "Pension application / PPO status enquiry",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/vigilance/cases/{caseId}/findings",
+    "regex": "^/vigilance/cases/[^/]+/findings$",
+    "status": "P",
+    "phase": 3,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "zo.vigilance"
+    ],
+    "summary": "Zonal vigilance records findings",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/claimants/death-claims/{claimId}",
+    "regex": "^/claimants/death\\-claims/[^/]+$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "claimant",
+      "claimant.nominee"
+    ],
+    "summary": "Status (claimant verified separately; no member PII beyond entitlement)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/members/{uan}/exits",
+    "regex": "^/employers/me/members/[^/]+/exits$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Mark exit with date and reason",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/pending-approvals",
+    "regex": "^/employers/me/pending\\-approvals$",
+    "status": "P",
+    "phase": 2,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Items awaiting DSC/e-sign (KYC, transfers, claims, JD)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/returns/dashboard",
+    "regex": "^/employers/me/returns/dashboard$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Return monthly dashboard by wage month",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/transfer-requests",
+    "regex": "^/employers/me/transfer\\-requests$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Form 13 transfer requests awaiting attestation",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/exempted/me/surrender-requests",
+    "regex": "^/exempted/me/surrender\\-requests$",
+    "status": "P",
+    "phase": 3,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "exempted.trust"
+    ],
+    "summary": "Surrender / cancellation of exemption",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/integrations/mca/registrations",
+    "regex": "^/integrations/mca/registrations$",
+    "status": "M",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ext.mca"
+    ],
+    "summary": "MCA SPICe+ / AGILE-PRO auto-registration feed (signed)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/international/coc-applications",
+    "regex": "^/international/coc\\-applications$",
+    "status": "M",
+    "phase": 2,
+    "owner": "international",
+    "upstream": "http://international-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Certificate of Coverage application (mock)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/claims/{claimId}/reissues",
+    "regex": "^/office/claims/[^/]+/reissues$",
+    "status": "W",
+    "phase": 1,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.cash"
+    ],
+    "summary": "Re-issue after bank return (Journey B6)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/compliance/cases/{caseId}",
+    "regex": "^/office/compliance/cases/[^/]+$",
+    "status": "P",
+    "phase": 2,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_compliance"
+    ],
+    "summary": "Case detail with full proceeding history",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/pensioners/me/life-certificate",
+    "regex": "^/pensioners/me/life\\-certificate$",
+    "status": "M",
+    "phase": 1,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "pensioner"
+    ],
+    "summary": "Jeevan Pramaan / Digital Life Certificate status: last submitted, valid till, source",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/closure-requests",
+    "regex": "^/employers/me/closure\\-requests$",
+    "status": "P",
+    "phase": 3,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Closure / business-discontinued declaration",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/kyc-bulk-uploads",
+    "regex": "^/employers/me/kyc\\-bulk\\-uploads$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Member > KYC BULK upload",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/ho/exemptions/{estId}/decisions",
+    "regex": "^/ho/exemptions/[^/]+/decisions$",
+    "status": "P",
+    "phase": 3,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "ho.exemption"
+    ],
+    "summary": "HO grants / cancels exemption",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/employment-history",
+    "regex": "^/members/me/employment\\-history$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Service history across linked employments",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/identity-assurance",
+    "regex": "^/members/me/identity\\-assurance$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Assurance level",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/joint-declarations",
+    "regex": "^/members/me/joint\\-declarations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "member"
+    ],
+    "summary": "Profile correction request (Joint Declaration)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/cases/{caseId}/decisions",
+    "regex": "^/office/cases/[^/]+/decisions$",
+    "status": "W",
+    "phase": 1,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.ao",
+      "fo.ss"
+    ],
+    "summary": "Decision → CaseDecisionSubmitted.v1",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/inspections",
+    "regex": "^/office/compliance/inspections$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "Inspection scheduling, including CAIU-allocated inspections",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/exempted/{estId}/returns",
+    "regex": "^/office/exempted/[^/]+/returns$",
+    "status": "P",
+    "phase": 3,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.exemption"
+    ],
+    "summary": "Exemption cell reviews trust returns",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/member-change-requests",
+    "regex": "^/office/member\\-change\\-requests$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "Joint Declaration / profile-change queue (initiator view)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/pensions/ppo-issuances",
+    "regex": "^/office/pensions/ppo\\-issuances$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.da_pension"
+    ],
+    "summary": "Issue PPO after Form 10D settlement",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/system/cad-static-data",
+    "regex": "^/office/system/cad\\-static\\-data$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.fa_accounts"
+    ],
+    "summary": "Diagnostic view of CAD static reference data (interest tables, bank branch master) and its version (tracker: \"Failed to load CAD static Data\")",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/direct-challans",
+    "regex": "^/employers/me/direct\\-challans$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Direct Challan: administrative / inspection charges challan, or miscellaneous challan for 14B damages and 7Q interest (Payments > ECR/Return filing > Direct Challan > Challan Entry)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/kyc/bank-accounts",
+    "regex": "^/members/me/kyc/bank\\-accounts$",
+    "status": "M",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "member"
+    ],
+    "summary": "Seed / change bank account (mock penny-drop, employer approval)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/compliance/defaulters",
+    "regex": "^/office/compliance/defaulters$",
+    "status": "P",
+    "phase": 2,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_compliance"
+    ],
+    "summary": "Non-filing / short-payment detection",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/exempted/{estId}/audits",
+    "regex": "^/office/exempted/[^/]+/audits$",
+    "status": "P",
+    "phase": 3,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.exemption"
+    ],
+    "summary": "Exemption cell reviews trust audit reports",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/members/{uan}/defreezes",
+    "regex": "^/office/members/[^/]+/defreezes$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.oic"
+    ],
+    "summary": "De-freeze, maker-checker",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/pensions/transfers-in",
+    "regex": "^/office/pensions/transfers\\-in$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_pension"
+    ],
+    "summary": "Transfer in with / without PPO",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/receipts/unreconciled",
+    "regex": "^/office/receipts/unreconciled$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.cash"
+    ],
+    "summary": "Unreconciled / suspense receipts",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/recovery/{caseId}/sales",
+    "regex": "^/office/recovery/[^/]+/sales$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.recovery_officer"
+    ],
+    "summary": "Sale of attached property (demo record only)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/public/claims/status-lookups",
+    "regex": "^/public/claims/status\\-lookups$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Claim status by reference (OTP proof; no PII in response)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/public/demo-calculations/epf",
+    "regex": "^/public/demo\\-calculations/epf$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "public"
+    ],
+    "summary": "Illustrative EPF contribution calculator",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/caiu/synthetic-risk-signals",
+    "regex": "^/caiu/synthetic\\-risk\\-signals$",
+    "status": "W",
+    "phase": 1,
+    "owner": "intelligence",
+    "upstream": "http://intelligence-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.caiu"
+    ],
+    "summary": "CAIU risk signals (Journey D2)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/security-reports",
+    "regex": "^/members/me/security\\-reports$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Report suspicious activity",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/tax/form-15g-15h",
+    "regex": "^/members/me/tax/form\\-15g\\-15h$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Upload Form 15G / 15H",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/accounts/inoperative",
+    "regex": "^/office/accounts/inoperative$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_accounts",
+      "fo.oic"
+    ],
+    "summary": "Inoperative account identification",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/pensioners/me/pension-slips",
+    "regex": "^/pensioners/me/pension\\-slips$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "pensioner"
+    ],
+    "summary": "Pension slip",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/public/establishments/{estId}",
+    "regex": "^/public/establishments/[^/]+$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "public"
+    ],
+    "summary": "Establishment public profile: name, office, coverage and exemption status",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/security/step-up-challenges",
+    "regex": "^/security/step\\-up\\-challenges$",
+    "status": "W",
+    "phase": 1,
+    "owner": "gateway",
+    "upstream": null,
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Start a demo step-up confirmation for a 🔐 action",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/bank-accounts",
+    "regex": "^/employers/me/bank\\-accounts$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Establishment bank accounts used for remittance",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/challans/{trrn}",
+    "regex": "^/employers/me/challans/[^/]+$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Challan detail by TRRN",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/configuration",
+    "regex": "^/employers/me/configuration$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Establishment configuration (read-only, seeded): coverage date, exemption status, coverage type, jurisdiction office, sub-codes, applicable schemes",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/kyc-approvals",
+    "regex": "^/employers/me/kyc\\-approvals$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Member KYC requests awaiting employer approval",
+    "revocation": false
+  },
+  {
+    "method": "PATCH",
+    "path_template": "/members/me/contact-details",
+    "regex": "^/members/me/contact\\-details$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "member"
+    ],
+    "summary": "Change mobile / email (Journey D1)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/service-history",
+    "regex": "^/members/me/service\\-history$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Pre-flight: service per member ID — contributory months, NCP days, pension-service months, transfer status — for pension and final-settlement decisions",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/ndc/issue-tracker/requests",
+    "regex": "^/ndc/issue\\-tracker/requests$",
+    "status": "P",
+    "phase": 2,
+    "owner": "platform",
+    "upstream": "http://platform-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.is"
+    ],
+    "summary": "Raise an Issue Tracker request (e.g. freeze / de-freeze), with the order attached",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/members/{uan}/freezes",
+    "regex": "^/office/members/[^/]+/freezes$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc",
+      "ho.fa_cao",
+      "zo.rpfc1"
+    ],
+    "summary": "UAN / member-ID freeze with reason and evidence",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/pensions/worksheets",
+    "regex": "^/office/pensions/worksheets$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_pension"
+    ],
+    "summary": "DA (Pension) generates the worksheet (Pension > Transaction > Pension Worksheet)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/pensioners/me/declarations",
+    "regex": "^/pensioners/me/declarations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "family_pensioner"
+    ],
+    "summary": "Non-remarriage / non-employment declarations",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/public/pension/ppo-lookups",
+    "regex": "^/public/pension/ppo\\-lookups$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "pensioner"
+    ],
+    "summary": "Know your PPO (by bank account + DoB / member ID)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/public/trrn-status-lookups",
+    "regex": "^/public/trrn\\-status\\-lookups$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "public"
+    ],
+    "summary": "TRRN / challan status lookup (CAPTCHA)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/audit/concurrent/extracts",
+    "regex": "^/audit/concurrent/extracts$",
+    "status": "P",
+    "phase": 2,
+    "owner": "audit",
+    "upstream": "http://audit-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "zo.rpfc1_audit"
+    ],
+    "summary": "Concurrent Audit Cell daily functionality extract (Audit Portal)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/account-status",
+    "regex": "^/members/me/account\\-status$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Pre-flight: readiness of each linked member account before filing — KYC, UAN–member-ID link, exit date, freeze, active ledger locks, unmigrated legacy transactions — as explicit blocker codes",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/claims/{claimId}",
+    "regex": "^/members/me/claims/[^/]+$",
+    "status": "W",
+    "phase": 1,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Claim detail + timeline (Journey B7)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/transfers/auto",
+    "regex": "^/members/me/transfers/auto$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Auto-transfer status on job change",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/monitoring/data-freshness",
+    "regex": "^/monitoring/data\\-freshness$",
+    "status": "W",
+    "phase": 1,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.cpfc"
+    ],
+    "summary": "Platform endpoint defined in init.md §3.1",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/ndc/dr/replication-status",
+    "regex": "^/ndc/dr/replication\\-status$",
+    "status": "P",
+    "phase": 3,
+    "owner": "platform",
+    "upstream": "http://platform-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "tech.adc"
+    ],
+    "summary": "ADC (DR site) replication status",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/claims/{claimId}/cad",
+    "regex": "^/office/claims/[^/]+/cad$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.fa_accounts"
+    ],
+    "summary": "View the generated CAD",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/claims/{claimId}/cad",
+    "regex": "^/office/claims/[^/]+/cad$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.fa_accounts"
+    ],
+    "summary": "Generate the Claim Authorization Document (CAD): interest split, TDS and net payable, with the rule and static-data versions used",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/ledger-adjustments",
+    "regex": "^/office/ledger\\-adjustments$",
+    "status": "?",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "Appendix E — field-office adjustment of a member's opening balances (taxable / non-taxable / total), also used for PF→EPS diversion. Not an employer remittance",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/contractors",
+    "regex": "^/employers/me/contractors$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "principal_employer"
+    ],
+    "summary": "Principal employer: linked contractors",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/contractors",
+    "regex": "^/employers/me/contractors$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "principal_employer"
+    ],
+    "summary": "Principal employer: register / link contractor",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/ecr-filings",
+    "regex": "^/employers/me/ecr\\-filings$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Return filing history",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/ecr-filings",
+    "regex": "^/employers/me/ecr\\-filings$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Create regular monthly ECR (upload / wizard)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/kyc/{kycType}",
+    "regex": "^/employers/me/kyc/[^/]+$",
+    "status": "M",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Seed / update establishment KYC (mock registry verification)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/signatories",
+    "regex": "^/employers/me/signatories$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.owner"
+    ],
+    "summary": "List authorised signatories",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/ho/finance/balance-sheet",
+    "regex": "^/ho/finance/balance\\-sheet$",
+    "status": "P",
+    "phase": 3,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "gov.statutory_auditor"
+    ],
+    "summary": "Balance sheet for statutory / attest audit (read-only)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/internal/security-events",
+    "regex": "^/internal/security\\-events$",
+    "status": "W",
+    "phase": 1,
+    "owner": "audit",
+    "upstream": "http://audit-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.security"
+    ],
+    "summary": "Ingest IdP events (login, new device, credential change) from the Keycloak event listener into audit + outbox → SecurityEventRecorded.v1 (Journey D1). Service-to-service only",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/international/agreements",
+    "regex": "^/international/agreements$",
+    "status": "P",
+    "phase": 2,
+    "owner": "international",
+    "upstream": "http://international-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.iwu"
+    ],
+    "summary": "Social-security agreement catalogue (synthetic, labelled)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/international",
+    "regex": "^/members/me/international$",
+    "status": "P",
+    "phase": 2,
+    "owner": "international",
+    "upstream": "http://international-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "intl_worker"
+    ],
+    "summary": "International worker profile",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/notifications",
+    "regex": "^/members/me/notifications$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Notifications (projection fed by claim / payment / grievance events — see §14)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/monitoring/contributions",
+    "regex": "^/monitoring/contributions$",
+    "status": "W",
+    "phase": 1,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.rpfc1",
+      "gov.mole",
+      "ho.cpfc"
+    ],
+    "summary": "Platform endpoint defined in init.md §3.1",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/members/{uan}/locks",
+    "regex": "^/office/members/[^/]+/locks$",
+    "status": "P",
+    "phase": 2,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.oic"
+    ],
+    "summary": "Active locks on a member ledger (annual accounts, claim adjudication, ECR posting) with owner and expiry",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/audit/concurrent/alerts",
+    "regex": "^/audit/concurrent/alerts$",
+    "status": "P",
+    "phase": 2,
+    "owner": "audit",
+    "upstream": "http://audit-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "zo.rpfc1_audit"
+    ],
+    "summary": "Concurrent audit alert to an RO",
+    "revocation": false
+  },
+  {
+    "method": "PUT",
+    "path_template": "/ho/config/rules/{ruleSet}",
+    "regex": "^/ho/config/rules/[^/]+$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "ho.acc_hq",
+      "ho.pension"
+    ],
+    "summary": "Publish a new version of an illustrative rule set (maker-checker)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/tax/form-16a",
+    "regex": "^/members/me/tax/form\\-16a$",
+    "status": "P",
+    "phase": 3,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "TDS certificate (Form 16A)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/uan-activations",
+    "regex": "^/members/uan\\-activations$",
+    "status": "M",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "UAN activation (mock OTP / mock face authentication)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/compliance/cases",
+    "regex": "^/office/compliance/cases$",
+    "status": "P",
+    "phase": 2,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "do.staff",
+      "fo.da_compliance"
+    ],
+    "summary": "Case search",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/cases",
+    "regex": "^/office/compliance/cases$",
+    "status": "P",
+    "phase": 2,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_compliance"
+    ],
+    "summary": "Open proceeding / enforcement case",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/tds/computations",
+    "regex": "^/office/tds/computations$",
+    "status": "P",
+    "phase": 3,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "TDS on withdrawal (illustrative rules)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/security/me/permissions",
+    "regex": "^/security/me/permissions$",
+    "status": "W",
+    "phase": 1,
+    "owner": "gateway",
+    "upstream": null,
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "*"
+    ],
+    "summary": "Permission inspection",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/ai/grievances/classify",
+    "regex": "^/ai/grievances/classify$",
+    "status": "W",
+    "phase": 1,
+    "owner": "intelligence",
+    "upstream": "http://intelligence-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.pro",
+      "tech.ai_service"
+    ],
+    "summary": "Platform endpoint defined in init.md §3.1",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/audit/internal/reports",
+    "regex": "^/audit/internal/reports$",
+    "status": "P",
+    "phase": 3,
+    "owner": "audit",
+    "upstream": "http://audit-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "zo.internal_audit"
+    ],
+    "summary": "Internal audit report for an office",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/claimants/death-claims",
+    "regex": "^/claimants/death\\-claims$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": true,
+    "step_up": false,
+    "callers": [
+      "claimant"
+    ],
+    "summary": "PF death claim by nominee / legal heir",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/cpps/disbursement-runs",
+    "regex": "^/cpps/disbursement\\-runs$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "tech.cpps"
+    ],
+    "summary": "CPPS monthly pan-India disbursement run through the sponsor bank",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/approvals",
+    "regex": "^/employers/me/approvals$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Member > Approvals queue (exits and other member changes awaiting the signatory)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/dashboard",
+    "regex": "^/employers/me/dashboard$",
+    "status": "P",
+    "phase": 2,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Employer home alerts and Dashboards (pending KYC, member-detail approvals, missing details)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/exemption",
+    "regex": "^/employers/me/exemption$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Exemption details (PF trust, relaxation)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/operators",
+    "regex": "^/employers/me/operators$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.owner"
+    ],
+    "summary": "List operators",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/governance/board-packs",
+    "regex": "^/governance/board\\-packs$",
+    "status": "P",
+    "phase": 3,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "gov.cbt",
+      "gov.ec",
+      "gov.fiac"
+    ],
+    "summary": "CBT / EC / FIAC board packs (aggregates only)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/grievances/{grievanceId}",
+    "regex": "^/grievances/[^/]+$",
+    "status": "W",
+    "phase": 1,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member",
+      "zo.acc"
+    ],
+    "summary": "Grievance detail (only the assigned office can read the body — Journey C2)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/ho/finance/investments",
+    "regex": "^/ho/finance/investments$",
+    "status": "P",
+    "phase": 3,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "gov.fiac",
+      "ho.investment"
+    ],
+    "summary": "Investment reporting",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/ho/reports/proceedings",
+    "regex": "^/ho/reports/proceedings$",
+    "status": "P",
+    "phase": 3,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.compliance"
+    ],
+    "summary": "HO view of e-Proceedings (7A, 14B & 7Q, virtual hearings)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/kyc/{kycType}",
+    "regex": "^/members/me/kyc/[^/]+$",
+    "status": "M",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "member"
+    ],
+    "summary": "Seed PAN / other KYC (mock)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/nominations",
+    "regex": "^/members/me/nominations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "e-Nomination (Form 2) — view",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/nominations",
+    "regex": "^/members/me/nominations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "member"
+    ],
+    "summary": "e-Nomination — submit with mock e-sign",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/uan-allotments",
+    "regex": "^/members/uan\\-allotments$",
+    "status": "M",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "csc_operator",
+      "member"
+    ],
+    "summary": "Self UAN allotment via mock Aadhaar face auth (UMANG-style)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/ndc/dr/failover-drills",
+    "regex": "^/ndc/dr/failover\\-drills$",
+    "status": "P",
+    "phase": 3,
+    "owner": "platform",
+    "upstream": "http://platform-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "tech.adc"
+    ],
+    "summary": "Run a DR failover drill",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/payment-scrolls",
+    "regex": "^/office/payment\\-scrolls$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.cash"
+    ],
+    "summary": "Batch approved settlements into a payment scroll → PaymentScrollGenerated.v1",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/physical-claims",
+    "regex": "^/office/physical\\-claims$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.diary",
+      "fo.pro_intake"
+    ],
+    "summary": "Physical claim intake: register a paper claim, scan, data entry",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/pensioners/me/payments",
+    "regex": "^/pensioners/me/payments$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "pensioner"
+    ],
+    "summary": "Pension payment history",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/branches",
+    "regex": "^/employers/me/branches$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Sub-codes / branches / departments",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/branches",
+    "regex": "^/employers/me/branches$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Create sub-code",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/challans",
+    "regex": "^/employers/me/challans$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Challan list",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/ho/actuarial/extracts",
+    "regex": "^/ho/actuarial/extracts$",
+    "status": "P",
+    "phase": 3,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.actuarial"
+    ],
+    "summary": "EPS data extract for actuarial valuation (no direct identifiers)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/grievances",
+    "regex": "^/members/me/grievances$",
+    "status": "W",
+    "phase": 1,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "List own grievances",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/grievances",
+    "regex": "^/members/me/grievances$",
+    "status": "W",
+    "phase": 1,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Member registers grievance linked to a claim (Journey C1)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/monitoring/grievances",
+    "regex": "^/monitoring/grievances$",
+    "status": "W",
+    "phase": 1,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.rpfc1",
+      "ho.cpfc",
+      "ho.customer_service",
+      "zo.acc"
+    ],
+    "summary": "Platform endpoint defined in init.md §3.1",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/public/establishments",
+    "regex": "^/public/establishments$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "public"
+    ],
+    "summary": "Establishment search by name / code / pincode (rate-limited, paged, no bulk enumeration)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/cpps/reconciliations",
+    "regex": "^/cpps/reconciliations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "tech.cpps"
+    ],
+    "summary": "CPPS reconciliation of paid statements",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/demands",
+    "regex": "^/employers/me/demands$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Payable demands: 14B damages, 7Q interest, admin charges, higher-pension dues (created from compliance / pension events)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/members",
+    "regex": "^/employers/me/members$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Employees of this establishment (own establishment only; feeds the ECR wizard in Journey A3)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/members",
+    "regex": "^/employers/me/members$",
+    "status": "M",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Register new joinee / generate UAN (mock Aadhaar)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/transfers",
+    "regex": "^/members/me/transfers$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": true,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Transfer of PF between member IDs / exempted trusts",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/ai/knowledge/search",
+    "regex": "^/ai/knowledge/search$",
+    "status": "W",
+    "phase": 1,
+    "owner": "intelligence",
+    "upstream": "http://intelligence-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "public",
+      "tech.ai_service"
+    ],
+    "summary": "Platform endpoint defined in init.md §3.1",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/exempted/me/profile",
+    "regex": "^/exempted/me/profile$",
+    "status": "P",
+    "phase": 3,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "exempted.trust"
+    ],
+    "summary": "Trust profile and exemption conditions",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/exempted/me/returns",
+    "regex": "^/exempted/me/returns$",
+    "status": "P",
+    "phase": 3,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "exempted.trust"
+    ],
+    "summary": "Periodic returns of exempted establishment",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/ho/reports/recovery",
+    "regex": "^/ho/reports/recovery$",
+    "status": "P",
+    "phase": 3,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.recovery"
+    ],
+    "summary": "HO recovery monitoring",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/passbook",
+    "regex": "^/members/me/passbook$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ext.umang",
+      "member"
+    ],
+    "summary": "Passbook across all accounts linked to the caller (no member ID parameter)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/sessions",
+    "regex": "^/members/me/sessions$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Session history",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/uan-card",
+    "regex": "^/members/me/uan\\-card$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "UAN card",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/uan-lookups",
+    "regex": "^/members/uan\\-lookups$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Know your UAN (OTP-verified)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/cases/{caseId}",
+    "regex": "^/office/cases/[^/]+$",
+    "status": "W",
+    "phase": 1,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.ao",
+      "fo.apfc",
+      "fo.da_accounts",
+      "fo.oic",
+      "fo.ss"
+    ],
+    "summary": "Case detail",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/vigilance/referrals",
+    "regex": "^/vigilance/referrals$",
+    "status": "P",
+    "phase": 3,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.caiu"
+    ],
+    "summary": "Vigilance referral contract (interface 18)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/zo/fraud-risk/cases",
+    "regex": "^/zo/fraud\\-risk/cases$",
+    "status": "P",
+    "phase": 2,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "zo.fraud_committee"
+    ],
+    "summary": "Zonal / regional fraud-risk committee case list",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/exempted/me/audits",
+    "regex": "^/exempted/me/audits$",
+    "status": "P",
+    "phase": 3,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "trust_auditor"
+    ],
+    "summary": "Annual trust audit filing",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/ndc/event-failures",
+    "regex": "^/ndc/event\\-failures$",
+    "status": "W",
+    "phase": 1,
+    "owner": "platform",
+    "upstream": "http://platform-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "tech.ndc"
+    ],
+    "summary": "Failed events / DLQ view (interface 11)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/legal/cases",
+    "regex": "^/office/legal/cases$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.legal",
+      "ho.legal"
+    ],
+    "summary": "Legal case register",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/legal/cases",
+    "regex": "^/office/legal/cases$",
+    "status": "P",
+    "phase": 3,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.legal"
+    ],
+    "summary": "Register a court / tribunal case",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/members/{uan}",
+    "regex": "^/office/members/[^/]+$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "Member 360 view (jurisdiction + purpose checked, audited)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/vdr-entries",
+    "regex": "^/office/vdr\\-entries$",
+    "status": "?",
+    "phase": 3,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.cash",
+      "fo.da_accounts"
+    ],
+    "summary": "VDR entry — record a receipt that arrived outside the online ECR/TRRN flow (e.g. cheque/DD, transfer-in, Annexure K, LIC). EPFO material reportedly expands VDR as *Valuable Document Register* (unconfirmed); the exact categories are unconfirmed",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/security/incidents",
+    "regex": "^/security/incidents$",
+    "status": "P",
+    "phase": 2,
+    "owner": "audit",
+    "upstream": "http://audit-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "ho.security"
+    ],
+    "summary": "Record a security incident; report to CERT-In",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/training/sandboxes",
+    "regex": "^/training/sandboxes$",
+    "status": "P",
+    "phase": 3,
+    "owner": "platform",
+    "upstream": "http://platform-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "train.pdnasa",
+      "train.zti",
+      "zo.zti"
+    ],
+    "summary": "Create a synthetic-data training sandbox (PDNASA / ZTI)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/ai/claims/analyse",
+    "regex": "^/ai/claims/analyse$",
+    "status": "W",
+    "phase": 1,
+    "owner": "intelligence",
+    "upstream": "http://intelligence-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_accounts",
+      "tech.ai_service"
+    ],
+    "summary": "Platform endpoint defined in init.md §3.1",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/claims",
+    "regex": "^/members/me/claims$",
+    "status": "W",
+    "phase": 1,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ext.umang",
+      "member"
+    ],
+    "summary": "List own claims",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/claims",
+    "regex": "^/members/me/claims$",
+    "status": "W",
+    "phase": 1,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": true,
+    "step_up": false,
+    "callers": [
+      "ext.umang",
+      "member",
+      "member.exited"
+    ],
+    "summary": "Advance / partial withdrawal (purpose as sub-type)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/monitoring/claims",
+    "regex": "^/monitoring/claims$",
+    "status": "W",
+    "phase": 1,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.oic",
+      "fo.rpfc1",
+      "gov.mole",
+      "gov.peic",
+      "ho.acc_hq",
+      "ho.cpfc",
+      "ho.edli",
+      "ho.pension",
+      "zo.acc"
+    ],
+    "summary": "Platform endpoint defined in init.md §3.1",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/work-queue",
+    "regex": "^/office/work\\-queue$",
+    "status": "W",
+    "phase": 1,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "do.incharge",
+      "do.staff",
+      "fo.ao",
+      "fo.apfc",
+      "fo.da_accounts",
+      "fo.oic",
+      "fo.ss"
+    ],
+    "summary": "Jurisdiction-filtered task queue",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/pensioners/me/ppo",
+    "regex": "^/pensioners/me/ppo$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "pensioner"
+    ],
+    "summary": "PPO view / download",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/public/grievances",
+    "regex": "^/public/grievances$",
+    "status": "P",
+    "phase": 2,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "complainant",
+      "pensioner"
+    ],
+    "summary": "Grievance intake from a non-logged-in person (OTP-verified contact)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/public/statistics",
+    "regex": "^/public/statistics$",
+    "status": "W",
+    "phase": 1,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "gov.mole",
+      "public"
+    ],
+    "summary": "Aggregate statistics, small-group suppression",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/security/sessions",
+    "regex": "^/security/sessions$",
+    "status": "W",
+    "phase": 1,
+    "owner": "gateway",
+    "upstream": null,
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.security"
+    ],
+    "summary": "Session inspection (security analyst, interface 17)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/kyc",
+    "regex": "^/employers/me/kyc$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Establishment KYC status: PAN, TAN, GSTIN, CIN, LIN",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/exits",
+    "regex": "^/members/me/exits$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "member"
+    ],
+    "summary": "Member-marked exit (when employer has not marked it)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/privacy/requests",
+    "regex": "^/privacy/requests$",
+    "status": "P",
+    "phase": 3,
+    "owner": "audit",
+    "upstream": "http://audit-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.data_protection"
+    ],
+    "summary": "Data-principal requests queue (DPDP Act)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/public/circulars",
+    "regex": "^/public/circulars$",
+    "status": "P",
+    "phase": 2,
+    "owner": "intelligence",
+    "upstream": "http://intelligence-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "public"
+    ],
+    "summary": "Circulars / notifications catalogue (synthetic, versioned documents)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/vigilance/cases",
+    "regex": "^/vigilance/cases$",
+    "status": "P",
+    "phase": 3,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.cvo",
+      "zo.vigilance"
+    ],
+    "summary": "Vigilance case list (restricted)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/kyc",
+    "regex": "^/members/me/kyc$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "KYC status (Aadhaar, PAN, bank)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/public/offices",
+    "regex": "^/public/offices$",
+    "status": "W",
+    "phase": 1,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "public"
+    ],
+    "summary": "Office locator by state/district/pincode",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/public/schemes",
+    "regex": "^/public/schemes$",
+    "status": "W",
+    "phase": 1,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "public"
+    ],
+    "summary": "Scheme catalogue (EPF, EPS, EDLI) — illustrative text",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/do/dashboards",
+    "regex": "^/do/dashboards$",
+    "status": "P",
+    "phase": 2,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "do.incharge"
+    ],
+    "summary": "District dashboard (interface 7)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/pensioners/me",
+    "regex": "^/pensioners/me$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "family_pensioner",
+      "pensioner"
+    ],
+    "summary": "Pensioner profile (PPO number, pension type, disbursing bank)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/zo/dashboards",
+    "regex": "^/zo/dashboards$",
+    "status": "W",
+    "phase": 1,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "zo.acc"
+    ],
+    "summary": "Zonal comparison dashboard (interface 9, aggregated, read-only)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/audit/events",
+    "regex": "^/audit/events$",
+    "status": "W",
+    "phase": 1,
+    "owner": "audit",
+    "upstream": "http://audit-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "gov.cag",
+      "gov.statutory_auditor",
+      "ho.audit",
+      "zo.rpfc1_audit"
+    ],
+    "summary": "Platform endpoint defined in init.md §3.1",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me",
+    "regex": "^/employers/me$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Establishment profile (active establishment chosen via X-Establishment-Id, validated server-side)",
+    "revocation": false
+  },
+  {
+    "method": "PATCH",
+    "path_template": "/employers/me",
+    "regex": "^/employers/me$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Update address / contact — creates a change request, not a direct edit",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/ho/circulars",
+    "regex": "^/ho/circulars$",
+    "status": "P",
+    "phase": 2,
+    "owner": "intelligence",
+    "upstream": "http://intelligence-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.publicity"
+    ],
+    "summary": "Publish a circular to the public corpus",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/hrm/postings",
+    "regex": "^/hrm/postings$",
+    "status": "P",
+    "phase": 2,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.admin",
+      "ho.hr"
+    ],
+    "summary": "Staff postings and role assignment to offices (drives jurisdiction)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/ai/feedback",
+    "regex": "^/ai/feedback$",
+    "status": "W",
+    "phase": 1,
+    "owner": "intelligence",
+    "upstream": "http://intelligence-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "tech.ai_service"
+    ],
+    "summary": "Platform endpoint defined in init.md §3.1",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me",
+    "regex": "^/members/me$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Profile",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/ndc/health",
+    "regex": "^/ndc/health$",
+    "status": "W",
+    "phase": 1,
+    "owner": "platform",
+    "upstream": "http://platform-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "tech.ndc"
+    ],
+    "summary": "Platform endpoint defined in init.md §3.1",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/ai/models",
+    "regex": "^/ai/models$",
+    "status": "W",
+    "phase": 1,
+    "owner": "intelligence",
+    "upstream": "http://intelligence-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "tech.ai_service"
+    ],
+    "summary": "Platform endpoint defined in init.md §3.1",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/hrm/me",
+    "regex": "^/hrm/me$",
+    "status": "W",
+    "phase": 1,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.admin",
+      "ho.hr"
+    ],
+    "summary": "HRM staff profile and assignment metadata (interface 15)",
+    "revocation": false
+  }
+]

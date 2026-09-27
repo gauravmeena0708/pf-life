@@ -1,0 +1,19 @@
+[project]
+name = "epfo-observability"
+version = "0.1.0"
+description = "Shared, business-free plumbing for EPFO POC services: correlation IDs, RFC 9457 errors, response envelope, JSON logs, health endpoints."
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi==0.115.4",
+  "structlog==24.4.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest==8.3.3", "httpx==0.27.2"]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["epfo_observability"]

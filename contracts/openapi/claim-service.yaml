@@ -708,7 +708,7 @@ paths:
   /members/me/claims/{claimId}/documents:
     post:
       operationId: postMembersClaimsClaimIdDocuments
-      summary: Upload supporting document (MinIO, scanned)
+      summary: Upload supporting document (object store, scanned)
       tags:
       - Member claims, transfers and pension applications
       parameters:
