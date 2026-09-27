@@ -1,0 +1,47 @@
+"""Load deterministic synthetic members and employments. Idempotent: python -m app.seed"""
+import asyncio
+import json
+import os
+from datetime import date
+
+from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+
+from app.infra.db import sessions
+from app.infra.tables import employments, members
+
+SEED_FILE = os.environ.get("SEED_FILE", "/srv/seed/synthetic.json")
+
+
+async def main() -> None:
+    with open(SEED_FILE, encoding="utf-8") as file:
+        seed = json.load(file)
+    establishment = seed["establishment"]
+    async with sessions()() as session:
+        insert = sqlite_insert if session.bind.dialect.name == "sqlite" else pg_insert
+        async with session.begin():
+            for member in seed["members"]:
+                values = {"member_id": member["member_id"], "uan": member["uan"],
+                          "subject": member["subject"], "name": member["name"],
+                          "date_of_birth": date.fromisoformat(member["date_of_birth"]),
+                          "gender": member["gender"], "mobile_masked": member["mobile_masked"],
+                          "email_masked": member["email_masked"], "bank_ifsc": member["bank_ifsc"],
+                          "bank_account_last4": member["bank_account_last4"], "kyc": member["kyc"]}
+                statement = insert(members).values(**values)
+                await session.execute(statement.on_conflict_do_update(
+                    index_elements=[members.c.member_id],
+                    set_={key: statement.excluded[key] for key in values if key != "member_id"}))
+                employment = {"account_link_id": member["account_link_id"], "member_id": member["member_id"],
+                              "establishment_id": establishment["establishment_id"],
+                              "establishment_name": establishment["legal_name"],
+                              "date_of_joining": date.fromisoformat(member["date_of_joining"]),
+                              "date_of_exit": date.fromisoformat(member["date_of_exit"]) if member.get("date_of_exit") else None}
+                statement = insert(employments).values(**employment)
+                await session.execute(statement.on_conflict_do_update(
+                    index_elements=[employments.c.account_link_id],
+                    set_={key: statement.excluded[key] for key in employment if key != "account_link_id"}))
+    print(f"member-service seeded: {len(seed['members'])} synthetic members")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
