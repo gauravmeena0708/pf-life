@@ -91,7 +91,7 @@ One topic exchange `epfo.events`; routing key = event type (`claim.ClaimSubmitte
 
 ### 2.8 Mock integrations
 
-One `mock-integrations` container implements the bank, UIDAI, NPCI, Jeevan Pramaan and MCA adapters. Responses are deterministic from seeded data. Callbacks to the platform are signed (HMAC-SHA256 over body + timestamp + nonce) and a nonce store rejects replays. A scenario endpoint (`dev` profile only) forces outcomes — bank return, penny-drop failure, face-auth mismatch — for demos and tests. Every mock response carries `"mock": true`.
+`payment-simulator` is the mock bank (it owns the catalogue's bank callback endpoints). One `mock-integrations` container implements the other adapters: UIDAI, NPCI, Jeevan Pramaan and MCA. Responses are deterministic from seeded data. Callbacks to the platform are signed (HMAC-SHA256 over body + timestamp + nonce) and a nonce store rejects replays. A scenario endpoint (`dev` profile only) forces outcomes — bank return, penny-drop failure, face-auth mismatch — for demos and tests. Every mock response carries `"mock": true`.
 
 ## 3. API layer — the gateway (ADR-0001, ADR-0002)
 
