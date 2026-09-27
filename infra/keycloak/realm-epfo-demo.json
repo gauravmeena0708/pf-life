@@ -71,6 +71,10 @@
         "description": "Stakeholder ho.cpfc (docs/stakeholders.md)"
       },
       {
+        "name": "ho.acc_hq",
+        "description": "Stakeholder ho.acc_hq (docs/stakeholders.md)"
+      },
+      {
         "name": "ho.cvo",
         "description": "Stakeholder ho.cvo (docs/stakeholders.md)"
       },
@@ -446,6 +450,25 @@
         "ho.cpfc"
       ],
       "id": "00000000-0000-4000-8000-000000000014"
+    },
+    {
+      "username": "ho-policy",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "HO policy (ACC HQ)",
+      "lastName": "Demo",
+      "email": "ho-policy@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ho.acc_hq"
+      ],
+      "id": "00000000-0000-4000-8000-000000000024"
     },
     {
       "username": "ndc-operator",

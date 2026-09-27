@@ -29,6 +29,7 @@ Activities: **F13.public** Browse schemes, offices, statistics, circulars; searc
 | `GET /public/establishments` | W |
 | `GET /public/establishments/{estId}` | W |
 | `GET /public/offices` | W |
+| `GET /public/policy/current` | W |
 | `GET /public/schemes` | W |
 | `GET /public/statistics` | W |
 | `POST /ai/knowledge/search` | W |
@@ -821,19 +822,26 @@ Activities: **F13.cpfc** National dashboards and policy approvals
 
 | Endpoint | Status |
 |---|---|
+| `GET /ho/config/rule-sets` | W |
+| `GET /ho/config/rule-sets/{versionId}` | W |
 | `GET /monitoring/claims` | W |
 | `GET /monitoring/contributions` | W |
 | `GET /monitoring/data-freshness` | W |
 | `GET /monitoring/grievances` | W |
+| `POST /ho/config/rule-sets/{versionId}/decisions` | W |
 
 #### `ho.acc_hq` — ACC (HQ) and HO division heads
 
-Activities: **F13.acc_hq** Division-level oversight and rule-set approvals
+Activities: **F13.acc_hq** Division-level oversight; draft rule-set changes (ceilings, rates, claim types, approval matrix) for CPFC approval
 
 | Endpoint | Status |
 |---|---|
+| `GET /ho/config/rule-sets` | W |
+| `GET /ho/config/rule-sets/{versionId}` | W |
 | `GET /monitoring/claims` | W |
-| `PUT /ho/config/rules/{ruleSet}` | P |
+| `POST /ho/config/rule-sets` | W |
+| `POST /ho/config/rule-sets/{versionId}/submissions` | W |
+| `PUT /ho/config/rule-sets/{versionId}` | W |
 
 #### `ho.fa_cao` — FA & CAO — Finance & Accounts, **FIA vertical** (freezing category A), Balance Sheet cell
 
@@ -884,8 +892,9 @@ Activities: **F05.policy** Pension policy, monitoring of DLC / higher-pension / 
 
 | Endpoint | Status |
 |---|---|
+| `GET /ho/config/rule-sets` | W |
+| `GET /ho/config/rule-sets/{versionId}` | W |
 | `GET /monitoring/claims` | W |
-| `PUT /ho/config/rules/{ruleSet}` | P |
 
 #### `ho.edli` — EDLI Division
 
@@ -903,6 +912,8 @@ Activities: **F12.ho** Audit Division: plan audits, IT audit, pre-audit, drop pa
 |---|---|
 | `GET /audit/correlations/{correlationId}` | W |
 | `GET /audit/events` | W |
+| `GET /ho/config/rule-sets` | W |
+| `GET /ho/config/rule-sets/{versionId}` | W |
 | `POST /audit/internal/paras/{paraId}/decisions` | P |
 
 #### `ho.caiu` — Central Analysis & Intelligence Unit
@@ -1775,7 +1786,7 @@ flowchart LR
   F13_zo["zo.acc<br/>Zone dashboards; approvals above RO limits"]
   style F13_zo stroke-dasharray: 5 5
   F13_cpfc["ho.cpfc<br/>National dashboards and policy approvals"]
-  F13_acc_hq["ho.acc_hq<br/>Division-level oversight and rule-set approvals"]
+  F13_acc_hq["ho.acc_hq<br/>Division-level oversight; draft rule-set changes (ceilings, "]
   F13_divisions["ho.edli<br/>EDLI policy and monitoring"]
   F13_investment["ho.investment<br/>Fund and investment reporting"]
   F13_fund_feed["ext.fund_manager<br/>Send portfolio / custody positions"]

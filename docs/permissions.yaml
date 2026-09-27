@@ -80,6 +80,12 @@ stakeholders:
     step_up: false
     via:
     - F13.public
+  - endpoint: GET /public/policy/current
+    status: W
+    scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
+    step_up: false
+    via:
+    - F13.public
   member:
   - endpoint: POST /members/uan-allotments
     status: M
@@ -2394,6 +2400,24 @@ stakeholders:
     step_up: false
     via:
     - F13.cpfc
+  - endpoint: GET /ho/config/rule-sets
+    status: W
+    scope: national (Head Office role)
+    step_up: false
+    via:
+    - F13.cpfc
+  - endpoint: GET /ho/config/rule-sets/{versionId}
+    status: W
+    scope: national (Head Office role)
+    step_up: false
+    via:
+    - F13.cpfc
+  - endpoint: POST /ho/config/rule-sets/{versionId}/decisions
+    status: W
+    scope: national (Head Office role)
+    step_up: true
+    via:
+    - F13.cpfc
   ho.acc_hq:
   - endpoint: GET /monitoring/claims
     status: W
@@ -2401,10 +2425,34 @@ stakeholders:
     step_up: false
     via:
     - F13.acc_hq
-  - endpoint: PUT /ho/config/rules/{ruleSet}
-    status: P
+  - endpoint: GET /ho/config/rule-sets
+    status: W
     scope: national (Head Office role)
-    step_up: true
+    step_up: false
+    via:
+    - F13.acc_hq
+  - endpoint: GET /ho/config/rule-sets/{versionId}
+    status: W
+    scope: national (Head Office role)
+    step_up: false
+    via:
+    - F13.acc_hq
+  - endpoint: POST /ho/config/rule-sets
+    status: W
+    scope: national (Head Office role)
+    step_up: false
+    via:
+    - F13.acc_hq
+  - endpoint: PUT /ho/config/rule-sets/{versionId}
+    status: W
+    scope: national (Head Office role)
+    step_up: false
+    via:
+    - F13.acc_hq
+  - endpoint: POST /ho/config/rule-sets/{versionId}/submissions
+    status: W
+    scope: national (Head Office role)
+    step_up: false
     via:
     - F13.acc_hq
   ho.fa_cao:
@@ -2467,10 +2515,16 @@ stakeholders:
     step_up: false
     via:
     - F05.policy
-  - endpoint: PUT /ho/config/rules/{ruleSet}
-    status: P
+  - endpoint: GET /ho/config/rule-sets
+    status: W
     scope: national (Head Office role)
-    step_up: true
+    step_up: false
+    via:
+    - F05.policy
+  - endpoint: GET /ho/config/rule-sets/{versionId}
+    status: W
+    scope: national (Head Office role)
+    step_up: false
     via:
     - F05.policy
   ho.edli:
@@ -2497,6 +2551,18 @@ stakeholders:
     status: P
     scope: read-only for auditors; audit writes by audit roles only
     step_up: true
+    via:
+    - F12.ho
+  - endpoint: GET /ho/config/rule-sets
+    status: W
+    scope: national (Head Office role)
+    step_up: false
+    via:
+    - F12.ho
+  - endpoint: GET /ho/config/rule-sets/{versionId}
+    status: W
+    scope: national (Head Office role)
+    step_up: false
     via:
     - F12.ho
   ho.caiu:

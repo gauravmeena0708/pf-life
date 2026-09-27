@@ -585,7 +585,13 @@ Monitoring (`/monitoring/**`), AI (`/ai/**`), audit (`/audit/**`) and NDC (`/ndc
 | `GET /governance/board-packs` | CBT / EC / FIAC board packs (aggregates only) | P | 3 | reporting |
 | `GET /zo/dashboards` | Zonal comparison dashboard (interface 9, aggregated, read-only) | W | 1 | reporting |
 | `GET /do/dashboards` | District dashboard (interface 7) | P | 2 | reporting |
-| `PUT /ho/config/rules/{ruleSet}` 🔐 | Publish a new version of an illustrative rule set (maker-checker) | P | 2 | contribution |
+| `GET /ho/config/rule-sets` | Policy administration: rule-set versions in force, scheduled, drafts and history | W | 1 | platform |
+| `GET /ho/config/rule-sets/{versionId}` | One rule set: its checks, what changed from its base, and worked examples of the effect | W | 1 | platform |
+| `POST /ho/config/rule-sets` | Draft a new rule-set version (wage ceilings, rates, claim types, approval matrix, auto-settlement, grievance settings) from an existing one, with an effective date | W | 1 | platform |
+| `PUT /ho/config/rule-sets/{versionId}` | Edit a draft (If-Match) | W | 1 | platform |
+| `POST /ho/config/rule-sets/{versionId}/submissions` | Submit a draft that passes every check for approval | W | 1 | platform |
+| `POST /ho/config/rule-sets/{versionId}/decisions` 🔐 | Approve and publish (effective from its date), or return, a submitted rule set; approver ≠ drafter | W | 1 | platform |
+| `GET /public/policy/current` | The rule set in force today: ceilings, rates, claim types and limits (public figures only) | W | 1 | platform |
 | `POST /ho/circulars` | Publish a circular to the public corpus | P | 2 | intelligence |
 | `GET /ndc/event-failures` | Failed events / DLQ view (interface 11) | W | 1 | platform |
 | `POST /ndc/event-failures/{eventId}/replays` 🔐 | Replay a dead-lettered event (idempotent consumers) | W | 1 | platform |
@@ -612,7 +618,10 @@ Added to `init.md` §7. These have no public endpoint but are required for the r
 
 ## 15. Configuration each function needs
 
-Every rule-dependent function reads a versioned, effective-dated section of `config/demo-rules.yaml`, all marked `ILLUSTRATIVE_ONLY`.
+Every rule-dependent function reads a versioned, effective-dated rule set, all marked `ILLUSTRATIVE_ONLY`.
+`config/demo-rules.yaml` is only the baseline; new versions are drafted, checked, approved (maker-checker) and
+published in Policy administration (`/ho/config/rule-sets`), and each service applies the version in force on the
+relevant date (claim date, ECR wage month) and records it with the decision.
 
 | Config section | Used by |
 |---|---|

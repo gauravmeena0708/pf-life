@@ -103,6 +103,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /public/establishments` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/establishments/{estId}` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/offices` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
+| `GET /public/policy/current` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/schemes` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/statistics` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `POST /ai/knowledge/search` | W | caller's own permissions; advisory output only |  |
@@ -772,17 +773,24 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /ho/config/rule-sets` | W | national (Head Office role) |  |
+| `GET /ho/config/rule-sets/{versionId}` | W | national (Head Office role) |  |
 | `GET /monitoring/claims` | W | role jurisdiction; aggregates with small-group suppression |  |
 | `GET /monitoring/contributions` | W | role jurisdiction; aggregates with small-group suppression |  |
 | `GET /monitoring/data-freshness` | W | role jurisdiction; aggregates with small-group suppression |  |
 | `GET /monitoring/grievances` | W | role jurisdiction; aggregates with small-group suppression |  |
+| `POST /ho/config/rule-sets/{versionId}/decisions` | W | national (Head Office role) | yes |
 
 **`ho.acc_hq`** — ACC (HQ) and HO division heads
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /ho/config/rule-sets` | W | national (Head Office role) |  |
+| `GET /ho/config/rule-sets/{versionId}` | W | national (Head Office role) |  |
 | `GET /monitoring/claims` | W | role jurisdiction; aggregates with small-group suppression |  |
-| `PUT /ho/config/rules/{ruleSet}` | P | national (Head Office role) | yes |
+| `POST /ho/config/rule-sets` | W | national (Head Office role) |  |
+| `POST /ho/config/rule-sets/{versionId}/submissions` | W | national (Head Office role) |  |
+| `PUT /ho/config/rule-sets/{versionId}` | W | national (Head Office role) |  |
 
 **`ho.fa_cao`** — FA & CAO — Finance & Accounts, **FIA vertical** (freezing category A), Balance Sheet cell
 
@@ -821,8 +829,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /ho/config/rule-sets` | W | national (Head Office role) |  |
+| `GET /ho/config/rule-sets/{versionId}` | W | national (Head Office role) |  |
 | `GET /monitoring/claims` | W | role jurisdiction; aggregates with small-group suppression |  |
-| `PUT /ho/config/rules/{ruleSet}` | P | national (Head Office role) | yes |
 
 **`ho.edli`** — EDLI Division
 
@@ -836,6 +845,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /audit/correlations/{correlationId}` | W | read-only for auditors; audit writes by audit roles only |  |
 | `GET /audit/events` | W | read-only for auditors; audit writes by audit roles only |  |
+| `GET /ho/config/rule-sets` | W | national (Head Office role) |  |
+| `GET /ho/config/rule-sets/{versionId}` | W | national (Head Office role) |  |
 | `POST /audit/internal/paras/{paraId}/decisions` | P | read-only for auditors; audit writes by audit roles only | yes |
 
 **`ho.caiu`** — Central Analysis & Intelligence Unit

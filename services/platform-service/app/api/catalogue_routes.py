@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /ndc/event-failures', 'GET /ndc/health', 'POST /ndc/event-failures/{eventId}/replays']
+OPERATIONS = ['GET /ndc/event-failures', 'GET /ndc/health', 'GET /ho/config/rule-sets', 'POST /ho/config/rule-sets', 'GET /public/policy/current', 'GET /ho/config/rule-sets/{versionId}', 'PUT /ho/config/rule-sets/{versionId}', 'POST /ho/config/rule-sets/{versionId}/decisions', 'POST /ho/config/rule-sets/{versionId}/submissions', 'POST /ndc/event-failures/{eventId}/replays']
 
 @router.api_route("/api/v1/ndc/event-failures", methods=["GET"], include_in_schema=False)
 async def get_ndc_event_failures(actor: Actor = Depends(require_actor)) -> None:
@@ -20,6 +20,41 @@ async def get_ndc_event_failures(actor: Actor = Depends(require_actor)) -> None:
 @router.api_route("/api/v1/ndc/health", methods=["GET"], include_in_schema=False)
 async def get_ndc_health(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Platform endpoint defined in init.md §3.1")
+
+
+@router.api_route("/api/v1/ho/config/rule-sets", methods=["GET"], include_in_schema=False)
+async def get_ho_config_rule_sets(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Policy administration: rule-set versions in force, scheduled, drafts and history")
+
+
+@router.api_route("/api/v1/ho/config/rule-sets", methods=["POST"], include_in_schema=False)
+async def post_ho_config_rule_sets(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Draft a new rule-set version (wage ceilings, rates, claim types, approval matrix, auto-settlement, g")
+
+
+@router.api_route("/api/v1/public/policy/current", methods=["GET"], include_in_schema=False)
+async def get_public_policy_current(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The rule set in force today: ceilings, rates, claim types and limits (public figures only)")
+
+
+@router.api_route("/api/v1/ho/config/rule-sets/{versionId}", methods=["GET"], include_in_schema=False)
+async def get_ho_config_rule_sets_versionId(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "One rule set: its checks, what changed from its base, and worked examples of the effect")
+
+
+@router.api_route("/api/v1/ho/config/rule-sets/{versionId}", methods=["PUT"], include_in_schema=False)
+async def put_ho_config_rule_sets_versionId(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Edit a draft (If-Match)")
+
+
+@router.api_route("/api/v1/ho/config/rule-sets/{versionId}/decisions", methods=["POST"], include_in_schema=False)
+async def post_ho_config_rule_sets_versionId_decisions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Approve and publish (effective from its date), or return, a submitted rule set; approver ≠ drafter")
+
+
+@router.api_route("/api/v1/ho/config/rule-sets/{versionId}/submissions", methods=["POST"], include_in_schema=False)
+async def post_ho_config_rule_sets_versionId_submissions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Submit a draft that passes every check for approval")
 
 
 @router.api_route("/api/v1/ndc/event-failures/{eventId}/replays", methods=["POST"], include_in_schema=False)

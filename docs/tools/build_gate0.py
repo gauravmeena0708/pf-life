@@ -212,6 +212,7 @@ EVENTS = [
     ("GrievanceResolved", "grievance", ["workflow", "reporting", "audit"], "grievance", 1, {"grievance_id": S, "office_id": S, "tier": {"enum": ["RO", "ZO", "HO"]}, "within_sla": B}),
     ("RiskSignalRaised", "intelligence", ["claim", "workflow", "reporting", "audit"], "risk_signal", 1, {"signal_id": S, "detection_type": S, "rule_version": S, "evidence_refs": "array", "subject_ref": S, "explanation": S}),
     ("ProcessTransitioned", "workflow", ["member", "audit"], "process_instance", 1, {"process": S, "instance_id": S, "subject_ref": S, "from_state": {"type": ["string", "null"]}, "to_state": S, "operation": S, "data": {"type": "object"}}),
+    ("PolicyPublished", "platform", ["claim", "contribution", "workflow", "grievance", "intelligence", "audit"], "rule_set", 1, {"version_id": S, "rule_version": S, "effective_from": S, "document_sha256": S, "approved_by_role": S, "document": {"type": "object"}}),
     ("RiskSignalReviewed", "intelligence", ["claim", "reporting", "audit"], "risk_signal", 1, {"signal_id": S, "subject_ref": S, "outcome": {"enum": ["CONFIRMED", "BENIGN", "NEEDS_MORE_EVIDENCE"]}}),
     ("SecurityEventRecorded", "audit", ["intelligence", "member", "gateway"], "security_event", 1, {"subject": S, "event_type": S, "device_fingerprint_hash": S}),
     ("NotificationRequested", ["claim", "grievance", "member"], ["member"], "notification", 1, {"recipient_subject": S, "template": S, "reference_id": S, "params": {"type": "object"}}),

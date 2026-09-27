@@ -1463,6 +1463,22 @@
   },
   {
     "method": "POST",
+    "path_template": "/ho/config/rule-sets/{versionId}/submissions",
+    "regex": "^/ho/config/rule\\-sets/[^/]+/submissions$",
+    "status": "W",
+    "phase": 1,
+    "owner": "platform",
+    "upstream": "http://platform-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.acc_hq"
+    ],
+    "summary": "Submit a draft that passes every check for approval",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/office/compliance/cases/{caseId}/reviews-7b",
     "regex": "^/office/compliance/cases/[^/]+/reviews\\-7b$",
     "status": "P",
@@ -1624,6 +1640,22 @@
       "fo.pro"
     ],
     "summary": "Transfer a grievance to another office",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/ho/config/rule-sets/{versionId}/decisions",
+    "regex": "^/ho/config/rule\\-sets/[^/]+/decisions$",
+    "status": "W",
+    "phase": 1,
+    "owner": "platform",
+    "upstream": "http://platform-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "ho.cpfc"
+    ],
+    "summary": "Approve and publish (effective from its date), or return, a submitted rule set; approver ≠ drafter",
     "revocation": false
   },
   {
@@ -3499,6 +3531,41 @@
     "revocation": false
   },
   {
+    "method": "GET",
+    "path_template": "/ho/config/rule-sets/{versionId}",
+    "regex": "^/ho/config/rule\\-sets/[^/]+$",
+    "status": "W",
+    "phase": 1,
+    "owner": "platform",
+    "upstream": "http://platform-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.acc_hq",
+      "ho.audit",
+      "ho.cpfc",
+      "ho.pension"
+    ],
+    "summary": "One rule set: its checks, what changed from its base, and worked examples of the effect",
+    "revocation": false
+  },
+  {
+    "method": "PUT",
+    "path_template": "/ho/config/rule-sets/{versionId}",
+    "regex": "^/ho/config/rule\\-sets/[^/]+$",
+    "status": "W",
+    "phase": 1,
+    "owner": "platform",
+    "upstream": "http://platform-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.acc_hq"
+    ],
+    "summary": "Edit a draft (If-Match)",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/ho/exemptions/{estId}/decisions",
     "regex": "^/ho/exemptions/[^/]+/decisions$",
@@ -4514,23 +4581,6 @@
     "revocation": false
   },
   {
-    "method": "PUT",
-    "path_template": "/ho/config/rules/{ruleSet}",
-    "regex": "^/ho/config/rules/[^/]+$",
-    "status": "P",
-    "phase": 2,
-    "owner": "contribution",
-    "upstream": "http://contribution-service:8000",
-    "money": false,
-    "step_up": true,
-    "callers": [
-      "ho.acc_hq",
-      "ho.pension"
-    ],
-    "summary": "Publish a new version of an illustrative rule set (maker-checker)",
-    "revocation": false
-  },
-  {
     "method": "GET",
     "path_template": "/members/me/tax/form-16a",
     "regex": "^/members/me/tax/form\\-16a$",
@@ -5103,6 +5153,22 @@
     "revocation": false
   },
   {
+    "method": "GET",
+    "path_template": "/public/policy/current",
+    "regex": "^/public/policy/current$",
+    "status": "W",
+    "phase": 1,
+    "owner": "platform",
+    "upstream": "http://platform-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "public"
+    ],
+    "summary": "The rule set in force today: ceilings, rates, claim types and limits (public figures only)",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/cpps/reconciliations",
     "regex": "^/cpps/reconciliations$",
@@ -5230,6 +5296,41 @@
       "exempted.trust"
     ],
     "summary": "Periodic returns of exempted establishment",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/ho/config/rule-sets",
+    "regex": "^/ho/config/rule\\-sets$",
+    "status": "W",
+    "phase": 1,
+    "owner": "platform",
+    "upstream": "http://platform-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.acc_hq",
+      "ho.audit",
+      "ho.cpfc",
+      "ho.pension"
+    ],
+    "summary": "Policy administration: rule-set versions in force, scheduled, drafts and history",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/ho/config/rule-sets",
+    "regex": "^/ho/config/rule\\-sets$",
+    "status": "W",
+    "phase": 1,
+    "owner": "platform",
+    "upstream": "http://platform-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.acc_hq"
+    ],
+    "summary": "Draft a new rule-set version (wage ceilings, rates, claim types, approval matrix, auto-settlement, grievance settings) from an existing one, with an effective date",
     "revocation": false
   },
   {

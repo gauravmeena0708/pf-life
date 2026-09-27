@@ -191,7 +191,8 @@
     "security-analyst": "00000000-0000-4000-8000-000000000020",
     "vigilance-investigator": "00000000-0000-4000-8000-000000000021",
     "auditor": "00000000-0000-4000-8000-000000000022",
-    "zo-rpfc": "00000000-0000-4000-8000-000000000023"
+    "zo-rpfc": "00000000-0000-4000-8000-000000000023",
+    "ho-policy": "00000000-0000-4000-8000-000000000024"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2026-03-31 (synthetic), so Journey B can exercise the higher approval bands repeatedly.",

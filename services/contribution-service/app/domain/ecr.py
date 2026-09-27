@@ -15,26 +15,8 @@ ARITHMETIC = FIELDS[6:9]
 ACCOUNTS = ("AC01_EPF_EE", "AC01_EPF_ER", "AC10_EPS", "AC21_EDLI", "AC02_ADMIN", "AC22_EDLI_ADMIN", "TOTAL")
 
 
-def round_rupee_half_up(amount_paise_numerator: int, denominator: int = 10_000) -> int:
-    """Round (paise*numerator/denominator) to a whole rupee, returning paise."""
-    rupees_numerator = amount_paise_numerator
-    divisor = denominator * 100
-    return ((rupees_numerator * 2 + divisor) // (2 * divisor)) * 100
-
-
-def split(epf_wages_paise: int, eps_wages_paise: int, age_years: int, rules: dict[str, Any], edli_wages_paise: int | None = None) -> dict[str, int]:
-    c = rules["contribution"]
-    eps_wages_paise = min(eps_wages_paise, c["eps_wage_ceiling_paise"])
-    ee = round_rupee_half_up(epf_wages_paise * c["epf_employee_rate_bp"])
-    eps = 0 if age_years >= c["eps_age_limit_years"] else round_rupee_half_up(eps_wages_paise * c["eps_rate_bp"])
-    er = ee - eps
-    edli_wages_paise = epf_wages_paise if edli_wages_paise is None else edli_wages_paise
-    edli = round_rupee_half_up(min(edli_wages_paise, c["edli_wage_ceiling_paise"]) * c["edli_rate_bp"])
-    admin = max(c["admin_charges_min_paise"], round_rupee_half_up(epf_wages_paise * c["admin_charges_rate_bp"]))
-    edli_admin = round_rupee_half_up(epf_wages_paise * c["edli_admin_rate_bp"])
-    return {"AC01_EPF_EE": ee, "AC01_EPF_ER": er, "AC10_EPS": eps, "AC21_EDLI": edli,
-            "AC02_ADMIN": admin, "AC22_EDLI_ADMIN": edli_admin,
-            "TOTAL": ee + er + eps + edli + admin + edli_admin}
+# The contribution split is shared with platform-service's policy preview, so both use the same arithmetic.
+from epfo_persistence.policy import round_rupee_half_up, split  # noqa: E402,F401
 
 
 def _masked_uan(uan: str) -> str:

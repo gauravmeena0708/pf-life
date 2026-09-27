@@ -625,43 +625,6 @@ paths:
             schema:
               type: object
               description: Defined when implemented
-  /ho/config/rules/{ruleSet}:
-    put:
-      operationId: putHoConfigRulesRuleSet
-      summary: Publish a new version of an illustrative rule set (maker-checker)
-      tags:
-      - Grievances, security, platform, audit and oversight
-      parameters:
-      - $ref: '#/components/parameters/CorrelationId'
-      - name: ruleSet
-        in: path
-        required: true
-        schema:
-          type: string
-      - $ref: '#/components/parameters/StepUpToken'
-      responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
-      x-owner-service: contribution
-      x-callers:
-      - ho.acc_hq
-      - ho.pension
-      x-scope: national (Head Office role)
-      security:
-      - bffSession: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              description: Defined when implemented
   /members/me/accounts/{accountLinkId}/passbook:
     get:
       operationId: getMembersAccountsAccountLinkIdPassbook
