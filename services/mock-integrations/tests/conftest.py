@@ -8,6 +8,7 @@ import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 # Point the service at an unreachable database: slice-1 tests must not need Docker.
+os.environ.setdefault("DISABLE_MESSAGING", "1")
 os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://nobody:none@127.0.0.1:1/none")
 
 KEY = Ed25519PrivateKey.generate()

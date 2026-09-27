@@ -116,3 +116,22 @@ def test_refetches_jwks_once_when_cached_key_is_stale():
     fresh = jwt.encode({"iss": "epfo-gateway", "aud": "claim-service", "sub": "u", "stakeholder": "member",
                         "iat": now, "exp": now + 60, "jti": "j2"}, new_key, algorithm="EdDSA", headers={"kid": KID})
     assert client().get("/me", headers=auth(fresh)).status_code == 200
+
+
+def test_require_grant_and_step_up():
+    from epfo_auth import require_grant, require_step_up
+    from epfo_observability import Problem
+    a = Actor(subject="s", stakeholder="employer.signatory", correlation_id="c",
+              claims={"grants": ["ecr.approve"]}, step_up={"action": "approve-ecr", "resource_id": "F1",
+                                                          "resource_version": 2, "amount_paise": 500})
+    require_grant(a, "ecr.approve")
+    require_step_up(a, "approve-ecr", "F1", 2, 500)
+    for bad in (lambda: require_grant(a, "ecr.submit"),
+                lambda: require_step_up(a, "approve-ecr", "F2", 2, 500),
+                lambda: require_step_up(a, "approve-ecr", "F1", 3, 500),
+                lambda: require_step_up(a, "submit-ecr", "F1", 2, 500)):
+        with pytest.raises(Problem):
+            bad()
+    with pytest.raises(Problem) as e:
+        require_step_up(Actor(subject="s", stakeholder="x", correlation_id="c"), "approve-ecr", "F1")
+    assert e.value.status == 428

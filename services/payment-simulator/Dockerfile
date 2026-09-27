@@ -12,6 +12,7 @@ COPY services/payment-simulator/app /srv/app
 COPY services/payment-simulator/migrations /srv/migrations
 COPY services/payment-simulator/alembic.ini /srv/alembic.ini
 RUN pip install /srv
+COPY scripts/seed /srv/seed
 USER app
 EXPOSE 8000
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers ${WEB_CONCURRENCY:-1}"]

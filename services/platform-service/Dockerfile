@@ -12,6 +12,7 @@ COPY services/platform-service/app /srv/app
 COPY services/platform-service/migrations /srv/migrations
 COPY services/platform-service/alembic.ini /srv/alembic.ini
 RUN pip install /srv
+COPY scripts/seed /srv/seed
 USER app
 EXPOSE 8000
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers ${WEB_CONCURRENCY:-1}"]

@@ -14,7 +14,7 @@ from fastapi import Depends, Request
 
 from epfo_observability import Problem
 
-__all__ = ["Actor", "JwksCache", "configure", "require_actor", "require_stakeholder"]
+__all__ = ["Actor", "JwksCache", "configure", "require_actor", "require_stakeholder", "require_grant", "require_step_up"]
 
 ISSUER = "epfo-gateway"
 MAX_LIFETIME_SECONDS = 60
@@ -121,3 +121,26 @@ def require_stakeholder(*allowed: str) -> Callable[..., Any]:
         return actor
 
     return dependency
+
+
+def require_grant(actor: Actor, grant: str) -> None:
+    """Domain grant carried in the internal token (resolved by the gateway from employer-service)."""
+    if grant not in (actor.claims.get("grants") or []):
+        raise Problem(403, "/problems/missing-grant", "You do not have permission for this action",
+                      f"This action needs the '{grant}' permission for this establishment.")
+
+
+def require_step_up(actor: Actor, action: str, resource_id: str, resource_version: int | None = None,
+                    amount_paise: int | None = None) -> None:
+    """The gateway consumed a step-up token for exactly this action, resource, version and amount (init.md §6.3)."""
+    s = actor.step_up or {}
+    if not s:
+        raise Problem(428, "/problems/step-up-required", "Confirm this action first",
+                      "This action needs a step-up confirmation.")
+    mismatches = [name for name, want, got in (
+        ("action", action, s.get("action")), ("resource_id", resource_id, s.get("resource_id")),
+        ("resource_version", resource_version, s.get("resource_version")),
+        ("amount_paise", amount_paise, s.get("amount_paise"))) if want is not None and want != got]
+    if mismatches:
+        raise Problem(403, "/problems/step-up-mismatch", "The confirmation does not match this action",
+                      f"Confirm again: the confirmation was for a different {', '.join(mismatches)}.")
