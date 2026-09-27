@@ -31,3 +31,4 @@ Thumbs.db
 *.db
 minio-data/
 postgres-data/
+tests/e2e/screenshots/

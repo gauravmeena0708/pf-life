@@ -107,11 +107,12 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /public/statistics` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `POST /ai/knowledge/search` | W | caller's own permissions; advisory output only |  |
 | `POST /public/demo-calculations/epf` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
+| `GET /public/demo-challenges` | M | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
+| `POST /public/trrn-status-lookups` | M | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/circulars` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/defaulting-establishments` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/establishments/{estId}/e-report-card` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `POST /public/demo-calculations/pension` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
-| `POST /public/trrn-status-lookups` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 
 **`member`** — Member — active contributor (UAN holder)
 
@@ -252,6 +253,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /employers/me` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/operators` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/signatories` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/registration-requests/{reqId}` | W | own registration request |  |
@@ -268,8 +270,12 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /employers/me` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/challans` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/challans/{trrn}` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/challans/{trrn}/receipt` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/ecr-filings` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/ecr-filings/{filingId}` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/ecr-filings/{filingId}/submissions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `GET /international/coc-applications/{id}` | M | own application (employer) or IWU role |  |
@@ -878,6 +884,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /security/me/permissions` | W | self — open to every authenticated caller (own data only) |  |
+| `GET /security/request-activity` | W | security analyst |  |
 | `GET /security/sessions` | W | security analyst |  |
 | `POST /internal/security-events` | W | service-to-service only (client credentials) |  |
 | `POST /security/sessions/{sessionId}/revocations` | W | security analyst | yes |

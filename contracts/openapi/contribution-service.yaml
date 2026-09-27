@@ -109,6 +109,7 @@ paths:
       x-owner-service: contribution
       x-callers:
       - employer.operator
+      - employer.signatory
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []
@@ -211,6 +212,7 @@ paths:
       x-owner-service: contribution
       x-callers:
       - employer.operator
+      - employer.signatory
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []
@@ -295,6 +297,7 @@ paths:
       x-owner-service: contribution
       x-callers:
       - employer.operator
+      - employer.signatory
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []
@@ -1601,25 +1604,34 @@ paths:
   /public/trrn-status-lookups:
     post:
       operationId: postPublicTrrnStatusLookups
-      summary: TRRN / challan status lookup (CAPTCHA)
+      summary: TRRN / challan status lookup with wage month, issue/payment times and next step; one-use synthetic demo proof
+        (productio
       tags:
       - Public information and establishment search
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: mock
+      x-phase: 1
       x-owner-service: contribution
       x-callers:
       - public
       x-scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
       security: []
+      description: TRRN / challan status lookup with wage month, issue/payment times and next step; one-use synthetic demo
+        proof (production CAPTCHA pending)
       requestBody:
         required: false
         content:

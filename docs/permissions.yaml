@@ -38,6 +38,12 @@ stakeholders:
     step_up: false
     via:
     - F13.public
+  - endpoint: GET /public/demo-challenges
+    status: M
+    scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
+    step_up: false
+    via:
+    - F13.public
   - endpoint: GET /public/establishments/{estId}/e-report-card
     status: P
     scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
@@ -63,7 +69,7 @@ stakeholders:
     via:
     - F13.public
   - endpoint: POST /public/trrn-status-lookups
-    status: P
+    status: M
     scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
     step_up: false
     via:
@@ -631,6 +637,12 @@ stakeholders:
     step_up: true
     via:
     - F01.dsc_register
+  - endpoint: GET /employers/me
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.signatories
   - endpoint: GET /employers/me/signatories
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
@@ -692,6 +704,12 @@ stakeholders:
     step_up: false
     via:
     - F01.form5a
+  - endpoint: GET /employers/me
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.signatory_profile
   - endpoint: POST /employers/me/configuration/change-requests
     status: P
     scope: own establishment (X-Establishment-Id validated against grants)
@@ -770,6 +788,18 @@ stakeholders:
     step_up: true
     via:
     - F02.jd_attest
+  - endpoint: GET /employers/me/ecr-filings
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F03.ecr_approve
+  - endpoint: GET /employers/me/ecr-filings/{filingId}
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F03.ecr_approve
   - endpoint: POST /employers/me/ecr-filings/{filingId}/approvals
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
@@ -804,6 +834,12 @@ stakeholders:
     status: M
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
+    via:
+    - F03.pay
+  - endpoint: GET /employers/me/challans/{trrn}/receipt
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
     via:
     - F03.pay
   - endpoint: POST /employers/me/direct-challans
@@ -2449,6 +2485,12 @@ stakeholders:
     via:
     - F07.vig_ho
   ho.security:
+  - endpoint: GET /security/request-activity
+    status: W
+    scope: security analyst
+    step_up: false
+    via:
+    - F14.security
   - endpoint: GET /security/sessions
     status: W
     scope: security analyst

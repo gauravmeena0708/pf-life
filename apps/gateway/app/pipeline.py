@@ -5,9 +5,13 @@ import httpx
 from fastapi import Request
 from fastapi.responses import JSONResponse, Response
 
+from . import grants as grant_resolver
 from .internal_jwt import mint
+from .stepup import consume_token, create_challenge, verify_challenge
 from .oidc import session_context, verify_token
 from .problems import problem
+from .public_access import create_demo_challenge, limit_public, verify_demo_challenge
+from .request_activity import get_request_activity, lookup_fingerprint, summarize_body
 from .revocation import is_revoked, record_revocation
 from .routing import match_route
 
@@ -21,9 +25,22 @@ async def handle_api(request: Request, path: str):
     route = match_route(request.app.state.routes, method, "/" + path)
     if not route:
         return problem(request, 404, "not-found", "Route not found")
+    request.state.route_template = route["path_template"]
     is_public = route["path_template"].startswith("/public/")
     principal = None
     sid = None
+
+    if is_public:
+        request.state.actor_subject = "anonymous"
+        request.state.actor_stakeholder = "public"
+        if route["path_template"] == "/public/establishments":
+            query = request.query_params.get("query", "")
+            if 0 < len(query) <= 200:
+                request.state.lookup_fingerprint = lookup_fingerprint(request, query)
+            request.state.search_mode = request.query_params.get("mode", "any")[:20]
+        limited = await limit_public(request, route)
+        if limited is not None:
+            return limited
 
     # Public planned contracts are intentionally visible without a session.
     if (route["status"] in ("P", "?") or int(route.get("phase", 1)) > 1) and is_public:
@@ -42,6 +59,8 @@ async def handle_api(request: Request, path: str):
                 return problem(request, 403, "forbidden", "Forbidden")
             principal = {"subject": claims.get("sub", claims.get("client_id", "machine")),
                          "stakeholder": stakeholder, "claims": claims}
+            request.state.actor_subject = principal["subject"]
+            request.state.actor_stakeholder = stakeholder
         except Exception:
             return problem(request, 401, "unauthenticated", "Invalid machine token")
         # TODO: verify callback HMAC, timestamp, event id and replay window per architecture §5.7.
@@ -53,6 +72,8 @@ async def handle_api(request: Request, path: str):
         if not session:
             return problem(request, 401, "unauthenticated", "Authentication required")
         principal = {"subject": session["subject"], "stakeholder": session["stakeholder"], "session": session}
+        request.state.actor_subject = principal["subject"]
+        request.state.actor_stakeholder = principal["stakeholder"]
         if method not in ("GET", "HEAD"):
             csrf_header, csrf_cookie = request.headers.get("x-csrf-token"), request.cookies.get("epfo-csrf")
             if not csrf_header or not csrf_cookie or not secrets.compare_digest(csrf_header, csrf_cookie):
@@ -74,12 +95,28 @@ async def handle_api(request: Request, path: str):
 
     if route["status"] in ("P", "?") or int(route.get("phase", 1)) > 1:
         return planned(request, route)
+    if route["path_template"] == "/public/trrn-status-lookups":
+        rejected = await verify_demo_challenge(request)
+        if rejected is not None:
+            return rejected
+    step_up = None
     if route["step_up"]:
-        if not request.headers.get("x-step-up-token"):
-            return problem(request, 428, "step-up-required", "Step-up verification required")
-        return planned(request, {**route, "summary": "step-up verification arrives in slice 4"})
+        supplied = request.headers.get("x-step-up-token")
+        if not supplied:
+            return problem(request, 428, "step-up-required", "Confirm this action first",
+                           "Start a confirmation with POST /api/v1/security/step-up-challenges.")
+        step_up = await consume_token(request, principal, supplied)
+        if not step_up:
+            return problem(request, 403, "step-up-invalid", "Confirmation expired, already used or not yours",
+                           "Confirm the action again.")
 
     if route["owner"] == "gateway":
+        if route["path_template"] == "/public/demo-challenges" and method == "GET":
+            return await create_demo_challenge(request)
+        if route["path_template"] == "/security/request-activity" and method == "GET":
+            if principal["stakeholder"] != "ho.security":
+                return problem(request, 403, "forbidden", "Security analyst access required")
+            return await get_request_activity(request)
         if route["path_template"] == "/security/me/permissions" and method == "GET":
             grants = [g for g in request.app.state.permissions.get(principal["stakeholder"], [])]
             endpoints = [{"endpoint": g["endpoint"], "status": g["status"], "scope": g.get("scope", ""),
@@ -88,11 +125,22 @@ async def handle_api(request: Request, path: str):
                     "meta": {"correlation_id": request.state.correlation_id, "api_version": "v1",
                              "source": "synthetic-poc",
                              "as_of": __import__("datetime").datetime.now(__import__("datetime").UTC).isoformat()}}
-        return planned(request, {**route, "summary": route.get("summary") or "Gateway route deferred in slice 1"})
+        if route["path_template"] == "/security/step-up-challenges" and method == "POST":
+            return await create_challenge(request, principal)
+        if route["path_template"] == "/security/step-up-challenges/{challengeId}/verifications" and method == "POST":
+            return await verify_challenge(request, principal, request.url.path.rstrip("/").split("/")[-2])
+        return planned(request, {**route, "summary": route.get("summary") or "Gateway route not built yet"})
 
     service_name = route["upstream"].removeprefix("http://").removesuffix(":8000")
+    establishment_id, grants = None, None
+    if principal["stakeholder"] in grant_resolver.EMPLOYER_STAKEHOLDERS:
+        try:
+            establishment_id, grants = await grant_resolver.employer_context(request, principal)
+        except Exception:
+            return problem(request, 503, "grants-unavailable", "Permissions could not be checked",
+                           "Try again in a moment.")
     token = mint(request.app.state.signing_key, principal["subject"], principal["stakeholder"],
-                 service_name, request.state.correlation_id, request.headers.get("x-establishment-id"))
+                 service_name, request.state.correlation_id, establishment_id, grants, step_up)
     headers = {}
     for name, value in request.headers.items():
         lower = name.lower()
@@ -102,9 +150,11 @@ async def handle_api(request: Request, path: str):
     headers["Authorization"] = f"Bearer {token}"
     headers["X-Correlation-Id"] = request.state.correlation_id
     target = route["upstream"].rstrip("/") + "/api/v1" + request.url.path.removeprefix("/api/v1")
+    body = await request.body()
+    summarize_body(request, body)
     try:
         upstream = await request.app.state.http_client.request(method, target, params=request.query_params,
-            content=await request.body(), headers=headers, timeout=10)
+            content=body, headers=headers, timeout=10)
     except httpx.RequestError:
         return problem(request, 502, "upstream-unavailable", "Upstream service unavailable")
 
@@ -114,9 +164,13 @@ async def handle_api(request: Request, path: str):
             if not isinstance(data, dict):
                 raise ValueError("revocation response has no data.revocation object")
             await record_revocation(request.app.state.redis, data)
+            grant_resolver.forget(data.get("subject"))
         except Exception:
             log.exception("revocation persistence failed", extra={"correlation_id": request.state.correlation_id})
             return problem(request, 503, "revocation-unavailable", "Could not persist revocation")
+    if 200 <= upstream.status_code < 300 and route["path_template"] in (
+            "/employers/me/operators/invitations", "/employers/me/signatories/authorisations"):
+        grant_resolver.forget()  # a new grant: next request re-reads permissions
     response_headers = {k: v for k, v in upstream.headers.items()
                         if k.lower() not in {"content-length", "transfer-encoding", "connection", "set-cookie"}}
     response_headers["X-Correlation-Id"] = request.state.correlation_id

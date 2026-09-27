@@ -1,8 +1,9 @@
 import base64
 import hashlib
 import json
+import re
 import secrets
-from urllib.parse import urlencode
+from urllib.parse import parse_qs, urlencode
 
 import httpx
 import jwt
@@ -67,7 +68,7 @@ def _session_store(request: Request) -> SessionStore:
 
 @router.get("/auth/login")
 async def login(request: Request, persona: str, return_to: str = "/"):
-    if not return_to.startswith("/") or return_to.startswith("//") or "\\" in return_to:
+    if not _safe_return_to(return_to):
         return problem(request, 400, "invalid-return-to", "Invalid return path")
     state, nonce, verifier = secrets.token_urlsafe(32), secrets.token_urlsafe(32), secrets.token_urlsafe(48)
     challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b"=").decode()
@@ -78,6 +79,10 @@ async def login(request: Request, persona: str, return_to: str = "/"):
               "state": state, "nonce": nonce, "code_challenge": challenge, "code_challenge_method": "S256",
               "login_hint": persona}
     return RedirectResponse(f"{_issuer(request)}/protocol/openid-connect/auth?{urlencode(params)}", status_code=302)
+
+
+def _safe_return_to(path: str) -> bool:
+    return path.startswith("/") and not path.startswith("//") and "\\" not in path
 
 
 @router.get("/auth/callback")
@@ -171,25 +176,39 @@ async def get_session(request: Request):
         return {"authenticated": False}
     if not session:
         return {"authenticated": False}
+    request.state.actor_subject = session["subject"]
+    request.state.actor_stakeholder = session["stakeholder"]
     return {"authenticated": True, "subject": session["subject"], "stakeholder": session["stakeholder"],
             "persona_label": session["persona_label"], "expires_at": session["expires_at"]}
 
 
 @router.post("/auth/logout")
-async def logout(request: Request):
+async def logout(request: Request, next_persona: str | None = None, return_to: str = "/"):
+    if next_persona and (not re.fullmatch(r"[a-z0-9-]{1,64}", next_persona) or not _safe_return_to(return_to)):
+        return problem(request, 400, "invalid-return-to", "Invalid sign-in destination")
     sid = request.cookies.get("__Host-epfo-session")
     csrf_header, csrf_cookie = request.headers.get("x-csrf-token"), request.cookies.get("epfo-csrf")
+    if not csrf_header and request.headers.get("content-type", "").startswith("application/x-www-form-urlencoded"):
+        body = await request.body()
+        if len(body) <= 4096:
+            csrf_header = parse_qs(body.decode("utf-8", errors="replace")).get("csrf_token", [None])[0]
     if sid and (not csrf_header or not csrf_cookie or not secrets.compare_digest(csrf_header, csrf_cookie)):
         return problem(request, 403, "csrf", "CSRF token missing or invalid")
     id_token = None
     if sid:
         session = await _session_store(request).get(sid)
         if session:
+            request.state.actor_subject = session["subject"]
+            request.state.actor_stakeholder = session["stakeholder"]
             id_token = session["tokens"].get("id_token")
         await _session_store(request).delete(sid)
     settings = request.app.state.settings
+    origin = settings.gateway_public_origin.rstrip("/")
+    next_url = origin + "/"
+    if next_persona:
+        next_url = f"{origin}/auth/login?{urlencode({'persona': next_persona, 'return_to': return_to})}"
     params = {"client_id": settings.keycloak_client_id,
-              "post_logout_redirect_uri": settings.gateway_public_origin.rstrip("/") + "/"}
+              "post_logout_redirect_uri": next_url}
     if id_token:
         params["id_token_hint"] = id_token
     response = RedirectResponse(f"{_issuer(request)}/protocol/openid-connect/logout?{urlencode(params)}", status_code=303)

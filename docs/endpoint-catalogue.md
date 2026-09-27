@@ -36,10 +36,11 @@ Rules that apply to every row:
 | `GET /public/statistics` | Aggregate statistics, small-group suppression | W | 1 | reporting |
 | `POST /public/demo-calculations/epf` | Illustrative EPF contribution calculator | W | 1 | contribution |
 | `POST /public/demo-calculations/pension` | Illustrative pension estimate calculator | P | 2 | pension |
-| `GET /public/establishments?query=` | **Establishment search** by name / code / pincode (rate-limited, paged, no bulk enumeration) | W | 1 | employer |
-| `GET /public/establishments/{estId}` | Establishment public profile: name, office, coverage and exemption status | W | 1 | employer |
+| `GET /public/establishments?query=&mode=&match=&office_id=&city=&district=&establishment_type=&exemption_status=&status=&page=` | **Establishment search** by code, registration, pincode, name or industry; filter by location, type, exemption and coverage | W | 1 | employer |
+| `GET /public/establishments/{estId}` | Public profile: name, registration, office, location, type, industry, coverage, verification and exemption | W | 1 | employer |
+| `GET /public/demo-challenges` | One-use arithmetic proof for synthetic public lookup demo | M | 1 | gateway |
 | `GET /public/establishments/{estId}/e-report-card` | Establishment **e-Report Card**: wage-month filing/payment history, counts and totals only | P | 2 | reporting |
-| `POST /public/trrn-status-lookups` | **TRRN / challan status** lookup (CAPTCHA) | P | 2 | contribution |
+| `POST /public/trrn-status-lookups` | **TRRN / challan status** lookup with wage month, issue/payment times and next step; one-use synthetic demo proof (production CAPTCHA pending) | M | 1 | contribution |
 | `GET /public/defaulting-establishments` | Published defaulter list (synthetic) | P | 2 | compliance |
 | `GET /public/circulars` | Circulars / notifications catalogue (synthetic, versioned documents) | P | 2 | intelligence |
 | `POST /public/pension/life-certificate-lookups` | **Jeevan Pramaan / life-certificate status** by PPO number or Jeevan Pramaan transaction ID (CAPTCHA, minimal disclosure) | M | 1 | pension |
@@ -544,6 +545,7 @@ Monitoring (`/monitoring/**`), AI (`/ai/**`), audit (`/audit/**`) and NDC (`/ndc
 | `POST /grievances/{grievanceId}/reminders` | Complainant reminder on an overdue grievance | P | 2 | grievance |
 | `POST /grievances/{grievanceId}/feedback` | Closure feedback / satisfaction | P | 2 | grievance |
 | `GET /security/me/permissions` | Permission inspection | W | 1 | gateway |
+| `GET /security/request-activity` | Security analyst view of recent API rates and redacted request activity (Redis POC, 24-hour retention) | W | 1 | gateway |
 | `GET /security/sessions` | Session inspection (security analyst, interface 17) | W | 1 | gateway |
 | `POST /security/sessions/{sessionId}/revocations` 🔐 | Revoke session (Journey A9) | W | 1 | gateway |
 | `POST /security/step-up-challenges` | Start a demo step-up confirmation for a 🔐 action | W | 1 | gateway |

@@ -1,0 +1,16 @@
+ILLUSTRATIVE_ONLY: true
+rule_version: demo-rules-2026.1
+effective_from: "2026-04-01"
+contribution:
+  epf_employee_rate_bp: 1200
+  eps_rate_bp: 833
+  eps_wage_ceiling_paise: 1500000
+  eps_age_limit_years: 58
+  edli_rate_bp: 50
+  edli_wage_ceiling_paise: 1500000
+  admin_charges_rate_bp: 50
+  admin_charges_min_paise: 50000
+  edli_admin_rate_bp: 0
+rounding: nearest_rupee_half_up
+validation:
+  headcount_change_warning_pct: 20

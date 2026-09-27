@@ -1,5 +1,322 @@
-"""Hand-written routes of contribution-service. A real route here replaces the generated stub with the same
-method and path in catalogue_routes.py."""
-from fastapi import APIRouter
+"""Contribution filing, challan, passbook and public demo calculator APIs."""
+from __future__ import annotations
+
+import json
+import os
+import uuid
+from datetime import UTC, date, datetime
+from functools import lru_cache
+from pathlib import Path
+from typing import Any
+
+import yaml
+from fastapi import APIRouter, Depends, Header, Query
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
+from sqlalchemy import text
+
+from app.domain.ecr import FIELDS, parse, split, validate
+from app.infra.db import sessions
+from epfo_auth import Actor, require_actor, require_grant, require_stakeholder, require_step_up
+from epfo_observability import Problem, envelope
+from epfo_persistence import add_event, audit, find_response, request_hash, store_response
 
 router = APIRouter()
+RULES_PATH = Path(os.getenv("RULES_FILE", "/srv/demo-rules.yaml"))
+
+
+@lru_cache(maxsize=1)
+def ruleset() -> dict[str, Any]:
+    path = RULES_PATH if RULES_PATH.exists() else Path(__file__).resolve().parents[4] / "config" / "demo-rules.yaml"
+    with path.open() as f:
+        return yaml.safe_load(f)
+
+
+class FilingInput(BaseModel):
+    wage_month: str = Field(pattern=r"^\d{4}-(0[1-9]|1[0-2])$")
+    type: str = "REGULAR"
+    format: str
+    content: str
+
+
+class ApprovalInput(BaseModel):
+    decision: str
+    reason: str | None = None
+
+
+class CalculatorInput(BaseModel):
+    epf_wages_paise: int = Field(ge=0)
+    eps_wages_paise: int = Field(ge=0)
+    age_years: int = Field(ge=0, le=130)
+
+
+class PublicTrrnLookup(BaseModel):
+    trrn: str = Field(pattern=r"^TRRN[0-9]{13}$")
+    challenge_id: str = Field(min_length=20, max_length=64)
+    answer: int = Field(ge=0, le=99)
+
+
+EMPLOYER = require_stakeholder("employer.owner", "employer.operator", "employer.signatory")
+MEMBER = require_stakeholder("member")
+
+
+def _establishment(actor: Actor) -> str:
+    if not actor.establishment_id:
+        raise Problem(403, "/problems/forbidden", "Not allowed", "No establishment is bound to this actor.")
+    return actor.establishment_id
+
+
+async def _fetch_filing(session, filing_id: str, establishment_id: str):
+    r = await session.execute(text("SELECT * FROM ecr_filings WHERE id=:id AND establishment_id=:e"), {"id": filing_id, "e": establishment_id})
+    row = r.mappings().first()
+    if not row:
+        raise Problem(404, "/problems/not-found", "Not found", "Filing not found.")
+    return dict(row)
+
+
+async def _members(session, establishment_id: str):
+    r = await session.execute(text("SELECT * FROM establishment_members WHERE establishment_id=:e"), {"e": establishment_id})
+    return [dict(x) for x in r.mappings().all()]
+
+
+async def _validation(session, filing: dict[str, Any]):
+    members = await _members(session, filing["establishment_id"])
+    prior = (await session.execute(text("SELECT wage_month,validation_report FROM ecr_filings WHERE establishment_id=:e AND state='POSTED' AND wage_month<:m ORDER BY wage_month DESC LIMIT 1"), {"e":filing["establishment_id"],"m":filing["wage_month"]})).mappings().first()
+    comparison = None
+    if prior:
+        old = prior["validation_report"] if isinstance(prior["validation_report"], dict) else json.loads(prior["validation_report"])
+        comparison = {"wage_month":prior["wage_month"],"members_then":old["summary"]["rows"],"total_then_paise":old["summary"]["totals_paise"]["TOTAL"],"total_now_paise":0}
+    report = validate(filing["content"], filing["format"], filing["wage_month"], members, ruleset(), comparison)
+    report.update({"filing_id": filing["id"], "version": filing["version"],
+                   "state": "VALIDATED" if report["valid"] else "VALIDATION_FAILED",
+                   "rule_version": filing["rule_version"]})
+    return report
+
+
+async def _create(body: FilingInput, actor: Actor):
+    require_grant(actor, "ecr.prepare")
+    eid = _establishment(actor)
+    if body.format not in ("ECR_TXT", "CSV"):
+        raise Problem(400, "/problems/invalid-ecr-format", "Unsupported ECR format")
+    if body.type != "REGULAR":
+        raise Problem(400, "/problems/invalid-ecr-type", "Only REGULAR filings are supported")
+    async with sessions()() as session, session.begin():
+        est = (await session.execute(text("SELECT status FROM establishments WHERE id=:e"), {"e": eid})).scalar_one_or_none()
+        if est != "VERIFIED":
+            raise Problem(409, "/problems/establishment-not-verified", "Establishment is not verified")
+        prior_rows = (await session.execute(text("SELECT * FROM ecr_filings WHERE establishment_id=:e AND wage_month=:m ORDER BY version DESC"), {"e": eid, "m": body.wage_month})).mappings().all()
+        if any(x["state"] not in ("DRAFT", "VALIDATION_FAILED", "VALIDATED", "SUPERSEDED") for x in prior_rows):
+            raise Problem(409, "/problems/wage-month-already-filed", "Wage month already filed", "Use a supplementary return.", fix="use a supplementary return")
+        for old in prior_rows:
+            if old["state"] in ("DRAFT", "VALIDATION_FAILED", "VALIDATED"):
+                await session.execute(text("UPDATE ecr_filings SET state='SUPERSEDED' WHERE id=:id"), {"id": old["id"]})
+        ver = (max((x["version"] for x in prior_rows), default=0) + 1)
+        fid = str(uuid.uuid4()); rv = ruleset()["rule_version"]
+        await session.execute(text("INSERT INTO ecr_filings (id, establishment_id, wage_month, filing_type, format, content, version, state, preparer_subject, rule_version) VALUES (:id,:e,:m,:t,:f,:c,:v,'DRAFT',:p,:r)"),
+                              {"id": fid, "e": eid, "m": body.wage_month, "t": body.type, "f": body.format, "c": body.content, "v": ver, "p": actor.subject, "r": rv})
+        filing = await _fetch_filing(session, fid, eid)
+        report = await _validation(session, filing)
+        state = report["state"]
+        await session.execute(text("UPDATE ecr_filings SET state=:s, validation_report=:r WHERE id=:id"), {"s": state, "r": json.dumps(report, default=str), "id": fid})
+        if report["valid"]:
+            await add_event(session, producer="contribution-service", event_type="ECRValidated.v1", aggregate_type="ecr_filing", aggregate_id=fid,
+                            payload={"filing_id":fid,"establishment_id":eid,"wage_month":body.wage_month,"member_count":report["summary"]["rows"]}, correlation_id=actor.correlation_id)
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="ecr.create", target_type="ecr_filing", target_id=fid, detail=f"version={ver}; rule_version={rv}")
+        filing["state"] = state
+        return {"filing": _filing_json(filing), "validation_report": report}
+
+
+def _filing_json(f):
+    return {"filing_id": f["id"], "wage_month": f["wage_month"], "type": f["filing_type"], "version": f["version"], "state": f["state"], "rule_version": f["rule_version"], "trrn": f.get("trrn")}
+
+
+@router.post("/api/v1/employers/me/ecr-filings", status_code=201)
+async def create_filing(body: FilingInput, actor: Actor = Depends(EMPLOYER)):
+    return envelope(await _create(body, actor))
+
+
+@router.post("/api/v1/partners/sandbox/payroll/ecr-filings", status_code=201)
+async def partner_create(body: FilingInput, actor: Actor = Depends(require_stakeholder("payroll_provider"))):
+    return envelope(await _create(body, actor))
+
+
+@router.post("/api/v1/employers/me/ecr-filings/{filingId}/validations")
+async def validate_filing(filingId: str, actor: Actor = Depends(EMPLOYER)):
+    require_grant(actor, "ecr.prepare"); eid = _establishment(actor)
+    async with sessions()() as session, session.begin():
+        f = await _fetch_filing(session, filingId, eid)
+        if f["state"] not in ("DRAFT", "VALIDATION_FAILED", "VALIDATED"):
+            raise Problem(409, "/problems/invalid-state", "This filing can no longer be validated")
+        report = await _validation(session, f)
+        await session.execute(text("UPDATE ecr_filings SET state=:s, validation_report=:r WHERE id=:id"), {"s": report["state"], "r": json.dumps(report, default=str), "id": filingId})
+        if report["valid"]:
+            await add_event(session, producer="contribution-service", event_type="ECRValidated.v1", aggregate_type="ecr_filing", aggregate_id=filingId,
+                            payload={"filing_id": filingId, "establishment_id": eid, "wage_month": f["wage_month"], "member_count": report["summary"]["rows"]}, correlation_id=actor.correlation_id)
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="ecr.validate", target_type="ecr_filing", target_id=filingId, detail=f"state={report['state']}; rule_version={f['rule_version']}")
+        return envelope(report)
+
+
+@router.post("/api/v1/employers/me/ecr-filings/{filingId}/approvals")
+async def approve_filing(filingId: str, body: ApprovalInput, actor: Actor = Depends(EMPLOYER)):
+    require_grant(actor, "ecr.approve"); eid = _establishment(actor)
+    async with sessions()() as session, session.begin():
+        f = await _fetch_filing(session, filingId, eid)
+        if f["state"] != "VALIDATED": raise Problem(409, "/problems/invalid-state", "Filing must be validated")
+        if f["preparer_subject"] == actor.subject: raise Problem(403, "/problems/self-approval", "Self approval is not allowed")
+        report = f["validation_report"] if isinstance(f["validation_report"], dict) else json.loads(f["validation_report"])
+        _check_stepup(actor, "approve-ecr", f, report["summary"]["totals_paise"]["TOTAL"])
+        if body.decision not in ("APPROVE", "RETURN"): raise Problem(400, "/problems/invalid-decision", "Decision must be APPROVE or RETURN")
+        if body.decision == "RETURN" and not body.reason:
+            raise Problem(400, "/problems/reason-required", "A reason is required when returning a filing")
+        state = "APPROVED" if body.decision == "APPROVE" else "DRAFT"
+        await session.execute(text("UPDATE ecr_filings SET state=:s, approver_subject=:a WHERE id=:i"), {"s": state, "a": actor.subject, "i": filingId})
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action=f"ecr.{body.decision.lower()}", target_type="ecr_filing", target_id=filingId, detail=body.reason)
+        return envelope({"filing_id": filingId, "state": state})
+
+
+def _check_stepup(actor: Actor, action: str, filing: dict[str, Any], amount: int):
+    require_step_up(actor, action, filing["id"], filing["version"], amount)
+
+
+async def _next_trrn(session) -> str:
+    if session.bind.dialect.name == "postgresql":
+        n = (await session.execute(text("SELECT nextval('trrn_sequence')"))).scalar_one()
+    else:  # SQLite in unit tests has no sequences
+        n = (await session.execute(text("SELECT COUNT(*) FROM challans"))).scalar_one() + 1
+    return f"TRRN{n:013d}"
+
+
+@router.post("/api/v1/employers/me/ecr-filings/{filingId}/submissions", status_code=201)
+async def submit_filing(filingId: str, actor: Actor = Depends(EMPLOYER), idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"), if_match: str | None = Header(default=None, alias="If-Match")):
+    require_grant(actor, "ecr.submit"); eid = _establishment(actor)
+    if not idempotency_key: raise Problem(400, "/problems/idempotency-key-required", "Idempotency-Key is required")
+    async with sessions()() as session, session.begin():
+        bodyhash = request_hash({"filing_id": filingId, "if_match": if_match})
+        cached = await find_response(session, actor.subject, "submit-ecr", idempotency_key, bodyhash)
+        if cached: return JSONResponse(cached.body, status_code=cached.status)
+        f = await _fetch_filing(session, filingId, eid)
+        if if_match is None or if_match.strip('"') != str(f["version"]): raise Problem(412, "/problems/version-mismatch", "Filing version does not match If-Match")
+        if f["state"] != "APPROVED": raise Problem(409, "/problems/invalid-state", "Filing must be approved before submission")
+        report = f["validation_report"] if isinstance(f["validation_report"], dict) else json.loads(f["validation_report"])
+        total = report["summary"]["totals_paise"]["TOTAL"]
+        _check_stepup(actor, "submit-ecr", f, total)
+        trrn = await _next_trrn(session)
+        breakdown = report["summary"]["totals_paise"]
+        await session.execute(text("INSERT INTO challans (trrn, filing_id, establishment_id, status, total_paise, breakdown) VALUES (:t,:f,:e,'DUE',:a,:b)"), {"t": trrn, "f": filingId, "e": eid, "a": total, "b": json.dumps(breakdown)})
+        await session.execute(text("UPDATE ecr_filings SET state='SUBMITTED', trrn=:t WHERE id=:f"), {"t": trrn, "f": filingId})
+        await add_event(session, producer="contribution-service", event_type="ECRSubmitted.v1", aggregate_type="ecr_filing", aggregate_id=filingId,
+                        payload={"filing_id": filingId, "establishment_id": eid, "trrn": trrn, "total_paise": total, "rule_version": f["rule_version"]}, correlation_id=actor.correlation_id)
+        result = envelope({"filing_id": filingId, "state": "SUBMITTED", "trrn": trrn, "total_paise": total, "breakdown_paise": breakdown})
+        await store_response(session, actor.subject, "submit-ecr", idempotency_key, bodyhash, 201, result)
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="ecr.submit", target_type="ecr_filing", target_id=filingId)
+        return JSONResponse(result, status_code=201)
+
+
+@router.get("/api/v1/employers/me/ecr-filings/{filingId}")
+async def get_filing(filingId: str, actor: Actor = Depends(EMPLOYER)):
+    eid = _establishment(actor)
+    async with sessions()() as session:
+        f = await _fetch_filing(session, filingId, eid)
+        return envelope({**_filing_json(f), "validation_report": f["validation_report"]})
+
+
+@router.get("/api/v1/employers/me/ecr-filings")
+async def list_filings(actor: Actor = Depends(EMPLOYER), wageMonth: str | None = Query(default=None), type: str | None = Query(default=None)):
+    eid = _establishment(actor)
+    async with sessions()() as session:
+        result = await session.execute(text("SELECT * FROM ecr_filings WHERE establishment_id=:e AND (CAST(:m AS TEXT) IS NULL OR wage_month=:m) AND (CAST(:t AS TEXT) IS NULL OR filing_type=:t) ORDER BY wage_month DESC,version DESC"), {"e": eid, "m": wageMonth, "t": type})
+        return envelope([_filing_json(dict(x)) for x in result.mappings().all()])
+
+
+async def _challan(trrn: str, eid: str):
+    async with sessions()() as session:
+        r = await session.execute(text("SELECT * FROM challans WHERE trrn=:t AND establishment_id=:e"), {"t": trrn, "e": eid})
+        row = r.mappings().first()
+        if not row: raise Problem(404, "/problems/not-found", "Not found", "Challan not found.")
+        return dict(row)
+
+
+@router.get("/api/v1/employers/me/challans")
+async def list_challans(actor: Actor = Depends(EMPLOYER)):
+    eid = _establishment(actor)
+    async with sessions()() as session:
+        r = await session.execute(text("SELECT * FROM challans WHERE establishment_id=:e ORDER BY created_at DESC"), {"e": eid})
+        return envelope([dict(x) for x in r.mappings().all()])
+
+
+@router.get("/api/v1/employers/me/challans/{trrn}")
+async def get_challan(trrn: str, actor: Actor = Depends(EMPLOYER)):
+    return envelope(await _challan(trrn, _establishment(actor)))
+
+
+@router.get("/api/v1/employers/me/challans/{trrn}/receipt")
+async def challan_receipt(trrn: str, actor: Actor = Depends(EMPLOYER)):
+    row = await _challan(trrn, _establishment(actor))
+    if row["status"] != "PAID": raise Problem(409, "/problems/challan-not-paid", "Challan is not paid", f"Current status: {row['status']}. Pay the challan and retry for a receipt.", current_status=row["status"], next="Pay the challan")
+    return envelope({"trrn": trrn, "status": row["status"], "paid_at": row.get("paid_at"), "total_paise": row["total_paise"]})
+
+
+@router.post("/api/v1/public/demo-calculations/epf")
+async def calculate(body: CalculatorInput, actor: Actor = Depends(require_actor)):  # anonymous callers still pass the gateway
+    rs = ruleset()
+    out = split(body.epf_wages_paise, body.eps_wages_paise, body.age_years, rs)
+    calc_id = str(uuid.uuid4())
+    async with sessions()() as session, session.begin():
+        await session.execute(text("INSERT INTO demo_calculations (id,epf_wages_paise,eps_wages_paise,age_years,rule_version,result) VALUES (:id,:epf,:eps,:age,:rv,:result)"),
+                              {"id":calc_id,"epf":body.epf_wages_paise,"eps":body.eps_wages_paise,"age":body.age_years,"rv":rs["rule_version"],"result":json.dumps(out)})
+    return envelope({**out, "calculation_id":calc_id, "rule_version": rs["rule_version"], "label": "ILLUSTRATIVE_ONLY"})
+
+
+@router.post("/api/v1/public/trrn-status-lookups")
+async def public_trrn_status(body: PublicTrrnLookup, actor: Actor = Depends(require_actor)):
+    """Expose only payment state; never disclose employer, member, or amount data."""
+    async with sessions()() as session:
+        row = (await session.execute(text("""SELECT c.status,c.created_at,c.paid_at,f.wage_month
+                                       FROM challans c JOIN ecr_filings f ON f.id=c.filing_id
+                                       WHERE c.trrn=:trrn"""),
+                                     {"trrn": body.trrn})).mappings().first()
+    status = row["status"] if row else "NOT_FOUND"
+    next_step = {"DUE": "Awaiting payment", "PAID": "Payment recorded", "FAILED": "Payment failed or returned",
+                 "NOT_FOUND": "Check the reference and try again"}.get(status, "Check with the issuing office")
+    return envelope({"trrn": body.trrn, "status": status, "wage_month": row["wage_month"] if row else None,
+                     "issued_at": row["created_at"].isoformat() if row and row["created_at"] else None,
+                     "paid_at": row["paid_at"].isoformat() if row and row["paid_at"] else None,
+                     "next_step": next_step, "label": "SYNTHETIC_DEMO"})
+
+
+@router.get("/api/v1/members/me/passbook")
+async def passbook(actor: Actor = Depends(MEMBER)):
+    return envelope(await _passbook(actor.subject, None))
+
+
+@router.get("/api/v1/members/me/accounts/{accountLinkId}/passbook")
+async def account_passbook(accountLinkId: str, actor: Actor = Depends(MEMBER)):
+    data = await _passbook(actor.subject, accountLinkId)
+    if not data["accounts"]: raise Problem(404, "/problems/not-found", "Not found", "Account not found.")
+    return envelope(data)
+
+
+async def _passbook(subject: str, account_link_id: str | None):
+    async with sessions()() as session:
+        q = text("SELECT account_link_id, establishment_id FROM establishment_members WHERE member_subject=:s AND (CAST(:a AS TEXT) IS NULL OR account_link_id=:a)")
+        accounts = (await session.execute(q, {"s": subject, "a": account_link_id})).mappings().all()
+        out=[]; pending=[]
+        for a in accounts:
+            lines = (await session.execute(text("SELECT j.occurred_at,f.wage_month,c.trrn, jl.side,jl.amount_paise,jl.share,e.legal_name FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id JOIN ecr_filings f ON f.id=j.filing_id JOIN challans c ON c.trrn=f.trrn JOIN establishments e ON e.id=f.establishment_id WHERE jl.account_link_id=:a ORDER BY f.wage_month,j.occurred_at"), {"a": a["account_link_id"]})).mappings().all()
+            grouped={}
+            for ln in lines:
+                key=(ln["wage_month"],ln["trrn"])
+                ent=grouped.setdefault(key,{"wage_month":ln["wage_month"],"employee_share_paise":0,"employer_share_paise":0,"establishment_name":ln["legal_name"],"trrn":ln["trrn"],"posted_at":ln["occurred_at"]})
+                if ln["side"] == "credit" and ln["share"] in ("employee","employer"):
+                    ent[f"{ln['share']}_share_paise"] += ln["amount_paise"]
+            balance=0; entries=[]
+            for ent in grouped.values():
+                balance += ent["employee_share_paise"] + ent["employer_share_paise"]
+                entries.append({**ent,"running_balance_paise":balance})
+            out.append({"account_link_id": a["account_link_id"], "entries": entries})
+        pending_rows=(await session.execute(text("SELECT f.wage_month,f.state,f.content,f.format,c.trrn,m.uan,m.account_link_id FROM ecr_filings f LEFT JOIN challans c ON c.filing_id=f.id JOIN establishment_members m ON m.establishment_id=f.establishment_id WHERE m.member_subject=:s AND (CAST(:a AS TEXT) IS NULL OR m.account_link_id=:a) AND f.state IN ('SUBMITTED','PAYMENT_PENDING')"), {"s":subject,"a":account_link_id})).mappings().all()
+        for x in pending_rows:
+            members,_,_=parse(x["content"],x["format"])
+            if any(m["UAN"] == x["uan"] for m in members):
+                pending.append({"account_link_id":x["account_link_id"],"wage_month":x["wage_month"],"trrn":x["trrn"],"status":x["state"],"message":"filed by employer, awaiting payment"})
+        return {"accounts":out,"pending":pending}

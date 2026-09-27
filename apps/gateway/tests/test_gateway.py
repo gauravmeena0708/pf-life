@@ -1,3 +1,4 @@
+import jwt
 import json
 import time
 
@@ -87,17 +88,76 @@ async def test_mutation_requires_double_submit_csrf(client):
 
 
 @pytest.mark.asyncio
-async def test_step_up_is_required_then_deferred(client):
+async def test_step_up_flow_binds_single_use_token_into_internal_jwt(client):
     http, app, _ = client
-    sid, session = await login_as(app, "member")
+    sid, session = await login_as(app, "member", subject="member-1")
     cookies = {"__Host-epfo-session": sid, "epfo-csrf": session["csrf"]}
     headers = {"X-CSRF-Token": session["csrf"]}
-    missing = await http.patch("/api/v1/members/me/contact-details", cookies=cookies, headers=headers)
-    assert missing.status_code == 428
-    deferred = await http.patch("/api/v1/members/me/contact-details", cookies=cookies,
-                               headers={**headers, "X-Step-Up-Token": "demo-token"})
-    assert deferred.status_code == 501
-    assert deferred.json()["detail"] == "step-up verification arrives in slice 4"
+    url = "/api/v1/members/me/contact-details"
+    assert (await http.patch(url, cookies=cookies, headers=headers)).status_code == 428
+    challenge = await http.post("/api/v1/security/step-up-challenges", cookies=cookies, headers=headers,
+                                json={"action": "change-contact", "resource_id": "member-1", "summary": "Change mobile"})
+    assert challenge.status_code == 200
+    c = challenge.json()["data"]
+    wrong = await http.post(f"/api/v1/security/step-up-challenges/{c['challenge_id']}/verifications", cookies=cookies,
+                            headers=headers, json={"otp": "000000" if c["demo_otp"] != "000000" else "111111"})
+    assert wrong.status_code == 403
+    ok = await http.post(f"/api/v1/security/step-up-challenges/{c['challenge_id']}/verifications", cookies=cookies,
+                         headers=headers, json={"otp": c["demo_otp"]})
+    token = ok.json()["data"]["step_up_token"]
+    seen = {}
+    with respx.mock() as router:
+        def reply(request):
+            seen["jwt"] = request.headers["authorization"].split()[1]
+            return Response(200, json={"data": {}})
+        router.patch("http://member-service:8000/api/v1/members/me/contact-details").mock(side_effect=reply)
+        first = await http.patch(url, cookies=cookies, headers={**headers, "X-Step-Up-Token": token})
+        replay = await http.patch(url, cookies=cookies, headers={**headers, "X-Step-Up-Token": token})
+    assert first.status_code == 200
+    claims = jwt.decode(seen["jwt"], options={"verify_signature": False})
+    assert claims["step_up"] == {"action": "change-contact", "resource_id": "member-1", "resource_version": None,
+                                 "amount_paise": None}
+    assert replay.status_code == 403 and replay.json()["type"] == "/problems/step-up-invalid"
+
+
+@pytest.mark.asyncio
+async def test_step_up_token_cannot_be_used_by_another_user(client):
+    http, app, _ = client
+    sid_a, sa = await login_as(app, "member", subject="member-a")
+    sid_b, sb = await login_as(app, "member", subject="member-b")
+    ca = {"__Host-epfo-session": sid_a, "epfo-csrf": sa["csrf"]}
+    c = (await http.post("/api/v1/security/step-up-challenges", cookies=ca, headers={"X-CSRF-Token": sa["csrf"]},
+                         json={"action": "x", "resource_id": "r", "summary": "s"})).json()["data"]
+    token = (await http.post(f"/api/v1/security/step-up-challenges/{c['challenge_id']}/verifications", cookies=ca,
+                             headers={"X-CSRF-Token": sa["csrf"]}, json={"otp": c["demo_otp"]})).json()["data"]["step_up_token"]
+    r = await http.patch("/api/v1/members/me/contact-details", cookies={"__Host-epfo-session": sid_b, "epfo-csrf": sb["csrf"]},
+                         headers={"X-CSRF-Token": sb["csrf"], "X-Step-Up-Token": token})
+    assert r.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_employer_grants_resolved_into_jwt_and_cache_cleared_on_revocation(client):
+    from app import grants as grant_resolver
+    grant_resolver.forget()
+    http, app, redis = client
+    sid, session = await login_as(app, "employer.operator", subject="operator-1")
+    cookies = {"__Host-epfo-session": sid}
+    seen = {}
+    with respx.mock() as router:
+        grants_route = router.get("http://employer-service:8000/internal/actors/operator-1/grants").mock(
+            return_value=Response(200, json={"data": {"establishments": [{"establishment_id": "EST-1", "grants": ["ecr.prepare"]}]}}))
+        def reply(request):
+            seen["jwt"] = request.headers["authorization"].split()[1]
+            return Response(200, json={"data": []})
+        router.get("http://contribution-service:8000/api/v1/employers/me/ecr-filings").mock(side_effect=reply)
+        assert (await http.get("/api/v1/employers/me/ecr-filings", cookies=cookies)).status_code == 200
+        assert (await http.get("/api/v1/employers/me/ecr-filings", cookies=cookies)).status_code == 200
+        assert grants_route.call_count == 1  # cached
+        grant_resolver.forget("operator-1")   # what a successful revocation does
+        await http.get("/api/v1/employers/me/ecr-filings", cookies=cookies)
+        assert grants_route.call_count == 2   # re-read immediately after revocation
+    claims = jwt.decode(seen["jwt"], options={"verify_signature": False})
+    assert claims["establishment_id"] == "EST-1" and claims["grants"] == ["ecr.prepare"]
 
 
 @pytest.mark.asyncio
@@ -149,12 +209,12 @@ async def test_revocation_persisted_before_success_is_returned(client):
     http, app, redis = client
     sid, session = await login_as(app, "employer.owner")
     route = next(r for r in app.state.routes if r["path_template"] == "/employers/me/operators/{operatorId}/revocations")
-    # Slice 1 intentionally defers step-up verification; disable the guard only in this test to exercise
-    # the successful-upstream synchronous persistence contract for when the step-up slice is enabled.
-    route["step_up"] = False
+    route["step_up"] = False  # step-up is covered by its own tests; this test isolates the revocation write
     event = {"data": {"revocation": {"subject": "target-subject", "establishment_id": "EST-1",
                                       "grant_id": "grant-1", "scope": "grant"}}}
     with respx.mock(assert_all_called=True) as router:
+        router.get(url__regex=r"http://employer-service:8000/internal/actors/.*/grants").mock(
+            return_value=Response(200, json={"data": {"establishments": [{"establishment_id": "EST-1", "grants": ["operators.manage"]}]}}))
         upstream = router.post("http://employer-service:8000/api/v1/employers/me/operators/op-1/revocations")
         async def reply(request):
             return Response(200, json=event)

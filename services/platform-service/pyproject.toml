@@ -12,6 +12,7 @@ dependencies = [
   "alembic==1.14.0",
   "epfo-observability",
   "epfo-auth-client",
+  "epfo-persistence",
 ]
 
 [project.optional-dependencies]

@@ -6,7 +6,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 
 | # | Interface | Coverage | Stakeholders | W | M | P | ? |
 |---|---|---|---|---|---|---|---|
-| 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 7 | 0 | 7 | 0 |
+| 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 7 | 2 | 6 | 0 |
 | 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 20 | 8 | 60 | 0 |
 | 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 23 | 7 | 48 | 0 |
 | 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 8 | 0 | 73 | 5 |
@@ -22,7 +22,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | 14 | CAIU | **Working** | `ho.caiu` | 2 | 0 | 1 | 0 |
 | 15 | HRM | **Working** | `ho.hr` | 1 | 0 | 1 | 0 |
 | 16 | Reporting and monitoring | **Working** | `gov.cbt`, `gov.ec`, `gov.fiac`, `gov.peic` | 1 | 0 | 2 | 0 |
-| 17 | Security | **Working** | `ho.security`, `ho.data_protection` | 4 | 0 | 3 | 0 |
+| 17 | Security | **Working** | `ho.security`, `ho.data_protection` | 5 | 0 | 3 | 0 |
 | 18 | Vigilance | **Planned** | `ho.cvo`, `zo.vigilance` | 0 | 0 | 3 | 0 |
 | 19 | Audit | **Working** | `ho.audit`, `zo.rpfc1_audit`, `zo.internal_audit`, `gov.cag`, `gov.statutory_auditor` | 2 | 0 | 7 | 0 |
 | 20 | UMANG | **Working** | `ext.umang` | 3 | 0 | 0 | 0 |
@@ -41,25 +41,26 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /public/statistics` | W | reporting | public |
 | `POST /ai/knowledge/search` | W | intelligence | public |
 | `POST /public/demo-calculations/epf` | W | contribution | public |
+| `GET /public/demo-challenges` | M | gateway | public |
+| `POST /public/trrn-status-lookups` | M | contribution | public |
 | `GET /public/circulars` | P | intelligence | public |
 | `GET /public/defaulting-establishments` | P | compliance | public |
 | `GET /public/establishments/{estId}/e-report-card` | P | reporting | public |
 | `POST /public/demo-calculations/pension` | P | pension | public |
 | `POST /public/grievances` | P | grievance | complainant |
 | `POST /public/grievances/status-lookups` | P | grievance | complainant |
-| `POST /public/trrn-status-lookups` | P | contribution | public |
 
 ### 2. Employer — Working
 
 | Endpoint | Status | Owner | Called by |
 |---|---|---|---|
-| `GET /employers/me` | W | employer | employer.operator |
+| `GET /employers/me` | W | employer | employer.operator, employer.owner, employer.signatory |
 | `GET /employers/me/challans` | W | contribution | employer.signatory |
 | `GET /employers/me/challans/{trrn}` | W | contribution | employer.signatory |
-| `GET /employers/me/challans/{trrn}/receipt` | W | contribution | employer.operator |
+| `GET /employers/me/challans/{trrn}/receipt` | W | contribution | employer.operator, employer.signatory |
 | `GET /employers/me/configuration` | W | employer | employer.operator |
-| `GET /employers/me/ecr-filings` | W | contribution | employer.operator |
-| `GET /employers/me/ecr-filings/{filingId}` | W | contribution | employer.operator |
+| `GET /employers/me/ecr-filings` | W | contribution | employer.operator, employer.signatory |
+| `GET /employers/me/ecr-filings/{filingId}` | W | contribution | employer.operator, employer.signatory |
 | `GET /employers/me/members` | W | member | employer.operator |
 | `GET /employers/me/operators` | W | employer | employer.owner |
 | `GET /employers/me/signatories` | W | employer | employer.owner |
@@ -485,6 +486,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | Endpoint | Status | Owner | Called by |
 |---|---|---|---|
 | `GET /security/me/permissions` | W | gateway | ho.security |
+| `GET /security/request-activity` | W | gateway | ho.security |
 | `GET /security/sessions` | W | gateway | ho.security |
 | `POST /internal/security-events` | W | audit | ho.security |
 | `POST /security/sessions/{sessionId}/revocations` | W | gateway | ho.security |

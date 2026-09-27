@@ -1,0 +1,20 @@
+[project]
+name = "epfo-persistence"
+version = "0.1.0"
+description = "Transactional outbox, outbox relay, idempotent event consumer and idempotency keys for EPFO POC services (docs/architecture.md §2.2, §2.7). No business logic."
+requires-python = ">=3.12"
+dependencies = [
+  "sqlalchemy[asyncio]==2.0.36",
+  "aio-pika==9.4.3",
+  "epfo-observability",
+]
+
+[project.optional-dependencies]
+test = ["pytest==8.3.3", "aiosqlite==0.20.0"]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["epfo_persistence"]

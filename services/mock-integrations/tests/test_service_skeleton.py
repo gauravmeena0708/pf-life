@@ -25,6 +25,7 @@ def test_every_phase1_operation_is_routed_and_protected(client, internal_token):
         wrong_audience = client.request(method, url, headers={"Authorization": f"Bearer {internal_token(audience='other-service')}"})
         assert wrong_audience.status_code == 401, op
         ok = client.request(method, url, headers={"Authorization": f"Bearer {internal_token()}"})
-        # A router-level miss (/problems/http-404 or 405) means the operation is not routed at all.
+        # Routed and authenticated: never a router-level miss (/problems/http-404 or 405) and never 401.
+        # Real routes may still answer 400/403/404/409/422, or 500 here because tests run without a database.
         assert ok.json().get("type") not in ("/problems/http-404", "/problems/http-405"), op
-        assert ok.status_code in (200, 201, 400, 404, 409, 422, 501), (op, ok.status_code)
+        assert ok.json().get("type") != "/problems/unauthenticated", (op, ok.json())  # the token was accepted

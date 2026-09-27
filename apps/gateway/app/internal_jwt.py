@@ -36,10 +36,14 @@ def public_jwks(key: Ed25519PrivateKey) -> dict:
 
 
 def mint(key: Ed25519PrivateKey, subject: str, stakeholder: str, audience: str, correlation_id: str,
-         establishment_id: str | None = None) -> str:
+         establishment_id: str | None = None, grants: list[str] | None = None, step_up: dict | None = None) -> str:
     now = int(time.time())
     claims = {"iss": "epfo-gateway", "aud": audience, "sub": subject, "stakeholder": stakeholder,
               "iat": now, "exp": now + 60, "jti": str(uuid.uuid4()), "correlation_id": correlation_id}
     if establishment_id:
         claims["establishment_id"] = establishment_id
+    if grants is not None:
+        claims["grants"] = grants
+    if step_up:
+        claims["step_up"] = step_up
     return jwt.encode(claims, key, algorithm="EdDSA", headers={"kid": key_id(key)})

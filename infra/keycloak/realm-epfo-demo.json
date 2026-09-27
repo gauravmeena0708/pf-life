@@ -174,7 +174,8 @@
       ],
       "realmRoles": [
         "member"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000001"
     },
     {
       "username": "member-b",
@@ -192,7 +193,8 @@
       ],
       "realmRoles": [
         "member"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000002"
     },
     {
       "username": "emp-owner",
@@ -210,7 +212,8 @@
       ],
       "realmRoles": [
         "employer.owner"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000003"
     },
     {
       "username": "emp-preparer",
@@ -228,7 +231,8 @@
       ],
       "realmRoles": [
         "employer.operator"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000004"
     },
     {
       "username": "emp-signatory",
@@ -246,7 +250,8 @@
       ],
       "realmRoles": [
         "employer.signatory"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000005"
     },
     {
       "username": "do-caseworker",
@@ -264,7 +269,8 @@
       ],
       "realmRoles": [
         "fo.da_accounts"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000006"
     },
     {
       "username": "ro-ss",
@@ -282,7 +288,8 @@
       ],
       "realmRoles": [
         "fo.ss"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000007"
     },
     {
       "username": "ro-ao",
@@ -300,7 +307,8 @@
       ],
       "realmRoles": [
         "fo.ao"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000008"
     },
     {
       "username": "ro-apfc",
@@ -318,7 +326,8 @@
       ],
       "realmRoles": [
         "fo.apfc"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000009"
     },
     {
       "username": "ro-oic",
@@ -336,7 +345,8 @@
       ],
       "realmRoles": [
         "fo.oic"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000010"
     },
     {
       "username": "ro-cashier",
@@ -354,7 +364,8 @@
       ],
       "realmRoles": [
         "fo.cash"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000011"
     },
     {
       "username": "ro-pro",
@@ -372,7 +383,8 @@
       ],
       "realmRoles": [
         "fo.pro"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000012"
     },
     {
       "username": "zo-acc",
@@ -390,7 +402,8 @@
       ],
       "realmRoles": [
         "zo.acc"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000013"
     },
     {
       "username": "ho-analyst",
@@ -408,7 +421,8 @@
       ],
       "realmRoles": [
         "ho.cpfc"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000014"
     },
     {
       "username": "ndc-operator",
@@ -426,7 +440,8 @@
       ],
       "realmRoles": [
         "tech.ndc"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000015"
     },
     {
       "username": "ministry-viewer",
@@ -444,7 +459,8 @@
       ],
       "realmRoles": [
         "gov.mole"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000016"
     },
     {
       "username": "b2b-client",
@@ -462,7 +478,8 @@
       ],
       "realmRoles": [
         "payroll_provider"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000017"
     },
     {
       "username": "caiu-investigator",
@@ -480,7 +497,8 @@
       ],
       "realmRoles": [
         "ho.caiu"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000018"
     },
     {
       "username": "hrm-employee",
@@ -498,7 +516,8 @@
       ],
       "realmRoles": [
         "ho.hr"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000019"
     },
     {
       "username": "security-analyst",
@@ -516,7 +535,8 @@
       ],
       "realmRoles": [
         "ho.security"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000020"
     },
     {
       "username": "vigilance-investigator",
@@ -534,7 +554,8 @@
       ],
       "realmRoles": [
         "ho.cvo"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000021"
     },
     {
       "username": "auditor",
@@ -552,7 +573,8 @@
       ],
       "realmRoles": [
         "ho.audit"
-      ]
+      ],
+      "id": "00000000-0000-4000-8000-000000000022"
     },
     {
       "username": "service-account-b2b-sandbox",

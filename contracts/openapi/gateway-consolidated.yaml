@@ -837,6 +837,8 @@ paths:
       x-owner-service: employer
       x-callers:
       - employer.operator
+      - employer.owner
+      - employer.signatory
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []
@@ -1160,6 +1162,7 @@ paths:
       x-owner-service: contribution
       x-callers:
       - employer.operator
+      - employer.signatory
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []
@@ -1590,6 +1593,7 @@ paths:
       x-owner-service: contribution
       x-callers:
       - employer.operator
+      - employer.signatory
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []
@@ -1674,6 +1678,7 @@ paths:
       x-owner-service: contribution
       x-callers:
       - employer.operator
+      - employer.signatory
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []
@@ -11528,15 +11533,89 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /public/demo-challenges:
+    get:
+      operationId: getPublicDemoChallenges
+      summary: One-use arithmetic proof for synthetic public lookup demo
+      tags:
+      - Public information and establishment search
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: mock
+      x-phase: 1
+      x-owner-service: gateway
+      x-callers:
+      - public
+      x-scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
+      security: []
   /public/establishments:
     get:
       operationId: getPublicEstablishments
-      summary: Establishment search by name / code / pincode (rate-limited, paged, no bulk enumeration)
+      summary: Establishment search by code, registration, pincode, name or industry; filter by location, type, exemption
+        and coverage
       tags:
       - Public information and establishment search
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       - name: query
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: mode
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: match
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: office_id
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: city
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: district
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: establishment_type
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: exemption_status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
         in: query
         required: false
         schema:
@@ -11564,7 +11643,7 @@ paths:
   /public/establishments/{estId}:
     get:
       operationId: getPublicEstablishmentsEstId
-      summary: 'Establishment public profile: name, office, coverage and exemption status'
+      summary: 'Public profile: name, registration, office, location, type, industry, coverage, verification and exemption'
       tags:
       - Public information and establishment search
       parameters:
@@ -11919,25 +11998,34 @@ paths:
   /public/trrn-status-lookups:
     post:
       operationId: postPublicTrrnStatusLookups
-      summary: TRRN / challan status lookup (CAPTCHA)
+      summary: TRRN / challan status lookup with wage month, issue/payment times and next step; one-use synthetic demo proof
+        (productio
       tags:
       - Public information and establishment search
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: mock
+      x-phase: 1
       x-owner-service: contribution
       x-callers:
       - public
       x-scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
       security: []
+      description: TRRN / challan status lookup with wage month, issue/payment times and next step; one-use synthetic demo
+        proof (production CAPTCHA pending)
       requestBody:
         required: false
         content:
@@ -12003,6 +12091,35 @@ paths:
       x-callers:
       - ho.security
       x-scope: self — open to every authenticated caller (own data only)
+      security:
+      - bffSession: []
+  /security/request-activity:
+    get:
+      operationId: getSecurityRequestActivity
+      summary: Security analyst view of recent API rates and redacted request activity (Redis POC, 24-hour retention)
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: gateway
+      x-callers:
+      - ho.security
+      x-scope: security analyst
       security:
       - bffSession: []
   /security/sessions:
