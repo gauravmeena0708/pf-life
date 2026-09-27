@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     db_pool_size: int = 5
     rabbitmq_url: str = "amqp://epfo:dev@localhost:5672/"
     gateway_jwks_url: str = "http://gateway:8000/internal/jwks"
+    mock_bank_hmac_secret: str = "dev-mock-bank-hmac-secret"
+    mock_bank_delay_seconds: float = 2.0
 
 
 settings = Settings()

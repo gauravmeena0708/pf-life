@@ -28,4 +28,4 @@ def test_every_phase1_operation_is_routed_and_protected(client, internal_token):
         # Routed and authenticated: never a router-level miss (/problems/http-404 or 405) and never 401.
         # Real routes may still answer 400/403/404/409/422, or 500 here because tests run without a database.
         assert ok.json().get("type") not in ("/problems/http-404", "/problems/http-405"), op
-        assert ok.status_code != 401, (op, ok.json())
+        assert ok.json().get("type") != "/problems/unauthenticated", (op, ok.json())  # the token was accepted
