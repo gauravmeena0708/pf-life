@@ -5,6 +5,7 @@ import secrets
 from fastapi import Request
 
 from .problems import problem
+from .request_activity import lookup_fingerprint, summarize_body
 
 PROTECTED = {"/public/establishments", "/public/establishments/{estId}",
              "/public/demo-challenges", "/public/trrn-status-lookups"}
@@ -25,10 +26,13 @@ async def limit_public(request: Request, route: dict):
         if count == 1:
             await request.app.state.redis.expire(key, 60)
     except Exception:
+        request.state.rate_decision = "unavailable"
         return problem(request, 503, "public-access-unavailable", "Public lookup temporarily unavailable")
     ceiling = 10 if route["path_template"] == "/public/trrn-status-lookups" else 30
     if count > ceiling:
+        request.state.rate_decision = "limited"
         return problem(request, 429, "rate-limited", "Too many public lookups", "Try again in a minute.")
+    request.state.rate_decision = "allowed"
     return None
 
 
@@ -47,10 +51,15 @@ async def create_demo_challenge(request: Request):
 
 
 async def verify_demo_challenge(request: Request):
-    if len(await request.body()) > 4096:
+    body_bytes = await request.body()
+    summarize_body(request, body_bytes)
+    if len(body_bytes) > 4096:
+        request.state.challenge_decision = "rejected"
         return problem(request, 413, "request-too-large", "Lookup request is too large")
     try:
         body = await request.json()
+        if isinstance(body, dict) and isinstance(body.get("trrn"), str):
+            request.state.lookup_fingerprint = lookup_fingerprint(request, body["trrn"])
         challenge_id = body.get("challenge_id") if isinstance(body, dict) else None
         answer = body.get("answer") if isinstance(body, dict) else None
         if not isinstance(challenge_id, str) or not 20 <= len(challenge_id) <= 64:
@@ -59,12 +68,17 @@ async def verify_demo_challenge(request: Request):
             raise ValueError
         raw = await request.app.state.redis.getdel(f"public:challenge:{challenge_id}")
     except (ValueError, TypeError, KeyError, json.JSONDecodeError):
+        request.state.challenge_decision = "rejected"
         return problem(request, 400, "invalid-request", "Invalid lookup request")
     except Exception:
+        request.state.challenge_decision = "unavailable"
         return problem(request, 503, "public-access-unavailable", "Public lookup temporarily unavailable")
     if not raw:
+        request.state.challenge_decision = "rejected"
         return problem(request, 403, "demo-proof-invalid", "Demo challenge expired or already used")
     saved = json.loads(raw)
     if saved["peer"] != _peer(request) or saved["answer"] != answer:
+        request.state.challenge_decision = "rejected"
         return problem(request, 403, "demo-proof-invalid", "Demo challenge answer is incorrect")
+    request.state.challenge_decision = "passed"
     return None

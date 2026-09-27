@@ -965,11 +965,12 @@ Activities: **F07.vig_ho** CVO / Director (Vigilance): oversee vigilance cases a
 
 #### `ho.security` — Information security / SOC (cyber incidents, access reviews)
 
-Activities: **F14.security** Session inspection and revocation; security events; incident reporting
+Activities: **F14.security** Inspect recent request rates and redacted activity; session inspection and revocation; security events; incident reporting
 
 | Endpoint | Status |
 |---|---|
 | `GET /security/me/permissions` | W |
+| `GET /security/request-activity` | W |
 | `GET /security/sessions` | W |
 | `POST /internal/security-events` | W |
 | `POST /security/sessions/{sessionId}/revocations` | W |
@@ -1778,7 +1779,7 @@ flowchart LR
   F14_ndc["tech.ndc<br/>Run production, batch jobs and health / event monitoring"]
   F14_adc["tech.adc<br/>Disaster-recovery site: replication status and failover dril"]
   style F14_adc stroke-dasharray: 5 5
-  F14_security["ho.security<br/>Session inspection and revocation; security events; incident"]
+  F14_security["ho.security<br/>Inspect recent request rates and redacted activity; session "]
   style F14_security stroke-dasharray: 5 5
   F14_cert_in["ext.cert_in<br/>Receive cyber-incident reports"]
   F14_step_up["member<br/>Complete step-up confirmation for sensitive actions"]

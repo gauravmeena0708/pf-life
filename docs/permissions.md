@@ -883,6 +883,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /security/me/permissions` | W | self — open to every authenticated caller (own data only) |  |
+| `GET /security/request-activity` | W | security analyst |  |
 | `GET /security/sessions` | W | security analyst |  |
 | `POST /internal/security-events` | W | service-to-service only (client credentials) |  |
 | `POST /security/sessions/{sessionId}/revocations` | W | security analyst | yes |

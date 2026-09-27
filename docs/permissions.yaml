@@ -2479,6 +2479,12 @@ stakeholders:
     via:
     - F07.vig_ho
   ho.security:
+  - endpoint: GET /security/request-activity
+    status: W
+    scope: security analyst
+    step_up: false
+    via:
+    - F14.security
   - endpoint: GET /security/sessions
     status: W
     scope: security analyst

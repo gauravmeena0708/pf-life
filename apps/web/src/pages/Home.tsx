@@ -17,6 +17,9 @@ export function Home() {
       {session.data?.stakeholder?.startsWith("employer.") ? (
         <p><Link to="/employer" className="button primary">{t("home.employerWorkspace")} →</Link></p>
       ) : null}
+      {session.data?.stakeholder === "ho.security" ? (
+        <p><Link to="/security/activity" className="button primary">{t("home.securityActivity")} →</Link></p>
+      ) : null}
       <ol className="interface-list">
         {INTERFACES.map((i) => (
           <li key={i.slug}>

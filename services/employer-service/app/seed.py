@@ -2,6 +2,7 @@
 import asyncio
 import json
 import os
+from datetime import datetime
 
 from sqlalchemy import select, update
 
@@ -36,6 +37,13 @@ async def main() -> None:
                 await s.execute(update(establishments).where(
                     establishments.c.establishment_id == est["establishment_id"],
                     establishments.c.pincode.is_(None)).values(pincode=est.get("pincode")))
+            for public_est in seed.get("public_establishments", []):
+                if not (await s.execute(select(establishments.c.establishment_id).where(
+                        establishments.c.establishment_id == public_est["establishment_id"]))).first():
+                    values = dict(public_est)
+                    if values.get("verified_at"):
+                        values["verified_at"] = datetime.fromisoformat(values["verified_at"])
+                    await s.execute(establishments.insert().values(**values))
             for username, subject in seed["keycloak_subjects"].items():
                 if not (await s.execute(select(directory.c.username).where(directory.c.username == username))).first():
                     role = next((u["role"] for u in seed["employer_users"] if u["username"] == username), "other")

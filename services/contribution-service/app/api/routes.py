@@ -270,10 +270,17 @@ async def calculate(body: CalculatorInput):
 async def public_trrn_status(body: PublicTrrnLookup):
     """Expose only payment state; never disclose employer, member, or amount data."""
     async with sessions()() as session:
-        row = (await session.execute(text("SELECT status FROM challans WHERE trrn=:trrn"),
+        row = (await session.execute(text("""SELECT c.status,c.created_at,c.paid_at,f.wage_month
+                                       FROM challans c JOIN ecr_filings f ON f.id=c.filing_id
+                                       WHERE c.trrn=:trrn"""),
                                      {"trrn": body.trrn})).mappings().first()
-    return envelope({"trrn": body.trrn, "status": row["status"] if row else "NOT_FOUND",
-                     "label": "SYNTHETIC_DEMO"})
+    status = row["status"] if row else "NOT_FOUND"
+    next_step = {"DUE": "Awaiting payment", "PAID": "Payment recorded", "FAILED": "Payment failed or returned",
+                 "NOT_FOUND": "Check the reference and try again"}.get(status, "Check with the issuing office")
+    return envelope({"trrn": body.trrn, "status": status, "wage_month": row["wage_month"] if row else None,
+                     "issued_at": row["created_at"].isoformat() if row and row["created_at"] else None,
+                     "paid_at": row["paid_at"].isoformat() if row and row["paid_at"] else None,
+                     "next_step": next_step, "label": "SYNTHETIC_DEMO"})
 
 
 @router.get("/api/v1/members/me/passbook")

@@ -22,7 +22,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | 14 | CAIU | **Working** | `ho.caiu` | 2 | 0 | 1 | 0 |
 | 15 | HRM | **Working** | `ho.hr` | 1 | 0 | 1 | 0 |
 | 16 | Reporting and monitoring | **Working** | `gov.cbt`, `gov.ec`, `gov.fiac`, `gov.peic` | 1 | 0 | 2 | 0 |
-| 17 | Security | **Working** | `ho.security`, `ho.data_protection` | 4 | 0 | 3 | 0 |
+| 17 | Security | **Working** | `ho.security`, `ho.data_protection` | 5 | 0 | 3 | 0 |
 | 18 | Vigilance | **Planned** | `ho.cvo`, `zo.vigilance` | 0 | 0 | 3 | 0 |
 | 19 | Audit | **Working** | `ho.audit`, `zo.rpfc1_audit`, `zo.internal_audit`, `gov.cag`, `gov.statutory_auditor` | 2 | 0 | 7 | 0 |
 | 20 | UMANG | **Working** | `ext.umang` | 3 | 0 | 0 | 0 |
@@ -486,6 +486,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | Endpoint | Status | Owner | Called by |
 |---|---|---|---|
 | `GET /security/me/permissions` | W | gateway | ho.security |
+| `GET /security/request-activity` | W | gateway | ho.security |
 | `GET /security/sessions` | W | gateway | ho.security |
 | `POST /internal/security-events` | W | audit | ho.security |
 | `POST /security/sessions/{sessionId}/revocations` | W | gateway | ho.security |

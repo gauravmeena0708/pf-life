@@ -1603,7 +1603,8 @@ paths:
   /public/trrn-status-lookups:
     post:
       operationId: postPublicTrrnStatusLookups
-      summary: TRRN / challan status lookup with one-use synthetic demo proof (production CAPTCHA pending)
+      summary: TRRN / challan status lookup with wage month, issue/payment times and next step; one-use synthetic demo proof
+        (productio
       tags:
       - Public information and establishment search
       parameters:
@@ -1628,6 +1629,8 @@ paths:
       - public
       x-scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
       security: []
+      description: TRRN / challan status lookup with wage month, issue/payment times and next step; one-use synthetic demo
+        proof (production CAPTCHA pending)
       requestBody:
         required: false
         content:

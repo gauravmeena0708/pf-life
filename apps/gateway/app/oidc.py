@@ -171,6 +171,8 @@ async def get_session(request: Request):
         return {"authenticated": False}
     if not session:
         return {"authenticated": False}
+    request.state.actor_subject = session["subject"]
+    request.state.actor_stakeholder = session["stakeholder"]
     return {"authenticated": True, "subject": session["subject"], "stakeholder": session["stakeholder"],
             "persona_label": session["persona_label"], "expires_at": session["expires_at"]}
 
@@ -185,6 +187,8 @@ async def logout(request: Request):
     if sid:
         session = await _session_store(request).get(sid)
         if session:
+            request.state.actor_subject = session["subject"]
+            request.state.actor_stakeholder = session["stakeholder"]
             id_token = session["tokens"].get("id_token")
         await _session_store(request).delete(sid)
     settings = request.app.state.settings

@@ -11,6 +11,7 @@ from .stepup import consume_token, create_challenge, verify_challenge
 from .oidc import session_context, verify_token
 from .problems import problem
 from .public_access import create_demo_challenge, limit_public, verify_demo_challenge
+from .request_activity import get_request_activity, lookup_fingerprint, summarize_body
 from .revocation import is_revoked, record_revocation
 from .routing import match_route
 
@@ -24,11 +25,19 @@ async def handle_api(request: Request, path: str):
     route = match_route(request.app.state.routes, method, "/" + path)
     if not route:
         return problem(request, 404, "not-found", "Route not found")
+    request.state.route_template = route["path_template"]
     is_public = route["path_template"].startswith("/public/")
     principal = None
     sid = None
 
     if is_public:
+        request.state.actor_subject = "anonymous"
+        request.state.actor_stakeholder = "public"
+        if route["path_template"] == "/public/establishments":
+            query = request.query_params.get("query", "")
+            if 0 < len(query) <= 200:
+                request.state.lookup_fingerprint = lookup_fingerprint(request, query)
+            request.state.search_mode = request.query_params.get("mode", "any")[:20]
         limited = await limit_public(request, route)
         if limited is not None:
             return limited
@@ -50,6 +59,8 @@ async def handle_api(request: Request, path: str):
                 return problem(request, 403, "forbidden", "Forbidden")
             principal = {"subject": claims.get("sub", claims.get("client_id", "machine")),
                          "stakeholder": stakeholder, "claims": claims}
+            request.state.actor_subject = principal["subject"]
+            request.state.actor_stakeholder = stakeholder
         except Exception:
             return problem(request, 401, "unauthenticated", "Invalid machine token")
         # TODO: verify callback HMAC, timestamp, event id and replay window per architecture §5.7.
@@ -61,6 +72,8 @@ async def handle_api(request: Request, path: str):
         if not session:
             return problem(request, 401, "unauthenticated", "Authentication required")
         principal = {"subject": session["subject"], "stakeholder": session["stakeholder"], "session": session}
+        request.state.actor_subject = principal["subject"]
+        request.state.actor_stakeholder = principal["stakeholder"]
         if method not in ("GET", "HEAD"):
             csrf_header, csrf_cookie = request.headers.get("x-csrf-token"), request.cookies.get("epfo-csrf")
             if not csrf_header or not csrf_cookie or not secrets.compare_digest(csrf_header, csrf_cookie):
@@ -100,6 +113,10 @@ async def handle_api(request: Request, path: str):
     if route["owner"] == "gateway":
         if route["path_template"] == "/public/demo-challenges" and method == "GET":
             return await create_demo_challenge(request)
+        if route["path_template"] == "/security/request-activity" and method == "GET":
+            if principal["stakeholder"] != "ho.security":
+                return problem(request, 403, "forbidden", "Security analyst access required")
+            return await get_request_activity(request)
         if route["path_template"] == "/security/me/permissions" and method == "GET":
             grants = [g for g in request.app.state.permissions.get(principal["stakeholder"], [])]
             endpoints = [{"endpoint": g["endpoint"], "status": g["status"], "scope": g.get("scope", ""),
@@ -133,9 +150,11 @@ async def handle_api(request: Request, path: str):
     headers["Authorization"] = f"Bearer {token}"
     headers["X-Correlation-Id"] = request.state.correlation_id
     target = route["upstream"].rstrip("/") + "/api/v1" + request.url.path.removeprefix("/api/v1")
+    body = await request.body()
+    summarize_body(request, body)
     try:
         upstream = await request.app.state.http_client.request(method, target, params=request.query_params,
-            content=await request.body(), headers=headers, timeout=10)
+            content=body, headers=headers, timeout=10)
     except httpx.RequestError:
         return problem(request, 502, "upstream-unavailable", "Upstream service unavailable")
 

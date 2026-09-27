@@ -15,7 +15,8 @@
     "heading": "Interfaces",
     "intro": "All 21 interfaces of the platform. Status shows what works in this proof of concept: Working, Mock (simulated outside system) or Planned (contract only).",
     "employerWorkspace": "Employer workspace",
-    "publicLookups": "Public lookups"
+    "publicLookups": "Public lookups",
+    "securityActivity": "Security activity"
   },
   "interface": {
     "unknown": "Unknown interface.",

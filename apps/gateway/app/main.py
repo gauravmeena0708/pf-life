@@ -1,4 +1,6 @@
 import logging
+import secrets
+import time
 import uuid
 from contextlib import asynccontextmanager
 
@@ -16,6 +18,7 @@ from .oidc import router as oidc_router
 from .permissions import load_permissions, stakeholder_for_claims
 from .pipeline import handle_api
 from .problems import problem
+from .request_activity import record_activity
 from .routing import load_routes
 from .session import SessionStore
 
@@ -28,6 +31,7 @@ logger = structlog.get_logger("gateway")
 
 class CorrelationMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        started = time.perf_counter()
         incoming = request.headers.get("x-correlation-id", "")
         try:
             correlation_id = str(uuid.UUID(incoming))
@@ -36,6 +40,7 @@ class CorrelationMiddleware(BaseHTTPMiddleware):
         request.state.correlation_id = correlation_id
         response = await call_next(request)
         response.headers["X-Correlation-Id"] = correlation_id
+        await record_activity(request, response.status_code, round((time.perf_counter() - started) * 1000))
         return response
 
 
@@ -55,6 +60,7 @@ def create_app(*, redis_client=None, settings=None) -> FastAPI:
     app.state.stakeholder_for_claims = lambda claims: stakeholder_for_claims(
         claims, set(app.state.permissions.keys()))
     app.state.redis = redis_client or redis.from_url(app.state.settings.redis_url, decode_responses=False)
+    app.state.activity_hmac_key = secrets.token_bytes(32)
     if app.state.settings.gateway_session_fernet_key:
         fernet = Fernet(app.state.settings.gateway_session_fernet_key.encode())
     else:

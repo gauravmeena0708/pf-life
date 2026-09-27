@@ -15,6 +15,27 @@
     "pan": "AAAPD0000D",
     "gstin": "07AAAPD0000D1Z5"
   },
+  "public_establishments": [
+    {
+      "establishment_id": "EST-DEMO-0002",
+      "registration_number": "DEMO/00002/000",
+      "legal_name": "Demo Engineering Works",
+      "office_id": "RO-DEMO-01",
+      "pincode": "110002",
+      "status": "VERIFIED",
+      "verified_at": "2026-04-15T10:00:00+00:00",
+      "pan": "AAAAD0002A"
+    },
+    {
+      "establishment_id": "EST-DEMO-0003",
+      "registration_number": "DEMO/00003/000",
+      "legal_name": "Demo Retail Cooperative",
+      "office_id": "RO-DEMO-01",
+      "pincode": "110003",
+      "status": "REGISTERED",
+      "pan": "AAAAD0003A"
+    }
+  ],
   "public_lookup_challan": {
     "trrn": "TRRN0000000000000",
     "filing_id": "00000000-0000-4000-8000-000000000000",

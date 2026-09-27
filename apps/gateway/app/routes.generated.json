@@ -3874,7 +3874,7 @@
     "callers": [
       "public"
     ],
-    "summary": "Establishment public profile: name, office, coverage and exemption status",
+    "summary": "Establishment public profile: name, registration, office, coverage, verification date and explicitly unmodelled exemption status",
     "revocation": false
   },
   {
@@ -4084,7 +4084,7 @@
     "callers": [
       "public"
     ],
-    "summary": "TRRN / challan status lookup with one-use synthetic demo proof (production CAPTCHA pending)",
+    "summary": "TRRN / challan status lookup with wage month, issue/payment times and next step; one-use synthetic demo proof (production CAPTCHA pending)",
     "revocation": false
   },
   {
@@ -4229,6 +4229,22 @@
       "fo.da_accounts"
     ],
     "summary": "Appendix E — field-office adjustment of a member's opening balances (taxable / non-taxable / total), also used for PF→EPS diversion. Not an employer remittance",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/security/request-activity",
+    "regex": "^/security/request\\-activity$",
+    "status": "W",
+    "phase": 1,
+    "owner": "gateway",
+    "upstream": null,
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.security"
+    ],
+    "summary": "Security analyst view of recent API rates and redacted request activity (Redis POC, 24-hour retention)",
     "revocation": false
   },
   {
@@ -5043,7 +5059,7 @@
     "callers": [
       "public"
     ],
-    "summary": "Establishment search by name / code / pincode (rate-limited, paged, no bulk enumeration)",
+    "summary": "Establishment search by exact code / registration / pincode or partial name, with office and coverage filters (rate-limited, paged, no bulk enumeration)",
     "revocation": false
   },
   {

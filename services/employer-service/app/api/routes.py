@@ -1,7 +1,7 @@
 """employer-service routes (Journey A1, A2, A9; contracts/openapi/employer-service.yaml)."""
 import secrets
 from datetime import UTC, datetime
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, Body, Depends, Query
 from pydantic import BaseModel, Field
@@ -289,30 +289,51 @@ async def revoke_signatory(signatoryId: str, body: Revocation, actor: Actor = De
 
 @router.get("/api/v1/public/establishments")
 async def search_establishments(query: str = Query(min_length=3, max_length=60), page: int = Query(default=1, ge=1, le=5),
+                                mode: Literal["any", "name", "code", "registration", "pincode"] = "any",
+                                match: Literal["contains", "starts_with"] = "contains",
+                                office_id: str | None = Query(default=None, max_length=40),
+                                status: Literal["REGISTERED", "VERIFIED"] | None = None,
                                 actor: Actor = Depends(require_actor),
                                 session: AsyncSession = Depends(db)) -> dict:
     term = query.strip().lower()
     if len(term) < 3:
         raise Problem(400, "/problems/invalid-query", "Enter at least three characters")
+    if mode == "pincode" and (len(term) != 6 or not term.isdigit()):
+        raise Problem(400, "/problems/invalid-query", "Enter an exact six digit pincode")
     escaped = term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-    like = f"%{escaped}%"
-    rows = (await session.execute(select(establishments).where(or_(
-        func.lower(establishments.c.legal_name).like(like, escape="\\"),
-        func.lower(establishments.c.registration_number).like(like, escape="\\"),
-        func.lower(establishments.c.establishment_id).like(like, escape="\\"),
-        establishments.c.pincode == term if term.isdigit() and len(term) == 6 else False))
+    name_filter = func.lower(establishments.c.legal_name).like(
+        f"{'' if match == 'starts_with' else '%'}{escaped}%", escape="\\")
+    exact_code = func.lower(establishments.c.establishment_id) == term
+    exact_registration = func.lower(establishments.c.registration_number) == term
+    exact_pincode = establishments.c.pincode == term
+    by_mode = {"name": name_filter, "code": exact_code, "registration": exact_registration,
+               "pincode": exact_pincode}
+    search_filter = by_mode[mode] if mode != "any" else or_(
+        name_filter, exact_code, exact_registration,
+        exact_pincode if term.isdigit() and len(term) == 6 else False)
+    statement = select(establishments).where(search_filter, establishments.c.status.in_(("REGISTERED", "VERIFIED")))
+    if office_id:
+        statement = statement.where(establishments.c.office_id == office_id.strip())
+    if status:
+        statement = statement.where(establishments.c.status == status)
+    rows = (await session.execute(statement
         .order_by(establishments.c.legal_name, establishments.c.establishment_id)
         .limit(20).offset((page - 1) * 20))).mappings().all()
     return envelope([{"establishment_id": r["establishment_id"], "legal_name": r["legal_name"],
-                      "office_id": r["office_id"], "pincode": r["pincode"],
+                      "registration_number": r["registration_number"], "office_id": r["office_id"],
+                      "pincode": r["pincode"],
                       "status": r["status"]} for r in rows])
 
 
 @router.get("/api/v1/public/establishments/{estId}")
 async def public_establishment(estId: str, actor: Actor = Depends(require_actor), session: AsyncSession = Depends(db)) -> dict:
     est = await _load_establishment(session, estId)
+    if est["status"] not in ("REGISTERED", "VERIFIED"):
+        raise Problem(404, "/problems/not-found", "Establishment not found")
     return envelope({"establishment_id": est["establishment_id"], "legal_name": est["legal_name"],
-                     "office_id": est["office_id"], "pincode": est["pincode"],
+                     "registration_number": est["registration_number"], "office_id": est["office_id"],
+                     "pincode": est["pincode"],
+                     "verified_at": est["verified_at"].isoformat() if est["verified_at"] else None,
                      "coverage_status": est["status"], "exemption_status": "NOT_MODELLED"})
 
 

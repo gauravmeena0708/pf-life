@@ -8,6 +8,7 @@ import { EmployerHome } from "./features/employer/EmployerHome";
 import { Home } from "./pages/Home";
 import { InterfacePage } from "./pages/InterfacePage";
 import { PublicLookups } from "./pages/PublicLookups";
+import { SecurityActivity } from "./pages/SecurityActivity";
 
 export function App() {
   const { t, i18n } = useTranslation();
@@ -43,6 +44,7 @@ export function App() {
             <Route path="/employer" element={<EmployerHome />} />
             <Route path="/employer/ecr" element={<EcrPage />} />
             <Route path="/public" element={<PublicLookups />} />
+            <Route path="/security/activity" element={<SecurityActivity />} />
           </Routes>
         </main>
       </div>
