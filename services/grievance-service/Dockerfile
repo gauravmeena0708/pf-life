@@ -5,7 +5,8 @@ RUN useradd --create-home --uid 10001 app
 WORKDIR /srv
 COPY packages/common-observability /opt/packages/common-observability
 COPY packages/common-auth-client /opt/packages/common-auth-client
-RUN pip install /opt/packages/common-observability /opt/packages/common-auth-client
+COPY packages/common-persistence /opt/packages/common-persistence
+RUN pip install /opt/packages/common-observability /opt/packages/common-auth-client /opt/packages/common-persistence
 COPY services/grievance-service/pyproject.toml /srv/pyproject.toml
 COPY services/grievance-service/app /srv/app
 COPY services/grievance-service/migrations /srv/migrations
