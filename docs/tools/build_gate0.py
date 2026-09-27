@@ -77,9 +77,7 @@ def platform_owner(path):
 
 # ───────────────────────────── scope rules ─────────────────────────────
 
-def scope_of(path):
-    """Data scope the gateway and service must enforce for a path."""
-    rules = [
+SCOPE_RULES = [
         ("/public/", "anyone (rate-limited; lookups need CAPTCHA/OTP proof)"),
         ("/members/me", "self — caller's own member record only"),
         ("/members/uan", "unauthenticated with OTP / face-auth proof"),
@@ -100,6 +98,7 @@ def scope_of(path):
         ("/vigilance/", "restricted — vigilance roles only, case-by-case"),
         ("/privacy/", "data-protection officer only"),
         ("/security/me", "self"),
+        ("/security/step-up", "self — challenge bound to one action and resource version"),
         ("/security/", "security analyst"),
         ("/internal/", "service-to-service only (client credentials)"),
         ("/integrations/", "signed partner callback (signature, event ID, replay window)"),
@@ -112,14 +111,20 @@ def scope_of(path):
         ("/ndc/", "NDC / IS operations role"),
         ("/training/", "training administrators; synthetic data only"),
         ("/vigilance", "restricted"),
-    ]
-    for prefix, scope in rules:
-        if path.startswith(prefix):
-            return scope
-    return "to be defined"
+]
+
+
+def scope_prefix(path):
+    return next((p for p, _ in SCOPE_RULES if path.startswith(p)), path)
+
+
+def scope_of(path):
+    """Data scope the gateway and service must enforce for a path."""
+    return next((scope for prefix, scope in SCOPE_RULES if path.startswith(prefix)), "to be defined")
 
 
 # Negative tests required by init.md §6.2, plus ones implied by the activity map.
+# (id, actor, endpoint, case, rule[, expected]); expected defaults to "403 (404 where existence must stay hidden) + audit event"
 MUST_DENY = [
     ("DENY-01", "member", "GET /members/me/accounts/{accountLinkId}/passbook", "Another member's accountLinkId", "Cross-UAN read"),
     ("DENY-02", "employer.operator", "GET /employers/me/ecr-filings/{filingId}", "Filing of an establishment the operator has no grant for", "Cross-establishment ECR read"),
@@ -137,7 +142,15 @@ MUST_DENY = [
     ("DENY-14", "fo.da_accounts", "POST /office/ledger-adjustments/{adjustmentId}/approvals", "DA approves an Appendix-E / VDR Special credit", "Exceptional credit without RPFC-II (F&A) approval"),
     ("DENY-15", "member", "POST /members/me/claims", "Account is frozen", "Claim on a frozen account (FIA SOP 4.7)"),
     ("DENY-16", "public", "POST /public/pension/life-certificate-lookups", "No CAPTCHA / OTP proof, repeated identifiers", "Enumeration of pensioners"),
-    ("DENY-17", "ext.collecting_bank", "POST /integrations/mock-bank/payment-confirmations", "Replayed callback or bad signature", "Falsified or replayed bank callback"),
+    ("DENY-17", "ext.collecting_bank", "POST /integrations/mock-bank/payment-confirmations", "Replayed callback or bad signature", "Falsified or replayed bank callback", "401 / 409, no state change"),
+    ("DENY-18", "employer.operator", "POST /employers/me/ecr-filings", "Operator revoked while a browser session is open", "Revoked operator (§6.6, ≤ 5 s)"),
+    ("DENY-19", "employer.operator", "GET /employers/me/members", "Grant removed for establishment X, still valid for Y; request for X", "Grant-scoped revocation (Y must still work)"),
+    ("DENY-20", "member", "POST /members/me/claims/{claimId}/confirmations", "Step-up token replayed, expired, or issued for another claim / amount", "Step-up binding (§6.3)", "403, token consumed or rejected"),
+    ("DENY-21", "fo.cash", "POST /office/claims/{claimId}/payment-instructions", "Claim still AWAITING_NEXT_APPROVAL or has an open risk signal", "Payment before the full approval chain", "409"),
+    ("DENY-22", "fo.cash", "POST /office/claims/{claimId}/payment-instructions", "Account frozen between approval and payment", "Frozen claim racing to payment", "409"),
+    ("DENY-23", "ext.collecting_bank", "POST /integrations/mock-bank/payment-confirmations", "Same valid callback delivered twice, or out of order", "No duplicate posting, settlement or notification", "200 with the original result; exactly one journal"),
+    ("DENY-24", "tech.ai_service", "POST /ai/knowledge/search", "Retrieval would return another member's document", "Permission-filtered retrieval (init.md §8.2)", "Document excluded before model context is built"),
+    ("DENY-25", "employer.operator", "GET /employers/me/ecr-filings/{filingId}", "Forged X-Establishment-Id for an establishment with no grant", "Forged establishment reference"),
 ]
 
 # 21 interfaces from init.md §2.3 -> stakeholder IDs.
@@ -168,15 +181,26 @@ INTERFACES = [
 # ───────────────────────────── events ─────────────────────────────
 
 S, N, D, B, E = "string", "number", "date-time", "boolean", "enum"
+# One balanced-journal line as seen by consumers (no names or identifiers beyond the opaque account link).
+POSTINGS = {"type": "array", "minItems": 1, "items": {
+    "type": "object", "additionalProperties": False, "required": ["account_code", "side", "amount_paise"],
+    "properties": {
+        "account_code": {"enum": ["AC01_EPF", "AC02_ADMIN", "AC10_EPS", "AC21_EDLI", "AC22_EDLI_ADMIN", "BANK_COLLECTION",
+                                  "SUSPENSE_RECEIPTS", "CLAIMS_PAYABLE", "BANK_SETTLEMENT", "DAMAGES_INTEREST"]},
+        "side": {"enum": ["debit", "credit"]},
+        "account_link_id": {"type": "string", "description": "Opaque member account link, for member sub-ledger lines"},
+        "share": {"enum": ["employee", "employer"]},
+        "amount_paise": {"type": "integer", "minimum": 0}}}}
 EVENTS = [
     # name, producer, consumers, aggregate, phase, payload {field: type}
     ("EmployerVerified", "employer", ["reporting", "audit"], "establishment", 1, {"establishment_id": S, "verification_ref": S}),
-    ("EmployerOperatorRevoked", "employer", ["gateway", "audit"], "establishment", 1, {"establishment_id": S, "operator_subject": S, "revoked_by": S}),
-    ("SignatoryRevoked", "employer", ["gateway", "audit"], "establishment", 1, {"establishment_id": S, "signatory_subject": S, "revoked_by": S}),
+    ("EmployerOperatorRevoked", "employer", ["gateway", "audit"], "establishment", 1, {"establishment_id": S, "operator_subject": S, "grant_id": S, "scope": {"enum": ["grant", "subject"]}, "revoked_by": S}),
+    ("SignatoryRevoked", "employer", ["gateway", "audit"], "establishment", 1, {"establishment_id": S, "signatory_subject": S, "grant_id": S, "scope": {"enum": ["grant", "subject"]}, "revoked_by": S}),
     ("ECRValidated", "contribution", ["reporting"], "ecr_filing", 1, {"filing_id": S, "establishment_id": S, "wage_month": S, "member_count": N}),
     ("ECRSubmitted", "contribution", ["payment-simulator", "reporting", "audit"], "ecr_filing", 1, {"filing_id": S, "establishment_id": S, "trrn": S, "total_paise": N, "rule_version": S}),
-    ("PaymentConfirmed", "payment-simulator", ["contribution", "claim", "audit"], "payment", 1, {"payment_id": S, "reference": S, "amount_paise": N, "mock": B}),
-    ("ContributionPosted", "contribution", ["member", "reporting", "audit"], "ledger_journal", 1, {"journal_id": S, "filing_id": S, "establishment_id": S, "wage_month": S, "member_account_links": "array"}),
+    ("PaymentConfirmed", "payment-simulator", ["contribution", "claim", "audit"], "payment", 1, {"payment_id": S, "purpose": {"enum": ["CHALLAN", "CLAIM_SETTLEMENT", "DEMAND"]}, "reference_type": {"enum": ["trrn", "claim", "demand"]}, "reference_id": S, "amount_paise": N, "mock": B}),
+    ("ContributionPosted", "contribution", ["member", "reporting", "audit"], "ledger_journal", 1, {"journal_id": S, "payment_id": S, "filing_id": S, "establishment_id": S, "wage_month": S, "postings": POSTINGS}),
+    ("ClaimDebitPosted", "contribution", ["claim", "member", "audit"], "ledger_journal", 1, {"journal_id": S, "claim_id": S, "postings": POSTINGS}),
     ("ClaimSubmitted", "claim", ["workflow", "intelligence", "reporting", "audit"], "claim", 1, {"claim_id": S, "form_type": S, "amount_paise": N, "rule_version": S, "office_id": S}),
     ("CaseDecisionSubmitted", "workflow", ["claim", "audit"], "case", 1, {"case_id": S, "claim_id": S, "decision": S, "officer_subject": S, "approval_level": N}),
     ("ClaimDecisionRecorded", "claim", ["member", "reporting", "audit"], "claim", 1, {"claim_id": S, "decision": S, "reason_code": S, "rule_version": S}),
@@ -201,7 +225,10 @@ EVENTS = [
 def event_schema(name, producer, aggregate, payload):
     props = {}
     for field, typ in payload.items():
-        props[field] = {"type": "array", "items": {"type": "string"}} if typ == "array" else {"type": typ}
+        if isinstance(typ, dict):
+            props[field] = typ
+        else:
+            props[field] = {"type": "array", "items": {"type": "string"}} if typ == "array" else {"type": typ}
         if field.endswith("_paise"):
             props[field] = {"type": "integer", "minimum": 0, "description": "Money in paise (integer); never floating point"}
     return {
@@ -222,7 +249,7 @@ def event_schema(name, producer, aggregate, payload):
             "producer": {"const": f"{producer}-service" if producer not in ("payment-simulator",) else producer},
             "occurred_at": {"type": "string", "format": "date-time", "description": "UTC"},
             "correlation_id": {"type": "string", "format": "uuid"},
-            "causation_id": {"type": "string", "format": "uuid"},
+            "causation_id": {"type": "string", "format": "uuid", "description": "Optional: the event that caused this one, when there is one"},
             "payload": {"type": "object", "additionalProperties": False, "required": list(payload), "properties": props},
         },
     }
@@ -367,7 +394,9 @@ def main():
         perm["stakeholders"][s] = [{"endpoint": ep, "status": ops[ep]["status"], "scope": scope_of(ops[ep]["path"]),
                                     "step_up": ops[ep]["step_up"], "via": acts_} for ep, acts_ in grants.get(s, {}).items()]
     perm["separation_of_duties"] = {cid: c for cid, c in chains.items()}
-    perm["must_deny"] = [{"id": i, "actor": a, "endpoint": e, "case": c, "rule": r} for i, a, e, c, r in MUST_DENY]
+    default_expected = "403 (404 where existence must stay hidden) + audit event"
+    deny = [(*row[:5], row[5] if len(row) > 5 else default_expected) for row in MUST_DENY]
+    perm["must_deny"] = [{"id": i, "actor": a, "endpoint": e, "case": c, "rule": r, "expected": x} for i, a, e, c, r, x in deny]
     dump_yaml(perm, DOCS / "permissions.yaml")
 
     # permissions.md
@@ -375,12 +404,10 @@ def main():
            "Default is **deny**. A stakeholder may call only the endpoints listed for it, only within the scope shown, "
            "and the owning service re-checks the grant on every write (init.md §6.6).", "",
            "## Scope rules by path", "", "| Path prefix | Scope enforced |", "|---|---|"]
-    seen = set()
-    for op in ops.values():
-        prefix = "/" + op["path"].split("/")[1] + "/"
-        if prefix not in seen:
-            seen.add(prefix)
-            out.append(f"| `{prefix}` | {scope_of(op['path'])} |")
+    used = OrderedDict()
+    for op in sorted(ops.values(), key=lambda o: o["path"]):
+        used.setdefault(scope_prefix(op["path"]), scope_of(op["path"]))
+    out += [f"| `{prefix}` | {scope} |" for prefix, scope in used.items()]
     out += ["", "## Separation of duties (approval chains)", "",
             "Maker and checker are always different people. Amount bands are illustrative configuration.", "",
             "| Chain | Route | Source |", "|---|---|---|"]
@@ -392,9 +419,9 @@ def main():
             route = " → ".join(f"`{x}`" for x in c.get("chain", []))
         out.append(f"| {cid} | {route} | {c.get('src', '')} |")
     out += ["", "## Must-deny tests (tests/security)", "",
-            "Each row is a required negative test. Expected result: `403` (or `404` where existence must not be revealed), "
-            "with an audit event.", "", "| ID | Actor | Endpoint | Case | Rule |", "|---|---|---|---|---|"]
-    out += [f"| {i} | `{a}` | `{e}` | {c} | {r} |" for i, a, e, c, r in MUST_DENY]
+            "Each row is a required negative or idempotency test in `tests/security/`.", "",
+            "| ID | Actor | Endpoint | Case | Rule | Expected |", "|---|---|---|---|---|---|"]
+    out += [f"| {i} | `{a}` | `{e}` | {c} | {r} | {x} |" for i, a, e, c, r, x in deny]
     out += ["", "## Grants by stakeholder", ""]
     for group, members in groups.items():
         out += [f"### {group}", ""]
@@ -437,8 +464,8 @@ def main():
     # Events
     EVENTS_DIR.mkdir(parents=True, exist_ok=True)
     rows = ["# Event Catalogue", "", f"> {GENERATED} Schemas: `contracts/events/`.", "",
-            "Every event uses the same envelope (event ID, type, schema version, aggregate, producer, UTC time, correlation "
-            "and causation IDs). Consumers must be idempotent by `event_id` and tolerate out-of-order delivery (init.md §3.3). "
+            "Every event uses the same envelope (event ID, type, schema version, aggregate, producer, UTC time and correlation ID; "
+            "`causation_id` is added when the event was caused by another event). Consumers must be idempotent by `event_id` and tolerate out-of-order delivery (init.md §3.3). "
             "Failed deliveries go to a DLQ and are replayed with `POST /ndc/event-failures/{eventId}/replays`.", "",
             "| Event | Producer | Consumers | Aggregate | Phase |", "|---|---|---|---|---|"]
     for name, producer, consumers, aggregate, phase, payload in EVENTS:
@@ -447,7 +474,7 @@ def main():
         rows.append(f"| `{name}.v1` | {producer} | {', '.join(consumers)} | {aggregate} | {phase}{' (contract only)' if phase > 1 else ''} |")
     (DOCS / "event-catalogue.md").write_text("\n".join(rows) + "\n", encoding="utf-8")
 
-    print(f"permissions: {sum(len(v) for v in grants.values())} grants, {len(MUST_DENY)} must-deny tests")
+    print(f"permissions: {sum(len(v) for v in grants.values())} grants, {len(deny)} must-deny tests")
     print(f"api-matrix: {len(INTERFACES)} interfaces")
     print(f"openapi: {len(by_owner)} service specs + consolidated, {len(ops)} operations")
     print(f"events: {len(EVENTS)} schemas")

@@ -8,33 +8,38 @@ Default is **deny**. A stakeholder may call only the endpoints listed for it, on
 
 | Path prefix | Scope enforced |
 |---|---|
-| `/public/` | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |
-| `/employers/` | own registration request |
-| `/office/` | office jurisdiction of the caller's posting |
-| `/integrations/` | signed partner callback (signature, event ID, replay window) |
-| `/partners/` | authenticated partner client, own records only |
-| `/ho/` | national (Head Office role) |
-| `/members/` | unauthenticated with OTP / face-auth proof |
-| `/claimants/` | self — claimant's own claims only |
-| `/pensioners/` | self — caller's own PPO only |
-| `/cpps/` | national (CPPS service role) |
-| `/caiu/` | CAIU role |
-| `/exempted/` | own exempted establishment |
-| `/international/` | own application (employer) or IWU role |
-| `/grievances/` | complainant or the assigned office |
-| `/security/` | self |
-| `/internal/` | service-to-service only (client credentials) |
-| `/hrm/` | self (read) / HR role (write) |
-| `/vigilance/` | restricted — vigilance roles only, case-by-case |
-| `/privacy/` | data-protection officer only |
-| `/zo/` | zone jurisdiction |
-| `/audit/` | read-only for auditors; audit writes by audit roles only |
-| `/governance/` | board members — aggregates only |
-| `/do/` | district jurisdiction |
-| `/ndc/` | NDC / IS operations role |
-| `/training/` | training administrators; synthetic data only |
-| `/monitoring/` | role jurisdiction; aggregates with small-group suppression |
 | `/ai/` | caller's own permissions; advisory output only |
+| `/audit/` | read-only for auditors; audit writes by audit roles only |
+| `/caiu/` | CAIU role |
+| `/claimants/` | self — claimant's own claims only |
+| `/cpps/` | national (CPPS service role) |
+| `/do/` | district jurisdiction |
+| `/employers/me` | own establishment (X-Establishment-Id validated against grants) |
+| `/employers/registration-requests` | own registration request |
+| `/employers/voluntary` | own registration request |
+| `/exempted/me` | own exempted establishment |
+| `/governance/` | board members — aggregates only |
+| `/grievances/` | complainant or the assigned office |
+| `/ho/` | national (Head Office role) |
+| `/hrm/` | self (read) / HR role (write) |
+| `/integrations/` | signed partner callback (signature, event ID, replay window) |
+| `/internal/` | service-to-service only (client credentials) |
+| `/international/` | own application (employer) or IWU role |
+| `/members/me` | self — caller's own member record only |
+| `/members/uan` | unauthenticated with OTP / face-auth proof |
+| `/monitoring/` | role jurisdiction; aggregates with small-group suppression |
+| `/ndc/` | NDC / IS operations role |
+| `/office/` | office jurisdiction of the caller's posting |
+| `/partners/` | authenticated partner client, own records only |
+| `/pensioners/me` | self — caller's own PPO only |
+| `/privacy/` | data-protection officer only |
+| `/public/` | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |
+| `/security/` | security analyst |
+| `/security/me` | self |
+| `/security/step-up` | self — challenge bound to one action and resource version |
+| `/training/` | training administrators; synthetic data only |
+| `/vigilance/` | restricted — vigilance roles only, case-by-case |
+| `/zo/` | zone jurisdiction |
 
 ## Separation of duties (approval chains)
 
@@ -56,27 +61,35 @@ Maker and checker are always different people. Amount bands are illustrative con
 
 ## Must-deny tests (tests/security)
 
-Each row is a required negative test. Expected result: `403` (or `404` where existence must not be revealed), with an audit event.
+Each row is a required negative or idempotency test in `tests/security/`.
 
-| ID | Actor | Endpoint | Case | Rule |
-|---|---|---|---|---|
-| DENY-01 | `member` | `GET /members/me/accounts/{accountLinkId}/passbook` | Another member's accountLinkId | Cross-UAN read |
-| DENY-02 | `employer.operator` | `GET /employers/me/ecr-filings/{filingId}` | Filing of an establishment the operator has no grant for | Cross-establishment ECR read |
-| DENY-03 | `employer.operator` | `POST /employers/me/ecr-filings/{filingId}/approvals` | Operator approves the filing they prepared | Payroll self-approval (separation of duties) |
-| DENY-04 | `employer.signatory` | `POST /employers/me/ecr-filings/{filingId}/submissions` | Signatory revoked seconds earlier, session still open | Revoked signatory (§6.6, ≤ 5 s) |
-| DENY-05 | `fo.apfc` | `POST /office/cases/{caseId}/decisions` | Case belongs to another office's jurisdiction | Cross-jurisdiction claim decision |
-| DENY-06 | `gov.mole` | `GET /office/members/{uan}` | Ministry viewer requests an individual member | Ministry access to raw PII |
-| DENY-07 | `tech.ndc` | `GET /members/me/passbook` | NDC operator requests member financial data | NDC operations access to financial data |
-| DENY-08 | `ho.audit` | `POST /office/cases/{caseId}/decisions` | Auditor attempts a write | Auditor writes |
-| DENY-09 | `tech.ai_service` | `POST /office/claims/{claimId}/payment-instructions` | AI service account issues a payment | AI issuing payment |
-| DENY-10 | `tech.ai_service` | `POST /office/cases/{caseId}/decisions` | AI service account approves a claim | AI approving claims |
-| DENY-11 | `payroll_provider` | `GET /employers/me/members` | Partner pages through members of establishments it does not serve | Partner bulk member enumeration |
-| DENY-12 | `fo.ss` | `POST /office/cases/{caseId}/decisions` | Claim amount above the SS band | Approver outside their amount band |
-| DENY-13 | `fo.da_accounts` | `POST /office/cases/{caseId}/second-approvals` | Recommender also approves the same case | Maker = checker |
-| DENY-14 | `fo.da_accounts` | `POST /office/ledger-adjustments/{adjustmentId}/approvals` | DA approves an Appendix-E / VDR Special credit | Exceptional credit without RPFC-II (F&A) approval |
-| DENY-15 | `member` | `POST /members/me/claims` | Account is frozen | Claim on a frozen account (FIA SOP 4.7) |
-| DENY-16 | `public` | `POST /public/pension/life-certificate-lookups` | No CAPTCHA / OTP proof, repeated identifiers | Enumeration of pensioners |
-| DENY-17 | `ext.collecting_bank` | `POST /integrations/mock-bank/payment-confirmations` | Replayed callback or bad signature | Falsified or replayed bank callback |
+| ID | Actor | Endpoint | Case | Rule | Expected |
+|---|---|---|---|---|---|
+| DENY-01 | `member` | `GET /members/me/accounts/{accountLinkId}/passbook` | Another member's accountLinkId | Cross-UAN read | 403 (404 where existence must stay hidden) + audit event |
+| DENY-02 | `employer.operator` | `GET /employers/me/ecr-filings/{filingId}` | Filing of an establishment the operator has no grant for | Cross-establishment ECR read | 403 (404 where existence must stay hidden) + audit event |
+| DENY-03 | `employer.operator` | `POST /employers/me/ecr-filings/{filingId}/approvals` | Operator approves the filing they prepared | Payroll self-approval (separation of duties) | 403 (404 where existence must stay hidden) + audit event |
+| DENY-04 | `employer.signatory` | `POST /employers/me/ecr-filings/{filingId}/submissions` | Signatory revoked seconds earlier, session still open | Revoked signatory (§6.6, ≤ 5 s) | 403 (404 where existence must stay hidden) + audit event |
+| DENY-05 | `fo.apfc` | `POST /office/cases/{caseId}/decisions` | Case belongs to another office's jurisdiction | Cross-jurisdiction claim decision | 403 (404 where existence must stay hidden) + audit event |
+| DENY-06 | `gov.mole` | `GET /office/members/{uan}` | Ministry viewer requests an individual member | Ministry access to raw PII | 403 (404 where existence must stay hidden) + audit event |
+| DENY-07 | `tech.ndc` | `GET /members/me/passbook` | NDC operator requests member financial data | NDC operations access to financial data | 403 (404 where existence must stay hidden) + audit event |
+| DENY-08 | `ho.audit` | `POST /office/cases/{caseId}/decisions` | Auditor attempts a write | Auditor writes | 403 (404 where existence must stay hidden) + audit event |
+| DENY-09 | `tech.ai_service` | `POST /office/claims/{claimId}/payment-instructions` | AI service account issues a payment | AI issuing payment | 403 (404 where existence must stay hidden) + audit event |
+| DENY-10 | `tech.ai_service` | `POST /office/cases/{caseId}/decisions` | AI service account approves a claim | AI approving claims | 403 (404 where existence must stay hidden) + audit event |
+| DENY-11 | `payroll_provider` | `GET /employers/me/members` | Partner pages through members of establishments it does not serve | Partner bulk member enumeration | 403 (404 where existence must stay hidden) + audit event |
+| DENY-12 | `fo.ss` | `POST /office/cases/{caseId}/decisions` | Claim amount above the SS band | Approver outside their amount band | 403 (404 where existence must stay hidden) + audit event |
+| DENY-13 | `fo.da_accounts` | `POST /office/cases/{caseId}/second-approvals` | Recommender also approves the same case | Maker = checker | 403 (404 where existence must stay hidden) + audit event |
+| DENY-14 | `fo.da_accounts` | `POST /office/ledger-adjustments/{adjustmentId}/approvals` | DA approves an Appendix-E / VDR Special credit | Exceptional credit without RPFC-II (F&A) approval | 403 (404 where existence must stay hidden) + audit event |
+| DENY-15 | `member` | `POST /members/me/claims` | Account is frozen | Claim on a frozen account (FIA SOP 4.7) | 403 (404 where existence must stay hidden) + audit event |
+| DENY-16 | `public` | `POST /public/pension/life-certificate-lookups` | No CAPTCHA / OTP proof, repeated identifiers | Enumeration of pensioners | 403 (404 where existence must stay hidden) + audit event |
+| DENY-17 | `ext.collecting_bank` | `POST /integrations/mock-bank/payment-confirmations` | Replayed callback or bad signature | Falsified or replayed bank callback | 401 / 409, no state change |
+| DENY-18 | `employer.operator` | `POST /employers/me/ecr-filings` | Operator revoked while a browser session is open | Revoked operator (§6.6, ≤ 5 s) | 403 (404 where existence must stay hidden) + audit event |
+| DENY-19 | `employer.operator` | `GET /employers/me/members` | Grant removed for establishment X, still valid for Y; request for X | Grant-scoped revocation (Y must still work) | 403 (404 where existence must stay hidden) + audit event |
+| DENY-20 | `member` | `POST /members/me/claims/{claimId}/confirmations` | Step-up token replayed, expired, or issued for another claim / amount | Step-up binding (§6.3) | 403, token consumed or rejected |
+| DENY-21 | `fo.cash` | `POST /office/claims/{claimId}/payment-instructions` | Claim still AWAITING_NEXT_APPROVAL or has an open risk signal | Payment before the full approval chain | 409 |
+| DENY-22 | `fo.cash` | `POST /office/claims/{claimId}/payment-instructions` | Account frozen between approval and payment | Frozen claim racing to payment | 409 |
+| DENY-23 | `ext.collecting_bank` | `POST /integrations/mock-bank/payment-confirmations` | Same valid callback delivered twice, or out of order | No duplicate posting, settlement or notification | 200 with the original result; exactly one journal |
+| DENY-24 | `tech.ai_service` | `POST /ai/knowledge/search` | Retrieval would return another member's document | Permission-filtered retrieval (init.md §8.2) | Document excluded before model context is built |
+| DENY-25 | `employer.operator` | `GET /employers/me/ecr-filings/{filingId}` | Forged X-Establishment-Id for an establishment with no grant | Forged establishment reference | 403 (404 where existence must stay hidden) + audit event |
 
 ## Grants by stakeholder
 
@@ -125,8 +138,8 @@ Each row is a required negative test. Expected result: `403` (or `404` where exi
 | `POST /members/me/claims/{claimId}/confirmations` | W | self — caller's own member record only | yes |
 | `POST /members/me/grievances` | W | self — caller's own member record only |  |
 | `POST /members/me/security-reports` | W | self — caller's own member record only |  |
-| `POST /security/step-up-challenges` | W | security analyst |  |
-| `POST /security/step-up-challenges/{challengeId}/verifications` | W | security analyst |  |
+| `POST /security/step-up-challenges` | W | self — challenge bound to one action and resource version |  |
+| `POST /security/step-up-challenges/{challengeId}/verifications` | W | self — challenge bound to one action and resource version |  |
 | `POST /members/me/kyc/bank-accounts` | M | self — caller's own member record only | yes |
 | `POST /members/me/kyc/{kycType}` | M | self — caller's own member record only | yes |
 | `POST /members/uan-activations` | M | unauthenticated with OTP / face-auth proof |  |
@@ -243,7 +256,7 @@ Each row is a required negative test. Expected result: `403` (or `404` where exi
 | `GET /employers/me/challans` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/challans/{trrn}` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W | own establishment (X-Establishment-Id validated against grants) | yes |
-| `POST /employers/me/ecr-filings/{filingId}/submissions` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `POST /employers/me/ecr-filings/{filingId}/submissions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `GET /international/coc-applications/{id}` | M | own application (employer) or IWU role |  |
 | `POST /employers/me/challans/{trrn}/payment-intents` | M | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/kyc/{kycType}` | M | own establishment (X-Establishment-Id validated against grants) | yes |

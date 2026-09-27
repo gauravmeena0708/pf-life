@@ -383,13 +383,13 @@ stakeholders:
     - F08.member_file
   - endpoint: POST /security/step-up-challenges
     status: W
-    scope: security analyst
+    scope: self — challenge bound to one action and resource version
     step_up: false
     via:
     - F14.step_up
   - endpoint: POST /security/step-up-challenges/{challengeId}/verifications
     status: W
-    scope: security analyst
+    scope: self — challenge bound to one action and resource version
     step_up: false
     via:
     - F14.step_up
@@ -718,7 +718,7 @@ stakeholders:
   - endpoint: POST /employers/me/ecr-filings/{filingId}/submissions
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
-    step_up: false
+    step_up: true
     via:
     - F03.ecr_approve
   - endpoint: POST /employers/me/ecr-filings/{filingId}/cancellations
@@ -2627,83 +2627,148 @@ must_deny:
   endpoint: GET /members/me/accounts/{accountLinkId}/passbook
   case: Another member's accountLinkId
   rule: Cross-UAN read
+  expected: 403 (404 where existence must stay hidden) + audit event
 - id: DENY-02
   actor: employer.operator
   endpoint: GET /employers/me/ecr-filings/{filingId}
   case: Filing of an establishment the operator has no grant for
   rule: Cross-establishment ECR read
+  expected: 403 (404 where existence must stay hidden) + audit event
 - id: DENY-03
   actor: employer.operator
   endpoint: POST /employers/me/ecr-filings/{filingId}/approvals
   case: Operator approves the filing they prepared
   rule: Payroll self-approval (separation of duties)
+  expected: 403 (404 where existence must stay hidden) + audit event
 - id: DENY-04
   actor: employer.signatory
   endpoint: POST /employers/me/ecr-filings/{filingId}/submissions
   case: Signatory revoked seconds earlier, session still open
   rule: Revoked signatory (§6.6, ≤ 5 s)
+  expected: 403 (404 where existence must stay hidden) + audit event
 - id: DENY-05
   actor: fo.apfc
   endpoint: POST /office/cases/{caseId}/decisions
   case: Case belongs to another office's jurisdiction
   rule: Cross-jurisdiction claim decision
+  expected: 403 (404 where existence must stay hidden) + audit event
 - id: DENY-06
   actor: gov.mole
   endpoint: GET /office/members/{uan}
   case: Ministry viewer requests an individual member
   rule: Ministry access to raw PII
+  expected: 403 (404 where existence must stay hidden) + audit event
 - id: DENY-07
   actor: tech.ndc
   endpoint: GET /members/me/passbook
   case: NDC operator requests member financial data
   rule: NDC operations access to financial data
+  expected: 403 (404 where existence must stay hidden) + audit event
 - id: DENY-08
   actor: ho.audit
   endpoint: POST /office/cases/{caseId}/decisions
   case: Auditor attempts a write
   rule: Auditor writes
+  expected: 403 (404 where existence must stay hidden) + audit event
 - id: DENY-09
   actor: tech.ai_service
   endpoint: POST /office/claims/{claimId}/payment-instructions
   case: AI service account issues a payment
   rule: AI issuing payment
+  expected: 403 (404 where existence must stay hidden) + audit event
 - id: DENY-10
   actor: tech.ai_service
   endpoint: POST /office/cases/{caseId}/decisions
   case: AI service account approves a claim
   rule: AI approving claims
+  expected: 403 (404 where existence must stay hidden) + audit event
 - id: DENY-11
   actor: payroll_provider
   endpoint: GET /employers/me/members
   case: Partner pages through members of establishments it does not serve
   rule: Partner bulk member enumeration
+  expected: 403 (404 where existence must stay hidden) + audit event
 - id: DENY-12
   actor: fo.ss
   endpoint: POST /office/cases/{caseId}/decisions
   case: Claim amount above the SS band
   rule: Approver outside their amount band
+  expected: 403 (404 where existence must stay hidden) + audit event
 - id: DENY-13
   actor: fo.da_accounts
   endpoint: POST /office/cases/{caseId}/second-approvals
   case: Recommender also approves the same case
   rule: Maker = checker
+  expected: 403 (404 where existence must stay hidden) + audit event
 - id: DENY-14
   actor: fo.da_accounts
   endpoint: POST /office/ledger-adjustments/{adjustmentId}/approvals
   case: DA approves an Appendix-E / VDR Special credit
   rule: Exceptional credit without RPFC-II (F&A) approval
+  expected: 403 (404 where existence must stay hidden) + audit event
 - id: DENY-15
   actor: member
   endpoint: POST /members/me/claims
   case: Account is frozen
   rule: Claim on a frozen account (FIA SOP 4.7)
+  expected: 403 (404 where existence must stay hidden) + audit event
 - id: DENY-16
   actor: public
   endpoint: POST /public/pension/life-certificate-lookups
   case: No CAPTCHA / OTP proof, repeated identifiers
   rule: Enumeration of pensioners
+  expected: 403 (404 where existence must stay hidden) + audit event
 - id: DENY-17
   actor: ext.collecting_bank
   endpoint: POST /integrations/mock-bank/payment-confirmations
   case: Replayed callback or bad signature
   rule: Falsified or replayed bank callback
+  expected: 401 / 409, no state change
+- id: DENY-18
+  actor: employer.operator
+  endpoint: POST /employers/me/ecr-filings
+  case: Operator revoked while a browser session is open
+  rule: Revoked operator (§6.6, ≤ 5 s)
+  expected: 403 (404 where existence must stay hidden) + audit event
+- id: DENY-19
+  actor: employer.operator
+  endpoint: GET /employers/me/members
+  case: Grant removed for establishment X, still valid for Y; request for X
+  rule: Grant-scoped revocation (Y must still work)
+  expected: 403 (404 where existence must stay hidden) + audit event
+- id: DENY-20
+  actor: member
+  endpoint: POST /members/me/claims/{claimId}/confirmations
+  case: Step-up token replayed, expired, or issued for another claim / amount
+  rule: Step-up binding (§6.3)
+  expected: 403, token consumed or rejected
+- id: DENY-21
+  actor: fo.cash
+  endpoint: POST /office/claims/{claimId}/payment-instructions
+  case: Claim still AWAITING_NEXT_APPROVAL or has an open risk signal
+  rule: Payment before the full approval chain
+  expected: '409'
+- id: DENY-22
+  actor: fo.cash
+  endpoint: POST /office/claims/{claimId}/payment-instructions
+  case: Account frozen between approval and payment
+  rule: Frozen claim racing to payment
+  expected: '409'
+- id: DENY-23
+  actor: ext.collecting_bank
+  endpoint: POST /integrations/mock-bank/payment-confirmations
+  case: Same valid callback delivered twice, or out of order
+  rule: No duplicate posting, settlement or notification
+  expected: 200 with the original result; exactly one journal
+- id: DENY-24
+  actor: tech.ai_service
+  endpoint: POST /ai/knowledge/search
+  case: Retrieval would return another member's document
+  rule: Permission-filtered retrieval (init.md §8.2)
+  expected: Document excluded before model context is built
+- id: DENY-25
+  actor: employer.operator
+  endpoint: GET /employers/me/ecr-filings/{filingId}
+  case: Forged X-Establishment-Id for an establishment with no grant
+  rule: Forged establishment reference
+  expected: 403 (404 where existence must stay hidden) + audit event

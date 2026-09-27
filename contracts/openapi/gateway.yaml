@@ -138,7 +138,7 @@ paths:
       x-owner-service: gateway
       x-callers:
       - member
-      x-scope: security analyst
+      x-scope: self — challenge bound to one action and resource version
       security:
       - bffSession: []
       requestBody:
@@ -179,7 +179,7 @@ paths:
       x-owner-service: gateway
       x-callers:
       - member
-      x-scope: security analyst
+      x-scope: self — challenge bound to one action and resource version
       security:
       - bffSession: []
       requestBody:

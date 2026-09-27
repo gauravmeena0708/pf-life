@@ -47,7 +47,8 @@
     },
     "causation_id": {
       "type": "string",
-      "format": "uuid"
+      "format": "uuid",
+      "description": "Optional: the event that caused this one, when there is one"
     },
     "payload": {
       "type": "object",

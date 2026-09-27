@@ -47,14 +47,17 @@
     },
     "causation_id": {
       "type": "string",
-      "format": "uuid"
+      "format": "uuid",
+      "description": "Optional: the event that caused this one, when there is one"
     },
     "payload": {
       "type": "object",
       "additionalProperties": false,
       "required": [
         "payment_id",
-        "reference",
+        "purpose",
+        "reference_type",
+        "reference_id",
         "amount_paise",
         "mock"
       ],
@@ -62,7 +65,21 @@
         "payment_id": {
           "type": "string"
         },
-        "reference": {
+        "purpose": {
+          "enum": [
+            "CHALLAN",
+            "CLAIM_SETTLEMENT",
+            "DEMAND"
+          ]
+        },
+        "reference_type": {
+          "enum": [
+            "trrn",
+            "claim",
+            "demand"
+          ]
+        },
+        "reference_id": {
           "type": "string"
         },
         "amount_paise": {

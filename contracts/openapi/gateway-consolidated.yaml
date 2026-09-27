@@ -1745,6 +1745,7 @@ paths:
       - $ref: '#/components/parameters/EstablishmentId'
       - $ref: '#/components/parameters/IdempotencyKey'
       - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/StepUpToken'
       responses:
         '201':
           $ref: '#/components/responses/Created'
@@ -10928,7 +10929,7 @@ paths:
       x-owner-service: gateway
       x-callers:
       - member
-      x-scope: security analyst
+      x-scope: self — challenge bound to one action and resource version
       security:
       - bffSession: []
       requestBody:
@@ -10969,7 +10970,7 @@ paths:
       x-owner-service: gateway
       x-callers:
       - member
-      x-scope: security analyst
+      x-scope: self — challenge bound to one action and resource version
       security:
       - bffSession: []
       requestBody:

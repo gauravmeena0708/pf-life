@@ -47,7 +47,8 @@
     },
     "causation_id": {
       "type": "string",
-      "format": "uuid"
+      "format": "uuid",
+      "description": "Optional: the event that caused this one, when there is one"
     },
     "payload": {
       "type": "object",
@@ -55,6 +56,8 @@
       "required": [
         "establishment_id",
         "operator_subject",
+        "grant_id",
+        "scope",
         "revoked_by"
       ],
       "properties": {
@@ -63,6 +66,15 @@
         },
         "operator_subject": {
           "type": "string"
+        },
+        "grant_id": {
+          "type": "string"
+        },
+        "scope": {
+          "enum": [
+            "grant",
+            "subject"
+          ]
         },
         "revoked_by": {
           "type": "string"

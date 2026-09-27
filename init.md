@@ -171,7 +171,18 @@ All host ports bind to `127.0.0.1` only. Business services are **not** published
 | Prometheus · Grafana · Jaeger (profile `observability`) | 9090 · 3000 · 16686 | Optional |
 | Services (profile `dev-direct` only) | 8101 employer · 8102 member · 8103 contribution · 8104 claim · 8105 payment-simulator · 8106 workflow · 8107 grievance · 8108 audit · 8109 reporting · 8110 intelligence · 8111 pension · 8112 compliance (reserved) · 8113 international (reserved) | Inside the network every service listens on 8000 |
 
-**Networks:** `edge` (web, gateway, Keycloak), `services` (gateway and business services), `data` (each service and only its own datastores). Business services cannot reach each other's databases at the network level either.
+**Networks:**
+
+| Network | Members |
+|---|---|
+| `edge` | web, gateway, Keycloak |
+| `services` | gateway, every business service, RabbitMQ, Redis |
+| `data-<service>` (one per service) | that service and PostgreSQL |
+| `storage` | MinIO and the services that store documents (claim, grievance, intelligence) |
+| `data-keycloak` | Keycloak and PostgreSQL |
+| `ops` (profile `observability`) | Prometheus, Grafana, Jaeger, and the services they scrape |
+
+All databases live in one PostgreSQL container for the POC, so network separation alone cannot stop one service reaching another's database. Isolation is enforced by credentials and `pg_hba.conf`: each `<service>_app` role may connect only to `<service>_db`, and only from the subnet of its own `data-<service>` network. Everything else is rejected.
 
 **Databases:** `infra/database/init/01-create-databases.sh` is mounted into `/docker-entrypoint-initdb.d/`. It creates, for each service, a database `<service>_db` and a login role `<service>_app` whose password comes from `.env` (`<SERVICE>_DB_PASSWORD`). Each role owns only its own database; `CONNECT` on every database is revoked from `PUBLIC`. A separate `reporting_ro` role has read access to the reporting database only. Schema migrations belong to each service and run with `make migrate` (Gate 2), not in the init script. §12.1 requires a test showing one service cannot connect with another service's credentials.
 
@@ -483,6 +494,8 @@ Every seeded persona maps to a stakeholder ID in `docs/stakeholders.md`; Keycloa
 
 Require an independently verifiable transaction-confirmation step (a **clearly labelled demo simulation** in this POC) for bank changes, high-risk claims, credential recovery, signatory replacement and privileged role grants. Include a summary of exactly what the user is authorising. Never allow a successful authentication event alone to imply transaction intent.
 
+**Step-up tokens are bound and single-use.** `POST /security/step-up-challenges` takes the action, the resource ID and version, the amount in paise (where money moves) and a hash of the summary shown to the user. The token returned after `…/verifications` is valid for 5 minutes, for that subject, that action and that exact resource version only, and is consumed on first use. A replayed, expired or mismatched token is rejected (DENY-20).
+
 ### 6.4 Privacy by design
 
 Only synthetic data. Field-level response filtering, fixed-scope service identities, short-lived token policies, restricted object-store documents, encrypted transport, protected secrets, permission-aware AI retrieval, aggregate suppression where small groups could reveal individuals, and retention controls. No secrets in Git, logs, sample requests or LLM prompts.
@@ -496,11 +509,13 @@ Create `docs/threat-model.md` covering STRIDE-style threats: IDOR/BOLA, JWT misu
 "Immediate" revocation is defined as: **the revoked actor's next request is denied within 5 seconds of the revoke command**, whatever tokens or sessions they hold. Mechanism:
 
 1. Access tokens live at most 5 minutes; refresh tokens at most 30 minutes idle. The browser holds only the gateway session cookie (§2.1).
-2. A revoke command (operator revocation, signatory revocation, role removal, session revocation, account freeze) commits in the owning service and emits an event through its outbox (`EmployerOperatorRevoked.v1`, `SignatoryRevoked.v1`, `SecurityEventRecorded.v1`).
-3. The gateway consumes these events and writes the subject (and establishment, where scoped) to a **revocation set in Redis** with a TTL longer than the longest token lifetime. It also ends the subject's Keycloak sessions through the admin API.
-4. The gateway checks the revocation set on **every** request. If Redis is unavailable, it fails closed for authenticated writes and sensitive reads, and keeps serving public pages.
-5. Defence in depth: the owning service re-checks the actor's grant from its own data on every write (e.g. `employer-service` verifies the operator grant is still active before an ECR command is accepted).
-6. `tests/security/` measures the time from revoke command to denial and fails above 5 seconds.
+2. Every revoke command (operator revocation, signatory revocation, role removal, session revocation, account freeze) passes through the gateway. Its route is flagged `revocation: true` in the gateway route table.
+3. **Synchronous path (the guarantee):** when the owning service returns success for a revocation route, the gateway writes the entry to a **revocation set in Redis** before it returns the response. The revoke is not reported as done until the entry exists. The gateway also ends the subject's Keycloak sessions through the admin API.
+4. **Durable path (the backup):** the owning service emits `EmployerOperatorRevoked.v1`, `SignatoryRevoked.v1`, `AccountFrozen.v1` or `SecurityEventRecorded.v1` through its outbox. The gateway consumes these idempotently, so the set is rebuilt after a gateway or Redis restart.
+5. **Scope of an entry:** removing one grant writes `(subject, establishment_id, grant_id)` and blocks only that grant; the person's other establishments and roles keep working. Session revocation and freezes write a subject-wide entry. Events carry `grant_id` and `scope` so the two can be told apart.
+6. The gateway checks the revocation set on **every** request. If Redis is unavailable, it fails closed for authenticated writes and sensitive reads, and keeps serving public pages.
+7. Defence in depth: the owning service re-checks the actor's grant from its own data on every write **and** on every read of personal or financial data (e.g. `employer-service` verifies the operator grant is still active before an ECR command or a member-list read).
+8. `tests/security/` measures the time from revoke command to denial and fails above 5 seconds (DENY-04, DENY-18, DENY-19 in `docs/permissions.md`).
 
 ---
 
@@ -522,19 +537,21 @@ State machines. Each table lists every allowed transition; anything not listed i
 
 | From | Command / event | To | Actor | Guard | Emits |
 |---|---|---|---|---|---|
-| — | create filing | DRAFT | `employer.operator` | active grant `ecr.prepare` | — |
+| — | create filing | DRAFT | `employer.operator` | establishment is VERIFIED; active grant `ecr.prepare` | — |
 | DRAFT | validate | VALIDATED / VALIDATION_FAILED | `employer.operator` | — | `ECRValidated.v1` on VALIDATED |
 | VALIDATION_FAILED | edit | DRAFT | `employer.operator` | — | — |
 | VALIDATED | request approval | AWAITING_SIGNATORY | `employer.operator` | — | — |
-| AWAITING_SIGNATORY | approve | APPROVED | `employer.signatory` | signatory ≠ preparer; step-up done | — |
+| AWAITING_SIGNATORY | approve | APPROVED | `employer.signatory` | active grant `ecr.approve`; signatory ≠ preparer; step-up bound to this filing version and total | — |
 | AWAITING_SIGNATORY | return | DRAFT | `employer.signatory` | reason given | — |
-| APPROVED | submit (Idempotency-Key) | SUBMITTED | `employer.signatory` | — | `ECRSubmitted.v1` (TRRN issued) |
+| APPROVED | submit (Idempotency-Key) | SUBMITTED | `employer.signatory` | active grant `ecr.submit`; filing version equals the approved version (`If-Match`); step-up bound to this filing | `ECRSubmitted.v1` (TRRN issued) |
 | SUBMITTED | create payment intent | PAYMENT_PENDING | `employer.signatory` | — | — |
 | SUBMITTED | cancel unpaid TRRN (phase 2) | CANCELLED | `employer.signatory` | no payment attempt succeeded | — |
 | PAYMENT_PENDING | bank confirmation | PAYMENT_CONFIRMED | system | signed, non-replayed callback | `PaymentConfirmed.v1` |
 | PAYMENT_PENDING | bank failure | PAYMENT_FAILED | system | signed callback | — |
 | PAYMENT_FAILED | retry payment | PAYMENT_PENDING | `employer.signatory` | — | — |
-| PAYMENT_CONFIRMED | journal committed | POSTED | system | journal balanced (§4.1) | `ContributionPosted.v1` |
+| PAYMENT_CONFIRMED | journal committed | POSTED | system | journal balanced (§4.1); journal keyed by payment ID so it can never post twice | `ContributionPosted.v1` |
+| PAYMENT_CONFIRMED | journal commit fails | POSTING_RETRY | system | — | — |
+| POSTING_RETRY | reconciler retries (backoff) | POSTED / POSTING_RETRY | system | after 5 failures, alert `tech.ndc`; never drop the confirmed payment | `ContributionPosted.v1` on success |
 
 POSTED is final. Corrections are supplementary filings or reversing journals, never edits.
 
@@ -546,19 +563,20 @@ POSTED is final. Corrections are supplementary filings or reversing journals, ne
 | DRAFT | submit | AWAITING_CONFIRMATION | `member` | documents complete | — |
 | AWAITING_CONFIRMATION | confirm intent | SUBMITTED | `member` | step-up done; summary shown | `ClaimSubmitted.v1` |
 | DRAFT / AWAITING_CONFIRMATION / SUBMITTED | withdraw (phase 2) | WITHDRAWN | `member` | no decision yet | — |
-| SUBMITTED | risk checks pass | AUTO_APPROVED | system | rule version allows auto-settlement; no risk signal | `ClaimDecisionRecorded.v1` |
+| SUBMITTED | risk checks pass | AUTO_APPROVED | system | rule version allows auto-settlement for this type and amount; no open risk signal. The Journey B demo claim is seeded above the auto-settlement limit, so it always takes the officer route | `ClaimDecisionRecorded.v1` |
 | SUBMITTED | risk check fails or rule requires review | UNDER_REVIEW | system | case opened in `workflow-service` | — |
+| UNDER_REVIEW | reassign / SLA breach | UNDER_REVIEW | `fo.oic` or system timer | new assignee in the same jurisdiction | — |
 | UNDER_REVIEW | recommendation recorded | RECOMMENDED | `fo.da_accounts` | — | — |
-| RECOMMENDED | decision (`CaseDecisionSubmitted.v1`) | APPROVED / REJECTED_WITH_REASON | `fo.ss` / `fo.ao` / `fo.apfc` / `fo.oic` by amount band | approver authorised for the band and jurisdiction; approver ≠ recommender | `ClaimDecisionRecorded.v1` |
-| RECOMMENDED | band needs a second approver | AWAITING_SECOND_APPROVAL | system | chain has more than one checker | — |
-| AWAITING_SECOND_APPROVAL | second approval | APPROVED / REJECTED_WITH_REASON | next approver in the chain | different person from first approver | `ClaimDecisionRecorded.v1` |
-| APPROVED / AUTO_APPROVED | payment instruction | PAYMENT_PENDING | `fo.cash` or system | journal "claim approved" committed | `PaymentInstructed.v1` |
+| RECOMMENDED | decision by the first checker in the band's chain (`POST …/decisions`) | AWAITING_NEXT_APPROVAL if more checkers remain in the chain · APPROVED if this was the last checker · REJECTED_WITH_REASON at any level | `fo.ss` / `fo.ao` / `fo.apfc` / `fo.oic`, as the `claim_settlement` band dictates | approver authorised for the band and jurisdiction; approver ≠ recommender | `CaseDecisionSubmitted.v1`; `ClaimDecisionRecorded.v1` on APPROVED / REJECTED |
+| AWAITING_NEXT_APPROVAL | decision by the next checker (`POST …/second-approvals`) | AWAITING_NEXT_APPROVAL · APPROVED (last checker) · REJECTED_WITH_REASON | next role in the chain | a different person from every earlier checker | same as above |
+| RECOMMENDED / AWAITING_NEXT_APPROVAL | checker returns for rework | UNDER_REVIEW | any checker | reason given; earlier approvals in this round are void | — |
+| APPROVED / AUTO_APPROVED | payment instruction | PAYMENT_PENDING | `fo.cash` or system | `ClaimDebitPosted.v1` received (journal "claim approved" committed); account not frozen | `PaymentInstructed.v1` |
 | PAYMENT_PENDING | bank confirmation | SETTLED | system | signed callback | `NotificationRequested.v1` |
 | PAYMENT_PENDING | bank return | PAYMENT_RETURNED | system | signed callback | `PaymentReturned.v1`, `NotificationRequested.v1` |
 | PAYMENT_RETURNED | member corrects bank details | CORRECTION_PENDING | `member` | KYC change approved | — |
 | CORRECTION_PENDING | re-issue | PAYMENT_PENDING | `fo.cash` | — | `PaymentInstructed.v1` |
-| any state before PAYMENT_PENDING | account frozen | ON_HOLD_FROZEN | system | freeze order | — |
-| ON_HOLD_FROZEN | account de-frozen | previous state, re-routed through `claim_settlement_after_defreeze` | system | de-freeze order | — |
+| any state before PAYMENT_PENDING | account frozen | ON_HOLD_FROZEN | system | freeze order; the prior state is stored | — |
+| ON_HOLD_FROZEN | account de-frozen | SUBMITTED if frozen before any recommendation; otherwise UNDER_REVIEW, with all earlier approvals void and the `claim_settlement_after_defreeze` chain applied | system | de-freeze order | — |
 
 **Grievance** (`grievance-service`)
 
@@ -566,10 +584,11 @@ POSTED is final. Corrections are supplementary filings or reversing journals, ne
 |---|---|---|---|---|---|
 | — | register | REGISTERED | `member` / `complainant` / `pensioner` | — | `GrievanceRegistered.v1` |
 | REGISTERED | route | ROUTED | system | competent office found | — |
+| REGISTERED | no competent office found | ROUTED (to the complainant's home RO) | system | flagged for manual routing by that RO's `fo.pro` | — |
 | ROUTED | assign | IN_PROGRESS | `fo.pro` | officer in the assigned office | — |
 | ROUTED / IN_PROGRESS | transfer to another office (phase 2) | ROUTED | `fo.pro` | reason given | — |
 | IN_PROGRESS | escalate | ESCALATED | complainant, SLA timer or `fo.pro` | — | `GrievanceEscalated.v1` |
-| ESCALATED | taken up by next tier | IN_PROGRESS | `zo.acc` (or next tier) | — | — |
+| ESCALATED | taken up by next tier | IN_PROGRESS | next tier: RO → `zo.acc` → `ho.customer_service` | Head Office is the top tier; a grievance escalated there cannot be escalated further | — |
 | IN_PROGRESS | resolve | RESOLVED | assigned officer | resolution text and evidence | `NotificationRequested.v1` |
 | RESOLVED | request reopen | REOPEN_REQUESTED | complainant | within the reopen window (config) | — |
 | REOPEN_REQUESTED | accept / reject | IN_PROGRESS / CLOSED | assigned office | — | — |
@@ -602,6 +621,7 @@ Minimum versioned event contracts (JSON Schema or AsyncAPI):
 - `RiskSignalRaised.v1`
 - `SecurityEventRecorded.v1`
 - `SignatoryRevoked.v1`
+- `ClaimDebitPosted.v1` (contribution → claim, member: claim journal committed)
 - `PaymentInstructed.v1`
 - `NotificationRequested.v1`
 - Phase 2 (contract only): `DemandRaised.v1`, `LedgerReversed.v1`, `PaymentScrollGenerated.v1`, `MemberChangeApproved.v1`, `AccountFrozen.v1`, `AccountDefrozen.v1`, `PpoIssued.v1`, `LifeCertificateRecorded.v1`

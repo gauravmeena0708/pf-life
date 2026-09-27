@@ -155,7 +155,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /employers/me/ecr-filings` 💰 (`type=SUPPLEMENTARY`) | **Supplementary / revised ECR** for missed members | P | 2 | contribution |
 | `POST /employers/me/ecr-filings/{filingId}/validations` | Schema + business validation | W | 1 | contribution |
 | `POST /employers/me/ecr-filings/{filingId}/approvals` 🔐 | Signatory approval | W | 1 | contribution |
-| `POST /employers/me/ecr-filings/{filingId}/submissions` 💰 | Submit → generate TRRN | W | 1 | contribution |
+| `POST /employers/me/ecr-filings/{filingId}/submissions` 💰🔐 | Submit → generate TRRN | W | 1 | contribution |
 | `POST /employers/me/ecr-filings/{filingId}/cancellations` 💰🔐 | Cancel an **unpaid** TRRN and release the wage-month lock | P | 2 | contribution |
 | `GET /employers/me/ecr-filings/{filingId}` | Filing detail and status | W | 1 | contribution |
 | `GET /employers/me/ecr-filings?wageMonth=&type=` | Return filing history | W | 1 | contribution |
