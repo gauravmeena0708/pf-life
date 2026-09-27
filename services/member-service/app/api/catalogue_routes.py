@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /members/me', 'GET /security/account-recovery-requests', 'GET /employers/me/members', 'POST /members/me/account-recovery-requests', 'PATCH /members/me/contact-details', 'GET /members/me/employment-history', 'GET /members/me/identity-assurance', 'GET /members/me/notifications', 'POST /members/me/security-reports', 'POST /security/account-recovery-requests/{requestId}/decisions']
+OPERATIONS = ['GET /members/me', 'GET /security/account-recovery-requests', 'GET /employers/me/members', 'POST /members/me/account-recovery-requests', 'PATCH /members/me/contact-details', 'GET /members/me/employment-history', 'GET /members/me/identity-assurance', 'GET /members/me/notifications', 'POST /members/me/security-reports', 'POST /office/members/{uan}/defreezes', 'POST /office/members/{uan}/freezes', 'POST /security/account-recovery-requests/{requestId}/decisions']
 
 @router.api_route("/api/v1/members/me", methods=["GET"], include_in_schema=False)
 async def get_members_me(actor: Actor = Depends(require_actor)) -> None:
@@ -55,6 +55,16 @@ async def get_members_me_notifications(actor: Actor = Depends(require_actor)) ->
 @router.api_route("/api/v1/members/me/security-reports", methods=["POST"], include_in_schema=False)
 async def post_members_me_security_reports(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Report suspicious activity")
+
+
+@router.api_route("/api/v1/office/members/{uan}/defreezes", methods=["POST"], include_in_schema=False)
+async def post_office_members_uan_defreezes(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "De-freeze, maker-checker (tier-2 process member_freeze)")
+
+
+@router.api_route("/api/v1/office/members/{uan}/freezes", methods=["POST"], include_in_schema=False)
+async def post_office_members_uan_freezes(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "UAN / member-ID freeze with reason and evidence (tier-2 process member_freeze)")
 
 
 @router.api_route("/api/v1/security/account-recovery-requests/{requestId}/decisions", methods=["POST"], include_in_schema=False)

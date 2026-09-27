@@ -8,6 +8,7 @@ import epfo_auth
 from app.api import catalogue_routes, routes
 from app.config import settings
 from app.domain.notifications import handle_notification_requested
+from app.domain.processes import on_process_transitioned
 from app.infra.db import database_ready, engine
 from epfo_observability import health_router, install
 from epfo_persistence import Consumer, OutboxRelay
@@ -21,13 +22,17 @@ async def lifespan(app: FastAPI):
         relay = OutboxRelay(engine(), settings.rabbitmq_url)
         consumer = Consumer(engine(), settings.rabbitmq_url, "member-service.notifications",
                             ["*.NotificationRequested.v1"], handle_notification_requested)
+        processes = Consumer(engine(), settings.rabbitmq_url, "member-service.processes",
+                             ["workflow-service.ProcessTransitioned.v1"], on_process_transitioned)
         relay.start()
         consumer.start()
+        processes.start()
     yield
     if relay:
         await relay.stop()
     if consumer:
         await consumer.stop()
+        await processes.stop()
 
 
 def create_app() -> FastAPI:

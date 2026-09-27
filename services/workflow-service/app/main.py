@@ -6,6 +6,7 @@ from fastapi import FastAPI
 
 import epfo_auth
 from app.api import catalogue_routes, routes
+from app.engine.engine import build_router, definitions
 from app.config import settings
 from app.api.routes import ruleset
 from app.infra.db import database_ready, engine
@@ -29,12 +30,14 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     ruleset()  # load and freeze the illustrative rule version at startup
+    definitions()  # and the process definitions
     app = FastAPI(title=settings.service_name, version="0.1.0", docs_url="/docs", redoc_url=None, lifespan=lifespan)
     install(app, settings.service_name)
     epfo_auth.configure(audience=settings.service_name,
                         jwks=epfo_auth.JwksCache(settings.gateway_jwks_url))
     app.include_router(health_router(database_ready))
     app.include_router(routes.router)
+    app.include_router(build_router())               # tier-2 processes from config/processes
     handled = {(m, r.path) for r in app.router.routes for m in getattr(r, "methods", set())}
     for route in catalogue_routes.router.routes:
         if not any((m, route.path) in handled for m in route.methods):

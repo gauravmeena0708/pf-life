@@ -1,0 +1,37 @@
+# Tier-2 process (ADR-0005): freeze of a member account (FIA SOP, illustrative), executed by the engine in
+# workflow-service. The public contract stays with the owner (member-service), which receives a
+# ProcessTransitioned.v1 callback and publishes AccountFrozen.v1 / AccountDefrozen.v1.
+process: member_freeze
+owner: member
+title: Freeze of a member account
+subject: uan                        # the path parameter that identifies what the process is about
+case_kind: MEMBER_FREEZE
+operations:
+  - name: freeze
+    operation: POST /office/members/{uan}/freezes
+    starts: true
+    roles: [fo.apfc, ho.fa_cao, zo.rpfc1]
+    step_up: freeze-account          # bound to the UAN
+    to: FROZEN
+    queue: verify                   # after this, the verification chain below takes over
+    form:
+      category: {enum: [A, B, C]}
+      reason: {min_length: 10}
+      order_ref: {min_length: 3}
+  - name: verify
+    operation: POST /office/freeze-cases/{caseId}/verifications
+    chain: [fo.da_accounts, fo.ss, fo.apfc, fo.oic]      # stakeholder-activities.yaml → freeze_verification_member
+    from: FROZEN
+    to: VERIFIED                     # after the last checker in the chain
+    form:
+      finding: {enum: [GENUINE_MEMBER, SUSPECTED_FRAUD, NEEDS_MORE_EVIDENCE]}
+      note: {min_length: 10}
+  - name: defreeze
+    operation: POST /office/members/{uan}/defreezes
+    roles: [fo.oic]
+    step_up: defreeze-account
+    from: VERIFIED
+    to: ACTIVE
+    requires_last_finding: GENUINE_MEMBER    # a suspected-fraud finding cannot be de-frozen here
+    form:
+      reason: {min_length: 10}

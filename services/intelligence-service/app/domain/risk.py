@@ -27,14 +27,14 @@ def takeover_evidence(events: list[dict[str, Any]], now: datetime, already_cited
     raise a fresh signal just because a later, unrelated claim arrives inside the same 24 hours."""
     recent = sorted((e for e in events if now - e["at"] <= TAKEOVER_WINDOW and e["event_id"] not in already_cited),
                     key=lambda e: e["at"])
-    login = next((e for e in recent if e["event_type"] == "LOGIN_NEW_DEVICE"), None)
-    if not login:
-        return None
-    change = next((e for e in recent if e["event_type"] == "CONTACT_DETAILS_CHANGED" and e["at"] >= login["at"]), None)
-    if not change:
-        return None
-    claim = next((e for e in recent if e["event_type"] == "CLAIM_CREATED" and e["at"] >= change["at"]), None)
-    return [login["event_id"], change["event_id"], claim["event_id"]] if claim else None
+    # The pattern is one new device doing all three steps; events from other devices do not combine.
+    for login in (e for e in recent if e["event_type"] == "LOGIN_NEW_DEVICE"):
+        same = [e for e in recent if e["device"] == login["device"] and e["at"] >= login["at"]]
+        change = next((e for e in same if e["event_type"] == "CONTACT_DETAILS_CHANGED"), None)
+        claim = next((e for e in same if change and e["event_type"] == "CLAIM_CREATED" and e["at"] >= change["at"]), None)
+        if claim:
+            return [login["event_id"], change["event_id"], claim["event_id"]]
+    return None
 
 
 def shared_device_context(subjects_on_device: int) -> dict[str, Any] | None:

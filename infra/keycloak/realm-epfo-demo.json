@@ -1,7 +1,7 @@
 {
   "realm": "epfo-demo",
   "enabled": true,
-  "displayName": "EPFO POC \u2014 synthetic demonstration",
+  "displayName": "EPFO POC — synthetic demonstration",
   "accessTokenLifespan": 300,
   "ssoSessionIdleTimeout": 1800,
   "ssoSessionMaxLifespan": 28800,
@@ -101,6 +101,10 @@
       {
         "name": "zo.acc",
         "description": "Stakeholder zo.acc (docs/stakeholders.md)"
+      },
+      {
+        "name": "zo.rpfc1",
+        "description": "Stakeholder zo.rpfc1 (docs/stakeholders.md)"
       }
     ]
   },
@@ -404,6 +408,25 @@
         "zo.acc"
       ],
       "id": "00000000-0000-4000-8000-000000000013"
+    },
+    {
+      "username": "zo-rpfc",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Zonal RPFC",
+      "lastName": "Demo",
+      "email": "zo-rpfc@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "zo.rpfc1"
+      ],
+      "id": "00000000-0000-4000-8000-000000000023"
     },
     {
       "username": "ho-analyst",

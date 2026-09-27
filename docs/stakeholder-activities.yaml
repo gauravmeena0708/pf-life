@@ -247,7 +247,7 @@ activities:
 
 # ─────────────────────────── F07 Freezing, fraud, vigilance ───────────────────────────
   - {id: F07.freeze_ho, actor: ho.fa_cao, does: "Order freezing for Category A (FIA vertical)", api: ["POST /office/members/{uan}/freezes", "POST /office/establishments/{estId}/freezes"], next: [F07.block], src: FIA, ev: D}
-  - {id: F07.freeze_zo, actor: zo.rpfc1, does: "Order freezing (Categories B / C) at zone level", api: ["POST /office/members/{uan}/freezes", "POST /office/establishments/{estId}/freezes"], next: [F07.block], src: FIA, ev: D, fut: true}
+  - {id: F07.freeze_zo, actor: zo.rpfc1, does: "Order freezing (Categories B / C) at zone level", api: ["GET /office/work-queue", "GET /office/cases/{caseId}", "POST /office/members/{uan}/freezes", "POST /office/establishments/{estId}/freezes"], next: [F07.block], src: FIA, ev: D, fut: true}
   - {id: F07.freeze_ro_member, actor: fo.apfc, does: "Order freezing of MID / UAN (Categories B / C)", api: ["POST /office/members/{uan}/freezes"], next: [F07.block], src: FIA, ev: D}
   - {id: F07.freeze_ro_est, actor: fo.oic, does: "Order freezing of an establishment (Category B); report to fraud committee", api: ["POST /office/establishments/{estId}/freezes"], next: [F07.block, F07.committee], src: FIA, ev: D}
   - {id: F07.block, actor: ho.is, does: "Execute block / unblock raised through the Issue Tracker; show login pop-ups", api: ["POST /ndc/issue-tracker/requests", "POST /ndc/issue-tracker/requests/{requestId}/executions"], next: [F07.verify_member, F07.verify_est], src: FIA, ev: V}
@@ -256,7 +256,7 @@ activities:
   - {id: F07.verify_ss, actor: fo.ss, does: "Review verification (SS route)", api: ["POST /office/freeze-cases/{caseId}/verifications"], next: [F07.verify_apfc], src: FIA, ev: D}
   - {id: F07.verify_ao, actor: fo.ao, does: "Review verification (AO route, accounts cases)", api: ["POST /office/freeze-cases/{caseId}/verifications"], next: [F07.verify_apfc], src: FIA, ev: D}
   - {id: F07.verify_apfc, actor: fo.apfc, does: "Validate verification", api: ["POST /office/freeze-cases/{caseId}/verifications"], next: [F07.defreeze], src: FIA, ev: D}
-  - {id: F07.defreeze, actor: fo.oic, does: "Recommend / order de-freezing; post-defreeze claims use the higher chain", api: ["POST /office/members/{uan}/defreezes", "POST /office/establishments/{estId}/defreezes"], next: [F07.block], chain: claim_settlement_after_defreeze, src: FIA, ev: D}
+  - {id: F07.defreeze, actor: fo.oic, does: "Recommend / order de-freezing; post-defreeze claims use the higher chain", api: ["POST /office/freeze-cases/{caseId}/verifications", "POST /office/members/{uan}/defreezes", "POST /office/establishments/{estId}/defreezes"], next: [F07.block], chain: claim_settlement_after_defreeze, src: FIA, ev: D}
   - {id: F07.committee, actor: zo.fraud_committee, does: "Review suspected fraud cases reported by OICs", api: ["GET /zo/fraud-risk/cases"], next: [F07.vig_referral], src: FIA, ev: D, fut: true}
   - {id: F07.vig_referral, actor: ho.caiu, does: "Refer a pattern to vigilance", api: ["POST /vigilance/referrals"], next: [F07.vig_zone], src: "EC, MAP", ev: U}
   - {id: F07.vig_zone, actor: zo.vigilance, does: "Investigate vigilance case with restricted evidence access", api: ["GET /vigilance/cases", "POST /vigilance/cases/{caseId}/findings"], next: [F07.vig_ho], src: "MAP, EC", ev: D, fut: true}

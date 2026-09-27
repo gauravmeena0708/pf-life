@@ -137,3 +137,11 @@ def test_reviewed_evidence_does_not_raise_a_second_signal(ctx):
     security("m-5", "CONTACT_DETAILS_CHANGED", minutes=41)
     security("m-5", "CLAIM_CREATED", minutes=42)
     assert len(raised()) == 2
+
+
+def test_steps_from_different_devices_do_not_combine(ctx):
+    _, security, raised = ctx
+    security("m-6", "LOGIN_NEW_DEVICE", device="dev-phone-0001", minutes=0)
+    security("m-6", "CONTACT_DETAILS_CHANGED", device="dev-laptop-001", minutes=1)
+    security("m-6", "CLAIM_CREATED", device="dev-phone-0001", minutes=2)
+    assert raised() == []

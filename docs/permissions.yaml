@@ -1352,7 +1352,7 @@ stakeholders:
     via:
     - F07.verify_member
   - endpoint: POST /office/freeze-cases/{caseId}/verifications
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1425,7 +1425,7 @@ stakeholders:
     via:
     - F06.report_process
   - endpoint: POST /office/freeze-cases/{caseId}/verifications
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1462,7 +1462,7 @@ stakeholders:
     via:
     - F04.approve_ss
   - endpoint: POST /office/freeze-cases/{caseId}/verifications
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1505,7 +1505,7 @@ stakeholders:
     via:
     - F05.ids_approve
   - endpoint: POST /office/freeze-cases/{caseId}/verifications
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1657,13 +1657,13 @@ stakeholders:
     via:
     - F06.prosecution
   - endpoint: POST /office/members/{uan}/freezes
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F07.freeze_ro_member
   - endpoint: POST /office/freeze-cases/{caseId}/verifications
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1737,8 +1737,14 @@ stakeholders:
     step_up: true
     via:
     - F07.freeze_ro_est
+  - endpoint: POST /office/freeze-cases/{caseId}/verifications
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F07.defreeze
   - endpoint: POST /office/members/{uan}/defreezes
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -2262,8 +2268,20 @@ stakeholders:
     via:
     - F13.zo
   zo.rpfc1:
+  - endpoint: GET /office/work-queue
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F07.freeze_zo
+  - endpoint: GET /office/cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F07.freeze_zo
   - endpoint: POST /office/members/{uan}/freezes
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -2403,7 +2421,7 @@ stakeholders:
     via:
     - F03.interest
   - endpoint: POST /office/members/{uan}/freezes
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:

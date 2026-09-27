@@ -324,8 +324,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/physical-claims` | **Physical claim intake**: register a paper claim, scan, data entry | P | 2 | claim |
 | `POST /office/physical-claims/{intakeId}/identity-validations` | UAN allocation / Aadhaar validation before settlement (mock) | P | 2 | member |
 | `GET /office/members/{uan}` | Member 360 view (jurisdiction + purpose checked, audited) | P | 2 | member |
-| `POST /office/members/{uan}/freezes` 🔐 | **UAN / member-ID freeze** with reason and evidence | P | 2 | member |
-| `POST /office/members/{uan}/defreezes` 🔐 | De-freeze, maker-checker | P | 2 | member |
+| `POST /office/members/{uan}/freezes` 🔐 | **UAN / member-ID freeze** with reason and evidence (tier-2 process `member_freeze`) | W | 1 | member |
+| `POST /office/members/{uan}/defreezes` 🔐 | De-freeze, maker-checker (tier-2 process `member_freeze`) | W | 1 | member |
 | `POST /office/accounts/interest-postings` 💰🔐 | Annual interest crediting run (illustrative rate) | P | 2 | contribution |
 | `GET /office/accounts/inoperative` | **Inoperative account** identification | P | 2 | contribution |
 | `POST /office/accounts/{accountLinkId}/reactivations` 🔐 | Inoperative account reactivation | P | 3 | contribution |
@@ -341,7 +341,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/member-change-requests/{requestId}/verifications` | JD verifier (SS or AO) verifies | P | 2 | member |
 | `POST /office/member-change-requests/{requestId}/decisions` 🔐 | JD approver decides (competent authority by change type) | P | 2 | member |
 | `GET /office/member-change-requests/pendency` | RPFC-I monitors JD pendency | P | 2 | member |
-| `POST /office/freeze-cases/{caseId}/verifications` | Freeze-case verification step (DA → SS/AO → APFC/RPFC-II → OIC) | P | 2 | workflow |
+| `POST /office/freeze-cases/{caseId}/verifications` | Freeze-case verification step (DA → SS/AO → APFC/RPFC-II → OIC; tier-2 process `member_freeze`) | W | 1 | workflow |
 | `POST /office/establishments/{estId}/freezes` 🔐 | Freeze an establishment | P | 2 | employer |
 | `POST /office/establishments/{estId}/defreezes` 🔐 | De-freeze an establishment, maker-checker | P | 2 | employer |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | Inoperative-account crowdsourcing verification through co-workers' logins | P | 3 | member |

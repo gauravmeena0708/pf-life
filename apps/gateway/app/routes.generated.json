@@ -1529,8 +1529,8 @@
     "method": "POST",
     "path_template": "/office/freeze-cases/{caseId}/verifications",
     "regex": "^/office/freeze\\-cases/[^/]+/verifications$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "workflow",
     "upstream": "http://workflow-service:8000",
     "money": false,
@@ -1540,9 +1540,10 @@
       "fo.apfc",
       "fo.da_accounts",
       "fo.da_compliance",
+      "fo.oic",
       "fo.ss"
     ],
-    "summary": "Freeze-case verification step (DA → SS/AO → APFC/RPFC-II → OIC)",
+    "summary": "Freeze-case verification step (DA → SS/AO → APFC/RPFC-II → OIC; tier-2 process member_freeze)",
     "revocation": false
   },
   {
@@ -3726,16 +3727,16 @@
     "method": "POST",
     "path_template": "/office/members/{uan}/defreezes",
     "regex": "^/office/members/[^/]+/defreezes$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "member",
-    "upstream": "http://member-service:8000",
+    "upstream": "http://workflow-service:8000",
     "money": false,
     "step_up": true,
     "callers": [
       "fo.oic"
     ],
-    "summary": "De-freeze, maker-checker",
+    "summary": "De-freeze, maker-checker (tier-2 process member_freeze)",
     "revocation": false
   },
   {
@@ -4047,10 +4048,10 @@
     "method": "POST",
     "path_template": "/office/members/{uan}/freezes",
     "regex": "^/office/members/[^/]+/freezes$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "member",
-    "upstream": "http://member-service:8000",
+    "upstream": "http://workflow-service:8000",
     "money": false,
     "step_up": true,
     "callers": [
@@ -4058,7 +4059,7 @@
       "ho.fa_cao",
       "zo.rpfc1"
     ],
-    "summary": "UAN / member-ID freeze with reason and evidence",
+    "summary": "UAN / member-ID freeze with reason and evidence (tier-2 process member_freeze)",
     "revocation": false
   },
   {
@@ -5330,7 +5331,8 @@
       "fo.oic",
       "fo.pro",
       "fo.ss",
-      "zo.acc"
+      "zo.acc",
+      "zo.rpfc1"
     ],
     "summary": "Case detail",
     "revocation": false
@@ -5595,7 +5597,8 @@
       "fo.oic",
       "fo.pro",
       "fo.ss",
-      "zo.acc"
+      "zo.acc",
+      "zo.rpfc1"
     ],
     "summary": "Jurisdiction-filtered task queue",
     "revocation": false

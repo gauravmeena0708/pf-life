@@ -23,6 +23,7 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `GrievanceEscalated.v1` | grievance | workflow, reporting, audit | grievance | 1 |
 | `GrievanceResolved.v1` | grievance | workflow, reporting, audit | grievance | 1 |
 | `RiskSignalRaised.v1` | intelligence | claim, workflow, reporting, audit | risk_signal | 1 |
+| `ProcessTransitioned.v1` | workflow | member, audit | process_instance | 1 |
 | `RiskSignalReviewed.v1` | intelligence | claim, reporting, audit | risk_signal | 1 |
 | `SecurityEventRecorded.v1` | audit | intelligence, member, gateway | security_event | 1 |
 | `NotificationRequested.v1` | claim, grievance, member | member | notification | 1 |
@@ -30,8 +31,8 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `LedgerReversed.v1` | contribution | reporting, audit | ledger_journal | 2 (contract only) |
 | `PaymentScrollGenerated.v1` | claim | payment-simulator, audit | payment_scroll | 2 (contract only) |
 | `MemberChangeApproved.v1` | member | claim, reporting, audit | member_change_request | 2 (contract only) |
-| `AccountFrozen.v1` | member | gateway, claim, audit | account | 2 (contract only) |
-| `AccountDefrozen.v1` | member | gateway, claim, audit | account | 2 (contract only) |
+| `AccountFrozen.v1` | member | gateway, claim, audit | account | 1 |
+| `AccountDefrozen.v1` | member | gateway, claim, audit | account | 1 |
 | `PpoIssued.v1` | pension | member, reporting, audit | pension_claim | 2 (contract only) |
 | `LifeCertificateRecorded.v1` | pension | reporting, audit | pensioner | 2 (contract only) |
 | `CADGenerated.v1` | claim | contribution, payment-simulator, audit | claim | 2 (contract only) |

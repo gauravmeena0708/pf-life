@@ -61,7 +61,7 @@ export function App() {
         <NavLink to="/public">{t("navigation.public")}</NavLink>
         {role?.startsWith("employer.") ? <><NavLink end to="/employer">{t("navigation.employer")}</NavLink><NavLink to="/employer/ecr">{t("navigation.ecr")}</NavLink></> : null}
         {role === "member" ? <><NavLink to="/member/passbook">{t("navigation.passbook")}</NavLink><NavLink end to="/member/claims">{t("navigation.claims")}</NavLink><NavLink to="/member/grievances">{t("navigation.grievances")}</NavLink><NavLink to="/member/profile">{t("navigation.profile")}</NavLink><NavLink to="/member/security">{t("navigation.accountSecurity")}</NavLink><NavLink to="/member/assistant">{t("navigation.assistant")}</NavLink></> : null}
-        {role?.startsWith("fo.") || role === "zo.acc" ? <NavLink to="/office/work-queue">{t("navigation.workQueue")}</NavLink> : null}
+        {role?.startsWith("fo.") || role === "zo.acc" || role === "zo.rpfc1" ? <NavLink to="/office/work-queue">{t("navigation.workQueue")}</NavLink> : null}
         {role === "zo.acc" || role === "ho.cpfc" ? <NavLink to="/monitoring/grievances">{t("navigation.grievanceMetrics")}</NavLink> : null}
         {role === "ho.security" ? <><NavLink to="/security/activity">{t("navigation.security")}</NavLink><NavLink to="/security/sessions">{t("navigation.sessions")}</NavLink><NavLink to="/audit/log">{t("navigation.audit")}</NavLink></> : null}
         {role === "ho.caiu" ? <NavLink to="/caiu/signals">{t("navigation.riskSignals")}</NavLink> : null}

@@ -8,6 +8,7 @@ import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { dateTime, roleLabel, stateLabel } from "../journeyB";
 import { ClaimAnalysisPanel } from "../ai/ClaimAnalysisPanel";
+import { ProcessForm } from "./ProcessForm";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 import type { CaseDetail } from "./types";
@@ -85,13 +86,19 @@ export function CasePage() {
     <ProblemMessage error={detail.error} />{detail.isLoading ? <p role="status">{t("office.loadingCase")}</p> : null}
     {notice ? <p role="status" className="ok">{t("office.actionSaved")}</p> : null}<ProblemMessage error={error} />
     {item ? <>
-      <section className="card stack" aria-labelledby="case-summary-heading"><h2 id="case-summary-heading">{t("office.caseSummary")}</h2>
+      {item.process ? <section className="card stack" aria-labelledby="process-heading"><h2 id="process-heading">{item.kind.replaceAll("_", " ").toLowerCase()}</h2>
+        <dl className="kv"><dt>Process</dt><dd><code>{item.process}</code> (tier-2, config/processes)</dd><dt>Subject</dt><dd><code>{item.subject_ref}</code></dd>
+          <dt>State</dt><dd>{item.state}</dd><dt>{t("office.slaDue")}</dt><dd>{dateTime(item.sla_due_at, i18n.language)}</dd></dl>
+        {item.your_turn && item.operation ? <ProcessForm operation={item.operation} onDone={(msg) => { setNotice(true); void msg; void qc.invalidateQueries({ queryKey: ["office-case", caseId] }); }} />
+          : <p className="muted">{item.current_role ? `Waiting for ${roleLabel(item.current_role, t)}.` : "Finished."}</p>}
+      </section> : null}
+      {!item.process ? <section className="card stack" aria-labelledby="case-summary-heading"><h2 id="case-summary-heading">{t("office.caseSummary")}</h2>
         <dl className="kv"><dt>{t("office.caseId")}</dt><dd><code>{item.case_id}</code></dd><dt>{t("claims.claimId")}</dt><dd><code>{item.claim_id}</code></dd>
           <dt>{t("claims.account")}</dt><dd><code>{item.account_link_id}</code></dd><dt>{t("claims.form")}</dt><dd>{item.form_type}</dd>
           <dt>{t("claims.amount")}</dt><dd>{rupees(item.amount_paise)}</dd><dt>{t("office.kind")}</dt><dd>{item.kind}</dd>
           <dt>{t("claims.ruleVersion")}</dt><dd>{item.rule_version} <span className="state-pill">{t("claims.illustrative")}</span></dd>
           <dt>{t("office.round")}</dt><dd>{item.round}</dd><dt>{t("office.slaDue")}</dt><dd>{dateTime(item.sla_due_at, i18n.language)}</dd></dl>
-      </section>
+      </section> : null}
       {item.advisory_signal_id ? <p className="demo-tip"><strong>{t("office.advisory")}:</strong> {t("office.advisoryHelp")} (<code>{item.advisory_signal_id}</code>)</p> : null}
       {role === "fo.da_accounts" && item.claim_id ? <ClaimAnalysisPanel claimId={item.claim_id} /> : null}
       <section className="card stack" aria-labelledby="chain-heading"><h2 id="chain-heading">{t("office.approvalChain")}</h2>

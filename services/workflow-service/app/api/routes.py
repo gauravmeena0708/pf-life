@@ -32,7 +32,7 @@ RULES_PATH = Path(os.getenv("RULES_FILE", "/srv/demo-rules.yaml"))
 SLA_DAYS = 20     # illustrative service standard for claim settlement
 FIRST_CHECKERS, SECOND_CHECKERS = ("fo.ss", "fo.ao"), ("fo.apfc", "fo.oic")
 OFFICERS = require_stakeholder("fo.da_accounts", "fo.ss", "fo.ao", "fo.apfc", "fo.oic", "fo.cash", "fo.pro",
-                               "do.incharge", "do.staff", "zo.acc")
+                               "do.incharge", "do.staff", "zo.acc", "zo.rpfc1")
 GRIEVANCE_HANDLER = {"RO": "fo.pro", "ZO": "zo.acc", "HO": "ho.customer_service"}
 GRIEVANCE_SLA_DAYS = {"RO": 15, "ZO": 10, "HO": 7}     # same illustrative standards as grievance-service
 
@@ -90,6 +90,10 @@ async def load_case(session: AsyncSession, case_id: str, office_id: str, lock: b
 
 
 def next_action(case: dict[str, Any]) -> str | None:
+    if case.get("process"):
+        from app.engine.engine import _next, definitions
+        definition = next(d for d in definitions() if d["process"] == case["process"])
+        return _next(definition, case["state"])[0] if case["current_role"] else None
     if case["state"] == "IN_REVIEW":
         return "recommend" if case["step"] == 0 else "decide" if case["step"] == 1 else "second-approve"
     return {"AWAITING_PAYMENT": "instruct-payment", "PAYMENT_RETURNED": "reissue", "OPEN": "handle-grievance"}.get(case["state"])
@@ -106,6 +110,7 @@ async def history(session: AsyncSession, case_id: str) -> list[dict[str, Any]]:
 def case_json(case: dict[str, Any]) -> dict[str, Any]:
     return {"case_id": case["case_id"], "claim_id": case["claim_id"], "grievance_id": case.get("grievance_id"),
             "kind": case["kind"], "office_id": case["office_id"], "advisory_signal_id": case.get("advisory_signal_id"),
+            "process": case.get("process"), "subject_ref": case.get("subject_ref"),
             "form_type": case["form_type"], "account_link_id": case["account_link_id"],
             "amount_paise": case["amount_paise"], "rule_version": case["rule_version"], "chain": case["chain"],
             "step": case["step"], "round": case["round"], "state": case["state"], "current_role": case["current_role"],
@@ -194,18 +199,21 @@ async def decide(case_id: str, body: Decision, actor: Actor, session: AsyncSessi
 async def work_queue(actor: Actor = Depends(OFFICERS), session: AsyncSession = Depends(db)) -> dict:
     staff = await posting(session, actor)
     rows = (await session.execute(select(cases).where(and_(
-        cases.c.office_id == staff["office_id"], cases.c.current_role == actor.stakeholder,
-        cases.c.state.in_(("IN_REVIEW", "AWAITING_PAYMENT", "PAYMENT_RETURNED", "OPEN")),
+        cases.c.office_id == staff["office_id"], cases.c.current_role == actor.stakeholder,   # finished cases have no role
         or_(cases.c.assignee_subject.is_(None), cases.c.assignee_subject == actor.subject))).order_by(cases.c.created_at))).mappings().all()
-    return envelope({"office_id": staff["office_id"], "role": actor.stakeholder, "items": [case_json(dict(r)) for r in rows]})
+    from app.engine.engine import startable
+    return envelope({"office_id": staff["office_id"], "role": actor.stakeholder, "items": [case_json(dict(r)) for r in rows],
+                     "startable_processes": startable(actor.stakeholder)})
 
 
 @router.get("/api/v1/office/cases/{case_id}")
 async def get_case(case_id: str, actor: Actor = Depends(OFFICERS), session: AsyncSession = Depends(db)) -> dict:
     staff = await posting(session, actor)
     case = await load_case(session, case_id, staff["office_id"])
+    from app.engine.engine import next_operation
     return envelope({**case_json(case), "history": await history(session, case_id),
-                     "your_turn": case["current_role"] == actor.stakeholder})
+                     "your_turn": case["current_role"] == actor.stakeholder,
+                     "operation": next_operation(case) if case.get("process") else None})
 
 
 @router.post("/api/v1/office/cases/{case_id}/recommendations")

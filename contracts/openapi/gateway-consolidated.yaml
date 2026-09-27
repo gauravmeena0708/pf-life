@@ -7094,6 +7094,7 @@ paths:
       - fo.pro
       - fo.ss
       - zo.acc
+      - zo.rpfc1
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -8982,7 +8983,7 @@ paths:
   /office/freeze-cases/{caseId}/verifications:
     post:
       operationId: postOfficeFreezeCasesCaseIdVerifications
-      summary: Freeze-case verification step (DA → SS/AO → APFC/RPFC-II → OIC)
+      summary: Freeze-case verification step (DA → SS/AO → APFC/RPFC-II → OIC; tier-2 process member_freeze)
       tags:
       - Office claim processing and member accounts
       parameters:
@@ -8993,20 +8994,27 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: workflow
       x-callers:
       - fo.ao
       - fo.apfc
       - fo.da_accounts
       - fo.da_compliance
+      - fo.oic
       - fo.ss
       x-scope: office jurisdiction of the caller's posting
       security:
@@ -9450,7 +9458,7 @@ paths:
   /office/members/{uan}/defreezes:
     post:
       operationId: postOfficeMembersUanDefreezes
-      summary: De-freeze, maker-checker
+      summary: De-freeze, maker-checker (tier-2 process member_freeze)
       tags:
       - Office claim processing and member accounts
       parameters:
@@ -9462,14 +9470,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - fo.oic
@@ -9486,7 +9500,7 @@ paths:
   /office/members/{uan}/freezes:
     post:
       operationId: postOfficeMembersUanFreezes
-      summary: UAN / member-ID freeze with reason and evidence
+      summary: UAN / member-ID freeze with reason and evidence (tier-2 process member_freeze)
       tags:
       - Office claim processing and member accounts
       parameters:
@@ -9498,14 +9512,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - fo.apfc
@@ -11033,6 +11053,7 @@ paths:
       - fo.pro
       - fo.ss
       - zo.acc
+      - zo.rpfc1
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []

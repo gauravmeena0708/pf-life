@@ -1491,7 +1491,7 @@ paths:
   /office/members/{uan}/defreezes:
     post:
       operationId: postOfficeMembersUanDefreezes
-      summary: De-freeze, maker-checker
+      summary: De-freeze, maker-checker (tier-2 process member_freeze)
       tags:
       - Office claim processing and member accounts
       parameters:
@@ -1503,14 +1503,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - fo.oic
@@ -1527,7 +1533,7 @@ paths:
   /office/members/{uan}/freezes:
     post:
       operationId: postOfficeMembersUanFreezes
-      summary: UAN / member-ID freeze with reason and evidence
+      summary: UAN / member-ID freeze with reason and evidence (tier-2 process member_freeze)
       tags:
       - Office claim processing and member accounts
       parameters:
@@ -1539,14 +1545,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - fo.apfc

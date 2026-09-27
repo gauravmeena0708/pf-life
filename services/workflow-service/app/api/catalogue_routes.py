@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /hrm/me', 'GET /office/work-queue', 'GET /public/offices', 'GET /office/cases/{caseId}', 'POST /office/cases/{caseId}/assignments', 'POST /office/cases/{caseId}/decisions', 'POST /office/cases/{caseId}/recommendations', 'POST /office/cases/{caseId}/second-approvals']
+OPERATIONS = ['GET /hrm/me', 'GET /office/work-queue', 'GET /public/offices', 'GET /office/cases/{caseId}', 'POST /office/cases/{caseId}/assignments', 'POST /office/cases/{caseId}/decisions', 'POST /office/cases/{caseId}/recommendations', 'POST /office/cases/{caseId}/second-approvals', 'POST /office/freeze-cases/{caseId}/verifications']
 
 @router.api_route("/api/v1/hrm/me", methods=["GET"], include_in_schema=False)
 async def get_hrm_me(actor: Actor = Depends(require_actor)) -> None:
@@ -50,3 +50,8 @@ async def post_office_cases_caseId_recommendations(actor: Actor = Depends(requir
 @router.api_route("/api/v1/office/cases/{caseId}/second-approvals", methods=["POST"], include_in_schema=False)
 async def post_office_cases_caseId_second_approvals(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Dual control for high-value / high-risk cases")
+
+
+@router.api_route("/api/v1/office/freeze-cases/{caseId}/verifications", methods=["POST"], include_in_schema=False)
+async def post_office_freeze_cases_caseId_verifications(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Freeze-case verification step (DA → SS/AO → APFC/RPFC-II → OIC; tier-2 process member_freeze)")

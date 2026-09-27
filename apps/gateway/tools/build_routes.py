@@ -30,10 +30,16 @@ def main() -> None:
         for grant in grant_rows or []:
             callers_by_endpoint.setdefault(grant["endpoint"], []).append(stakeholder)
 
+    # Tier-2 processes (ADR-0005): the contract keeps its owner, but the engine in workflow-service serves it.
+    engine_ops = {op["operation"] for d in (yaml.safe_load(p.read_text(encoding="utf-8"))
+                                            for p in sorted((ROOT / "config" / "processes").glob("*.yaml")))
+                  for op in d["operations"]}
     routes = []
     for key, op in load_catalogue().items():
         owner = op["owner"]
-        if owner == "gateway":
+        if key in engine_ops:
+            upstream = "http://workflow-service:8000"
+        elif owner == "gateway":
             upstream = None
         elif owner == "platform":
             upstream = "http://platform-service:8000"
