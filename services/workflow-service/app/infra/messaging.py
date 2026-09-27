@@ -4,7 +4,7 @@ from typing import Any
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.routes import open_case
+from app.api.routes import grievance_case, open_case
 from app.infra.tables import cases
 
 BINDINGS = [
@@ -13,6 +13,9 @@ BINDINGS = [
     "claim-service.PaymentInstructed.v1",
     "payment-simulator.PaymentConfirmed.v1",
     "payment-simulator.PaymentReturned.v1",
+    "grievance-service.GrievanceRegistered.v1",
+    "grievance-service.GrievanceEscalated.v1",
+    "grievance-service.GrievanceResolved.v1",
 ]
 
 
@@ -49,7 +52,25 @@ async def on_payment_result(session: AsyncSession, event: dict[str, Any]) -> Non
         await _move(session, p["reference"], ("PAYMENT_ISSUED",), state="PAYMENT_RETURNED", current_role="fo.cash")
 
 
+async def on_grievance_registered(session: AsyncSession, event: dict[str, Any]) -> None:
+    p = event["payload"]
+    await grievance_case(session, p["grievance_id"], p["office_id"], "RO")
+
+
+async def on_grievance_escalated(session: AsyncSession, event: dict[str, Any]) -> None:
+    p = event["payload"]
+    await grievance_case(session, p["grievance_id"], p["office_id"], p["to_tier"])
+
+
+async def on_grievance_resolved(session: AsyncSession, event: dict[str, Any]) -> None:
+    await session.execute(update(cases).where(cases.c.grievance_id == event["payload"]["grievance_id"])
+                          .values(state="CLOSED", current_role=None, version=cases.c.version + 1))
+
+
 HANDLERS = {
+    "GrievanceRegistered.v1": on_grievance_registered,
+    "GrievanceEscalated.v1": on_grievance_escalated,
+    "GrievanceResolved.v1": on_grievance_resolved,
     "ClaimSubmitted.v1": on_claim_submitted,
     "ClaimDecisionRecorded.v1": on_claim_decision,
     "PaymentInstructed.v1": on_payment_instructed,

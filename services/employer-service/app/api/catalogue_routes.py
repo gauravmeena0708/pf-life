@@ -24,7 +24,7 @@ async def post_employers_registration_requests(actor: Actor = Depends(require_ac
 
 @router.api_route("/api/v1/public/establishments", methods=["GET"], include_in_schema=False)
 async def get_public_establishments(actor: Actor = Depends(require_actor)) -> None:
-    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Establishment search by name / code / pincode (rate-limited, paged, no bulk enumeration)")
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Establishment search by code, registration, pincode, name or industry; filter by location, type, exe")
 
 
 @router.api_route("/api/v1/employers/me/configuration", methods=["GET"], include_in_schema=False)
@@ -69,7 +69,7 @@ async def get_employers_registration_requests_reqId(actor: Actor = Depends(requi
 
 @router.api_route("/api/v1/public/establishments/{estId}", methods=["GET"], include_in_schema=False)
 async def get_public_establishments_estId(actor: Actor = Depends(require_actor)) -> None:
-    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Establishment public profile: name, office, coverage and exemption status")
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Public profile: name, registration, office, location, type, industry, coverage, verification and exe")
 
 
 @router.api_route("/api/v1/employers/registration-requests/{reqId}/verification-evidence", methods=["POST"], include_in_schema=False)

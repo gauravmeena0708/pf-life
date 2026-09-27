@@ -164,6 +164,7 @@ paths:
       - gov.cag
       - gov.statutory_auditor
       - ho.audit
+      - ho.security
       - zo.rpfc1_audit
       x-scope: read-only for auditors; audit writes by audit roles only
       security:

@@ -353,6 +353,22 @@
   },
   {
     "method": "POST",
+    "path_template": "/security/account-recovery-requests/{requestId}/decisions",
+    "regex": "^/security/account\\-recovery\\-requests/[^/]+/decisions$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "ho.security"
+    ],
+    "summary": "Approve or reject an account-recovery request; approval restores the verified contact details (Journey D5)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/office/cases/{caseId}/documents/{docId}/attestation-views",
     "regex": "^/office/cases/[^/]+/documents/[^/]+/attestation\\-views$",
     "status": "P",
@@ -2536,6 +2552,8 @@
     "money": false,
     "step_up": false,
     "callers": [
+      "fo.pro",
+      "member",
       "zo.acc"
     ],
     "summary": "Escalate to next supervisory tier (Journey C4)",
@@ -2623,6 +2641,22 @@
   },
   {
     "method": "GET",
+    "path_template": "/security/account-recovery-requests",
+    "regex": "^/security/account\\-recovery\\-requests$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.security"
+    ],
+    "summary": "Review queue of account-recovery requests (Journey D5)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/employers/me/ecr-filings/{filingId}",
     "regex": "^/employers/me/ecr\\-filings/[^/]+$",
     "status": "W",
@@ -2665,7 +2699,8 @@
     "money": false,
     "step_up": true,
     "callers": [
-      "fo.pro"
+      "fo.pro",
+      "zo.acc"
     ],
     "summary": "Resolve with reason (Journey C4)",
     "revocation": false
@@ -3117,7 +3152,8 @@
     "step_up": false,
     "callers": [
       "fo.pro",
-      "member"
+      "member",
+      "zo.acc"
     ],
     "summary": "Reply / message",
     "revocation": false
@@ -4747,6 +4783,7 @@
     "money": false,
     "step_up": false,
     "callers": [
+      "fo.pro",
       "member",
       "zo.acc"
     ],
@@ -5289,7 +5326,9 @@
       "fo.cash",
       "fo.da_accounts",
       "fo.oic",
-      "fo.ss"
+      "fo.pro",
+      "fo.ss",
+      "zo.acc"
     ],
     "summary": "Case detail",
     "revocation": false
@@ -5552,7 +5591,9 @@
       "fo.cash",
       "fo.da_accounts",
       "fo.oic",
-      "fo.ss"
+      "fo.pro",
+      "fo.ss",
+      "zo.acc"
     ],
     "summary": "Jurisdiction-filtered task queue",
     "revocation": false
@@ -5815,6 +5856,7 @@
       "gov.cag",
       "gov.statutory_auditor",
       "ho.audit",
+      "ho.security",
       "zo.rpfc1_audit"
     ],
     "summary": "Platform endpoint defined in init.md §3.1",

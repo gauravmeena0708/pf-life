@@ -423,6 +423,12 @@ stakeholders:
     step_up: false
     via:
     - F08.member_file
+  - endpoint: POST /grievances/{grievanceId}/escalations
+    status: W
+    scope: complainant or the assigned office
+    step_up: false
+    via:
+    - F08.member_file
   - endpoint: POST /grievances/{grievanceId}/reminders
     status: P
     scope: complainant or the assigned office
@@ -2064,6 +2070,30 @@ stakeholders:
     via:
     - F10.decide
   fo.pro:
+  - endpoint: GET /office/work-queue
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F08.triage
+  - endpoint: GET /office/cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F08.triage
+  - endpoint: GET /grievances/{grievanceId}
+    status: W
+    scope: complainant or the assigned office
+    step_up: false
+    via:
+    - F08.triage
+  - endpoint: POST /grievances/{grievanceId}/escalations
+    status: W
+    scope: complainant or the assigned office
+    step_up: false
+    via:
+    - F08.triage
   - endpoint: POST /office/cases/{caseId}/assignments
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2153,6 +2183,18 @@ stakeholders:
     via:
     - F06.district
   zo.acc:
+  - endpoint: GET /office/work-queue
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F08.escalate
+  - endpoint: GET /office/cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F08.escalate
   - endpoint: POST /grievances/{grievanceId}/escalations
     status: W
     scope: complainant or the assigned office
@@ -2163,6 +2205,18 @@ stakeholders:
     status: W
     scope: complainant or the assigned office
     step_up: false
+    via:
+    - F08.escalate
+  - endpoint: POST /grievances/{grievanceId}/messages
+    status: W
+    scope: complainant or the assigned office
+    step_up: false
+    via:
+    - F08.escalate
+  - endpoint: POST /grievances/{grievanceId}/resolution
+    status: W
+    scope: complainant or the assigned office
+    step_up: true
     via:
     - F08.escalate
   - endpoint: GET /zo/dashboards
@@ -2513,6 +2567,24 @@ stakeholders:
     status: W
     scope: security analyst
     step_up: true
+    via:
+    - F14.security
+  - endpoint: GET /security/account-recovery-requests
+    status: W
+    scope: security analyst
+    step_up: false
+    via:
+    - F14.security
+  - endpoint: POST /security/account-recovery-requests/{requestId}/decisions
+    status: W
+    scope: security analyst
+    step_up: true
+    via:
+    - F14.security
+  - endpoint: GET /audit/events
+    status: W
+    scope: read-only for auditors; audit writes by audit roles only
+    step_up: false
     via:
     - F14.security
   - endpoint: GET /security/me/permissions

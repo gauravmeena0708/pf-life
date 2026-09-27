@@ -203,3 +203,22 @@ def test_public_offices_and_hrm_me(ctx):
     assert offices[0]["office_id"] == "RO-DEMO-01"
     me = client.get("/api/v1/hrm/me", headers=hdr(APFC, "fo.apfc")).json()["data"]
     assert me["role"] == "fo.apfc" and me["office"]["office_id"] == "RO-DEMO-01"
+
+
+ZO_ACC = S["zo-acc"]
+
+
+def test_grievance_case_follows_registration_escalation_and_resolution(ctx):
+    client, _, deliver = ctx
+    deliver("GrievanceRegistered.v1", {"grievance_id": "GRV-1", "category": "CLAIM_DELAY", "office_id": "RO-DEMO-01",
+                                       "linked_claim_id": "CLM-0001"}, "grievance-service")
+    [case] = queue(client, PRO, "fo.pro")
+    assert case["kind"] == "GRIEVANCE" and case["grievance_id"] == "GRV-1" and case["next_action"] == "handle-grievance"
+    deliver("GrievanceEscalated.v1", {"grievance_id": "GRV-1", "from_tier": "RO", "to_tier": "ZO",
+                                      "office_id": "ZO-DEMO-01"}, "grievance-service")
+    assert queue(client, PRO, "fo.pro") == []
+    [case] = queue(client, ZO_ACC, "zo.acc")
+    assert case["chain"] == ["fo.pro", "zo.acc"]
+    deliver("GrievanceResolved.v1", {"grievance_id": "GRV-1", "office_id": "RO-DEMO-01", "tier": "ZO",
+                                     "within_sla": True}, "grievance-service")
+    assert queue(client, ZO_ACC, "zo.acc") == []

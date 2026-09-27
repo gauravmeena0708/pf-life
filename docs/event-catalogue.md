@@ -21,9 +21,10 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `PaymentReturned.v1` | payment-simulator | claim, audit | payment | 1 |
 | `GrievanceRegistered.v1` | grievance | workflow, reporting, intelligence, audit | grievance | 1 |
 | `GrievanceEscalated.v1` | grievance | workflow, reporting, audit | grievance | 1 |
+| `GrievanceResolved.v1` | grievance | workflow, reporting, audit | grievance | 1 |
 | `RiskSignalRaised.v1` | intelligence | workflow, reporting, audit | risk_signal | 1 |
 | `SecurityEventRecorded.v1` | audit | intelligence, member, gateway | security_event | 1 |
-| `NotificationRequested.v1` | claim | member | notification | 1 |
+| `NotificationRequested.v1` | claim, grievance, member | member | notification | 1 |
 | `DemandRaised.v1` | compliance | contribution, audit | compliance_case | 2 (contract only) |
 | `LedgerReversed.v1` | contribution | reporting, audit | ledger_journal | 2 (contract only) |
 | `PaymentScrollGenerated.v1` | claim | payment-simulator, audit | payment_scroll | 2 (contract only) |

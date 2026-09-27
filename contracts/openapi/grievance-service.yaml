@@ -42,6 +42,7 @@ paths:
       x-phase: 1
       x-owner-service: grievance
       x-callers:
+      - fo.pro
       - member
       - zo.acc
       x-scope: complainant or the assigned office
@@ -118,6 +119,8 @@ paths:
       x-phase: 1
       x-owner-service: grievance
       x-callers:
+      - fo.pro
+      - member
       - zo.acc
       x-scope: complainant or the assigned office
       security:
@@ -237,6 +240,7 @@ paths:
       x-callers:
       - fo.pro
       - member
+      - zo.acc
       x-scope: complainant or the assigned office
       security:
       - bffSession: []
@@ -390,6 +394,7 @@ paths:
       x-owner-service: grievance
       x-callers:
       - fo.pro
+      - zo.acc
       x-scope: complainant or the assigned office
       security:
       - bffSession: []

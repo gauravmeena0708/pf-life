@@ -29,7 +29,7 @@ async def get_grievances_grievanceId(actor: Actor = Depends(require_actor)) -> N
 
 @router.api_route("/api/v1/grievances/{grievanceId}/documents", methods=["POST"], include_in_schema=False)
 async def post_grievances_grievanceId_documents(actor: Actor = Depends(require_actor)) -> None:
-    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Attach a synthetic document (MinIO, malware-scan stub, Journey C1)")
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Attach a synthetic document (object store, malware-scan stub, Journey C1)")
 
 
 @router.api_route("/api/v1/grievances/{grievanceId}/escalations", methods=["POST"], include_in_schema=False)
