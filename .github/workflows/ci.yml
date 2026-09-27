@@ -1,0 +1,57 @@
+name: ci
+on:
+  push:
+  pull_request:
+
+jobs:
+  docs:
+    name: catalogue, contracts and generated docs are in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pyyaml==6.0.2 openapi-spec-validator==0.7.1 jsonschema==4.23.0
+      - run: make check-docs
+      - name: validate OpenAPI and event schemas
+        run: |
+          python - <<'PY'
+          import glob, json, yaml
+          from openapi_spec_validator import validate
+          from jsonschema import Draft202012Validator
+          for f in glob.glob("contracts/openapi/*.yaml"): validate(yaml.safe_load(open(f)))
+          for f in glob.glob("contracts/events/*.json"): Draft202012Validator.check_schema(json.load(open(f)))
+          print("contracts valid")
+          PY
+
+  python:
+    name: packages, services and gateway tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -e "packages/common-observability[test]" -e "packages/common-auth-client[test]"
+      - run: pip install "uvicorn[standard]==0.32.0" "pydantic-settings==2.6.1" "sqlalchemy[asyncio]==2.0.36" "asyncpg==0.30.0" "alembic==1.14.0"
+      - run: test ! -f apps/gateway/pyproject.toml || pip install -e "apps/gateway[test]"
+      - run: make test
+
+  web:
+    name: web app build, lint and unit tests
+    runs-on: ubuntu-latest
+    defaults: {run: {working-directory: apps/web}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: "22"}
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test -- --run
+      - run: npm run build
+
+  compose:
+    name: compose file is valid
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cp .env.example .env && docker compose config -q && docker compose -f compose.yaml -f compose.lite.yaml -f compose.dev-direct.yaml config -q

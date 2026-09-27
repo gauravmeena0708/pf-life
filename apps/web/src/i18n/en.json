@@ -1,0 +1,27 @@
+{
+  "banner": "SYNTHETIC DEMONSTRATION — NOT AN OFFICIAL EPFO SYSTEM",
+  "title": "EPFO platform POC",
+  "skip": "Skip to content",
+  "language": "Language",
+  "persona": {
+    "heading": "Persona",
+    "current": "Logged in as {{label}} ({{role}})",
+    "none": "Not logged in",
+    "choose": "Switch to persona",
+    "password": "Password for every persona (demo only):",
+    "logout": "Log out"
+  },
+  "home": {
+    "heading": "Interfaces",
+    "intro": "All 21 interfaces of the platform. Status shows what works in this proof of concept: Working, Mock (simulated outside system) or Planned (contract only)."
+  },
+  "interface": {
+    "unknown": "Unknown interface.",
+    "back": "All interfaces",
+    "stakeholders": "Stakeholders",
+    "login": "Choose a persona to see the endpoints that role may call.",
+    "yourEndpoints": "Endpoints your role ({{role}}) may call",
+    "none": "This role has no endpoints in this interface.",
+    "stepUp": "needs step-up confirmation"
+  }
+}

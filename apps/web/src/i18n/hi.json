@@ -1,0 +1,27 @@
+{
+  "banner": "कृत्रिम प्रदर्शन — आधिकारिक ईपीएफओ प्रणाली नहीं [TODO-review]",
+  "title": "EPFO platform POC [TODO-translate]",
+  "skip": "Skip to content [TODO-translate]",
+  "language": "Language [TODO-translate]",
+  "persona": {
+    "heading": "Persona [TODO-translate]",
+    "current": "Logged in as {{label}} ({{role}}) [TODO-translate]",
+    "none": "Not logged in [TODO-translate]",
+    "choose": "Switch to persona [TODO-translate]",
+    "password": "Password for every persona (demo only): [TODO-translate]",
+    "logout": "Log out [TODO-translate]"
+  },
+  "home": {
+    "heading": "Interfaces [TODO-translate]",
+    "intro": "All 21 interfaces of the platform. Status shows what works in this proof of concept: Working, Mock (simulated outside system) or Planned (contract only). [TODO-translate]"
+  },
+  "interface": {
+    "unknown": "Unknown interface. [TODO-translate]",
+    "back": "All interfaces [TODO-translate]",
+    "stakeholders": "Stakeholders [TODO-translate]",
+    "login": "Choose a persona to see the endpoints that role may call. [TODO-translate]",
+    "yourEndpoints": "Endpoints your role ({{role}}) may call [TODO-translate]",
+    "none": "This role has no endpoints in this interface. [TODO-translate]",
+    "stepUp": "needs step-up confirmation [TODO-translate]"
+  }
+}

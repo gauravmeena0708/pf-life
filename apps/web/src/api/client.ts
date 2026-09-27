@@ -1,0 +1,63 @@
+/** Fetch wrapper for the gateway. Cookies only (no tokens in the browser); CSRF header on changes. */
+export interface Problem {
+  type: string;
+  title: string;
+  status: number;
+  detail?: string;
+  correlation_id?: string;
+}
+
+export class ApiError extends Error {
+  constructor(public problem: Problem) {
+    super(problem.title);
+  }
+}
+
+function csrfToken(): string | undefined {
+  return document.cookie
+    .split("; ")
+    .find((c) => c.startsWith("epfo-csrf="))
+    ?.split("=")[1];
+}
+
+export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const method = (init.method ?? "GET").toUpperCase();
+  const headers = new Headers(init.headers);
+  headers.set("Accept", "application/json");
+  if (!["GET", "HEAD"].includes(method)) {
+    const token = csrfToken();
+    if (token) headers.set("X-CSRF-Token", token);
+  }
+  const res = await fetch(path, { ...init, method, headers, credentials: "include" });
+  const text = await res.text();
+  const body = text ? JSON.parse(text) : undefined;
+  if (!res.ok) {
+    const problem: Problem =
+      body && typeof body === "object" && "title" in body
+        ? body
+        : { type: "/problems/http", title: res.statusText || "Request failed", status: res.status };
+    problem.correlation_id ??= res.headers.get("X-Correlation-Id") ?? undefined;
+    throw new ApiError(problem);
+  }
+  return body as T;
+}
+
+export interface Session {
+  authenticated: boolean;
+  subject?: string;
+  stakeholder?: string;
+  persona_label?: string;
+  expires_at?: string;
+}
+
+export interface Grant {
+  endpoint: string;
+  status: "W" | "M" | "P" | "?";
+  scope: string;
+  step_up: boolean;
+}
+
+export const getSession = () => api<Session>("/auth/session");
+export const logout = () => api<unknown>("/auth/logout", { method: "POST" });
+export const getMyPermissions = () =>
+  api<{ data: { stakeholder: string; endpoints: Grant[] } }>("/api/v1/security/me/permissions");
