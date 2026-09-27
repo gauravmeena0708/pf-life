@@ -1,8 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
 
 import { api, command, newIdempotencyKey, rupees, type Envelope } from "../../api/client";
+import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
@@ -209,20 +209,20 @@ export function EcrPage() {
     "Mock payment started. Refresh challans to see the bank result.");
   }
 
-  if (establishment.isLoading) return <p>Loading employer workspace…</p>;
-  if (establishment.error) return <><p><Link to="/">← Interfaces</Link></p><ProblemMessage error={establishment.error} /></>;
+  if (establishment.isLoading || establishment.error) return <div className="stack">
+    <PageHeader eyebrow="Monthly returns · Journey A" title="ECR workbench"
+      description="Prepare and track synthetic monthly returns." current="Monthly returns (ECR)"
+      parent={{ label: "Employer workspace", to: "/employer" }} />
+    {establishment.isLoading ? <p role="status">Loading employer workspace…</p> : <ProblemMessage error={establishment.error} />}
+  </div>;
 
   return (
     <section className="stack" aria-labelledby="ecr-heading">
-      <p><Link to="/employer">← Employer workspace</Link></p>
-      <div className="workspace-head">
-        <div>
-          <p className="eyebrow">Monthly returns · Journey A</p>
-          <h1 id="ecr-heading">ECR workbench</h1>
-          <p className="muted">{establishment.data?.data.legal_name} · synthetic demonstration · illustrative contribution rules</p>
-        </div>
+      <PageHeader id="ecr-heading" eyebrow="Monthly returns · Journey A" title="ECR workbench"
+        description={`${establishment.data?.data.legal_name} · synthetic demonstration · illustrative contribution rules`}
+        current="Monthly returns (ECR)" parent={{ label: "Employer workspace", to: "/employer" }}>
         <button type="button" onClick={() => void qc.invalidateQueries()} disabled={busy}>Refresh status</button>
-      </div>
+      </PageHeader>
       {notice ? <p role="status" className="ok">{notice}</p> : null}
       <ProblemMessage error={error} />
       {!canPrepare && !canReadFilings && !canPay ? <p className="card">This persona has no return or payment grant. The establishment owner can assign a payroll operator or signatory from the employer workspace.</p> : null}

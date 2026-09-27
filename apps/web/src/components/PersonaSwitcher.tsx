@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 
@@ -36,10 +37,37 @@ export function PersonaSwitcher() {
   const { t } = useTranslation();
   const location = useLocation();
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
+  const menuRef = useRef<HTMLDetailsElement>(null);
+
+  useEffect(() => {
+    function closeOutside(event: PointerEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) menuRef.current.open = false;
+    }
+    function closeEscape(event: KeyboardEvent) {
+      if (event.key === "Escape" && menuRef.current?.open) {
+        menuRef.current.open = false;
+        menuRef.current.querySelector<HTMLElement>("summary")?.focus();
+      }
+    }
+    function openAccount() {
+      if (menuRef.current) {
+        menuRef.current.open = true;
+        menuRef.current.querySelector<HTMLElement>("summary")?.focus();
+      }
+    }
+    document.addEventListener("pointerdown", closeOutside);
+    document.addEventListener("keydown", closeEscape);
+    window.addEventListener("open-demo-account", openAccount);
+    return () => {
+      document.removeEventListener("pointerdown", closeOutside);
+      document.removeEventListener("keydown", closeEscape);
+      window.removeEventListener("open-demo-account", openAccount);
+    };
+  }, []);
 
   function switchTo(username: string) {
     const role = PERSONAS.find((persona) => persona.username === username)?.role;
-    const returnTo = role === "ho.security" ? "/security/activity"
+    const returnTo = role === "ho.security" ? "/security/activity" : role === "member" ? "/member/passbook"
       : role?.startsWith("employer.") ? (location.pathname.startsWith("/employer") ? location.pathname : "/employer")
         : "/";
     if (session.data?.authenticated) {
@@ -50,7 +78,11 @@ export function PersonaSwitcher() {
   }
 
   return (
-    <section aria-labelledby="persona-heading" className="persona">
+    <details className="account-menu" ref={menuRef}>
+      <summary>{session.data?.authenticated
+        ? t("persona.account", { label: session.data.persona_label ?? session.data.subject, role: session.data.stakeholder })
+        : t("persona.signIn")}</summary>
+      <section aria-labelledby="persona-heading" className="persona account-panel">
       <h2 id="persona-heading">{t("persona.heading")}</h2>
       <p className="muted">
         {session.data?.authenticated
@@ -76,6 +108,7 @@ export function PersonaSwitcher() {
           {t("persona.logout")}
         </button>
       ) : null}
-    </section>
+      </section>
+    </details>
   );
 }

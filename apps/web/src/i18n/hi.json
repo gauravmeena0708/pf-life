@@ -9,14 +9,48 @@
     "none": "Not logged in [TODO-translate]",
     "choose": "Switch to persona [TODO-translate]",
     "password": "Password for every persona (demo only): [TODO-translate]",
-    "logout": "Log out [TODO-translate]"
+    "logout": "Log out [TODO-translate]",
+    "account": "{{label}} · {{role}}",
+    "signIn": "साइन इन (डेमो)"
   },
   "home": {
-    "heading": "Interfaces [TODO-translate]",
-    "intro": "All 21 interfaces of the platform. Status shows what works in this proof of concept: Working, Mock (simulated outside system) or Planned (contract only). [TODO-translate]",
+    "heading": "भविष्य निधि सेवाओं का प्रदर्शन",
+    "intro": "इस अवधारणा प्रमाण में उपलब्ध कृत्रिम सेवाएँ और भूमिका आधारित कार्यक्षेत्र देखें।",
     "employerWorkspace": "नियोक्ता कार्यक्षेत्र",
     "publicLookups": "सार्वजनिक खोज",
-    "securityActivity": "सुरक्षा गतिविधि"
+    "securityActivity": "सुरक्षा गतिविधि",
+    "eyebrow": "सेवाएँ और कार्यक्षेत्र",
+    "heroEyebrow": "प्रदर्शन पोर्टल में आपका स्वागत है",
+    "heroTitle": "भविष्य निधि प्रक्रियाओं की स्पष्ट जानकारी",
+    "heroDescription": "डेमो डेटा से सार्वजनिक रिकॉर्ड खोजें, नियोक्ता की फाइलिंग देखें या सदस्य की पासबुक जाँचें। कार्यक्षेत्र देखने के लिए डेमो पहचान से साइन इन करें।",
+    "signIn": "डेमो पहचान से साइन इन करें",
+    "servicesEyebrow": "पोर्टल देखें",
+    "servicesTitle": "आवश्यकता के अनुसार सेवाएँ",
+    "explore": "सेवा देखें",
+    "directoryTitle": "सभी 20+ इंटरफ़ेस और उनकी निर्माण स्थिति",
+    "directoryDescription": "स्थिति: कार्यरत, मॉक (अनुकरण किया गया एकीकरण), या नियोजित (केवल अनुबंध)।",
+    "services": {
+      "employer": {
+        "title": "नियोक्ता",
+        "description": "प्रतिष्ठान की पहुँच संभालें और मासिक रिटर्न तैयार करें।"
+      },
+      "member": {
+        "title": "सदस्य",
+        "description": "डेमो पासबुक में जमा अंशदान देखें।"
+      },
+      "public": {
+        "title": "सार्वजनिक खोज",
+        "description": "सार्वजनिक प्रतिष्ठान रजिस्टर खोजें और TRRN जाँचें।"
+      },
+      "office": {
+        "title": "क्षेत्रीय कार्यालय",
+        "description": "कार्यालय की भूमिकाएँ और उपलब्ध इंटरफ़ेस देखें।"
+      },
+      "security": {
+        "title": "सुरक्षा",
+        "description": "सुरक्षा इंटरफ़ेस और गेटवे गतिविधि देखें।"
+      }
+    }
   },
   "interface": {
     "unknown": "Unknown interface. [TODO-translate]",
@@ -25,6 +59,45 @@
     "login": "Choose a persona to see the endpoints that role may call. [TODO-translate]",
     "yourEndpoints": "Endpoints your role ({{role}}) may call [TODO-translate]",
     "none": "This role has no endpoints in this interface. [TODO-translate]",
-    "stepUp": "needs step-up confirmation [TODO-translate]"
+    "stepUp": "needs step-up confirmation [TODO-translate]",
+    "eyebrow": "इंटरफ़ेस {{number}} · निर्माण स्थिति",
+    "description": "इस कृत्रिम इंटरफ़ेस में हितधारक कवरेज और एंडपॉइंट की स्थिति देखें।"
+  },
+  "portal": {
+    "subtitle": "कृत्रिम प्रदर्शन पोर्टल",
+    "disclaimer": "कृत्रिम प्रदर्शन — यह आधिकारिक ईपीएफओ प्रणाली नहीं है। कोई वास्तविक व्यक्तिगत डेटा नहीं।",
+    "built": "API-प्रथम अवधारणा प्रमाण के रूप में निर्मित"
+  },
+  "navigation": {
+    "home": "मुख्य पृष्ठ",
+    "public": "सार्वजनिक सेवाएँ",
+    "employer": "नियोक्ता कार्यक्षेत्र",
+    "ecr": "मासिक रिटर्न (ECR)",
+    "passbook": "मेरी पासबुक",
+    "security": "सुरक्षा गतिविधि",
+    "primary": "मुख्य नेविगेशन",
+    "footer": "पादलेख नेविगेशन",
+    "breadcrumb": "पृष्ठ पथ"
+  },
+  "passbook": {
+    "eyebrow": "सदस्य सेवाएँ · अंशदान",
+    "title": "मेरी पासबुक",
+    "description": "अपने जुड़े हुए कृत्रिम खातों में जमा अंशदान देखें।",
+    "loading": "पासबुक लोड हो रही है…",
+    "summary": "पासबुक सारांश",
+    "totalBalance": "कुल शेष राशि",
+    "contributions": "अंशदान",
+    "lastMonth": "अंतिम जमा माह",
+    "pendingTitle": "नियोक्ता द्वारा दाखिल — भुगतान की प्रतीक्षा",
+    "pendingDescription": "ये फाइलिंग अभी जमा नहीं हुई हैं। नियोक्ता के भुगतान की पुष्टि होने पर राशि दिखाई देगी।",
+    "empty": "अभी कोई अंशदान जमा नहीं हुआ है।",
+    "emptyDescription": "भुगतान की पुष्टि के बाद जमा अंशदान यहाँ दिखाई देगा।",
+    "account": "जुड़ा खाता",
+    "wageMonth": "वेतन माह",
+    "establishment": "प्रतिष्ठान",
+    "employeeShare": "कर्मचारी अंश",
+    "employerShare": "नियोक्ता अंश",
+    "runningBalance": "चल शेष",
+    "trrn": "TRRN"
   }
 }

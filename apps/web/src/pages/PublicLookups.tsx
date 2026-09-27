@@ -1,7 +1,7 @@
 import { FormEvent, useState } from "react";
-import { Link } from "react-router-dom";
 
 import { api, command, Envelope } from "../api/client";
+import { PageHeader } from "../components/PageHeader";
 import { ProblemMessage } from "../components/ProblemMessage";
 
 type SearchMode = "any" | "name" | "code" | "registration" | "pincode" | "industry";
@@ -132,12 +132,9 @@ export function PublicLookups() {
   const activeMode = SEARCH_MODES.find((item) => item.value === mode)!;
 
   return <div className="stack public-lookups">
-    <p><Link to="/">← All interfaces</Link></p>
-    <header className="workspace-head public-hero">
-      <div><p className="eyebrow">Public register · synthetic POC</p><h1>Find an establishment</h1>
-        <p className="muted">Search by name, EPF code, registration number, pincode or industry. Open a result to see its public demo profile.</p></div>
-      <span className="state-pill">Seeded demo records</span>
-    </header>
+    <PageHeader eyebrow="Public register · synthetic POC" title="Find an establishment"
+      description="Search by name, EPF code, registration number, pincode or industry. Open a result to see its public demo profile."
+      current="Public services"><span className="state-pill">Seeded demo records</span></PageHeader>
 
     <section className="card stack" aria-labelledby="establishment-search">
       <div className="section-heading"><div><p className="eyebrow">01 / Directory</p><h2 id="establishment-search">Establishment search</h2></div><span className="muted small">20 per page · first 5 pages</span></div>

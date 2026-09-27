@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
 
 import { api, Envelope, getSession } from "../api/client";
+import { PageHeader } from "../components/PageHeader";
 import { ProblemMessage } from "../components/ProblemMessage";
 
 type ActivityEvent = {
@@ -42,11 +42,11 @@ export function SecurityActivity() {
     && (!routeFilter || item.route === routeFilter)) || [];
 
   return <div className="stack security-workspace">
-    <p><Link to="/">← All interfaces</Link></p>
-    <header className="workspace-head"><div><p className="eyebrow">Interface 17 · security analyst</p><h1>Request activity</h1>
-      <p className="muted">Recent gateway traffic, rates and challenge decisions for the synthetic demonstration.</p></div>
+    <PageHeader eyebrow="Interface 17 · security analyst" title="Request activity"
+      description="Recent gateway traffic, rates and challenge decisions for the synthetic demonstration."
+      current="Security activity">
       {authorised && <button type="button" onClick={() => void activity.refetch()} disabled={activity.isFetching}>Refresh now</button>}
-    </header>
+    </PageHeader>
     {session.isLoading && <p>Checking access…</p>}
     {!session.isLoading && !authorised && <div className="card"><h2>Security role required</h2><p>Switch to the security analyst demo persona to view gateway activity.</p></div>}
     {authorised && <>
@@ -69,13 +69,13 @@ export function SecurityActivity() {
           <div className="form-row"><label>Route<select value={routeFilter} onChange={(event) => setRouteFilter(event.target.value)}><option value="">All routes</option>
             {[...new Set(data.events.map((item) => item.route))].sort().map((route) => <option key={route} value={route}>{route}</option>)}</select></label>
             <label className="check-row"><input type="checkbox" checked={blockedOnly} onChange={(event) => setBlockedOnly(event.target.checked)} />Blocked only (403 / 429)</label></div>
-          <div className="table-scroll"><table><thead><tr><th>When</th><th>Request</th><th>Who</th><th>Gateway peer</th><th>Result</th><th>Request shape</th></tr></thead>
+          <div className="table-scroll"><table><thead><tr><th>When</th><th>Request</th><th>Who</th><th>Gateway peer</th><th className="numeric">Result</th><th>Request shape</th></tr></thead>
             <tbody>{visible.map((item) => <tr key={item.correlation_id}>
               <td><time dateTime={item.at}>{new Date(item.at).toLocaleTimeString()}</time><br /><small>{item.duration_ms} ms</small></td>
               <td><strong>{item.method}</strong> <code>{item.route}</code></td>
               <td>{item.stakeholder}<br /><code className="small">{item.actor}</code></td>
               <td><code>{item.peer_ip}</code></td>
-              <td><span className={item.status >= 400 ? "status-alert" : "status-good"}>{item.status}</span><br /><small>{item.rate_decision}{item.challenge_decision ? ` · proof ${item.challenge_decision}` : ""}</small></td>
+              <td className="numeric"><span className={item.status >= 400 ? "status-alert" : "status-good"}>{item.status}</span><br /><small>{item.rate_decision}{item.challenge_decision ? ` · proof ${item.challenge_decision}` : ""}</small></td>
               <td><span className="small">{activitySummary(item)}</span>
                 {item.search_mode && <div className="small">Mode: {item.search_mode}</div>}
                 {item.lookup_fingerprint && <div className="small">Lookup fingerprint: <code>{item.lookup_fingerprint}</code></div>}

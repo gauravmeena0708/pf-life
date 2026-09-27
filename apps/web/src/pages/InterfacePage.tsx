@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 import { getMyPermissions, getSession, type Grant } from "../api/client";
+import { PageHeader } from "../components/PageHeader";
 import { ProblemMessage } from "../components/ProblemMessage";
 import { StatusBadge } from "../components/StatusBadge";
 import { INTERFACES } from "../data/interfaces";
@@ -25,12 +26,9 @@ export function InterfacePage() {
   const grants = perms.data?.data.endpoints ?? [];
   return (
     <section aria-labelledby="interface-heading">
-      <p>
-        <Link to="/">← {t("interface.back")}</Link>
-      </p>
-      <h1 id="interface-heading">
-        {def.id}. {def.name} <StatusBadge status={def.coverage} />
-      </h1>
+      <PageHeader id="interface-heading" eyebrow={t("interface.eyebrow", { number: def.id })}
+        title={def.name} description={t("interface.description")}
+        current={def.name}><StatusBadge status={def.coverage} /></PageHeader>
       <p className="muted">
         {t("interface.stakeholders")}: {def.stakeholders.map((s) => <code key={s}>{s} </code>)}
       </p>

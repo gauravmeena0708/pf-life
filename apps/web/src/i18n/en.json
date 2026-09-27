@@ -9,14 +9,48 @@
     "none": "Not logged in",
     "choose": "Switch to persona",
     "password": "Password for every persona (demo only):",
-    "logout": "Log out"
+    "logout": "Log out",
+    "account": "{{label}} · {{role}}",
+    "signIn": "Sign in (demo)"
   },
   "home": {
-    "heading": "Interfaces",
-    "intro": "All 21 interfaces of the platform. Status shows what works in this proof of concept: Working, Mock (simulated outside system) or Planned (contract only).",
+    "heading": "Provident fund services, demonstrated",
+    "intro": "Explore the synthetic services and role workspaces available in this proof of concept.",
     "employerWorkspace": "Employer workspace",
     "publicLookups": "Public lookups",
-    "securityActivity": "Security activity"
+    "securityActivity": "Security activity",
+    "eyebrow": "Services and workspaces",
+    "heroEyebrow": "Welcome to the demonstration portal",
+    "heroTitle": "A clear view of provident fund journeys",
+    "heroDescription": "Search public records, follow an employer filing, or review a member passbook using seeded demo data. Sign in with a demo persona to explore a role workspace.",
+    "signIn": "Sign in with a demo persona",
+    "servicesEyebrow": "Explore the portal",
+    "servicesTitle": "Services by need",
+    "explore": "Explore service",
+    "directoryTitle": "All 20+ interfaces and their build status",
+    "directoryDescription": "Coverage indicates Working, Mock (simulated integration), or Planned (contract only).",
+    "services": {
+      "employer": {
+        "title": "Employer",
+        "description": "Manage establishment access and prepare monthly returns."
+      },
+      "member": {
+        "title": "Member",
+        "description": "Review credited contributions in a demo passbook."
+      },
+      "public": {
+        "title": "Public lookups",
+        "description": "Search the public establishment register and check a TRRN."
+      },
+      "office": {
+        "title": "Field office",
+        "description": "Explore office roles and the interfaces available to them."
+      },
+      "security": {
+        "title": "Security",
+        "description": "Inspect the security interface and gateway activity."
+      }
+    }
   },
   "interface": {
     "unknown": "Unknown interface.",
@@ -25,6 +59,45 @@
     "login": "Choose a persona to see the endpoints that role may call.",
     "yourEndpoints": "Endpoints your role ({{role}}) may call",
     "none": "This role has no endpoints in this interface.",
-    "stepUp": "needs step-up confirmation"
+    "stepUp": "needs step-up confirmation",
+    "eyebrow": "Interface {{number}} · build status",
+    "description": "Review stakeholder coverage and the endpoint status for this synthetic interface."
+  },
+  "portal": {
+    "subtitle": "Synthetic demonstration portal",
+    "disclaimer": "Synthetic demonstration — not an official EPFO system. No real personal data.",
+    "built": "Built as an API-first proof of concept"
+  },
+  "navigation": {
+    "home": "Home",
+    "public": "Public services",
+    "employer": "Employer workspace",
+    "ecr": "Monthly returns (ECR)",
+    "passbook": "My passbook",
+    "security": "Security activity",
+    "primary": "Primary navigation",
+    "footer": "Footer navigation",
+    "breadcrumb": "Breadcrumb"
+  },
+  "passbook": {
+    "eyebrow": "Member services · contributions",
+    "title": "My passbook",
+    "description": "View credited contributions across your linked synthetic accounts.",
+    "loading": "Loading passbook…",
+    "summary": "Passbook summary",
+    "totalBalance": "Total balance",
+    "contributions": "Contributions",
+    "lastMonth": "Last credited month",
+    "pendingTitle": "Filed by employer — awaiting payment",
+    "pendingDescription": "These filings are not credited yet. The amount will appear once the employer’s payment is confirmed.",
+    "empty": "No contributions credited yet.",
+    "emptyDescription": "Credited contributions will appear here after payment confirmation.",
+    "account": "Linked account",
+    "wageMonth": "Wage month",
+    "establishment": "Establishment",
+    "employeeShare": "Employee share",
+    "employerShare": "Employer share",
+    "runningBalance": "Running balance",
+    "trrn": "TRRN"
   }
 }

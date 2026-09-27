@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { api, command, type Envelope } from "../../api/client";
+import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
@@ -104,15 +105,17 @@ export function EmployerHome() {
       `${g.username} was revoked. Their next request is denied, even in an open browser session.`);
   }
 
-  if (est.isLoading) return <p>Loading…</p>;
-  if (est.error) return <ProblemMessage error={est.error} />;
+  if (est.isLoading || est.error) return <div className="stack">
+    <PageHeader eyebrow="Employer services · workspace" title="Employer workspace"
+      description="Manage your synthetic establishment and role permissions." current="Employer workspace" />
+    {est.isLoading ? <p role="status">Loading…</p> : <ProblemMessage error={est.error} />}
+  </div>;
   const e = est.data!.data;
   return (
     <section aria-labelledby="emp-heading" className="stack">
-      <h1 id="emp-heading">{e.legal_name}</h1>
-      <p className="muted">
-        {e.establishment_id} · {e.registration_number} · office {e.office_id} · status <strong>{e.status}</strong>
-      </p>
+      <PageHeader id="emp-heading" eyebrow="Employer services · workspace" title={e.legal_name}
+        description={`${e.establishment_id} · ${e.registration_number} · office ${e.office_id} · status ${e.status}`}
+        current="Employer workspace" />
       <p>Your permissions: {perms.length ? perms.map((p) => <code key={p}>{p} </code>) : "none"}</p>
       {notice ? <p role="status" className="ok">{notice}</p> : null}
       <ProblemMessage error={error} />

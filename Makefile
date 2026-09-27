@@ -1,5 +1,6 @@
 # EPFO POC — SYNTHETIC DEMONSTRATION, NOT AN OFFICIAL EPFO SYSTEM.
 COMPOSE := docker compose
+export PYTHONPATH := $(CURDIR)/packages/common-auth-client:$(CURDIR)/packages/common-observability:$(CURDIR)/packages/common-persistence
 SERVICES := employer-service member-service contribution-service claim-service payment-simulator workflow-service \
             grievance-service audit-service reporting-service intelligence-service pension-service platform-service mock-integrations
 
