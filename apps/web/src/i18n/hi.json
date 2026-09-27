@@ -88,7 +88,8 @@
     "audit": "लेखा-परीक्षा लॉग",
     "riskSignals": "जोखिम संकेत",
     "assistant": "सहायक से पूछें",
-    "dashboards": "डैशबोर्ड"
+    "dashboards": "डैशबोर्ड",
+    "policy": "नियम और सीमाएँ"
   },
   "passbook": {
     "eyebrow": "सदस्य सेवाएँ · अंशदान",

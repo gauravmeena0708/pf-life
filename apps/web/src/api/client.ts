@@ -91,3 +91,14 @@ export function rupees(paise: number | null | undefined): string {
 export function newIdempotencyKey(): string {
   return crypto.randomUUID();
 }
+
+/** The rule set in force today (public figures). Screens derive samples and choices from it, never from constants. */
+export interface CurrentPolicy {
+  rule_version: string;
+  effective_from: string;
+  contribution: { epf_employee_rate_bp: number; eps_rate_bp: number; eps_wage_ceiling_paise: number; edli_wage_ceiling_paise: number };
+  claim_types: Record<string, { form_type: string; label: string; plain_rule: string }>;
+  grievance_categories: string[];
+  scheduled: { rule_version: string; effective_from: string }[];
+}
+export const getCurrentPolicy = () => api<Envelope<CurrentPolicy>>("/api/v1/public/policy/current");

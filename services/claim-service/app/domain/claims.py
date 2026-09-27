@@ -2,15 +2,10 @@
 
 Everything here is deterministic and reads only the frozen rule set passed in, so a decision can be
 reproduced from the stored evaluation snapshot."""
-import os
 from datetime import date
-from functools import lru_cache
-from pathlib import Path
 from typing import Any
 
-import yaml
-
-RULES_PATH = Path(os.getenv("RULES_FILE", "/srv/demo-rules.yaml"))
+from epfo_persistence.policy import approval_chain as chain_for, auto_settle_limit
 
 OPEN_STATES = {"AWAITING_CONFIRMATION", "SUBMITTED", "UNDER_REVIEW", "RECOMMENDED", "AWAITING_NEXT_APPROVAL",
                "APPROVED", "AUTO_APPROVED", "PAYMENT_PENDING", "PAYMENT_RETURNED"}
@@ -36,13 +31,6 @@ NEXT_STEP = {
 }
 
 
-@lru_cache(maxsize=1)
-def ruleset() -> dict[str, Any]:
-    path = RULES_PATH if RULES_PATH.exists() else Path(__file__).resolve().parents[4] / "config" / "demo-rules.yaml"
-    with path.open() as f:
-        return yaml.safe_load(f)
-
-
 def rupees(paise: int) -> str:
     """₹ with Indian digit grouping, e.g. 60000000 → ₹6,00,000."""
     whole, frac = divmod(paise, 100)
@@ -61,51 +49,64 @@ def months_between(start: date, end: date) -> int:
     return (end.year - start.year) * 12 + end.month - start.month - (end.day < start.day)
 
 
-def eligibility(account: dict[str, Any], claim_type: str, rules: dict[str, Any], today: date) -> dict[str, Any]:
-    """Whether this account may claim this type today, the maximum amount, and why."""
+def eligibility(account: dict[str, Any], claim_type: str, rules: dict[str, Any], today: date,
+                previous_claims: list[date] | None = None) -> dict[str, Any]:
+    """Whether this account may claim this type today, the maximum amount, and why — using only the
+    conditions the rule set declares for the type (see config/demo-rules.yaml)."""
     spec = rules["claims"]["types"][claim_type]
     employee, employer = int(account["employee_paise"]), int(account["employer_paise"])
     reasons: list[str] = []
     exited = account.get("date_of_exit")
+    joined = account.get("date_of_joining")
+    if spec.get("retired"):
+        reasons.append("This claim type is no longer offered.")
     if spec.get("requires_active_employment") and exited:
         reasons.append("This advance is only for members who are still employed.")
-    if "requires_exit_months" in spec:
+    if spec.get("requires_exit_months") is not None:
         if not exited:
-            reasons.append("Final settlement is available only after you leave employment.")
+            reasons.append("This claim is available only after you leave employment.")
         elif months_between(exited, today) < spec["requires_exit_months"]:
-            reasons.append(f"Final settlement is available {spec['requires_exit_months']} months after leaving employment.")
+            reasons.append(f"This claim is available {spec['requires_exit_months']} months after leaving employment.")
+    if spec.get("min_service_months") and joined and months_between(joined, exited or today) < spec["min_service_months"]:
+        reasons.append(f"You need at least {spec['min_service_months'] // 12} years "
+                       f"{'and ' + str(spec['min_service_months'] % 12) + ' months ' if spec['min_service_months'] % 12 else ''}of service.")
+    if spec.get("once_every_months") and any(months_between(d, today) < spec["once_every_months"] for d in previous_claims or []):
+        reasons.append(f"This claim can be made once every {spec['once_every_months']} months.")
     base = employee if spec["max_from"] == "employee_share" else employee + employer
-    maximum = min(base, spec["cap_paise"]) if spec.get("cap_paise") else base
+    maximum = base * spec.get("max_pct_bp", 10000) // 10000
+    if spec.get("cap_paise"):
+        maximum = min(maximum, spec["cap_paise"])
     if maximum <= 0:
         reasons.append("There is no balance available for this claim yet.")
     return {
         "claim_type": claim_type, "form_type": spec["form_type"], "label": spec["label"], "plain_rule": spec["plain_rule"],
         "eligible": not reasons, "max_amount_paise": maximum if not reasons else 0, "reasons": reasons,
         "trace": {"employee_paise": employee, "employer_paise": employer, "max_from": spec["max_from"],
-                  "cap_paise": spec.get("cap_paise"), "date_of_exit": exited.isoformat() if exited else None,
-                  "evaluated_on": today.isoformat(), "rule_version": rules["rule_version"]},
+                  "max_pct_bp": spec.get("max_pct_bp", 10000), "cap_paise": spec.get("cap_paise"),
+                  "date_of_exit": exited.isoformat() if exited else None, "evaluated_on": today.isoformat(),
+                  "rule_version": rules["rule_version"]},
     }
 
 
-def approval_chain(amount_paise: int, rules: dict[str, Any]) -> list[str]:
-    for band in rules["claims"]["approval_bands"]:
-        if band["upto_paise"] is None or amount_paise <= band["upto_paise"]:
-            return list(band["chain"])
-    raise ValueError("no approval band")
+def approval_chain(amount_paise: int, rules: dict[str, Any], claim_type: str) -> list[str]:
+    return chain_for(rules, claim_type, amount_paise)
 
 
-def route(amount_paise: int, rules: dict[str, Any]) -> str:
-    return "AUTO" if amount_paise <= rules["claims"]["auto_settlement_limit_paise"] else "REVIEW"
+def route(amount_paise: int, rules: dict[str, Any], claim_type: str) -> str:
+    limit = auto_settle_limit(rules, claim_type)
+    return "AUTO" if limit is not None and amount_paise <= limit else "REVIEW"
 
 
 def summary(evaluation: dict[str, Any], amount_paise: int, rules: dict[str, Any]) -> str:
-    chain = approval_chain(amount_paise, rules)
-    if route(amount_paise, rules) == "AUTO":
+    claim_type = evaluation["claim_type"]
+    chain = approval_chain(amount_paise, rules, claim_type)
+    limit = auto_settle_limit(rules, claim_type)
+    if route(amount_paise, rules, claim_type) == "AUTO":
         path = "It is within the automatic settlement limit, so it can be approved without an officer."
     else:
-        path = ("It is above the automatic settlement limit of "
-                f"{rupees(rules['claims']['auto_settlement_limit_paise'])}, so it will be reviewed by: "
-                + " → ".join(ROLE_LABELS[r] for r in chain) + ".")
+        why = (f"It is above the automatic settlement limit of {rupees(limit)}" if limit is not None
+               else "This type of claim is always decided by officers")
+        path = f"{why}, so it will be reviewed by: " + " → ".join(ROLE_LABELS[r] for r in chain) + "."
     return (f"You are claiming {rupees(amount_paise)} as '{evaluation['label']}' (Form {evaluation['form_type']}). "
             f"Rule: {evaluation['plain_rule']} Your maximum today is {rupees(evaluation['max_amount_paise'])}. "
             f"{path} The money will be paid to the bank account linked to your UAN. "

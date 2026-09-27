@@ -35,5 +35,4 @@ export interface GrievanceRow {
   created_at: string | null;
 }
 
-export const CATEGORIES = ["CLAIM_DELAY", "CLAIM_REJECTION", "PASSBOOK", "KYC", "EMPLOYER", "OTHER"] as const;
 export const OPEN_STATES = ["REGISTERED", "ROUTED", "IN_PROGRESS", "ESCALATED", "REOPEN_REQUESTED"];

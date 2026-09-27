@@ -20,12 +20,11 @@ from app.infra.tables import complainants, grievance_documents, grievance_entrie
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit
+from epfo_persistence.policy import rules_on
 
 router = APIRouter()
 PRODUCER = "grievance-service"
-SLA_DAYS = {"RO": 15, "ZO": 10, "HO": 7}          # illustrative service standards per tier
-REOPEN_WINDOW_DAYS = 30
-CATEGORIES = {"CLAIM_DELAY", "CLAIM_REJECTION", "PASSBOOK", "KYC", "EMPLOYER", "OTHER"}
+# Categories, service levels per tier and the reopen window come from the rule set in force (Policy administration).
 NEXT_TIER = {"RO": "ZO", "ZO": "HO"}
 NEXT_TIER_REVERSE = {v: k for k, v in NEXT_TIER.items()}
 DOCUMENT_TYPES = {"application/pdf", "image/png", "image/jpeg", "text/plain"}
@@ -153,17 +152,22 @@ async def view(session: AsyncSession, g: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def sla(tier: str) -> datetime:
-    return datetime.now(UTC) + timedelta(days=SLA_DAYS[tier])
+async def settings(session: AsyncSession) -> dict[str, Any]:
+    return (await rules_on(session, datetime.now(UTC).date()))["grievances"]
+
+
+async def sla(session: AsyncSession, tier: str) -> datetime:
+    return datetime.now(UTC) + timedelta(days=(await settings(session))["sla_days"][tier])
 
 
 # ── member ──────────────────────────────────────────────────────────────────────────────────────
 
 @router.post("/api/v1/members/me/grievances", status_code=201)
 async def register(body: GrievanceInput, actor: Actor = Depends(MEMBER), session: AsyncSession = Depends(db)) -> dict:
-    if body.category not in CATEGORIES:
-        raise Problem(422, "/problems/validation", "Unknown category", "Choose one of: " + ", ".join(sorted(CATEGORIES)))
     async with session.begin():
+        categories = (await settings(session))["categories"]
+        if body.category not in categories:
+            raise Problem(422, "/problems/validation", "Unknown category", "Choose one of: " + ", ".join(categories))
         home = (await session.execute(select(complainants).where(complainants.c.subject == actor.subject))).mappings().first()
         if not home:
             raise Problem(422, "/problems/no-home-office", "We could not find your regional office",
@@ -172,7 +176,7 @@ async def register(body: GrievanceInput, actor: Actor = Depends(MEMBER), session
         await session.execute(insert(grievances).values(
             grievance_id=gid, complainant_subject=actor.subject, category=body.category, subject_line=body.subject,
             description=body.description, linked_claim_id=body.linked_claim_id, office_id=home["office_id"],
-            zone_id=home["zone_id"], tier="RO", state="REGISTERED", version=1, sla_due_at=sla("RO")))
+            zone_id=home["zone_id"], tier="RO", state="REGISTERED", version=1, sla_due_at=await sla(session, "RO")))
         g = dict((await session.execute(select(grievances).where(grievances.c.grievance_id == gid))).mappings().one())
         await entry(session, g, "STATUS", "member", "Grievance registered.", state="REGISTERED")
         await add_event(session, producer=PRODUCER, event_type="GrievanceRegistered.v1", aggregate_type="grievance",
@@ -275,7 +279,7 @@ async def escalate(grievance_id: str, body: EscalationInput,
         if not to_tier:
             raise Problem(409, "/problems/top-tier", "Head Office is the top tier", "This grievance cannot go higher.")
         g = await move(session, g, "ESCALATED", actor.stakeholder, f"Escalated from {g['tier']} to {to_tier}: {body.reason}",
-                       tier=to_tier, sla_due_at=sla(to_tier))
+                       tier=to_tier, sla_due_at=await sla(session, to_tier))
         await add_event(session, producer=PRODUCER, event_type="GrievanceEscalated.v1", aggregate_type="grievance",
                         aggregate_id=grievance_id, correlation_id=actor.correlation_id, payload={
                             "grievance_id": grievance_id, "from_tier": NEXT_TIER_REVERSE[to_tier], "to_tier": to_tier,
@@ -320,10 +324,11 @@ async def reopen(grievance_id: str, body: ReopenInput, actor: Actor = Depends(ME
         if g["state"] != "RESOLVED":
             raise Problem(409, "/problems/invalid-state", "Only a resolved grievance can be reopened")
         resolved = g["resolved_at"] if g["resolved_at"].tzinfo else g["resolved_at"].replace(tzinfo=UTC)
-        if datetime.now(UTC) > resolved + timedelta(days=REOPEN_WINDOW_DAYS):
+        window = (await settings(session))["reopen_window_days"]
+        if datetime.now(UTC) > resolved + timedelta(days=window):
             raise Problem(409, "/problems/reopen-window-closed", "The reopen window has passed",
-                          f"A grievance can be reopened within {REOPEN_WINDOW_DAYS} days; please file a new one.")
-        g = await move(session, g, "REOPEN_REQUESTED", "member", f"Reopen requested: {body.reason}", sla_due_at=sla(g["tier"]))
+                          f"A grievance can be reopened within {window} days; please file a new one.")
+        g = await move(session, g, "REOPEN_REQUESTED", "member", f"Reopen requested: {body.reason}", sla_due_at=await sla(session, g["tier"]))
         result = await view(session, g)
     return envelope(result)
 

@@ -2,14 +2,10 @@
 from __future__ import annotations
 
 import json
-import os
 import uuid
 from datetime import UTC, date, datetime
-from functools import lru_cache
-from pathlib import Path
 from typing import Any
 
-import yaml
 from fastapi import APIRouter, Depends, Header, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
@@ -20,16 +16,13 @@ from app.infra.db import sessions
 from epfo_auth import Actor, require_actor, require_grant, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit, find_response, request_hash, store_response
+from epfo_persistence.policy import rules_on
 
 router = APIRouter()
-RULES_PATH = Path(os.getenv("RULES_FILE", "/srv/demo-rules.yaml"))
 
 
-@lru_cache(maxsize=1)
-def ruleset() -> dict[str, Any]:
-    path = RULES_PATH if RULES_PATH.exists() else Path(__file__).resolve().parents[4] / "config" / "demo-rules.yaml"
-    with path.open() as f:
-        return yaml.safe_load(f)
+def wage_month_start(wage_month: str) -> date:
+    return date.fromisoformat(wage_month + "-01")
 
 
 class FilingInput(BaseModel):
@@ -86,10 +79,13 @@ async def _validation(session, filing: dict[str, Any]):
     if prior:
         old = prior["validation_report"] if isinstance(prior["validation_report"], dict) else json.loads(prior["validation_report"])
         comparison = {"wage_month":prior["wage_month"],"members_then":old["summary"]["rows"],"total_then_paise":old["summary"]["totals_paise"]["TOTAL"],"total_now_paise":0}
-    report = validate(filing["content"], filing["format"], filing["wage_month"], members, ruleset(), comparison)
+    # A return is checked against the rules in force on the first day of its wage month; until it is
+    # submitted, re-validating picks up a newly published version for that month.
+    rules = await rules_on(session, wage_month_start(filing["wage_month"]))
+    report = validate(filing["content"], filing["format"], filing["wage_month"], members, rules, comparison)
     report.update({"filing_id": filing["id"], "version": filing["version"],
                    "state": "VALIDATED" if report["valid"] else "VALIDATION_FAILED",
-                   "rule_version": filing["rule_version"]})
+                   "rule_version": rules["rule_version"]})
     return report
 
 
@@ -111,13 +107,13 @@ async def _create(body: FilingInput, actor: Actor):
             if old["state"] in ("DRAFT", "VALIDATION_FAILED", "VALIDATED"):
                 await session.execute(text("UPDATE ecr_filings SET state='SUPERSEDED' WHERE id=:id"), {"id": old["id"]})
         ver = (max((x["version"] for x in prior_rows), default=0) + 1)
-        fid = str(uuid.uuid4()); rv = ruleset()["rule_version"]
+        fid = str(uuid.uuid4()); rv = (await rules_on(session, wage_month_start(body.wage_month)))["rule_version"]
         await session.execute(text("INSERT INTO ecr_filings (id, establishment_id, wage_month, filing_type, format, content, version, state, preparer_subject, rule_version) VALUES (:id,:e,:m,:t,:f,:c,:v,'DRAFT',:p,:r)"),
                               {"id": fid, "e": eid, "m": body.wage_month, "t": body.type, "f": body.format, "c": body.content, "v": ver, "p": actor.subject, "r": rv})
         filing = await _fetch_filing(session, fid, eid)
         report = await _validation(session, filing)
         state = report["state"]
-        await session.execute(text("UPDATE ecr_filings SET state=:s, validation_report=:r WHERE id=:id"), {"s": state, "r": json.dumps(report, default=str), "id": fid})
+        await session.execute(text("UPDATE ecr_filings SET state=:s, validation_report=:r, rule_version=:v WHERE id=:id"), {"s": state, "r": json.dumps(report, default=str), "v": report["rule_version"], "id": fid})
         if report["valid"]:
             await add_event(session, producer="contribution-service", event_type="ECRValidated.v1", aggregate_type="ecr_filing", aggregate_id=fid,
                             payload={"filing_id":fid,"establishment_id":eid,"wage_month":body.wage_month,"member_count":report["summary"]["rows"]}, correlation_id=actor.correlation_id)
@@ -148,7 +144,7 @@ async def validate_filing(filingId: str, actor: Actor = Depends(EMPLOYER)):
         if f["state"] not in ("DRAFT", "VALIDATION_FAILED", "VALIDATED"):
             raise Problem(409, "/problems/invalid-state", "This filing can no longer be validated")
         report = await _validation(session, f)
-        await session.execute(text("UPDATE ecr_filings SET state=:s, validation_report=:r WHERE id=:id"), {"s": report["state"], "r": json.dumps(report, default=str), "id": filingId})
+        await session.execute(text("UPDATE ecr_filings SET state=:s, validation_report=:r, rule_version=:v WHERE id=:id"), {"s": report["state"], "r": json.dumps(report, default=str), "v": report["rule_version"], "id": filingId})
         if report["valid"]:
             await add_event(session, producer="contribution-service", event_type="ECRValidated.v1", aggregate_type="ecr_filing", aggregate_id=filingId,
                             payload={"filing_id": filingId, "establishment_id": eid, "wage_month": f["wage_month"], "member_count": report["summary"]["rows"]}, correlation_id=actor.correlation_id)
@@ -258,10 +254,10 @@ async def challan_receipt(trrn: str, actor: Actor = Depends(EMPLOYER)):
 
 @router.post("/api/v1/public/demo-calculations/epf")
 async def calculate(body: CalculatorInput, actor: Actor = Depends(require_actor)):  # anonymous callers still pass the gateway
-    rs = ruleset()
-    out = split(body.epf_wages_paise, body.eps_wages_paise, body.age_years, rs)
     calc_id = str(uuid.uuid4())
     async with sessions()() as session, session.begin():
+        rs = await rules_on(session, date.today())
+        out = split(body.epf_wages_paise, body.eps_wages_paise, body.age_years, rs)
         await session.execute(text("INSERT INTO demo_calculations (id,epf_wages_paise,eps_wages_paise,age_years,rule_version,result) VALUES (:id,:epf,:eps,:age,:rv,:result)"),
                               {"id":calc_id,"epf":body.epf_wages_paise,"eps":body.eps_wages_paise,"age":body.age_years,"rv":rs["rule_version"],"result":json.dumps(out)})
     return envelope({**out, "calculation_id":calc_id, "rule_version": rs["rule_version"], "label": "ILLUSTRATIVE_ONLY"})

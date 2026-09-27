@@ -28,6 +28,8 @@ def ctx(tmp_path, monkeypatch):
         async with db.engine().begin() as c:
             await c.run_sync(Base.metadata.create_all)
             await c.run_sync(metadata.create_all)
+            from epfo_persistence.policy import policy_metadata
+            await c.run_sync(policy_metadata.create_all)
     asyncio.run(setup())
     import epfo_auth
     from fastapi.testclient import TestClient

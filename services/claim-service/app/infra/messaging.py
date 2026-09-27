@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.routes import load_claim, notify, record_decision, transition
 from app.infra.tables import accounts, claims, risk_flags
 from epfo_observability import Problem, get_logger
+from epfo_persistence.policy import on_policy_published
 
 log = get_logger("claim-service")
 
@@ -21,6 +22,7 @@ BINDINGS = [
     "intelligence-service.RiskSignalReviewed.v1",
     "member-service.AccountFrozen.v1",
     "member-service.AccountDefrozen.v1",
+    "platform-service.PolicyPublished.v1",
 ]
 
 
@@ -114,6 +116,7 @@ async def on_freeze(session: AsyncSession, event: dict[str, Any]) -> None:
 
 
 HANDLERS = {
+    "PolicyPublished.v1": on_policy_published,
     "AccountFrozen.v1": on_freeze,
     "AccountDefrozen.v1": on_freeze,
     "RiskSignalRaised.v1": on_risk_signal,

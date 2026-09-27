@@ -19,6 +19,8 @@ import { GrievancesPage } from "./features/grievance/GrievancesPage";
 import { SecurityPage } from "./features/member/SecurityPage";
 import { AssistantPage } from "./features/ai/AssistantPage";
 import { AuditLogPage } from "./features/oversight/AuditLogPage";
+import { PolicyListPage } from "./features/policy/PolicyListPage";
+import { PolicyVersionPage } from "./features/policy/PolicyVersionPage";
 import { DashboardsPage } from "./features/oversight/DashboardsPage";
 import { GrievanceMetricsPage } from "./features/oversight/GrievanceMetricsPage";
 import { RiskSignalsPage } from "./features/oversight/RiskSignalsPage";
@@ -65,6 +67,7 @@ export function App() {
         {role?.startsWith("fo.") || role === "zo.acc" || role === "zo.rpfc1" ? <NavLink to="/office/work-queue">{t("navigation.workQueue")}</NavLink> : null}
         {role === "zo.acc" || role === "ho.cpfc" ? <NavLink to="/monitoring/grievances">{t("navigation.grievanceMetrics")}</NavLink> : null}
         {["zo.acc", "ho.cpfc", "gov.mole", "fo.oic"].includes(role ?? "") ? <NavLink to="/dashboards">{t("navigation.dashboards")}</NavLink> : null}
+        {["ho.acc_hq", "ho.cpfc", "ho.pension", "ho.audit"].includes(role ?? "") ? <NavLink to="/policy">{t("navigation.policy")}</NavLink> : null}
         {role === "ho.security" ? <><NavLink to="/security/activity">{t("navigation.security")}</NavLink><NavLink to="/security/sessions">{t("navigation.sessions")}</NavLink><NavLink to="/audit/log">{t("navigation.audit")}</NavLink></> : null}
         {role === "ho.caiu" ? <NavLink to="/caiu/signals">{t("navigation.riskSignals")}</NavLink> : null}
         {role === "ho.audit" ? <NavLink to="/audit/log">{t("navigation.audit")}</NavLink> : null}
@@ -94,6 +97,8 @@ export function App() {
             <Route path="/audit/log" element={<AuditLogPage />} />
             <Route path="/monitoring/grievances" element={<GrievanceMetricsPage />} />
             <Route path="/dashboards" element={<DashboardsPage />} />
+            <Route path="/policy" element={<PolicyListPage />} />
+            <Route path="/policy/:versionId" element={<PolicyVersionPage />} />
           </Routes>
         </main>
       </div>

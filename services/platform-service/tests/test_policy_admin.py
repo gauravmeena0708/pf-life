@@ -151,3 +151,15 @@ def test_backdating_and_editing_rules(ctx):
     r = client.put(url, json={"change_note": "Ceiling raised to ₹25,000 (corrected)"}, headers=drafter(**{"If-Match": "1"}))
     assert r.status_code == 200 and r.json()["data"]["version"] == 2
     assert client.get("/api/v1/ho/config/rule-sets", headers=hdr("x", "member")).status_code == 403
+
+
+def test_an_earlier_version_cannot_be_published_under_a_scheduled_later_one(ctx):
+    client, _ = ctx
+    later = draft(client, name="demo-rules-2026.5", effective=(datetime.now(UTC).date() + timedelta(days=60)).isoformat()).json()["data"]
+    client.post(f"/api/v1/ho/config/rule-sets/{later['version_id']}/submissions", headers=drafter())
+    step = {"action": "publish-policy", "resource_id": later["version_id"], "resource_version": 2}
+    assert client.post(f"/api/v1/ho/config/rule-sets/{later['version_id']}/decisions", json={"decision": "APPROVE",
+                       "note": "Scheduled ceiling change"}, headers=hdr(APPROVER, "ho.cpfc", step)).status_code == 200
+    earlier = draft(client, name="demo-rules-2026.4", effective=(datetime.now(UTC).date() + timedelta(days=5)).isoformat()).json()["data"]
+    r = client.post(f"/api/v1/ho/config/rule-sets/{earlier['version_id']}/submissions", headers=drafter())
+    assert r.status_code == 409 and r.json()["type"] == "/problems/later-version-scheduled"

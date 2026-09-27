@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState, type FormEvent } from "react";
 
-import { api, command, newIdempotencyKey, rupees, type Envelope } from "../../api/client";
+import { api, getCurrentPolicy, type CurrentPolicy, command, newIdempotencyKey, rupees, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
@@ -54,11 +54,20 @@ interface Challan {
   status: string;
 }
 
-const SAMPLE_CSV = [
-  "UAN,Member Name,Gross Wages,EPF Wages,EPS Wages,EDLI Wages,EPF Contribution (EE share),EPS Contribution,EPF-EPS Difference (ER share),NCP Days,Refund of Advances",
-  "100000000001,ASHA DEMO,20000,15000,15000,15000,1800,1250,550,0,0",
-  "100000000002,BHARAT DEMO,20000,15000,15000,15000,1800,1250,550,0,0",
-].join("\n");
+const HEADER = "UAN,Member Name,Gross Wages,EPF Wages,EPS Wages,EDLI Wages,EPF Contribution (EE share),EPS Contribution,EPF-EPS Difference (ER share),NCP Days,Refund of Advances";
+
+/** A synthetic sample that is correct under the rules in force: ₹20,000 wages, capped at the current ceilings. */
+function sampleCsv(policy: CurrentPolicy | undefined): string {
+  const c = policy?.contribution ?? { epf_employee_rate_bp: 1200, eps_rate_bp: 833, eps_wage_ceiling_paise: 1500000, edli_wage_ceiling_paise: 1500000 };
+  const gross = 20000;
+  const epf = Math.min(gross, c.eps_wage_ceiling_paise / 100);
+  const eps = epf;
+  const edli = Math.min(gross, c.edli_wage_ceiling_paise / 100);
+  const ee = Math.round((epf * c.epf_employee_rate_bp) / 10000);
+  const epsShare = Math.round((eps * c.eps_rate_bp) / 10000);
+  const line = (uan: string, name: string) => [uan, name, gross, epf, eps, edli, ee, epsShare, ee - epsShare, 0, 0].join(",");
+  return [HEADER, line("100000000001", "ASHA DEMO"), line("100000000002", "BHARAT DEMO")].join("\n");
+}
 
 function reportOf(value: Filing["validation_report"]): ValidationReport | null {
   if (!value) return null;
@@ -83,6 +92,7 @@ export function EcrPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [paymentScenario, setPaymentScenario] = useState<"SUCCESS" | "RETURN">("SUCCESS");
 
+  const policy = useQuery({ queryKey: ["current-policy"], queryFn: getCurrentPolicy, retry: false });
   const establishment = useQuery({
     queryKey: ["employer-me"],
     queryFn: () => api<Envelope<Establishment>>("/api/v1/employers/me"),
@@ -239,10 +249,10 @@ export function EcrPage() {
           <label>ECR file <input type="file" accept=".csv,.txt,text/csv,text/plain" onChange={(e) => void loadFile(e.target.files?.[0])} /></label>
           <label>Or paste file content <textarea rows={6} value={content} onChange={(e) => setContent(e.target.value)} spellCheck={false} /></label>
           <div className="actions">
-            <button type="button" onClick={() => { setContent(SAMPLE_CSV); setFormat("CSV"); setWageMonth("2026-08"); }}>Load synthetic sample</button>
+            <button type="button" onClick={() => { setContent(sampleCsv(policy.data?.data)); setFormat("CSV"); setWageMonth("2026-08"); }}>Load synthetic sample</button>
             <button className="primary" type="submit" disabled={busy || !content.trim()}>Create and validate return</button>
           </div>
-          <p className="muted small">The sample uses two synthetic members. The other seeded members appear as warnings, so the operator can review them.</p>
+          <p className="muted small">The sample uses two synthetic members and the ceilings in force ({policy.data ? `rules ${policy.data.data.rule_version}, EPS ceiling ${rupees(policy.data.data.contribution.eps_wage_ceiling_paise)}` : "loading rules"}). The other seeded members appear as warnings, so the operator can review them.</p>
         </form>
       ) : null}
 

@@ -35,6 +35,8 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `caiu-investigator` | CAIU reviewer | D, E |
 | `security-analyst` | Security operations | D |
 | `auditor` | Audit division | C |
+| `ho-policy` | ACC (HQ) — drafts rule changes | Policy |
+| `ho-analyst` | CPFC — approves and publishes rule changes, dashboards | Policy |
 
 ---
 
@@ -116,6 +118,23 @@ simulation; point out that the dialog says exactly what is being authorised (act
 3. **`do-caseworker`, `ro-ss`, `ro-apfc`, `ro-oic`** each verify in turn (the generic process screen, driven
    by `config/processes/member-freeze.yaml`). Out of turn → refused.
 4. **`ro-oic`** de-freezes (only after a *genuine member* finding).
+
+## Policy administration — changing rules without code
+*Tests: `tests/e2e/test_policy_admin.py`, `services/platform-service/tests/test_policy_admin.py`*
+
+1. **`ho-policy` → Rules and limits → Start a change.** Name it, choose *takes effect from* (for example the
+   first of next month) and cite the notification.
+2. Raise the EPS and EDLI wage ceilings from 15000 to 25000 → *Save and check*. Point out: every check is shown
+   in plain words, *What changes* lists exactly two settings, and *Effect, with worked examples* shows that at
+   ₹20,000 wages the employer's EPS goes from ₹1,250 to ₹1,666. *Submit for approval*.
+3. **`ho-analyst` (CPFC)** opens it, approves with a one-time code → *Scheduled*. The drafter cannot approve
+   their own change. A version that would silently undo a scheduled one is refused.
+4. Returns for months before the date are still checked against ₹15,000; from that month, against ₹25,000.
+   Every return and claim records the rule version it used.
+5. Another change, in force today: add a claim type (for example *Advance for building a house*: 3 years of
+   service, 90% of the balance, always decided by officers, its own chain DA → AO → APFC), or retire one, or
+   change the default approval matrix and automatic-settlement limits. Members see it on *My claims*
+   immediately; claims already made keep their rules; the assistant quotes the new figures.
 
 ## What the tests cover
 

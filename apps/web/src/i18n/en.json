@@ -88,7 +88,8 @@
     "audit": "Audit log",
     "riskSignals": "Risk signals",
     "assistant": "Ask the assistant",
-    "dashboards": "Dashboards"
+    "dashboards": "Dashboards",
+    "policy": "Rules and limits"
   },
   "passbook": {
     "eyebrow": "Member services · contributions",

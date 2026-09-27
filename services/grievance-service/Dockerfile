@@ -11,6 +11,7 @@ COPY services/grievance-service/pyproject.toml /srv/pyproject.toml
 COPY services/grievance-service/app /srv/app
 COPY services/grievance-service/migrations /srv/migrations
 COPY services/grievance-service/alembic.ini /srv/alembic.ini
+COPY config/demo-rules.yaml /srv/demo-rules.yaml
 RUN pip install /srv
 COPY scripts/seed /srv/seed
 USER app

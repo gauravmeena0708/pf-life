@@ -111,6 +111,18 @@ async def check_names(session: AsyncSession, rule_version: str, effective_from: 
                       "Decisions already made keep the rules they were made under; choose today or a later date.")
 
 
+async def refuse_if_overridden(session: AsyncSession, row: dict[str, Any]) -> None:
+    """A version already scheduled for a later date was copied from older rules; from its date it would silently
+    undo this change. Refuse, so the drafter prepares one combined version instead."""
+    later = (await session.execute(select(rule_sets.c.rule_version, rule_sets.c.effective_from).where(
+        rule_sets.c.status == "PUBLISHED", rule_sets.c.effective_from > row["effective_from"]))).first()
+    if later:
+        raise Problem(409, "/problems/later-version-scheduled", "A later version is already scheduled",
+                      f"{later[0]} takes effect on {later[1].isoformat()} and does not contain this change, so it would undo it "
+                      "from that date. Put both changes into one version, or choose a date after it.",
+                      scheduled_version=later[0])
+
+
 # ── routes ──────────────────────────────────────────────────────────────────────────────────────
 
 @router.get("/api/v1/ho/config/rule-sets")
@@ -178,6 +190,7 @@ async def submit(version_id: str, actor: Actor = Depends(DRAFTERS), session: Asy
             raise Problem(422, "/problems/policy-checks-failed", "The rule set does not pass its checks",
                           "Fix every item listed in 'problems' before submitting.", problems=problems)
         await check_names(session, row["rule_version"], row["effective_from"], version_id)
+        await refuse_if_overridden(session, row)
         await session.execute(update(rule_sets).where(rule_sets.c.version_id == version_id).values(
             status="SUBMITTED", submitted_by=actor.subject, submitted_at=datetime.now(UTC), version=row["version"] + 1))
         await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="policy.submit",
@@ -211,6 +224,7 @@ async def decide(version_id: str, body: Decision, actor: Actor = Depends(APPROVE
                 rule_sets.c.status == "PUBLISHED", rule_sets.c.effective_from == row["effective_from"]))).scalar_one_or_none()
             if same_day:
                 raise Problem(409, "/problems/same-effective-date", "Another published rule set takes effect on that date")
+            await refuse_if_overridden(session, row)
             await session.execute(update(rule_sets).where(rule_sets.c.version_id == version_id).values(
                 status="PUBLISHED", decided_by=actor.subject, decision_note=body.note, decided_at=datetime.now(UTC),
                 version=row["version"] + 1))
@@ -235,4 +249,5 @@ async def current_policy(actor: Actor = Depends(require_actor), session: AsyncSe
                      "illustrative_only": True, "contribution": doc["contribution"],
                      "claim_types": {k: {f: v[f] for f in ("form_type", "label", "plain_rule") if f in v}
                                      for k, v in doc["claims"]["types"].items() if not v.get("retired")},
+                     "grievance_categories": doc["grievances"]["categories"],
                      "scheduled": scheduled})

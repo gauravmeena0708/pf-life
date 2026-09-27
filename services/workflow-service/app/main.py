@@ -8,7 +8,6 @@ import epfo_auth
 from app.api import catalogue_routes, routes
 from app.engine.engine import build_router, definitions
 from app.config import settings
-from app.api.routes import ruleset
 from app.infra.db import database_ready, engine
 from app.infra.messaging import BINDINGS, dispatch
 from epfo_observability import health_router, install
@@ -29,7 +28,6 @@ async def lifespan(app: FastAPI):
 
 
 def create_app() -> FastAPI:
-    ruleset()  # load and freeze the illustrative rule version at startup
     definitions()  # and the process definitions
     app = FastAPI(title=settings.service_name, version="0.1.0", docs_url="/docs", redoc_url=None, lifespan=lifespan)
     install(app, settings.service_name)

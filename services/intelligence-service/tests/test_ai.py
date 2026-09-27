@@ -28,6 +28,8 @@ def ctx(tmp_path, monkeypatch):
         async with db.engine().begin() as c:
             await c.run_sync(Base.metadata.create_all)
             await c.run_sync(metadata.create_all)
+            from epfo_persistence.policy import policy_metadata
+            await c.run_sync(policy_metadata.create_all)
         from app import seed
         from pathlib import Path
         seed.SEED_FILE = str(Path(__file__).resolve().parents[3] / "scripts" / "seed" / "synthetic.json")
@@ -186,3 +188,19 @@ def test_unverified_documents_are_never_quoted_as_the_answer(ctx):
     fixture = [c for c in d["citations"] if c["ref"].startswith("PUB-099")]
     assert fixture and not fixture[0]["verified"] and "few minutes" not in d["answer"]
     assert d["citations"][0]["verified"] is True
+
+
+def test_document_figures_follow_the_rules_in_force(ctx):
+    client, deliver, _ = ctx
+    assert "₹10,00,000" in ask(client, "How much can I withdraw as a medical advance?").json()["data"]["answer"]
+    import copy
+    from epfo_persistence.policy import baseline
+    doc = copy.deepcopy(baseline())
+    doc["claims"]["types"]["ADVANCE_ILLNESS"]["cap_paise"] = 150000000
+    doc["grievances"]["reopen_window_days"] = 45
+    doc.update(rule_version="demo-rules-2026.9", effective_from="2026-01-01")
+    deliver("PolicyPublished.v1", {"version_id": "POL-T", "rule_version": "demo-rules-2026.9", "effective_from": "2026-01-01",
+                                   "document_sha256": "x" * 64, "approved_by_role": "ho.cpfc", "document": doc})
+    answer = ask(client, "How much can I withdraw as a medical advance?").json()["data"]["answer"]
+    assert "₹15,00,000" in answer and "₹10,00,000" not in answer and "{{" not in answer
+    assert "45 days" in ask(client, "How do I reopen a grievance?").json()["data"]["answer"]

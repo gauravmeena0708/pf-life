@@ -455,7 +455,7 @@
       "username": "ho-policy",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "HO policy (ACC HQ)",
+      "firstName": "HO policy ACC HQ",
       "lastName": "Demo",
       "email": "ho-policy@demo.invalid",
       "credentials": [

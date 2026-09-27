@@ -35,6 +35,8 @@ def ctx(tmp_path, monkeypatch):
         async with db.engine().begin() as c:
             await c.run_sync(Base.metadata.create_all)
             await c.run_sync(metadata.create_all)
+            from epfo_persistence.policy import policy_metadata
+            await c.run_sync(policy_metadata.create_all)
         from app import seed
         seed.SEED_FILE = str(ROOT / "scripts" / "seed" / "synthetic.json")
         await seed.main()
@@ -229,3 +231,22 @@ def test_case_shows_advisory_signal(ctx):
     submitted(deliver, amount=1000000, signal="RSK-1")
     [case] = queue(client, DA, "fo.da_accounts")
     assert case["advisory_signal_id"] == "RSK-1"
+
+
+def test_case_uses_the_chain_of_the_claims_rule_version_and_type(ctx):
+    client, _, deliver = ctx
+    import copy
+    from epfo_persistence.policy import baseline
+    doc = copy.deepcopy(baseline())
+    doc["claims"]["types"]["ADVANCE_HOUSING"] = {
+        "form_type": "31", "label": "House", "plain_rule": "x", "max_from": "total_balance",
+        "approval_bands": [{"upto_paise": None, "chain": ["fo.da_accounts", "fo.ao", "fo.apfc"]}]}
+    doc["claims"]["settlement_sla_days"] = 7
+    doc.update(rule_version="demo-rules-2026.9", effective_from="2026-01-01")
+    deliver("PolicyPublished.v1", {"version_id": "POL-T", "rule_version": "demo-rules-2026.9", "effective_from": "2026-01-01",
+                                   "document_sha256": "x" * 64, "approved_by_role": "ho.cpfc", "document": doc}, "platform-service")
+    deliver("ClaimSubmitted.v1", {"claim_id": "CLM-H", "form_type": "31", "amount_paise": 100000, "rule_version": "demo-rules-2026.9",
+                                  "office_id": "RO-DEMO-01", "account_link_id": "AL-0001", "route": "REVIEW",
+                                  "advisory_signal_id": None, "claim_type": "ADVANCE_HOUSING"})
+    [case] = queue(client, DA, "fo.da_accounts")
+    assert case["chain"] == ["fo.da_accounts", "fo.ao", "fo.apfc"] and case["rule_version"] == "demo-rules-2026.9"

@@ -80,3 +80,34 @@ def retrieve(question: str, stakeholder: str, limit: int = 4) -> list[Paragraph]
         if score > 0:
             scored.append((score + (0.5 if p.verified else 0), p))
     return [p for _, p in sorted(scored, key=lambda s: (-s[0], s[1].ref))[:limit]]
+
+
+PLACEHOLDER = re.compile(r"\{\{(?:(rupees):)?([a-zA-Z0-9_.]+)\}\}")
+
+
+def _rupees(paise: int) -> str:
+    whole = str(paise // 100)
+    if len(whole) > 3:
+        head, groups = whole[:-3], [whole[-3:]]
+        while len(head) > 2:
+            groups.insert(0, head[-2:])
+            head = head[:-2]
+        whole = ",".join(([head] if head else []) + groups)
+    return f"₹{whole}"
+
+
+def render(text: str, rules: dict) -> str:
+    """Fill {{path}} / {{rupees:path}} placeholders from the rule set in force, so figures are never stale."""
+    def value(match: re.Match) -> str:
+        node: object = rules
+        for part in match.group(2).split("."):
+            if isinstance(node, list) and part.isdigit() and int(part) < len(node):
+                node = node[int(part)]
+            elif isinstance(node, dict) and part in node:
+                node = node[part]
+            else:
+                return "[figure not set in the current rules]"
+        if node is None:
+            return "no automatic limit (always reviewed)" if match.group(1) else "not set"
+        return _rupees(int(node)) if match.group(1) else str(node)
+    return PLACEHOLDER.sub(value, text)
