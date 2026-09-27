@@ -303,8 +303,8 @@ async def public_statistics(actor: Actor = Depends(PUBLIC), session: AsyncSessio
 
 def _office_zone() -> dict[str, str]:
     configured = Path(os.getenv("SEED_FILE", "/srv/seed/synthetic.json"))
-    fallback = Path(__file__).resolve().parents[4] / "scripts" / "seed" / "synthetic.json"
-    path = configured if configured.is_file() else fallback
+    # The repository path exists only when running from a checkout (tests); the image has /srv/seed.
+    path = configured if configured.is_file() else Path(__file__).resolve().parents[4] / "scripts" / "seed" / "synthetic.json"
     with path.open(encoding="utf-8") as seed_file:
         office = json.load(seed_file)["office"]
     return {office["office_id"]: office["zone_id"]}
