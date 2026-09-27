@@ -222,13 +222,14 @@ Activities: **F01.register** Register establishment online and submit verificati
 
 #### `employer.signatory` — Authorised signatory (registered DSC / e-sign)
 
-Activities: **F01.form5a** File / update Form 5A ownership return and branches (Form 2A), signed with DSC / e-sign; **F01.signatory_profile** View the establishment before approving returns and payments; **F01.change_request** Request configuration change, closure / deregistration or office transfer; **F02.kyc_approve** Approve KYC seeded by member / pending for digital signature, with DSC or e-sign; **F02.employer_approvals** Approve queued member changes (Member > Approvals); **F02.jd_attest** Attest, return or reject the Joint Declaration; employer-initiated JD; **F03.ecr_approve** Review, approve and submit ECR (generates TRRN); cancel an unpaid TRRN; **F03.pay** Pay challan online (or via bank counter where allowed); **F03.direct_challan** Create a Direct Challan: administrative / inspection charges, or miscellaneous challan for 14B damages and 7Q interest; pay demands; **F04.attest** Attest claims that need employer attestation; **F04.transfer_attest** Attest pending transfer claims (Online Services > Transfer Claims); **F05.higher_employer** Validate joint options and upload wage details; **F06.employer_reply** Reply and submit evidence in proceedings; **F06.vishwas_apply** Apply under VISHWAS to settle a 14B damages / penalty dispute at reduced rates; **F10.apply** Apply for / extend CoC for a posted worker (IWU portal EMPLOYER login); upload signed application; download CoC
+Activities: **F01.form5a** File / update Form 5A ownership return and branches (Form 2A), signed with DSC / e-sign; **F01.signatory_profile** View the establishment before approving returns and payments; **F01.change_request** Request configuration change, closure / deregistration or office transfer; **F02.kyc_approve** Approve KYC seeded by member / pending for digital signature, with DSC or e-sign; **F02.employer_approvals** Approve queued member changes (Member > Approvals); **F02.jd_attest** Attest, return or reject the Joint Declaration; employer-initiated JD; **F03.ecr_approve** Review, approve and submit ECR (generates TRRN); cancel an unpaid TRRN; **F03.pay** Pay challan online (or via bank counter where allowed) and download the payment receipt; **F03.direct_challan** Create a Direct Challan: administrative / inspection charges, or miscellaneous challan for 14B damages and 7Q interest; pay demands; **F04.attest** Attest claims that need employer attestation; **F04.transfer_attest** Attest pending transfer claims (Online Services > Transfer Claims); **F05.higher_employer** Validate joint options and upload wage details; **F06.employer_reply** Reply and submit evidence in proceedings; **F06.vishwas_apply** Apply under VISHWAS to settle a 14B damages / penalty dispute at reduced rates; **F10.apply** Apply for / extend CoC for a posted worker (IWU portal EMPLOYER login); upload signed application; download CoC
 
 | Endpoint | Status |
 |---|---|
 | `GET /employers/me` | W |
 | `GET /employers/me/challans` | W |
 | `GET /employers/me/challans/{trrn}` | W |
+| `GET /employers/me/challans/{trrn}/receipt` | W |
 | `GET /employers/me/ecr-filings` | W |
 | `GET /employers/me/ecr-filings/{filingId}` | W |
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W |
@@ -1372,7 +1373,7 @@ flowchart LR
   F03_b2b_upload["payroll_provider<br/>Upload ECR through the B2B payroll API on behalf of an emplo"]
   style F03_b2b_upload stroke-dasharray: 5 5
   F03_ecr_approve["employer.signatory<br/>Review, approve and submit ECR (generates TRRN); cancel an u"]
-  F03_pay["employer.signatory<br/>Pay challan online (or via bank counter where allowed)"]
+  F03_pay["employer.signatory<br/>Pay challan online (or via bank counter where allowed) and d"]
   F03_bank_confirm["ext.collecting_bank<br/>Confirm or return the payment"]
   F03_post["tech.epfo3<br/>Post balanced ledger entries and emit ContributionPosted"]
   F03_receipt["employer.operator<br/>Download receipt; view return history and compliance summary"]

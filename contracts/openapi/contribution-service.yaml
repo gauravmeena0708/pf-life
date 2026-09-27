@@ -109,6 +109,7 @@ paths:
       x-owner-service: contribution
       x-callers:
       - employer.operator
+      - employer.signatory
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []

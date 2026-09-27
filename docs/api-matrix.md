@@ -57,7 +57,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /employers/me` | W | employer | employer.operator, employer.owner, employer.signatory |
 | `GET /employers/me/challans` | W | contribution | employer.signatory |
 | `GET /employers/me/challans/{trrn}` | W | contribution | employer.signatory |
-| `GET /employers/me/challans/{trrn}/receipt` | W | contribution | employer.operator |
+| `GET /employers/me/challans/{trrn}/receipt` | W | contribution | employer.operator, employer.signatory |
 | `GET /employers/me/configuration` | W | employer | employer.operator |
 | `GET /employers/me/ecr-filings` | W | contribution | employer.operator, employer.signatory |
 | `GET /employers/me/ecr-filings/{filingId}` | W | contribution | employer.operator, employer.signatory |

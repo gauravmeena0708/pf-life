@@ -83,9 +83,8 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
-      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: -rabbitmq_management load_definitions "/etc/rabbitmq/definitions.json"
-    volumes:
-    - ./infra/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+      # No definitions preload: loading definitions at boot skips creating the default user.
+      # Producers and consumers declare epfo.events and epfo.events.dlx themselves (epfo_persistence).
     ports:
     - 127.0.0.1:5672:5672
     - 127.0.0.1:15672:15672

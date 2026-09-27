@@ -194,3 +194,5 @@ code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9em; }
   .interface-list { columns: 1; }
   .hero-card .actions > * { width: 100%; box-sizing: border-box; text-align: center; }
 }
+.passbook-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 600px) { .passbook-metrics { grid-template-columns: 1fr; } }

@@ -836,6 +836,12 @@ stakeholders:
     step_up: true
     via:
     - F03.pay
+  - endpoint: GET /employers/me/challans/{trrn}/receipt
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F03.pay
   - endpoint: POST /employers/me/direct-challans
     status: P
     scope: own establishment (X-Establishment-Id validated against grants)

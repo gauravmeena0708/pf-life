@@ -2439,7 +2439,8 @@
     "money": false,
     "step_up": false,
     "callers": [
-      "employer.operator"
+      "employer.operator",
+      "employer.signatory"
     ],
     "summary": "Payment receipt / CRN",
     "revocation": false

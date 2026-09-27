@@ -89,11 +89,11 @@ def test_planned_endpoint_answers_501_planned(page):
 
 
 def test_working_endpoint_reaches_service_with_verified_internal_token(page):
-    # Slice 1 services answer 501 /problems/not-yet-built only AFTER verifying the gateway's internal JWT;
-    # a missing or invalid token would give 401. So this proves browser -> gateway -> service auth works.
+    # The service answers only after verifying the gateway's internal JWT (a missing or invalid token gives 401),
+    # and it resolves the member from that token's subject. So this proves browser -> gateway -> service auth works.
     login(page, "member-a")
     status, body = api(page, "GET", "/api/v1/members/me/passbook")
-    assert status == 501 and body["type"] == "/problems/not-yet-built", body
+    assert status == 200 and [a["account_link_id"] for a in body["data"]["accounts"]] == ["AL-0001"], body
 
 
 def test_office_persona_reaches_office_service(page):

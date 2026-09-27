@@ -273,6 +273,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /employers/me` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/challans` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/challans/{trrn}` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/challans/{trrn}/receipt` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ecr-filings` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ecr-filings/{filingId}` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W | own establishment (X-Establishment-Id validated against grants) | yes |

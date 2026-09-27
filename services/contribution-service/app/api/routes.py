@@ -224,7 +224,7 @@ async def get_filing(filingId: str, actor: Actor = Depends(EMPLOYER)):
 async def list_filings(actor: Actor = Depends(EMPLOYER), wageMonth: str | None = Query(default=None), type: str | None = Query(default=None)):
     eid = _establishment(actor)
     async with sessions()() as session:
-        result = await session.execute(text("SELECT * FROM ecr_filings WHERE establishment_id=:e AND (:m IS NULL OR wage_month=:m) AND (:t IS NULL OR filing_type=:t) ORDER BY wage_month DESC,version DESC"), {"e": eid, "m": wageMonth, "t": type})
+        result = await session.execute(text("SELECT * FROM ecr_filings WHERE establishment_id=:e AND (CAST(:m AS TEXT) IS NULL OR wage_month=:m) AND (CAST(:t AS TEXT) IS NULL OR filing_type=:t) ORDER BY wage_month DESC,version DESC"), {"e": eid, "m": wageMonth, "t": type})
         return envelope([_filing_json(dict(x)) for x in result.mappings().all()])
 
 
@@ -298,7 +298,7 @@ async def account_passbook(accountLinkId: str, actor: Actor = Depends(MEMBER)):
 
 async def _passbook(subject: str, account_link_id: str | None):
     async with sessions()() as session:
-        q = text("SELECT account_link_id, establishment_id FROM establishment_members WHERE member_subject=:s AND (:a IS NULL OR account_link_id=:a)")
+        q = text("SELECT account_link_id, establishment_id FROM establishment_members WHERE member_subject=:s AND (CAST(:a AS TEXT) IS NULL OR account_link_id=:a)")
         accounts = (await session.execute(q, {"s": subject, "a": account_link_id})).mappings().all()
         out=[]; pending=[]
         for a in accounts:
@@ -314,7 +314,7 @@ async def _passbook(subject: str, account_link_id: str | None):
                 balance += ent["employee_share_paise"] + ent["employer_share_paise"]
                 entries.append({**ent,"running_balance_paise":balance})
             out.append({"account_link_id": a["account_link_id"], "entries": entries})
-        pending_rows=(await session.execute(text("SELECT f.wage_month,f.state,f.content,f.format,c.trrn,m.uan,m.account_link_id FROM ecr_filings f LEFT JOIN challans c ON c.filing_id=f.id JOIN establishment_members m ON m.establishment_id=f.establishment_id WHERE m.member_subject=:s AND (:a IS NULL OR m.account_link_id=:a) AND f.state IN ('SUBMITTED','PAYMENT_PENDING')"), {"s":subject,"a":account_link_id})).mappings().all()
+        pending_rows=(await session.execute(text("SELECT f.wage_month,f.state,f.content,f.format,c.trrn,m.uan,m.account_link_id FROM ecr_filings f LEFT JOIN challans c ON c.filing_id=f.id JOIN establishment_members m ON m.establishment_id=f.establishment_id WHERE m.member_subject=:s AND (CAST(:a AS TEXT) IS NULL OR m.account_link_id=:a) AND f.state IN ('SUBMITTED','PAYMENT_PENDING')"), {"s":subject,"a":account_link_id})).mappings().all()
         for x in pending_rows:
             members,_,_=parse(x["content"],x["format"])
             if any(m["UAN"] == x["uan"] for m in members):
