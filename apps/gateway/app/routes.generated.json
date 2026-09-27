@@ -3874,7 +3874,7 @@
     "callers": [
       "public"
     ],
-    "summary": "Establishment public profile: name, registration, office, coverage, verification date and explicitly unmodelled exemption status",
+    "summary": "Public profile: name, registration, office, location, type, industry, coverage, verification and exemption",
     "revocation": false
   },
   {
@@ -5059,7 +5059,7 @@
     "callers": [
       "public"
     ],
-    "summary": "Establishment search by exact code / registration / pincode or partial name, with office and coverage filters (rate-limited, paged, no bulk enumeration)",
+    "summary": "Establishment search by code, registration, pincode, name or industry; filter by location, type, exemption and coverage",
     "revocation": false
   },
   {

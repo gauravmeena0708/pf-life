@@ -289,9 +289,13 @@ async def revoke_signatory(signatoryId: str, body: Revocation, actor: Actor = De
 
 @router.get("/api/v1/public/establishments")
 async def search_establishments(query: str = Query(min_length=3, max_length=60), page: int = Query(default=1, ge=1, le=5),
-                                mode: Literal["any", "name", "code", "registration", "pincode"] = "any",
+                                mode: Literal["any", "name", "code", "registration", "pincode", "industry"] = "any",
                                 match: Literal["contains", "starts_with"] = "contains",
                                 office_id: str | None = Query(default=None, max_length=40),
+                                city: str | None = Query(default=None, max_length=80),
+                                district: str | None = Query(default=None, max_length=80),
+                                establishment_type: str | None = Query(default=None, max_length=80),
+                                exemption_status: Literal["EXEMPT", "NOT_EXEMPT"] | None = None,
                                 status: Literal["REGISTERED", "VERIFIED"] | None = None,
                                 actor: Actor = Depends(require_actor),
                                 session: AsyncSession = Depends(db)) -> dict:
@@ -303,17 +307,26 @@ async def search_establishments(query: str = Query(min_length=3, max_length=60),
     escaped = term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
     name_filter = func.lower(establishments.c.legal_name).like(
         f"{'' if match == 'starts_with' else '%'}{escaped}%", escape="\\")
+    industry_filter = func.lower(establishments.c.industry_group).like(f"%{escaped}%", escape="\\")
     exact_code = func.lower(establishments.c.establishment_id) == term
     exact_registration = func.lower(establishments.c.registration_number) == term
     exact_pincode = establishments.c.pincode == term
     by_mode = {"name": name_filter, "code": exact_code, "registration": exact_registration,
-               "pincode": exact_pincode}
+               "pincode": exact_pincode, "industry": industry_filter}
     search_filter = by_mode[mode] if mode != "any" else or_(
-        name_filter, exact_code, exact_registration,
+        name_filter, industry_filter, exact_code, exact_registration,
         exact_pincode if term.isdigit() and len(term) == 6 else False)
     statement = select(establishments).where(search_filter, establishments.c.status.in_(("REGISTERED", "VERIFIED")))
     if office_id:
         statement = statement.where(establishments.c.office_id == office_id.strip())
+    if city:
+        statement = statement.where(func.lower(establishments.c.city) == city.strip().lower())
+    if district:
+        statement = statement.where(func.lower(establishments.c.district) == district.strip().lower())
+    if establishment_type:
+        statement = statement.where(func.lower(establishments.c.establishment_type) == establishment_type.strip().lower())
+    if exemption_status:
+        statement = statement.where(establishments.c.exemption_status == exemption_status)
     if status:
         statement = statement.where(establishments.c.status == status)
     rows = (await session.execute(statement
@@ -321,7 +334,9 @@ async def search_establishments(query: str = Query(min_length=3, max_length=60),
         .limit(20).offset((page - 1) * 20))).mappings().all()
     return envelope([{"establishment_id": r["establishment_id"], "legal_name": r["legal_name"],
                       "registration_number": r["registration_number"], "office_id": r["office_id"],
-                      "pincode": r["pincode"],
+                      "pincode": r["pincode"], "city": r["city"], "district": r["district"],
+                      "establishment_type": r["establishment_type"],
+                      "industry_group": r["industry_group"], "exemption_status": r["exemption_status"],
                       "status": r["status"]} for r in rows])
 
 
@@ -332,9 +347,12 @@ async def public_establishment(estId: str, actor: Actor = Depends(require_actor)
         raise Problem(404, "/problems/not-found", "Establishment not found")
     return envelope({"establishment_id": est["establishment_id"], "legal_name": est["legal_name"],
                      "registration_number": est["registration_number"], "office_id": est["office_id"],
-                     "pincode": est["pincode"],
+                     "pincode": est["pincode"], "city": est["city"], "district": est["district"],
+                     "establishment_type": est["establishment_type"], "industry_group": est["industry_group"],
+                     "coverage_date": est["coverage_date"].isoformat() if est["coverage_date"] else None,
                      "verified_at": est["verified_at"].isoformat() if est["verified_at"] else None,
-                     "coverage_status": est["status"], "exemption_status": "NOT_MODELLED"})
+                     "coverage_status": est["status"],
+                     "exemption_status": est["exemption_status"] or "NOT_MODELLED"})
 
 
 # ── Internal: grant resolution for the gateway (not public; architecture §3 step 2) ─────────

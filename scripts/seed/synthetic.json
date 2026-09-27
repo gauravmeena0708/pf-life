@@ -11,6 +11,12 @@
     "legal_name": "Synthetic Textiles Pvt Ltd (DEMO)",
     "office_id": "RO-DEMO-01",
     "pincode": "110001",
+    "city": "New Delhi",
+    "district": "Central Delhi",
+    "coverage_date": "2022-06-01",
+    "establishment_type": "PRIVATE_COMPANY",
+    "industry_group": "TEXTILES",
+    "exemption_status": "NOT_EXEMPT",
     "status": "REGISTERED",
     "pan": "AAAPD0000D",
     "gstin": "07AAAPD0000D1Z5"
@@ -22,6 +28,12 @@
       "legal_name": "Demo Engineering Works",
       "office_id": "RO-DEMO-01",
       "pincode": "110002",
+      "city": "New Delhi",
+      "district": "Central Delhi",
+      "coverage_date": "2024-04-01",
+      "establishment_type": "PARTNERSHIP",
+      "industry_group": "ENGINEERING",
+      "exemption_status": "NOT_EXEMPT",
       "status": "VERIFIED",
       "verified_at": "2026-04-15T10:00:00+00:00",
       "pan": "AAAAD0002A"
@@ -32,6 +44,12 @@
       "legal_name": "Demo Retail Cooperative",
       "office_id": "RO-DEMO-01",
       "pincode": "110003",
+      "city": "New Delhi",
+      "district": "Central Delhi",
+      "coverage_date": "2025-02-01",
+      "establishment_type": "COOPERATIVE",
+      "industry_group": "RETAIL",
+      "exemption_status": "EXEMPT",
       "status": "REGISTERED",
       "pan": "AAAAD0003A"
     }

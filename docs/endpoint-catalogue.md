@@ -36,8 +36,8 @@ Rules that apply to every row:
 | `GET /public/statistics` | Aggregate statistics, small-group suppression | W | 1 | reporting |
 | `POST /public/demo-calculations/epf` | Illustrative EPF contribution calculator | W | 1 | contribution |
 | `POST /public/demo-calculations/pension` | Illustrative pension estimate calculator | P | 2 | pension |
-| `GET /public/establishments?query=&mode=&match=&office_id=&status=&page=` | **Establishment search** by exact code / registration / pincode or partial name, with office and coverage filters (rate-limited, paged, no bulk enumeration) | W | 1 | employer |
-| `GET /public/establishments/{estId}` | Establishment public profile: name, registration, office, coverage, verification date and explicitly unmodelled exemption status | W | 1 | employer |
+| `GET /public/establishments?query=&mode=&match=&office_id=&city=&district=&establishment_type=&exemption_status=&status=&page=` | **Establishment search** by code, registration, pincode, name or industry; filter by location, type, exemption and coverage | W | 1 | employer |
+| `GET /public/establishments/{estId}` | Public profile: name, registration, office, location, type, industry, coverage, verification and exemption | W | 1 | employer |
 | `GET /public/demo-challenges` | One-use arithmetic proof for synthetic public lookup demo | M | 1 | gateway |
 | `GET /public/establishments/{estId}/e-report-card` | Establishment **e-Report Card**: wage-month filing/payment history, counts and totals only | P | 2 | reporting |
 | `POST /public/trrn-status-lookups` | **TRRN / challan status** lookup with wage month, issue/payment times and next step; one-use synthetic demo proof (production CAPTCHA pending) | M | 1 | contribution |

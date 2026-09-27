@@ -1,0 +1,2 @@
+# Local field-shape reference only; never send sample master rows to image builds.
+docs/est.csv

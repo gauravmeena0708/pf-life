@@ -1,5 +1,5 @@
 """Tables owned by employer-service (created by migration 0002)."""
-from sqlalchemy import JSON, Column, DateTime, Integer, MetaData, String, Table, func
+from sqlalchemy import JSON, Column, Date, DateTime, Integer, MetaData, String, Table, func
 
 metadata = MetaData()
 
@@ -10,6 +10,12 @@ establishments = Table(
     Column("legal_name", String(200), nullable=False),
     Column("office_id", String(40), nullable=False),
     Column("pincode", String(6)),
+    Column("city", String(80)),
+    Column("district", String(80)),
+    Column("coverage_date", Date),
+    Column("establishment_type", String(80)),
+    Column("industry_group", String(120)),
+    Column("exemption_status", String(30)),
     Column("pan", String(10), nullable=False),
     Column("gstin", String(15)),
     Column("status", String(30), nullable=False),        # REGISTERED | VERIFIED | REJECTED

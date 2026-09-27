@@ -4,14 +4,17 @@ import { Link } from "react-router-dom";
 import { api, command, Envelope } from "../api/client";
 import { ProblemMessage } from "../components/ProblemMessage";
 
-type SearchMode = "any" | "name" | "code" | "registration" | "pincode";
+type SearchMode = "any" | "name" | "code" | "registration" | "pincode" | "industry";
 type NameMatch = "contains" | "starts_with";
 type Coverage = "" | "REGISTERED" | "VERIFIED";
 type Establishment = {
   establishment_id: string; registration_number: string; legal_name: string;
-  office_id: string; pincode?: string; status: string;
+  office_id: string; pincode?: string; city?: string; district?: string;
+  establishment_type?: string; industry_group?: string; exemption_status?: string; status: string;
 };
-type Profile = Omit<Establishment, "status"> & { coverage_status: string; exemption_status: string; verified_at: string | null };
+type Profile = Omit<Establishment, "status"> & {
+  coverage_status: string; coverage_date: string | null; verified_at: string | null;
+};
 type Challenge = { challenge_id: string; prompt: string; proof_type: string };
 type TrrnStatus = {
   trrn: string; status: string; wage_month: string | null; issued_at: string | null;
@@ -19,15 +22,20 @@ type TrrnStatus = {
 };
 
 const SEARCH_MODES: { value: SearchMode; label: string; hint: string }[] = [
-  { value: "any", label: "All fields", hint: "Name, exact code, registration or pincode" },
+  { value: "any", label: "All fields", hint: "Name, industry, exact code, registration or pincode" },
   { value: "name", label: "Name", hint: "Try Demo Engineering" },
   { value: "code", label: "EPF code", hint: "Try EST-DEMO-0002" },
   { value: "registration", label: "Registration no.", hint: "Try DEMO/00002/000" },
   { value: "pincode", label: "Pincode", hint: "Try 110002" },
+  { value: "industry", label: "Industry", hint: "Try engineering" },
 ];
 
 function dateTime(value: string | null): string {
   return value ? new Date(value).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "Not recorded";
+}
+
+function dateOnly(value: string | null): string {
+  return value ? new Date(`${value}T00:00:00Z`).toLocaleDateString("en-IN", { dateStyle: "medium", timeZone: "UTC" }) : "Not recorded";
 }
 
 function label(value: string): string {
@@ -39,6 +47,10 @@ export function PublicLookups() {
   const [query, setQuery] = useState("");
   const [match, setMatch] = useState<NameMatch>("contains");
   const [office, setOffice] = useState("");
+  const [city, setCity] = useState("");
+  const [district, setDistrict] = useState("");
+  const [establishmentType, setEstablishmentType] = useState("");
+  const [exemption, setExemption] = useState("");
   const [coverage, setCoverage] = useState<Coverage>("");
   const [page, setPage] = useState(1);
   const [results, setResults] = useState<Establishment[] | null>(null);
@@ -59,6 +71,10 @@ export function PublicLookups() {
     try {
       const params = new URLSearchParams({ query: query.trim(), mode, match, page: String(nextPage) });
       if (office.trim()) params.set("office_id", office.trim());
+      if (city.trim()) params.set("city", city.trim());
+      if (district.trim()) params.set("district", district.trim());
+      if (establishmentType) params.set("establishment_type", establishmentType);
+      if (exemption) params.set("exemption_status", exemption);
       if (coverage) params.set("status", coverage);
       const response = await api<Envelope<Establishment[]>>(`/api/v1/public/establishments?${params}`);
       setResults(response.data);
@@ -119,7 +135,7 @@ export function PublicLookups() {
     <p><Link to="/">← All interfaces</Link></p>
     <header className="workspace-head public-hero">
       <div><p className="eyebrow">Public register · synthetic POC</p><h1>Find an establishment</h1>
-        <p className="muted">Search by name, EPF code, registration number or pincode. Open a result to see its public demo profile.</p></div>
+        <p className="muted">Search by name, EPF code, registration number, pincode or industry. Open a result to see its public demo profile.</p></div>
       <span className="state-pill">Seeded demo records</span>
     </header>
 
@@ -139,6 +155,10 @@ export function PublicLookups() {
           {(mode === "name" || mode === "any") && <label>Name match<select value={match} onChange={(event) => setMatch(event.target.value as NameMatch)}><option value="contains">Contains</option><option value="starts_with">Starts with</option></select></label>}
           <label>Coverage status<select value={coverage} onChange={(event) => setCoverage(event.target.value as Coverage)}><option value="">Any active status</option><option value="REGISTERED">Registered</option><option value="VERIFIED">Verified</option></select></label>
           <label>Office code<input value={office} onChange={(event) => setOffice(event.target.value)} placeholder="RO-DEMO-01" maxLength={40} /></label>
+          <label>City<input value={city} onChange={(event) => setCity(event.target.value)} placeholder="New Delhi" maxLength={80} /></label>
+          <label>District<input value={district} onChange={(event) => setDistrict(event.target.value)} placeholder="Central Delhi" maxLength={80} /></label>
+          <label>Establishment type<select value={establishmentType} onChange={(event) => setEstablishmentType(event.target.value)}><option value="">Any type</option><option value="PRIVATE_COMPANY">Private company</option><option value="PARTNERSHIP">Partnership</option><option value="COOPERATIVE">Cooperative</option></select></label>
+          <label>Exemption<select value={exemption} onChange={(event) => setExemption(event.target.value)}><option value="">Any status</option><option value="NOT_EXEMPT">Not exempt</option><option value="EXEMPT">Exempt</option></select></label>
         </div></details>
       </form>
       <ProblemMessage error={searchError} />
@@ -146,16 +166,19 @@ export function PublicLookups() {
         <div className="section-heading"><strong>{results.length ? `Page ${page} · ${results.length} result${results.length === 1 ? "" : "s"}` : "No matching demo establishments"}</strong><span className="muted small">Synthetic records only</span></div>
         <ul className="result-cards">{results.map((row) => <li key={row.establishment_id}>
           <div><span className="eyebrow">{row.establishment_id}</span><h3><button type="button" className="lookup-link" onClick={() => void openProfile(row.establishment_id)}>{row.legal_name} ↗</button></h3>
-            <p className="muted small">Registration {row.registration_number} · {row.office_id} · {row.pincode || "Pincode unavailable"}</p></div>
+            <p className="muted small">Registration {row.registration_number} · {row.city || "City unavailable"}, {row.district || "District unavailable"} · {row.pincode || "Pincode unavailable"}</p>
+            <p className="muted small">{row.establishment_type ? label(row.establishment_type) : "Type unavailable"} · {row.industry_group ? label(row.industry_group) : "Industry unavailable"} · {row.office_id}</p></div>
           <span className="state-pill">{label(row.status)}</span>
         </li>)}</ul>
         <div className="actions"><button type="button" disabled={searchBusy || page <= 1} onClick={() => void search(page - 1)}>Previous</button><button type="button" disabled={searchBusy || results.length < 20 || page >= 5} onClick={() => void search(page + 1)}>Next</button></div>
       </div>}
       {profile && <div className="profile-card" aria-live="polite"><p className="eyebrow">Public profile · synthetic record</p><h3>{profile.legal_name}</h3>
         <dl className="profile-grid"><div><dt>EPF code</dt><dd>{profile.establishment_id}</dd></div><div><dt>Registration number</dt><dd>{profile.registration_number}</dd></div>
-          <div><dt>Office</dt><dd>{profile.office_id}</dd></div><div><dt>Pincode</dt><dd>{profile.pincode || "Unavailable"}</dd></div>
+          <div><dt>Office</dt><dd>{profile.office_id}</dd></div><div><dt>City and district</dt><dd>{profile.city || "Unavailable"}, {profile.district || "Unavailable"}</dd></div>
+          <div><dt>Pincode</dt><dd>{profile.pincode || "Unavailable"}</dd></div><div><dt>Establishment type</dt><dd>{profile.establishment_type ? label(profile.establishment_type) : "Not recorded"}</dd></div>
+          <div><dt>Industry group</dt><dd>{profile.industry_group ? label(profile.industry_group) : "Not recorded"}</dd></div><div><dt>Coverage date</dt><dd>{dateOnly(profile.coverage_date)}</dd></div>
           <div><dt>Coverage status</dt><dd>{label(profile.coverage_status)}</dd></div><div><dt>Verified on</dt><dd>{dateTime(profile.verified_at)}</dd></div>
-          <div><dt>Exemption</dt><dd>{profile.exemption_status === "NOT_MODELLED" ? "Not modelled in this demo" : label(profile.exemption_status)}</dd></div></dl>
+          <div><dt>Exemption</dt><dd>{profile.exemption_status === "NOT_MODELLED" || !profile.exemption_status ? "Not modelled in this demo" : label(profile.exemption_status)}</dd></div></dl>
       </div>}
     </section>
 

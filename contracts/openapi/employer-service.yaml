@@ -1409,8 +1409,8 @@ paths:
   /public/establishments:
     get:
       operationId: getPublicEstablishments
-      summary: Establishment search by exact code / registration / pincode or partial name, with office and coverage filters
-        (rate-limi
+      summary: Establishment search by code, registration, pincode, name or industry; filter by location, type, exemption
+        and coverage
       tags:
       - Public information and establishment search
       parameters:
@@ -1431,6 +1431,26 @@ paths:
         schema:
           type: string
       - name: office_id
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: city
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: district
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: establishment_type
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: exemption_status
         in: query
         required: false
         schema:
@@ -1465,13 +1485,10 @@ paths:
       - public
       x-scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
       security: []
-      description: Establishment search by exact code / registration / pincode or partial name, with office and coverage filters
-        (rate-limited, paged, no bulk enumeration)
   /public/establishments/{estId}:
     get:
       operationId: getPublicEstablishmentsEstId
-      summary: 'Establishment public profile: name, registration, office, coverage, verification date and explicitly unmodelled
-        exemptio'
+      summary: 'Public profile: name, registration, office, location, type, industry, coverage, verification and exemption'
       tags:
       - Public information and establishment search
       parameters:
@@ -1501,8 +1518,6 @@ paths:
       - public
       x-scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
       security: []
-      description: 'Establishment public profile: name, registration, office, coverage, verification date and explicitly unmodelled
-        exemption status'
 components:
   securitySchemes:
     bffSession:
