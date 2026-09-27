@@ -68,11 +68,12 @@ export function CasePage() {
       return;
     }
     const isReissue = action === "reissue";
-    const token = await stepUp.ask({ action: isReissue ? "reissue-payment" : "instruct-payment", resourceId: item.claim_id,
-      amountPaise: item.amount_paise, summary: t(isReissue ? "office.reissueSummary" : "office.paymentSummary", { claimId: item.claim_id, scenario: t(`office.scenarios.${scenario}`) }) });
+    const claimId = item.claim_id ?? "";
+    const token = await stepUp.ask({ action: isReissue ? "reissue-payment" : "instruct-payment", resourceId: claimId,
+      amountPaise: item.amount_paise, summary: t(isReissue ? "office.reissueSummary" : "office.paymentSummary", { claimId, scenario: t(`office.scenarios.${scenario}`) }) });
     if (!token) return;
     retryKey.current ??= newIdempotencyKey();
-    await run(() => command("POST", `/api/v1/office/claims/${item.claim_id}/${isReissue ? "reissues" : "payment-instructions"}`,
+    await run(() => command("POST", `/api/v1/office/claims/${claimId}/${isReissue ? "reissues" : "payment-instructions"}`,
       { demo_scenario: scenario }, { stepUpToken: token, idempotencyKey: retryKey.current! }));
   }
 
@@ -90,6 +91,7 @@ export function CasePage() {
           <dt>{t("claims.ruleVersion")}</dt><dd>{item.rule_version} <span className="state-pill">{t("claims.illustrative")}</span></dd>
           <dt>{t("office.round")}</dt><dd>{item.round}</dd><dt>{t("office.slaDue")}</dt><dd>{dateTime(item.sla_due_at, i18n.language)}</dd></dl>
       </section>
+      {item.advisory_signal_id ? <p className="demo-tip"><strong>{t("office.advisory")}:</strong> {t("office.advisoryHelp")} (<code>{item.advisory_signal_id}</code>)</p> : null}
       <section className="card stack" aria-labelledby="chain-heading"><h2 id="chain-heading">{t("office.approvalChain")}</h2>
         <ol className="chain-stepper">{item.chain.map((chainRole, index) => {
           const current = item.state === "IN_REVIEW" && index === item.step;

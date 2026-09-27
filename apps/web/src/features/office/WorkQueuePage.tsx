@@ -20,7 +20,9 @@ export function WorkQueuePage() {
       {queue.isLoading ? <p role="status">{t("office.loadingQueue")}</p> : null}
       {data?.items.length === 0 ? <p className="empty-state">{t("office.emptyQueue")}</p> : null}
       {data?.items.length ? <div className="table-scroll"><table><thead><tr><th scope="col">{t("office.caseId")}</th><th scope="col">{t("claims.claimId")}</th><th scope="col">{t("claims.form")}</th><th scope="col" className="numeric">{t("claims.amount")}</th><th scope="col">{t("office.chainProgress")}</th><th scope="col">{t("office.slaDue")}</th><th scope="col">{t("office.nextAction")}</th></tr></thead><tbody>{data.items.map((item) => <tr key={item.case_id}>
-        <td><Link to={`/office/cases/${item.case_id}`}><code>{item.case_id}</code></Link></td><td><code>{item.claim_id}</code></td><td>{item.form_type}</td><td className="numeric">{rupees(item.amount_paise)}</td>
+        <td><Link to={item.grievance_id ? `/office/grievances/${item.grievance_id}` : `/office/cases/${item.case_id}`}><code>{item.case_id}</code></Link></td>
+        <td><code>{item.claim_id ?? item.grievance_id}</code>{item.advisory_signal_id ? <><br /><span className="state-pill" title={t("office.advisoryHelp")}>{t("office.advisory")}</span></> : null}</td>
+        <td>{item.grievance_id ? t("office.grievanceKind") : item.form_type}</td><td className="numeric">{item.grievance_id ? "—" : rupees(item.amount_paise)}</td>
         <td>{item.chain.length ? t("office.stepOf", { step: Math.min(item.step + 1, item.chain.length), total: item.chain.length }) : "—"}</td><td>{dateTime(item.sla_due_at, i18n.language)}</td><td>{item.next_action ? <span className="state-pill">{t(`office.actions.${item.next_action}`)}</span> : "—"}</td>
       </tr>)}</tbody></table></div> : null}
     </section>

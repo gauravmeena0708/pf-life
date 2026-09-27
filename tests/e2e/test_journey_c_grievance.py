@@ -92,6 +92,7 @@ def test_journey_c_grievance_reply_escalation_resolution_metrics_and_audit(as_pe
     zone = as_persona("zo-acc", "/office/work-queue")
     wait_for(lambda: grievance_case(zone, gid))
     wait_for(lambda: grievance_case(pro, gid) is None)
+    shot(zone, "c4-zone-grievance", f"/office/grievances/{gid}")
     status, r = call(zone, "POST", f"/api/v1/grievances/{gid}/messages", {"body": "The zone has reviewed the payment record."})
     assert r["data"]["state"] == "IN_PROGRESS"
     token = step_up(zone, "resolve-grievance", gid, r["data"]["version"])
@@ -117,3 +118,6 @@ def test_journey_c_grievance_reply_escalation_resolution_metrics_and_audit(as_pe
     correlated = call(auditor, "GET", f"/api/v1/audit/correlations/{registered['correlation_id']}")[1]["data"]
     assert {i["event_type"] for i in correlated["items"]} >= {"GrievanceRegistered.v1", "NotificationRequested.v1"}
     assert call(member, "GET", "/api/v1/audit/events")[0] == 403
+    shot(member, "c1-member-grievance", f"/member/grievances/{gid}")
+    shot(zone, "c5-grievance-metrics", "/monitoring/grievances")
+    shot(auditor, "c5-audit-log", "/audit/log")

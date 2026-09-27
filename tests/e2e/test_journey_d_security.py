@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.e2e.test_journey_a_ecr import EST, call, ensure_verified_and_granted, login, step_up, wait_for
+from tests.e2e.test_journey_a_ecr import SHOTS, WEB, call, ensure_verified_and_granted, login, step_up, wait_for
 
 playwright = pytest.importorskip("playwright.sync_api")
 
@@ -47,6 +47,14 @@ def as_persona(contexts, persona, return_to="/", context=None):
     page = (context or contexts()).new_page()
     login(page, persona, return_to)
     return page
+
+
+def shot(page, name, path):
+    SHOTS.mkdir(exist_ok=True)
+    page.goto(f"{WEB}{path}")
+    page.get_by_role("heading", level=1).wait_for()
+    page.wait_for_load_state("networkidle")
+    page.screenshot(path=str(SHOTS / f"{name}.png"), full_page=True)
 
 
 def signals(caiu):
@@ -142,6 +150,8 @@ def test_journey_d_risk_signal_review_recovery_and_revocations(contexts):
     shared = wait_for(lambda: signals(caiu)["shared_devices_not_signals"])
     assert shared[0]["subjects"] >= 3 and "not evidence of fraud" in shared[0]["note"]
 
+    shot(caiu, "d2-risk-signals", "/caiu/signals")
+
     # D4: the reviewer records outcomes; nothing is frozen, rejected or accused automatically.
     url = f"/api/v1/caiu/synthetic-risk-signals/{signal['signal_id']}/reviews"
     status, r = call(caiu, "POST", url, {"outcome": "needs-more-evidence", "note": "Ask the member about the new phone"})
@@ -182,6 +192,7 @@ def test_journey_d_risk_signal_review_recovery_and_revocations(contexts):
     queue = call(analyst, "GET", "/api/v1/security/account-recovery-requests")[1]["data"]
     pending = next(q for q in queue if q["state"] == "PENDING_REVIEW" and q["member_id"] == me["member_id"])
     assert pending["restore_to"]["mobile_masked"] == SEED["members"][1]["mobile_masked"]
+    shot(analyst, "d5-sessions-recovery", "/security/sessions")
     token = step_up(analyst, "decide-recovery", pending["request_id"])
     status, r = call(analyst, "POST", f"/api/v1/security/account-recovery-requests/{pending['request_id']}/decisions",
                      {"decision": "APPROVE", "note": "Verified with the member on the registered number"}, {"X-Step-Up-Token": token})
@@ -197,6 +208,8 @@ def test_journey_d_risk_signal_review_recovery_and_revocations(contexts):
     assert status == 200 and r["data"]["revoked"] is True
     assert call(kiosk_page, "GET", "/api/v1/members/me")[0] == 401
     assert call(member, "GET", "/api/v1/members/me")[0] == 200            # the member's own session is untouched
+
+    shot(member, "d5-member-security", "/member/security")
 
     # D5b: the employer owner revokes the authorised signatory; the signatory is refused within 5 seconds.
     owner = as_persona(contexts, "emp-owner", "/employer")
