@@ -5,7 +5,9 @@ import httpx
 from fastapi import Request
 from fastapi.responses import JSONResponse, Response
 
+from . import grants as grant_resolver
 from .internal_jwt import mint
+from .stepup import consume_token, create_challenge, verify_challenge
 from .oidc import session_context, verify_token
 from .problems import problem
 from .revocation import is_revoked, record_revocation
@@ -74,10 +76,16 @@ async def handle_api(request: Request, path: str):
 
     if route["status"] in ("P", "?") or int(route.get("phase", 1)) > 1:
         return planned(request, route)
+    step_up = None
     if route["step_up"]:
-        if not request.headers.get("x-step-up-token"):
-            return problem(request, 428, "step-up-required", "Step-up verification required")
-        return planned(request, {**route, "summary": "step-up verification arrives in slice 4"})
+        supplied = request.headers.get("x-step-up-token")
+        if not supplied:
+            return problem(request, 428, "step-up-required", "Confirm this action first",
+                           "Start a confirmation with POST /api/v1/security/step-up-challenges.")
+        step_up = await consume_token(request, principal, supplied)
+        if not step_up:
+            return problem(request, 403, "step-up-invalid", "Confirmation expired, already used or not yours",
+                           "Confirm the action again.")
 
     if route["owner"] == "gateway":
         if route["path_template"] == "/security/me/permissions" and method == "GET":
@@ -88,11 +96,22 @@ async def handle_api(request: Request, path: str):
                     "meta": {"correlation_id": request.state.correlation_id, "api_version": "v1",
                              "source": "synthetic-poc",
                              "as_of": __import__("datetime").datetime.now(__import__("datetime").UTC).isoformat()}}
-        return planned(request, {**route, "summary": route.get("summary") or "Gateway route deferred in slice 1"})
+        if route["path_template"] == "/security/step-up-challenges" and method == "POST":
+            return await create_challenge(request, principal)
+        if route["path_template"] == "/security/step-up-challenges/{challengeId}/verifications" and method == "POST":
+            return await verify_challenge(request, principal, request.url.path.rstrip("/").split("/")[-2])
+        return planned(request, {**route, "summary": route.get("summary") or "Gateway route not built yet"})
 
     service_name = route["upstream"].removeprefix("http://").removesuffix(":8000")
+    establishment_id, grants = None, None
+    if principal["stakeholder"] in grant_resolver.EMPLOYER_STAKEHOLDERS:
+        try:
+            establishment_id, grants = await grant_resolver.employer_context(request, principal)
+        except Exception:
+            return problem(request, 503, "grants-unavailable", "Permissions could not be checked",
+                           "Try again in a moment.")
     token = mint(request.app.state.signing_key, principal["subject"], principal["stakeholder"],
-                 service_name, request.state.correlation_id, request.headers.get("x-establishment-id"))
+                 service_name, request.state.correlation_id, establishment_id, grants, step_up)
     headers = {}
     for name, value in request.headers.items():
         lower = name.lower()
@@ -114,9 +133,13 @@ async def handle_api(request: Request, path: str):
             if not isinstance(data, dict):
                 raise ValueError("revocation response has no data.revocation object")
             await record_revocation(request.app.state.redis, data)
+            grant_resolver.forget(data.get("subject"))
         except Exception:
             log.exception("revocation persistence failed", extra={"correlation_id": request.state.correlation_id})
             return problem(request, 503, "revocation-unavailable", "Could not persist revocation")
+    if 200 <= upstream.status_code < 300 and route["path_template"] in (
+            "/employers/me/operators/invitations", "/employers/me/signatories/authorisations"):
+        grant_resolver.forget()  # a new grant: next request re-reads permissions
     response_headers = {k: v for k, v in upstream.headers.items()
                         if k.lower() not in {"content-length", "transfer-encoding", "connection", "set-cookie"}}
     response_headers["X-Correlation-Id"] = request.state.correlation_id

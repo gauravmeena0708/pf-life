@@ -427,7 +427,7 @@
     "money": false,
     "step_up": false,
     "callers": [
-      "member"
+      "*"
     ],
     "summary": "Complete step-up",
     "revocation": false
@@ -3887,7 +3887,7 @@
     "money": false,
     "step_up": false,
     "callers": [
-      "member"
+      "*"
     ],
     "summary": "Start a demo step-up confirmation for a 🔐 action",
     "revocation": false
