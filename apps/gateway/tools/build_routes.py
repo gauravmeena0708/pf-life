@@ -46,6 +46,7 @@ def main() -> None:
             "path_template": path,
             "regex": route_regex(path),
             "status": op["status"],
+            "phase": op["phase"],
             "owner": owner,
             "upstream": upstream,
             "money": op["money"],

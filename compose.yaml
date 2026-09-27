@@ -181,7 +181,7 @@ services:
       REDIS_URL: redis://redis:6379/0
       KEYCLOAK_ISSUER: ${KEYCLOAK_PUBLIC_ISSUER}
       KEYCLOAK_INTERNAL_URL: http://keycloak:8080
-      PUBLIC_BASE_URL: http://localhost:5173
+      GATEWAY_PUBLIC_ORIGIN: http://localhost:5173
     ports:
     - 127.0.0.1:8000:8000
     depends_on:

@@ -17,16 +17,42 @@ router = APIRouter()
 
 
 def _issuer(request: Request) -> str:
+    """Public issuer: used for browser redirects and for validating `iss`."""
     return request.app.state.settings.keycloak_issuer.rstrip("/")
+
+
+def _backchannel(request: Request) -> str:
+    """Issuer URL as reachable from the gateway (inside Docker: http://keycloak:8080/realms/...)."""
+    settings = request.app.state.settings
+    issuer = settings.keycloak_issuer.rstrip("/")
+    if not settings.keycloak_internal_url:
+        return issuer
+    realm_path = "/realms/" + issuer.split("/realms/", 1)[1]
+    return settings.keycloak_internal_url.rstrip("/") + realm_path
+
+
+_JWKS_TTL_SECONDS = 300
+_jwks_cache: dict[str, tuple[float, list[dict]]] = {}
+
+
+async def _jwks(request: Request, kid: str | None) -> list[dict]:
+    url = f"{_backchannel(request)}/protocol/openid-connect/certs"
+    cached = _jwks_cache.get(url)
+    fresh = cached and __import__("time").monotonic() - cached[0] < _JWKS_TTL_SECONDS
+    if fresh and any(k.get("kid") == kid for k in cached[1]):
+        return cached[1]
+    async with httpx.AsyncClient(timeout=5) as client:  # unknown kid or stale cache: refetch (key rotation)
+        response = await client.get(url)
+        response.raise_for_status()
+    keys = response.json().get("keys", [])
+    _jwks_cache[url] = (__import__("time").monotonic(), keys)
+    return keys
 
 
 async def verify_token(request: Request, token: str, *, audience: str | None = None) -> dict:
     issuer = _issuer(request)
-    async with httpx.AsyncClient(timeout=5) as client:
-        response = await client.get(f"{issuer}/protocol/openid-connect/certs")
-        response.raise_for_status()
     header = jwt.get_unverified_header(token)
-    jwk = next((key for key in response.json().get("keys", []) if key.get("kid") == header.get("kid")), None)
+    jwk = next((key for key in await _jwks(request, header.get("kid")) if key.get("kid") == header.get("kid")), None)
     if not jwk:
         raise ValueError("unknown signing key")
     public_key = PyJWK.from_dict(jwk).key
@@ -66,7 +92,7 @@ async def callback(request: Request, code: str | None = None, state: str | None 
     saved = json.loads(saved)
     settings = request.app.state.settings
     async with httpx.AsyncClient(timeout=10) as client:
-        response = await client.post(f"{_issuer(request)}/protocol/openid-connect/token", data={
+        response = await client.post(f"{_backchannel(request)}/protocol/openid-connect/token", data={
             "grant_type": "authorization_code", "client_id": settings.keycloak_client_id,
             "client_secret": settings.keycloak_client_secret, "code": code,
             "redirect_uri": f"{settings.gateway_public_origin.rstrip('/')}/auth/callback",
@@ -79,6 +105,8 @@ async def callback(request: Request, code: str | None = None, state: str | None 
         identity = await verify_token(request, tokens["id_token"], audience=settings.keycloak_client_id)
         access = await verify_token(request, tokens["access_token"])
         if identity.get("nonce") != saved["nonce"] or identity.get("sub") != access.get("sub"):
+            raise ValueError("OIDC identity mismatch")
+        if access.get("azp") != settings.keycloak_client_id:  # token must have been issued to this BFF client
             raise ValueError("OIDC identity mismatch")
         stakeholder = request.app.state.stakeholder_for_claims(access)
         if not stakeholder:
@@ -108,7 +136,7 @@ async def session_context(request: Request, *, refresh: bool = True):
     if refresh and session["expires_at"] <= int(__import__("time").time()) + 60:
         settings = request.app.state.settings
         async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.post(f"{_issuer(request)}/protocol/openid-connect/token", data={
+            response = await client.post(f"{_backchannel(request)}/protocol/openid-connect/token", data={
                 "grant_type": "refresh_token", "client_id": settings.keycloak_client_id,
                 "client_secret": settings.keycloak_client_secret, "refresh_token": tokens["refresh_token"],
             })

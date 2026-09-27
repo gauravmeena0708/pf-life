@@ -26,7 +26,7 @@ async def handle_api(request: Request, path: str):
     sid = None
 
     # Public planned contracts are intentionally visible without a session.
-    if route["status"] in ("P", "?") and is_public:
+    if (route["status"] in ("P", "?") or int(route.get("phase", 1)) > 1) and is_public:
         return planned(request, route)
 
     if is_public:
@@ -71,7 +71,7 @@ async def handle_api(request: Request, path: str):
     if not is_public and principal["stakeholder"] not in route.get("callers", []):
         return problem(request, 403, "forbidden", "Forbidden")
 
-    if route["status"] in ("P", "?"):
+    if route["status"] in ("P", "?") or int(route.get("phase", 1)) > 1:
         return planned(request, route)
     if route["step_up"]:
         if not request.headers.get("x-step-up-token"):
@@ -83,7 +83,10 @@ async def handle_api(request: Request, path: str):
             grants = [g for g in request.app.state.permissions.get(principal["stakeholder"], [])]
             endpoints = [{"endpoint": g["endpoint"], "status": g["status"], "scope": g.get("scope", ""),
                           "step_up": bool(g.get("step_up", False))} for g in grants]
-            return {"stakeholder": principal["stakeholder"], "endpoints": endpoints}
+            return {"data": {"stakeholder": principal["stakeholder"], "endpoints": endpoints},
+                    "meta": {"correlation_id": request.state.correlation_id, "api_version": "v1",
+                             "source": "synthetic-poc",
+                             "as_of": __import__("datetime").datetime.now(__import__("datetime").UTC).isoformat()}}
         return planned(request, {**route, "summary": route.get("summary") or "Gateway route deferred in slice 1"})
 
     service_name = route["upstream"].removeprefix("http://").removesuffix(":8000")

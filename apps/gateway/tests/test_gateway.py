@@ -92,9 +92,9 @@ async def test_step_up_is_required_then_deferred(client):
     sid, session = await login_as(app, "member")
     cookies = {"__Host-epfo-session": sid, "epfo-csrf": session["csrf"]}
     headers = {"X-CSRF-Token": session["csrf"]}
-    missing = await http.post("/api/v1/members/me/kyc/bank-accounts", cookies=cookies, headers=headers)
+    missing = await http.patch("/api/v1/members/me/contact-details", cookies=cookies, headers=headers)
     assert missing.status_code == 428
-    deferred = await http.post("/api/v1/members/me/kyc/bank-accounts", cookies=cookies,
+    deferred = await http.patch("/api/v1/members/me/contact-details", cookies=cookies,
                                headers={**headers, "X-Step-Up-Token": "demo-token"})
     assert deferred.status_code == 501
     assert deferred.json()["detail"] == "step-up verification arrives in slice 4"
@@ -172,7 +172,9 @@ async def test_permissions_route_returns_only_callers_grants(client):
     sid, _ = await login_as(app, "ho.security")
     response = await http.get("/api/v1/security/me/permissions", cookies={"__Host-epfo-session": sid})
     assert response.status_code == 200
-    result = response.json()
+    body = response.json()
+    assert body["meta"]["source"] == "synthetic-poc"  # standard envelope (init.md §3.2)
+    result = body["data"]
     assert result["stakeholder"] == "ho.security"
     assert result["endpoints"]
     assert all("ho.security" in next(r for r in app.state.routes if r["method"] == g["endpoint"].split(" ", 1)[0]
@@ -203,7 +205,7 @@ async def test_oidc_code_callback_uses_pkce_and_validates_keycloak_jwks(client):
                 "iat": now, "exp": now + 300}
         identity = jwt.encode({**base, "aud": "epfo-bff", "nonce": saved["nonce"],
                                "name": "Synthetic Member"}, private_key, algorithm="RS256", headers={"kid": "test-key"})
-        access = jwt.encode({**base, "realm_access": {"roles": ["member"]}}, private_key,
+        access = jwt.encode({**base, "azp": "epfo-bff", "realm_access": {"roles": ["member"]}}, private_key,
                             algorithm="RS256", headers={"kid": "test-key"})
         token_exchange.mock(return_value=Response(200, json={"id_token": identity, "access_token": access,
             "refresh_token": "refresh-secret", "expires_in": 300}))
@@ -214,3 +216,52 @@ async def test_oidc_code_callback_uses_pkce_and_validates_keycloak_jwks(client):
     assert "__Host-epfo-session=" in cookie and "HttpOnly" in cookie and "Secure" in cookie and "SameSite=strict" in cookie
     assert "epfo-csrf=" in cookie
     assert await redis.get(f"oidc:state:{state}") is None
+
+
+@pytest.mark.asyncio
+async def test_oidc_callback_rejects_access_token_issued_to_another_client(client):
+    http, app, redis = client
+    private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    jwk = algorithms.RSAAlgorithm.to_jwk(private_key.public_key(), as_dict=True)
+    jwk.update({"kid": "test-key-2", "use": "sig", "alg": "RS256"})
+    with respx.mock() as router:
+        router.get("https://keycloak.example/realms/epfo-demo/protocol/openid-connect/certs").mock(
+            return_value=Response(200, json={"keys": [jwk]}))
+        token_exchange = router.post("https://keycloak.example/realms/epfo-demo/protocol/openid-connect/token")
+        login = await http.get("/auth/login", params={"persona": "member-a", "return_to": "/"})
+        from urllib.parse import parse_qs, urlparse
+        state = parse_qs(urlparse(login.headers["location"]).query)["state"][0]
+        saved = json.loads(await redis.get(f"oidc:state:{state}"))
+        now = int(time.time())
+        base = {"iss": "https://keycloak.example/realms/epfo-demo", "sub": "oidc-member", "iat": now, "exp": now + 300}
+        identity = jwt.encode({**base, "aud": "epfo-bff", "nonce": saved["nonce"]}, private_key, algorithm="RS256",
+                              headers={"kid": "test-key-2"})
+        access = jwt.encode({**base, "azp": "some-other-client", "realm_access": {"roles": ["member"]}}, private_key,
+                            algorithm="RS256", headers={"kid": "test-key-2"})
+        token_exchange.mock(return_value=Response(200, json={"id_token": identity, "access_token": access,
+                                                             "refresh_token": "r", "expires_in": 300}))
+        callback = await http.get("/auth/callback", params={"code": "c", "state": state})
+    assert callback.status_code == 401
+    assert "set-cookie" not in callback.headers
+
+
+def test_backchannel_uses_internal_keycloak_url_but_keeps_public_issuer():
+    from types import SimpleNamespace
+
+    from app.oidc import _backchannel, _issuer
+    settings = SimpleNamespace(keycloak_issuer="http://localhost:8080/realms/epfo-demo",
+                               keycloak_internal_url="http://keycloak:8080")
+    request = SimpleNamespace(app=SimpleNamespace(state=SimpleNamespace(settings=settings)))
+    assert _issuer(request) == "http://localhost:8080/realms/epfo-demo"
+    assert _backchannel(request) == "http://keycloak:8080/realms/epfo-demo"
+
+
+@pytest.mark.asyncio
+async def test_phase_2_mock_route_answers_planned_not_502(client):
+    http, app, _ = client
+    sid, session = await login_as(app, "member")
+    response = await http.post("/api/v1/members/uan-activations",
+                               cookies={"__Host-epfo-session": sid, "epfo-csrf": session["csrf"]},
+                               headers={"X-CSRF-Token": session["csrf"]})
+    assert response.status_code == 501
+    assert response.json()["type"] == "/problems/planned"
