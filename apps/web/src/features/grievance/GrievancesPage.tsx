@@ -3,11 +3,11 @@ import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 
-import { api, command, type Envelope } from "../../api/client";
+import { api, command, getCurrentPolicy, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { dateTime, stateLabel } from "../journeyB";
-import { CATEGORIES, type Grievance, type GrievanceRow } from "./types";
+import type { Grievance, GrievanceRow } from "./types";
 
 interface ClaimRow { claim_id: string; claim_type: string; state: string }
 const MAX_BYTES = 256 * 1024;
@@ -27,6 +27,8 @@ export function GrievancesPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const list = useQuery({ queryKey: ["member-grievances"], queryFn: () => api<Envelope<GrievanceRow[]>>("/api/v1/members/me/grievances"), retry: false });
+  const policy = useQuery({ queryKey: ["current-policy"], queryFn: getCurrentPolicy, retry: false });
+  const categories = policy.data?.data.grievance_categories ?? ["OTHER"];      // set in Policy administration
   const claims = useQuery({ queryKey: ["member-claims"], queryFn: () => api<Envelope<ClaimRow[]>>("/api/v1/members/me/claims"), retry: false });
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -67,8 +69,8 @@ export function GrievancesPage() {
         <div className="section-heading"><div><p className="eyebrow">01</p><h2 id="new-grievance-heading">{t("grievances.new")}</h2></div></div>
         <div className="form-row">
           <label>{t("grievances.category")}
-            <select name="category" required defaultValue="CLAIM_DELAY">
-              {CATEGORIES.map((c) => <option key={c} value={c}>{t(`grievances.categories.${c}`)}</option>)}
+            <select name="category" required defaultValue={categories.includes("CLAIM_DELAY") ? "CLAIM_DELAY" : categories[0]} key={categories.join()}>
+              {categories.map((c) => <option key={c} value={c}>{t(`grievances.categories.${c}`, { defaultValue: c.replaceAll("_", " ").toLowerCase() })}</option>)}
             </select>
           </label>
           <label>{t("grievances.linkedClaim")}

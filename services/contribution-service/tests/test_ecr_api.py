@@ -42,6 +42,8 @@ def ctx(tmp_path, monkeypatch):
     async def setup():
         async with db.engine().begin() as c:
             await c.run_sync(Base.metadata.create_all)
+            from epfo_persistence.policy import policy_metadata
+            await c.run_sync(policy_metadata.create_all)
         from app.seed import seed
         await seed()
         async with db.engine().begin() as c:
@@ -239,3 +241,25 @@ def test_claim_above_ledger_balance_is_refused(ctx):
         _deliver(on_claim_decision, {"claim_id": "CLM-2", "decision": "APPROVED", "reason_code": "x", "rule_version": "r",
                                      "amount_paise": 10**12, "account_link_id": SEED["members"][0]["account_link_id"]},
                  "ClaimDecisionRecorded.v1")
+
+
+def test_wage_ceiling_change_applies_from_its_wage_month(ctx):
+    client, q = ctx
+    import copy
+    from epfo_persistence.policy import baseline, on_policy_published
+    doc = copy.deepcopy(baseline())
+    doc["contribution"].update(eps_wage_ceiling_paise=2500000, edli_wage_ceiling_paise=2500000)
+    doc.update(rule_version="demo-rules-2026.2", effective_from="2026-10-01")
+    _deliver(on_policy_published, {"version_id": "POL-1", "rule_version": "demo-rules-2026.2", "effective_from": "2026-10-01",
+                                   "document_sha256": "x" * 64, "approved_by_role": "ho.cpfc", "document": doc}, "PolicyPublished.v1")
+    m = SEED["members"][0]
+    ee, eps = 2400, round(20000 * 0.0833)                           # ₹20,000 wages, all of it under the new ceiling
+    line = "#~#".join(map(str, [m["uan"], m["name"], 20000, 20000, 20000, 20000, ee, eps, ee - eps, 0, 0]))
+
+    def file_for(month):
+        return client.post("/api/v1/employers/me/ecr-filings", json={"wage_month": month, "format": "ECR_TXT", "content": line},
+                           headers=preparer()).json()["data"]
+    september, october = file_for("2026-09"), file_for("2026-10")
+    assert september["filing"]["rule_version"] == "demo-rules-2026.1" and september["validation_report"]["valid"] is False
+    assert any(i["code"] == "E-EPS-CEILING" for i in september["validation_report"]["issues"])
+    assert october["filing"]["rule_version"] == "demo-rules-2026.2" and october["validation_report"]["valid"] is True, october["validation_report"]["issues"]

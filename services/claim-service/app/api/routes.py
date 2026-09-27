@@ -11,13 +11,13 @@ from pydantic import BaseModel, Field
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.claims import (NEXT_STEP, OPEN_STATES, ROLE_LABELS, approval_chain, eligibility, route, ruleset,
-                               summary)
+from app.domain.claims import NEXT_STEP, OPEN_STATES, ROLE_LABELS, approval_chain, eligibility, route, summary
 from app.infra.db import sessions
 from app.infra.tables import accounts, claim_timeline, claims, office_staff, risk_flags
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit, find_response, request_hash, store_response
+from epfo_persistence.policy import rules_by_version, rules_on
 
 router = APIRouter()
 PRODUCER = "claim-service"
@@ -120,16 +120,28 @@ async def staff_office(session: AsyncSession, actor: Actor) -> str:
 
 # ── member routes ───────────────────────────────────────────────────────────────────────────────
 
+async def previous_claims(session: AsyncSession, account_link_id: str, claim_type: str) -> list[date]:
+    rows = (await session.execute(select(claims.c.created_at).where(
+        claims.c.account_link_id == account_link_id, claims.c.claim_type == claim_type,
+        claims.c.state.notin_(("REJECTED_WITH_REASON", "AWAITING_CONFIRMATION"))))).scalars().all()
+    return [r.date() for r in rows if r]
+
+
 @router.get("/api/v1/members/me/claims/eligible-types")
 async def eligible_types(actor: Actor = Depends(MEMBER), session: AsyncSession = Depends(db)) -> dict:
-    rules, today = ruleset(), date.today()
+    today = date.today()
+    rules = await rules_on(session, today)                   # the rule set in force today
     out = []
     for a in await member_accounts(session, actor.subject):
+        types = []
+        for t, spec in rules["claims"]["types"].items():
+            if spec.get("retired"):
+                continue
+            e = eligibility(a, t, rules, today, await previous_claims(session, a["account_link_id"], t))
+            types.append({k: v for k, v in e.items() if k != "trace"})
         out.append({"account_link_id": a["account_link_id"],
                     "balance": {"employee_paise": a["employee_paise"], "employer_paise": a["employer_paise"],
-                                "total_paise": a["employee_paise"] + a["employer_paise"]},
-                    "types": [{k: v for k, v in eligibility(a, t, rules, today).items() if k != "trace"}
-                              for t in rules["claims"]["types"]]})
+                                "total_paise": a["employee_paise"] + a["employer_paise"]}, "types": types})
     return envelope({"rule_version": rules["rule_version"], "illustrative_only": True,
                      "auto_settlement_limit_paise": rules["claims"]["auto_settlement_limit_paise"], "accounts": out})
 
@@ -138,12 +150,12 @@ async def eligible_types(actor: Actor = Depends(MEMBER), session: AsyncSession =
 async def create_claim(body: ClaimInput, request: Request, actor: Actor = Depends(MEMBER),
                        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
                        session: AsyncSession = Depends(db)) -> dict:
-    rules = ruleset()
-    if body.claim_type not in rules["claims"]["types"]:
-        raise Problem(422, "/problems/validation", "Unknown claim type",
-                      "Choose one of: " + ", ".join(rules["claims"]["types"]))
     operation, h = "POST /members/me/claims", request_hash(body.model_dump())
     async with session.begin():
+        rules = await rules_on(session, date.today())
+        offered = {k for k, v in rules["claims"]["types"].items() if not v.get("retired")}
+        if body.claim_type not in offered:
+            raise Problem(422, "/problems/validation", "This claim type is not offered", "Choose one of: " + ", ".join(sorted(offered)))
         if idempotency_key and (cached := await find_response(session, actor.subject, operation, idempotency_key, h)):
             return envelope(cached.body)
         account = next((a for a in await member_accounts(session, actor.subject)
@@ -153,7 +165,8 @@ async def create_claim(body: ClaimInput, request: Request, actor: Actor = Depend
         if account["frozen"]:
             raise Problem(403, "/problems/account-frozen", "This account is on hold",
                           "A new claim cannot be filed while the account is under verification. Contact your regional office.")
-        evaluation = eligibility(account, body.claim_type, rules, date.today())
+        evaluation = eligibility(account, body.claim_type, rules, date.today(),
+                                 await previous_claims(session, account["account_link_id"], body.claim_type))
         if not evaluation["eligible"]:
             raise Problem(422, "/problems/not-eligible", "You are not eligible for this claim today",
                           " ".join(evaluation["reasons"]), reasons=evaluation["reasons"])
@@ -184,8 +197,8 @@ async def create_claim(body: ClaimInput, request: Request, actor: Actor = Depend
         result = {**await claim_view(session, claim),
                   "rules_applied": {"rule_version": rules["rule_version"], "plain_rule": evaluation["plain_rule"],
                                     "max_amount_paise": evaluation["max_amount_paise"],
-                                    "route": route(body.amount_paise, rules),
-                                    "approval_chain": [ROLE_LABELS[r] for r in approval_chain(body.amount_paise, rules)]},
+                                    "route": route(body.amount_paise, rules, body.claim_type),
+                                    "approval_chain": [ROLE_LABELS[r] for r in approval_chain(body.amount_paise, rules, body.claim_type)]},
                   "confirmation": {"action": "confirm-claim", "resource_id": claim_id, "resource_version": 1,
                                    "amount_paise": body.amount_paise}}
         if idempotency_key:
@@ -195,9 +208,9 @@ async def create_claim(body: ClaimInput, request: Request, actor: Actor = Depend
 
 @router.post("/api/v1/members/me/claims/{claim_id}/confirmations")
 async def confirm_claim(claim_id: str, actor: Actor = Depends(MEMBER), session: AsyncSession = Depends(db)) -> dict:
-    rules = ruleset()
     async with session.begin():
         claim = await load_claim(session, claim_id, member=actor.subject, lock=True)
+        rules = await rules_by_version(session, claim["rule_version"])     # the rules the member was shown
         require_step_up(actor, "confirm-claim", claim_id, claim["version"], claim["amount_paise"])
         await ensure_not_frozen(session, claim, 403)
         if claim["state"] != "AWAITING_CONFIRMATION":
@@ -206,12 +219,12 @@ async def confirm_claim(claim_id: str, actor: Actor = Depends(MEMBER), session: 
         claim = await transition(session, claim, "SUBMITTED", "member", "You confirmed the claim.")
         signal = (await session.execute(select(risk_flags.c.signal_id).where(
             risk_flags.c.subject == actor.subject, risk_flags.c.status != "BENIGN"))).scalars().first()
-        path = "REVIEW" if signal else route(claim["amount_paise"], rules)
+        path = "REVIEW" if signal else route(claim["amount_paise"], rules, claim["claim_type"])
         await add_event(session, producer=PRODUCER, event_type="ClaimSubmitted.v1", aggregate_type="claim",
                         aggregate_id=claim_id, correlation_id=actor.correlation_id, payload={
                             "claim_id": claim_id, "form_type": claim["form_type"], "amount_paise": claim["amount_paise"],
                             "rule_version": claim["rule_version"], "office_id": claim["office_id"],
-                            "account_link_id": claim["account_link_id"], "route": path,
+                            "account_link_id": claim["account_link_id"], "route": path, "claim_type": claim["claim_type"],
                             "advisory_signal_id": signal})
         await notify(session, claim, "CLAIM_SUBMITTED", actor.correlation_id)
         if path == "AUTO":
@@ -220,7 +233,7 @@ async def confirm_claim(claim_id: str, actor: Actor = Depends(MEMBER), session: 
             await record_decision(session, claim, "AUTO_APPROVED", "WITHIN_AUTO_LIMIT", actor.correlation_id)
             await notify(session, claim, "CLAIM_APPROVED", actor.correlation_id)
         else:
-            chain = approval_chain(claim["amount_paise"], rules)
+            chain = approval_chain(claim["amount_paise"], rules, claim["claim_type"])
             why = (" A routine security check on recent account activity asks an officer to look at this claim; "
                    "this is not an accusation and does not change what you are entitled to.") if signal else ""
             claim = await transition(session, claim, "UNDER_REVIEW", "system",

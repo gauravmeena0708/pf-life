@@ -44,6 +44,14 @@ existed (it sorts first), and the zone dashboard computed a repository-only fall
 Phase 1 is complete: every phase-1 operation is either built or behind a labelled mock. Three phase-2 freeze
 operations moved to W as the first tier-2 process (`config/processes/member-freeze.yaml`).
 
+## Update — policy administration (27 September 2026)
+
+After adding policy administration (`/ho/config/rule-sets`) the suites were run again on the same stack:
+every unit test passes (platform-service 9 new, shared policy module 15 new, plus policy tests in claim,
+contribution, workflow and intelligence services), and 38 end-to-end and security tests pass, including
+`tests/e2e/test_policy_admin.py` (a new claim type with its own approval chain, in force today; the wage ceiling
+raised to ₹25,000 from next month).
+
 ## Known limits
 
 - Journey B spends ₹6,00,000 of member A's synthetic balance per run; after about six runs `make reset` restores it.

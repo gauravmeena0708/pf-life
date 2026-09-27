@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import grievance_case, open_case
 from app.infra.tables import cases
+from epfo_persistence.policy import on_policy_published
 
 BINDINGS = [
     "claim-service.ClaimSubmitted.v1",
@@ -16,6 +17,7 @@ BINDINGS = [
     "grievance-service.GrievanceRegistered.v1",
     "grievance-service.GrievanceEscalated.v1",
     "grievance-service.GrievanceResolved.v1",
+    "platform-service.PolicyPublished.v1",
 ]
 
 
@@ -68,6 +70,7 @@ async def on_grievance_resolved(session: AsyncSession, event: dict[str, Any]) ->
 
 
 HANDLERS = {
+    "PolicyPublished.v1": on_policy_published,
     "GrievanceRegistered.v1": on_grievance_registered,
     "GrievanceEscalated.v1": on_grievance_escalated,
     "GrievanceResolved.v1": on_grievance_resolved,

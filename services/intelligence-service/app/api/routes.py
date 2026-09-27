@@ -18,6 +18,7 @@ from app.infra.tables import risk_signals, security_events
 from epfo_auth import Actor, require_stakeholder
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit
+from epfo_persistence.policy import on_policy_published
 
 router = APIRouter()
 PRODUCER = "intelligence-service"
@@ -78,12 +79,15 @@ async def on_security_event(session: AsyncSession, event: dict[str, Any]) -> Non
 async def dispatch(session: AsyncSession, event: dict[str, Any]) -> None:
     if event["event_type"] == "SecurityEventRecorded.v1":
         await on_security_event(session, event)
+    elif event["event_type"] == "PolicyPublished.v1":
+        await on_policy_published(session, event)
     elif event["event_type"] in AI_HANDLERS:
         await AI_HANDLERS[event["event_type"]](session, event)
 
 
 BINDINGS = ["audit-service.SecurityEventRecorded.v1", "claim-service.ClaimSubmitted.v1",
-            "workflow-service.CaseDecisionSubmitted.v1", "grievance-service.GrievanceRegistered.v1"]
+            "workflow-service.CaseDecisionSubmitted.v1", "grievance-service.GrievanceRegistered.v1",
+            "platform-service.PolicyPublished.v1"]
 
 
 def _signal(r: Any) -> dict[str, Any]:

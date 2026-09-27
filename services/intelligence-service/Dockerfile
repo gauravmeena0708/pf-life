@@ -12,6 +12,7 @@ COPY services/intelligence-service/app /srv/app
 COPY services/intelligence-service/migrations /srv/migrations
 COPY services/intelligence-service/alembic.ini /srv/alembic.ini
 COPY config/ai-corpus /srv/ai-corpus
+COPY config/demo-rules.yaml /srv/demo-rules.yaml
 RUN pip install /srv
 COPY scripts/seed /srv/seed
 USER app

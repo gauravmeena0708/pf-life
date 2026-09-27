@@ -6,7 +6,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 
 | # | Interface | Coverage | Stakeholders | W | M | P | ? |
 |---|---|---|---|---|---|---|---|
-| 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 7 | 2 | 6 | 0 |
+| 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 8 | 2 | 6 | 0 |
 | 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 20 | 8 | 60 | 0 |
 | 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 26 | 7 | 48 | 0 |
 | 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 10 | 0 | 72 | 5 |
@@ -15,7 +15,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | 7 | District office | **Working** | `do.incharge`, `do.staff` | 1 | 0 | 2 | 0 |
 | 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 9 | 0 | 25 | 1 |
 | 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 10 | 0 | 3 | 0 |
-| 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 5 | 0 | 13 | 0 |
+| 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 11 | 0 | 12 | 0 |
 | 11 | NDC | **Working** | `tech.ndc`, `tech.adc`, `tech.cpps`, `tech.epfo3` | 3 | 0 | 4 | 0 |
 | 12 | Ministry | **Working** | `gov.mole`, `gov.parliament` | 3 | 0 | 0 | 0 |
 | 13 | B2B | **Mock** | `payroll_provider`, `ext.collecting_bank`, `ext.pension_bank`, `ext.mca`, `ext.shram_suvidha`, `ext.fund_manager` | 0 | 7 | 0 | 0 |
@@ -24,7 +24,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | 16 | Reporting and monitoring | **Working** | `gov.cbt`, `gov.ec`, `gov.fiac`, `gov.peic` | 1 | 0 | 2 | 0 |
 | 17 | Security | **Working** | `ho.security`, `ho.data_protection` | 8 | 0 | 3 | 0 |
 | 18 | Vigilance | **Planned** | `ho.cvo`, `zo.vigilance` | 0 | 0 | 3 | 0 |
-| 19 | Audit | **Working** | `ho.audit`, `zo.rpfc1_audit`, `zo.internal_audit`, `gov.cag`, `gov.statutory_auditor` | 2 | 0 | 7 | 0 |
+| 19 | Audit | **Working** | `ho.audit`, `zo.rpfc1_audit`, `zo.internal_audit`, `gov.cag`, `gov.statutory_auditor` | 4 | 0 | 7 | 0 |
 | 20 | UMANG | **Working** | `ext.umang` | 3 | 0 | 0 | 0 |
 | 21 | AI model / local LLM | **Working** | `tech.ai_service` | 5 | 0 | 0 | 0 |
 
@@ -37,6 +37,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /public/establishments` | W | employer | public |
 | `GET /public/establishments/{estId}` | W | employer | public |
 | `GET /public/offices` | W | workflow | public |
+| `GET /public/policy/current` | W | platform | public |
 | `GET /public/schemes` | W | reporting | public |
 | `GET /public/statistics` | W | reporting | public |
 | `POST /ai/knowledge/search` | W | intelligence | public |
@@ -420,11 +421,17 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 
 | Endpoint | Status | Owner | Called by |
 |---|---|---|---|
+| `GET /ho/config/rule-sets` | W | platform | ho.acc_hq, ho.cpfc, ho.pension |
+| `GET /ho/config/rule-sets/{versionId}` | W | platform | ho.acc_hq, ho.cpfc, ho.pension |
 | `GET /monitoring/claims` | W | reporting | ho.acc_hq, ho.cpfc, ho.edli, ho.pension |
 | `GET /monitoring/contributions` | W | reporting | ho.cpfc |
 | `GET /monitoring/data-freshness` | W | reporting | ho.cpfc |
 | `GET /monitoring/grievances` | W | reporting | ho.cpfc |
+| `POST /ho/config/rule-sets` | W | platform | ho.acc_hq |
+| `POST /ho/config/rule-sets/{versionId}/decisions` | W | platform | ho.cpfc |
+| `POST /ho/config/rule-sets/{versionId}/submissions` | W | platform | ho.acc_hq |
 | `POST /office/members/{uan}/freezes` | W | member | ho.fa_cao |
+| `PUT /ho/config/rule-sets/{versionId}` | W | platform | ho.acc_hq |
 | `GET /ho/actuarial/extracts` | P | pension | ho.actuarial |
 | `GET /ho/finance/investments` | P | reporting | ho.investment |
 | `GET /ho/reports/proceedings` | P | reporting | ho.compliance |
@@ -437,7 +444,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/accounts/interest-postings` | P | contribution | ho.fa_cao |
 | `POST /office/establishments/{estId}/freezes` | P | employer | ho.fa_cao |
 | `PUT /ho/config/interest-rates/{financialYear}` | P | contribution | ho.fa_cao |
-| `PUT /ho/config/rules/{ruleSet}` | P | contribution | ho.acc_hq, ho.pension |
 
 ### 11. NDC — Working
 
@@ -525,6 +531,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 |---|---|---|---|
 | `GET /audit/correlations/{correlationId}` | W | audit | gov.cag, ho.audit, zo.internal_audit, zo.rpfc1_audit |
 | `GET /audit/events` | W | audit | gov.cag, gov.statutory_auditor, ho.audit, zo.rpfc1_audit |
+| `GET /ho/config/rule-sets` | W | platform | ho.audit |
+| `GET /ho/config/rule-sets/{versionId}` | W | platform | ho.audit |
 | `GET /audit/concurrent/extracts` | P | audit | zo.rpfc1_audit |
 | `GET /ho/finance/balance-sheet` | P | reporting | gov.statutory_auditor |
 | `GET /office/claims/{claimId}/audit-trail` | P | claim | zo.rpfc1_audit |

@@ -12,6 +12,236 @@ servers:
 - url: http://localhost:8000/api/v1
   description: Gateway (init.md §2.4)
 paths:
+  /ho/config/rule-sets:
+    get:
+      operationId: getHoConfigRuleSets
+      summary: 'Policy administration: rule-set versions in force, scheduled, drafts and history'
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: platform
+      x-callers:
+      - ho.acc_hq
+      - ho.audit
+      - ho.cpfc
+      - ho.pension
+      x-scope: national (Head Office role)
+      security:
+      - bffSession: []
+    post:
+      operationId: postHoConfigRuleSets
+      summary: Draft a new rule-set version (wage ceilings, rates, claim types, approval matrix, auto-settlement, grievance
+        settings) f
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: platform
+      x-callers:
+      - ho.acc_hq
+      x-scope: national (Head Office role)
+      security:
+      - bffSession: []
+      description: Draft a new rule-set version (wage ceilings, rates, claim types, approval matrix, auto-settlement, grievance
+        settings) from an existing one, with an effective date
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /ho/config/rule-sets/{versionId}:
+    get:
+      operationId: getHoConfigRuleSetsVersionId
+      summary: 'One rule set: its checks, what changed from its base, and worked examples of the effect'
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: versionId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: platform
+      x-callers:
+      - ho.acc_hq
+      - ho.audit
+      - ho.cpfc
+      - ho.pension
+      x-scope: national (Head Office role)
+      security:
+      - bffSession: []
+    put:
+      operationId: putHoConfigRuleSetsVersionId
+      summary: Edit a draft (If-Match)
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: versionId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: platform
+      x-callers:
+      - ho.acc_hq
+      x-scope: national (Head Office role)
+      security:
+      - bffSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /ho/config/rule-sets/{versionId}/decisions:
+    post:
+      operationId: postHoConfigRuleSetsVersionIdDecisions
+      summary: Approve and publish (effective from its date), or return, a submitted rule set; approver ≠ drafter
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: versionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: platform
+      x-callers:
+      - ho.cpfc
+      x-scope: national (Head Office role)
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /ho/config/rule-sets/{versionId}/submissions:
+    post:
+      operationId: postHoConfigRuleSetsVersionIdSubmissions
+      summary: Submit a draft that passes every check for approval
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: versionId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: platform
+      x-callers:
+      - ho.acc_hq
+      x-scope: national (Head Office role)
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /ndc/dr/failover-drills:
     post:
       operationId: postNdcDrFailoverDrills
@@ -232,6 +462,34 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /public/policy/current:
+    get:
+      operationId: getPublicPolicyCurrent
+      summary: 'The rule set in force today: ceilings, rates, claim types and limits (public figures only)'
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: platform
+      x-callers:
+      - public
+      x-scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
+      security: []
   /training/sandboxes:
     post:
       operationId: postTrainingSandboxes

@@ -6,6 +6,7 @@
 * with the model off or failing, every endpoint answers deterministically (mode "extractive" / "rules").
 Nothing here writes to another service, approves, rejects or changes anything."""
 import secrets
+from datetime import date
 from typing import Any
 
 from fastapi import APIRouter, Depends
@@ -14,6 +15,7 @@ from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai import corpus
+from app.ai.corpus import render
 from app.ai.guard import (Citation, ClaimAnalysis, KnowledgeAnswer, ModelSummary, asks_for_other_members,
                           looks_like_injection, redact)
 from app.ai.provider import ProviderUnavailable, from_environment
@@ -22,6 +24,7 @@ from app.infra.db import sessions
 from app.infra.tables import ai_feedback, ai_interactions, claim_facts, grievance_links, office_staff, risk_signals
 from epfo_auth import Actor, require_stakeholder
 from epfo_observability import Problem, envelope, get_logger
+from epfo_persistence.policy import rules_on
 
 router = APIRouter()
 log = get_logger("intelligence-service.ai")
@@ -70,22 +73,23 @@ async def knowledge_search(body: Question, actor: Actor = Depends(require_stakeh
                    "details after signing in; for anyone else, only the member concerned can see them.",
             citations=[], uncertainty="none", mode="refused", model_id=provider.model_id)
         return envelope({**answer.model_dump(), "interaction_id": await record(session, actor, "knowledge", "refused", [])})
+    rules = await rules_on(session, date.today())            # figures in the documents come from the rules in force
     found = corpus.retrieve(body.question, actor.stakeholder)
     flagged = [p.ref for p in found if looks_like_injection(p.text)]
     usable = [p for p in found if p.ref not in flagged]
     usable.sort(key=lambda p: not p.verified)                     # verified documents first
-    citations = [Citation(ref=p.ref, title=p.title, excerpt=redact(p.text[:280]), verified=p.verified) for p in usable]
+    citations = [Citation(ref=p.ref, title=p.title, excerpt=redact(render(p.text, rules)[:280]), verified=p.verified) for p in usable]
     unverified = [p.ref for p in usable if not p.verified]
     verified = [p for p in usable if p.verified]
     uncertainty = ("No approved document answers this; ask your regional office." if not usable else
                    "Based on illustrative demonstration rules, not the official EPF Scheme." +
                    (f" Not used for the answer because unverified: {', '.join(unverified)}." if unverified else ""))
     # Only documents checked against the platform are ever quoted as the answer; unverified ones are cited, marked.
-    mode, text = "extractive", " ".join(p.text for p in verified[:2]) or "I could not find an answer in the approved documents."
+    mode, text = "extractive", " ".join(render(p.text, rules) for p in verified[:2]) or "I could not find an answer in the approved documents."
     if usable:
         # Flagged paragraphs are still shown to the model as quoted data (so the model's resistance is exercised),
         # but they are never quoted in the answer or cited.
-        sources = "\n".join(f"[{p.ref}] {p.text}" for p in found)
+        sources = "\n".join(f"[{p.ref}] {render(p.text, rules)}" for p in found)
         try:
             text = await provider.generate(SYSTEM, f"Sources:\n{sources}\n\nQuestion: {body.question}\nAnswer:")
             mode = "llm"
@@ -144,11 +148,13 @@ async def analyse_claim(body: ClaimQuestion, actor: Actor = Depends(require_stak
     guidance = corpus.retrieve("claim scrutiny checklist recommend approve risk signal", actor.stakeholder
                                if actor.stakeholder != "tech.ai_service" else "fo.da_accounts", limit=3)
     mode = "rules"
+    rules = await rules_on(session, date.today())
     try:
         raw = await provider.structured_output(
             SYSTEM + " Return JSON with keys summary (string) and uncertainties (list of strings) only.",
             "Facts (from the case record):\n- " + base["summary"] + "\nGuidance:\n" +
-            "\n".join(f"[{p.ref}] {p.text}" for p in guidance) + "\nWrite a short advisory summary for the officer.")
+            "\n".join(f"[{p.ref}] {render(p.text, rules)}" for p in guidance)
+            + "\nWrite a short advisory summary for the officer.")
         model = ModelSummary.model_validate(raw)                          # extra keys such as "action" are rejected
         base["summary"] = redact(model.summary)
         base["uncertainties"] = base["uncertainties"] + [redact(u) for u in model.uncertainties]

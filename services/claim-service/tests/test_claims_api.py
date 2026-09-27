@@ -35,6 +35,8 @@ def ctx(tmp_path, monkeypatch):
         async with db.engine().begin() as c:
             await c.run_sync(Base.metadata.create_all)
             await c.run_sync(metadata.create_all)
+            from epfo_persistence.policy import policy_metadata
+            await c.run_sync(policy_metadata.create_all)
         from app import seed
         seed.SEED_FILE = str(ROOT / "scripts" / "seed" / "synthetic.json")
         await seed.main()
@@ -296,3 +298,52 @@ def test_frozen_account_blocks_new_claims_confirmation_and_payment(ctx):
     r = client.post(f"/api/v1/office/claims/{claim_id}/payment-instructions", json={},
                     headers=hdr(CASHIER, "fo.cash", step, **{"Idempotency-Key": "f2"}))
     assert r.status_code == 200
+
+
+def _publish(deliver, change, version="demo-rules-2026.9", effective="2026-01-01"):
+    import copy
+    from epfo_persistence.policy import baseline
+    doc = copy.deepcopy(baseline())
+    change(doc)
+    doc.update(rule_version=version, effective_from=effective)
+    deliver("PolicyPublished.v1", {"version_id": "POL-T", "rule_version": version, "effective_from": effective,
+                                   "document_sha256": "x" * 64, "approved_by_role": "ho.cpfc", "document": doc}, "platform-service")
+
+
+HOUSING = {"form_type": "31", "label": "Advance for building a house", "plain_rule": "Up to 90% of your balance after 3 years of service.",
+           "requires_active_employment": True, "min_service_months": 36, "max_from": "total_balance", "max_pct_bp": 9000,
+           "once_every_months": 120, "auto_settle_up_to_paise": None,
+           "approval_bands": [{"upto_paise": None, "chain": ["fo.da_accounts", "fo.ao", "fo.apfc"]}]}
+
+
+def test_published_policy_adds_retires_and_routes_claim_types(ctx):
+    client, q, deliver = ctx
+    before = create(client, amount=100000).json()["data"]                     # made under the baseline rules
+
+    def change(d):
+        d["claims"]["types"]["ADVANCE_HOUSING"] = HOUSING
+        d["claims"]["types"]["ADVANCE_ILLNESS"]["retired"] = True
+    _publish(deliver, change)
+    types = {t["claim_type"]: t for t in client.get("/api/v1/members/me/claims/eligible-types", headers=member()).json()["data"]["accounts"][0]["types"]}
+    assert "ADVANCE_ILLNESS" not in types and types["ADVANCE_HOUSING"]["eligible"]
+    assert types["ADVANCE_HOUSING"]["max_amount_paise"] == 600000000 * 9000 // 10000
+    assert create(client, amount=100000).status_code == 422                     # retired type: no new claims
+    r = client.post("/api/v1/members/me/claims", json={"account_link_id": "AL-0001", "claim_type": "ADVANCE_HOUSING",
+                                                        "amount_paise": 100000}, headers=member())
+    d = r.json()["data"]
+    assert r.status_code == 201 and d["rule_version"] == "demo-rules-2026.9"
+    assert d["rules_applied"]["route"] == "REVIEW"                              # always reviewed, even ₹1,000
+    assert d["rules_applied"]["approval_chain"] == ["Dealing assistant (accounts)", "Accounts officer", "Assistant PF commissioner"]
+    assert confirm(client, d).json()["data"]["state"] == "UNDER_REVIEW"
+    again = client.post("/api/v1/members/me/claims", json={"account_link_id": "AL-0001", "claim_type": "ADVANCE_HOUSING",
+                                                            "amount_paise": 100000}, headers=member())
+    assert again.status_code in (409, 422)                                      # once every 120 months (or already open)
+    # The claim prepared before the change keeps its own rules: still automatic under the baseline.
+    assert before["rule_version"] == "demo-rules-2026.1"
+    assert confirm(client, before).json()["data"]["state"] == "AUTO_APPROVED"
+
+
+def test_a_future_policy_does_not_apply_before_its_date(ctx):
+    client, q, deliver = ctx
+    _publish(deliver, lambda d: d["claims"]["types"]["ADVANCE_ILLNESS"].update(retired=True), effective="2099-01-01")
+    assert create(client, amount=100000).status_code == 201

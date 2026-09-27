@@ -4,7 +4,7 @@ import uuid
 from datetime import UTC, datetime
 from sqlalchemy import text
 from app.domain.ecr import FIELDS, parse, split
-from app.api.routes import ruleset
+from epfo_persistence.policy import rules_by_version
 from epfo_persistence import add_event
 
 
@@ -27,6 +27,7 @@ async def handle_payment_confirmed(session, event):
     if exists: return
     content,_,_=parse(f["content"],f["format"])
     members=(await session.execute(text("SELECT * FROM establishment_members WHERE establishment_id=:e"), {"e":f["establishment_id"]})).mappings().all()
+    rules=await rules_by_version(session, f["rule_version"])   # the exact rules the return was validated and submitted under
     by_uan={m["uan"]:m for m in members}; postings=[]
     # Assemble member specific liabilities and establishment level charges from validated file rows.
     for line in content:
@@ -40,7 +41,7 @@ async def handle_payment_confirmed(session, event):
         import calendar
         last_day=calendar.monthrange(int(f["wage_month"][:4]),int(f["wage_month"][5:7]))[1]
         age=int(f["wage_month"][:4])-dob.year-((int(f["wage_month"][5:7]),last_day)<(dob.month,dob.day))
-        calculated=split(epf*100,eps*100,age,ruleset(),edli*100)
+        calculated=split(epf*100,eps*100,age,rules,edli*100)
         for code,amt in (("AC10_EPS",eps_share*100),("AC21_EDLI",calculated["AC21_EDLI"])):
             if amt: postings.append({"account_code":code,"side":"credit","amount_paise":amt})
     report=f["validation_report"] if isinstance(f["validation_report"],dict) else json.loads(f["validation_report"])

@@ -61,7 +61,8 @@
         "office_id",
         "account_link_id",
         "route",
-        "advisory_signal_id"
+        "advisory_signal_id",
+        "claim_type"
       ],
       "properties": {
         "claim_id": {
@@ -95,6 +96,9 @@
             "string",
             "null"
           ]
+        },
+        "claim_type": {
+          "type": "string"
         }
       }
     }

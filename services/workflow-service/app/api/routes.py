@@ -1,20 +1,16 @@
 """workflow-service: officer work queue and the claim approval chain (Journey B4–B5).
 
-A case follows `chain` (from the claim_settlement band in config/demo-rules.yaml):
+A case follows `chain` (from the approval matrix of the claim's rule version, set in Policy administration):
   step 0            fo.da_accounts records a recommendation      POST …/recommendations
   step 1            first checker (fo.ss or fo.ao) decides        POST …/decisions        (step-up)
   step 2 and later  next checker (fo.apfc or fo.oic) decides      POST …/second-approvals (step-up)
 Each officer must be posted to the case's office, hold the role whose turn it is, and be a different
 person from everyone who already acted in this round. RETURN sends the case back to step 0 and voids
 the round's approvals."""
-import os
 import secrets
 from datetime import UTC, datetime, timedelta
-from functools import lru_cache
-from pathlib import Path
 from typing import Any
 
-import yaml
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from sqlalchemy import and_, insert, or_, select, update
@@ -25,30 +21,14 @@ from app.infra.tables import case_actions, cases, office_staff, offices
 from epfo_auth import Actor, require_actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit
+from epfo_persistence.policy import approval_chain, rules_by_version, rules_on
 
 router = APIRouter()
 PRODUCER = "workflow-service"
-RULES_PATH = Path(os.getenv("RULES_FILE", "/srv/demo-rules.yaml"))
-SLA_DAYS = 20     # illustrative service standard for claim settlement
 FIRST_CHECKERS, SECOND_CHECKERS = ("fo.ss", "fo.ao"), ("fo.apfc", "fo.oic")
 OFFICERS = require_stakeholder("fo.da_accounts", "fo.ss", "fo.ao", "fo.apfc", "fo.oic", "fo.cash", "fo.pro",
                                "do.incharge", "do.staff", "zo.acc", "zo.rpfc1")
 GRIEVANCE_HANDLER = {"RO": "fo.pro", "ZO": "zo.acc", "HO": "ho.customer_service"}
-GRIEVANCE_SLA_DAYS = {"RO": 15, "ZO": 10, "HO": 7}     # same illustrative standards as grievance-service
-
-
-@lru_cache(maxsize=1)
-def ruleset() -> dict[str, Any]:
-    path = RULES_PATH if RULES_PATH.exists() else Path(__file__).resolve().parents[4] / "config" / "demo-rules.yaml"
-    with path.open() as f:
-        return yaml.safe_load(f)
-
-
-def approval_chain(amount_paise: int) -> list[str]:
-    for band in ruleset()["claims"]["approval_bands"]:
-        if band["upto_paise"] is None or amount_paise <= band["upto_paise"]:
-            return list(band["chain"])
-    raise ValueError("no approval band")
 
 
 async def db() -> AsyncSession:
@@ -283,29 +263,32 @@ async def hrm_me(actor: Actor = Depends(require_actor), session: AsyncSession = 
 async def open_case(session: AsyncSession, payload: dict[str, Any], state: str) -> None:
     if (await session.execute(select(cases.c.case_id).where(cases.c.claim_id == payload["claim_id"]))).first():
         return
-    chain = approval_chain(int(payload["amount_paise"]))
+    # The chain and service level of the rule version the claim was made under (not whatever is in force now).
+    rules = await rules_by_version(session, payload["rule_version"])
+    chain = approval_chain(rules, payload.get("claim_type", ""), int(payload["amount_paise"]))
     await session.execute(insert(cases).values(
         case_id=f"CASE-{secrets.token_hex(4).upper()}", claim_id=payload["claim_id"], office_id=payload["office_id"],
         kind="CLAIM_SETTLEMENT", form_type=payload["form_type"], account_link_id=payload["account_link_id"],
         amount_paise=payload["amount_paise"], rule_version=payload["rule_version"], chain=chain, step=0, round=1,
         advisory_signal_id=payload.get("advisory_signal_id"),
         state=state, current_role=chain[0] if state == "IN_REVIEW" else None, version=1,
-        sla_due_at=datetime.now(UTC) + timedelta(days=SLA_DAYS)))
+        sla_due_at=datetime.now(UTC) + timedelta(days=rules["claims"]["settlement_sla_days"])))
 
 
 async def grievance_case(session: AsyncSession, grievance_id: str, office_id: str, tier: str) -> None:
     """Open the grievance's case, or move it to the tier (and office) now handling it."""
     role = GRIEVANCE_HANDLER[tier]
+    sla = (await rules_on(session, datetime.now(UTC).date()))["grievances"]["sla_days"]
     existing = (await session.execute(select(cases).where(cases.c.grievance_id == grievance_id))).mappings().first()
     if existing:
         await session.execute(update(cases).where(cases.c.case_id == existing["case_id"]).values(
             office_id=office_id, current_role=role, state="OPEN", assignee_subject=None, version=existing["version"] + 1,
             chain=[*existing["chain"], role], step=existing["step"] + 1,
-            sla_due_at=datetime.now(UTC) + timedelta(days=GRIEVANCE_SLA_DAYS[tier])))
+            sla_due_at=datetime.now(UTC) + timedelta(days=sla[tier])))
         return
     await session.execute(insert(cases).values(
         case_id=f"CASE-{secrets.token_hex(4).upper()}", grievance_id=grievance_id, office_id=office_id, kind="GRIEVANCE",
         form_type="-", account_link_id="-", amount_paise=0, rule_version="-", chain=[role], step=0, round=1,
         state="OPEN", current_role=role, version=1,
-        sla_due_at=datetime.now(UTC) + timedelta(days=GRIEVANCE_SLA_DAYS[tier])))
+        sla_due_at=datetime.now(UTC) + timedelta(days=sla[tier])))
 

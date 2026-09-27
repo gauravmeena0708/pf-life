@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 dependencies = [
   "sqlalchemy[asyncio]==2.0.36",
   "aio-pika==9.4.3",
+  "PyYAML==6.0.2",
   "epfo-observability",
 ]
 
