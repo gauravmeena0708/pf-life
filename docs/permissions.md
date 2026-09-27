@@ -131,6 +131,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/passbook` | W | self — caller's own member record only |  |
 | `GET /members/me/sessions` | W | self — caller's own member record only |  |
 | `PATCH /members/me/contact-details` | W | self — caller's own member record only | yes |
+| `POST /ai/feedback` | W | caller's own permissions; advisory output only |  |
+| `POST /ai/knowledge/search` | W | caller's own permissions; advisory output only |  |
 | `POST /grievances/{grievanceId}/documents` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/escalations` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/messages` | W | complainant or the assigned office |  |
@@ -407,7 +409,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /ai/claims/analyse` | W | caller's own permissions; advisory output only |  |
+| `POST /ai/feedback` | W | caller's own permissions; advisory output only |  |
 | `POST /office/cases/{caseId}/recommendations` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/accounts/inoperative` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/claims/{claimId}/audit-trail` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/member-change-requests` | P | office jurisdiction of the caller's posting |  |
@@ -416,7 +420,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/cases/{caseId}/documents/{docId}/attestation-views` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/ecr-filings/{filingId}/rejections` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/freeze-cases/{caseId}/verifications` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/ledger-journals/{journalId}/reversals` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/member-change-requests/{requestId}/recommendations` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/pension-claims/{claimId}/input-data-sheets` | P | office jurisdiction of the caller's posting |  |
@@ -435,6 +438,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/compliance/cases` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/compliance/cases/{caseId}` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/compliance/defaulters` | P | office jurisdiction of the caller's posting |  |
@@ -443,7 +447,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/compliance/inspections/{inspectionId}/processing-notes` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/establishment-registrations/{reqId}/scrutiny-notes` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/establishments/{estId}/damages-knock-offs` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/freeze-cases/{caseId}/verifications` | P | office jurisdiction of the caller's posting |  |
 
 **`fo.ss`** — Section Supervisor (Accounts / Compliance)
 
@@ -452,8 +455,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/cases/{caseId}/decisions` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/damages-knock-offs/{knockOffId}/approvals` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/freeze-cases/{caseId}/verifications` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/member-change-requests/{requestId}/verifications` | P | office jurisdiction of the caller's posting |  |
 
 **`fo.ao`** — Accounts Officer
@@ -463,8 +466,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/cases/{caseId}/decisions` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/freeze-cases/{caseId}/verifications` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/member-change-requests/{requestId}/decisions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/member-change-requests/{requestId}/verifications` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals` | P | office jurisdiction of the caller's posting | yes |
@@ -484,6 +487,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/cases/{caseId}/second-approvals` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/members/{uan}/freezes` | W | office jurisdiction of the caller's posting | yes |
 | `GET /office/death-claims/{claimId}/shares-summary` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/claims/{claimId}/re-disbursement-approvals` | P | office jurisdiction of the caller's posting | yes |
@@ -499,9 +504,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/establishment-registrations/{reqId}/coverage-decisions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/freeze-cases/{caseId}/verifications` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/member-change-requests/{requestId}/decisions` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/members/{uan}/freezes` | P | office jurisdiction of the caller's posting | yes |
 | `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/ledger-adjustments/{adjustmentId}/approvals` | ? | office jurisdiction of the caller's posting | yes |
 
@@ -522,13 +525,14 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/cases/{caseId}/second-approvals` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/members/{uan}/defreezes` | W | office jurisdiction of the caller's posting | yes |
 | `GET /office/accounts/inoperative` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/members/{uan}/locks` | P | office jurisdiction of the caller's posting |  |
 | `POST /audit/concurrent/alerts/{alertId}/replies` | P | read-only for auditors; audit writes by audit roles only |  |
 | `POST /audit/internal/paras/{paraId}/replies` | P | read-only for auditors; audit writes by audit roles only |  |
 | `POST /office/establishments/{estId}/defreezes` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/freezes` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/members/{uan}/defreezes` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/system/locks/{lockId}/release` | P | office jurisdiction of the caller's posting | yes |
 
 **`fo.cash`** — Cashier / Cash branch
@@ -658,6 +662,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /grievances/{grievanceId}` | W | complainant or the assigned office |  |
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
+| `POST /ai/feedback` | W | caller's own permissions; advisory output only |  |
 | `POST /ai/grievances/classify` | W | caller's own permissions; advisory output only |  |
 | `POST /grievances/{grievanceId}/escalations` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/evidence-links` | W | complainant or the assigned office |  |
@@ -718,8 +723,10 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/members/{uan}/freezes` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/freezes` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/members/{uan}/freezes` | P | office jurisdiction of the caller's posting | yes |
 
 **`zo.rpfc1_audit`** — RPFC-I (Audit) and **Zonal Concurrent Audit Cell (CAC)** — daily download from the Audit Portal, alerts to ROs
 
@@ -781,9 +788,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `POST /office/members/{uan}/freezes` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/accounts/interest-postings` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/freezes` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/members/{uan}/freezes` | P | office jurisdiction of the caller's posting | yes |
 | `PUT /ho/config/interest-rates/{financialYear}` | P | national (Head Office role) | yes |
 
 **`ho.compliance`** — Compliance Division
@@ -835,6 +842,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /ai/models` | W | caller's own permissions; advisory output only |  |
 | `GET /caiu/synthetic-risk-signals` | W | CAIU role |  |
 | `POST /caiu/synthetic-risk-signals/{signalId}/reviews` | W | CAIU role |  |
 | `POST /vigilance/referrals` | P | restricted — vigilance roles only, case-by-case |  |

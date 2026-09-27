@@ -211,6 +211,7 @@ EVENTS = [
     ("GrievanceEscalated", "grievance", ["workflow", "reporting", "audit"], "grievance", 1, {"grievance_id": S, "from_tier": S, "to_tier": S, "office_id": S}),
     ("GrievanceResolved", "grievance", ["workflow", "reporting", "audit"], "grievance", 1, {"grievance_id": S, "office_id": S, "tier": {"enum": ["RO", "ZO", "HO"]}, "within_sla": B}),
     ("RiskSignalRaised", "intelligence", ["claim", "workflow", "reporting", "audit"], "risk_signal", 1, {"signal_id": S, "detection_type": S, "rule_version": S, "evidence_refs": "array", "subject_ref": S, "explanation": S}),
+    ("ProcessTransitioned", "workflow", ["member", "audit"], "process_instance", 1, {"process": S, "instance_id": S, "subject_ref": S, "from_state": {"type": ["string", "null"]}, "to_state": S, "operation": S, "data": {"type": "object"}}),
     ("RiskSignalReviewed", "intelligence", ["claim", "reporting", "audit"], "risk_signal", 1, {"signal_id": S, "subject_ref": S, "outcome": {"enum": ["CONFIRMED", "BENIGN", "NEEDS_MORE_EVIDENCE"]}}),
     ("SecurityEventRecorded", "audit", ["intelligence", "member", "gateway"], "security_event", 1, {"subject": S, "event_type": S, "device_fingerprint_hash": S}),
     ("NotificationRequested", ["claim", "grievance", "member"], ["member"], "notification", 1, {"recipient_subject": S, "template": S, "reference_id": S, "params": {"type": "object"}}),
@@ -218,8 +219,8 @@ EVENTS = [
     ("LedgerReversed", "contribution", ["reporting", "audit"], "ledger_journal", 2, {"journal_id": S, "reverses_journal_id": S, "reason": S}),
     ("PaymentScrollGenerated", "claim", ["payment-simulator", "audit"], "payment_scroll", 2, {"scroll_id": S, "claim_ids": "array", "total_paise": N}),
     ("MemberChangeApproved", "member", ["claim", "reporting", "audit"], "member_change_request", 2, {"request_id": S, "parameters": "array", "approver_subject": S}),
-    ("AccountFrozen", "member", ["gateway", "claim", "audit"], "account", 2, {"target_type": S, "target_id": S, "category": S, "order_ref": S}),
-    ("AccountDefrozen", "member", ["gateway", "claim", "audit"], "account", 2, {"target_type": S, "target_id": S, "order_ref": S}),
+    ("AccountFrozen", "member", ["gateway", "claim", "audit"], "account", 1, {"target_type": S, "target_id": S, "category": S, "order_ref": S}),
+    ("AccountDefrozen", "member", ["gateway", "claim", "audit"], "account", 1, {"target_type": S, "target_id": S, "order_ref": S}),
     ("PpoIssued", "pension", ["member", "reporting", "audit"], "pension_claim", 2, {"ppo_id": S, "pension_type": S, "office_id": S}),
     ("LifeCertificateRecorded", "pension", ["reporting", "audit"], "pensioner", 2, {"ppo_id": S, "valid_until": S, "source": S}),
     # From the Samadhan Setu integration spec (payloads converted to paise / basis points, no member identifiers)

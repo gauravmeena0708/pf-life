@@ -19,6 +19,8 @@ BINDINGS = [
     "payment-simulator.PaymentReturned.v1",
     "intelligence-service.RiskSignalRaised.v1",
     "intelligence-service.RiskSignalReviewed.v1",
+    "member-service.AccountFrozen.v1",
+    "member-service.AccountDefrozen.v1",
 ]
 
 
@@ -104,7 +106,16 @@ async def on_risk_signal(session: AsyncSession, event: dict[str, Any]) -> None:
         await session.execute(insert(risk_flags).values(signal_id=p["signal_id"], subject=p["subject_ref"], status=status))
 
 
+async def on_freeze(session: AsyncSession, event: dict[str, Any]) -> None:
+    p = event["payload"]
+    if p["target_type"] == "member":
+        await session.execute(update(accounts).where(accounts.c.uan == p["target_id"]).values(
+            frozen=event["event_type"] == "AccountFrozen.v1"))
+
+
 HANDLERS = {
+    "AccountFrozen.v1": on_freeze,
+    "AccountDefrozen.v1": on_freeze,
     "RiskSignalRaised.v1": on_risk_signal,
     "RiskSignalReviewed.v1": on_risk_signal,
     "ContributionPosted.v1": on_contribution_posted,

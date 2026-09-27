@@ -96,6 +96,14 @@ async def claim_view(session: AsyncSession, claim: dict[str, Any]) -> dict[str, 
     }
 
 
+async def ensure_not_frozen(session: AsyncSession, claim: dict[str, Any], status: int) -> None:
+    frozen = (await session.execute(select(accounts.c.frozen).where(
+        accounts.c.account_link_id == claim["account_link_id"]))).scalar_one_or_none()
+    if frozen:
+        raise Problem(status, "/problems/account-frozen", "The account is frozen",
+                      "Nothing is paid or confirmed while the account is under verification (FIA SOP, illustrative).")
+
+
 async def member_accounts(session: AsyncSession, subject: str) -> list[dict[str, Any]]:
     rows = (await session.execute(select(accounts).where(accounts.c.member_subject == subject)
                                   .order_by(accounts.c.account_link_id))).mappings().all()
@@ -142,6 +150,9 @@ async def create_claim(body: ClaimInput, request: Request, actor: Actor = Depend
                         if a["account_link_id"] == body.account_link_id), None)
         if not account:
             raise Problem(404, "/problems/not-found", "Account not found")
+        if account["frozen"]:
+            raise Problem(403, "/problems/account-frozen", "This account is on hold",
+                          "A new claim cannot be filed while the account is under verification. Contact your regional office.")
         evaluation = eligibility(account, body.claim_type, rules, date.today())
         if not evaluation["eligible"]:
             raise Problem(422, "/problems/not-eligible", "You are not eligible for this claim today",
@@ -188,6 +199,7 @@ async def confirm_claim(claim_id: str, actor: Actor = Depends(MEMBER), session: 
     async with session.begin():
         claim = await load_claim(session, claim_id, member=actor.subject, lock=True)
         require_step_up(actor, "confirm-claim", claim_id, claim["version"], claim["amount_paise"])
+        await ensure_not_frozen(session, claim, 403)
         if claim["state"] != "AWAITING_CONFIRMATION":
             raise Problem(409, "/problems/invalid-state", "This claim is already confirmed",
                           f"Current status: {claim['state']}.")
@@ -272,6 +284,7 @@ async def _cash_command(claim_id: str, action: str, allowed: set[str], body: Pay
         if claim["state"] not in allowed:
             raise Problem(409, "/problems/invalid-state", "The claim is not ready for this payment step",
                           f"Current status: {claim['state']}.")
+        await ensure_not_frozen(session, claim, 409)
         if not claim["debit_journal_id"]:
             raise Problem(409, "/problems/ledger-debit-pending", "The ledger debit is not posted yet",
                           "The member's account is being debited; try again in a few seconds.")

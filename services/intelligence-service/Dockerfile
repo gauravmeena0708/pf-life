@@ -11,6 +11,7 @@ COPY services/intelligence-service/pyproject.toml /srv/pyproject.toml
 COPY services/intelligence-service/app /srv/app
 COPY services/intelligence-service/migrations /srv/migrations
 COPY services/intelligence-service/alembic.ini /srv/alembic.ini
+COPY config/ai-corpus /srv/ai-corpus
 RUN pip install /srv
 COPY scripts/seed /srv/seed
 USER app

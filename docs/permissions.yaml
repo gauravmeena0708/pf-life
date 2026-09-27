@@ -165,6 +165,18 @@ stakeholders:
     step_up: true
     via:
     - F02.self_service
+  - endpoint: POST /ai/knowledge/search
+    status: W
+    scope: caller's own permissions; advisory output only
+    step_up: false
+    via:
+    - F02.self_service
+  - endpoint: POST /ai/feedback
+    status: W
+    scope: caller's own permissions; advisory output only
+    step_up: false
+    via:
+    - F02.self_service
   - endpoint: POST /members/me/joint-declarations
     status: P
     scope: self — caller's own member record only
@@ -1285,6 +1297,12 @@ stakeholders:
     step_up: false
     via:
     - F04.process
+  - endpoint: POST /ai/feedback
+    status: W
+    scope: caller's own permissions; advisory output only
+    step_up: false
+    via:
+    - F04.process
   - endpoint: POST /office/cases/{caseId}/documents/{docId}/attestation-views
     status: P
     scope: office jurisdiction of the caller's posting
@@ -1334,7 +1352,7 @@ stakeholders:
     via:
     - F07.verify_member
   - endpoint: POST /office/freeze-cases/{caseId}/verifications
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1407,7 +1425,7 @@ stakeholders:
     via:
     - F06.report_process
   - endpoint: POST /office/freeze-cases/{caseId}/verifications
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1444,7 +1462,7 @@ stakeholders:
     via:
     - F04.approve_ss
   - endpoint: POST /office/freeze-cases/{caseId}/verifications
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1487,7 +1505,7 @@ stakeholders:
     via:
     - F05.ids_approve
   - endpoint: POST /office/freeze-cases/{caseId}/verifications
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1639,13 +1657,13 @@ stakeholders:
     via:
     - F06.prosecution
   - endpoint: POST /office/members/{uan}/freezes
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F07.freeze_ro_member
   - endpoint: POST /office/freeze-cases/{caseId}/verifications
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1719,8 +1737,14 @@ stakeholders:
     step_up: true
     via:
     - F07.freeze_ro_est
+  - endpoint: POST /office/freeze-cases/{caseId}/verifications
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F07.defreeze
   - endpoint: POST /office/members/{uan}/defreezes
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -2130,6 +2154,12 @@ stakeholders:
     step_up: false
     via:
     - F08.triage
+  - endpoint: POST /ai/feedback
+    status: W
+    scope: caller's own permissions; advisory output only
+    step_up: false
+    via:
+    - F08.triage
   - endpoint: POST /office/rti-requests/{requestId}/replies
     status: P
     scope: office jurisdiction of the caller's posting
@@ -2238,8 +2268,20 @@ stakeholders:
     via:
     - F13.zo
   zo.rpfc1:
+  - endpoint: GET /office/work-queue
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F07.freeze_zo
+  - endpoint: GET /office/cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F07.freeze_zo
   - endpoint: POST /office/members/{uan}/freezes
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -2379,7 +2421,7 @@ stakeholders:
     via:
     - F03.interest
   - endpoint: POST /office/members/{uan}/freezes
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -2467,6 +2509,12 @@ stakeholders:
   - endpoint: POST /caiu/synthetic-risk-signals/{signalId}/reviews
     status: W
     scope: CAIU role
+    step_up: false
+    via:
+    - F06.detect
+  - endpoint: GET /ai/models
+    status: W
+    scope: caller's own permissions; advisory output only
     step_up: false
     via:
     - F06.detect

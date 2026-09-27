@@ -21,6 +21,7 @@ export const PERSONAS: Persona[] = [
   { username: "ro-cashier", label: "Cashier", role: "fo.cash" },
   { username: "ro-pro", label: "Grievance officer / PRO", role: "fo.pro" },
   { username: "zo-acc", label: "Zonal supervisor (ACC)", role: "zo.acc" },
+  { username: "zo-rpfc", label: "Zonal RPFC-I (freeze orders)", role: "zo.rpfc1" },
   { username: "ho-analyst", label: "Head Office analyst", role: "ho.cpfc" },
   { username: "ndc-operator", label: "NDC operator", role: "tech.ndc" },
   { username: "ministry-viewer", label: "Ministry aggregate viewer", role: "gov.mole" },

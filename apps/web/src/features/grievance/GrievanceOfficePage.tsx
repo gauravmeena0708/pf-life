@@ -10,6 +10,7 @@ import { dateTime, stateLabel } from "../journeyB";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 import { GrievanceThread } from "./GrievanceThread";
+import { TriageSuggestion } from "./TriageSuggestion";
 import type { Grievance } from "./types";
 
 const TIER_OF: Record<string, string> = { "fo.pro": "RO", "zo.acc": "ZO" };
@@ -77,6 +78,7 @@ export function GrievanceOfficePage() {
             </dl>
             {!handling && !["RESOLVED", "CLOSED"].includes(g.state) ? <p className="demo-tip">This grievance is currently handled at the {g.tier} tier. You can read it but not act on it.</p> : null}
           </section>
+          {role === "fo.pro" ? <TriageSuggestion text={`${g.subject}. ${g.description}`} current={g.category} /> : null}
           <GrievanceThread grievance={g} viewer="office" />
           {handling ? (
             <div className="activity-columns">

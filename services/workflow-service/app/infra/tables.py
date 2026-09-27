@@ -29,6 +29,8 @@ cases = Table(
     Column("claim_id", String(40), unique=True),             # set for claim cases
     Column("grievance_id", String(40), unique=True),         # set for grievance cases
     Column("advisory_signal_id", String(40)),                # an open advisory risk signal the officer should see
+    Column("process", String(60)),                           # tier-2 process name (ADR-0005), for engine cases
+    Column("subject_ref", String(40), index=True),           # what the process is about, e.g. a UAN
     Column("office_id", String(40), nullable=False, index=True),
     Column("kind", String(40), nullable=False),
     Column("form_type", String(10), nullable=False),
@@ -59,4 +61,12 @@ case_actions = Table(
     Column("approval_level", Integer),
     Column("reason", Text),
     Column("checks", JSON),
+)
+
+# Which office a process subject belongs to (synthetic seed), so the engine can enforce jurisdiction.
+subject_offices = Table(
+    "subject_offices", metadata,
+    Column("subject_ref", String(40), primary_key=True),
+    Column("office_id", String(40), nullable=False),
+    Column("zone_id", String(40)),
 )

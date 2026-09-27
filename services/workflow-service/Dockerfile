@@ -12,6 +12,7 @@ COPY services/workflow-service/app /srv/app
 COPY services/workflow-service/migrations /srv/migrations
 COPY services/workflow-service/alembic.ini /srv/alembic.ini
 COPY config/demo-rules.yaml /srv/demo-rules.yaml
+COPY config/processes /srv/processes
 RUN pip install /srv
 COPY scripts/seed /srv/seed
 USER app

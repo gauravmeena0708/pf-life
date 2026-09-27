@@ -59,6 +59,8 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/passbook` | W |
 | `GET /members/me/sessions` | W |
 | `PATCH /members/me/contact-details` | W |
+| `POST /ai/feedback` | W |
+| `POST /ai/knowledge/search` | W |
 | `POST /grievances/{grievanceId}/documents` | W |
 | `POST /grievances/{grievanceId}/escalations` | W |
 | `POST /grievances/{grievanceId}/messages` | W |
@@ -385,7 +387,9 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/work-queue` | W |
 | `POST /ai/claims/analyse` | W |
+| `POST /ai/feedback` | W |
 | `POST /office/cases/{caseId}/recommendations` | W |
+| `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `GET /office/accounts/inoperative` | P |
 | `GET /office/claims/{claimId}/audit-trail` | P |
 | `GET /office/member-change-requests` | P |
@@ -394,7 +398,6 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /office/cases/{caseId}/documents/{docId}/attestation-views` | P |
 | `POST /office/ecr-filings/{filingId}/rejections` | P |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P |
-| `POST /office/freeze-cases/{caseId}/verifications` | P |
 | `POST /office/ledger-journals/{journalId}/reversals` | P |
 | `POST /office/member-change-requests/{requestId}/recommendations` | P |
 | `POST /office/pension-claims/{claimId}/input-data-sheets` | P |
@@ -417,6 +420,7 @@ Activities: **F01.olre_scrutiny** Scrutinise documents of a newly registered est
 
 | Endpoint | Status |
 |---|---|
+| `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `GET /office/compliance/cases` | P |
 | `GET /office/compliance/cases/{caseId}` | P |
 | `GET /office/compliance/defaulters` | P |
@@ -425,7 +429,6 @@ Activities: **F01.olre_scrutiny** Scrutinise documents of a newly registered est
 | `POST /office/compliance/inspections/{inspectionId}/processing-notes` | P |
 | `POST /office/establishment-registrations/{reqId}/scrutiny-notes` | P |
 | `POST /office/establishments/{estId}/damages-knock-offs` | P |
-| `POST /office/freeze-cases/{caseId}/verifications` | P |
 
 #### `fo.ss` — Section Supervisor (Accounts / Compliance)
 
@@ -436,8 +439,8 @@ Activities: **F02.jd_verify** Verifier (SS route): cross-check and recommend; **
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/decisions` | W |
+| `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/damages-knock-offs/{knockOffId}/approvals` | P |
-| `POST /office/freeze-cases/{caseId}/verifications` | P |
 | `POST /office/member-change-requests/{requestId}/verifications` | P |
 
 #### `fo.ao` — Accounts Officer
@@ -449,8 +452,8 @@ Activities: **F02.jd_verify_ao** Verifier (AO route): cross-check and recommend;
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/decisions` | W |
+| `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P |
-| `POST /office/freeze-cases/{caseId}/verifications` | P |
 | `POST /office/member-change-requests/{requestId}/decisions` | P |
 | `POST /office/member-change-requests/{requestId}/verifications` | P |
 | `POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals` | P |
@@ -474,6 +477,8 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
+| `POST /office/freeze-cases/{caseId}/verifications` | W |
+| `POST /office/members/{uan}/freezes` | W |
 | `GET /office/death-claims/{claimId}/shares-summary` | P |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P |
 | `POST /office/claims/{claimId}/re-disbursement-approvals` | P |
@@ -489,9 +494,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/establishment-registrations/{reqId}/coverage-decisions` | P |
 | `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | P |
 | `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` | P |
-| `POST /office/freeze-cases/{caseId}/verifications` | P |
 | `POST /office/member-change-requests/{requestId}/decisions` | P |
-| `POST /office/members/{uan}/freezes` | P |
 | `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | P |
 | `POST /office/ledger-adjustments/{adjustmentId}/approvals` | ? |
 
@@ -516,13 +519,14 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
+| `POST /office/freeze-cases/{caseId}/verifications` | W |
+| `POST /office/members/{uan}/defreezes` | W |
 | `GET /office/accounts/inoperative` | P |
 | `GET /office/members/{uan}/locks` | P |
 | `POST /audit/concurrent/alerts/{alertId}/replies` | P |
 | `POST /audit/internal/paras/{paraId}/replies` | P |
 | `POST /office/establishments/{estId}/defreezes` | P |
 | `POST /office/establishments/{estId}/freezes` | P |
-| `POST /office/members/{uan}/defreezes` | P |
 | `POST /office/system/locks/{lockId}/release` | P |
 
 #### `fo.cash` — Cashier / Cash branch
@@ -686,6 +690,7 @@ Activities: **F08.triage** Triage, assign, reply with evidence, lodge local grie
 | `GET /grievances/{grievanceId}` | W |
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/work-queue` | W |
+| `POST /ai/feedback` | W |
 | `POST /ai/grievances/classify` | W |
 | `POST /grievances/{grievanceId}/escalations` | W |
 | `POST /grievances/{grievanceId}/evidence-links` | W |
@@ -756,8 +761,10 @@ Activities: **F07.freeze_zo** Order freezing (Categories B / C) at zone level
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/cases/{caseId}` | W |
+| `GET /office/work-queue` | W |
+| `POST /office/members/{uan}/freezes` | W |
 | `POST /office/establishments/{estId}/freezes` | P |
-| `POST /office/members/{uan}/freezes` | P |
 
 #### `zo.rpfc1_audit` — RPFC-I (Audit) and **Zonal Concurrent Audit Cell (CAC)** — daily download from the Audit Portal, alerts to ROs
 
@@ -834,9 +841,9 @@ Activities: **F03.interest** Record the approved annual interest rate and run in
 
 | Endpoint | Status |
 |---|---|
+| `POST /office/members/{uan}/freezes` | W |
 | `POST /office/accounts/interest-postings` | P |
 | `POST /office/establishments/{estId}/freezes` | P |
-| `POST /office/members/{uan}/freezes` | P |
 | `PUT /ho/config/interest-rates/{financialYear}` | P |
 
 #### `ho.compliance` — Compliance Division
@@ -904,6 +911,7 @@ Activities: **F06.detect** Analyse data and allocate risk-based inspections / ri
 
 | Endpoint | Status |
 |---|---|
+| `GET /ai/models` | W |
 | `GET /caiu/synthetic-risk-signals` | W |
 | `POST /caiu/synthetic-risk-signals/{signalId}/reviews` | W |
 | `POST /vigilance/referrals` | P |

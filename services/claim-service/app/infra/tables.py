@@ -1,5 +1,5 @@
 """Tables owned by claim-service (created by migration 0002)."""
-from sqlalchemy import JSON, BigInteger, Column, Date, DateTime, Integer, MetaData, String, Table, Text, func
+from sqlalchemy import JSON, BigInteger, Boolean, Column, Date, DateTime, Integer, MetaData, String, Table, Text, false as sa_false, func
 
 from app.infra.models import IdType
 
@@ -17,6 +17,8 @@ accounts = Table(
     Column("date_of_exit", Date),
     Column("employee_paise", BigInteger, nullable=False, server_default="0"),
     Column("employer_paise", BigInteger, nullable=False, server_default="0"),
+    Column("uan", String(12), index=True),
+    Column("frozen", Boolean, nullable=False, server_default=sa_false()),   # from AccountFrozen.v1 / AccountDefrozen.v1
 )
 
 # Office staff directory (synthetic seed): which office an officer acts for.

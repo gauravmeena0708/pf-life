@@ -17,6 +17,7 @@ members = Table(
     Column("bank_ifsc", String(20), nullable=False),
     Column("bank_account_last4", String(4), nullable=False),
     Column("kyc", JSON, nullable=False),
+    Column("account_state", String(20), nullable=False, server_default="ACTIVE"),   # ACTIVE | FROZEN (member_freeze process)
     Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
 )
 

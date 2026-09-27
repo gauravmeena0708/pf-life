@@ -277,3 +277,22 @@ def test_benign_review_restores_automatic_settlement(ctx):
     r = confirm(client, create(client, amount=5000000).json()["data"])
     assert r.json()["data"]["state"] == "AUTO_APPROVED"
     assert events(q, "ClaimSubmitted.v1")[0]["advisory_signal_id"] is None
+
+
+def test_frozen_account_blocks_new_claims_confirmation_and_payment(ctx):
+    client, q, deliver = ctx
+    claim_id = _approved_claim(client, deliver)
+    deliver("ClaimDebitPosted.v1", {"journal_id": "J1", "claim_id": claim_id, "postings": [
+        {"account_code": "CLAIMS_PAYABLE", "side": "credit", "amount_paise": JOURNEY_B_AMOUNT}]}, "contribution-service")
+    uan = SEED["members"][0]["uan"]
+    deliver("AccountFrozen.v1", {"target_type": "member", "target_id": uan, "category": "B", "order_ref": "ORD-1"}, "member-service")
+    r = create(client, amount=100000)                                               # DENY-15
+    assert r.status_code == 403 and r.json()["type"] == "/problems/account-frozen"
+    step = {"action": "instruct-payment", "resource_id": claim_id, "amount_paise": JOURNEY_B_AMOUNT}
+    r = client.post(f"/api/v1/office/claims/{claim_id}/payment-instructions", json={},
+                    headers=hdr(CASHIER, "fo.cash", step, **{"Idempotency-Key": "f1"}))   # DENY-22
+    assert r.status_code == 409 and r.json()["type"] == "/problems/account-frozen"
+    deliver("AccountDefrozen.v1", {"target_type": "member", "target_id": uan, "order_ref": "CASE-1"}, "member-service")
+    r = client.post(f"/api/v1/office/claims/{claim_id}/payment-instructions", json={},
+                    headers=hdr(CASHIER, "fo.cash", step, **{"Idempotency-Key": "f2"}))
+    assert r.status_code == 200
