@@ -1,0 +1,453 @@
+<title>EPFO Stakeholder Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F2F4F1; --surface:#FFFFFF; --surface-2:#E7ECE6; --ink:#17223B; --ink-2:#4B5667; --ink-3:#77818C;
+  --line:#D3D9D2; --line-2:#BCC5BD; --accent:#0E6E6A; --accent-ink:#FFFFFF; --accent-weak:#D5EAE7;
+  --edge:#8C979B; --edge-hi:#0E6E6A; --fut:#7B4A92;
+  --w:#2F7D43; --w-bg:#DCEEE0; --m:#2F5DA8; --m-bg:#DEE7F6; --p:#5E6672; --p-bg:#E6E9EC; --q:#9A5704; --q-bg:#F6E7CF;
+  --g0:#2F7D6E; --g1:#3E5FA3; --g2:#8A5A2B; --g3:#6A4C93; --g4:#A0445A; --g5:#4D7A2E; --g6:#2C6F95; --g7:#7A6A2A; --g8:#5A6470; --g9:#8E4F2F;
+  --shadow:0 1px 2px rgba(23,34,59,.06),0 4px 14px rgba(23,34,59,.06);
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif; --body:"IBM Plex Sans","Segoe UI",Roboto,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0F1417; --surface:#161D21; --surface-2:#1D272C; --ink:#E4EBE8; --ink-2:#A3B0B4; --ink-3:#7C898E;
+    --line:#29353B; --line-2:#3A474D; --accent:#4DB6AE; --accent-ink:#0B1B1A; --accent-weak:#16393A;
+    --edge:#5F6D72; --edge-hi:#4DB6AE; --fut:#C29AD8;
+    --w:#7CCB8E; --w-bg:#183424; --m:#8FB1EC; --m-bg:#1B2B45; --p:#AEB6BF; --p-bg:#262E35; --q:#E5AE5C; --q-bg:#3A2A12;
+    --g0:#5DBBA8; --g1:#8AA6E6; --g2:#D09B66; --g3:#AE92D6; --g4:#E08A9E; --g5:#98C36F; --g6:#6FB5DA; --g7:#CDBA6A; --g8:#A6B0BA; --g9:#DB9573;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 16px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0F1417; --surface:#161D21; --surface-2:#1D272C; --ink:#E4EBE8; --ink-2:#A3B0B4; --ink-3:#7C898E;
+  --line:#29353B; --line-2:#3A474D; --accent:#4DB6AE; --accent-ink:#0B1B1A; --accent-weak:#16393A;
+  --edge:#5F6D72; --edge-hi:#4DB6AE; --fut:#C29AD8;
+  --w:#7CCB8E; --w-bg:#183424; --m:#8FB1EC; --m-bg:#1B2B45; --p:#AEB6BF; --p-bg:#262E35; --q:#E5AE5C; --q-bg:#3A2A12;
+  --g0:#5DBBA8; --g1:#8AA6E6; --g2:#D09B66; --g3:#AE92D6; --g4:#E08A9E; --g5:#98C36F; --g6:#6FB5DA; --g7:#CDBA6A; --g8:#A6B0BA; --g9:#DB9573;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 16px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 var(--body);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.app{display:grid;grid-template-rows:auto 1fr;height:100%;padding-inline:16px}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding-block:14px 12px;border-bottom:1px solid var(--line)}
+.brand{display:flex;flex-direction:column;gap:2px;margin-right:auto;min-width:0}
+.brand h1{font:800 20px/1.1 var(--display);letter-spacing:-.01em;margin:0;text-wrap:balance}
+.brand p{margin:0;color:var(--ink-2);font-size:12.5px}
+.tabs{display:flex;gap:4px;background:var(--surface-2);padding:3px;border-radius:9px}
+.tabs button{border:0;background:transparent;padding:6px 12px;border-radius:7px;cursor:pointer;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.search{position:relative;flex:0 1 260px;min-width:160px}
+.search input{width:100%;border:1px solid var(--line-2);background:var(--surface);border-radius:8px;padding:7px 10px 7px 30px}
+.search svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:14px;height:14px;fill:none;stroke:var(--ink-3);stroke-width:2}
+.stats{display:flex;gap:18px;flex-wrap:wrap;color:var(--ink-2);font-size:12px;width:100%}
+.stats b{font:700 15px var(--display);color:var(--ink);font-variant-numeric:tabular-nums;margin-right:4px}
+.body{display:grid;grid-template-columns:290px minmax(0,1fr);gap:20px;min-height:0;padding-block:16px}
+aside.side{min-height:0;overflow:auto;border-right:1px solid var(--line);padding-right:14px}
+main{min-width:0;min-height:0;overflow:auto;padding-bottom:40px}
+.side h3{font:700 11px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:16px 0 6px;display:flex;align-items:center;gap:8px}
+.side h3:first-child{margin-top:0}
+.side h3 .dot{width:8px;height:8px;border-radius:2px}
+.item{display:flex;align-items:baseline;gap:8px;width:100%;text-align:left;border:0;background:transparent;padding:5px 8px;border-radius:6px;cursor:pointer;color:var(--ink)}
+.item:hover{background:var(--surface-2)}
+.item[aria-current="true"]{background:var(--accent-weak);color:var(--ink);font-weight:600}
+.item .n{margin-left:auto;color:var(--ink-3);font-size:11.5px;font-variant-numeric:tabular-nums;white-space:nowrap;flex:none}
+.item .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item.fut .nm{font-style:italic}
+.mobile-pick{display:none}
+.eyebrow{font:700 11px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+h2.title{font:800 26px/1.15 var(--display);margin:4px 0 6px;text-wrap:balance;letter-spacing:-.01em}
+.lede{color:var(--ink-2);margin:0 0 14px;max-width:72ch}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line-2);border-radius:999px;padding:1px 9px;font-size:12px;color:var(--ink-2);background:var(--surface)}
+.chip.fut{border-style:dashed;border-color:var(--fut);color:var(--fut)}
+.chip code{font-family:var(--mono);font-size:11.5px}
+.st{display:inline-block;min-width:28px;text-align:center;border-radius:5px;padding:0 5px;font:600 11px/18px var(--mono)}
+.st.W{color:var(--w);background:var(--w-bg)} .st.M{color:var(--m);background:var(--m-bg)} .st.P{color:var(--p);background:var(--p-bg)} .st.Q{color:var(--q);background:var(--q-bg)}
+.ev{font:600 10.5px var(--mono);border-radius:4px;padding:0 4px;border:1px solid var(--line-2);color:var(--ink-3)}
+.ev.V{color:var(--w);border-color:currentColor}.ev.U{color:var(--q);border-color:currentColor}
+.summary{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px;min-width:110px}
+.kpi b{display:block;font:800 22px/1.1 var(--display);font-variant-numeric:tabular-nums}
+.kpi span{font-size:12px;color:var(--ink-2)}
+section.block{margin-top:22px}
+section.block>h4{font:700 15px var(--display);margin:0 0 10px}
+.acts{display:grid;gap:10px}
+.act{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:8px}
+.act.fut{border-style:dashed;border-color:var(--fut)}
+.act .hd{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.act .id{font:500 12px var(--mono);color:var(--ink-3)}
+.act .flow{font-size:12px;border:0;background:var(--surface-2);border-radius:5px;padding:1px 7px;cursor:pointer;color:var(--ink-2)}
+.act .does{font-weight:600;font-size:14.5px}
+.act .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:var(--ink-2)}
+.act .row>span.lbl{font:700 10.5px var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);min-width:58px}
+.ep{display:inline-flex;align-items:center;gap:6px;background:var(--surface-2);border-radius:6px;padding:2px 7px 2px 3px;font:12px var(--mono);color:var(--ink);max-width:100%;overflow-wrap:anywhere}
+.link{border:0;background:none;padding:0;color:var(--accent);cursor:pointer;text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--accent) 35%,transparent);text-underline-offset:2px;font-size:12.5px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:700 10.5px var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+td.mono{font-family:var(--mono);white-space:nowrap}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 12px}
+.filters label{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-2);cursor:pointer}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--ink-2);margin:6px 0 12px}
+.legend .sw{display:inline-block;width:22px;height:0;border-top:2px solid var(--edge);vertical-align:middle;margin-right:5px}
+.legend .sw.fut{border-top:2px dashed var(--fut)}
+/* swimlane */
+.lanewrap{position:relative;overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface);max-height:calc(100vh - 250px);min-height:300px}
+.lanes{position:relative;display:grid;min-width:max-content}
+.lane-label{position:sticky;left:0;z-index:2;background:var(--surface);border-right:1px solid var(--line);padding:10px 12px;display:flex;flex-direction:column;justify-content:center;gap:2px;width:190px}
+.lane-label b{font:700 12.5px/1.25 var(--display)}
+.lane-label small{color:var(--ink-3);font:11px var(--mono)}
+.lane-label .bar{position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:2px}
+.cell{padding:10px 24px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px;justify-content:center;min-height:74px}
+.lane-row-bg{border-bottom:1px solid var(--line)}
+.node{position:relative;z-index:1;width:210px;background:var(--surface);border:1px solid var(--line-2);border-radius:9px;padding:7px 9px;text-align:left;cursor:pointer;display:grid;gap:3px;box-shadow:var(--shadow)}
+.node:hover{border-color:var(--accent)}
+.node.fut{border-style:dashed;border-color:var(--fut)}
+.node.sel{outline:2px solid var(--accent);outline-offset:1px}
+.node.dim{opacity:.32}
+.node.hit{background:var(--accent-weak)}
+.node .nid{font:500 10.5px var(--mono);color:var(--ink-3);display:flex;gap:6px;align-items:center}
+.node .nd{font-size:12.5px;line-height:1.3;font-weight:500}
+.node .out{font-size:11px;color:var(--accent)}
+svg.edges{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:visible}
+svg.edges path{fill:none;stroke:var(--edge);stroke-width:1.4}
+svg.edges path.hi{stroke:var(--edge-hi);stroke-width:2.2}
+svg.edges path.dim{opacity:.18}
+svg.edges marker path{fill:var(--edge);stroke:none}
+svg.edges marker#arrHi path{fill:var(--edge-hi)}
+.detail{margin-top:14px}
+/* chains */
+.chains{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr))}
+.chain{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.chain h4{font:700 15px var(--display);margin:0 0 2px}
+.chain .src{font:11.5px var(--mono);color:var(--ink-3)}
+.band{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.band:first-of-type{border-top:0}
+.amt{font:600 12.5px var(--mono);font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.steps{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.step{border:1px solid var(--line-2);background:var(--surface-2);border-radius:6px;padding:2px 8px;font-size:12px;cursor:pointer}
+.step:hover{border-color:var(--accent)}
+.arrow{color:var(--ink-3);font-size:12px}
+.note{font-size:12.5px;color:var(--ink-2);margin-top:8px}
+.foot{font-size:12px;color:var(--ink-3);margin-top:26px;max-width:80ch}
+.empty{color:var(--ink-3);padding:20px 0}
+@media (max-width:820px){
+  .body{grid-template-columns:1fr}
+  aside.side{display:none}
+  .mobile-pick{display:block;margin-bottom:12px}
+  .mobile-pick select{width:100%;padding:8px;border:1px solid var(--line-2);border-radius:8px;background:var(--surface)}
+  .search{flex:1 1 100%}
+  .lane-label{width:130px}
+  .lanewrap{max-height:none}
+}
+@media (prefers-reduced-motion:no-preference){.node,.item,.tabs button{transition:background .15s,border-color .15s,opacity .15s}}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <h1>EPFO Stakeholder Atlas</h1>
+      <p>Who does what across the EPFO platform, who acts next, and which APIs each role needs.</p>
+    </div>
+    <div class="tabs" role="tablist" aria-label="Views">
+      <button role="tab" id="tab-stakeholders" aria-selected="true" data-view="stakeholders">Stakeholders</button>
+      <button role="tab" id="tab-lifecycles" aria-selected="false" data-view="lifecycles">Lifecycles</button>
+      <button role="tab" id="tab-chains" aria-selected="false" data-view="chains">Approval chains</button>
+    </div>
+    <label class="search" for="q">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Search roles, activities, endpoints" autocomplete="off">
+    </label>
+    <div class="stats" id="stats"></div>
+  </header>
+  <div class="body">
+    <aside class="side" id="side" aria-label="Navigation"></aside>
+    <main id="main"></main>
+  </div>
+</div>
+
+<script>
+const DATA = /*DATA*/null;
+
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const stClass = s => s === "?" ? "Q" : s;
+const stName = {W:"Working",M:"Mock",P:"Planned",Q:"Definition pending"};
+const evName = {V:"Screen or menu named in an EPFO source",D:"Process described in an EPFO source",U:"Inferred, needs confirmation"};
+const store = {get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+const S = Object.fromEntries(DATA.stakeholders.map(s => [s.id, s]));
+const A = Object.fromEntries(DATA.activities.map(a => [a.id, a]));
+const groupIndex = Object.fromEntries(DATA.groups.map((g, i) => [g, i]));
+const byActor = {}, incoming = {};
+for (const a of DATA.activities) {
+  (byActor[a.actor] ||= []).push(a);
+  for (const n of a.next) (incoming[n] ||= []).push(a.id);
+}
+const epStatus = ep => (DATA.endpoints[ep] || {}).status || "P";
+const gcol = id => `var(--g${(groupIndex[S[id]?.group] ?? 8) % 10})`;
+const sname = id => S[id]?.name || id;
+const shortName = id => { const n = sname(id); return n.length > 46 ? n.slice(0, 44) + "…" : n; };
+
+let state = {
+  view: ["stakeholders","lifecycles","chains"].includes(location.hash.slice(1)) ? location.hash.slice(1) : (store.get("atlas.view") || "stakeholders"),
+  stakeholder: store.get("atlas.sh") || "fo.da_accounts",
+  flow: store.get("atlas.flow") || "F04",
+  selAct: null, q: "", futOnly: false,
+};
+if (!S[state.stakeholder]) state.stakeholder = "member";
+if (!DATA.flows[state.flow]) state.flow = "F04";
+
+function setView(v) {
+  state.view = v; store.set("atlas.view", v);
+  document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.view === v)));
+  render();
+}
+document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => setView(b.dataset.view)));
+$("#q").addEventListener("input", e => { state.q = e.target.value.trim().toLowerCase(); render(); });
+
+function renderStats() {
+  const eps = Object.values(DATA.endpoints);
+  const c = k => eps.filter(e => e.status === k).length;
+  $("#stats").innerHTML = `<span><b>${DATA.stakeholders.length}</b>stakeholders</span><span><b>${DATA.activities.length}</b>activities</span><span><b>${Object.keys(DATA.flows).length}</b>lifecycles</span><span><b>${eps.length}</b>endpoints</span><span><span class="st W">W</span> ${c("W")} <span class="st M">M</span> ${c("M")} <span class="st P">P</span> ${c("P")} <span class="st Q">?</span> ${c("?")}</span>`;
+}
+
+function matchStakeholder(s) {
+  if (!state.q) return true;
+  const hay = [s.id, s.name, ...(byActor[s.id] || []).flatMap(a => [a.does, a.id, ...a.api])].join(" ").toLowerCase();
+  return hay.includes(state.q);
+}
+function matchAct(a) {
+  if (!state.q) return false;
+  return [a.id, a.does, a.actor, sname(a.actor), ...a.api].join(" ").toLowerCase().includes(state.q);
+}
+
+/* ─────────── Stakeholders view ─────────── */
+function renderStakeholderSide() {
+  let html = "", options = "";
+  DATA.groups.forEach((g, gi) => {
+    const members = DATA.stakeholders.filter(s => s.group === g && matchStakeholder(s));
+    if (!members.length) return;
+    html += `<h3><span class="dot" style="background:var(--g${gi % 10})"></span>${esc(g)}</h3>`;
+    options += `<optgroup label="${esc(g)}">`;
+    for (const s of members) {
+      const n = (byActor[s.id] || []).length;
+      html += `<button class="item${s.fut ? " fut" : ""}" data-sh="${esc(s.id)}" aria-current="${s.id === state.stakeholder}" title="${esc(s.id)}"><span class="nm">${esc(s.name)}</span><span class="n">${n}</span></button>`;
+      options += `<option value="${esc(s.id)}"${s.id === state.stakeholder ? " selected" : ""}>${esc(s.name)}</option>`;
+    }
+    options += `</optgroup>`;
+  });
+  $("#side").innerHTML = html || `<p class="empty">No role matches “${esc(state.q)}”.</p>`;
+  $("#side").querySelectorAll("[data-sh]").forEach(b => b.addEventListener("click", () => pickStakeholder(b.dataset.sh)));
+  return options;
+}
+function pickStakeholder(id) { state.stakeholder = id; store.set("atlas.sh", id); if (state.view !== "stakeholders") setView("stakeholders"); else render(); $("#main").scrollTop = 0; }
+
+function actCard(a, opts = {}) {
+  const prev = (incoming[a.id] || []).map(i => A[i]);
+  const handTo = a.next.map(i => A[i]).filter(Boolean);
+  const person = x => `<button class="link" data-sh="${esc(x.actor)}">${esc(shortName(x.actor))}</button>`;
+  const api = a.api.length ? a.api.map(ep => `<span class="ep"><span class="st ${stClass(epStatus(ep))}" title="${stName[stClass(epStatus(ep))]}">${esc(epStatus(ep))}</span>${esc(ep)}</span>`).join("") : `<span>No endpoint of its own${a.adapter ? ` · reached through the <b>${esc(a.adapter)}</b> adapter` : ""}</span>`;
+  return `<article class="act${a.fut ? " fut" : ""}">
+    <div class="hd"><span class="id">${esc(a.id)}</span><button class="flow" data-flow="${esc(a.flow)}">${esc(a.flow)} · ${esc(DATA.flows[a.flow].name)}</button>
+      <span class="ev ${esc(a.ev)}" title="${esc(evName[a.ev] || "")}">${esc(a.ev)}</span>${a.fut ? `<span class="chip fut">future role or step</span>` : ""}</div>
+    ${opts.showActor ? `<div class="row"><span class="lbl">Actor</span>${person(a)}</div>` : ""}
+    <div class="does">${esc(a.does)}</div>
+    <div class="row"><span class="lbl">APIs</span>${api}</div>
+    ${prev.length ? `<div class="row"><span class="lbl">After</span>${prev.map(p => `${person(p)} <span class="id">${esc(p.id)}</span>`).join(" · ")}</div>` : ""}
+    ${handTo.length ? `<div class="row"><span class="lbl">Then</span>${handTo.map(p => `${person(p)} <span class="id">${esc(p.id)}</span>`).join(" · ")}</div>` : ""}
+    ${a.chain ? `<div class="row"><span class="lbl">Chain</span><button class="link" data-chain="${esc(a.chain)}">${esc(a.chain.replace(/_/g, " "))}</button></div>` : ""}
+    ${a.event ? `<div class="row"><span class="lbl">Emits</span><code>${esc(a.event)}</code></div>` : ""}
+    <div class="row"><span class="lbl">Source</span>${esc(a.src)}</div>
+  </article>`;
+}
+
+function renderStakeholderMain(options) {
+  const s = S[state.stakeholder];
+  const acts = byActor[s.id] || [];
+  const eps = {};
+  for (const a of acts) for (const ep of a.api) eps[ep] = DATA.endpoints[ep] || {status:"P"};
+  const epList = Object.entries(eps).sort((x, y) => "WMP?".indexOf(x[1].status) - "WMP?".indexOf(y[1].status) || x[0].localeCompare(y[0]));
+  const cnt = k => epList.filter(e => e[1].status === k).length;
+  const partners = new Set();
+  for (const a of acts) { for (const n of a.next) if (A[n] && A[n].actor !== s.id) partners.add(A[n].actor); for (const p of incoming[a.id] || []) if (A[p].actor !== s.id) partners.add(A[p].actor); }
+  const flows = [...new Set(acts.map(a => a.flow))];
+  $("#main").innerHTML = `
+    <div class="mobile-pick"><label class="eyebrow" for="pick-sh">Stakeholder</label><select id="pick-sh">${options}</select></div>
+    <div class="eyebrow" style="color:${gcol(s.id)}">${esc(s.group)}</div>
+    <h2 class="title">${esc(s.name)}</h2>
+    <div class="chips"><span class="chip"><code>${esc(s.id)}</code></span>${s.today ? `<span class="chip">Today: ${esc(s.today)}</span>` : ""}${s.future ? `<span class="chip${s.fut ? " fut" : ""}">Future: ${esc(s.future)}</span>` : ""}${s.poc ? `<span class="chip">POC persona: ${esc(s.poc)}</span>` : ""}</div>
+    <div class="summary">
+      <div class="kpi"><b>${acts.length}</b><span>activities</span></div>
+      <div class="kpi"><b>${epList.length}</b><span>endpoints</span></div>
+      <div class="kpi"><b>${cnt("W")}·${cnt("M")}·${cnt("P")}·${cnt("?")}</b><span>W · M · P · ?</span></div>
+      <div class="kpi"><b>${partners.size}</b><span>hand-off partners</span></div>
+    </div>
+    ${flows.length ? `<div class="chips">${flows.map(f => `<button class="chip" data-flow="${esc(f)}" style="cursor:pointer">${esc(f)} · ${esc(DATA.flows[f].name)}</button>`).join("")}</div>` : ""}
+    <section class="block"><h4>What this role does</h4><div class="acts">${acts.map(a => actCard(a)).join("") || `<p class="empty">No activity mapped.</p>`}</div></section>
+    <section class="block"><h4>API set</h4>${epList.length ? `<div class="tablewrap"><table><thead><tr><th>Status</th><th>Endpoint</th><th>Function</th><th>Phase</th><th>Owner service</th></tr></thead><tbody>${epList.map(([ep, e]) => `<tr><td><span class="st ${stClass(e.status)}">${esc(e.status)}</span></td><td class="mono">${esc(ep)}</td><td>${esc(e.fn || "")}</td><td>${esc(e.phase || "")}</td><td>${esc(e.owner || "")}</td></tr>`).join("")}</tbody></table></div>` : `<p class="empty">This stakeholder has no endpoints of its own. It takes part through ${acts.some(a => a.adapter) ? "an integration adapter" : "another role recording its decisions"}.</p>`}</section>`;
+  const sel = $("#pick-sh"); if (sel) sel.addEventListener("change", e => pickStakeholder(e.target.value));
+  wireLinks($("#main"));
+}
+
+/* ─────────── Lifecycles view ─────────── */
+function renderFlowSide() {
+  let html = `<h3>Lifecycles</h3>`, options = "";
+  for (const [fid, f] of Object.entries(DATA.flows)) {
+    const acts = DATA.activities.filter(a => a.flow === fid);
+    const hits = state.q ? acts.filter(matchAct).length : 0;
+    const actors = new Set(acts.map(a => a.actor)).size;
+    html += `<button class="item" data-fl="${esc(fid)}" aria-current="${fid === state.flow}"><span class="nm"><span class="id" style="font:500 11px var(--mono);color:var(--ink-3)">${esc(fid)}</span> ${esc(f.name)}</span><span class="n">${state.q ? (hits ? hits + " hit" + (hits > 1 ? "s" : "") : "") : actors + " roles"}</span></button>`;
+    options += `<option value="${esc(fid)}"${fid === state.flow ? " selected" : ""}>${esc(fid)} · ${esc(f.name)}</option>`;
+  }
+  $("#side").innerHTML = html;
+  $("#side").querySelectorAll("[data-fl]").forEach(b => b.addEventListener("click", () => pickFlow(b.dataset.fl)));
+  return options;
+}
+function pickFlow(fid, actId = null) { state.flow = fid; state.selAct = actId; store.set("atlas.flow", fid); if (state.view !== "lifecycles") setView("lifecycles"); else render(); }
+
+function layoutFlow(fid) {
+  const acts = DATA.activities.filter(a => a.flow === fid && (!state.futOnly || a.fut));
+  const ids = new Set(acts.map(a => a.id));
+  const indeg = {}, depth = {};
+  acts.forEach(a => { indeg[a.id] = 0; });
+  acts.forEach(a => a.next.forEach(n => { if (ids.has(n)) indeg[n]++; }));
+  const queue = acts.filter(a => indeg[a.id] === 0).map(a => a.id);
+  queue.forEach(i => depth[i] = 0);
+  const done = new Set();
+  while (queue.length) {
+    const id = queue.shift(); done.add(id);
+    for (const n of A[id].next) if (ids.has(n)) { depth[n] = Math.max(depth[n] ?? 0, depth[id] + 1); if (--indeg[n] === 0) queue.push(n); }
+  }
+  // Nodes inside cycles: place after their already-placed predecessors.
+  for (const a of acts) if (!done.has(a.id)) {
+    const preds = (incoming[a.id] || []).filter(p => ids.has(p) && depth[p] !== undefined);
+    depth[a.id] = preds.length ? Math.max(...preds.map(p => depth[p])) + 1 : 0;
+    for (const n of a.next) if (ids.has(n) && !done.has(n) && depth[n] === undefined) depth[n] = depth[a.id] + 1;
+  }
+  const actors = [];
+  [...acts].sort((x, y) => depth[x.id] - depth[y.id]).forEach(a => { if (!actors.includes(a.actor)) actors.push(a.actor); });
+  const cols = Math.max(0, ...Object.values(depth)) + 1;
+  return {acts, depth, actors, cols, ids};
+}
+
+function renderFlowMain(options) {
+  const f = DATA.flows[state.flow];
+  const L = layoutFlow(state.flow);
+  const grid = `grid-template-columns: auto repeat(${L.cols}, max-content); grid-template-rows: repeat(${L.actors.length}, auto)`;
+  let cells = "";
+  L.actors.forEach((actor, r) => {
+    cells += `<div class="lane-label" style="grid-row:${r + 1};grid-column:1"><span class="bar" style="background:${gcol(actor)}"></span><b>${esc(shortName(actor))}</b><small>${esc(actor)}</small></div>`;
+    for (let c = 0; c < L.cols; c++) {
+      const here = L.acts.filter(a => a.actor === actor && L.depth[a.id] === c);
+      cells += `<div class="cell" style="grid-row:${r + 1};grid-column:${c + 2}">${here.map(a => {
+        const outside = a.next.filter(n => !L.ids.has(n) && A[n]);
+        return `<button class="node${a.fut ? " fut" : ""}${matchAct(a) ? " hit" : ""}" data-act="${esc(a.id)}" aria-pressed="${a.id === state.selAct}"><span class="nid">${esc(a.id.split(".")[1])}<span class="ev ${esc(a.ev)}">${esc(a.ev)}</span></span><span class="nd">${esc(a.does)}</span>${outside.map(n => `<span class="out">→ ${esc(A[n].flow)} ${esc(n.split(".")[1])}</span>`).join("")}</button>`;
+      }).join("")}</div>`;
+    }
+  });
+  const fromOutside = [...new Set(L.acts.flatMap(a => (incoming[a.id] || []).filter(p => !L.ids.has(p))))];
+  $("#main").innerHTML = `
+    <div class="mobile-pick"><label class="eyebrow" for="pick-fl">Lifecycle</label><select id="pick-fl">${options}</select></div>
+    <div class="eyebrow">${esc(state.flow)} · ${L.actors.length} roles · ${L.acts.length} steps</div>
+    <h2 class="title">${esc(f.name)}</h2>
+    <p class="lede">Each row is a role; steps run left to right in hand-off order. Select a step to trace what comes before and after it.</p>
+    <div class="filters"><label for="futonly"><input type="checkbox" id="futonly"${state.futOnly ? " checked" : ""}> Show only future roles and steps</label>
+      ${fromOutside.length ? `<span class="chips">Entered from: ${fromOutside.map(p => `<button class="chip" data-goto="${esc(p)}" style="cursor:pointer">${esc(A[p].flow)} ${esc(p.split(".")[1])}</button>`).join("")}</span>` : ""}</div>
+    <div class="legend"><span><span class="sw"></span>hand-off</span><span><span class="sw fut"></span>future role or step (dashed box)</span><span><span class="ev V">V</span> screen named in source</span><span><span class="ev D">D</span> process described</span><span><span class="ev U">U</span> inferred</span><span><span class="out" style="color:var(--accent)">→ F03 …</span> continues in another lifecycle</span></div>
+    <div class="lanewrap" id="lanewrap"><div class="lanes" id="lanes" style="${grid}">${cells}<svg class="edges" id="edges" aria-hidden="true"></svg></div></div>
+    <div class="detail" id="detail">${state.selAct && A[state.selAct] ? actCard(A[state.selAct], {showActor:true}) : `<p class="empty">Select a step to see its APIs, approvals and hand-offs.</p>`}</div>`;
+  const sel = $("#pick-fl"); if (sel) sel.addEventListener("change", e => pickFlow(e.target.value));
+  $("#futonly").addEventListener("change", e => { state.futOnly = e.target.checked; render(); });
+  $("#lanes").querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", () => { state.selAct = state.selAct === b.dataset.act ? null : b.dataset.act; renderFlowMain(options); }));
+  $("#main").querySelectorAll("[data-goto]").forEach(b => b.addEventListener("click", () => pickFlow(A[b.dataset.goto].flow, b.dataset.goto)));
+  wireLinks($("#detail"));
+  drawEdges(L);
+}
+
+function related(id, L) {
+  const up = new Set(), down = new Set();
+  const walk = (x, dir, seen) => { const nbrs = dir === "down" ? A[x].next : (incoming[x] || []); for (const n of nbrs) if (L.ids.has(n) && !seen.has(n)) { seen.add(n); walk(n, dir, seen); } };
+  walk(id, "down", down); walk(id, "up", up);
+  return new Set([id, ...up, ...down]);
+}
+
+function drawEdges(L) {
+  const lanes = $("#lanes"), svg = $("#edges");
+  if (!lanes || !svg) return;
+  const base = lanes.getBoundingClientRect();
+  const box = id => { const el = lanes.querySelector(`[data-act="${CSS.escape(id)}"]`); if (!el) return null; const r = el.getBoundingClientRect(); return {x:r.left - base.left, y:r.top - base.top, w:r.width, h:r.height}; };
+  const rel = state.selAct && L.ids.has(state.selAct) ? related(state.selAct, L) : null;
+  let paths = "";
+  for (const a of L.acts) for (const n of a.next) {
+    if (!L.ids.has(n)) continue;
+    const s = box(a.id), t = box(n); if (!s || !t) continue;
+    const hi = rel && rel.has(a.id) && rel.has(n);
+    const cls = rel ? (hi ? "hi" : "dim") : "";
+    let d;
+    if (t.x > s.x + s.w / 2) {
+      const x1 = s.x + s.w, y1 = s.y + s.h / 2, x2 = t.x - 6, y2 = t.y + t.h / 2, mx = (x1 + x2) / 2;
+      d = `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
+    } else {
+      const x1 = s.x + s.w / 2, y1 = s.y + s.h, x2 = t.x + t.w / 2, y2 = t.y + t.h + 6, low = Math.max(y1, y2) + 34;
+      d = `M${x1},${y1} C${x1},${low} ${x2},${low} ${x2},${y2}`;
+    }
+    paths += `<path class="${cls}" d="${d}" marker-end="url(#${hi ? "arrHi" : "arr"})"/>`;
+  }
+  svg.setAttribute("width", lanes.scrollWidth); svg.setAttribute("height", lanes.scrollHeight);
+  svg.innerHTML = `<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker><marker id="arrHi" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"/></marker></defs>${paths}`;
+  lanes.querySelectorAll("[data-act]").forEach(el => {
+    el.classList.toggle("sel", el.dataset.act === state.selAct);
+    el.classList.toggle("dim", !!rel && !rel.has(el.dataset.act));
+  });
+}
+
+/* ─────────── Chains view ─────────── */
+function renderChainSide() {
+  $("#side").innerHTML = `<h3>Approval chains</h3>` + Object.keys(DATA.chains).map(c => `<button class="item" data-jump="${esc(c)}"><span class="nm">${esc(c.replace(/_/g, " "))}</span><span class="n">${(DATA.activities.filter(a => a.chain === c)).length} steps</span></button>`).join("");
+  $("#side").querySelectorAll("[data-jump]").forEach(b => b.addEventListener("click", () => document.getElementById("chain-" + b.dataset.jump)?.scrollIntoView({behavior:"smooth", block:"start"})));
+}
+const inr = n => "₹" + Number(n).toLocaleString("en-IN");
+function stepsHtml(list) { return `<div class="steps">${list.map((x, i) => `${i ? `<span class="arrow">→</span>` : ""}<span class="step" data-sh="${esc(x)}" role="button" tabindex="0" title="${esc(x)}">${esc(S[x] ? shortName(x) : x)}</span>`).join("")}</div>`; }
+function renderChainMain() {
+  const cards = Object.entries(DATA.chains).map(([id, c]) => {
+    let body = "";
+    if (c.bands) body = c.bands.map(b => `<div class="band"><span class="amt">${b.upto ? "up to " + inr(b.upto) : "above " + inr(b.above)}</span>${stepsHtml(b.chain)}</div>`).join("");
+    if (c.chain) body += `<div class="band"><span class="amt">all cases</span>${stepsHtml(c.chain)}</div>`;
+    const used = DATA.activities.filter(a => a.chain === id);
+    return `<article class="chain" id="chain-${esc(id)}"><h4>${esc(id.replace(/_/g, " "))}</h4><div class="src">${esc(c.src || "")}</div>${body}${c.note ? `<div class="note">${esc(c.note)}</div>` : ""}${c.bands && c.bands.some(b => b.notify) ? `<div class="note">Also informed: ${c.bands.flatMap(b => b.notify || []).map(x => esc(shortName(x))).join(", ")}</div>` : ""}${used.length ? `<div class="note">Used by: ${used.map(a => `<button class="link" data-goto="${esc(a.id)}">${esc(a.id)}</button>`).join(" · ")}</div>` : ""}</article>`;
+  }).join("");
+  $("#main").innerHTML = `<div class="eyebrow">${Object.keys(DATA.chains).length} chains</div><h2 class="title">Approval chains</h2><p class="lede">Maker → checker routes quoted from EPFO SOPs. Amounts are EPFO's own delegation bands; in the POC they are illustrative, editable configuration, never hard-coded.</p><div class="chains">${cards}</div>`;
+  $("#main").querySelectorAll("[data-goto]").forEach(b => b.addEventListener("click", () => pickFlow(A[b.dataset.goto].flow, b.dataset.goto)));
+  wireLinks($("#main"));
+}
+
+function wireLinks(root) {
+  root.querySelectorAll("[data-sh]").forEach(b => { const go = () => S[b.dataset.sh] && pickStakeholder(b.dataset.sh); b.addEventListener("click", go); b.addEventListener("keydown", e => { if (e.key === "Enter") go(); }); });
+  root.querySelectorAll("[data-flow]").forEach(b => b.addEventListener("click", () => pickFlow(b.dataset.flow)));
+  root.querySelectorAll("[data-chain]").forEach(b => b.addEventListener("click", () => { setView("chains"); setTimeout(() => document.getElementById("chain-" + b.dataset.chain)?.scrollIntoView({block:"start"}), 30); }));
+}
+
+function render() {
+  document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.view === state.view)));
+  if (state.view === "stakeholders") { if (!S[state.stakeholder] || !matchStakeholder(S[state.stakeholder])) { const first = DATA.stakeholders.find(matchStakeholder); if (first) state.stakeholder = first.id; } renderStakeholderMain(renderStakeholderSide()); }
+  else if (state.view === "lifecycles") renderFlowMain(renderFlowSide());
+  else { renderChainSide(); renderChainMain(); }
+}
+
+let raf = 0;
+new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { if (state.view === "lifecycles") drawEdges(layoutFlow(state.flow)); }); }).observe(document.body);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (state.view === "lifecycles") drawEdges(layoutFlow(state.flow)); });
+renderStats(); render();
+</script>

@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node / frontend
+node_modules/
+dist/
+build/
+.vite/
+coverage/
+
+# Environment and secrets (never commit real credentials)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local data and tooling
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.sqlite
+*.db
+minio-data/
+postgres-data/

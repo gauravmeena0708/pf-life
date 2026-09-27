@@ -1,0 +1,324 @@
+# Stakeholder activity map — EPFO platform
+#
+# One row per activity: WHO does WHAT, through WHICH API, and WHO acts NEXT.
+# Build per-stakeholder API sets and flow diagrams from this file with:
+#     python3 docs/tools/build_stakeholder_views.py
+#
+# Field reference
+#   id      stable activity ID (flow prefix + short name)
+#   actor   stakeholder ID from docs/stakeholders.md
+#   does    what the stakeholder does
+#   api     endpoints from docs/endpoint-catalogue.md ("METHOD /path", no /api/v1 prefix,
+#           query strings and formType/type variants dropped). "METHOD /path" marks an
+#           endpoint this activity needs that the catalogue does not have yet.
+#   adapter outbound integration used (external system), when there is no inbound endpoint
+#   event   domain event emitted, for system activities
+#   next    activity IDs that can follow (hand-off). Several IDs = alternative routes (e.g. by
+#           amount band or outcome), not parallel steps, unless the activity says otherwise.
+#   chain   approval chain ID (see approval_chains)
+#   src     evidence key (see docs/stakeholders.md → Sources)
+#   ev      V = menu / screen named in the source · D = process described in the source ·
+#           U = inferred, needs domain confirmation
+#   fut     true = needed in the future system; no system role for this today
+#
+# Thresholds in approval_chains are EPFO delegations quoted from SOPs. In the POC they are
+# ILLUSTRATIVE configuration (config/demo-rules.yaml), never hard-coded (init.md §0.5).
+
+version: 1
+
+approval_chains:
+  claim_settlement:
+    src: FIA 8(xvi); WSU 5.4.2
+    bands:
+      - {upto: 50000,    chain: [fo.da_accounts, fo.ss]}
+      - {upto: 500000,   chain: [fo.da_accounts, fo.ao]}
+      - {upto: 2500000,  chain: [fo.da_accounts, fo.ss, fo.apfc]}
+      - {above: 2500000, chain: [fo.da_accounts, fo.ao, fo.oic]}
+  claim_settlement_after_defreeze:
+    src: FIA 8(xvi)
+    bands:
+      - {upto: 50000,    chain: [fo.da_accounts, fo.ss, fo.ao]}
+      - {upto: 500000,   chain: [fo.da_accounts, fo.ao, fo.apfc]}
+      - {above: 500000,  chain: [fo.da_accounts, fo.ao, fo.apfc, fo.oic], notify: [zo.rpfc1, zo.rpfc1_audit]}
+  inoperative_settlement:
+    src: WSU 5.1, 5.5
+    note: several amount bands; exact bands to be copied from WSU tables into config
+    chain: [fo.da_accounts, fo.ss, fo.ao, fo.apfc, fo.oic]
+  joint_declaration:
+    src: JD 4.3-4.5, Table 3
+    chain: [employer.signatory, fo.da_accounts, fo.ss, fo.apfc]
+    note: verifier is SS or AO; approver is RPFC-I / RPFC-II / APFC / AO / SS by change type (major / minor) per JD Table 3
+  freeze_verification_member:
+    src: FIA 8(vi-viii)
+    chain: [fo.da_accounts, fo.ss, fo.apfc, fo.oic]
+  freeze_verification_establishment:
+    src: FIA 8(ix-xii)
+    chain: [fo.da_compliance, fo.ss, fo.apfc, fo.oic]
+  damages_knock_off:
+    src: CMP 3.5.4-3.5.8
+    chain: [fo.da_compliance, fo.ss]
+  pension_ppo:
+    src: PEN 11.7-11.9
+    chain: [fo.da_accounts, fo.ao, fo.da_pension, fo.apfc_pension]
+  pension_initial_arrear:
+    src: PEN 11.9.2, 11.9.7
+    chain: [fo.da_pension, fo.ss_pension, fo.apfc_pension]
+  office_ledger_exception:
+    src: FRM
+    chain: [fo.da_accounts, fo.apfc]
+    note: Appendix-E / VDR (Special) credit only in exceptional cases with RPFC-II (F&A) approval
+  generic_maker_checker:
+    src: AUD 5 ("maker and checker must be different persons")
+    chain: [maker, checker]
+
+flows:
+  F01: {name: "Establishment onboarding, signatories and configuration"}
+  F02: {name: "Member onboarding, KYC and profile correction"}
+  F03: {name: "ECR, challan, payment and contribution posting"}
+  F04: {name: "PF claims, transfers and death / EDLI claims"}
+  F05: {name: "Pension: application, PPO, disbursement, life certificate"}
+  F06: {name: "Compliance, inspection, quasi-judicial proceedings and recovery"}
+  F07: {name: "Freezing, de-freezing, fraud and vigilance"}
+  F08: {name: "Grievances"}
+  F09: {name: "Exempted establishments (PF trusts)"}
+  F10: {name: "International workers"}
+  F11: {name: "Inoperative accounts"}
+  F12: {name: "Audit (concurrent, internal, external)"}
+  F13: {name: "Monitoring, governance and reporting"}
+  F14: {name: "Technology, security, data protection and training"}
+
+activities:
+
+# ─────────────────────────── F01 Establishment onboarding ───────────────────────────
+  - {id: F01.register, actor: employer.owner, does: "Register establishment online and submit verification evidence", api: ["POST /employers/registration-requests", "POST /employers/registration-requests/{reqId}/verification-evidence", "GET /employers/registration-requests/{reqId}"], next: [F01.olre_scrutiny], src: CMP, ev: D}
+  - {id: F01.mca_autoreg, actor: ext.mca, does: "Auto-register companies incorporated through SPICe+ / AGILE-PRO", api: ["POST /integrations/mca/registrations"], next: [F01.olre_scrutiny], src: REF, ev: D}
+  - {id: F01.ssp_reg, actor: ext.shram_suvidha, does: "Common registration through Shram Suvidha", api: ["POST /integrations/shram-suvidha/registrations"], next: [F01.olre_scrutiny], src: "REF, CMP", ev: D}
+  - {id: F01.kyc_registry, actor: ext.gstn, does: "Verify GSTIN of the establishment", adapter: gstn, next: [], src: EC, ev: U}
+  - {id: F01.olre_scrutiny, actor: fo.da_compliance, does: "Scrutinise documents of a newly registered establishment (FO-interface >> OLRE >> View Documents) and open the compliance e-file", api: ["GET /office/establishment-registrations/{reqId}/documents", "POST /office/establishment-registrations/{reqId}/scrutiny-notes"], next: [F01.circle_review], src: CMP, ev: V}
+  - {id: F01.circle_review, actor: fo.apfc, does: "Circle officer reviews coverage of the new establishment", api: ["POST /office/establishment-registrations/{reqId}/coverage-decisions"], next: [], src: CMP, ev: D}
+  - {id: F01.form5a, actor: employer.signatory, does: "File / update Form 5A ownership return and branches (Form 2A), signed with DSC / e-sign", api: ["GET /employers/me/ownership-declaration", "PUT /employers/me/ownership-declaration", "GET /employers/me/branches", "POST /employers/me/branches"], next: [], src: MAP, ev: V}
+  - {id: F01.dsc_register, actor: employer.owner, does: "Register DSC or e-sign of an authorised signatory and submit the request letter", api: ["POST /employers/me/signatories/{signatoryId}/dsc-registrations", "POST /employers/me/signatories/{signatoryId}/esign-registrations"], next: [F01.dsc_approve], src: MAP, ev: V}
+  - {id: F01.dsc_approve, actor: fo.apfc, does: "Approve the DSC / e-sign registration at the PF office", api: ["POST /office/establishments/{estId}/signature-registrations/{regId}/decisions"], next: [], src: MAP, ev: U}
+  - {id: F01.signatories, actor: employer.owner, does: "Authorise or revoke signatories", api: ["GET /employers/me/signatories", "POST /employers/me/signatories/authorisations", "POST /employers/me/signatories/{signatoryId}/revocations"], next: [], src: MAP, ev: D}
+  - {id: F01.operators, actor: employer.owner, does: "Invite, scope and revoke employer sub-users (User / Admin menus)", api: ["GET /employers/me/operators", "POST /employers/me/operators/invitations", "POST /employers/me/operators/{operatorId}/revocations"], next: [], src: WEB, ev: U}
+  - {id: F01.profile, actor: employer.operator, does: "View establishment profile, configuration, KYC and home-page alerts", api: ["GET /employers/me", "GET /employers/me/configuration", "GET /employers/me/kyc", "GET /employers/me/bank-accounts", "GET /employers/me/exemption", "GET /employers/me/pending-approvals", "GET /employers/me/dashboard"], next: [], src: MAP, ev: V}
+  - {id: F01.change_request, actor: employer.signatory, does: "Request configuration change, closure / deregistration or office transfer", api: ["POST /employers/me/configuration/change-requests", "PATCH /employers/me", "POST /employers/me/closure-requests", "POST /employers/me/office-transfer-requests", "POST /employers/me/kyc/{kycType}", "POST /employers/voluntary-coverage-requests"], next: [F01.change_decide], src: MAP, ev: D}
+  - {id: F01.change_decide, actor: fo.apfc, does: "Decide establishment change, closure or transfer requests", api: ["POST /office/establishments/{estId}/change-requests/{requestId}/decisions"], next: [], src: MAP, ev: U}
+  - {id: F01.contractors, actor: principal_employer, does: "Link contractors, upload work orders, watch contractor compliance", api: ["GET /employers/me/contractors", "POST /employers/me/contractors", "GET /employers/me/contractors/{contractorId}/compliance"], next: [], src: "CMP, SOP-B", ev: D}
+  - {id: F01.contractor_tag, actor: contractor, does: "Tag ECR members to the principal employer", api: ["POST /employers/me/ecr-filings/{filingId}/principal-employer-tags"], next: [F01.contractors], src: CMP, ev: D}
+  - {id: F01.liquidation, actor: liquidator, does: "Receive EPFO dues claim for an employer in liquidation / insolvency", api: ["GET /partners/liquidators/claims/{claimId}"], next: [F06.recovery], src: "SOP-B, CMP", ev: D, fut: true}
+
+# ─────────────────────────── F02 Member onboarding, KYC, profile ───────────────────────────
+  - {id: F02.register, actor: employer.operator, does: "Register a new joinee (create or link UAN), bulk registration, Form 11 declaration", api: ["POST /employers/me/members", "POST /employers/me/members/bulk-registrations", "POST /employers/me/members/{uan}/declarations", "GET /employers/me/members"], next: [F02.kyc_approve], src: MAP, ev: V}
+  - {id: F02.uan_self, actor: member, does: "Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP", api: ["POST /members/uan-allotments", "POST /members/uan-activations", "POST /members/uan-lookups"], adapter: uidai, next: [F02.kyc_seed], src: REF, ev: D}
+  - {id: F02.uidai, actor: ext.uidai, does: "Aadhaar e-KYC, OTP and face-authentication responses", adapter: uidai, next: [], src: "JD, REF", ev: D}
+  - {id: F02.csc_assist, actor: csc_operator, does: "Assist a member or pensioner with UAN or life-certificate services", api: ["POST /members/uan-allotments", "POST /pensioners/me/life-certificate/submissions"], next: [], src: "PEN, EC", ev: D, fut: true}
+  - {id: F02.kyc_seed, actor: member, does: "Seed KYC (Aadhaar, bank, PAN)", api: ["GET /members/me/kyc", "POST /members/me/kyc/bank-accounts", "POST /members/me/kyc/{kycType}"], next: [F02.kyc_approve], src: MAP, ev: V}
+  - {id: F02.kyc_approve, actor: employer.signatory, does: "Approve KYC seeded by member / pending for digital signature, with DSC or e-sign", api: ["GET /employers/me/kyc-approvals", "POST /employers/me/kyc-approvals/{requestId}/decisions"], adapter: npci, next: [], src: MAP, ev: V}
+  - {id: F02.pan_verify, actor: ext.income_tax, does: "Verify PAN", adapter: income_tax, next: [], src: EC, ev: U}
+  - {id: F02.kyc_bulk, actor: employer.operator, does: "Bulk KYC upload; KYC and PAN verification", api: ["POST /employers/me/kyc-bulk-uploads", "GET /employers/me/kyc-bulk-uploads/{uploadId}/errors"], next: [F02.kyc_approve], src: MAP, ev: V}
+  - {id: F02.missing_details, actor: employer.operator, does: "Fill missing member details; member location mapping; download active members", api: ["PATCH /employers/me/members/{uan}/profile", "POST /employers/me/members/{uan}/location-mappings", "GET /employers/me/members/active-export"], next: [], src: MAP, ev: V}
+  - {id: F02.exit, actor: employer.operator, does: "Mark date of exit (single or bulk) and corrections", api: ["POST /employers/me/members/{uan}/exits", "POST /employers/me/members/{uan}/exit-corrections", "POST /employers/me/members/exit-bulk-uploads"], next: [F02.employer_approvals], src: MAP, ev: V}
+  - {id: F02.employer_approvals, actor: employer.signatory, does: "Approve queued member changes (Member > Approvals)", api: ["GET /employers/me/approvals", "POST /employers/me/approvals/{approvalId}/decisions"], next: [], src: MAP, ev: V}
+  - {id: F02.self_service, actor: member, does: "View profile, service history, UAN card; change contact details; e-nomination; self-marked exit", api: ["GET /members/me", "GET /members/me/identity-assurance", "GET /members/me/employment-history", "GET /members/me/uan-card", "PATCH /members/me/contact-details", "GET /members/me/nominations", "POST /members/me/nominations", "POST /members/me/exits"], next: [], src: "MAP, WEB", ev: V}
+  - {id: F02.jd_submit, actor: member, does: "Submit Joint Declaration to correct one of 12 profile parameters", api: ["POST /members/me/joint-declarations"], next: [F02.jd_attest], src: JD, ev: D}
+  - {id: F02.jd_attest, actor: employer.signatory, does: "Attest, return or reject the Joint Declaration; employer-initiated JD", api: ["GET /employers/me/joint-declarations", "POST /employers/me/joint-declarations/{jdId}/decisions", "POST /employers/me/joint-declarations"], next: [F02.jd_initiate], chain: joint_declaration, src: JD, ev: D}
+  - {id: F02.jd_initiate, actor: fo.da_accounts, does: "Initiator: examine JD and documents, recommend", api: ["GET /office/member-change-requests", "POST /office/member-change-requests/{requestId}/recommendations"], next: [F02.jd_verify, F02.jd_verify_ao], chain: joint_declaration, src: JD, ev: D}
+  - {id: F02.jd_verify, actor: fo.ss, does: "Verifier (SS route): cross-check and recommend", api: ["POST /office/member-change-requests/{requestId}/verifications"], next: [F02.jd_approve, F02.jd_approve_minor], chain: joint_declaration, src: JD, ev: D}
+  - {id: F02.jd_verify_ao, actor: fo.ao, does: "Verifier (AO route): cross-check and recommend", api: ["POST /office/member-change-requests/{requestId}/verifications"], next: [F02.jd_approve, F02.jd_approve_minor], chain: joint_declaration, src: JD, ev: D}
+  - {id: F02.jd_approve, actor: fo.apfc, does: "Approver for major changes (APFC / RPFC-II / RPFC-I per JD Table 3): approve / reject / return", api: ["POST /office/member-change-requests/{requestId}/decisions"], next: [], chain: joint_declaration, src: JD, ev: D}
+  - {id: F02.jd_approve_minor, actor: fo.ao, does: "Approver for minor changes (AO / SS per JD Table 3)", api: ["POST /office/member-change-requests/{requestId}/decisions"], next: [], chain: joint_declaration, src: JD, ev: D}
+  - {id: F02.jd_monitor, actor: fo.rpfc1, does: "Monitor JD pendency across the RO", api: ["GET /office/member-change-requests/pendency"], next: [], src: JD, ev: D}
+
+# ─────────────────────────── F03 ECR, payment, posting ───────────────────────────
+  - {id: F03.ecr_prepare, actor: employer.operator, does: "Prepare regular / arrear / supplementary ECR and validate", api: ["POST /employers/me/ecr-filings", "POST /employers/me/ecr-filings/{filingId}/validations", "GET /employers/me/ecr-filings/{filingId}", "GET /employers/me/ecr-filings", "GET /employers/me/returns/dashboard"], next: [F03.ecr_approve], src: "MAP, WEB", ev: V}
+  - {id: F03.b2b_upload, actor: payroll_provider, does: "Upload ECR through the B2B payroll API on behalf of an employer", api: ["POST /partners/sandbox/payroll/ecr-filings"], next: [F03.ecr_approve], src: WEB, ev: U, fut: true}
+  - {id: F03.ecr_approve, actor: employer.signatory, does: "Approve and submit ECR (generates TRRN); cancel an unpaid TRRN", api: ["POST /employers/me/ecr-filings/{filingId}/approvals", "POST /employers/me/ecr-filings/{filingId}/submissions", "POST /employers/me/ecr-filings/{filingId}/cancellations"], next: [F03.pay], src: MAP, ev: D}
+  - {id: F03.pay, actor: employer.signatory, does: "Pay challan online (or via bank counter where allowed)", api: ["GET /employers/me/challans", "GET /employers/me/challans/{trrn}", "POST /employers/me/challans/{trrn}/payment-intents"], adapter: collecting_bank, next: [F03.bank_confirm], src: MAP, ev: D}
+  - {id: F03.bank_confirm, actor: ext.collecting_bank, does: "Confirm or return the payment", api: ["POST /integrations/mock-bank/payment-confirmations", "POST /integrations/mock-bank/payment-returns"], next: [F03.post], src: MAP, ev: D}
+  - {id: F03.post, actor: tech.epfo3, does: "Post balanced ledger entries and emit ContributionPosted", event: ContributionPosted.v1, next: [F03.passbook, F03.receipt], src: "init.md §3.3", ev: D}
+  - {id: F03.receipt, actor: employer.operator, does: "Download receipt; view return history and compliance summary", api: ["GET /employers/me/challans/{trrn}/receipt", "GET /employers/me/compliance-summary", "GET /employers/me/members/{uan}/contribution-ledger"], next: [], src: MAP, ev: D}
+  - {id: F03.passbook, actor: member, does: "View passbook, annual statement and taxable-interest split", api: ["GET /members/me/passbook", "GET /members/me/accounts/{accountLinkId}/passbook", "GET /members/me/annual-statements/{financialYear}", "GET /members/me/tax/taxable-interest"], next: [], src: MAP, ev: D}
+  - {id: F03.direct_challan, actor: employer.signatory, does: "Create a Direct Challan: administrative / inspection charges, or miscellaneous challan for 14B damages and 7Q interest; pay demands", api: ["POST /employers/me/direct-challans", "GET /employers/me/demands", "POST /employers/me/demands/{demandId}/payment-intents"], next: [F03.knock_off], src: MAP, ev: V}
+  - {id: F03.knock_off, actor: fo.da_compliance, does: "Knock off auto-calculated 14B / 7Q against a miscellaneous challan (FO INTERFACE >> 14B/7Q Knock Off)", api: ["POST /office/establishments/{estId}/damages-knock-offs"], next: [F03.knock_off_approve], chain: damages_knock_off, src: CMP, ev: V}
+  - {id: F03.knock_off_approve, actor: fo.ss, does: "Approve the knock-off (14B/7Q Knock Off >> Approve)", api: ["POST /office/damages-knock-offs/{knockOffId}/approvals"], next: [], chain: damages_knock_off, src: CMP, ev: V}
+  - {id: F03.receipts, actor: fo.cash, does: "Handle cheques / DDs and receipts outside the online flow; record VDR entries", api: ["GET /office/receipts/unreconciled", "POST /office/vdr-entries"], next: [F03.vdr_reconcile], src: "PEN, FRM", ev: D}
+  - {id: F03.vdr_reconcile, actor: fo.da_accounts, does: "Reconcile VDR entries with ECRs; TRRN adjustment; Member VDR deposits", api: ["POST /office/vdr-entries/{vdrId}/ecr-reconciliations", "POST /office/receipts/{receiptId}/trrn-adjustments"], next: [F03.eo_certify], chain: generic_maker_checker, src: "PEN, FRM", ev: D}
+  - {id: F03.eo_certify, actor: fo.eo, does: "Certify an employer's revised ECR for major corrections (VDR-ECR process)", api: ["POST /office/vdr-entries/{vdrId}/eo-certifications"], next: [], src: FRM, ev: D}
+  - {id: F03.ledger_exception, actor: fo.da_accounts, does: "Appendix-E adjustment (e.g. PF → EPS) or VDR (Special) credit — exceptional", api: ["POST /office/ledger-adjustments", "POST /office/vdr-entries/{vdrId}/special-credits"], next: [F03.ledger_exception_approve], chain: office_ledger_exception, src: "PEN, FRM, FIA", ev: D}
+  - {id: F03.ledger_exception_approve, actor: fo.apfc, does: "Approve an exceptional ledger adjustment (RPFC-II F&A)", api: ["POST /office/ledger-adjustments/{adjustmentId}/approvals"], next: [], chain: office_ledger_exception, src: FRM, ev: D}
+  - {id: F03.ecr_reject, actor: fo.da_accounts, does: "Reject an ECR before posting; reverse a posted journal", api: ["POST /office/ecr-filings/{filingId}/rejections", "POST /office/ledger-journals/{journalId}/reversals"], next: [], chain: generic_maker_checker, src: FRM, ev: D}
+  - {id: F03.interest, actor: ho.fa_cao, does: "Record the approved annual interest rate and run interest crediting", api: ["PUT /ho/config/interest-rates/{financialYear}", "POST /office/accounts/interest-postings"], next: [F03.passbook], src: "EC, MAP", ev: D}
+  - {id: F03.interest_rate, actor: gov.cbt, does: "Recommend the annual interest rate (notified with Ministry concurrence)", next: [F03.interest], src: EC, ev: D}
+
+# ─────────────────────────── F04 Claims, transfers, death / EDLI ───────────────────────────
+  - {id: F04.claim_file, actor: member, does: "Check eligibility and file a claim (Form 31 / 19 / 10C); confirm intent; upload documents", api: ["GET /members/me/claims/eligible-types", "POST /members/me/claims", "POST /members/me/claims/{claimId}/confirmations", "POST /members/me/claims/{claimId}/documents", "POST /members/me/claims/{claimId}/withdrawals", "POST /members/me/tax/form-15g-15h"], next: [F04.auto_settle, F04.attest], src: "PEN, REF", ev: D}
+  - {id: F04.auto_settle, actor: tech.epfo3, does: "Auto-settle claims that clear risk checks; route the rest to the office", event: ClaimSubmitted.v1, next: [F04.process, F04.pay], src: REF, ev: D}
+  - {id: F04.attest, actor: employer.signatory, does: "Attest claims that need employer attestation", api: ["GET /employers/me/claim-attestations", "POST /employers/me/claim-attestations/{claimId}/decisions"], next: [F04.process], src: WEB, ev: D}
+  - {id: F04.physical, actor: fo.diary, does: "Diarise physical claims and documents", api: ["POST /office/physical-claims"], next: [F04.physical_validate], src: PEN, ev: D}
+  - {id: F04.physical_validate, actor: fo.da_accounts, does: "UAN allocation / Aadhaar validation of a physical claim", api: ["POST /office/physical-claims/{intakeId}/identity-validations"], next: [F04.process], src: PEN, ev: D}
+  - {id: F04.process, actor: fo.da_accounts, does: "Scrutinise and process the claim (Claims > Transaction); recommend", api: ["GET /office/work-queue", "GET /office/cases/{caseId}", "POST /office/cases/{caseId}/recommendations", "POST /ai/claims/analyse"], next: [F04.approve_ss, F04.approve_ao], chain: claim_settlement, src: "PEN, FIA", ev: V}
+  - {id: F04.approve_ss, actor: fo.ss, does: "Approve claims in the SS band", api: ["POST /office/cases/{caseId}/decisions"], next: [F04.approve_apfc, F04.pay], chain: claim_settlement, src: FIA, ev: D}
+  - {id: F04.approve_ao, actor: fo.ao, does: "Approve claims in the AO band", api: ["POST /office/cases/{caseId}/decisions"], next: [F04.approve_oic, F04.pay], chain: claim_settlement, src: FIA, ev: D}
+  - {id: F04.approve_apfc, actor: fo.apfc, does: "Approve claims in the APFC / RPFC-II band", api: ["POST /office/cases/{caseId}/second-approvals"], next: [F04.pay], chain: claim_settlement, src: FIA, ev: D}
+  - {id: F04.approve_oic, actor: fo.oic, does: "Approve claims above the top threshold", api: ["POST /office/cases/{caseId}/second-approvals"], next: [F04.pay], chain: claim_settlement, src: FIA, ev: D}
+  - {id: F04.pay, actor: fo.cash, does: "Issue payment instruction / payment scroll; reconcile returns; re-issue", api: ["POST /office/claims/{claimId}/payment-instructions", "POST /office/payment-scrolls", "POST /office/payment-scrolls/{scrollId}/return-reconciliations", "POST /office/claims/{claimId}/reissues"], adapter: collecting_bank, next: [F04.track], src: "PEN, MAP", ev: D}
+  - {id: F04.track, actor: member, does: "Track claims and notifications; download Form 16A", api: ["GET /members/me/tax/form-16a", "GET /members/me/claims", "GET /members/me/claims/{claimId}", "GET /members/me/notifications", "POST /public/claims/status-lookups"], next: [], src: WEB, ev: D}
+  - {id: F04.tds, actor: fo.da_accounts, does: "Compute TDS on withdrawals and file with Income Tax", api: ["POST /office/tds/computations"], adapter: income_tax, next: [], src: MAP, ev: D}
+  - {id: F04.transfer, actor: member, does: "Request Form 13 transfer; confirm auto-transfer; view Annexure K", api: ["POST /members/me/transfers", "GET /members/me/transfers/{transferId}", "GET /members/me/transfers/auto", "POST /members/me/transfers/auto/{transferId}/confirmations", "GET /members/me/transfers/{transferId}/annexure-k"], next: [F04.transfer_attest], src: "MAP, WEB", ev: D}
+  - {id: F04.transfer_attest, actor: employer.signatory, does: "Attest pending transfer claims (Online Services > Transfer Claims)", api: ["GET /employers/me/transfer-requests", "POST /employers/me/transfer-requests/{transferId}/decisions"], next: [F04.transfer_process], src: MAP, ev: V}
+  - {id: F04.transfer_process, actor: fo.da_accounts, does: "Process transfer between member IDs / offices", api: ["POST /office/transfers/{transferId}/decisions"], next: [], chain: generic_maker_checker, src: MAP, ev: D}
+  - {id: F04.death_claim, actor: claimant, does: "File PF (Form 20), EDLI (Form 5IF) or composite death claim", api: ["POST /claimants/death-claims", "GET /claimants/death-claims/{claimId}"], next: [F04.edli], src: "PEN, EDLI", ev: D}
+  - {id: F04.edli, actor: fo.edli, does: "Process EDLI assurance benefit", api: ["POST /office/edli-claims/{claimId}/decisions"], next: [F04.pay], chain: claim_settlement, src: EDLI, ev: D}
+
+# ─────────────────────────── F05 Pension ───────────────────────────
+  - {id: F05.apply, actor: member, does: "Apply for monthly pension (Form 10D) or scheme certificate", api: ["POST /members/me/pension-applications", "POST /members/me/pension-scheme-certificates", "GET /members/me/pension-scheme-certificate"], next: [F05.ids], src: PEN, ev: D}
+  - {id: F05.disabled_apply, actor: member.disabled, does: "Apply for disablement pension", api: ["POST /members/me/pension-applications"], next: [F05.ids], src: PEN, ev: D}
+  - {id: F05.family_apply, actor: family_pensioner, does: "Apply for widow / child / orphan / dependent-parent pension", api: ["POST /claimants/family-pension-applications"], next: [F05.ids], src: PEN, ev: D}
+  - {id: F05.ids, actor: fo.da_accounts, does: "Prepare Input Data Sheet (Claims > Transaction > Form-10D/10C); update service history in FO Interface", api: ["POST /office/pension-claims/{claimId}/input-data-sheets"], next: [F05.ids_approve], chain: pension_ppo, src: PEN, ev: V}
+  - {id: F05.ids_approve, actor: fo.ao, does: "Approve the Input Data Sheet and send to the Pension section via inter-section diary", api: ["POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals"], next: [F05.worksheet], chain: pension_ppo, src: PEN, ev: D}
+  - {id: F05.worksheet, actor: fo.da_pension, does: "Generate pension worksheet (Pension > Transaction > Pension Worksheet); Special 10D for incomplete data; send errors back", api: ["POST /office/pensions/worksheets", "POST /office/pensions/special-10d-cases"], next: [F05.ppo], chain: pension_ppo, src: PEN, ev: V}
+  - {id: F05.ppo, actor: fo.da_pension, does: "Generate PPO; process transfer-in with / without PPO", api: ["POST /office/pensions/ppo-issuances", "POST /office/pensions/transfers-in"], next: [F05.ppo_approve], chain: pension_ppo, src: PEN, ev: V}
+  - {id: F05.initial_arrear, actor: fo.ss_pension, does: "Check initial arrear and forward", api: ["POST /office/pensions/ppos/{ppoId}/initial-arrears"], next: [F05.ppo_approve], chain: pension_initial_arrear, src: PEN, ev: D}
+  - {id: F05.ppo_approve, actor: fo.apfc_pension, does: "Approve worksheet, PPO and initial arrear; e-sign PPO; decide higher-pension options", api: ["POST /office/pensions/worksheets/{worksheetId}/approvals", "POST /office/pensions/ppos/{ppoId}/e-signatures", "POST /office/pensions/higher-pension-options/{optionId}/decisions", "POST /office/pensions/{ppoId}/revisions"], next: [F05.dispatch], chain: pension_ppo, src: PEN, ev: D}
+  - {id: F05.dispatch, actor: fo.da_pension, does: "Dispatch PPO and scroll to the bank", api: ["POST /office/pensions/ppos/{ppoId}/dispatches"], next: [F05.cpps], src: PEN, ev: D}
+  - {id: F05.cpps, actor: tech.cpps, does: "Monthly pan-India disbursement through the sponsor bank; reconcile paid statements", api: ["POST /cpps/disbursement-runs", "POST /cpps/reconciliations"], adapter: pension_bank, next: [F05.bank], src: "PEN, REF", ev: D}
+  - {id: F05.disbursement_section, actor: fo.pension_disbursement, does: "Legacy bank-wise disbursement tasks until CPPS takes over", api: ["GET /office/pensions/disbursement-lists"], next: [F05.cpps], src: PEN, ev: D}
+  - {id: F05.bank, actor: ext.pension_bank, does: "Credit pensions; send paid statements", api: ["POST /integrations/mock-pension-bank/paid-statements"], next: [], src: PEN, ev: D}
+  - {id: F05.pensioner_view, actor: pensioner, does: "View PPO, pension slips, payments; change bank; declarations; public pension enquiries", api: ["GET /pensioners/me", "GET /pensioners/me/ppo", "GET /pensioners/me/pension-slips", "GET /pensioners/me/payments", "POST /pensioners/me/bank-change-requests", "POST /public/pension/ppo-lookups", "POST /public/pension/payment-enquiries", "POST /public/pension/status-enquiries"], next: [], src: "PEN, WEB", ev: V}
+  - {id: F05.family_view, actor: family_pensioner, does: "View pension; submit non-remarriage / non-employment declarations", api: ["GET /pensioners/me", "POST /pensioners/me/declarations"], next: [], src: PEN, ev: D}
+  - {id: F05.dlc, actor: pensioner, does: "Submit Digital Life Certificate; check status", api: ["POST /pensioners/me/life-certificate/submissions", "GET /pensioners/me/life-certificate", "POST /public/pension/life-certificate-lookups"], adapter: jeevan_pramaan, next: [F05.dlc_event], src: PEN, ev: V}
+  - {id: F05.dlc_event, actor: ext.jeevan_pramaan, does: "Send the DLC result", api: ["POST /integrations/mock-jeevan-pramaan/dlc-events"], next: [F05.dlc_monitor], src: PEN, ev: D}
+  - {id: F05.dlc_doorstep, actor: ext.ippb, does: "Doorstep DLC through India Post Payments Bank", adapter: jeevan_pramaan, next: [F05.dlc_event], src: PEN, ev: D}
+  - {id: F05.dlc_monitor, actor: fo.apfc_pension, does: "Monitor overdue life certificates; suspend or resume pension", api: ["GET /office/pensions/life-certificates/overdue", "POST /office/pensions/{ppoId}/suspensions", "POST /office/pensions/{ppoId}/resumptions"], next: [], src: PEN, ev: D}
+  - {id: F05.higher_member, actor: member, does: "Apply for pension on higher wages (joint option); track status", api: ["POST /members/me/higher-pension-options", "GET /members/me/higher-pension-options/{optionId}"], next: [F05.higher_employer], src: PEN, ev: D}
+  - {id: F05.higher_employer, actor: employer.signatory, does: "Validate joint options and upload wage details", api: ["GET /employers/me/higher-pension-options", "POST /employers/me/higher-pension-options/{optionId}/validations"], next: [F05.higher_deposit], src: PEN, ev: D}
+  - {id: F05.higher_deposit, actor: fo.da_accounts, does: "Book dues deposit through Member VDR ('Pension on Higher Wages'); Appendix-E code for PF → EPS diversion", api: ["POST /office/vdr-entries", "POST /office/ledger-adjustments", "POST /office/pensions/higher-pension-options/{optionId}/ledger-transfers"], next: [F05.ppo_approve], src: PEN, ev: V}
+  - {id: F05.actuarial, actor: ho.actuarial, does: "Extract EPS data for actuarial valuation", api: ["GET /ho/actuarial/extracts"], next: [F05.valuation], src: PEN, ev: D}
+  - {id: F05.valuation, actor: ext.actuary, does: "Perform EPS actuarial valuation", next: [], src: PEN, ev: D}
+  - {id: F05.policy, actor: ho.pension, does: "Pension policy, monitoring of DLC / higher-pension / death-claim pendency", api: ["GET /monitoring/claims", "PUT /ho/config/rules/{ruleSet}"], next: [], src: PEN, ev: D}
+  - {id: F05.peic, actor: gov.peic, does: "Review pension and EDLI implementation", api: ["GET /monitoring/claims"], next: [], src: PEN, ev: D}
+
+# ─────────────────────────── F06 Compliance, inspection, proceedings, recovery ───────────────────────────
+  - {id: F06.detect, actor: ho.caiu, does: "Analyse data and allocate risk-based inspections / risk signals", api: ["GET /caiu/synthetic-risk-signals", "POST /caiu/synthetic-risk-signals/{signalId}/reviews"], next: [F06.schedule], src: "SOP-B, EC", ev: D}
+  - {id: F06.defaulters, actor: fo.da_compliance, does: "Identify non-filers / short payers; open compliance case", api: ["GET /office/compliance/defaulters", "POST /office/compliance/cases", "GET /office/compliance/cases", "GET /office/compliance/cases/{caseId}"], next: [F06.schedule], src: CMP, ev: D}
+  - {id: F06.schedule, actor: fo.apfc, does: "Circle officer schedules inspection (incl. CAIU-allocated)", api: ["POST /office/compliance/inspections"], next: [F06.inspect], src: "CMP, ICF", ev: D}
+  - {id: F06.inspect, actor: fo.icf, does: "Conduct inspection; upload report on Unified Portal and Shram Suvidha", api: ["POST /office/compliance/inspections/{inspectionId}/reports"], adapter: shram_suvidha, next: [F06.report_process], src: ICF, ev: D, fut: true}
+  - {id: F06.inspect_legacy, actor: fo.eo, does: "Enforcement Officer inspection (legacy role before ICF)", api: ["POST /office/compliance/inspections/{inspectionId}/reports"], next: [F06.report_process], src: "CMP, MAP", ev: D}
+  - {id: F06.report_process, actor: fo.da_compliance, does: "Process inspection report in the e-Office file within 3 working days", api: ["POST /office/compliance/inspections/{inspectionId}/processing-notes"], next: [F06.proceed], src: CMP, ev: D}
+  - {id: F06.proceed, actor: fo.apfc, does: "Quasi-judicial authority: issue notice / summons, hold hearings (e-Proceedings Cause List, Daily Order)", api: ["POST /office/compliance/cases/{caseId}/notices", "POST /office/compliance/cases/{caseId}/hearings"], next: [F06.employer_reply], src: "CMP, EP", ev: D}
+  - {id: F06.order, actor: fo.apfc, does: "Pass 7A / 14B / 7Q order (e-Proceedings Final Order); 7B review; 7C; 26B disputes", api: ["POST /office/compliance/cases/{caseId}/orders", "POST /office/compliance/cases/{caseId}/reviews-7b", "POST /office/compliance/cases/{caseId}/escaped-assessments-7c", "POST /office/compliance/membership-disputes"], event: DemandRaised.v1, next: [F03.direct_challan, F06.appeal, F06.recovery], src: "CMP, EP", ev: D}
+  - {id: F06.employer_reply, actor: employer.signatory, does: "Reply and submit evidence in proceedings", api: ["POST /employers/me/proceedings/{caseId}/submissions"], next: [F06.order], src: CMP, ev: D}
+  - {id: F06.appeal, actor: ext.cgit, does: "Tribunal hears 7-I appeals and decides 7-O pre-deposit / waiver", next: [F06.legal], src: "EC, CMP", ev: D}
+  - {id: F06.courts, actor: ext.courts, does: "Writs and orders on EPFO matters", next: [F06.legal], src: "EC, CMP, EXM", ev: D}
+  - {id: F06.legal, actor: fo.legal, does: "Record 7-I appeals, 7-O pre-deposits / waivers and court / tribunal orders; track compliance", api: ["POST /office/compliance/cases/{caseId}/appeals", "POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposits", "POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposit-waivers", "POST /office/legal/cases", "GET /office/legal/cases", "POST /office/legal/cases/{caseId}/orders"], next: [], src: "SOP-B, CMP", ev: D}
+  - {id: F06.recovery, actor: fo.recovery_officer, does: "Take up recovery certificate for unpaid assessed dues", api: ["POST /office/compliance/cases/{caseId}/recovery-certificates"], next: [F06.garnishee, F06.attach], src: REC, ev: D}
+  - {id: F06.garnishee, actor: fo.recovery_officer, does: "8F garnishee order on bank / debtor (demo record only)", api: ["POST /office/compliance/cases/{caseId}/recovery-8f"], next: [], src: REC, ev: D}
+  - {id: F06.attach, actor: fo.recovery_officer, does: "Attach movable / immovable property (demo record only)", api: ["POST /office/recovery/{caseId}/attachments"], next: [F06.sale, F06.receiver], src: REC, ev: D}
+  - {id: F06.sale, actor: fo.recovery_officer, does: "Sale of attached property (demo record only)", api: ["POST /office/recovery/{caseId}/sales"], next: [], src: REC, ev: D}
+  - {id: F06.receiver, actor: fo.recovery_officer, does: "Appoint receiver for business / property (demo record only)", api: ["POST /office/recovery/{caseId}/receivers"], next: [F06.arrest], src: REC, ev: D}
+  - {id: F06.arrest, actor: fo.recovery_officer, does: "Arrest and detention of defaulter as last resort (demo record only)", api: ["POST /office/recovery/{caseId}/arrest-warrants"], next: [], src: REC, ev: D}
+  - {id: F06.prosecution, actor: fo.apfc, does: "Initiate prosecution", api: ["POST /office/compliance/cases/{caseId}/prosecutions"], next: [F06.legal], src: CMP, ev: D}
+  - {id: F06.district, actor: do.staff, does: "District-level compliance follow-up and facilitation", api: ["GET /office/work-queue", "GET /office/compliance/cases"], next: [F06.schedule], src: CMP, ev: U, fut: true}
+  - {id: F06.ho_policy, actor: ho.compliance, does: "Compliance policy and e-Proceedings oversight", api: ["GET /ho/reports/proceedings"], next: [], src: "CMP, EP", ev: V}
+  - {id: F06.ho_recovery, actor: ho.recovery, does: "Recovery policy and monitoring", api: ["GET /ho/reports/recovery"], next: [], src: REC, ev: D}
+  - {id: F06.ho_legal, actor: ho.legal, does: "Legal policy; monitoring of court cases", api: ["GET /office/legal/cases"], next: [], src: SOP-B, ev: D}
+
+# ─────────────────────────── F07 Freezing, fraud, vigilance ───────────────────────────
+  - {id: F07.freeze_ho, actor: ho.fa_cao, does: "Order freezing for Category A (FIA vertical)", api: ["POST /office/members/{uan}/freezes", "POST /office/establishments/{estId}/freezes"], next: [F07.block], src: FIA, ev: D}
+  - {id: F07.freeze_zo, actor: zo.rpfc1, does: "Order freezing (Categories B / C) at zone level", api: ["POST /office/members/{uan}/freezes", "POST /office/establishments/{estId}/freezes"], next: [F07.block], src: FIA, ev: D, fut: true}
+  - {id: F07.freeze_ro_member, actor: fo.apfc, does: "Order freezing of MID / UAN (Categories B / C)", api: ["POST /office/members/{uan}/freezes"], next: [F07.block], src: FIA, ev: D}
+  - {id: F07.freeze_ro_est, actor: fo.oic, does: "Order freezing of an establishment (Category B); report to fraud committee", api: ["POST /office/establishments/{estId}/freezes"], next: [F07.block, F07.committee], src: FIA, ev: D}
+  - {id: F07.block, actor: ho.is, does: "Execute block / unblock raised through the Issue Tracker; show login pop-ups", api: ["POST /ndc/issue-tracker/requests", "POST /ndc/issue-tracker/requests/{requestId}/executions"], next: [F07.verify_member, F07.verify_est], src: FIA, ev: V}
+  - {id: F07.verify_member, actor: fo.da_accounts, does: "Open e-file and verify the frozen MID / UAN (member ledger, crowdsourcing)", api: ["GET /office/members/{uan}", "POST /office/freeze-cases/{caseId}/verifications"], next: [F07.verify_ss, F07.verify_ao], chain: freeze_verification_member, src: FIA, ev: D}
+  - {id: F07.verify_est, actor: fo.da_compliance, does: "Verify the frozen establishment", api: ["POST /office/freeze-cases/{caseId}/verifications"], next: [F07.verify_ss], chain: freeze_verification_establishment, src: FIA, ev: D}
+  - {id: F07.verify_ss, actor: fo.ss, does: "Review verification (SS route)", api: ["POST /office/freeze-cases/{caseId}/verifications"], next: [F07.verify_apfc], src: FIA, ev: D}
+  - {id: F07.verify_ao, actor: fo.ao, does: "Review verification (AO route, accounts cases)", api: ["POST /office/freeze-cases/{caseId}/verifications"], next: [F07.verify_apfc], src: FIA, ev: D}
+  - {id: F07.verify_apfc, actor: fo.apfc, does: "Validate verification", api: ["POST /office/freeze-cases/{caseId}/verifications"], next: [F07.defreeze], src: FIA, ev: D}
+  - {id: F07.defreeze, actor: fo.oic, does: "Recommend / order de-freezing; post-defreeze claims use the higher chain", api: ["POST /office/members/{uan}/defreezes", "POST /office/establishments/{estId}/defreezes"], next: [F07.block], chain: claim_settlement_after_defreeze, src: FIA, ev: D}
+  - {id: F07.committee, actor: zo.fraud_committee, does: "Review suspected fraud cases reported by OICs", api: ["GET /zo/fraud-risk/cases"], next: [F07.vig_referral], src: FIA, ev: D, fut: true}
+  - {id: F07.vig_referral, actor: ho.caiu, does: "Refer a pattern to vigilance", api: ["POST /vigilance/referrals"], next: [F07.vig_zone], src: "EC, MAP", ev: U}
+  - {id: F07.vig_zone, actor: zo.vigilance, does: "Investigate vigilance case with restricted evidence access", api: ["GET /vigilance/cases", "POST /vigilance/cases/{caseId}/findings"], next: [F07.vig_ho], src: "MAP, EC", ev: D, fut: true}
+  - {id: F07.vig_ho, actor: ho.cvo, does: "CVO / Director (Vigilance): oversee vigilance cases and decisions", api: ["GET /vigilance/cases", "POST /vigilance/cases/{caseId}/decisions"], next: [], src: "MAP, EC", ev: D, fut: true}
+  - {id: F07.member_report, actor: member, does: "Report suspicious activity; account recovery; view sessions", api: ["POST /members/me/security-reports", "POST /members/me/account-recovery-requests", "GET /members/me/sessions"], next: [F07.vig_referral], src: "init.md Journey D", ev: U}
+
+# ─────────────────────────── F08 Grievances ───────────────────────────
+  - {id: F08.member_file, actor: member, does: "Register, track, reopen, remind and give feedback on grievances", api: ["POST /members/me/grievances", "GET /members/me/grievances", "GET /grievances/{grievanceId}", "POST /grievances/{grievanceId}/documents", "POST /grievances/{grievanceId}/messages", "POST /grievances/{grievanceId}/reopen-requests", "POST /grievances/{grievanceId}/reminders", "POST /grievances/{grievanceId}/feedback"], next: [F08.triage], src: WEB, ev: V}
+  - {id: F08.public_file, actor: complainant, does: "Register grievance without login (pensioner, employer, others); check status", api: ["POST /public/grievances", "POST /public/grievances/status-lookups"], next: [F08.triage], src: WEB, ev: V}
+  - {id: F08.pensioner_file, actor: pensioner, does: "Register pension grievance", api: ["POST /public/grievances"], next: [F08.triage], src: PEN, ev: D}
+  - {id: F08.cpgrams, actor: ext.cpgrams, does: "Route CPGRAMS grievances to EPFO", api: ["POST /integrations/cpgrams/grievances"], next: [F08.triage], src: EC, ev: D}
+  - {id: F08.triage, actor: fo.pro, does: "Triage, assign, reply with evidence, lodge local grievances, transfer between offices, resolve", api: ["POST /office/cases/{caseId}/assignments", "POST /grievances/{grievanceId}/messages", "POST /grievances/{grievanceId}/evidence-links", "POST /grievances/{grievanceId}/resolution", "POST /ai/grievances/classify", "POST /grievances/{grievanceId}/office-transfers"], next: [F08.escalate], src: "EC, MAP", ev: V}
+  - {id: F08.escalate, actor: zo.acc, does: "Handle grievances escalated to the zone", api: ["POST /grievances/{grievanceId}/escalations", "GET /grievances/{grievanceId}"], next: [F08.ho], src: "EC, REF", ev: D, fut: true}
+  - {id: F08.ho, actor: ho.customer_service, does: "Monitor grievance pendency and root causes", api: ["GET /monitoring/grievances"], next: [], src: "EC, REF", ev: D}
+  - {id: F08.rti, actor: rti_applicant, does: "File RTI request (handled through the RTI portal; answered by the office)", adapter: rti_portal, next: [F08.rti_reply], src: "PEN, EC", ev: D}
+  - {id: F08.rti_reply, actor: fo.pro, does: "Answer RTI requests", api: ["POST /office/rti-requests/{requestId}/replies"], next: [], src: "PEN, EC", ev: U}
+
+# ─────────────────────────── F09 Exempted establishments ───────────────────────────
+  - {id: F09.returns, actor: exempted.trust, does: "File monthly return of exempted establishment (Parts A-F); view trust profile", api: ["POST /exempted/me/returns", "GET /exempted/me/profile"], next: [F09.supervise], src: EXM, ev: V}
+  - {id: F09.annexure_k, actor: exempted.trust, does: "Exchange Annexure K for transfers in / out", api: ["GET /exempted/me/annexure-k-requests", "POST /exempted/me/annexure-k-submissions"], next: [F09.annexure_k_reconcile], src: EXM, ev: D}
+  - {id: F09.annexure_k_reconcile, actor: fo.da_accounts, does: "Reconcile Annexure K with receipts and member records", api: ["POST /office/exempted/annexure-k/{annexureId}/reconciliations"], next: [], src: EXM, ev: D}
+  - {id: F09.audit, actor: trust_auditor, does: "Audit the PF trust and submit the audited statements", api: ["POST /exempted/me/audits"], next: [F09.supervise], src: EXM, ev: D, fut: true}
+  - {id: F09.surrender, actor: exempted.trust, does: "Surrender exemption", api: ["POST /exempted/me/surrender-requests"], next: [F09.past_accum], src: EXM, ev: V}
+  - {id: F09.past_accum, actor: fo.exemption, does: "Transfer past accumulations after surrender / cancellation", api: ["POST /office/exempted/{estId}/past-accumulation-transfers"], next: [], chain: generic_maker_checker, src: EXM, ev: V}
+  - {id: F09.supervise, actor: fo.exemption, does: "Supervise PF trusts: returns, investments, audit reports", api: ["GET /office/exempted/{estId}/returns", "GET /office/exempted/{estId}/audits"], next: [], src: EXM, ev: D}
+  - {id: F09.ho, actor: ho.exemption, does: "Grant / cancel exemption policy decisions", api: ["POST /ho/exemptions/{estId}/decisions"], next: [], src: EXM, ev: D}
+
+# ─────────────────────────── F10 International workers ───────────────────────────
+  - {id: F10.apply, actor: employer.signatory, does: "Apply for / extend CoC for a posted worker (IWU portal EMPLOYER login); upload signed application; download CoC", api: ["POST /international/coc-applications", "GET /international/coc-applications/{id}", "POST /international/coc-applications/{id}/extensions", "POST /international/coc-applications/{id}/signed-uploads", "GET /international/coc-applications/{id}/certificate"], next: [F10.decide], src: IWU, ev: V}
+  - {id: F10.worker, actor: intl_worker, does: "View own international-worker status and CoC (no direct IWU login found; member-portal view is a future option)", api: ["GET /members/me/international"], next: [], src: IWU, ev: U, fut: true}
+  - {id: F10.decide, actor: fo.iw, does: "Verify and issue Certificate of Coverage", api: ["POST /office/international/coc-applications/{id}/decisions"], next: [F10.foreign], src: IWU, ev: D}
+  - {id: F10.foreign, actor: ext.foreign_ss, does: "Foreign social-security agency verifies CoC (FOREIGN AGENCIES login)", api: ["GET /partners/foreign-agencies/coc-certificates/{id}"], next: [], src: IWU, ev: V}
+  - {id: F10.ho, actor: ho.iwu, does: "Maintain social-security agreements; route totalisation claims", api: ["GET /international/agreements", "POST /international/totalisation-claims"], next: [], src: "EC, MAP", ev: D}
+
+# ─────────────────────────── F11 Inoperative accounts ───────────────────────────
+  - {id: F11.search, actor: member.exited, does: "Search inoperative accounts; request reactivation / settlement (online, at FO or NAN camp)", api: ["POST /public/inoperative-accounts/searches", "POST /members/me/claims"], next: [F11.verify], src: WSU, ev: D}
+  - {id: F11.nan, actor: fo.nan, does: "Help members at Nidhi Aapke Nikat camps", api: ["POST /office/outreach-camps/{campId}/assisted-requests"], next: [F11.verify], src: "WSU, PEN", ev: D, fut: true}
+  - {id: F11.verify, actor: fo.da_accounts, does: "Verify inoperative account (digital records, crowdsourcing through co-workers' logins)", api: ["GET /office/accounts/inoperative", "POST /office/accounts/{accountLinkId}/crowdsource-verifications"], next: [F11.approve], chain: inoperative_settlement, src: WSU, ev: D}
+  - {id: F11.approve, actor: fo.ao, does: "Approve reactivation / settlement in the AO band; forward higher bands", api: ["POST /office/accounts/{accountLinkId}/reactivations"], next: [F11.approve_apfc], chain: inoperative_settlement, src: WSU, ev: D}
+  - {id: F11.approve_apfc, actor: fo.apfc, does: "Approve inoperative-account settlement in higher amount bands", api: ["POST /office/accounts/{accountLinkId}/reactivations"], next: [F11.oic_monitor], chain: inoperative_settlement, src: WSU, ev: D}
+  - {id: F11.oic_monitor, actor: fo.oic, does: "Trigger verification of suspicious inoperative-account requests and monitor unblocking daily", api: ["GET /office/accounts/inoperative"], next: [F07.block], src: WSU, ev: D}
+
+# ─────────────────────────── F12 Audit ───────────────────────────
+  - {id: F12.concurrent, actor: zo.rpfc1_audit, does: "Download daily functionality data from the Audit Portal; flag suspicious cases; alert ROs; review replies", api: ["GET /audit/events", "GET /audit/concurrent/extracts", "POST /audit/concurrent/alerts"], next: [F12.reply], src: AUD, ev: V}
+  - {id: F12.reply, actor: fo.oic, does: "Reply to concurrent-audit alerts within 3 days", api: ["POST /audit/concurrent/alerts/{alertId}/replies"], next: [], src: AUD, ev: D}
+  - {id: F12.internal, actor: zo.internal_audit, does: "Internal audit of an RO; raise audit paras", api: ["POST /audit/internal/reports", "POST /audit/internal/reports/{reportId}/paras", "GET /audit/correlations/{correlationId}"], next: [F12.para_reply], src: AUD, ev: D, fut: true}
+  - {id: F12.para_reply, actor: fo.oic, does: "Comply with audit paras; request dropping", api: ["POST /audit/internal/paras/{paraId}/replies"], next: [F12.ho], src: AUD, ev: D}
+  - {id: F12.ho, actor: ho.audit, does: "Audit Division: plan audits, IT audit, pre-audit, drop paras, oversee CAG audit", api: ["GET /audit/events", "POST /audit/internal/paras/{paraId}/decisions"], next: [], src: AUD, ev: D}
+  - {id: F12.cag, actor: gov.cag, does: "External audit with read-only access", api: ["GET /audit/events", "GET /audit/correlations/{correlationId}"], next: [], src: AUD, ev: D}
+  - {id: F12.statutory, actor: gov.statutory_auditor, does: "Attest audit of accounts (read-only)", api: ["GET /audit/events", "GET /ho/finance/balance-sheet"], next: [], src: AUD, ev: D}
+
+# ─────────────────────────── F13 Monitoring, governance, reporting ───────────────────────────
+  - {id: F13.public, actor: public, does: "Browse schemes, offices, statistics, circulars; search establishments; calculators; TRRN status", api: ["GET /public/schemes", "GET /public/offices", "GET /public/statistics", "GET /public/circulars", "GET /public/establishments", "GET /public/establishments/{estId}", "GET /public/establishments/{estId}/e-report-card", "GET /public/defaulting-establishments", "POST /public/demo-calculations/epf", "POST /public/demo-calculations/pension", "POST /public/trrn-status-lookups", "POST /ai/knowledge/search"], next: [], src: WEB, ev: V}
+  - {id: F13.do, actor: do.incharge, does: "District dashboard and jurisdiction-scoped queue", api: ["GET /office/work-queue", "GET /do/dashboards"], next: [], src: "CMP, EC", ev: U, fut: true}
+  - {id: F13.ro, actor: fo.rpfc1, does: "RO-level monitoring (claims, grievances, compliance)", api: ["GET /monitoring/claims", "GET /monitoring/contributions", "GET /monitoring/grievances"], next: [], src: "JD, PEN", ev: D}
+  - {id: F13.oic, actor: fo.oic, does: "Office-level pendency and daily unblocking monitoring", api: ["GET /monitoring/claims", "GET /office/work-queue"], next: [], src: "FIA, WSU", ev: D}
+  - {id: F13.zo, actor: zo.acc, does: "Zone dashboards; approvals above RO limits", api: ["GET /zo/dashboards", "GET /monitoring/claims", "GET /monitoring/grievances"], next: [], src: "EC, SOP-B", ev: U, fut: true}
+  - {id: F13.cpfc, actor: ho.cpfc, does: "National dashboards and policy approvals", api: ["GET /monitoring/claims", "GET /monitoring/contributions", "GET /monitoring/grievances", "GET /monitoring/data-freshness"], next: [], src: "MAP, EC", ev: D}
+  - {id: F13.acc_hq, actor: ho.acc_hq, does: "Division-level oversight and rule-set approvals", api: ["GET /monitoring/claims", "PUT /ho/config/rules/{ruleSet}"], next: [], src: "EC, SOP-B", ev: D}
+  - {id: F13.divisions, actor: ho.edli, does: "EDLI policy and monitoring", api: ["GET /monitoring/claims"], next: [], src: EDLI, ev: D}
+  - {id: F13.investment, actor: ho.investment, does: "Fund and investment reporting", api: ["GET /ho/finance/investments"], next: [], src: EC, ev: D}
+  - {id: F13.fund_feed, actor: ext.fund_manager, does: "Send portfolio / custody positions", api: ["POST /integrations/fund-managers/positions"], next: [F13.investment], src: EC, ev: D}
+  - {id: F13.publicity, actor: ho.publicity, does: "Publish circulars and awareness content", api: ["POST /ho/circulars"], next: [F13.public], src: EC, ev: U}
+  - {id: F13.mole, actor: gov.mole, does: "Aggregate dashboards (no PII)", api: ["GET /public/statistics", "GET /monitoring/claims", "GET /monitoring/contributions"], next: [F13.parliament], src: "EC, REF", ev: D}
+  - {id: F13.parliament, actor: gov.parliament, does: "Receive answers to questions through the Ministry", next: [], src: "MAP, REF", ev: D}
+  - {id: F13.cbt, actor: gov.cbt, does: "Board dashboards; approve accounts, interest rate, policies", api: ["GET /governance/board-packs"], next: [F03.interest], src: EC, ev: D}
+  - {id: F13.ec, actor: gov.ec, does: "Executive Committee papers and decisions", api: ["GET /governance/board-packs"], next: [], src: EC, ev: D}
+  - {id: F13.fiac, actor: gov.fiac, does: "Finance, investment and audit review", api: ["GET /governance/board-packs", "GET /ho/finance/investments"], next: [], src: EC, ev: D}
+  - {id: F13.insurer, actor: ext.insurer, does: "Provide EDLI / insurance history data", adapter: insurer, next: [], src: MAP, ev: U}
+  - {id: F13.hr, actor: ho.hr, does: "Staff profiles, postings and delegation of roles to offices", api: ["GET /hrm/me", "POST /hrm/postings"], next: [], src: "OUL, EC", ev: D}
+  - {id: F13.admin, actor: fo.admin, does: "Office administration: staff postings and role assignment in the office", api: ["GET /hrm/me", "POST /hrm/postings"], next: [], src: OUL, ev: U}
+
+# ─────────────────────────── F14 Technology, security, data protection, training ───────────────────────────
+  - {id: F14.ndc, actor: tech.ndc, does: "Run production, batch jobs and health / event monitoring", api: ["GET /ndc/health", "GET /ndc/event-failures", "POST /ndc/event-failures/{eventId}/replays"], next: [F14.adc], src: "AUD, PEN", ev: D}
+  - {id: F14.adc, actor: tech.adc, does: "Disaster-recovery site: replication status and failover drills", api: ["GET /ndc/dr/replication-status", "POST /ndc/dr/failover-drills"], next: [], src: "MAP, AUD, WEB", ev: U, fut: true}
+  - {id: F14.security, actor: ho.security, does: "Session inspection and revocation; security events; incident reporting", api: ["GET /security/sessions", "POST /security/sessions/{sessionId}/revocations", "GET /security/me/permissions", "POST /internal/security-events", "POST /security/incidents"], adapter: cert_in, next: [F14.cert_in], src: "init.md §6", ev: U, fut: true}
+  - {id: F14.cert_in, actor: ext.cert_in, does: "Receive cyber-incident reports", adapter: cert_in, next: [], src: WEB, ev: U}
+  - {id: F14.step_up, actor: member, does: "Complete step-up confirmation for sensitive actions", api: ["POST /security/step-up-challenges", "POST /security/step-up-challenges/{challengeId}/verifications"], next: [], src: "init.md §6.3", ev: U}
+  - {id: F14.privacy, actor: ho.data_protection, does: "Handle data-principal requests and breach records (DPDP Act)", api: ["GET /privacy/requests", "POST /privacy/requests/{requestId}/decisions"], next: [], src: WEB, ev: U, fut: true}
+  - {id: F14.ai, actor: tech.ai_service, does: "Advisory AI: knowledge search, claim analysis, grievance classification (no privileged writes)", api: ["POST /ai/knowledge/search", "POST /ai/claims/analyse", "POST /ai/grievances/classify", "GET /ai/models", "POST /ai/feedback"], next: [], src: "init.md §8", ev: U}
+  - {id: F14.training, actor: train.pdnasa, does: "Run training on a synthetic-data sandbox", api: ["POST /training/sandboxes"], next: [], src: EC, ev: U, fut: true}
+  - {id: F14.zti, actor: train.zti, does: "Zonal training on the sandbox", api: ["POST /training/sandboxes"], next: [], src: EC, ev: U, fut: true}
+  - {id: F14.zti_zo, actor: zo.zti, does: "Zonal Training Institute uses the training sandbox", api: ["POST /training/sandboxes"], next: [], src: EC, ev: U, fut: true}
+  - {id: F14.npci, actor: ext.npci, does: "Validate bank accounts (penny drop / name match)", adapter: npci, next: [], src: WEB, ev: U}
+  - {id: F14.digilocker, actor: ext.digilocker, does: "Issue documents (UAN card, PPO) to DigiLocker", adapter: digilocker, next: [], src: WEB, ev: U, fut: true}
+  - {id: F14.umang, actor: ext.umang, does: "Mobile channel calling the same member / pensioner APIs", api: ["GET /members/me/passbook", "POST /members/me/claims", "GET /members/me/claims"], next: [], src: "EC, REF", ev: D}
