@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "epfo-poc-gateway"
+version = "0.1.0"
+description = "Synthetic EPFO proof-of-concept API gateway/BFF"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "fastapi==0.115.12",
+  "uvicorn[standard]==0.34.2",
+  "httpx==0.28.1",
+  "redis==5.2.1",
+  "PyJWT[crypto]==2.10.1",
+  "cryptography==45.0.3",
+  "pydantic-settings==2.9.1",
+  "structlog==25.3.0",
+  "PyYAML==6.0.2",
+]
+
+[project.optional-dependencies]
+test = ["pytest==8.3.5", "pytest-asyncio==0.26.0", "fakeredis==2.28.1", "respx==0.22.0"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
