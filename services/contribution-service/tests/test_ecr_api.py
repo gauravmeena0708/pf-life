@@ -211,7 +211,7 @@ def test_opening_balance_claim_debit_and_settlement_balance_and_show_in_passbook
     from app.infra.claims_ledger import on_claim_decision, on_claim_paid
     member = SEED["members"][0]
     decision = {"claim_id": "CLM-1", "decision": "APPROVED", "reason_code": "OFFICER_APPROVED", "rule_version": "r",
-                "amount_paise": 95000000, "account_link_id": member["account_link_id"]}   # more than the employee share
+                "amount_paise": 400000000, "account_link_id": member["account_link_id"]}  # more than the employee share
     applied, event = _deliver(on_claim_decision, decision, "ClaimDecisionRecorded.v1")
     assert applied
     import app.infra.db as db
@@ -220,17 +220,17 @@ def test_opening_balance_claim_debit_and_settlement_balance_and_show_in_passbook
     [(payload,)] = q("SELECT payload FROM outbox WHERE event_type='ClaimDebitPosted.v1'")
     postings = json.loads(payload)["envelope"]["payload"]["postings"]
     assert [(p["account_code"], p["side"], p.get("share"), p["amount_paise"]) for p in postings] == [
-        ("AC01_EPF", "debit", "employee", 90000000), ("AC01_EPF", "debit", "employer", 5000000),
-        ("CLAIMS_PAYABLE", "credit", None, 95000000)]
+        ("AC01_EPF", "debit", "employee", 360000000), ("AC01_EPF", "debit", "employer", 40000000),
+        ("CLAIMS_PAYABLE", "credit", None, 400000000)]
     _deliver(on_claim_paid, {"payment_id": "PAY-CLM-1-1", "purpose": "CLAIM_SETTLEMENT", "reference_type": "claim",
-                             "reference_id": "CLM-1", "amount_paise": 95000000, "mock": True}, "PaymentConfirmed.v1")
+                             "reference_id": "CLM-1", "amount_paise": 400000000, "mock": True}, "PaymentConfirmed.v1")
     for (debit, credit) in q("SELECT SUM(CASE WHEN side='debit' THEN amount_paise ELSE 0 END), "
                              "SUM(CASE WHEN side='credit' THEN amount_paise ELSE 0 END) FROM journal_lines GROUP BY journal_id"):
         assert debit == credit                                                                   # every journal balances
     book = client.get("/api/v1/members/me/passbook", headers=hdr(member["subject"], "member", [], establishment=None)).json()["data"]
     entries = book["accounts"][0]["entries"]
     assert [e["kind"] for e in entries] == ["OPENING_BALANCE", "WITHDRAWAL"]
-    assert entries[0]["running_balance_paise"] == 150000000 and entries[-1]["running_balance_paise"] == 55000000
+    assert entries[0]["running_balance_paise"] == 600000000 and entries[-1]["running_balance_paise"] == 200000000
 
 
 def test_claim_above_ledger_balance_is_refused(ctx):

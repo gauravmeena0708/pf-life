@@ -4,7 +4,7 @@ import subprocess
 
 
 def main() -> None:
-    for service in ("employer-service", "contribution-service"):
+    for service in ("employer-service", "member-service", "contribution-service", "claim-service", "workflow-service"):
         print(f"== {service} synthetic seed", flush=True)
         subprocess.run(["docker", "compose", "exec", "-T", service, "python", "-m", "app.seed"], check=True)
 

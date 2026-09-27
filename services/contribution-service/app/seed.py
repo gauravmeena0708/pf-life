@@ -13,7 +13,8 @@ async def seed() -> None:
         data = json.load(f)
     establishment = data["establishment"]
     async with sessions()() as session, session.begin():
-        await session.execute(text("INSERT INTO establishments (id,legal_name,status) VALUES (:id,:name,:status) ON CONFLICT (id) DO UPDATE SET legal_name=excluded.legal_name,status=excluded.status"), {"id": establishment["establishment_id"], "name": establishment["legal_name"], "status": establishment["status"]})
+        # status is owned by EmployerVerified.v1 after the first load; a re-seed must not undo a verification
+        await session.execute(text("INSERT INTO establishments (id,legal_name,status) VALUES (:id,:name,:status) ON CONFLICT (id) DO UPDATE SET legal_name=excluded.legal_name"), {"id": establishment["establishment_id"], "name": establishment["legal_name"], "status": establishment["status"]})
         for m in data["members"]:
             await session.execute(text("""INSERT INTO establishment_members
               (uan,name,date_of_birth,account_link_id,member_subject,establishment_id,date_of_joining,date_of_exit,status)

@@ -530,6 +530,8 @@ Activities: **F03.receipts** Handle cheques / DDs and receipts outside the onlin
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/cases/{caseId}` | W |
+| `GET /office/work-queue` | W |
 | `POST /office/claims/{claimId}/payment-instructions` | W |
 | `POST /office/claims/{claimId}/reissues` | W |
 | `GET /office/receipts/unreconciled` | P |

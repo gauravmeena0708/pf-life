@@ -12,13 +12,14 @@ export function Home() {
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
   const role = session.data?.stakeholder;
   const workspace = role?.startsWith("employer.") ? { to: "/employer", label: t("navigation.employer") }
-    : role === "member" ? { to: "/member/passbook", label: t("navigation.passbook") }
+    : role === "member" ? { to: "/member/claims", label: t("navigation.claims") }
+      : role?.startsWith("fo.") ? { to: "/office/work-queue", label: t("navigation.workQueue") }
       : role === "ho.security" ? { to: "/security/activity", label: t("navigation.security") } : null;
   const services = [
     { key: "employer", to: role?.startsWith("employer.") ? "/employer" : "/i/employer" },
-    { key: "member", to: role === "member" ? "/member/passbook" : "/i/member" },
+    { key: "member", to: "/member/claims" },
     { key: "public", to: "/public" },
-    { key: "office", to: "/i/office" },
+    { key: "office", to: "/office/work-queue" },
     { key: "security", to: role === "ho.security" ? "/security/activity" : "/i/security" },
   ] as const;
   return (

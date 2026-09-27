@@ -99,7 +99,7 @@ def test_working_endpoint_reaches_service_with_verified_internal_token(page):
 def test_office_persona_reaches_office_service(page):
     login(page, "ro-apfc")
     status, body = api(page, "GET", "/api/v1/office/work-queue")
-    assert status == 501 and body["type"] == "/problems/not-yet-built", body
+    assert status == 200 and body["data"]["role"] == "fo.apfc" and body["data"]["office_id"] == "RO-DEMO-01", body
 
 
 def test_mutation_without_csrf_is_rejected(page):

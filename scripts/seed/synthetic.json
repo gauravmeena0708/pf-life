@@ -193,8 +193,8 @@
     "auditor": "00000000-0000-4000-8000-000000000022"
     },
   "opening_balances": {
-    "_comment": "Balances brought forward on 2026-03-31 (synthetic), so Journey B can exercise the higher approval bands.",
-    "AL-0001": {"employee_paise": 90000000, "employer_paise": 60000000, "as_of": "2026-03-31"},
+    "_comment": "Balances brought forward on 2026-03-31 (synthetic), so Journey B can exercise the higher approval bands repeatedly.",
+    "AL-0001": {"employee_paise": 360000000, "employer_paise": 240000000, "as_of": "2026-03-31"},
     "AL-0002": {"employee_paise": 3000000, "employer_paise": 2000000, "as_of": "2026-03-31"}
   },
   "office_staff": [

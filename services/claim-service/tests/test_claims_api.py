@@ -101,9 +101,9 @@ def test_eligible_types_use_opening_balance_and_explain_rules(ctx):
     assert r.status_code == 200
     body = r.json()["data"]
     account = body["accounts"][0]
-    assert account["account_link_id"] == "AL-0001" and account["balance"]["total_paise"] == 150000000
+    assert account["account_link_id"] == "AL-0001" and account["balance"]["total_paise"] == 600000000
     types = {t["claim_type"]: t for t in account["types"]}
-    assert types["ADVANCE_ILLNESS"]["eligible"] and types["ADVANCE_ILLNESS"]["max_amount_paise"] == 90000000
+    assert types["ADVANCE_ILLNESS"]["eligible"] and types["ADVANCE_ILLNESS"]["max_amount_paise"] == 100000000   # capped at ₹10,00,000
     assert not types["FINAL_SETTLEMENT"]["eligible"] and types["FINAL_SETTLEMENT"]["reasons"]
     assert body["illustrative_only"] is True
 
@@ -127,8 +127,8 @@ def test_create_shows_summary_route_and_confirmation_binding(ctx):
 
 def test_amount_above_limit_and_other_members_account_are_refused(ctx):
     client, *_ = ctx
-    over = create(client, amount=90000001)
-    assert over.status_code == 422 and over.json()["max_amount_paise"] == 90000000
+    over = create(client, amount=100000001)
+    assert over.status_code == 422 and over.json()["max_amount_paise"] == 100000000
     assert create(client, account="AL-0001", subject=MEMBER_B).status_code == 404   # member B names A's account
 
 
@@ -203,7 +203,7 @@ def test_officer_chain_moves_claim_to_approved_and_duplicate_events_apply_once(c
     import app.infra.db as db
     from epfo_persistence.consumer import apply_once
     assert asyncio.run(apply_once(db.sessions(), event, dispatch)) is False
-    assert q("SELECT employee_paise FROM accounts WHERE account_link_id='AL-0001'")[0][0] == 90000000 - JOURNEY_B_AMOUNT
+    assert q("SELECT employee_paise FROM accounts WHERE account_link_id='AL-0001'")[0][0] == 360000000 - JOURNEY_B_AMOUNT
 
 
 def test_payment_needs_debit_step_up_and_idempotency_then_settles(ctx):

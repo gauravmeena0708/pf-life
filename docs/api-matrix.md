@@ -231,8 +231,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | Endpoint | Status | Owner | Called by |
 |---|---|---|---|
 | `GET /hrm/me` | W | workflow | fo.admin |
-| `GET /office/cases/{caseId}` | W | workflow | fo.ao, fo.da_accounts, fo.ss |
-| `GET /office/work-queue` | W | workflow | fo.ao, fo.da_accounts, fo.ss |
+| `GET /office/cases/{caseId}` | W | workflow | fo.ao, fo.cash, fo.da_accounts, fo.ss |
+| `GET /office/work-queue` | W | workflow | fo.ao, fo.cash, fo.da_accounts, fo.ss |
 | `POST /ai/claims/analyse` | W | intelligence | fo.da_accounts |
 | `POST /office/cases/{caseId}/decisions` | W | workflow | fo.ao, fo.ss |
 | `POST /office/cases/{caseId}/recommendations` | W | workflow | fo.da_accounts |

@@ -130,6 +130,7 @@ paths:
       x-callers:
       - fo.ao
       - fo.apfc
+      - fo.cash
       - fo.da_accounts
       - fo.oic
       - fo.ss
@@ -554,6 +555,7 @@ paths:
       - do.staff
       - fo.ao
       - fo.apfc
+      - fo.cash
       - fo.da_accounts
       - fo.oic
       - fo.ss
