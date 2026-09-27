@@ -87,7 +87,8 @@
     "sessions": "Sessions & recovery",
     "audit": "Audit log",
     "riskSignals": "Risk signals",
-    "assistant": "Ask the assistant"
+    "assistant": "Ask the assistant",
+    "dashboards": "Dashboards"
   },
   "passbook": {
     "eyebrow": "Member services · contributions",

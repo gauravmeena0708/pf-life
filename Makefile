@@ -4,10 +4,10 @@ export PYTHONPATH := $(CURDIR)/packages/common-auth-client:$(CURDIR)/packages/co
 SERVICES := employer-service member-service contribution-service claim-service payment-simulator workflow-service \
             grievance-service audit-service reporting-service intelligence-service pension-service platform-service mock-integrations
 
-.PHONY: help env up up-lite up-direct down reset ps logs migrate seed test test-packages test-services e2e check-docs scaffold demo
+.PHONY: help env up up-lite up-direct down reset ps logs migrate seed test test-packages test-services e2e security resilience check-docs scaffold demo
 
 help:
-	@echo "make env | up | up-lite | up-direct | down | reset | ps | logs | migrate | seed | test | e2e | check-docs | scaffold | demo"
+	@echo "make env | up | up-lite | up-direct | down | reset | ps | logs | migrate | seed | test | e2e | security | resilience | check-docs | scaffold | demo"
 
 env:
 	@test -f .env || (cp .env.example .env && echo "created .env from .env.example (development values)")
@@ -52,6 +52,12 @@ test-services:
 e2e:
 	python3 -m pytest -q -p no:cacheprovider tests/e2e   # needs the stack running (make up) and Playwright + Chromium
 
+security:
+	python3 -m pytest -q -p no:cacheprovider tests/security   # the 25 must-deny tests; needs the stack running
+
+resilience:
+	python3 -m pytest -q -p no:cacheprovider tests/resilience   # stops and starts containers; run on its own
+
 check-docs:
 	python3 docs/tools/build_stakeholder_views.py --check
 	python3 docs/tools/build_gate0.py
@@ -68,5 +74,7 @@ demo:
 	@echo "RabbitMQ UI:    http://localhost:15672"
 	@echo "Object store:   http://localhost:8333   (S3 API, SeaweedFS)"
 	@echo "Personas: member-a member-b emp-owner emp-preparer emp-signatory do-caseworker ro-ss ro-ao ro-apfc ro-oic"
+	@echo "          ro-cashier ro-pro zo-acc zo-rpfc caiu-investigator security-analyst auditor (password Demo@2026!)"
+	@echo "Walkthrough:    docs/demo-script.md"
 	@echo "          ro-cashier ro-pro zo-acc ho-analyst ndc-operator ministry-viewer b2b-client caiu-investigator"
 	@echo "          hrm-employee security-analyst vigilance-investigator auditor   (password Demo@2026! — demo only)"
