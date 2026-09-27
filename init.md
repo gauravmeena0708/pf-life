@@ -203,6 +203,7 @@ This section is the **minimum** set. The full list of EPFO functions (establishm
 | `docs/stakeholders.md` | 114 stakeholders (members, employers, field-office roles, DO / ZO / HO, NDC / ADC, vigilance, audit, external bodies) with stable IDs | By hand |
 | `docs/stakeholder-activities.yaml` | 230 activities: actor, endpoints, hand-offs, approval chains, source evidence | By hand |
 | `docs/portal-functions-by-login.md` | Real EPFO portal functions by login type, with sources | By hand |
+| `docs/architecture.md`, `docs/adr/` | How the POC is built (backend, gateway, frontend, tokens, data, runtime) and the decisions behind it | By hand |
 | `docs/samadhan-setu-mapping.md` | Every Samadhan Setu spec / knowledge-base item → contract, with each deviation explained | By hand |
 | `docs/stakeholder-api-sets.md` | API set per stakeholder, gap lists, Mermaid flow diagrams | Generated: `python3 docs/tools/build_stakeholder_views.py` |
 | `docs/stakeholder-atlas.html` | Interactive explorer of stakeholders, lifecycles and approval chains | Generated: `python3 docs/tools/build_stakeholder_atlas.py` |
