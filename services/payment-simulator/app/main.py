@@ -31,7 +31,8 @@ async def lifespan(app: FastAPI):
     if os.environ.get("DISABLE_MESSAGING") != "1":
         workers = [OutboxRelay(engine(), settings.rabbitmq_url),
                    Consumer(engine(), settings.rabbitmq_url, "payment-simulator.ecr",
-                            ["contribution-service.ECRSubmitted.v1"], routes.on_ecr_submitted)]
+                            ["contribution-service.ECRSubmitted.v1", "claim-service.PaymentInstructed.v1"],
+                            routes.dispatch)]
         for w in workers:
             w.start()
         bank = asyncio.create_task(_mock_bank_loop(), name="mock-bank")

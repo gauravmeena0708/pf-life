@@ -57,19 +57,33 @@
         "claim_id",
         "decision",
         "reason_code",
-        "rule_version"
+        "rule_version",
+        "amount_paise",
+        "account_link_id"
       ],
       "properties": {
         "claim_id": {
           "type": "string"
         },
         "decision": {
-          "type": "string"
+          "enum": [
+            "APPROVED",
+            "AUTO_APPROVED",
+            "REJECTED"
+          ]
         },
         "reason_code": {
           "type": "string"
         },
         "rule_version": {
+          "type": "string"
+        },
+        "amount_paise": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Money in paise (integer); never floating point"
+        },
+        "account_link_id": {
           "type": "string"
         }
       }

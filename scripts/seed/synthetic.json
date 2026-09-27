@@ -161,5 +161,19 @@
     "security-analyst": "00000000-0000-4000-8000-000000000020",
     "vigilance-investigator": "00000000-0000-4000-8000-000000000021",
     "auditor": "00000000-0000-4000-8000-000000000022"
-  }
+    },
+  "opening_balances": {
+    "_comment": "Balances brought forward on 2026-03-31 (synthetic), so Journey B can exercise the higher approval bands.",
+    "AL-0001": {"employee_paise": 90000000, "employer_paise": 60000000, "as_of": "2026-03-31"},
+    "AL-0002": {"employee_paise": 3000000, "employer_paise": 2000000, "as_of": "2026-03-31"}
+  },
+  "office_staff": [
+    {"username": "do-caseworker", "subject": "00000000-0000-4000-8000-000000000006", "stakeholder": "fo.da_accounts", "office_id": "RO-DEMO-01"},
+    {"username": "ro-ss", "subject": "00000000-0000-4000-8000-000000000007", "stakeholder": "fo.ss", "office_id": "RO-DEMO-01"},
+    {"username": "ro-ao", "subject": "00000000-0000-4000-8000-000000000008", "stakeholder": "fo.ao", "office_id": "RO-DEMO-01"},
+    {"username": "ro-apfc", "subject": "00000000-0000-4000-8000-000000000009", "stakeholder": "fo.apfc", "office_id": "RO-DEMO-01"},
+    {"username": "ro-oic", "subject": "00000000-0000-4000-8000-000000000010", "stakeholder": "fo.oic", "office_id": "RO-DEMO-01"},
+    {"username": "ro-cashier", "subject": "00000000-0000-4000-8000-000000000011", "stakeholder": "fo.cash", "office_id": "RO-DEMO-01"},
+    {"username": "ro-pro", "subject": "00000000-0000-4000-8000-000000000012", "stakeholder": "fo.pro", "office_id": "RO-DEMO-01"}
+  ]
 }

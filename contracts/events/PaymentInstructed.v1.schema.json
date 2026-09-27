@@ -56,7 +56,9 @@
       "required": [
         "claim_id",
         "payment_id",
-        "amount_paise"
+        "amount_paise",
+        "attempt",
+        "demo_scenario"
       ],
       "properties": {
         "claim_id": {
@@ -69,6 +71,15 @@
           "type": "integer",
           "minimum": 0,
           "description": "Money in paise (integer); never floating point"
+        },
+        "attempt": {
+          "type": "number"
+        },
+        "demo_scenario": {
+          "enum": [
+            "SUCCESS",
+            "RETURN"
+          ]
         }
       }
     }

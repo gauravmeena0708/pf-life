@@ -2,7 +2,8 @@
 import asyncio
 import json
 import os
-from datetime import date
+import uuid
+from datetime import date, datetime
 from sqlalchemy import text
 from app.infra.db import sessions
 
@@ -31,6 +32,24 @@ async def seed() -> None:
           (trrn,filing_id,establishment_id,status,total_paise,breakdown)
           VALUES (:trrn,:filing,:est,:status,0,'{}') ON CONFLICT (trrn) DO NOTHING"""),
           {"trrn":demo["trrn"],"filing":demo["filing_id"],"est":establishment["establishment_id"],"status":demo["status"]})
+        # Balances brought forward (synthetic), as balanced journals keyed OPENING-<account>, posted once.
+        for account, bal in data.get("opening_balances", {}).items():
+            if account.startswith("_"):
+                continue
+            key = f"OPENING-{account}"
+            if (await session.execute(text("SELECT 1 FROM journals WHERE business_key=:k"), {"k": key})).first():
+                continue
+            journal_id = str(uuid.uuid4())
+            total = bal["employee_paise"] + bal["employer_paise"]
+            await session.execute(text("""INSERT INTO journals (id,business_key,kind,occurred_at,filing_id,claim_id)
+              VALUES (:id,:k,'OPENING_BALANCE',:at,NULL,NULL)"""),
+              {"id": journal_id, "k": key, "at": datetime.fromisoformat(bal["as_of"] + "T23:59:59+00:00")})
+            for code, side, amount, link, share in (
+                    ("OPENING_BALANCE_BF", "debit", total, None, None),
+                    ("AC01_EPF", "credit", bal["employee_paise"], account, "employee"),
+                    ("AC01_EPF", "credit", bal["employer_paise"], account, "employer")):
+                await session.execute(text("""INSERT INTO journal_lines (journal_id,account_code,side,amount_paise,account_link_id,share)
+                  VALUES (:j,:a,:s,:n,:l,:h)"""), {"j": journal_id, "a": code, "s": side, "n": amount, "l": link, "h": share})
 
 
 if __name__ == "__main__":

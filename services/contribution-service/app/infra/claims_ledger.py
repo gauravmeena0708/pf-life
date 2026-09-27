@@ -1,0 +1,72 @@
+"""Claim journals (Journey B6): the member-account debit when a claim is approved, and the bank
+settlement when the mock bank pays it. Journals are keyed by business key, so a redelivered event
+can never post twice; every journal balances."""
+import uuid
+from datetime import UTC, datetime
+from typing import Any
+
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from epfo_persistence import add_event
+
+PRODUCER = "contribution-service"
+
+
+async def _post(session: AsyncSession, business_key: str, kind: str, claim_id: str, lines: list[dict[str, Any]]) -> str | None:
+    """Insert a balanced journal once. Returns the journal ID, or None if it already exists."""
+    if (await session.execute(text("SELECT id FROM journals WHERE business_key=:k"), {"k": business_key})).first():
+        return None
+    debit = sum(x["amount_paise"] for x in lines if x["side"] == "debit")
+    credit = sum(x["amount_paise"] for x in lines if x["side"] == "credit")
+    if debit != credit:
+        raise ValueError(f"unbalanced {kind} journal for {claim_id}: {debit} != {credit}")
+    journal_id = str(uuid.uuid4())
+    await session.execute(text("INSERT INTO journals (id, business_key, kind, occurred_at, filing_id, claim_id) "
+                               "VALUES (:id, :k, :kind, :at, NULL, :c)"),
+                          {"id": journal_id, "k": business_key, "kind": kind, "at": datetime.now(UTC), "c": claim_id})
+    for line in lines:
+        await session.execute(text("INSERT INTO journal_lines (journal_id, account_code, side, amount_paise, account_link_id, share) "
+                                   "VALUES (:j, :a, :s, :n, :l, :h)"),
+                              {"j": journal_id, "a": line["account_code"], "s": line["side"], "n": line["amount_paise"],
+                               "l": line.get("account_link_id"), "h": line.get("share")})
+    return journal_id
+
+
+async def member_shares(session: AsyncSession, account_link_id: str) -> dict[str, int]:
+    rows = (await session.execute(text(
+        "SELECT share, SUM(CASE WHEN side='credit' THEN amount_paise ELSE -amount_paise END) FROM journal_lines "
+        "WHERE account_code='AC01_EPF' AND account_link_id=:a AND share IN ('employee','employer') GROUP BY share"),
+        {"a": account_link_id})).all()
+    shares = {"employee": 0, "employer": 0}
+    shares.update({share: int(total) for share, total in rows})
+    return shares
+
+
+async def on_claim_decision(session: AsyncSession, event: dict[str, Any]) -> None:
+    """Approved claim → debit the member's EPF account (employee share first) and credit CLAIMS_PAYABLE."""
+    p = event["payload"]
+    if p["decision"] not in ("APPROVED", "AUTO_APPROVED"):
+        return
+    amount, account = int(p["amount_paise"]), p["account_link_id"]
+    shares = await member_shares(session, account)
+    if shares["employee"] + shares["employer"] < amount:
+        raise ValueError(f"claim {p['claim_id']} exceeds the ledger balance of {account}")
+    from_employee = min(amount, shares["employee"])
+    lines = [{"account_code": "AC01_EPF", "side": "debit", "amount_paise": part, "account_link_id": account, "share": share}
+             for share, part in (("employee", from_employee), ("employer", amount - from_employee)) if part]
+    lines.append({"account_code": "CLAIMS_PAYABLE", "side": "credit", "amount_paise": amount})
+    journal_id = await _post(session, f"CLAIM-DEBIT-{p['claim_id']}", "CLAIM_DEBIT", p["claim_id"], lines)
+    if journal_id:
+        await add_event(session, producer=PRODUCER, event_type="ClaimDebitPosted.v1", aggregate_type="ledger_journal",
+                        aggregate_id=journal_id, correlation_id=event["correlation_id"],
+                        payload={"journal_id": journal_id, "claim_id": p["claim_id"], "postings": lines})
+
+
+async def on_claim_paid(session: AsyncSession, event: dict[str, Any]) -> None:
+    """The mock bank paid the claim → CLAIMS_PAYABLE is discharged against BANK_SETTLEMENT."""
+    p = event["payload"]
+    amount = int(p["amount_paise"])
+    await _post(session, p["payment_id"], "CLAIM_SETTLEMENT", p["reference_id"], [
+        {"account_code": "CLAIMS_PAYABLE", "side": "debit", "amount_paise": amount},
+        {"account_code": "BANK_SETTLEMENT", "side": "credit", "amount_paise": amount}])

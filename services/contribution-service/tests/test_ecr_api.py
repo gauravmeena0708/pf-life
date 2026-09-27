@@ -197,3 +197,45 @@ def test_member_passbook_shows_filed_but_unpaid(ctx):
     pending = r.json()["data"]["pending"]
     assert pending and pending[0]["wage_month"] == MONTH and "awaiting payment" in pending[0]["message"]
     assert client.get("/api/v1/members/me/passbook", headers=preparer()).status_code == 403
+
+
+def _deliver(handler, payload, event_type):
+    import app.infra.db as db
+    from epfo_persistence.consumer import apply_once
+    event = {"event_id": str(uuid.uuid4()), "event_type": event_type, "correlation_id": str(uuid.uuid4()), "payload": payload}
+    return asyncio.run(apply_once(db.sessions(), event, handler)), event
+
+
+def test_opening_balance_claim_debit_and_settlement_balance_and_show_in_passbook(ctx):
+    client, q = ctx
+    from app.infra.claims_ledger import on_claim_decision, on_claim_paid
+    member = SEED["members"][0]
+    decision = {"claim_id": "CLM-1", "decision": "APPROVED", "reason_code": "OFFICER_APPROVED", "rule_version": "r",
+                "amount_paise": 95000000, "account_link_id": member["account_link_id"]}   # more than the employee share
+    applied, event = _deliver(on_claim_decision, decision, "ClaimDecisionRecorded.v1")
+    assert applied
+    import app.infra.db as db
+    from epfo_persistence.consumer import apply_once
+    assert asyncio.run(apply_once(db.sessions(), event, on_claim_decision)) is False           # redelivery: no second debit
+    [(payload,)] = q("SELECT payload FROM outbox WHERE event_type='ClaimDebitPosted.v1'")
+    postings = json.loads(payload)["envelope"]["payload"]["postings"]
+    assert [(p["account_code"], p["side"], p.get("share"), p["amount_paise"]) for p in postings] == [
+        ("AC01_EPF", "debit", "employee", 90000000), ("AC01_EPF", "debit", "employer", 5000000),
+        ("CLAIMS_PAYABLE", "credit", None, 95000000)]
+    _deliver(on_claim_paid, {"payment_id": "PAY-CLM-1-1", "purpose": "CLAIM_SETTLEMENT", "reference_type": "claim",
+                             "reference_id": "CLM-1", "amount_paise": 95000000, "mock": True}, "PaymentConfirmed.v1")
+    for (debit, credit) in q("SELECT SUM(CASE WHEN side='debit' THEN amount_paise ELSE 0 END), "
+                             "SUM(CASE WHEN side='credit' THEN amount_paise ELSE 0 END) FROM journal_lines GROUP BY journal_id"):
+        assert debit == credit                                                                   # every journal balances
+    book = client.get("/api/v1/members/me/passbook", headers=hdr(member["subject"], "member", [], establishment=None)).json()["data"]
+    entries = book["accounts"][0]["entries"]
+    assert [e["kind"] for e in entries] == ["OPENING_BALANCE", "WITHDRAWAL"]
+    assert entries[0]["running_balance_paise"] == 150000000 and entries[-1]["running_balance_paise"] == 55000000
+
+
+def test_claim_above_ledger_balance_is_refused(ctx):
+    from app.infra.claims_ledger import on_claim_decision
+    with pytest.raises(ValueError):
+        _deliver(on_claim_decision, {"claim_id": "CLM-2", "decision": "APPROVED", "reason_code": "x", "rule_version": "r",
+                                     "amount_paise": 10**12, "account_link_id": SEED["members"][0]["account_link_id"]},
+                 "ClaimDecisionRecorded.v1")

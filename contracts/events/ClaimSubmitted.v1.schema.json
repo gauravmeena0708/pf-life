@@ -58,7 +58,9 @@
         "form_type",
         "amount_paise",
         "rule_version",
-        "office_id"
+        "office_id",
+        "account_link_id",
+        "route"
       ],
       "properties": {
         "claim_id": {
@@ -77,6 +79,15 @@
         },
         "office_id": {
           "type": "string"
+        },
+        "account_link_id": {
+          "type": "string"
+        },
+        "route": {
+          "enum": [
+            "AUTO",
+            "REVIEW"
+          ]
         }
       }
     }

@@ -55,6 +55,8 @@
       "additionalProperties": false,
       "required": [
         "payment_id",
+        "purpose",
+        "reference_type",
         "reference",
         "return_reason",
         "mock"
@@ -62,6 +64,20 @@
       "properties": {
         "payment_id": {
           "type": "string"
+        },
+        "purpose": {
+          "enum": [
+            "CHALLAN",
+            "CLAIM_SETTLEMENT",
+            "DEMAND"
+          ]
+        },
+        "reference_type": {
+          "enum": [
+            "trrn",
+            "claim",
+            "demand"
+          ]
         },
         "reference": {
           "type": "string"

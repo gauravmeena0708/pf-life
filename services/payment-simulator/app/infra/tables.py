@@ -16,7 +16,9 @@ payables = Table(  # learnt from contribution-service.ECRSubmitted.v1
 payment_intents = Table(
     "payment_intents", metadata,
     Column("payment_id", String(40), primary_key=True),
-    Column("trrn", String(20), nullable=False),
+    Column("trrn", String(20)),                             # set for challans
+    Column("purpose", String(20), nullable=False, server_default="CHALLAN"),   # CHALLAN | CLAIM_SETTLEMENT
+    Column("reference_id", String(40)),                     # claim ID for claim settlements
     Column("amount_paise", Money, nullable=False),
     Column("channel", String(20), nullable=False),
     Column("scenario", String(20), nullable=False),        # SUCCESS | RETURN (demo switch)

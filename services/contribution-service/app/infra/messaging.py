@@ -63,6 +63,6 @@ async def handle_payment_confirmed(session, event):
 
 async def handle_payment_returned(session,event):
     p=event["payload"]
-    if p.get("reference") is None: return
+    if p.get("reference") is None or p.get("purpose", "CHALLAN") != "CHALLAN": return
     await session.execute(text("UPDATE challans SET status='FAILED' WHERE trrn=:t"), {"t":p["reference"]})
     await session.execute(text("UPDATE ecr_filings SET state='PAYMENT_FAILED' WHERE trrn=:t"), {"t":p["reference"]})

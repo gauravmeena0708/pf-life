@@ -133,7 +133,8 @@ class Journal(Base):
     kind: Mapped[str] = mapped_column(String(40))
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     reverses_journal_id: Mapped[str | None] = mapped_column(ForeignKey("journals.id"))
-    filing_id: Mapped[str] = mapped_column(ForeignKey("ecr_filings.id"))
+    filing_id: Mapped[str | None] = mapped_column(ForeignKey("ecr_filings.id"))
+    claim_id: Mapped[str | None] = mapped_column(String(40))
 
 
 class JournalLine(Base):

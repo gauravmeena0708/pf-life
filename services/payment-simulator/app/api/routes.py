@@ -94,17 +94,21 @@ async def apply_bank_callback(session: AsyncSession, kind: str, body: bytes, tim
     now = datetime.now(UTC)
     await session.execute(update(payment_intents).where(payment_intents.c.payment_id == intent["payment_id"]).values(
         status=target, settled_at=now, bank_reference=data.get("bank_reference")))
-    await session.execute(update(payables).where(payables.c.trrn == intent["trrn"]).values(
-        status="PAID" if target == "CONFIRMED" else "FAILED"))
+    challan = intent["purpose"] == "CHALLAN"
+    if challan:
+        await session.execute(update(payables).where(payables.c.trrn == intent["trrn"]).values(
+            status="PAID" if target == "CONFIRMED" else "FAILED"))
+    reference = {"purpose": intent["purpose"], "reference_type": "trrn" if challan else "claim"}
+    reference_id = intent["trrn"] if challan else intent["reference_id"]
     if target == "CONFIRMED":
         await add_event(session, producer=PRODUCER, event_type="PaymentConfirmed.v1", aggregate_type="payment",
                         aggregate_id=intent["payment_id"], payload={
-                            "payment_id": intent["payment_id"], "purpose": "CHALLAN", "reference_type": "trrn",
-                            "reference_id": intent["trrn"], "amount_paise": intent["amount_paise"], "mock": True})
+                            "payment_id": intent["payment_id"], **reference, "reference_id": reference_id,
+                            "amount_paise": intent["amount_paise"], "mock": True})
     else:
         await add_event(session, producer=PRODUCER, event_type="PaymentReturned.v1", aggregate_type="payment",
                         aggregate_id=intent["payment_id"], payload={
-                            "payment_id": intent["payment_id"], "reference": intent["trrn"],
+                            "payment_id": intent["payment_id"], **reference, "reference": reference_id,
                             "return_reason": data.get("return_reason", "MOCK_RETURN"), "mock": True})
     return {"payment_id": intent["payment_id"], "status": target, "duplicate": False}
 
@@ -151,7 +155,7 @@ async def process_due_payments() -> int:
     return done
 
 
-# ── Event handler: learn challans from submitted returns ──────────────────────────────────────
+# ── Event handlers: challans from submitted returns, claim settlements from payment instructions ──
 
 async def on_ecr_submitted(session: AsyncSession, event: dict) -> None:
     p = event["payload"]
@@ -159,3 +163,21 @@ async def on_ecr_submitted(session: AsyncSession, event: dict) -> None:
         await session.execute(insert(payables).values(
             trrn=p["trrn"], establishment_id=p["establishment_id"], filing_id=p["filing_id"],
             total_paise=p["total_paise"], status="DUE"))
+
+
+async def on_payment_instructed(session: AsyncSession, event: dict) -> None:
+    """A claim settlement instructed by claim-service; the mock bank settles it like a challan payment."""
+    p = event["payload"]
+    if (await session.execute(select(payment_intents.c.payment_id).where(
+            payment_intents.c.payment_id == p["payment_id"]))).first():
+        return
+    await session.execute(insert(payment_intents).values(
+        payment_id=p["payment_id"], purpose="CLAIM_SETTLEMENT", reference_id=p["claim_id"],
+        amount_paise=p["amount_paise"], channel="NEFT", scenario=p.get("demo_scenario", "SUCCESS"),
+        status="PENDING", created_by="claim-service"))
+
+
+async def dispatch(session: AsyncSession, event: dict) -> None:
+    handler = {"ECRSubmitted.v1": on_ecr_submitted, "PaymentInstructed.v1": on_payment_instructed}.get(event["event_type"])
+    if handler:
+        await handler(session, event)
