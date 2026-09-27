@@ -35,7 +35,7 @@ Default is **deny**. A stakeholder may call only the endpoints listed for it, on
 | `/privacy/` | data-protection officer only |
 | `/public/` | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |
 | `/security/` | security analyst |
-| `/security/me` | self |
+| `/security/me` | self — open to every authenticated caller (own data only) |
 | `/security/step-up` | self — challenge bound to one action and resource version |
 | `/training/` | training administrators; synthetic data only |
 | `/vigilance/` | restricted — vigilance roles only, case-by-case |
@@ -442,6 +442,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/cases/{caseId}/decisions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/damages-knock-offs/{knockOffId}/approvals` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/freeze-cases/{caseId}/verifications` | P | office jurisdiction of the caller's posting |  |
@@ -451,6 +453,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/cases/{caseId}/decisions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/freeze-cases/{caseId}/verifications` | P | office jurisdiction of the caller's posting |  |
@@ -470,6 +474,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/cases/{caseId}/second-approvals` | W | office jurisdiction of the caller's posting | yes |
 | `GET /office/death-claims/{claimId}/shares-summary` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P | office jurisdiction of the caller's posting | yes |
@@ -506,6 +512,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /monitoring/claims` | W | role jurisdiction; aggregates with small-group suppression |  |
+| `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/cases/{caseId}/second-approvals` | W | office jurisdiction of the caller's posting | yes |
 | `GET /office/accounts/inoperative` | P | office jurisdiction of the caller's posting |  |
@@ -870,7 +877,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /security/me/permissions` | W | self |  |
+| `GET /security/me/permissions` | W | self — open to every authenticated caller (own data only) |  |
 | `GET /security/sessions` | W | security analyst |  |
 | `POST /internal/security-events` | W | service-to-service only (client credentials) |  |
 | `POST /security/sessions/{sessionId}/revocations` | W | security analyst | yes |

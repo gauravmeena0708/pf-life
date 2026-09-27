@@ -46,6 +46,12 @@ class JwksCache:
         self._keys = {k["kid"]: jwt.PyJWK(k).key for k in jwks.get("keys", []) if k.get("kid")}
         self._loaded_at = time.monotonic()
 
+    def refresh_and_get(self, kid: str) -> Any:
+        self._load()
+        if kid not in self._keys:
+            raise KeyError(kid)
+        return self._keys[kid]
+
     def key(self, kid: str) -> Any:
         if not self._keys or time.monotonic() - self._loaded_at > self.ttl:
             self._load()
@@ -72,13 +78,19 @@ def _unauthorised(detail: str) -> Problem:
 def verify(token: str) -> Actor:
     if "audience" not in _state:
         configure()
-    try:
-        kid = jwt.get_unverified_header(token).get("kid", "")
-        key = _state["jwks"].key(kid)
-        claims = jwt.decode(
+    def decode(key: Any) -> dict:
+        return jwt.decode(
             token, key, algorithms=["EdDSA"], audience=_state["audience"], issuer=ISSUER,
             options={"require": ["exp", "iat", "sub", "aud", "iss", "jti"]}, leeway=LEEWAY_SECONDS,
         )
+
+    try:
+        kid = jwt.get_unverified_header(token).get("kid", "")
+        try:
+            claims = decode(_state["jwks"].key(kid))
+        except jwt.InvalidSignatureError:
+            # The gateway may have restarted with a new key under a reused kid: refetch once, then retry.
+            claims = decode(_state["jwks"].refresh_and_get(kid))
     except (jwt.PyJWTError, KeyError, httpx.HTTPError) as exc:
         raise _unauthorised(f"Internal token rejected ({type(exc).__name__}).") from None
     if claims["exp"] - claims["iat"] > MAX_LIFETIME_SECONDS:

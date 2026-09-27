@@ -38,7 +38,7 @@ paths:
       x-owner-service: gateway
       x-callers:
       - ho.security
-      x-scope: self
+      x-scope: self — open to every authenticated caller (own data only)
       security:
       - bffSession: []
   /security/sessions:

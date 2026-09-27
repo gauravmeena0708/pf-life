@@ -1,4 +1,6 @@
 import base64
+import hashlib
+import json
 import time
 import uuid
 
@@ -16,18 +18,28 @@ def load_signing_key(pem: str) -> Ed25519PrivateKey:
     return Ed25519PrivateKey.generate()
 
 
-def public_jwks(key: Ed25519PrivateKey) -> dict:
+def _x(key: Ed25519PrivateKey) -> str:
     raw = key.public_key().public_bytes(serialization.Encoding.Raw, serialization.PublicFormat.Raw)
+    return base64.urlsafe_b64encode(raw).rstrip(b"=").decode()
+
+
+def key_id(key: Ed25519PrivateKey) -> str:
+    """RFC 7638 JWK thumbprint: a new key always gets a new kid, so services refetch the JWKS after a
+    gateway restart with an ephemeral key instead of verifying with a stale cached key."""
+    canonical = json.dumps({"crv": "Ed25519", "kty": "OKP", "x": _x(key)}, separators=(",", ":"), sort_keys=True)
+    return base64.urlsafe_b64encode(hashlib.sha256(canonical.encode()).digest()).rstrip(b"=").decode()
+
+
+def public_jwks(key: Ed25519PrivateKey) -> dict:
     return {"keys": [{"kty": "OKP", "crv": "Ed25519", "use": "sig", "alg": "EdDSA",
-                      "kid": "gateway-ephemeral", "x": base64.urlsafe_b64encode(raw).rstrip(b"=").decode()}]}
+                      "kid": key_id(key), "x": _x(key)}]}
 
 
 def mint(key: Ed25519PrivateKey, subject: str, stakeholder: str, audience: str, correlation_id: str,
          establishment_id: str | None = None) -> str:
     now = int(time.time())
     claims = {"iss": "epfo-gateway", "aud": audience, "sub": subject, "stakeholder": stakeholder,
-              "iat": now, "exp": now + 60, "jti": str(uuid.uuid4()), "correlation_id": correlation_id,
-              "kid": "gateway-ephemeral"}
+              "iat": now, "exp": now + 60, "jti": str(uuid.uuid4()), "correlation_id": correlation_id}
     if establishment_id:
         claims["establishment_id"] = establishment_id
-    return jwt.encode(claims, key, algorithm="EdDSA", headers={"kid": "gateway-ephemeral"})
+    return jwt.encode(claims, key, algorithm="EdDSA", headers={"kid": key_id(key)})

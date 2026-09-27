@@ -163,7 +163,7 @@
       "enabled": true,
       "emailVerified": true,
       "firstName": "Member A",
-      "lastName": "(demo)",
+      "lastName": "Demo",
       "email": "member-a@demo.invalid",
       "credentials": [
         {
@@ -181,7 +181,7 @@
       "enabled": true,
       "emailVerified": true,
       "firstName": "Member B",
-      "lastName": "(demo)",
+      "lastName": "Demo",
       "email": "member-b@demo.invalid",
       "credentials": [
         {
@@ -199,7 +199,7 @@
       "enabled": true,
       "emailVerified": true,
       "firstName": "Employer owner",
-      "lastName": "(demo)",
+      "lastName": "Demo",
       "email": "emp-owner@demo.invalid",
       "credentials": [
         {
@@ -217,7 +217,7 @@
       "enabled": true,
       "emailVerified": true,
       "firstName": "Payroll preparer",
-      "lastName": "(demo)",
+      "lastName": "Demo",
       "email": "emp-preparer@demo.invalid",
       "credentials": [
         {
@@ -235,7 +235,7 @@
       "enabled": true,
       "emailVerified": true,
       "firstName": "Authorised signatory",
-      "lastName": "(demo)",
+      "lastName": "Demo",
       "email": "emp-signatory@demo.invalid",
       "credentials": [
         {
@@ -252,8 +252,8 @@
       "username": "do-caseworker",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "District caseworker (DA)",
-      "lastName": "(demo)",
+      "firstName": "District caseworker DA",
+      "lastName": "Demo",
       "email": "do-caseworker@demo.invalid",
       "credentials": [
         {
@@ -271,7 +271,7 @@
       "enabled": true,
       "emailVerified": true,
       "firstName": "Section supervisor",
-      "lastName": "(demo)",
+      "lastName": "Demo",
       "email": "ro-ss@demo.invalid",
       "credentials": [
         {
@@ -289,7 +289,7 @@
       "enabled": true,
       "emailVerified": true,
       "firstName": "Accounts officer",
-      "lastName": "(demo)",
+      "lastName": "Demo",
       "email": "ro-ao@demo.invalid",
       "credentials": [
         {
@@ -306,8 +306,8 @@
       "username": "ro-apfc",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Regional approving officer (APFC)",
-      "lastName": "(demo)",
+      "firstName": "Regional approving officer APFC",
+      "lastName": "Demo",
       "email": "ro-apfc@demo.invalid",
       "credentials": [
         {
@@ -325,7 +325,7 @@
       "enabled": true,
       "emailVerified": true,
       "firstName": "Officer-in-charge",
-      "lastName": "(demo)",
+      "lastName": "Demo",
       "email": "ro-oic@demo.invalid",
       "credentials": [
         {
@@ -343,7 +343,7 @@
       "enabled": true,
       "emailVerified": true,
       "firstName": "Cashier",
-      "lastName": "(demo)",
+      "lastName": "Demo",
       "email": "ro-cashier@demo.invalid",
       "credentials": [
         {
@@ -360,8 +360,8 @@
       "username": "ro-pro",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Grievance officer / PRO",
-      "lastName": "(demo)",
+      "firstName": "Grievance officer - PRO",
+      "lastName": "Demo",
       "email": "ro-pro@demo.invalid",
       "credentials": [
         {
@@ -378,8 +378,8 @@
       "username": "zo-acc",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Zonal supervisor (ACC)",
-      "lastName": "(demo)",
+      "firstName": "Zonal supervisor ACC",
+      "lastName": "Demo",
       "email": "zo-acc@demo.invalid",
       "credentials": [
         {
@@ -397,7 +397,7 @@
       "enabled": true,
       "emailVerified": true,
       "firstName": "Head Office analyst",
-      "lastName": "(demo)",
+      "lastName": "Demo",
       "email": "ho-analyst@demo.invalid",
       "credentials": [
         {
@@ -415,7 +415,7 @@
       "enabled": true,
       "emailVerified": true,
       "firstName": "NDC operator",
-      "lastName": "(demo)",
+      "lastName": "Demo",
       "email": "ndc-operator@demo.invalid",
       "credentials": [
         {
@@ -433,7 +433,7 @@
       "enabled": true,
       "emailVerified": true,
       "firstName": "Ministry aggregate viewer",
-      "lastName": "(demo)",
+      "lastName": "Demo",
       "email": "ministry-viewer@demo.invalid",
       "credentials": [
         {
@@ -451,7 +451,7 @@
       "enabled": true,
       "emailVerified": true,
       "firstName": "B2B payroll client",
-      "lastName": "(demo)",
+      "lastName": "Demo",
       "email": "b2b-client@demo.invalid",
       "credentials": [
         {
@@ -469,7 +469,7 @@
       "enabled": true,
       "emailVerified": true,
       "firstName": "CAIU investigator",
-      "lastName": "(demo)",
+      "lastName": "Demo",
       "email": "caiu-investigator@demo.invalid",
       "credentials": [
         {
@@ -487,7 +487,7 @@
       "enabled": true,
       "emailVerified": true,
       "firstName": "HRM employee",
-      "lastName": "(demo)",
+      "lastName": "Demo",
       "email": "hrm-employee@demo.invalid",
       "credentials": [
         {
@@ -505,7 +505,7 @@
       "enabled": true,
       "emailVerified": true,
       "firstName": "Security analyst",
-      "lastName": "(demo)",
+      "lastName": "Demo",
       "email": "security-analyst@demo.invalid",
       "credentials": [
         {
@@ -523,7 +523,7 @@
       "enabled": true,
       "emailVerified": true,
       "firstName": "Vigilance investigator",
-      "lastName": "(demo)",
+      "lastName": "Demo",
       "email": "vigilance-investigator@demo.invalid",
       "credentials": [
         {
@@ -541,7 +541,7 @@
       "enabled": true,
       "emailVerified": true,
       "firstName": "Independent auditor",
-      "lastName": "(demo)",
+      "lastName": "Demo",
       "email": "auditor@demo.invalid",
       "credentials": [
         {

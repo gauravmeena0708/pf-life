@@ -7069,7 +7069,11 @@ paths:
       x-phase: 1
       x-owner-service: workflow
       x-callers:
+      - fo.ao
+      - fo.apfc
       - fo.da_accounts
+      - fo.oic
+      - fo.ss
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -11001,8 +11005,11 @@ paths:
       x-callers:
       - do.incharge
       - do.staff
+      - fo.ao
+      - fo.apfc
       - fo.da_accounts
       - fo.oic
+      - fo.ss
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -11995,7 +12002,7 @@ paths:
       x-owner-service: gateway
       x-callers:
       - ho.security
-      x-scope: self
+      x-scope: self — open to every authenticated caller (own data only)
       security:
       - bffSession: []
   /security/sessions:

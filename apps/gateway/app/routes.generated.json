@@ -2359,7 +2359,7 @@
     "callers": [
       "member"
     ],
-    "summary": "Upload supporting document (MinIO, scanned)",
+    "summary": "Upload supporting document (object store, scanned)",
     "revocation": false
   },
   {
@@ -2844,7 +2844,7 @@
     "callers": [
       "member"
     ],
-    "summary": "Attach a synthetic document (MinIO, malware-scan stub, Journey C1)",
+    "summary": "Attach a synthetic document (object store, malware-scan stub, Journey C1)",
     "revocation": false
   },
   {
@@ -4565,7 +4565,7 @@
     "money": false,
     "step_up": false,
     "callers": [
-      "ho.security"
+      "*"
     ],
     "summary": "Permission inspection",
     "revocation": false
@@ -5249,7 +5249,11 @@
     "money": false,
     "step_up": false,
     "callers": [
-      "fo.da_accounts"
+      "fo.ao",
+      "fo.apfc",
+      "fo.da_accounts",
+      "fo.oic",
+      "fo.ss"
     ],
     "summary": "Case detail",
     "revocation": false
@@ -5507,8 +5511,11 @@
     "callers": [
       "do.incharge",
       "do.staff",
+      "fo.ao",
+      "fo.apfc",
       "fo.da_accounts",
-      "fo.oic"
+      "fo.oic",
+      "fo.ss"
     ],
     "summary": "Jurisdiction-filtered task queue",
     "revocation": false

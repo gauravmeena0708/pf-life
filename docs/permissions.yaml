@@ -1383,6 +1383,18 @@ stakeholders:
     step_up: true
     via:
     - F03.knock_off_approve
+  - endpoint: GET /office/work-queue
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.approve_ss
+  - endpoint: GET /office/cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.approve_ss
   - endpoint: POST /office/cases/{caseId}/decisions
     status: W
     scope: office jurisdiction of the caller's posting
@@ -1408,6 +1420,18 @@ stakeholders:
     step_up: true
     via:
     - F02.jd_approve_minor
+  - endpoint: GET /office/work-queue
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.approve_ao
+  - endpoint: GET /office/cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.approve_ao
   - endpoint: POST /office/cases/{caseId}/decisions
     status: W
     scope: office jurisdiction of the caller's posting
@@ -1482,6 +1506,18 @@ stakeholders:
     step_up: true
     via:
     - F03.ledger_exception_approve
+  - endpoint: GET /office/work-queue
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.approve_apfc
+  - endpoint: GET /office/cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.approve_apfc
   - endpoint: POST /office/cases/{caseId}/second-approvals
     status: W
     scope: office jurisdiction of the caller's posting
@@ -1604,6 +1640,19 @@ stakeholders:
     via:
     - F13.ro
   fo.oic:
+  - endpoint: GET /office/work-queue
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.approve_oic
+    - F13.oic
+  - endpoint: GET /office/cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.approve_oic
   - endpoint: POST /office/cases/{caseId}/second-approvals
     status: W
     scope: office jurisdiction of the caller's posting
@@ -1661,12 +1710,6 @@ stakeholders:
   - endpoint: GET /monitoring/claims
     status: W
     scope: role jurisdiction; aggregates with small-group suppression
-    step_up: false
-    via:
-    - F13.oic
-  - endpoint: GET /office/work-queue
-    status: W
-    scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F13.oic
@@ -2420,7 +2463,7 @@ stakeholders:
     - F14.security
   - endpoint: GET /security/me/permissions
     status: W
-    scope: self
+    scope: self — open to every authenticated caller (own data only)
     step_up: false
     via:
     - F14.security

@@ -68,7 +68,8 @@ async def handle_api(request: Request, path: str):
             return problem(request, 503, "revocation-unavailable", "Authorization state unavailable")
 
     # Check grants before revealing that a protected contract is planned.
-    if not is_public and principal["stakeholder"] not in route.get("callers", []):
+    callers = route.get("callers", [])
+    if not is_public and "*" not in callers and principal["stakeholder"] not in callers:
         return problem(request, 403, "forbidden", "Forbidden")
 
     if route["status"] in ("P", "?") or int(route.get("phase", 1)) > 1:

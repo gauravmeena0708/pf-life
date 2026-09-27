@@ -101,3 +101,18 @@ def test_hs256_downgrade_rejected():
 def test_require_stakeholder():
     assert client().get("/office-only", headers=auth(token())).status_code == 403
     assert client().get("/office-only", headers=auth(token(stakeholder="fo.apfc"))).status_code == 200
+
+
+def test_refetches_jwks_once_when_cached_key_is_stale():
+    """Gateway restarted with a new key under the same kid: first verification fails, refetch succeeds."""
+    new_key = Ed25519PrivateKey.generate()
+    new_jwks = {"keys": [{**json.loads(jwt.algorithms.OKPAlgorithm.to_jwk(new_key.public_key())), "kid": KID}]}
+    served = [JWKS]
+    cache = JwksCache("http://x", fetch=lambda _: served[0])
+    epfo_auth.configure(audience="claim-service", jwks=cache)
+    cache.key(KID)  # warm the cache with the old key
+    served[0] = new_jwks
+    now = int(time.time())
+    fresh = jwt.encode({"iss": "epfo-gateway", "aud": "claim-service", "sub": "u", "stakeholder": "member",
+                        "iat": now, "exp": now + 60, "jti": "j2"}, new_key, algorithm="EdDSA", headers={"kid": KID})
+    assert client().get("/me", headers=auth(fresh)).status_code == 200

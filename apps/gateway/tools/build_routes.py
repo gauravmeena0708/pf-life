@@ -51,7 +51,9 @@ def main() -> None:
             "upstream": upstream,
             "money": op["money"],
             "step_up": op["step_up"],
-            "callers": sorted(set(callers_by_endpoint.get(key, []))),
+            # "About me" routes (/security/me/...) are open to every authenticated caller; they only ever
+            # return the caller's own data. "*" = any authenticated stakeholder.
+            "callers": ["*"] if op["path"].startswith("/security/me/") else sorted(set(callers_by_endpoint.get(key, []))),
             "summary": op["summary"],
             "revocation": path in {
                 "/employers/me/operators/{operatorId}/revocations",

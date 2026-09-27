@@ -177,9 +177,27 @@ async def test_permissions_route_returns_only_callers_grants(client):
     result = body["data"]
     assert result["stakeholder"] == "ho.security"
     assert result["endpoints"]
-    assert all("ho.security" in next(r for r in app.state.routes if r["method"] == g["endpoint"].split(" ", 1)[0]
-                                       and r["path_template"] == g["endpoint"].split(" ", 1)[1])["callers"]
-               for g in result["endpoints"])
+    def callers(g):
+        method, path = g["endpoint"].split(" ", 1)
+        return next(r for r in app.state.routes if r["method"] == method and r["path_template"] == path)["callers"]
+    assert all("ho.security" in callers(g) or "*" in callers(g) for g in result["endpoints"])
+
+
+@pytest.mark.asyncio
+async def test_self_permissions_route_open_to_every_authenticated_stakeholder(client):
+    http, app, _ = client
+    sid, _ = await login_as(app, "member")
+    response = await http.get("/api/v1/security/me/permissions", cookies={"__Host-epfo-session": sid})
+    assert response.status_code == 200 and response.json()["data"]["stakeholder"] == "member"
+
+
+def test_key_id_is_a_thumbprint_that_changes_with_the_key():
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey as K
+
+    from app.internal_jwt import key_id, public_jwks
+    a, b = K.generate(), K.generate()
+    assert key_id(a) != key_id(b)
+    assert public_jwks(a)["keys"][0]["kid"] == key_id(a)
 
 
 @pytest.mark.asyncio
