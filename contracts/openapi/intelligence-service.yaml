@@ -74,6 +74,9 @@ paths:
       x-phase: 1
       x-owner-service: intelligence
       x-callers:
+      - fo.da_accounts
+      - fo.pro
+      - member
       - tech.ai_service
       x-scope: caller's own permissions; advisory output only
       security:
@@ -147,6 +150,7 @@ paths:
       x-phase: 1
       x-owner-service: intelligence
       x-callers:
+      - member
       - public
       - tech.ai_service
       x-scope: caller's own permissions; advisory output only
@@ -184,6 +188,7 @@ paths:
       x-phase: 1
       x-owner-service: intelligence
       x-callers:
+      - ho.caiu
       - tech.ai_service
       x-scope: caller's own permissions; advisory output only
       security:

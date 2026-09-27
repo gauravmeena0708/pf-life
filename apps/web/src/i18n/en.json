@@ -86,7 +86,8 @@
     "grievanceMetrics": "Grievance metrics",
     "sessions": "Sessions & recovery",
     "audit": "Audit log",
-    "riskSignals": "Risk signals"
+    "riskSignals": "Risk signals",
+    "assistant": "Ask the assistant"
   },
   "passbook": {
     "eyebrow": "Member services · contributions",
@@ -391,5 +392,34 @@
     "requestRecovery": "Request account recovery",
     "recoveryRequested": "Recovery requested. A security analyst will review it.",
     "recoverySummary": "Ask EPFO to review your account and restore your last verified contact details."
+  },
+  "assistant": {
+    "eyebrow": "Member services · assistant",
+    "title": "Ask the assistant",
+    "description": "Answers come only from approved help documents, with their sources. The assistant cannot see or change your account.",
+    "question": "Your question",
+    "ask": "Ask",
+    "example1": "How much can I withdraw as a medical advance?",
+    "example2": "How is a large claim decided?",
+    "example3": "How long does a claim take? Community FAQ",
+    "notice": "Advisory only. Rules shown are illustrative for this demonstration, not the official EPF Scheme. The assistant never shares anyone's personal details.",
+    "answer": "Answer",
+    "uncertainty": "How sure",
+    "sources": "Sources",
+    "modes": {
+      "llm": "Written by the model from the sources",
+      "extractive": "Quoted from the sources (model off)",
+      "refused": "Not answered"
+    },
+    "ignoredTitle": "Instructions ignored.",
+    "ignored": "A retrieved document ({{refs}}) contained instructions to the assistant. They were treated as text, not followed, and not quoted.",
+    "model": "Model: {{model}}",
+    "feedbackQuestion": "Was this helpful?",
+    "helpful": "Helpful",
+    "notHelpful": "Not helpful",
+    "incorrect": "Incorrect",
+    "correction": "What should it have said? (optional)",
+    "feedbackThanks": "Thank you. Your feedback is reviewed by people; the assistant is not changed automatically.",
+    "unverified": "unverified — not used for the answer"
   }
 }

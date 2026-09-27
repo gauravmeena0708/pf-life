@@ -7,6 +7,7 @@ import { api, command, getSession, newIdempotencyKey, rupees, type Envelope } fr
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { dateTime, roleLabel, stateLabel } from "../journeyB";
+import { ClaimAnalysisPanel } from "../ai/ClaimAnalysisPanel";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 import type { CaseDetail } from "./types";
@@ -92,6 +93,7 @@ export function CasePage() {
           <dt>{t("office.round")}</dt><dd>{item.round}</dd><dt>{t("office.slaDue")}</dt><dd>{dateTime(item.sla_due_at, i18n.language)}</dd></dl>
       </section>
       {item.advisory_signal_id ? <p className="demo-tip"><strong>{t("office.advisory")}:</strong> {t("office.advisoryHelp")} (<code>{item.advisory_signal_id}</code>)</p> : null}
+      {role === "fo.da_accounts" && item.claim_id ? <ClaimAnalysisPanel claimId={item.claim_id} /> : null}
       <section className="card stack" aria-labelledby="chain-heading"><h2 id="chain-heading">{t("office.approvalChain")}</h2>
         <ol className="chain-stepper">{item.chain.map((chainRole, index) => {
           const current = item.state === "IN_REVIEW" && index === item.step;

@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.ai_routes import AI_HANDLERS
 from app.domain.risk import (EXPLANATIONS, MEMBER_REPORT, RULE_VERSION, SHARED_DEVICE_MIN_SUBJECTS, TAKEOVER,
                              shared_device_context, takeover_evidence)
 from app.infra.db import sessions
@@ -67,17 +68,22 @@ async def on_security_event(session: AsyncSession, event: dict[str, Any]) -> Non
     context = shared_device_context(await _subjects_on_device(session, p["device_fingerprint_hash"])) or {}
     if p["event_type"] == "MEMBER_SECURITY_REPORT":
         await _raise(session, p["subject"], MEMBER_REPORT, [event["event_id"]], context, event["correlation_id"])
-    evidence = takeover_evidence(events, at)
+    cited = {ref for (refs,) in (await session.execute(select(risk_signals.c.evidence_refs).where(
+        risk_signals.c.subject == p["subject"], risk_signals.c.detection_type == TAKEOVER))).all() for ref in refs}
+    evidence = takeover_evidence(events, at, cited)
     if evidence:
         await _raise(session, p["subject"], TAKEOVER, evidence, context, event["correlation_id"])
-
-
-BINDINGS = ["audit-service.SecurityEventRecorded.v1"]
 
 
 async def dispatch(session: AsyncSession, event: dict[str, Any]) -> None:
     if event["event_type"] == "SecurityEventRecorded.v1":
         await on_security_event(session, event)
+    elif event["event_type"] in AI_HANDLERS:
+        await AI_HANDLERS[event["event_type"]](session, event)
+
+
+BINDINGS = ["audit-service.SecurityEventRecorded.v1", "claim-service.ClaimSubmitted.v1",
+            "workflow-service.CaseDecisionSubmitted.v1", "grievance-service.GrievanceRegistered.v1"]
 
 
 def _signal(r: Any) -> dict[str, Any]:

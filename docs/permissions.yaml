@@ -165,6 +165,18 @@ stakeholders:
     step_up: true
     via:
     - F02.self_service
+  - endpoint: POST /ai/knowledge/search
+    status: W
+    scope: caller's own permissions; advisory output only
+    step_up: false
+    via:
+    - F02.self_service
+  - endpoint: POST /ai/feedback
+    status: W
+    scope: caller's own permissions; advisory output only
+    step_up: false
+    via:
+    - F02.self_service
   - endpoint: POST /members/me/joint-declarations
     status: P
     scope: self — caller's own member record only
@@ -1285,6 +1297,12 @@ stakeholders:
     step_up: false
     via:
     - F04.process
+  - endpoint: POST /ai/feedback
+    status: W
+    scope: caller's own permissions; advisory output only
+    step_up: false
+    via:
+    - F04.process
   - endpoint: POST /office/cases/{caseId}/documents/{docId}/attestation-views
     status: P
     scope: office jurisdiction of the caller's posting
@@ -2130,6 +2148,12 @@ stakeholders:
     step_up: false
     via:
     - F08.triage
+  - endpoint: POST /ai/feedback
+    status: W
+    scope: caller's own permissions; advisory output only
+    step_up: false
+    via:
+    - F08.triage
   - endpoint: POST /office/rti-requests/{requestId}/replies
     status: P
     scope: office jurisdiction of the caller's posting
@@ -2467,6 +2491,12 @@ stakeholders:
   - endpoint: POST /caiu/synthetic-risk-signals/{signalId}/reviews
     status: W
     scope: CAIU role
+    step_up: false
+    via:
+    - F06.detect
+  - endpoint: GET /ai/models
+    status: W
+    scope: caller's own permissions; advisory output only
     step_up: false
     via:
     - F06.detect

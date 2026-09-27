@@ -13,6 +13,7 @@ dependencies = [
   "epfo-observability",
   "epfo-auth-client",
   "epfo-persistence",
+  "httpx==0.27.2",
 ]
 
 [project.optional-dependencies]

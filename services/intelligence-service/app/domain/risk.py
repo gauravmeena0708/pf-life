@@ -21,9 +21,12 @@ EXPLANATIONS = {
 }
 
 
-def takeover_evidence(events: list[dict[str, Any]], now: datetime) -> list[str] | None:
-    """Event IDs for new-device login → contact change → claim, in that order within the window, or None."""
-    recent = sorted((e for e in events if now - e["at"] <= TAKEOVER_WINDOW), key=lambda e: e["at"])
+def takeover_evidence(events: list[dict[str, Any]], now: datetime, already_cited: set[str] = frozenset()) -> list[str] | None:
+    """Event IDs for new-device login → contact change → claim, in that order within the window, or None.
+    Events already cited by an earlier signal are not reused: a pattern a reviewer has judged once must not
+    raise a fresh signal just because a later, unrelated claim arrives inside the same 24 hours."""
+    recent = sorted((e for e in events if now - e["at"] <= TAKEOVER_WINDOW and e["event_id"] not in already_cited),
+                    key=lambda e: e["at"])
     login = next((e for e in recent if e["event_type"] == "LOGIN_NEW_DEVICE"), None)
     if not login:
         return None

@@ -131,6 +131,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/passbook` | W | self — caller's own member record only |  |
 | `GET /members/me/sessions` | W | self — caller's own member record only |  |
 | `PATCH /members/me/contact-details` | W | self — caller's own member record only | yes |
+| `POST /ai/feedback` | W | caller's own permissions; advisory output only |  |
+| `POST /ai/knowledge/search` | W | caller's own permissions; advisory output only |  |
 | `POST /grievances/{grievanceId}/documents` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/escalations` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/messages` | W | complainant or the assigned office |  |
@@ -407,6 +409,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /ai/claims/analyse` | W | caller's own permissions; advisory output only |  |
+| `POST /ai/feedback` | W | caller's own permissions; advisory output only |  |
 | `POST /office/cases/{caseId}/recommendations` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/accounts/inoperative` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/claims/{claimId}/audit-trail` | P | office jurisdiction of the caller's posting |  |
@@ -658,6 +661,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /grievances/{grievanceId}` | W | complainant or the assigned office |  |
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
+| `POST /ai/feedback` | W | caller's own permissions; advisory output only |  |
 | `POST /ai/grievances/classify` | W | caller's own permissions; advisory output only |  |
 | `POST /grievances/{grievanceId}/escalations` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/evidence-links` | W | complainant or the assigned office |  |
@@ -835,6 +839,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /ai/models` | W | caller's own permissions; advisory output only |  |
 | `GET /caiu/synthetic-risk-signals` | W | CAIU role |  |
 | `POST /caiu/synthetic-risk-signals/{signalId}/reviews` | W | CAIU role |  |
 | `POST /vigilance/referrals` | P | restricted — vigilance roles only, case-by-case |  |

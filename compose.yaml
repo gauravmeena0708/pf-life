@@ -437,6 +437,11 @@ services:
     environment:
       SERVICE_NAME: intelligence-service
       DATABASE_URL: postgresql+asyncpg://intelligence_app:${INTELLIGENCE_DB_PASSWORD}@postgres:5432/intelligence_db
+      # AI is off by default (init.md §8.1). To try a local model: AI_PROVIDER=ollama, `docker compose --profile ai up -d`,
+      # then `docker compose exec ollama ollama pull qwen2.5:0.5b` (about 400 MB; CPU is enough).
+      AI_PROVIDER: ${AI_PROVIDER:-disabled}
+      OLLAMA_URL: http://ollama:11434
+      AI_MODEL: ${AI_MODEL:-qwen2.5:0.5b}
       RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
       GATEWAY_JWKS_URL: http://gateway:8000/internal/jwks
       WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}

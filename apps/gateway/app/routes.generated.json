@@ -5192,6 +5192,7 @@
     "money": false,
     "step_up": false,
     "callers": [
+      "member",
       "public",
       "tech.ai_service"
     ],
@@ -5941,6 +5942,9 @@
     "money": false,
     "step_up": false,
     "callers": [
+      "fo.da_accounts",
+      "fo.pro",
+      "member",
       "tech.ai_service"
     ],
     "summary": "Platform endpoint defined in init.md §3.1",
@@ -5989,6 +5993,7 @@
     "money": false,
     "step_up": false,
     "callers": [
+      "ho.caiu",
       "tech.ai_service"
     ],
     "summary": "Platform endpoint defined in init.md §3.1",

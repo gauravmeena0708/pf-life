@@ -120,3 +120,20 @@ def test_review_outcomes_and_no_automatic_action(ctx):
     assert r.json()["data"]["status"] == "BENIGN"
     assert client.post(url, json={"outcome": "confirmed", "note": "changing my mind later"}, headers=hdr("ho.caiu")).status_code == 409
     assert client.get("/api/v1/caiu/synthetic-risk-signals", headers=hdr("member")).status_code == 403
+
+
+def test_reviewed_evidence_does_not_raise_a_second_signal(ctx):
+    client, security, raised = ctx
+    security("m-5", "LOGIN_NEW_DEVICE", minutes=0)
+    security("m-5", "CONTACT_DETAILS_CHANGED", minutes=1)
+    security("m-5", "CLAIM_CREATED", minutes=2)
+    [s] = raised()
+    client.post(f"/api/v1/caiu/synthetic-risk-signals/{s['signal_id']}/reviews",
+                json={"outcome": "benign", "note": "Member confirmed a new phone"}, headers=hdr("ho.caiu"))
+    security("m-5", "LOGIN", minutes=30)
+    security("m-5", "CLAIM_CREATED", minutes=31)          # a later claim, same 24 hours, nothing new happened
+    assert len(raised()) == 1
+    security("m-5", "LOGIN_NEW_DEVICE", minutes=40)       # a genuinely new pattern still raises
+    security("m-5", "CONTACT_DETAILS_CHANGED", minutes=41)
+    security("m-5", "CLAIM_CREATED", minutes=42)
+    assert len(raised()) == 2

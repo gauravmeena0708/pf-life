@@ -59,6 +59,8 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/passbook` | W |
 | `GET /members/me/sessions` | W |
 | `PATCH /members/me/contact-details` | W |
+| `POST /ai/feedback` | W |
+| `POST /ai/knowledge/search` | W |
 | `POST /grievances/{grievanceId}/documents` | W |
 | `POST /grievances/{grievanceId}/escalations` | W |
 | `POST /grievances/{grievanceId}/messages` | W |
@@ -385,6 +387,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/work-queue` | W |
 | `POST /ai/claims/analyse` | W |
+| `POST /ai/feedback` | W |
 | `POST /office/cases/{caseId}/recommendations` | W |
 | `GET /office/accounts/inoperative` | P |
 | `GET /office/claims/{claimId}/audit-trail` | P |
@@ -686,6 +689,7 @@ Activities: **F08.triage** Triage, assign, reply with evidence, lodge local grie
 | `GET /grievances/{grievanceId}` | W |
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/work-queue` | W |
+| `POST /ai/feedback` | W |
 | `POST /ai/grievances/classify` | W |
 | `POST /grievances/{grievanceId}/escalations` | W |
 | `POST /grievances/{grievanceId}/evidence-links` | W |
@@ -904,6 +908,7 @@ Activities: **F06.detect** Analyse data and allocate risk-based inspections / ri
 
 | Endpoint | Status |
 |---|---|
+| `GET /ai/models` | W |
 | `GET /caiu/synthetic-risk-signals` | W |
 | `POST /caiu/synthetic-risk-signals/{signalId}/reviews` | W |
 | `POST /vigilance/referrals` | P |
