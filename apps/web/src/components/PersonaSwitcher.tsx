@@ -2,8 +2,34 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 
-import { getSession, logout } from "../api/client";
+import { getSession } from "../api/client";
 import { DEMO_PASSWORD, PERSONAS } from "../data/personas";
+
+function csrfToken(): string | undefined {
+  return document.cookie.split("; ").find((cookie) => cookie.startsWith("epfo-csrf="))?.split("=")[1];
+}
+
+/** A top-level POST follows the Keycloak sign-out redirect; fetch cannot complete that browser flow. */
+function leaveSession(nextPersona?: string, returnTo = "/") {
+  const params = new URLSearchParams();
+  if (nextPersona) {
+    params.set("next_persona", nextPersona);
+    params.set("return_to", returnTo);
+  }
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = `/auth/logout${params.size ? `?${params}` : ""}`;
+  const token = csrfToken();
+  if (token) {
+    const field = document.createElement("input");
+    field.type = "hidden";
+    field.name = "csrf_token";
+    field.value = token;
+    form.append(field);
+  }
+  document.body.append(form);
+  form.submit();
+}
 
 /** Switching persona is a real logout + login through Keycloak — never impersonation. */
 export function PersonaSwitcher() {
@@ -11,16 +37,16 @@ export function PersonaSwitcher() {
   const location = useLocation();
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
 
-  async function switchTo(username: string) {
+  function switchTo(username: string) {
+    const role = PERSONAS.find((persona) => persona.username === username)?.role;
+    const returnTo = role === "ho.security" ? "/security/activity"
+      : role?.startsWith("employer.") ? (location.pathname.startsWith("/employer") ? location.pathname : "/employer")
+        : "/";
     if (session.data?.authenticated) {
-      try {
-        await logout();
-      } catch {
-        /* continue to login even if logout failed */
-      }
+      leaveSession(username, returnTo);
+    } else {
+      window.location.assign(`/auth/login?${new URLSearchParams({ persona: username, return_to: returnTo })}`);
     }
-    const returnTo = encodeURIComponent(location.pathname);
-    window.location.assign(`/auth/login?persona=${encodeURIComponent(username)}&return_to=${returnTo}`);
   }
 
   return (
@@ -46,7 +72,7 @@ export function PersonaSwitcher() {
         {t("persona.password")} <code>{DEMO_PASSWORD}</code>
       </p>
       {session.data?.authenticated ? (
-        <button type="button" onClick={() => logout().then(() => window.location.assign("/"))}>
+        <button type="button" onClick={() => leaveSession()}>
           {t("persona.logout")}
         </button>
       ) : null}

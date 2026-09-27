@@ -58,7 +58,6 @@ export interface Grant {
 }
 
 export const getSession = () => api<Session>("/auth/session");
-export const logout = () => api<unknown>("/auth/logout", { method: "POST" });
 export const getMyPermissions = () =>
   api<{ data: { stakeholder: string; endpoints: Grant[] } }>("/api/v1/security/me/permissions");
 
