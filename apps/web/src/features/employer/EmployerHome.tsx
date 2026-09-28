@@ -6,6 +6,7 @@ import { api, command, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
+import { JointDeclarations } from "./JointDeclarations";
 import { useStepUp } from "../stepup/useStepUp";
 
 interface Establishment {
@@ -167,6 +168,7 @@ export function EmployerHome() {
           </div>
         );
       })}
+      {perms.includes("ecr.approve") ? <JointDeclarations /> : null}
       <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
     </section>
   );

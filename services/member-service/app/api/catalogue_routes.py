@@ -10,16 +10,26 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /members/me', 'GET /security/account-recovery-requests', 'GET /employers/me/members', 'POST /members/me/account-recovery-requests', 'PATCH /members/me/contact-details', 'GET /members/me/employment-history', 'GET /members/me/identity-assurance', 'GET /members/me/notifications', 'POST /members/me/security-reports', 'POST /office/members/{uan}/defreezes', 'POST /office/members/{uan}/freezes', 'POST /security/account-recovery-requests/{requestId}/decisions']
+OPERATIONS = ['GET /members/me', 'GET /office/member-change-requests', 'GET /security/account-recovery-requests', 'GET /employers/me/joint-declarations', 'GET /employers/me/members', 'POST /members/me/account-recovery-requests', 'PATCH /members/me/contact-details', 'GET /members/me/employment-history', 'GET /members/me/identity-assurance', 'POST /members/me/joint-declarations', 'GET /members/me/notifications', 'POST /members/me/security-reports', 'GET /office/member-change-requests/pendency', 'POST /employers/me/joint-declarations/{jdId}/decisions', 'POST /office/member-change-requests/{requestId}/decisions', 'POST /office/member-change-requests/{requestId}/recommendations', 'POST /office/member-change-requests/{requestId}/verifications', 'POST /office/members/{uan}/defreezes', 'POST /office/members/{uan}/freezes', 'POST /security/account-recovery-requests/{requestId}/decisions']
 
 @router.api_route("/api/v1/members/me", methods=["GET"], include_in_schema=False)
 async def get_members_me(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Profile")
 
 
+@router.api_route("/api/v1/office/member-change-requests", methods=["GET"], include_in_schema=False)
+async def get_office_member_change_requests(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Joint Declaration / profile-change queue (initiator view) (tier-2 process joint_declaration)")
+
+
 @router.api_route("/api/v1/security/account-recovery-requests", methods=["GET"], include_in_schema=False)
 async def get_security_account_recovery_requests(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Review queue of account-recovery requests (Journey D5)")
+
+
+@router.api_route("/api/v1/employers/me/joint-declarations", methods=["GET"], include_in_schema=False)
+async def get_employers_me_joint_declarations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Joint Declarations awaiting attestation (tier-2 process joint_declaration)")
 
 
 @router.api_route("/api/v1/employers/me/members", methods=["GET"], include_in_schema=False)
@@ -47,6 +57,11 @@ async def get_members_me_identity_assurance(actor: Actor = Depends(require_actor
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Assurance level")
 
 
+@router.api_route("/api/v1/members/me/joint-declarations", methods=["POST"], include_in_schema=False)
+async def post_members_me_joint_declarations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Profile correction request (Joint Declaration) (tier-2 process joint_declaration)")
+
+
 @router.api_route("/api/v1/members/me/notifications", methods=["GET"], include_in_schema=False)
 async def get_members_me_notifications(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Notifications (projection fed by claim / payment / grievance events — see §14)")
@@ -55,6 +70,31 @@ async def get_members_me_notifications(actor: Actor = Depends(require_actor)) ->
 @router.api_route("/api/v1/members/me/security-reports", methods=["POST"], include_in_schema=False)
 async def post_members_me_security_reports(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Report suspicious activity")
+
+
+@router.api_route("/api/v1/office/member-change-requests/pendency", methods=["GET"], include_in_schema=False)
+async def get_office_member_change_requests_pendency(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "RPFC-I monitors JD pendency (tier-2 process joint_declaration)")
+
+
+@router.api_route("/api/v1/employers/me/joint-declarations/{jdId}/decisions", methods=["POST"], include_in_schema=False)
+async def post_employers_me_joint_declarations_jdId_decisions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Attest / reject Joint Declaration (tier-2 process joint_declaration)")
+
+
+@router.api_route("/api/v1/office/member-change-requests/{requestId}/decisions", methods=["POST"], include_in_schema=False)
+async def post_office_member_change_requests_requestId_decisions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "JD approver decides (competent authority by change type) (tier-2 process joint_declaration)")
+
+
+@router.api_route("/api/v1/office/member-change-requests/{requestId}/recommendations", methods=["POST"], include_in_schema=False)
+async def post_office_member_change_requests_requestId_recommendations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "JD initiator (DA) recommends (tier-2 process joint_declaration)")
+
+
+@router.api_route("/api/v1/office/member-change-requests/{requestId}/verifications", methods=["POST"], include_in_schema=False)
+async def post_office_member_change_requests_requestId_verifications(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "JD verifier (SS or AO) verifies (tier-2 process joint_declaration)")
 
 
 @router.api_route("/api/v1/office/members/{uan}/defreezes", methods=["POST"], include_in_schema=False)

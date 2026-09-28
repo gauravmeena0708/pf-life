@@ -423,5 +423,26 @@
     "correction": "What should it have said? (optional)",
     "feedbackThanks": "Thank you. Your feedback is reviewed by people; the assistant is not changed automatically.",
     "unverified": "unverified — not used for the answer"
+  },
+  "correction": {
+    "title": "Correct my details (Joint Declaration)",
+    "help": "Your employer confirms the correction, then your regional office checks and approves it. Major changes (name, date of birth, gender) are approved by an APFC.",
+    "parameter": "What needs correcting",
+    "current": "As it is now",
+    "corrected": "As it should be",
+    "reason": "Why (and which document shows it)",
+    "submit": "Send for correction",
+    "summary": "Ask your employer and the regional office to correct your details.",
+    "sent": "Sent ({{id}}). You will get a notice at each step.",
+    "parameters": {
+      "NAME": "Name",
+      "DATE_OF_BIRTH": "Date of birth (YYYY-MM-DD)",
+      "GENDER": "Gender",
+      "FATHER_NAME": "Father's name",
+      "MOTHER_NAME": "Mother's name",
+      "MARITAL_STATUS": "Marital status",
+      "NATIONALITY": "Nationality",
+      "DATE_OF_JOINING": "Date of joining"
+    }
   }
 }

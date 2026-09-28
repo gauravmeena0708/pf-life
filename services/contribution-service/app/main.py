@@ -10,7 +10,7 @@ from app.config import settings
 from app.infra.db import database_ready
 from app.infra.db import engine
 from app.infra.claims_ledger import on_claim_decision, on_claim_paid
-from app.infra.messaging import handle_employer_verified, handle_payment_confirmed, handle_payment_returned
+from app.infra.messaging import handle_employer_verified, handle_member_change, handle_payment_confirmed, handle_payment_returned
 from epfo_persistence import Consumer, OutboxRelay
 from epfo_persistence.policy import on_policy_published
 from epfo_observability import health_router, install
@@ -30,6 +30,8 @@ def create_app() -> FastAPI:
                          ["claim-service.ClaimDecisionRecorded.v1"], on_claim_decision),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.policy",
                          ["platform-service.PolicyPublished.v1"], on_policy_published),
+                Consumer(engine(), settings.rabbitmq_url, "contribution-service.members",
+                         ["member-service.MemberChangeApproved.v1"], handle_member_change),
             ]
             relay.start()
             for consumer in consumers: consumer.start()

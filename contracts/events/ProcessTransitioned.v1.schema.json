@@ -60,6 +60,8 @@
         "from_state",
         "to_state",
         "operation",
+        "actor_subject",
+        "actor_role",
         "data"
       ],
       "properties": {
@@ -82,6 +84,12 @@
           "type": "string"
         },
         "operation": {
+          "type": "string"
+        },
+        "actor_subject": {
+          "type": "string"
+        },
+        "actor_role": {
           "type": "string"
         },
         "data": {

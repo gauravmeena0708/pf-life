@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState, type FormEvent } from "react";
+import { Fragment, useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
@@ -89,7 +89,8 @@ export function CasePage() {
       {item.process ? <section className="card stack" aria-labelledby="process-heading"><h2 id="process-heading">{item.kind.replaceAll("_", " ").toLowerCase()}</h2>
         <dl className="kv"><dt>Process</dt><dd><code>{item.process}</code> (tier-2, config/processes)</dd><dt>Subject</dt><dd><code>{item.subject_ref}</code></dd>
           <dt>State</dt><dd>{item.state}</dd><dt>{t("office.slaDue")}</dt><dd>{dateTime(item.sla_due_at, i18n.language)}</dd></dl>
-        {item.your_turn && item.operation ? <ProcessForm operation={item.operation} onDone={(msg) => { setNotice(true); void msg; void qc.invalidateQueries({ queryKey: ["office-case", caseId] }); }} />
+        {item.data && Object.keys(item.data).length ? <dl className="kv">{Object.entries(item.data).map(([k, v]) => <Fragment key={k}><dt>{k.replaceAll("_", " ")}</dt><dd>{String(v)}</dd></Fragment>)}</dl> : null}
+        {item.your_turn && item.operation ? <ProcessForm operation={item.operation} caseRef={{ id: item.case_id, version: item.version }} onDone={(msg) => { setNotice(true); void msg; void qc.invalidateQueries({ queryKey: ["office-case", caseId] }); }} />
           : <p className="muted">{item.current_role ? `Waiting for ${roleLabel(item.current_role, t)}.` : "Finished."}</p>}
       </section> : null}
       {!item.process ? <section className="card stack" aria-labelledby="case-summary-heading"><h2 id="case-summary-heading">{t("office.caseSummary")}</h2>

@@ -55,11 +55,15 @@
       "additionalProperties": false,
       "required": [
         "request_id",
+        "uan",
         "parameters",
         "approver_subject"
       ],
       "properties": {
         "request_id": {
+          "type": "string"
+        },
+        "uan": {
           "type": "string"
         },
         "parameters": {

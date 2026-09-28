@@ -184,7 +184,7 @@ stakeholders:
     via:
     - F02.self_service
   - endpoint: POST /members/me/joint-declarations
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: true
     via:
@@ -795,13 +795,13 @@ stakeholders:
     via:
     - F02.employer_approvals
   - endpoint: GET /employers/me/joint-declarations
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
     - F02.jd_attest
   - endpoint: POST /employers/me/joint-declarations/{jdId}/decisions
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:
@@ -1219,13 +1219,13 @@ stakeholders:
   exempted.trust_liquidator: []
   fo.da_accounts:
   - endpoint: GET /office/member-change-requests
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F02.jd_initiate
   - endpoint: POST /office/member-change-requests/{requestId}/recommendations
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1438,7 +1438,7 @@ stakeholders:
     - F07.verify_est
   fo.ss:
   - endpoint: POST /office/member-change-requests/{requestId}/verifications
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1475,13 +1475,13 @@ stakeholders:
     - F07.verify_ss
   fo.ao:
   - endpoint: POST /office/member-change-requests/{requestId}/verifications
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F02.jd_verify_ao
   - endpoint: POST /office/member-change-requests/{requestId}/decisions
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -1561,7 +1561,7 @@ stakeholders:
     via:
     - F01.change_decide
   - endpoint: POST /office/member-change-requests/{requestId}/decisions
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -1682,7 +1682,7 @@ stakeholders:
     - F11.approve_apfc
   fo.rpfc1:
   - endpoint: GET /office/member-change-requests/pendency
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:

@@ -90,7 +90,7 @@ async def history(session: AsyncSession, case_id: str) -> list[dict[str, Any]]:
 def case_json(case: dict[str, Any]) -> dict[str, Any]:
     return {"case_id": case["case_id"], "claim_id": case["claim_id"], "grievance_id": case.get("grievance_id"),
             "kind": case["kind"], "office_id": case["office_id"], "advisory_signal_id": case.get("advisory_signal_id"),
-            "process": case.get("process"), "subject_ref": case.get("subject_ref"),
+            "process": case.get("process"), "subject_ref": case.get("subject_ref"), "data": case.get("data") or {},
             "form_type": case["form_type"], "account_link_id": case["account_link_id"],
             "amount_paise": case["amount_paise"], "rule_version": case["rule_version"], "chain": case["chain"],
             "step": case["step"], "round": case["round"], "state": case["state"], "current_role": case["current_role"],
@@ -179,7 +179,11 @@ async def decide(case_id: str, body: Decision, actor: Actor, session: AsyncSessi
 async def work_queue(actor: Actor = Depends(OFFICERS), session: AsyncSession = Depends(db)) -> dict:
     staff = await posting(session, actor)
     rows = (await session.execute(select(cases).where(and_(
-        cases.c.office_id == staff["office_id"], cases.c.current_role == actor.stakeholder,   # finished cases have no role
+        cases.c.office_id == staff["office_id"],
+        or_(cases.c.current_role == actor.stakeholder,                 # finished cases have no role; engine steps
+            cases.c.current_role.like(f"{actor.stakeholder}|%"),       # open to several roles list them with "|"
+            cases.c.current_role.like(f"%|{actor.stakeholder}"),
+            cases.c.current_role.like(f"%|{actor.stakeholder}|%")),
         or_(cases.c.assignee_subject.is_(None), cases.c.assignee_subject == actor.subject))).order_by(cases.c.created_at))).mappings().all()
     from app.engine.engine import startable
     return envelope({"office_id": staff["office_id"], "role": actor.stakeholder, "items": [case_json(dict(r)) for r in rows],
@@ -192,7 +196,7 @@ async def get_case(case_id: str, actor: Actor = Depends(OFFICERS), session: Asyn
     case = await load_case(session, case_id, staff["office_id"])
     from app.engine.engine import next_operation
     return envelope({**case_json(case), "history": await history(session, case_id),
-                     "your_turn": case["current_role"] == actor.stakeholder,
+                     "your_turn": actor.stakeholder in (case["current_role"] or "").split("|"),
                      "operation": next_operation(case) if case.get("process") else None})
 
 

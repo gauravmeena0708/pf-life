@@ -307,16 +307,16 @@
     "method": "POST",
     "path_template": "/office/member-change-requests/{requestId}/recommendations",
     "regex": "^/office/member\\-change\\-requests/[^/]+/recommendations$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "member",
-    "upstream": "http://member-service:8000",
+    "upstream": "http://workflow-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
       "fo.da_accounts"
     ],
-    "summary": "JD initiator (DA) recommends",
+    "summary": "JD initiator (DA) recommends (tier-2 process joint_declaration)",
     "revocation": false
   },
   {
@@ -419,17 +419,17 @@
     "method": "POST",
     "path_template": "/office/member-change-requests/{requestId}/verifications",
     "regex": "^/office/member\\-change\\-requests/[^/]+/verifications$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "member",
-    "upstream": "http://member-service:8000",
+    "upstream": "http://workflow-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
       "fo.ao",
       "fo.ss"
     ],
-    "summary": "JD verifier (SS or AO) verifies",
+    "summary": "JD verifier (SS or AO) verifies (tier-2 process joint_declaration)",
     "revocation": false
   },
   {
@@ -630,17 +630,17 @@
     "method": "POST",
     "path_template": "/office/member-change-requests/{requestId}/decisions",
     "regex": "^/office/member\\-change\\-requests/[^/]+/decisions$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "member",
-    "upstream": "http://member-service:8000",
+    "upstream": "http://workflow-service:8000",
     "money": false,
     "step_up": true,
     "callers": [
       "fo.ao",
       "fo.apfc"
     ],
-    "summary": "JD approver decides (competent authority by change type)",
+    "summary": "JD approver decides (competent authority by change type) (tier-2 process joint_declaration)",
     "revocation": false
   },
   {
@@ -791,16 +791,16 @@
     "method": "POST",
     "path_template": "/employers/me/joint-declarations/{jdId}/decisions",
     "regex": "^/employers/me/joint\\-declarations/[^/]+/decisions$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "member",
-    "upstream": "http://member-service:8000",
+    "upstream": "http://workflow-service:8000",
     "money": false,
     "step_up": true,
     "callers": [
       "employer.signatory"
     ],
-    "summary": "Attest / reject Joint Declaration",
+    "summary": "Attest / reject Joint Declaration (tier-2 process joint_declaration)",
     "revocation": false
   },
   {
@@ -1918,16 +1918,16 @@
     "method": "GET",
     "path_template": "/office/member-change-requests/pendency",
     "regex": "^/office/member\\-change\\-requests/pendency$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "member",
-    "upstream": "http://member-service:8000",
+    "upstream": "http://workflow-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
       "fo.rpfc1"
     ],
-    "summary": "RPFC-I monitors JD pendency",
+    "summary": "RPFC-I monitors JD pendency (tier-2 process joint_declaration)",
     "revocation": false
   },
   {
@@ -3098,16 +3098,16 @@
     "method": "GET",
     "path_template": "/employers/me/joint-declarations",
     "regex": "^/employers/me/joint\\-declarations$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "member",
-    "upstream": "http://member-service:8000",
+    "upstream": "http://workflow-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
       "employer.signatory"
     ],
-    "summary": "Joint Declarations awaiting attestation",
+    "summary": "Joint Declarations awaiting attestation (tier-2 process joint_declaration)",
     "revocation": false
   },
   {
@@ -3617,16 +3617,16 @@
     "method": "POST",
     "path_template": "/members/me/joint-declarations",
     "regex": "^/members/me/joint\\-declarations$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "member",
-    "upstream": "http://member-service:8000",
+    "upstream": "http://workflow-service:8000",
     "money": false,
     "step_up": true,
     "callers": [
       "member"
     ],
-    "summary": "Profile correction request (Joint Declaration)",
+    "summary": "Profile correction request (Joint Declaration) (tier-2 process joint_declaration)",
     "revocation": false
   },
   {
@@ -3682,16 +3682,16 @@
     "method": "GET",
     "path_template": "/office/member-change-requests",
     "regex": "^/office/member\\-change\\-requests$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "member",
-    "upstream": "http://member-service:8000",
+    "upstream": "http://workflow-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
       "fo.da_accounts"
     ],
-    "summary": "Joint Declaration / profile-change queue (initiator view)",
+    "summary": "Joint Declaration / profile-change queue (initiator view) (tier-2 process joint_declaration)",
     "revocation": false
   },
   {

@@ -70,6 +70,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/me/claims` | W |
 | `POST /members/me/claims/{claimId}/confirmations` | W |
 | `POST /members/me/grievances` | W |
+| `POST /members/me/joint-declarations` | W |
 | `POST /members/me/security-reports` | W |
 | `POST /security/step-up-challenges` | W |
 | `POST /security/step-up-challenges/{challengeId}/verifications` | W |
@@ -100,7 +101,6 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/me/claims/{claimId}/re-disbursement-requests` | P |
 | `POST /members/me/exits` | P |
 | `POST /members/me/higher-pension-options` | P |
-| `POST /members/me/joint-declarations` | P |
 | `POST /members/me/nominations` | P |
 | `POST /members/me/pension-applications` | P |
 | `POST /members/me/pension-scheme-certificates` | P |
@@ -236,8 +236,10 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `GET /employers/me/challans/{trrn}/receipt` | W |
 | `GET /employers/me/ecr-filings` | W |
 | `GET /employers/me/ecr-filings/{filingId}` | W |
+| `GET /employers/me/joint-declarations` | W |
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W |
 | `POST /employers/me/ecr-filings/{filingId}/submissions` | W |
+| `POST /employers/me/joint-declarations/{jdId}/decisions` | W |
 | `GET /international/coc-applications/{id}` | M |
 | `POST /employers/me/challans/{trrn}/payment-intents` | M |
 | `POST /employers/me/kyc/{kycType}` | M |
@@ -247,7 +249,6 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `GET /employers/me/claim-attestations` | P |
 | `GET /employers/me/demands` | P |
 | `GET /employers/me/higher-pension-options` | P |
-| `GET /employers/me/joint-declarations` | P |
 | `GET /employers/me/kyc-approvals` | P |
 | `GET /employers/me/ownership-declaration` | P |
 | `GET /employers/me/transfer-requests` | P |
@@ -263,7 +264,6 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `POST /employers/me/ecr-filings/{filingId}/cancellations` | P |
 | `POST /employers/me/higher-pension-options/{optionId}/validations` | P |
 | `POST /employers/me/joint-declarations` | P |
-| `POST /employers/me/joint-declarations/{jdId}/decisions` | P |
 | `POST /employers/me/kyc-approvals/{requestId}/decisions` | P |
 | `POST /employers/me/office-transfer-requests` | P |
 | `POST /employers/me/proceedings/{caseId}/submissions` | P |
@@ -386,21 +386,21 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | Endpoint | Status |
 |---|---|
 | `GET /office/cases/{caseId}` | W |
+| `GET /office/member-change-requests` | W |
 | `GET /office/work-queue` | W |
 | `POST /ai/claims/analyse` | W |
 | `POST /ai/feedback` | W |
 | `POST /office/cases/{caseId}/recommendations` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
+| `POST /office/member-change-requests/{requestId}/recommendations` | W |
 | `GET /office/accounts/inoperative` | P |
 | `GET /office/claims/{claimId}/audit-trail` | P |
-| `GET /office/member-change-requests` | P |
 | `GET /office/members/{uan}` | P |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | P |
 | `POST /office/cases/{caseId}/documents/{docId}/attestation-views` | P |
 | `POST /office/ecr-filings/{filingId}/rejections` | P |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P |
 | `POST /office/ledger-journals/{journalId}/reversals` | P |
-| `POST /office/member-change-requests/{requestId}/recommendations` | P |
 | `POST /office/pension-claims/{claimId}/input-data-sheets` | P |
 | `POST /office/pensions/higher-pension-options/{optionId}/ledger-transfers` | P |
 | `POST /office/physical-claims/{intakeId}/identity-validations` | P |
@@ -441,8 +441,8 @@ Activities: **F02.jd_verify** Verifier (SS route): cross-check and recommend; **
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/decisions` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
+| `POST /office/member-change-requests/{requestId}/verifications` | W |
 | `POST /office/damages-knock-offs/{knockOffId}/approvals` | P |
-| `POST /office/member-change-requests/{requestId}/verifications` | P |
 
 #### `fo.ao` — Accounts Officer
 
@@ -454,9 +454,9 @@ Activities: **F02.jd_verify_ao** Verifier (AO route): cross-check and recommend;
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/decisions` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
+| `POST /office/member-change-requests/{requestId}/decisions` | W |
+| `POST /office/member-change-requests/{requestId}/verifications` | W |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P |
-| `POST /office/member-change-requests/{requestId}/decisions` | P |
-| `POST /office/member-change-requests/{requestId}/verifications` | P |
 | `POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals` | P |
 
 #### `fo.fa_accounts` — DA / SS in the F&A (Accounts) wing — ledger debit posting, **Claim Authorization Document (CAD)** generation, reconciliation of rejected / returned payments
@@ -479,6 +479,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
+| `POST /office/member-change-requests/{requestId}/decisions` | W |
 | `POST /office/members/{uan}/freezes` | W |
 | `GET /office/death-claims/{claimId}/shares-summary` | P |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P |
@@ -495,7 +496,6 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/establishment-registrations/{reqId}/coverage-decisions` | P |
 | `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | P |
 | `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` | P |
-| `POST /office/member-change-requests/{requestId}/decisions` | P |
 | `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | P |
 | `POST /office/ledger-adjustments/{adjustmentId}/approvals` | ? |
 
@@ -508,7 +508,7 @@ Activities: **F02.jd_monitor** Monitor JD pendency across the RO; **F13.ro** RO-
 | `GET /monitoring/claims` | W |
 | `GET /monitoring/contributions` | W |
 | `GET /monitoring/grievances` | W |
-| `GET /office/member-change-requests/pendency` | P |
+| `GET /office/member-change-requests/pendency` | W |
 
 #### `fo.oic` — Officer-in-Charge of the office
 

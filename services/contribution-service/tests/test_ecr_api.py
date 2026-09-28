@@ -263,3 +263,12 @@ def test_wage_ceiling_change_applies_from_its_wage_month(ctx):
     assert september["filing"]["rule_version"] == "demo-rules-2026.1" and september["validation_report"]["valid"] is False
     assert any(i["code"] == "E-EPS-CEILING" for i in september["validation_report"]["issues"])
     assert october["filing"]["rule_version"] == "demo-rules-2026.2" and october["validation_report"]["valid"] is True, october["validation_report"]["issues"]
+
+
+def test_joint_declaration_name_correction_reaches_ecr_checks(ctx):
+    client, q = ctx
+    from app.infra.messaging import handle_member_change
+    m = SEED["members"][0]
+    _deliver(handle_member_change, {"request_id": "CASE-1", "uan": m["uan"], "approver_subject": "x",
+                                    "parameters": [{"parameter": "NAME", "value": "ASHA RANI DEMO"}]}, "MemberChangeApproved.v1")
+    assert q(f"SELECT name FROM establishment_members WHERE uan='{m['uan']}'")[0][0] == "ASHA RANI DEMO"

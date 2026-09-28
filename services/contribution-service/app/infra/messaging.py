@@ -67,3 +67,14 @@ async def handle_payment_returned(session,event):
     if p.get("reference") is None or p.get("purpose", "CHALLAN") != "CHALLAN": return
     await session.execute(text("UPDATE challans SET status='FAILED' WHERE trrn=:t"), {"t":p["reference"]})
     await session.execute(text("UPDATE ecr_filings SET state='PAYMENT_FAILED' WHERE trrn=:t"), {"t":p["reference"]})
+
+
+async def handle_member_change(session, event):
+    """A Joint Declaration correction: ECR name and age checks use the corrected record from now on."""
+    p = event["payload"]
+    for change in p["parameters"]:
+        if change["parameter"] == "NAME":
+            await session.execute(text("UPDATE establishment_members SET name=:v WHERE uan=:u"), {"v": change["value"], "u": p["uan"]})
+        elif change["parameter"] == "DATE_OF_BIRTH":
+            await session.execute(text("UPDATE establishment_members SET date_of_birth=:v WHERE uan=:u"),
+                                  {"v": datetime.fromisoformat(change["value"]).date(), "u": p["uan"]})

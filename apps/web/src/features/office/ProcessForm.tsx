@@ -7,13 +7,15 @@ import { useStepUp } from "../stepup/useStepUp";
 
 export interface ProcessOperation {
   process: string; title: string; name: string; method: string; path: string; subject: string;
-  step_up: string | null; form: Record<string, { enum?: string[]; min_length?: number }>;
+  step_up: { action: string; bind: "subject" | "case" } | null; subject_from?: string;
+  form: Record<string, { enum?: string[]; min_length?: number; optional?: boolean }>;
 }
 
 const label = (name: string) => name.replaceAll("_", " ").replace(/^./, (c) => c.toUpperCase());
 
 /** One generic form for any tier-2 process operation (ADR-0005): fields, rules and step-up come from the definition. */
-export function ProcessForm({ operation, onDone, askSubject = false }: { operation: ProcessOperation; onDone: (msg: string) => void; askSubject?: boolean }) {
+export function ProcessForm({ operation, onDone, askSubject = false, caseRef }: {
+  operation: ProcessOperation; onDone: (msg: string) => void; askSubject?: boolean; caseRef?: { id: string; version: number } }) {
   const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
@@ -25,11 +27,13 @@ export function ProcessForm({ operation, onDone, askSubject = false }: { operati
     const subject = askSubject ? String(f.get("__subject")).trim() : "";
     const path = askSubject ? operation.path.replace(`{${operation.subject}}`, encodeURIComponent(subject)) : operation.path;
     const resourceId = askSubject ? subject : decodeURIComponent(path.split("/").slice(-2)[0]);
-    const body = Object.fromEntries(Object.keys(operation.form).map((k) => [k, String(f.get(k) ?? "").trim()]));
+    const body = Object.fromEntries(Object.keys(operation.form).map((k) => [k, String(f.get(k) ?? "").trim()]).filter(([, v]) => v !== ""));
     let token: string | null = null;
     if (operation.step_up) {
-      token = await stepUp.ask({ action: operation.step_up, resourceId,
-        summary: `${label(operation.name)} — ${operation.title} for ${operation.subject.toUpperCase()} ${resourceId}.` });
+      const onCase = operation.step_up.bind === "case" && caseRef;
+      token = await stepUp.ask({ action: operation.step_up.action, resourceId: onCase ? caseRef.id : resourceId,
+        resourceVersion: onCase ? caseRef.version : undefined,
+        summary: `${label(operation.name)} — ${operation.title}${onCase ? ` (case ${caseRef.id})` : ` for ${operation.subject.toUpperCase()} ${resourceId}`}.` });
       if (!token) return;
     }
     setBusy(true); setError(null);
@@ -49,7 +53,7 @@ export function ProcessForm({ operation, onDone, askSubject = false }: { operati
           {rule.enum.map((v) => <label className="check-row" key={v}><input type="radio" name={name} value={v} required />{label(v.toLowerCase())}</label>)}
         </fieldset>
       ) : (
-        <label key={name}>{label(name)}<textarea name={name} required minLength={rule.min_length} /></label>
+        <label key={name}>{label(name)}{rule.optional ? " (optional)" : ""}<textarea name={name} required={!rule.optional} minLength={rule.min_length} /></label>
       ))}
       {operation.step_up ? <p className="muted small">Needs a one-time code bound to this {operation.subject.toUpperCase()}.</p> : null}
       <div className="actions"><button type="submit" className="primary" disabled={busy}>{label(operation.name)}</button></div>

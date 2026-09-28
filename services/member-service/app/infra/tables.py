@@ -18,6 +18,7 @@ members = Table(
     Column("bank_account_last4", String(4), nullable=False),
     Column("kyc", JSON, nullable=False),
     Column("account_state", String(20), nullable=False, server_default="ACTIVE"),   # ACTIVE | FROZEN (member_freeze process)
+    Column("profile_extra", JSON),                           # corrected via Joint Declaration: father's name, etc.
     Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
 )
 
@@ -78,4 +79,17 @@ recovery_requests = Table(
     Column("decision_note", String(2000)),
     Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
     Column("decided_at", DateTime(timezone=True)),
+)
+
+# Every applied Joint Declaration correction: what changed, from what, to what, and who approved it.
+member_changes = Table(
+    "member_changes", metadata,
+    Column("id", IdType, primary_key=True, autoincrement=True),
+    Column("request_id", String(40), nullable=False, index=True),
+    Column("member_id", String(40), ForeignKey("members.member_id"), nullable=False),
+    Column("parameter", String(40), nullable=False),
+    Column("old_value", String(200)),
+    Column("new_value", String(200), nullable=False),
+    Column("approved_by", String(80), nullable=False),
+    Column("applied_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
 )

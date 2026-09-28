@@ -22,6 +22,11 @@ TEMPLATES = {
     "GRIEVANCE_RESOLVED": ("Grievance resolved", "Your grievance {reference_id} was resolved. You can reopen it within 30 days if the problem remains."),
     "CONTACT_DETAILS_CHANGED": ("Contact details changed", "Your mobile number and email were changed. If this was not you, report it and ask for account recovery straight away."),
     "ACCOUNT_RECOVERY_APPROVED": ("Account recovered", "Your account recovery {reference_id} was approved and your verified contact details were restored."),
+    "JD_EMPLOYER_ATTESTED": ("Correction request attested", "Your employer confirmed your {parameter} correction ({reference_id}); your regional office will now check it."),
+    "JD_RETURNED_BY_EMPLOYER": ("Correction request returned", "Your employer returned your {parameter} correction ({reference_id}): {reason} You can file it again."),
+    "JD_REJECTED_BY_EMPLOYER": ("Correction request not supported", "Your employer did not support your {parameter} correction ({reference_id}): {reason}"),
+    "JD_APPROVED": ("Profile corrected", "Your {parameter} was corrected ({reference_id}). It now shows on your profile."),
+    "JD_REJECTED": ("Correction request rejected", "Your {parameter} correction ({reference_id}) was rejected: {reason}"),
     "ACCOUNT_RECOVERY_REJECTED": ("Account recovery not approved", "Your account recovery request {reference_id} was not approved. Please contact your regional office."),
 }
 
@@ -46,7 +51,7 @@ def render(template: str, reference_id: str, params: dict[str, Any] | None = Non
     reason = str(values.get("reason") or "Check your claim details for more information.")
     paise = values.get("amount_paise")
     amount = f" for {rupees(int(paise))}" if paise is not None else ""
-    return title, body.format(reference_id=reference_id, reason=reason,
+    return title, body.format(reference_id=reference_id, reason=reason, parameter=values.get("parameter") or "profile",
                               amount=amount, bank_ending=f" ending {ending}" if ending else "")
 
 

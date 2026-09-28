@@ -21,8 +21,10 @@ async def main() -> None:
         await session.execute(insert(offices).values(office_id=office["office_id"], name=office["name"],
                                                      zone_id=office.get("zone_id")).on_conflict_do_nothing())
         for m in seed["members"]:               # process subjects (UANs) belong to the establishment's office
-            await session.execute(insert(subject_offices).values(subject_ref=m["uan"], office_id=seed["establishment"]["office_id"],
-                                                                 zone_id=office.get("zone_id")).on_conflict_do_nothing())
+            values = {"office_id": seed["establishment"]["office_id"], "zone_id": office.get("zone_id"),
+                      "member_subject": m.get("subject"), "establishment_id": seed["establishment"]["establishment_id"]}
+            statement = insert(subject_offices).values(subject_ref=m["uan"], **values)
+            await session.execute(statement.on_conflict_do_update(index_elements=[subject_offices.c.subject_ref], set_=values))
         for s in seed.get("office_staff", []):
             await session.execute(insert(office_staff).values(
                 subject=s["subject"], username=s["username"], stakeholder=s["stakeholder"],

@@ -121,8 +121,8 @@ Rules that apply to every row:
 | `POST /employers/me/members/{uan}/exit-corrections` 🔐 | Date-of-exit correction | P | 2 | member |
 | `GET /employers/me/kyc-approvals` | Member KYC requests awaiting employer approval | P | 2 | member |
 | `POST /employers/me/kyc-approvals/{requestId}/decisions` 🔐 | Approve / reject member KYC (bank, PAN, Aadhaar seeding) | P | 2 | member |
-| `GET /employers/me/joint-declarations` | Joint Declarations awaiting attestation | P | 2 | member |
-| `POST /employers/me/joint-declarations/{jdId}/decisions` 🔐 | Attest / reject Joint Declaration | P | 2 | member |
+| `GET /employers/me/joint-declarations` | Joint Declarations awaiting attestation (tier-2 process `joint_declaration`) | W | 1 | member |
+| `POST /employers/me/joint-declarations/{jdId}/decisions` 🔐 | Attest / reject Joint Declaration (tier-2 process `joint_declaration`) | W | 1 | member |
 | `POST /employers/me/joint-declarations` 🔐 | Employer-initiated Joint Declaration | P | 2 | member |
 | `GET /employers/me/transfer-requests` | Form 13 transfer requests awaiting attestation | P | 2 | claim |
 | `POST /employers/me/transfer-requests/{transferId}/decisions` 🔐 | Attest / reject transfer | P | 2 | claim |
@@ -219,7 +219,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /members/me/kyc` | KYC status (Aadhaar, PAN, bank) | P | 2 | member |
 | `POST /members/me/kyc/bank-accounts` 🔐 | Seed / change bank account (mock penny-drop, employer approval) | M | 2 | member |
 | `POST /members/me/kyc/{kycType}` 🔐 | Seed PAN / other KYC (mock) | M | 2 | member |
-| `POST /members/me/joint-declarations` 🔐 | Profile correction request (Joint Declaration) | P | 2 | member |
+| `POST /members/me/joint-declarations` 🔐 | Profile correction request (Joint Declaration) (tier-2 process `joint_declaration`) | W | 1 | member |
 | `GET /members/me/employment-history` | Service history across linked employments | W | 1 | member |
 | `POST /members/me/exits` 🔐 | Member-marked exit (when employer has not marked it) | P | 2 | member |
 | `GET /members/me/passbook` | Passbook across all accounts linked to the caller (no member ID parameter) | W | 1 | contribution |
@@ -336,11 +336,11 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `GET /office/member-change-requests` | Joint Declaration / profile-change queue (initiator view) | P | 2 | member |
-| `POST /office/member-change-requests/{requestId}/recommendations` | JD initiator (DA) recommends | P | 2 | member |
-| `POST /office/member-change-requests/{requestId}/verifications` | JD verifier (SS or AO) verifies | P | 2 | member |
-| `POST /office/member-change-requests/{requestId}/decisions` 🔐 | JD approver decides (competent authority by change type) | P | 2 | member |
-| `GET /office/member-change-requests/pendency` | RPFC-I monitors JD pendency | P | 2 | member |
+| `GET /office/member-change-requests` | Joint Declaration / profile-change queue (initiator view) (tier-2 process `joint_declaration`) | W | 1 | member |
+| `POST /office/member-change-requests/{requestId}/recommendations` | JD initiator (DA) recommends (tier-2 process `joint_declaration`) | W | 1 | member |
+| `POST /office/member-change-requests/{requestId}/verifications` | JD verifier (SS or AO) verifies (tier-2 process `joint_declaration`) | W | 1 | member |
+| `POST /office/member-change-requests/{requestId}/decisions` 🔐 | JD approver decides (competent authority by change type) (tier-2 process `joint_declaration`) | W | 1 | member |
+| `GET /office/member-change-requests/pendency` | RPFC-I monitors JD pendency (tier-2 process `joint_declaration`) | W | 1 | member |
 | `POST /office/freeze-cases/{caseId}/verifications` | Freeze-case verification step (DA → SS/AO → APFC/RPFC-II → OIC; tier-2 process `member_freeze`) | W | 1 | workflow |
 | `POST /office/establishments/{estId}/freezes` 🔐 | Freeze an establishment | P | 2 | employer |
 | `POST /office/establishments/{estId}/defreezes` 🔐 | De-freeze an establishment, maker-checker | P | 2 | employer |

@@ -31,7 +31,7 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `DemandRaised.v1` | compliance | contribution, audit | compliance_case | 2 (contract only) |
 | `LedgerReversed.v1` | contribution | reporting, audit | ledger_journal | 2 (contract only) |
 | `PaymentScrollGenerated.v1` | claim | payment-simulator, audit | payment_scroll | 2 (contract only) |
-| `MemberChangeApproved.v1` | member | claim, reporting, audit | member_change_request | 2 (contract only) |
+| `MemberChangeApproved.v1` | member | contribution, claim, reporting, audit | member_change_request | 1 |
 | `AccountFrozen.v1` | member | gateway, claim, audit | account | 1 |
 | `AccountDefrozen.v1` | member | gateway, claim, audit | account | 1 |
 | `PpoIssued.v1` | pension | member, reporting, audit | pension_claim | 2 (contract only) |

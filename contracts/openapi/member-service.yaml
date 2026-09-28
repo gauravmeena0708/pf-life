@@ -76,21 +76,27 @@ paths:
   /employers/me/joint-declarations:
     get:
       operationId: getEmployersJointDeclarations
-      summary: Joint Declarations awaiting attestation
+      summary: Joint Declarations awaiting attestation (tier-2 process joint_declaration)
       tags:
       - Employer-side member management
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - employer.signatory
@@ -131,7 +137,7 @@ paths:
   /employers/me/joint-declarations/{jdId}/decisions:
     post:
       operationId: postEmployersJointDeclarationsJdIdDecisions
-      summary: Attest / reject Joint Declaration
+      summary: Attest / reject Joint Declaration (tier-2 process joint_declaration)
       tags:
       - Employer-side member management
       parameters:
@@ -144,14 +150,20 @@ paths:
       - $ref: '#/components/parameters/EstablishmentId'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - employer.signatory
@@ -860,21 +872,27 @@ paths:
   /members/me/joint-declarations:
     post:
       operationId: postMembersJointDeclarations
-      summary: Profile correction request (Joint Declaration)
+      summary: Profile correction request (Joint Declaration) (tier-2 process joint_declaration)
       tags:
       - Member self-service
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - member
@@ -1309,20 +1327,26 @@ paths:
   /office/member-change-requests:
     get:
       operationId: getOfficeMemberChangeRequests
-      summary: Joint Declaration / profile-change queue (initiator view)
+      summary: Joint Declaration / profile-change queue (initiator view) (tier-2 process joint_declaration)
       tags:
       - Office claim processing and member accounts
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - fo.da_accounts
@@ -1332,20 +1356,26 @@ paths:
   /office/member-change-requests/pendency:
     get:
       operationId: getOfficeMemberChangeRequestsPendency
-      summary: RPFC-I monitors JD pendency
+      summary: RPFC-I monitors JD pendency (tier-2 process joint_declaration)
       tags:
       - Office claim processing and member accounts
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - fo.rpfc1
@@ -1355,7 +1385,7 @@ paths:
   /office/member-change-requests/{requestId}/decisions:
     post:
       operationId: postOfficeMemberChangeRequestsRequestIdDecisions
-      summary: JD approver decides (competent authority by change type)
+      summary: JD approver decides (competent authority by change type) (tier-2 process joint_declaration)
       tags:
       - Office claim processing and member accounts
       parameters:
@@ -1367,14 +1397,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - fo.ao
@@ -1392,7 +1428,7 @@ paths:
   /office/member-change-requests/{requestId}/recommendations:
     post:
       operationId: postOfficeMemberChangeRequestsRequestIdRecommendations
-      summary: JD initiator (DA) recommends
+      summary: JD initiator (DA) recommends (tier-2 process joint_declaration)
       tags:
       - Office claim processing and member accounts
       parameters:
@@ -1403,14 +1439,20 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - fo.da_accounts
@@ -1427,7 +1469,7 @@ paths:
   /office/member-change-requests/{requestId}/verifications:
     post:
       operationId: postOfficeMemberChangeRequestsRequestIdVerifications
-      summary: JD verifier (SS or AO) verifies
+      summary: JD verifier (SS or AO) verifies (tier-2 process joint_declaration)
       tags:
       - Office claim processing and member accounts
       parameters:
@@ -1438,14 +1480,20 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - fo.ao

@@ -5,6 +5,7 @@ export interface OfficeCase {
   advisory_signal_id: string | null;
   process: string | null;
   subject_ref: string | null;
+  data?: Record<string, unknown>;
   kind: string;
   office_id: string;
   form_type: string;

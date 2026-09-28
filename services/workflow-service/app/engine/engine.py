@@ -1,9 +1,16 @@
 """Tier-2 process engine (ADR-0005). Executes the YAML definitions in config/processes.
 
-For every operation in a definition the engine registers a route and enforces, generically:
-form rules, allowed roles, office jurisdiction, the approval chain in order, one action per officer per
-round (maker ≠ checker), step-up bound to the subject, and state preconditions. Each state change emits
-ProcessTransitioned.v1; the owning service reacts to it and publishes its own domain events."""
+Each operation in a definition becomes a route. The engine enforces, generically:
+
+* who may act     `roles`, a `chain` taken step by step, or `roles_by` a field of the case (e.g. major → APFC);
+* where           `scope`: office (posting and jurisdiction), establishment (the employer of the subject),
+                  or self (the member the process is about);
+* when            `from` states; the result is `to`, or `outcomes` chosen by a form field;
+* how             `form` rules, `step_up` bound to the subject or to the case version, one action per officer
+                  per round (maker ≠ checker), `requires_last_finding`;
+* lists           GET operations with `lists` return the open cases in given states within the caller's scope.
+
+Each state change emits ProcessTransitioned.v1; the owning service reacts and publishes its own domain events."""
 import os
 import secrets
 from datetime import UTC, datetime, timedelta
@@ -32,18 +39,33 @@ def definitions() -> tuple[dict[str, Any], ...]:
     folder = PROCESSES_DIR if PROCESSES_DIR.exists() else Path(__file__).resolve().parents[4] / "config" / "processes"
     loaded = tuple(yaml.safe_load(p.read_text(encoding="utf-8")) for p in sorted(folder.glob("*.yaml")))
     for d in loaded:                     # fail at startup, not on the first request, if a definition is inconsistent
-        names = {op["name"] for op in d["operations"]}
+        states = set(d.get("terminal_states", []))
         for op in d["operations"]:
-            if op.get("queue") and op["queue"] not in names:
-                raise ValueError(f"{d['process']}: operation {op['name']} queues unknown operation {op['queue']}")
-            if not (op.get("roles") or op.get("chain")):
-                raise ValueError(f"{d['process']}: operation {op['name']} has no roles or chain")
+            where = f"{d['process']}.{op['name']}"
+            if not (op.get("roles") or op.get("chain") or op.get("roles_by")):
+                raise ValueError(f"{where}: no roles, chain or roles_by")
+            if op.get("lists"):
+                continue
+            if not (op.get("starts") or op.get("case_from")):
+                raise ValueError(f"{where}: needs starts or case_from")
+            if op.get("outcomes"):
+                states |= set(op["outcomes"]["map"].values())
+            elif "to" in op:
+                states.add(op["to"])
+            else:
+                raise ValueError(f"{where}: needs to or outcomes")
+        for op in d["operations"]:
+            for field, rule in (op.get("form") or {}).items():
+                if any(not isinstance(v, str) for v in rule.get("enum", [])):   # YAML reads YES/NO/ON as booleans
+                    raise ValueError(f"{d['process']}.{op['name']}: quote the enum values of {field}")
+            for state in _as_list(op.get("from")):
+                if state not in states:
+                    raise ValueError(f"{d['process']}.{op['name']}: from-state {state} is never reached")
     return loaded
 
 
-def operations() -> list[str]:
-    """Catalogue operations served by the engine (used by the gateway route builder and the docs)."""
-    return [op["operation"] for d in definitions() for op in d["operations"]]
+def _as_list(value: Any) -> list[Any]:
+    return [] if value is None else value if isinstance(value, list) else [value]
 
 
 def validate_form(form: dict[str, Any], body: dict[str, Any]) -> dict[str, Any]:
@@ -51,27 +73,93 @@ def validate_form(form: dict[str, Any], body: dict[str, Any]) -> dict[str, Any]:
     for name, rule in form.items():
         value = body.get(name)
         if value is None or (isinstance(value, str) and not value.strip()):
+            if rule.get("optional"):
+                continue
             problems.append(f"{name} is required")
             continue
         if "enum" in rule and value not in rule["enum"]:
             problems.append(f"{name} must be one of {', '.join(map(str, rule['enum']))}")
         if "min_length" in rule and len(str(value).strip()) < rule["min_length"]:
             problems.append(f"{name} needs at least {rule['min_length']} characters")
+        if "max_length" in rule and len(str(value).strip()) > rule["max_length"]:
+            problems.append(f"{name} allows at most {rule['max_length']} characters")
         clean[name] = value.strip() if isinstance(value, str) else value
     if problems:
         raise Problem(422, "/problems/validation", "Please correct the form", "; ".join(problems), errors=problems)
     return clean
 
 
-async def posting(session: AsyncSession, actor: Actor) -> dict[str, Any]:
+def derive(definition: dict[str, Any], data: dict[str, Any]) -> dict[str, Any]:
+    out = {}
+    for name, rule in (definition.get("derive") or {}).items():
+        out[name] = next((cls for cls, values in rule["map"].items() if data.get(rule["from"]) in values), rule.get("default"))
+    return out
+
+
+def roles_for(op: dict[str, Any], case: dict[str, Any] | None) -> list[str]:
+    """Who may perform `op` now: the chain step, the roles for a case field, or the listed roles."""
+    if op.get("chain"):
+        return [case["chain"][case["step"]]] if case else list(op["chain"])
+    if op.get("roles_by"):
+        by = op["roles_by"]
+        if case is None:
+            return sorted({r for rs in by["map"].values() for r in rs})
+        return list(by["map"].get((case.get("data") or {}).get(by["field"]), []))
+    return list(op["roles"])
+
+
+def next_op(definition: dict[str, Any], state: str) -> dict[str, Any] | None:
+    if state in definition.get("terminal_states", []):
+        return None
+    return next((op for op in definition["operations"] if not op.get("lists") and state in _as_list(op.get("from"))), None)
+
+
+def current_role(definition: dict[str, Any], case: dict[str, Any]) -> str | None:
+    op = next_op(definition, case["state"])
+    return "|".join(roles_for(op, case)) if op else None
+
+
+def route_of(definition: dict[str, Any], case: dict[str, Any]) -> list[str]:
+    """The roles the case will pass through, for display (chain processes show their chain)."""
+    if case.get("chain"):
+        return case["chain"]
+    return ["|".join(roles_for(op, case)) for op in definition["operations"] if not op.get("lists") and not op.get("starts")]
+
+
+async def posting(session: AsyncSession, actor: Actor) -> dict[str, Any] | None:
     row = (await session.execute(select(office_staff).where(office_staff.c.subject == actor.subject))).mappings().first()
-    if not row:
-        raise Problem(403, "/problems/no-posting", "You are not posted to an office")
-    return dict(row)
+    return dict(row) if row else None
 
 
-def in_jurisdiction(staff: dict[str, Any], office: dict[str, Any]) -> bool:
-    return staff["office_id"] in (office["office_id"], office.get("zone_id")) or staff["office_id"].startswith("HO")
+def in_jurisdiction(staff: dict[str, Any] | None, office_id: str, zone_id: str | None) -> bool:
+    return bool(staff) and (staff["office_id"] in (office_id, zone_id) or staff["office_id"].startswith("HO"))
+
+
+async def subject_row(session: AsyncSession, subject_ref: str) -> dict[str, Any] | None:
+    row = (await session.execute(select(subject_offices).where(subject_offices.c.subject_ref == subject_ref))).mappings().first()
+    return dict(row) if row else None
+
+
+def in_scope(op: dict[str, Any], actor: Actor, staff: dict[str, Any] | None, subject: dict[str, Any] | None) -> bool:
+    if not subject:
+        return False
+    scope = op.get("scope", "office")
+    if scope == "self":
+        return subject.get("member_subject") == actor.subject
+    if scope == "establishment":
+        return bool(actor.establishment_id) and subject.get("establishment_id") == actor.establishment_id
+    return in_jurisdiction(staff, subject["office_id"], subject.get("zone_id"))
+
+
+def bind_step_up(op: dict[str, Any], actor: Actor, case: dict[str, Any] | None, subject_ref: str) -> None:
+    step = op.get("step_up")
+    if not step:
+        return
+    action, bind = (step, "subject") if isinstance(step, str) else (step["action"], step.get("bind", "subject"))
+    if bind == "case":
+        require_step_up(actor, action, case["case_id"], case["version"])
+    else:
+        require_step_up(actor, action, subject_ref)
 
 
 async def emit(session: AsyncSession, definition: dict[str, Any], case: dict[str, Any], op: dict[str, Any],
@@ -79,157 +167,192 @@ async def emit(session: AsyncSession, definition: dict[str, Any], case: dict[str
     await add_event(session, producer=PRODUCER, event_type="ProcessTransitioned.v1", aggregate_type="process_instance",
                     aggregate_id=case["case_id"], correlation_id=actor.correlation_id, payload={
                         "process": definition["process"], "instance_id": case["case_id"], "subject_ref": case["subject_ref"],
-                        "from_state": from_state, "to_state": to_state, "operation": op["name"], "data": data})
-
-
-def _next(definition: dict[str, Any], state: str) -> tuple[str | None, str | None]:
-    """The operation available from `state` and the role that performs it."""
-    for op in definition["operations"]:
-        if op.get("from") == state:
-            return op["name"], (op.get("chain") or op["roles"])[0]
-    return None, None
+                        "from_state": from_state, "to_state": to_state, "operation": op["name"],
+                        "actor_subject": actor.subject, "actor_role": actor.stakeholder,
+                        "data": {**(case.get("data") or {}), **data}})
 
 
 def build_router() -> APIRouter:
     router = APIRouter()
     for definition in definitions():
         for op in definition["operations"]:
-            router.add_api_route("/api/v1" + op["operation"].split(" ", 1)[1], _handler(definition, op),
-                                 methods=[op["operation"].split(" ", 1)[0]], name=f"{definition['process']}.{op['name']}")
+            method, path = op["operation"].split(" ", 1)
+            router.add_api_route("/api/v1" + path, _lister(definition, op) if op.get("lists") else _handler(definition, op),
+                                 methods=[method], name=f"{definition['process']}.{op['name']}")
     return router
+
+
+def _check_role(op: dict[str, Any], actor: Actor, case: dict[str, Any] | None) -> None:
+    allowed = roles_for(op, case)
+    if actor.stakeholder not in allowed:
+        raise Problem(403, "/problems/not-your-turn" if case else "/problems/forbidden", "Not allowed at this step",
+                      f"{op['name']} is done by {', '.join(allowed) or 'nobody at this step'}.")
 
 
 def _handler(definition: dict[str, Any], op: dict[str, Any]):
     async def handle(request: Request, body: dict[str, Any] = Body(default_factory=dict),
                      actor: Actor = Depends(require_actor)) -> dict:
-        allowed = op.get("chain") or op["roles"]
-        if actor.stakeholder not in allowed:
-            raise Problem(403, "/problems/forbidden", "Not allowed", f"{op['name']} is done by {', '.join(allowed)}.")
+        _check_role(op, actor, None)
         data = validate_form(op.get("form", {}), body)
         async with sessions()() as session, session.begin():
             staff = await posting(session, actor)
+            if op.get("scope", "office") == "office" and not staff:
+                raise Problem(403, "/problems/no-posting", "You are not posted to an office")
             if op.get("starts"):
-                result = await _start(session, definition, op, request.path_params[definition["subject"]], staff, data, actor)
-            elif op.get("chain"):
-                result = await _chain_step(session, definition, op, request.path_params["caseId"], staff, data, actor)
+                result = await _start(session, definition, op, request, staff, data, actor)
             else:
-                result = await _subject_step(session, definition, op, request.path_params[definition["subject"]], staff, data, actor)
+                result = await _step(session, definition, op, request, staff, data, actor)
         return envelope(result)
     return handle
 
 
+def _lister(definition: dict[str, Any], op: dict[str, Any]):
+    async def handle(actor: Actor = Depends(require_actor)) -> dict:
+        _check_role(op, actor, None)
+        async with sessions()() as session:
+            staff = await posting(session, actor)
+            rows = (await session.execute(select(cases, subject_offices).join(
+                subject_offices, subject_offices.c.subject_ref == cases.c.subject_ref).where(
+                cases.c.process == definition["process"], cases.c.state.in_(op["lists"]["states"]))
+                .order_by(cases.c.created_at))).mappings().all()
+            items = [_view(dict(r), definition) for r in rows if in_scope(op, actor, staff, dict(r))]
+        if op["lists"].get("summary"):
+            counts: dict[str, int] = {}
+            for i in items:
+                counts[i["state"]] = counts.get(i["state"], 0) + 1
+            return envelope({"process": definition["process"], "pending_by_state": counts, "total": len(items)})
+        return envelope(items)
+    return handle
+
+
 async def _open_case(session: AsyncSession, definition: dict[str, Any], subject_ref: str) -> dict[str, Any] | None:
-    row = (await session.execute(select(cases).where(cases.c.process == definition["process"], cases.c.subject_ref == subject_ref,
-                                                     cases.c.state != "CLOSED"))).mappings().first()
+    row = (await session.execute(select(cases).where(
+        cases.c.process == definition["process"], cases.c.subject_ref == subject_ref,
+        cases.c.state.notin_(definition.get("terminal_states", []) + ["CLOSED"])))).mappings().first()
     return dict(row) if row else None
 
 
 def _view(case: dict[str, Any], definition: dict[str, Any]) -> dict[str, Any]:
-    nxt, role = _next(definition, case["state"])
-    return {"case_id": case["case_id"], "process": definition["process"], "subject_ref": case["subject_ref"],
-            "state": case["state"], "step": case["step"], "chain": case["chain"], "current_role": case["current_role"],
-            "version": case["version"], "next_operation": nxt if case["current_role"] else None}
+    op = next_op(definition, case["state"])
+    return {"case_id": case["case_id"], "process": definition["process"], "title": definition["title"],
+            "subject_ref": case["subject_ref"], "state": case["state"], "step": case["step"], "chain": route_of(definition, case),
+            "current_role": case["current_role"], "version": case["version"], "data": case.get("data") or {},
+            "next_operation": op["name"] if op and case["current_role"] else None}
 
 
-async def _start(session, definition, op, subject_ref, staff, data, actor) -> dict[str, Any]:
-    office = (await session.execute(select(subject_offices).where(subject_offices.c.subject_ref == subject_ref))).mappings().first()
-    if not office or not in_jurisdiction(staff, dict(office)):
+async def _start(session, definition, op, request, staff, data, actor) -> dict[str, Any]:
+    if op.get("subject_from") == "actor":
+        row = (await session.execute(select(subject_offices).where(subject_offices.c.member_subject == actor.subject))).mappings().first()
+        subject_ref = row["subject_ref"] if row else None
+    else:
+        subject_ref = request.path_params[definition["subject"]]
+    subject = await subject_row(session, subject_ref) if subject_ref else None
+    if not in_scope(op, actor, staff, subject):
         raise Problem(404, "/problems/not-found", "Not found")          # outside your jurisdiction looks the same
-    require_step_up(actor, op["step_up"], subject_ref)
+    bind_step_up(op, actor, None, subject_ref)
     if await _open_case(session, definition, subject_ref):
         raise Problem(409, "/problems/process-open", f"A {definition['title'].lower()} is already in progress for this subject")
-    queue = next(o for o in definition["operations"] if o["name"] == op["queue"])
+    case_data = {**data, **derive(definition, data)}
+    queue = next((o for o in definition["operations"] if o["name"] == op.get("queue")), None)
     case = {"case_id": f"CASE-{secrets.token_hex(4).upper()}", "subject_ref": subject_ref, "state": op["to"], "step": 0,
-            "chain": list(queue["chain"]), "current_role": queue["chain"][0], "version": 1}
+            "chain": list(queue["chain"]) if queue and queue.get("chain") else [], "version": 1, "data": case_data, "round": 1}
+    case["current_role"] = current_role(definition, case)
     await session.execute(insert(cases).values(
-        **case, claim_id=None, grievance_id=None, office_id=office["office_id"], kind=definition["case_kind"],
-        process=definition["process"], form_type="-", account_link_id="-", amount_paise=0, rule_version="-", round=1,
-        sla_due_at=datetime.now(UTC) + timedelta(days=SLA_DAYS)))
+        **{k: case[k] for k in ("case_id", "subject_ref", "state", "step", "chain", "version", "data", "round", "current_role")},
+        claim_id=None, grievance_id=None, office_id=subject["office_id"], kind=definition["case_kind"],
+        process=definition["process"], form_type="-", account_link_id="-", amount_paise=0, rule_version="-",
+        sla_due_at=datetime.now(UTC) + timedelta(days=definition.get("sla_days", SLA_DAYS))))
     await session.execute(insert(case_actions).values(case_id=case["case_id"], round=1, officer_subject=actor.subject,
                                                       officer_role=actor.stakeholder, action=op["name"].upper(), checks=data,
                                                       reason=data.get("reason")))
     await emit(session, definition, case, op, None, op["to"], data, actor)
     await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action=f"{definition['process']}.{op['name']}",
-                target_type=definition["subject"], target_id=subject_ref, detail=data.get("order_ref"))
+                target_type=definition["subject"], target_id=subject_ref)
     return _view(case, definition)
 
 
-async def _chain_step(session, definition, op, case_id, staff, data, actor) -> dict[str, Any]:
-    row = (await session.execute(select(cases).where(cases.c.case_id == case_id, cases.c.process == definition["process"]))).mappings().first()
-    if not row or row["office_id"] != staff["office_id"]:
-        raise Problem(404, "/problems/not-found", "Case not found")
-    case = dict(row)
-    if case["state"] != op["from"]:
-        raise Problem(409, "/problems/invalid-state", "This case is not at this step", f"State: {case['state']}.")
-    if case["chain"][case["step"]] != actor.stakeholder:
-        raise Problem(403, "/problems/not-your-turn", "This case is waiting for another role", f"It is with {case['chain'][case['step']]}.")
-    acted = (await session.execute(select(case_actions.c.officer_subject).where(
-        case_actions.c.case_id == case_id, case_actions.c.round == case["round"]))).scalars().all()
-    if actor.subject in acted:
-        raise Problem(403, "/problems/separation-of-duties", "You already acted on this case",
-                      "A different officer must take each step.")
-    last = case["step"] + 1 >= len(case["chain"])
-    values: dict[str, Any] = {"step": case["step"] + 1, "version": case["version"] + 1}
-    if last:
-        values["state"] = op["to"]
-        values["current_role"] = _next(definition, op["to"])[1]
+async def _step(session, definition, op, request, staff, data, actor) -> dict[str, Any]:
+    kind, name = op["case_from"].split(":", 1)
+    if kind == "path_subject":
+        case = await _open_case(session, definition, request.path_params[name])
     else:
-        values["current_role"] = case["chain"][case["step"] + 1]
-    result = await session.execute(update(cases).where(cases.c.case_id == case_id, cases.c.version == case["version"]).values(**values))
-    if result.rowcount != 1:
-        raise Problem(409, "/problems/version-conflict", "This case changed meanwhile")
-    await session.execute(insert(case_actions).values(case_id=case_id, round=case["round"], officer_subject=actor.subject,
-                                                      officer_role=actor.stakeholder, action=op["name"].upper(),
-                                                      approval_level=case["step"], checks=data, reason=data.get("note")))
-    case.update(values)
-    if last:
-        await emit(session, definition, case, op, op["from"], op["to"], data, actor)
-    return _view(case, definition)
-
-
-async def _subject_step(session, definition, op, subject_ref, staff, data, actor) -> dict[str, Any]:
-    case = await _open_case(session, definition, subject_ref)
-    if not case or case["office_id"] != staff["office_id"] and not staff["office_id"].startswith("HO"):
-        raise Problem(404, "/problems/not-found", "No open process for this subject")
-    require_step_up(actor, op["step_up"], subject_ref)
-    if case["state"] != op["from"]:
-        raise Problem(409, "/problems/invalid-state", f"{op['name']} needs state {op['from']}", f"State: {case['state']}.")
+        row = (await session.execute(select(cases).where(cases.c.case_id == request.path_params[name],
+                                                         cases.c.process == definition["process"]))).mappings().first()
+        case = dict(row) if row else None
+    subject = await subject_row(session, case["subject_ref"]) if case else None
+    if not case or not in_scope(op, actor, staff, subject):
+        raise Problem(404, "/problems/not-found", "Not found")
+    if case["state"] not in _as_list(op.get("from")):
+        raise Problem(409, "/problems/invalid-state", f"{op['name']} is not possible now", f"State: {case['state']}.")
+    _check_role(op, actor, case)
+    if op.get("scope", "office") == "office" and not op.get("same_officer_allowed"):
+        acted = (await session.execute(select(case_actions.c.officer_subject).where(
+            case_actions.c.case_id == case["case_id"], case_actions.c.round == case["round"]))).scalars().all()
+        if actor.subject in acted:
+            raise Problem(403, "/problems/separation-of-duties", "You already acted on this case",
+                          "A different officer must take each step.")
+    bind_step_up(op, actor, case, case["subject_ref"])
     if op.get("requires_last_finding"):
         last = (await session.execute(select(case_actions.c.checks).where(case_actions.c.case_id == case["case_id"])
                                       .order_by(case_actions.c.id.desc()).limit(1))).scalar_one_or_none() or {}
         if last.get("finding") != op["requires_last_finding"]:
             raise Problem(409, "/problems/finding-required", f"The verification did not find {op['requires_last_finding']}",
                           f"Last finding: {last.get('finding')}. This cannot be done here.")
-    result = await session.execute(update(cases).where(cases.c.case_id == case["case_id"], cases.c.version == case["version"]).values(
-        state="CLOSED" if op["to"] == "ACTIVE" else op["to"], current_role=None, version=case["version"] + 1))
+    before = case["state"]
+    values: dict[str, Any] = {"version": case["version"] + 1}
+    if op.get("chain") and case["step"] + 1 < len(case["chain"]):
+        values["step"] = case["step"] + 1                          # the chain continues with its next role
+        state = before
+    else:
+        state = op["outcomes"]["map"][data[op["outcomes"]["field"]]] if op.get("outcomes") else op["to"]
+        if op.get("chain"):
+            values["step"] = case["step"] + 1
+        if state in _as_list(op.get("new_round_on")):
+            values["round"] = case["round"] + 1                    # sent back: earlier steps are redone by anyone
+    values["state"] = state
+    updated = {**case, **values}
+    values["current_role"] = (case["chain"][values["step"]] if op.get("chain") and state == before
+                              else current_role(definition, updated))
+    result = await session.execute(update(cases).where(cases.c.case_id == case["case_id"], cases.c.version == case["version"]).values(**values))
     if result.rowcount != 1:
         raise Problem(409, "/problems/version-conflict", "This case changed meanwhile")
     await session.execute(insert(case_actions).values(case_id=case["case_id"], round=case["round"], officer_subject=actor.subject,
-                                                      officer_role=actor.stakeholder, action=op["name"].upper(), checks=data,
-                                                      reason=data.get("reason")))
-    await emit(session, definition, case, op, op["from"], op["to"], data, actor)
+                                                      officer_role=actor.stakeholder, action=op["name"].upper(),
+                                                      approval_level=case["step"], checks=data,
+                                                      reason=data.get("note") or data.get("reason")))
+    updated.update(values)
+    if state != before:
+        await emit(session, definition, updated, op, before, state, data, actor)
     await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action=f"{definition['process']}.{op['name']}",
-                target_type=definition["subject"], target_id=subject_ref)
-    case.update(state=op["to"], current_role=None, version=case["version"] + 1)
-    return _view(case, definition)
+                target_type="case", target_id=case["case_id"], detail=state)
+    return _view(updated, definition)
 
 
-def _describe(definition: dict[str, Any], op: dict[str, Any], **params: str) -> dict[str, Any]:
+def _describe(definition: dict[str, Any], op: dict[str, Any], case: dict[str, Any] | None = None) -> dict[str, Any]:
     method, path = op["operation"].split(" ", 1)
-    for key, value in params.items():
-        path = path.replace("{" + key + "}", value)
+    if case:
+        for key in ("caseId", "requestId", "jdId"):
+            path = path.replace("{" + key + "}", case["case_id"])
+        path = path.replace("{" + definition["subject"] + "}", case["subject_ref"])
+    step = op.get("step_up")
+    step_up = None if not step else {"action": step, "bind": "subject"} if isinstance(step, str) else step
     return {"process": definition["process"], "title": definition["title"], "name": op["name"], "method": method,
-            "path": "/api/v1" + path, "form": op.get("form", {}), "step_up": op.get("step_up"),
-            "subject": definition["subject"]}
+            "path": "/api/v1" + path, "form": op.get("form", {}), "step_up": step_up, "subject": definition["subject"],
+            "subject_from": op.get("subject_from", "path")}
 
 
 def startable(role: str) -> list[dict[str, Any]]:
     """Processes this role may start, described well enough for the generic web screen to render the form."""
-    return [_describe(d, op) for d in definitions() for op in d["operations"] if op.get("starts") and role in op["roles"]]
+    return [_describe(d, op) for d in definitions() for op in d["operations"] if op.get("starts") and role in roles_for(op, None)]
 
 
 def next_operation(case: dict[str, Any]) -> dict[str, Any] | None:
     definition = next((d for d in definitions() if d["process"] == case["process"]), None)
-    name = _next(definition, case["state"])[0] if definition and case["current_role"] else None
-    op = next((o for o in definition["operations"] if o["name"] == name), None) if name else None
-    return _describe(definition, op, caseId=case["case_id"], **{definition["subject"]: case["subject_ref"]}) if op else None
+    op = next_op(definition, case["state"]) if definition and case["current_role"] else None
+    return _describe(definition, op, case) if op else None
+
+
+def _next(definition: dict[str, Any], state: str) -> tuple[str | None, str | None]:
+    """Name of the next operation from `state` (used by the work queue)."""
+    op = next_op(definition, state)
+    return (op["name"], roles_for(op, None)[0]) if op else (None, None)

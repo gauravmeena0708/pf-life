@@ -6,6 +6,7 @@ owner: member
 title: Freeze of a member account
 subject: uan                        # the path parameter that identifies what the process is about
 case_kind: MEMBER_FREEZE
+terminal_states: [ACTIVE]
 operations:
   - name: freeze
     operation: POST /office/members/{uan}/freezes
@@ -20,6 +21,7 @@ operations:
       order_ref: {min_length: 3}
   - name: verify
     operation: POST /office/freeze-cases/{caseId}/verifications
+    case_from: path:caseId
     chain: [fo.da_accounts, fo.ss, fo.apfc, fo.oic]      # stakeholder-activities.yaml → freeze_verification_member
     from: FROZEN
     to: VERIFIED                     # after the last checker in the chain
@@ -28,7 +30,9 @@ operations:
       note: {min_length: 10}
   - name: defreeze
     operation: POST /office/members/{uan}/defreezes
+    case_from: path_subject:uan
     roles: [fo.oic]
+    same_officer_allowed: true       # the OIC who verified last also orders the de-freeze (FIA SOP)
     step_up: defreeze-account
     from: VERIFIED
     to: ACTIVE
