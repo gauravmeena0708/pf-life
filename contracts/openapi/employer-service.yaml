@@ -747,6 +747,45 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /employers/me/signatories/{signatoryId}/request-letters:
+    post:
+      operationId: postEmployersSignatoriesSignatoryIdRequestLetters
+      summary: Upload the scanned, signed signatory registration request letter; *Authorized eSign List* shows its status
+        (Establishmen
+      tags:
+      - Employer operators, signatories, DSC and e-sign
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: signatoryId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/EstablishmentId'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: employer
+      x-callers:
+      - employer.owner
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
+      description: Upload the scanned, signed signatory registration request letter; *Authorized eSign List* shows its status
+        (Establishment > e-sign Registration)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /employers/me/signatories/{signatoryId}/revocations:
     post:
       operationId: postEmployersSignatoriesSignatoryIdRevocations
@@ -783,6 +822,45 @@ paths:
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /employers/me/signatories/{signatoryId}/revoke-letters:
+    post:
+      operationId: postEmployersSignatoriesSignatoryIdRevokeLetters
+      summary: 'Upload the signed signatory revoke letter that backs a revocation, with its own status (*Authorized eSign
+        List*: Signato'
+      tags:
+      - Employer operators, signatories, DSC and e-sign
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: signatoryId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/EstablishmentId'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: employer
+      x-callers:
+      - employer.owner
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
+      description: 'Upload the signed signatory revoke letter that backs a revocation, with its own status (*Authorized eSign
+        List*: Signatory Revoke Request)'
       requestBody:
         required: false
         content:

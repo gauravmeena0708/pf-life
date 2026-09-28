@@ -743,6 +743,37 @@ paths:
       description: Pre-flight readiness of every member account linked to the caller's UAN. Composed by member-service from
         its own data plus read-only lookups of active ledger locks (workflow-service) and open claims (claim-service). Returns
         blocker codes instead of letting a later claim submission fail.
+  /members/me/applications:
+    get:
+      operationId: getMembersApplications
+      summary: '*Recent Pending Applications* / *Recent Processed Applications* (Service History page); also the "process
+        already ongoin'
+      tags:
+      - Member self-service
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: member
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+      description: '*Recent Pending Applications* / *Recent Processed Applications* (Service History page); also the "process
+        already ongoing" list that blocks a new Mark Exit'
   /members/me/contact-details:
     patch:
       operationId: patchMembersContactDetails
@@ -812,7 +843,7 @@ paths:
   /members/me/exits:
     post:
       operationId: postMembersExits
-      summary: Member-marked exit (when employer has not marked it)
+      summary: Member-marked exit (when employer has not marked it); refused while another process for the member ID is ongoing
       tags:
       - Member self-service
       parameters:

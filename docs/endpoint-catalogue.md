@@ -103,6 +103,8 @@ Rules that apply to every row:
 | `GET /employers/me/signatories` | List authorised signatories | W | 1 | employer |
 | `POST /employers/me/signatories/authorisations` 🔐 | Authorise signatory | W | 1 | employer |
 | `POST /employers/me/signatories/{signatoryId}/revocations` 🔐 | Revoke / replace signatory (Journey D5) | W | 1 | employer |
+| `POST /employers/me/signatories/{signatoryId}/request-letters` | Upload the scanned, signed **signatory registration request letter**; *Authorized eSign List* shows its status (Establishment > e-sign Registration) | P | 2 | employer |
+| `POST /employers/me/signatories/{signatoryId}/revoke-letters` | Upload the signed **signatory revoke letter** that backs a revocation, with its own status (*Authorized eSign List*: Signatory Revoke Request) | P | 2 | employer |
 | `POST /employers/me/signatories/{signatoryId}/dsc-registrations` 🔐 | Register DSC for signatory | M | 2 | employer |
 | `POST /employers/me/signatories/{signatoryId}/esign-registrations` 🔐 | Register Aadhaar e-sign for signatory | M | 2 | employer |
 | `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` 🔐 | Field office approval of DSC / e-sign registration | P | 2 | employer |
@@ -184,6 +186,10 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/ledger-adjustments` 💰🔐 (`type=APPENDIX_E`) | **Appendix E** — field-office adjustment of a member's opening balances (taxable / non-taxable / total), also used for PF→EPS diversion. Not an employer remittance | ? | 2 | contribution |
 | `POST /office/ledger-adjustments/{adjustmentId}/approvals` 🔐 | Second approval of a ledger adjustment | ? | 2 | contribution |
 | `POST /office/ecr-filings/{filingId}/rejections` 🔐 | Reject an ECR **before** posting | P | 2 | contribution |
+| `GET /office/ecr-filings?state=PENDING_OFFICE_APPROVAL` | **ECR Approval** queue (top menu on the APFC login; exact scope not yet confirmed — see §16) | ? | 3 | contribution |
+| `POST /office/ecr-filings/{filingId}/approvals` 🔐 | Office approval of an ECR held for approval (*ECR Approval* menu; scope to be confirmed) | ? | 3 | contribution |
+| `POST /office/vdr-entries/{vdrId}/rejections` 🔐 | **VDR Rejection** — reject a VDR entry with a reason (top menu *VDR Rejection*) | P | 2 | contribution |
+| `POST /office/vdr-entries/{vdrId}/member-beneficiaries` 🔐 | **VDR Member Beneficiary** — attach the member / beneficiary to whom a VDR receipt is credited (top menu; exact meaning to be confirmed) | ? | 3 | contribution |
 | `POST /office/ledger-journals/{journalId}/reversals` 💰🔐 | Reverse an **already posted** journal (new reversing entries; never edit in place) → `LedgerReversed.v1` | P | 2 | contribution |
 
 
@@ -221,7 +227,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /members/me/kyc/{kycType}` 🔐 | Seed PAN / other KYC (mock) | M | 2 | member |
 | `POST /members/me/joint-declarations` 🔐 | Profile correction request (Joint Declaration) (tier-2 process `joint_declaration`) | W | 1 | member |
 | `GET /members/me/employment-history` | Service history across linked employments | W | 1 | member |
-| `POST /members/me/exits` 🔐 | Member-marked exit (when employer has not marked it) | P | 2 | member |
+| `POST /members/me/exits` 🔐 | Member-marked exit (when employer has not marked it); refused while another process for the member ID is ongoing | P | 2 | member |
+| `GET /members/me/applications?status=` | *Recent Pending Applications* / *Recent Processed Applications* (Service History page); also the "process already ongoing" list that blocks a new Mark Exit | P | 2 | member |
 | `GET /members/me/passbook` | Passbook across all accounts linked to the caller (no member ID parameter) | W | 1 | contribution |
 | `GET /members/me/accounts/{accountLinkId}/passbook` | Passbook for one linked account; `accountLinkId` is an opaque ID validated against the caller | W | 1 | contribution |
 | `GET /members/me/annual-statements/{financialYear}` | Annual account slip | P | 2 | contribution |
@@ -369,6 +376,10 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
 | `GET /office/claims/{claimId}/audit-trail` | Full claim audit trail for officers and auditors: transitions, actor IDs, approval level, rule version, lock events, CAD versions | P | 2 | claim |
+| `GET /office/claims/{claimId}/additional-forms` | **Additional Form Details** — forms filed with a claim (e.g. a Joint Declaration): filed / initiated dates, processing status, rejection reason, pending office | P | 2 | claim |
+| `GET /office/annexure-k-files?direction=` | **ANNEXURE K FILE** — Annexure K inward / outward between field offices for Form 13 transfers | P | 2 | claim |
+| `POST /office/annexure-k-files/{annexureId}/reconciliations` 🔐 | **ANNEXURE K RECO** — match an inter-office Annexure K with the transfer and member records | P | 2 | claim |
+| `POST /office/annexure-k-files/{annexureId}/vdr-reconciliations` 🔐 | **ANNEXURE K VDR RECO** — match the Annexure K amount with the VDR receipt | P | 2 | contribution |
 
 ## 9. Pension (EPS) and pensioners
 
@@ -388,6 +399,11 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /office/pensions/life-certificates/overdue` | Pensioners with expired life certificates | P | 2 | pension |
 | `POST /office/pensions/{ppoId}/suspensions` 🔐 | Suspend pension on missing life certificate | P | 2 | pension |
 | `POST /office/pensions/{ppoId}/resumptions` 🔐 | Resume pension | P | 2 | pension |
+| `GET /office/pensions/enquiries?ppo=&memberId=&uan=` | **Pension Enquiry Details** — PPO, beneficiaries, pension payments, scheme certificate issue, service, arrears adjustment, recovery and TDS (restricted to the officer's office) | P | 2 | pension |
+| `POST /office/pensions/{ppoId}/updation-activities` 🔐 | DA (Pension) initiates an updation activity: `BASIC_DETAILS`, `PENSION_START`, `PENSION_STOP`, `DLC_REVALIDATION`, `UNHOLD_TRANSACTIONS` | P | 2 | pension |
+| `GET /office/pensions/updation-activities?activity=&mode=&status=` | **Track Claim Updation Activity Status** — PRO and DA activities by filing mode (physical / online) and status (new, pending, rejected, settled, sent back to DA), transfer cases separately | P | 2 | pension |
+| `POST /office/physical-claims` (`formType=PPO_AMENDMENT_BENEFICIARY` \| `PPO_AMENDMENT_SERVICE` \| `PPO_AMENDMENT_POHW`) | PRO counter intake of a **PPO amendment** (beneficiary, service, pension on higher wages) | P | 2 | pension |
+| `POST /office/physical-claims` (`formType=DEATH_UPDATION` \| `PHYSICAL_LC_UPDATION` \| `SPOUSE_REMARRIAGE_UPDATION`) | PRO counter intake of a pensioner **death**, **physical life certificate** or **spouse remarriage** updation | P | 2 | pension |
 | `POST /office/pensions/ppo-issuances` 🔐 | Issue PPO after Form 10D settlement | P | 2 | pension |
 | `POST /office/pensions/{ppoId}/revisions` 💰🔐 | Pension revision (incl. higher-pension outcome) | W | 1 | pension |
 | `GET /office/pensions/revisions?state=` | Pension revisions proposed when a published formula change raises pensions in payment, with arrears to date | W | 1 | pension |
@@ -493,6 +509,8 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | `POST /exempted/me/audits` | Annual trust audit filing | P | 3 | employer |
 | `POST /exempted/me/surrender-requests` 🔐 | Surrender / cancellation of exemption | P | 3 | employer |
 | `POST /office/exempted/{estId}/past-accumulation-transfers` 💰🔐 | Transfer past accumulations to EPFO after surrender / cancellation | P | 3 | contribution |
+| `POST /office/exempted/past-accumulation-bulk-transfers` 💰🔐 | **PAST ACCUM BULK TRANSFER** — transfer past accumulations of many members in one batch | P | 3 | contribution |
+| `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` 🔐 | **PAST ACCUM VDR RECO** — match past-accumulation receipts with VDR entries | P | 3 | contribution |
 
 
 **Added from the stakeholder activity map** (`docs/stakeholder-activities.yaml`)

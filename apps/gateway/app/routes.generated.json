@@ -193,6 +193,22 @@
   },
   {
     "method": "POST",
+    "path_template": "/office/exempted/{estId}/past-accumulation-vdr-reconciliations",
+    "regex": "^/office/exempted/[^/]+/past\\-accumulation\\-vdr\\-reconciliations$",
+    "status": "P",
+    "phase": 3,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.exemption"
+    ],
+    "summary": "PAST ACCUM VDR RECO — match past-accumulation receipts with VDR entries",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/employers/me/ecr-filings/{filingId}/principal-employer-tags",
     "regex": "^/employers/me/ecr\\-filings/[^/]+/principal\\-employer\\-tags$",
     "status": "P",
@@ -337,6 +353,22 @@
   },
   {
     "method": "POST",
+    "path_template": "/office/annexure-k-files/{annexureId}/vdr-reconciliations",
+    "regex": "^/office/annexure\\-k\\-files/[^/]+/vdr\\-reconciliations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "ANNEXURE K VDR RECO — match the Annexure K amount with the VDR receipt",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/office/payment-scrolls/{scrollId}/return-reconciliations",
     "regex": "^/office/payment\\-scrolls/[^/]+/return\\-reconciliations$",
     "status": "P",
@@ -450,6 +482,22 @@
   },
   {
     "method": "POST",
+    "path_template": "/employers/me/signatories/{signatoryId}/request-letters",
+    "regex": "^/employers/me/signatories/[^/]+/request\\-letters$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.owner"
+    ],
+    "summary": "Upload the scanned, signed signatory registration request letter; *Authorized eSign List* shows its status (Establishment > e-sign Registration)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/office/compliance/cases/{caseId}/recovery-certificates",
     "regex": "^/office/compliance/cases/[^/]+/recovery\\-certificates$",
     "status": "P",
@@ -479,6 +527,22 @@
       "fo.pro_intake"
     ],
     "summary": "UAN allocation / Aadhaar validation before settlement (mock)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/signatories/{signatoryId}/revoke-letters",
+    "regex": "^/employers/me/signatories/[^/]+/revoke\\-letters$",
+    "status": "P",
+    "phase": 2,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.owner"
+    ],
+    "summary": "Upload the signed signatory revoke letter that backs a revocation, with its own status (*Authorized eSign List*: Signatory Revoke Request)",
     "revocation": false
   },
   {
@@ -527,6 +591,22 @@
       "member"
     ],
     "summary": "Confirm auto-transfer",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/annexure-k-files/{annexureId}/reconciliations",
+    "regex": "^/office/annexure\\-k\\-files/[^/]+/reconciliations$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "ANNEXURE K RECO — match an inter-office Annexure K with the transfer and member records",
     "revocation": false
   },
   {
@@ -689,6 +769,22 @@
       "employer.signatory"
     ],
     "summary": "Employer uploads signed CoC application",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/exempted/past-accumulation-bulk-transfers",
+    "regex": "^/office/exempted/past\\-accumulation\\-bulk\\-transfers$",
+    "status": "P",
+    "phase": 3,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.exemption"
+    ],
+    "summary": "PAST ACCUM BULK TRANSFER — transfer past accumulations of many members in one batch",
     "revocation": false
   },
   {
@@ -993,6 +1089,22 @@
       "employer.signatory"
     ],
     "summary": "Download issued Certificate of Coverage",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/vdr-entries/{vdrId}/member-beneficiaries",
+    "regex": "^/office/vdr\\-entries/[^/]+/member\\-beneficiaries$",
+    "status": "?",
+    "phase": 3,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "VDR Member Beneficiary — attach the member / beneficiary to whom a VDR receipt is credited (top menu; exact meaning to be confirmed)",
     "revocation": false
   },
   {
@@ -1510,6 +1622,22 @@
     "revocation": false
   },
   {
+    "method": "POST",
+    "path_template": "/office/pensions/{ppoId}/updation-activities",
+    "regex": "^/office/pensions/[^/]+/updation\\-activities$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.da_pension"
+    ],
+    "summary": "DA (Pension) initiates an updation activity: BASIC_DETAILS, PENSION_START, PENSION_STOP, DLC_REVALIDATION, UNHOLD_TRANSACTIONS",
+    "revocation": false
+  },
+  {
     "method": "GET",
     "path_template": "/public/establishments/{estId}/e-report-card",
     "regex": "^/public/establishments/[^/]+/e\\-report\\-card$",
@@ -1867,6 +1995,22 @@
     "revocation": false
   },
   {
+    "method": "GET",
+    "path_template": "/office/claims/{claimId}/additional-forms",
+    "regex": "^/office/claims/[^/]+/additional\\-forms$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "Additional Form Details — forms filed with a claim (e.g. a Joint Declaration): filed / initiated dates, processing status, rejection reason, pending office",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/office/compliance/cases/{caseId}/appeals",
     "regex": "^/office/compliance/cases/[^/]+/appeals$",
@@ -2152,6 +2296,22 @@
       "fo.apfc"
     ],
     "summary": "26B coverage / membership dispute",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/ecr-filings/{filingId}/approvals",
+    "regex": "^/office/ecr\\-filings/[^/]+/approvals$",
+    "status": "?",
+    "phase": 3,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "Office approval of an ECR held for approval (*ECR Approval* menu; scope to be confirmed)",
     "revocation": false
   },
   {
@@ -2459,6 +2619,38 @@
       "fo.apfc_pension"
     ],
     "summary": "Monthly Bank Reconciliation Statement (BRS) of pension scrolls vs bank debit advices",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/pensions/updation-activities",
+    "regex": "^/office/pensions/updation\\-activities$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_pension"
+    ],
+    "summary": "Track Claim Updation Activity Status — PRO and DA activities by filing mode (physical / online) and status (new, pending, rejected, settled, sent back to DA), transfer cases separately",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/vdr-entries/{vdrId}/rejections",
+    "regex": "^/office/vdr\\-entries/[^/]+/rejections$",
+    "status": "P",
+    "phase": 2,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "VDR Rejection — reject a VDR entry with a reason (top menu *VDR Rejection*)",
     "revocation": false
   },
   {
@@ -4355,6 +4547,22 @@
   },
   {
     "method": "GET",
+    "path_template": "/office/pensions/enquiries",
+    "regex": "^/office/pensions/enquiries$",
+    "status": "P",
+    "phase": 2,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_pension"
+    ],
+    "summary": "Pension Enquiry Details — PPO, beneficiaries, pension payments, scheme certificate issue, service, arrears adjustment, recovery and TDS (restricted to the officer's office)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/office/pensions/revisions",
     "regex": "^/office/pensions/revisions$",
     "status": "W",
@@ -4614,6 +4822,22 @@
   },
   {
     "method": "GET",
+    "path_template": "/members/me/applications",
+    "regex": "^/members/me/applications$",
+    "status": "P",
+    "phase": 2,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "*Recent Pending Applications* / *Recent Processed Applications* (Service History page); also the \"process already ongoing\" list that blocks a new Mark Exit",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/members/me/tax/form-16a",
     "regex": "^/members/me/tax/form\\-16a$",
     "status": "P",
@@ -4642,6 +4866,22 @@
       "member"
     ],
     "summary": "UAN activation (mock OTP / mock face authentication)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/annexure-k-files",
+    "regex": "^/office/annexure\\-k\\-files$",
+    "status": "P",
+    "phase": 2,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "ANNEXURE K FILE — Annexure K inward / outward between field offices for Form 13 transfers",
     "revocation": false
   },
   {
@@ -5536,6 +5776,22 @@
   },
   {
     "method": "GET",
+    "path_template": "/office/ecr-filings",
+    "regex": "^/office/ecr\\-filings$",
+    "status": "?",
+    "phase": 3,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "ECR Approval queue (top menu on the APFC login; exact scope not yet confirmed — see §16)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/office/legal/cases",
     "regex": "^/office/legal/cases$",
     "status": "P",
@@ -5831,7 +6087,7 @@
     "callers": [
       "member"
     ],
-    "summary": "Member-marked exit (when employer has not marked it)",
+    "summary": "Member-marked exit (when employer has not marked it); refused while another process for the member ID is ongoing",
     "revocation": false
   },
   {

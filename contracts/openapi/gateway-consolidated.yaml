@@ -3077,6 +3077,45 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /employers/me/signatories/{signatoryId}/request-letters:
+    post:
+      operationId: postEmployersSignatoriesSignatoryIdRequestLetters
+      summary: Upload the scanned, signed signatory registration request letter; *Authorized eSign List* shows its status
+        (Establishmen
+      tags:
+      - Employer operators, signatories, DSC and e-sign
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: signatoryId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/EstablishmentId'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: employer
+      x-callers:
+      - employer.owner
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
+      description: Upload the scanned, signed signatory registration request letter; *Authorized eSign List* shows its status
+        (Establishment > e-sign Registration)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /employers/me/signatories/{signatoryId}/revocations:
     post:
       operationId: postEmployersSignatoriesSignatoryIdRevocations
@@ -3113,6 +3152,45 @@ paths:
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /employers/me/signatories/{signatoryId}/revoke-letters:
+    post:
+      operationId: postEmployersSignatoriesSignatoryIdRevokeLetters
+      summary: 'Upload the signed signatory revoke letter that backs a revocation, with its own status (*Authorized eSign
+        List*: Signato'
+      tags:
+      - Employer operators, signatories, DSC and e-sign
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: signatoryId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/EstablishmentId'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: employer
+      x-callers:
+      - employer.owner
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
+      description: 'Upload the signed signatory revoke letter that backs a revocation, with its own status (*Authorized eSign
+        List*: Signatory Revoke Request)'
       requestBody:
         required: false
         content:
@@ -5173,6 +5251,37 @@ paths:
       x-scope: self — caller's own member record only
       security:
       - bffSession: []
+  /members/me/applications:
+    get:
+      operationId: getMembersApplications
+      summary: '*Recent Pending Applications* / *Recent Processed Applications* (Service History page); also the "process
+        already ongoin'
+      tags:
+      - Member self-service
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: member
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+      description: '*Recent Pending Applications* / *Recent Processed Applications* (Service History page); also the "process
+        already ongoing" list that blocks a new Mark Exit'
   /members/me/claims:
     get:
       operationId: getMembersClaims
@@ -5707,7 +5816,7 @@ paths:
   /members/me/exits:
     post:
       operationId: postMembersExits
-      summary: Member-marked exit (when employer has not marked it)
+      summary: Member-marked exit (when employer has not marked it); refused while another process for the member ID is ongoing
       tags:
       - Member self-service
       parameters:
@@ -7324,6 +7433,106 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/annexure-k-files:
+    get:
+      operationId: getOfficeAnnexureKFiles
+      summary: ANNEXURE K FILE — Annexure K inward / outward between field offices for Form 13 transfers
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: direction
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: claim
+      x-callers:
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+  /office/annexure-k-files/{annexureId}/reconciliations:
+    post:
+      operationId: postOfficeAnnexureKFilesAnnexureIdReconciliations
+      summary: ANNEXURE K RECO — match an inter-office Annexure K with the transfer and member records
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: annexureId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: claim
+      x-callers:
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/annexure-k-files/{annexureId}/vdr-reconciliations:
+    post:
+      operationId: postOfficeAnnexureKFilesAnnexureIdVdrReconciliations
+      summary: ANNEXURE K VDR RECO — match the Annexure K amount with the VDR receipt
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: annexureId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: contribution
+      x-callers:
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/cases/{caseId}:
     get:
       operationId: getOfficeCasesCaseId
@@ -7583,6 +7792,37 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/claims/{claimId}/additional-forms:
+    get:
+      operationId: getOfficeClaimsClaimIdAdditionalForms
+      summary: 'Additional Form Details — forms filed with a claim (e.g. a Joint Declaration): filed / initiated dates, processing
+        statu'
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: claimId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: claim
+      x-callers:
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Additional Form Details — forms filed with a claim (e.g. a Joint Declaration): filed / initiated dates,
+        processing status, rejection reason, pending office'
   /office/claims/{claimId}/audit-trail:
     get:
       operationId: getOfficeClaimsClaimIdAuditTrail
@@ -8680,6 +8920,70 @@ paths:
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+  /office/ecr-filings:
+    get:
+      operationId: getOfficeEcrFilings
+      summary: ECR Approval queue (top menu on the APFC login; exact scope not yet confirmed — see §16)
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: state
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: definition-pending
+      x-phase: 3
+      x-owner-service: contribution
+      x-callers:
+      - fo.apfc
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+  /office/ecr-filings/{filingId}/approvals:
+    post:
+      operationId: postOfficeEcrFilingsFilingIdApprovals
+      summary: Office approval of an ECR held for approval (*ECR Approval* menu; scope to be confirmed)
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: filingId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: definition-pending
+      x-phase: 3
+      x-owner-service: contribution
+      x-callers:
+      - fo.apfc
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/ecr-filings/{filingId}/payment-rejections:
     post:
       operationId: postOfficeEcrFilingsFilingIdPaymentRejections
@@ -9122,6 +9426,39 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/exempted/past-accumulation-bulk-transfers:
+    post:
+      operationId: postOfficeExemptedPastAccumulationBulkTransfers
+      summary: PAST ACCUM BULK TRANSFER — transfer past accumulations of many members in one batch
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 3
+      x-owner-service: contribution
+      x-callers:
+      - fo.exemption
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/exempted/{estId}/audits:
     get:
       operationId: getOfficeExemptedEstIdAudits
@@ -9203,6 +9540,42 @@ paths:
           type: string
       - $ref: '#/components/parameters/IdempotencyKey'
       - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 3
+      x-owner-service: contribution
+      x-callers:
+      - fo.exemption
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/exempted/{estId}/past-accumulation-vdr-reconciliations:
+    post:
+      operationId: postOfficeExemptedEstIdPastAccumulationVdrReconciliations
+      summary: PAST ACCUM VDR RECO — match past-accumulation receipts with VDR entries
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: estId
+        in: path
+        required: true
+        schema:
+          type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
         '501':
@@ -10124,6 +10497,47 @@ paths:
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+  /office/pensions/enquiries:
+    get:
+      operationId: getOfficePensionsEnquiries
+      summary: Pension Enquiry Details — PPO, beneficiaries, pension payments, scheme certificate issue, service, arrears
+        adjustment, r
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: ppo
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: memberId
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: uan
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: pension
+      x-callers:
+      - fo.da_pension
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: Pension Enquiry Details — PPO, beneficiaries, pension payments, scheme certificate issue, service, arrears
+        adjustment, recovery and TDS (restricted to the officer's office)
   /office/pensions/higher-pension-options/{optionId}/decisions:
     post:
       operationId: postOfficePensionsHigherPensionOptionsOptionIdDecisions
@@ -10521,6 +10935,47 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/pensions/updation-activities:
+    get:
+      operationId: getOfficePensionsUpdationActivities
+      summary: Track Claim Updation Activity Status — PRO and DA activities by filing mode (physical / online) and status
+        (new, pending
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: activity
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: mode
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: pension
+      x-callers:
+      - fo.da_pension
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: Track Claim Updation Activity Status — PRO and DA activities by filing mode (physical / online) and status
+        (new, pending, rejected, settled, sent back to DA), transfer cases separately
   /office/pensions/worksheets:
     post:
       operationId: postOfficePensionsWorksheets
@@ -10696,6 +11151,45 @@ paths:
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/pensions/{ppoId}/updation-activities:
+    post:
+      operationId: postOfficePensionsPpoIdUpdationActivities
+      summary: 'DA (Pension) initiates an updation activity: BASIC_DETAILS, PENSION_START, PENSION_STOP, DLC_REVALIDATION,
+        UNHOLD_TRANSA'
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: ppoId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: pension
+      x-callers:
+      - fo.da_pension
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'DA (Pension) initiates an updation activity: BASIC_DETAILS, PENSION_START, PENSION_STOP, DLC_REVALIDATION,
+        UNHOLD_TRANSACTIONS'
       requestBody:
         required: false
         content:
@@ -11311,6 +11805,81 @@ paths:
       x-owner-service: contribution
       x-callers:
       - fo.eo
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/vdr-entries/{vdrId}/member-beneficiaries:
+    post:
+      operationId: postOfficeVdrEntriesVdrIdMemberBeneficiaries
+      summary: VDR Member Beneficiary — attach the member / beneficiary to whom a VDR receipt is credited (top menu; exact
+        meaning to b
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: vdrId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: definition-pending
+      x-phase: 3
+      x-owner-service: contribution
+      x-callers:
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: VDR Member Beneficiary — attach the member / beneficiary to whom a VDR receipt is credited (top menu; exact
+        meaning to be confirmed)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/vdr-entries/{vdrId}/rejections:
+    post:
+      operationId: postOfficeVdrEntriesVdrIdRejections
+      summary: VDR Rejection — reject a VDR entry with a reason (top menu *VDR Rejection*)
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: vdrId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: contribution
+      x-callers:
+      - fo.da_accounts
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []

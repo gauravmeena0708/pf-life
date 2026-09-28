@@ -631,6 +631,47 @@ paths:
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+  /office/pensions/enquiries:
+    get:
+      operationId: getOfficePensionsEnquiries
+      summary: Pension Enquiry Details — PPO, beneficiaries, pension payments, scheme certificate issue, service, arrears
+        adjustment, r
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: ppo
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: memberId
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: uan
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: pension
+      x-callers:
+      - fo.da_pension
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: Pension Enquiry Details — PPO, beneficiaries, pension payments, scheme certificate issue, service, arrears
+        adjustment, recovery and TDS (restricted to the officer's office)
   /office/pensions/higher-pension-options/{optionId}/decisions:
     post:
       operationId: postOfficePensionsHigherPensionOptionsOptionIdDecisions
@@ -1028,6 +1069,47 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/pensions/updation-activities:
+    get:
+      operationId: getOfficePensionsUpdationActivities
+      summary: Track Claim Updation Activity Status — PRO and DA activities by filing mode (physical / online) and status
+        (new, pending
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: activity
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: mode
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: pension
+      x-callers:
+      - fo.da_pension
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: Track Claim Updation Activity Status — PRO and DA activities by filing mode (physical / online) and status
+        (new, pending, rejected, settled, sent back to DA), transfer cases separately
   /office/pensions/worksheets:
     post:
       operationId: postOfficePensionsWorksheets
@@ -1203,6 +1285,45 @@ paths:
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/pensions/{ppoId}/updation-activities:
+    post:
+      operationId: postOfficePensionsPpoIdUpdationActivities
+      summary: 'DA (Pension) initiates an updation activity: BASIC_DETAILS, PENSION_START, PENSION_STOP, DLC_REVALIDATION,
+        UNHOLD_TRANSA'
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: ppoId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: pension
+      x-callers:
+      - fo.da_pension
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'DA (Pension) initiates an updation activity: BASIC_DETAILS, PENSION_START, PENSION_STOP, DLC_REVALIDATION,
+        UNHOLD_TRANSACTIONS'
       requestBody:
         required: false
         content:

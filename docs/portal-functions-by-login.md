@@ -26,6 +26,8 @@
 
 **Top-level menus seen in screenshots [ECR][UAN2]:** Home · Establishment · Member · Payments · Online Services · Dashboards · User · Admin · ABRY · Past Accum. · File Upload · Surrender Exemption. The last four only appear for some establishments (incentive-scheme or exempted).
 
+**Current menu bar (2026) [SS: IMG-20260728-WA0031, CPV 1.0.12]:** Home · Member · Establishment · Payments · Dashboards · User · Admin · Online Services · PMVBRY · EEC-2026/VISHWAS. The *Authorized eSign List* (Establishment) shows, per signatory, a **registration request letter** (upload the scanned signed copy; status) and a **revoke letter** with its own status → `…/signatories/{signatoryId}/request-letters`, `…/revoke-letters`.
+
 | Menu path | What it does | Ev. | Source | Catalogue |
 |---|---|---|---|---|
 | **Home** → Alerts | Pending items: KYC awaiting approval, member basic-detail approve/reject, KYC seeded at registration | V | [EB] | ➕ missing |
@@ -70,6 +72,8 @@
 
 ## 2. Member login — Unified Member Portal and Passbook
 
+
+**Current menu bar (2026) [SS: IMG-20260828-WA0061, IMG-20260805-WA0084, CPV 1.0.18]:** Home · View · Manage · Account · Online Services · PMVBRY. *Manage › Mark Exit* shows member ID, establishment and the employer's last contribution month, takes the exit date and an Aadhaar OTP, and **refuses a new request while a process for that member ID is ongoing** (lists process, member ID, UAN, time). *View › Service History* has *Recent Pending Applications* and *Recent Processed Applications* panels → `GET /members/me/applications`.
 | Menu path | What it does | Ev. | Source | Catalogue |
 |---|---|---|---|---|
 | Home | Landing page | V | [JD] | — |
@@ -137,6 +141,7 @@ Field-office staff do not use a public portal. They work in the **FO Application
 | [WSU] | EPFO SOP 01/2024 v2, *Transaction-less and Inoperative accounts in EPFO*, 02/08/2024 (`…/Circulars/Y2024-2025/Circular_SOP_WSU_02082024.pdf`, archived; read in full) |
 | [FRM] | EPFO, *Success stories* — RO Bengaluru Central, *Fraud risk mitigation* (`…/Updates/Success_Story_EPFO.pdf`, archived) |
 | [EP] | Compliance e-Proceedings portal, public menu labels (opened by Codex) |
+| [SS] | Samadhan Setu screenshots of live screens, Jul–Sep 2026 (`samadhan-setu files/`: screen1.png, screen2.png, IMG-20260728-WA0031, IMG-20260731-WA0066, IMG-20260805-WA0084, IMG-20260807-WA0027, IMG-20260817-WA0027, IMG-20260819-WA0044, IMG-20260828-WA0061). Top-level menus and screen contents only: no open dropdown is visible in any of them, so submenus are **not** confirmed |
 
 ### 8.1 Roles and what each one does
 
@@ -180,6 +185,27 @@ A frozen MID/UAN/establishment cannot log in, generate or link a UAN, change pro
 
 
 ---
+
+### 8.4 FO Interface menus seen on live screens [SS]
+
+The menu bar depends on the role and office; long bars wrap onto a second and third row (the first row ends in an expand button).
+
+| Login seen | Top-level menus (in screen order) |
+|---|---|
+| DA, RO Hyderabad (Banjara Hills) — screen1/2 | Home · Annual Accounting · CLAIMS · Establishment · Online Services · OLRE · VDR Vs ECR filing · Reco - ECR Vs VDR · Member · Query · Dashboard · 7Q & 14B · Admin · Services · Exempted-Unexempted · (expand) |
+| APFC/RPFC-II, Bommasandra — IMG-20260731-WA0066 | …Establishment · Online Services · OLRE · **ECR Approval** · Reco - ECR Vs VDR · Member · Query · Dashboard · Admin · Exempted-Unexempted · Past Accum. File Upload · Pension · ANNEXURE K FILE · VDR Member Beneficiary · (row 2) ANNEXURE K RECO · CLAIMS · Annual Accounting |
+| DA, Akola — IMG-20260819-WA0044 | …Establishment · OLRE · VDR Vs ECR filing · Reco - ECR Vs VDR · Member · Query · Dashboard · 7Q & 14B · Admin · Services · Exempted-Unexempted · (row 2) …File Upload · Pension · PAST ACCUM BULK TRANSFER · ANNEXURE K FILE · VDR Member Beneficiary · VDR Rejection · PAST ACCUM VDR RECO · (row 3) ANNEXURE K VDR RECO… |
+| DA (Pension), Barrackpore (Titagarh) — IMG-20260817-WA0027 | Services · NPPS · Pension · CLAIMS |
+
+| Screen | What it shows | Catalogue |
+|---|---|---|
+| *CLAIMS › Form 20 Claim List › Form Details* (screen1/2) | Claim details / beneficiary details; legacy (pre-CITES) beneficiary shares and their payment status; process as per latest e-nomination, physical nomination / list of surviving family members, or new beneficiaries | death-claim share endpoints (§8) |
+| *PRO physical claim — member details* (`/fointerface/pro/physical/claim/member-details`, WA0066) | Request form types: Form-20, Pension (10D), Transfer (13), Form-5IF, Scheme Certificate Surrender, PPO Amendment Beneficiary / Service / POHW, Death Updation, Physical LC Updation, Spouse Remarriage Updation; KYC verification statuses; claim mode *In Person* | `POST /office/physical-claims` (formType variants) |
+| *Pension Enquiry Details* (WA0027, 07 Aug) | Search by PPO, member ID or UAN (own office only); tabs PPO, Beneficiary, Pension Payment, Scheme Certificate Issue, Service, Arrears Adjustment, Recovery, TDS | `GET /office/pensions/enquiries` |
+| *Track Claim Updation Activity Status* (WA0027, 17 Aug) | Activities from the PRO module (physical LC, death, spouse remarriage) and from the DA (basic details, pension start, pension stop, DLC revalidation, unhold transactions); filing mode; status New / Pending / Rejected / Settled / Send Back to DA; transfer cases separately | `…/updation-activities` |
+| *Additional Form Details* (WA0044) | Forms filed with a claim (e.g. Joint Declaration): filed and initiated dates, processing status, rejection reason, pending office | `GET /office/claims/{claimId}/additional-forms` |
+
+*ECR Approval* and *VDR Member Beneficiary* are catalogued with status **?** until their scope is confirmed. The submenus listed in `samadhan-setu files/EPFO_PORTAL_FUNCTIONALITIES_AND_NAVBARS.md` (for example *Batch Interest Lock*, *Service Period Merge*, *Re-scroll Generation*, the *Admin*, *Query* and *Dashboard* lists, and the employer *Admin* submenus) are not visible in any screenshot and are **not** used here.
 
 ## Gaps this adds to the API list
 

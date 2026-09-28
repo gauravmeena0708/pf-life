@@ -155,6 +155,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /members/uan-allotments` | M | unauthenticated with OTP / face-auth proof |  |
 | `GET /members/me/account-status` | P | self — caller's own member record only |  |
 | `GET /members/me/annual-statements/{financialYear}` | P | self — caller's own member record only |  |
+| `GET /members/me/applications` | P | self — caller's own member record only |  |
 | `GET /members/me/claims/eligibility-preview` | P | self — caller's own member record only |  |
 | `GET /members/me/claims/{claimId}/audit-trail` | P | self — caller's own member record only |  |
 | `GET /members/me/higher-pension-options/{optionId}` | P | self — caller's own member record only |  |
@@ -269,6 +270,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /employers/me/signatories/{signatoryId}/dsc-registrations` | M | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/signatories/{signatoryId}/esign-registrations` | M | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/registration-requests/{reqId}/verification-evidence` | M | own registration request |  |
+| `POST /employers/me/signatories/{signatoryId}/request-letters` | P | own establishment (X-Establishment-Id validated against grants) |  |
+| `POST /employers/me/signatories/{signatoryId}/revoke-letters` | P | own establishment (X-Establishment-Id validated against grants) |  |
 
 **`employer.signatory`** — Authorised signatory (registered DSC / e-sign)
 
@@ -416,9 +419,13 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/member-change-requests/{requestId}/recommendations` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/accounts/inoperative` | P | office jurisdiction of the caller's posting |  |
+| `GET /office/annexure-k-files` | P | office jurisdiction of the caller's posting |  |
+| `GET /office/claims/{claimId}/additional-forms` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/claims/{claimId}/audit-trail` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/members/{uan}` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | P | office jurisdiction of the caller's posting |  |
+| `POST /office/annexure-k-files/{annexureId}/reconciliations` | P | office jurisdiction of the caller's posting | yes |
+| `POST /office/annexure-k-files/{annexureId}/vdr-reconciliations` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/cases/{caseId}/documents/{docId}/attestation-views` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/ecr-filings/{filingId}/rejections` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P | office jurisdiction of the caller's posting | yes |
@@ -430,9 +437,11 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/tds/computations` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/transfers/{transferId}/decisions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/transfers/{transferId}/recredits` | P | office jurisdiction of the caller's posting | yes |
+| `POST /office/vdr-entries/{vdrId}/rejections` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/ledger-adjustments` | ? | office jurisdiction of the caller's posting | yes |
 | `POST /office/vdr-entries` | ? | office jurisdiction of the caller's posting | yes |
 | `POST /office/vdr-entries/{vdrId}/ecr-reconciliations` | ? | office jurisdiction of the caller's posting | yes |
+| `POST /office/vdr-entries/{vdrId}/member-beneficiaries` | ? | office jurisdiction of the caller's posting | yes |
 | `POST /office/vdr-entries/{vdrId}/special-credits` | ? | office jurisdiction of the caller's posting | yes |
 
 **`fo.da_compliance`** — Dealing Assistant (Compliance) — establishment files, inspections, 14B/7Q knock-off
@@ -507,6 +516,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` | P | office jurisdiction of the caller's posting | yes |
 | `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | P | office jurisdiction of the caller's posting | yes |
+| `GET /office/ecr-filings` | ? | office jurisdiction of the caller's posting |  |
+| `POST /office/ecr-filings/{filingId}/approvals` | ? | office jurisdiction of the caller's posting | yes |
 | `POST /office/ledger-adjustments/{adjustmentId}/approvals` | ? | office jurisdiction of the caller's posting | yes |
 
 **`fo.rpfc1`** — RPFC-I — regional head of wings
@@ -567,6 +578,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /office/pensions/enquiries` | P | office jurisdiction of the caller's posting |  |
+| `GET /office/pensions/updation-activities` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/pensions/ppo-issuances` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/ppos/{ppoId}/dispatches` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/pensions/scheme-certificates/{certId}/surrender-adjudications` | P | office jurisdiction of the caller's posting | yes |
@@ -574,6 +587,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/pensions/special-10d-cases` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/pensions/transfers-in` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/pensions/worksheets` | P | office jurisdiction of the caller's posting |  |
+| `POST /office/pensions/{ppoId}/updation-activities` | P | office jurisdiction of the caller's posting | yes |
 
 **`fo.ss_pension`** — SS (Pension)
 
@@ -642,8 +656,10 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /office/exempted/{estId}/audits` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/exempted/{estId}/returns` | P | office jurisdiction of the caller's posting |  |
+| `POST /office/exempted/past-accumulation-bulk-transfers` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/{estId}/past-accumulation-ingestions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/{estId}/past-accumulation-transfers` | P | office jurisdiction of the caller's posting | yes |
+| `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` | P | office jurisdiction of the caller's posting | yes |
 
 **`fo.edli`** — EDLI claims handling
 

@@ -1006,6 +1006,101 @@ paths:
       x-scope: self — caller's own member record only
       security:
       - bffSession: []
+  /office/annexure-k-files:
+    get:
+      operationId: getOfficeAnnexureKFiles
+      summary: ANNEXURE K FILE — Annexure K inward / outward between field offices for Form 13 transfers
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: direction
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: claim
+      x-callers:
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+  /office/annexure-k-files/{annexureId}/reconciliations:
+    post:
+      operationId: postOfficeAnnexureKFilesAnnexureIdReconciliations
+      summary: ANNEXURE K RECO — match an inter-office Annexure K with the transfer and member records
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: annexureId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: claim
+      x-callers:
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/claims/{claimId}/additional-forms:
+    get:
+      operationId: getOfficeClaimsClaimIdAdditionalForms
+      summary: 'Additional Form Details — forms filed with a claim (e.g. a Joint Declaration): filed / initiated dates, processing
+        statu'
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: claimId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '501':
+          $ref: '#/components/responses/Planned'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+      x-status: planned
+      x-phase: 2
+      x-owner-service: claim
+      x-callers:
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Additional Form Details — forms filed with a claim (e.g. a Joint Declaration): filed / initiated dates,
+        processing status, rejection reason, pending office'
   /office/claims/{claimId}/audit-trail:
     get:
       operationId: getOfficeClaimsClaimIdAuditTrail

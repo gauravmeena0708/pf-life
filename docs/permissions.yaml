@@ -183,6 +183,12 @@ stakeholders:
     step_up: false
     via:
     - F02.self_service
+  - endpoint: GET /members/me/applications
+    status: P
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F02.self_service
   - endpoint: POST /members/me/joint-declarations
     status: W
     scope: self — caller's own member record only
@@ -683,6 +689,18 @@ stakeholders:
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
+    via:
+    - F01.signatories
+  - endpoint: POST /employers/me/signatories/{signatoryId}/request-letters
+    status: P
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.signatories
+  - endpoint: POST /employers/me/signatories/{signatoryId}/revoke-letters
+    status: P
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
     via:
     - F01.signatories
   - endpoint: GET /employers/me/operators
@@ -1242,6 +1260,18 @@ stakeholders:
     step_up: true
     via:
     - F03.vdr_reconcile
+  - endpoint: POST /office/vdr-entries/{vdrId}/rejections
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F03.vdr_reconcile
+  - endpoint: POST /office/vdr-entries/{vdrId}/member-beneficiaries
+    status: '?'
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F03.vdr_reconcile
   - endpoint: POST /office/ledger-adjustments
     status: '?'
     scope: office jurisdiction of the caller's posting
@@ -1309,6 +1339,12 @@ stakeholders:
     step_up: false
     via:
     - F04.process
+  - endpoint: GET /office/claims/{claimId}/additional-forms
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.process
   - endpoint: POST /office/cases/{caseId}/documents/{docId}/attestation-views
     status: P
     scope: office jurisdiction of the caller's posting
@@ -1364,6 +1400,24 @@ stakeholders:
     via:
     - F07.verify_member
   - endpoint: POST /office/exempted/annexure-k/{annexureId}/reconciliations
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F09.annexure_k_reconcile
+  - endpoint: GET /office/annexure-k-files
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F09.annexure_k_reconcile
+  - endpoint: POST /office/annexure-k-files/{annexureId}/reconciliations
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F09.annexure_k_reconcile
+  - endpoint: POST /office/annexure-k-files/{annexureId}/vdr-reconciliations
     status: P
     scope: office jurisdiction of the caller's posting
     step_up: true
@@ -1572,6 +1626,18 @@ stakeholders:
     step_up: true
     via:
     - F03.ledger_exception_approve
+  - endpoint: GET /office/ecr-filings
+    status: '?'
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F03.ecr_office_approval
+  - endpoint: POST /office/ecr-filings/{filingId}/approvals
+    status: '?'
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F03.ecr_office_approval
   - endpoint: GET /office/work-queue
     status: W
     scope: office jurisdiction of the caller's posting
@@ -1903,6 +1969,24 @@ stakeholders:
     step_up: false
     via:
     - F05.dispatch
+  - endpoint: GET /office/pensions/enquiries
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F05.updation
+  - endpoint: POST /office/pensions/{ppoId}/updation-activities
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F05.updation
+  - endpoint: GET /office/pensions/updation-activities
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F05.updation
   fo.ss_pension:
   - endpoint: POST /office/pensions/ppos/{ppoId}/initial-arrears
     status: P
@@ -2074,6 +2158,18 @@ stakeholders:
     via:
     - F09.ingest
   - endpoint: POST /office/exempted/{estId}/past-accumulation-transfers
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F09.past_accum
+  - endpoint: POST /office/exempted/past-accumulation-bulk-transfers
+    status: P
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F09.past_accum
+  - endpoint: POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations
     status: P
     scope: office jurisdiction of the caller's posting
     step_up: true
