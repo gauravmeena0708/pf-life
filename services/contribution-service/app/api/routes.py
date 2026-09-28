@@ -305,7 +305,7 @@ async def _passbook(subject: str, account_link_id: str | None):
         out=[]; pending=[]
         for a in accounts:
             lines = (await session.execute(text(
-                "SELECT j.id AS journal_id, j.kind, j.occurred_at, j.claim_id, f.wage_month, f.trrn, jl.side, jl.amount_paise, jl.share, "
+                "SELECT j.id AS journal_id, j.kind, j.business_key, j.occurred_at, j.claim_id, f.wage_month, f.trrn, jl.side, jl.amount_paise, jl.share, "
                 "ip.financial_year, ip.rate_bp FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id "
                 "LEFT JOIN ecr_filings f ON f.id=j.filing_id LEFT JOIN interest_postings ip ON ip.journal_id=j.id "
                 "WHERE jl.account_link_id=:a AND jl.account_code='AC01_EPF' ORDER BY j.occurred_at, COALESCE(ip.revision, 0), j.id"),
@@ -315,13 +315,16 @@ async def _passbook(subject: str, account_link_id: str | None):
             grouped = {}
             for ln in lines:
                 kind = {"CONTRIBUTION": "CONTRIBUTION", "OPENING_BALANCE": "OPENING_BALANCE", "CLAIM_DEBIT": "WITHDRAWAL",
-                        "CLAIM_REVERSAL": "WITHDRAWAL_REVERSED", "INTEREST": "INTEREST", "INTEREST_REVISION": "INTEREST"}.get(ln["kind"], ln["kind"])
+                        "CLAIM_REVERSAL": "WITHDRAWAL_REVERSED", "INTEREST": "INTEREST", "INTEREST_REVISION": "INTEREST",
+                        "TRANSFER": "TRANSFER_OUT" if ln["side"] == "debit" else "TRANSFER_IN"}.get(ln["kind"], ln["kind"])
                 rate = f"{ln['rate_bp'] / 100:g}%" if ln["rate_bp"] is not None else ""
                 ent = grouped.setdefault(ln["journal_id"], {
                     "kind": kind, "wage_month": ln["wage_month"] or _month(ln["occurred_at"]),
                     "description": {"CONTRIBUTION": "Monthly contribution", "OPENING_BALANCE": "Balance brought forward",
                                     "WITHDRAWAL": f"Claim {ln['claim_id']} paid out",
                                     "WITHDRAWAL_REVERSED": f"Claim {ln['claim_id']} not paid: amount returned",
+                                    "TRANSFER_OUT": f"Transferred to another member ID (Form 13, {ln['business_key'][9:]})",
+                                    "TRANSFER_IN": f"Transferred in from a previous member ID (Form 13, {ln['business_key'][9:]})",
                                     "INTEREST": (f"Interest for {ln['financial_year']} at {rate}" if ln["kind"] == "INTEREST"
                                                  else f"Interest for {ln['financial_year']} revised to {rate}: difference")}.get(kind, kind),
                     "employee_share_paise": 0, "employer_share_paise": 0, "establishment_name": name,
@@ -400,3 +403,32 @@ async def interest_run(body: InterestRunInput, actor: Actor = Depends(FINANCE)):
     return envelope({"financial_year": body.financial_year, "rate_bp": plan["rate_bp"], "rule_version": plan["rule_version"],
                      "accounts": len(posted), "credited_paise": plan["total_to_credit_paise"],
                      "revision": any(p["revision"] for p in posted), "postings": posted})
+
+
+# ── Annexure K: the member's transfer statement (Form 13) ────────────────────────────────────────
+
+@router.get("/api/v1/members/me/transfers/{transferId}/annexure-k")
+async def annexure_k(transferId: str, actor: Actor = Depends(MEMBER)):
+    async with sessions()() as session:
+        t = (await session.execute(text("SELECT * FROM transfer_postings WHERE transfer_id=:t AND member_subject=:s"),
+                                   {"t": transferId, "s": actor.subject})).mappings().first()
+        if not t:
+            raise Problem(404, "/problems/not-found", "Transfer not found", "Annexure K is available once the transfer is posted.")
+        accounts = {r["account_link_id"]: r for r in (await session.execute(text(
+            "SELECT m.account_link_id, m.name, m.uan, m.date_of_joining, m.date_of_exit, e.legal_name FROM establishment_members m "
+            "JOIN establishments e ON e.id=m.establishment_id WHERE m.account_link_id IN (:f, :to)"),
+            {"f": t["from_account_link_id"], "to": t["to_account_link_id"]})).mappings().all()}
+    frm, to = accounts[t["from_account_link_id"]], accounts[t["to_account_link_id"]]
+
+    def iso(v):
+        return v.isoformat() if hasattr(v, "isoformat") else v        # SQLite (unit tests) returns text
+
+    def side(a):
+        return {"member_id": a["account_link_id"], "establishment": a["legal_name"],
+                "date_of_joining": iso(a["date_of_joining"]), "date_of_exit": iso(a["date_of_exit"])}
+    return envelope({"title": "Annexure K — transfer statement (illustrative)", "transfer_id": t["transfer_id"], "uan": t["uan"],
+                     "member_name": frm["name"], "transferred_from": side(frm), "transferred_to": side(to),
+                     "employee_share_paise": t["employee_paise"], "employer_share_paise": t["employer_paise"],
+                     "total_paise": t["employee_paise"] + t["employer_paise"],
+                     "posted_at": iso(t["posted_at"]),
+                     "note": "Synthetic demonstration; the real Annexure K also carries pension service details."})

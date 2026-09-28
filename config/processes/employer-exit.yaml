@@ -1,0 +1,39 @@
+# Tier-2 process (ADR-0005): an employer marks a member's date of exit; the authorised signatory approves it
+# (Member > Approvals on the employer portal). member-service owns the contract: on APPROVED it records the exit
+# and publishes MemberExitMarked.v1. A member can also mark the exit themselves (POST /members/me/exits).
+process: employer_exit
+owner: member
+title: Date of exit (employer)
+subject: uan
+case_kind: EMPLOYER_EXIT
+sla_days: 7
+visible_to_member: true
+terminal_states: [APPROVED, REJECTED]
+operations:
+  - name: mark
+    operation: POST /employers/me/members/{uan}/exits
+    starts: true
+    roles: [employer.operator, employer.owner]
+    scope: establishment
+    step_up: mark-exit-employer
+    to: EXIT_MARKED
+    form:
+      account_link_id: {account: {owner: subject, establishment: actor, exited: false}}
+      date_of_exit: {date: {not_future: true, after_joining_of: account_link_id}}
+      reason: {enum: [CESSATION, SUPERANNUATION, RETIREMENT, DEATH_IN_SERVICE, PERMANENT_DISABLEMENT]}
+  - name: approvals
+    operation: GET /employers/me/approvals
+    roles: [employer.signatory]
+    scope: establishment
+    lists: {states: [EXIT_MARKED]}
+  - name: approve
+    operation: POST /employers/me/approvals/{approvalId}/decisions
+    case_from: path:approvalId
+    roles: [employer.signatory]
+    scope: establishment
+    step_up: {action: approve-exit, bind: case}
+    from: EXIT_MARKED
+    outcomes: {field: decision, map: {APPROVE: APPROVED, REJECT: REJECTED}}
+    form:
+      decision: {enum: [APPROVE, REJECT]}
+      note: {min_length: 5, max_length: 1000}

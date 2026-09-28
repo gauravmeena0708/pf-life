@@ -40,6 +40,7 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `ho-finance` | FA & CAO — annual interest crediting | Money |
 | `member-c` | Member who left employment (final settlement, TDS) | Money |
 | `pensioner-a`, `ro-pension` | Pensioner; APFC (Pension) who approves revisions | Money |
+| `member-d` | Member with two member IDs (a previous job) | Exit and transfer |
 
 ---
 
@@ -154,6 +155,23 @@ simulation; point out that the dialog says exactly what is being authorised (act
    service, 90% of the balance, always decided by officers, its own chain DA → AO → APFC), or retire one, or
    change the default approval matrix and automatic-settlement limits. Members see it on *My claims*
    immediately; claims already made keep their rules; the assistant quotes the new figures.
+
+## Date of exit and transfer (Form 13)
+*Tests: `tests/e2e/test_exit_transfer.py`, `services/workflow-service/tests/test_exit_transfer.py`,
+`services/member-service/tests/test_exits.py`, `services/contribution-service/tests/test_transfers.py`*
+
+1. **`member-d` → View › Service History.** Two member IDs: AL-0008 at Demo Engineering Works (left in 2025, the
+   employer never marked the exit) and AL-0009 (current).
+2. **Manage › Mark Exit.** Choose AL-0008; the date must be in the month of the last contribution (Dec 2025) and
+   is allowed two months after it; one-time code. It cannot be marked again, and no exit can be marked while
+   another request is in progress.
+3. **Online Services › One Member – One EPF Account.** Transfer AL-0008 into AL-0009 (one-time code).
+4. **`emp-signatory` → Online Services › Transfer Claims** attests it (DSC / e-sign → one-time code).
+5. **`do-caseworker`** verifies it from the work queue; **`ro-ao`** approves (one-time code). The ledger moves
+   the whole balance; both passbooks show it (*Transferred out* / *Transferred in*).
+6. **`member-d` → Recent applications → Annexure K**: the transfer statement.
+7. Employer side: **`emp-preparer` → Member › Member Profile** marks a member's date of exit; it takes effect
+   only when **`emp-signatory`** approves it under **Member › Approvals**.
 
 ## Policy changes that move money — interest, TDS and pensions
 *Tests: `tests/e2e/test_policy_money.py`, `services/contribution-service/tests/test_interest.py`,

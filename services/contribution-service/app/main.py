@@ -10,6 +10,7 @@ from app.config import settings
 from app.infra.db import database_ready
 from app.infra.db import engine
 from app.infra.claims_ledger import on_claim_decision, on_claim_paid, on_tax_deducted
+from app.infra.transfers import on_member_exit, on_process_transitioned as on_transfer_step
 from app.infra.messaging import handle_employer_verified, handle_member_change, handle_payment_confirmed, handle_payment_returned
 from epfo_persistence import Consumer, OutboxRelay
 from epfo_persistence.policy import on_policy_published
@@ -31,7 +32,9 @@ def create_app() -> FastAPI:
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.policy",
                          ["platform-service.PolicyPublished.v1"], on_policy_published),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.members",
-                         ["member-service.MemberChangeApproved.v1"], handle_member_change),
+                         ["member-service.MemberChangeApproved.v1", "member-service.MemberExitMarked.v1"], _members_router),
+                Consumer(engine(), settings.rabbitmq_url, "contribution-service.processes",
+                         ["workflow-service.ProcessTransitioned.v1"], on_transfer_step),
             ]
             relay.start()
             for consumer in consumers: consumer.start()
@@ -72,3 +75,10 @@ async def _claims_router(session, event):
         await on_tax_deducted(session, event)
     else:
         await on_claim_decision(session, event)
+
+
+async def _members_router(session, event):
+    if event.get("event_type") == "MemberExitMarked.v1":
+        await on_member_exit(session, event)
+    else:
+        await handle_member_change(session, event)

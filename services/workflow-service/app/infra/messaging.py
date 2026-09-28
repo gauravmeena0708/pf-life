@@ -1,11 +1,12 @@
 """Events workflow-service consumes: claims open cases; payment results move the cash-section task."""
+from datetime import date
 from typing import Any
 
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import grievance_case, open_case
-from app.infra.tables import cases
+from app.infra.tables import cases, member_accounts
 from epfo_persistence.policy import after_defreeze_chain, approval_chain, on_policy_published, rules_by_version
 
 BINDINGS = [
@@ -19,6 +20,8 @@ BINDINGS = [
     "grievance-service.GrievanceResolved.v1",
     "platform-service.PolicyPublished.v1",
     "claim-service.ClaimStateChanged.v1",
+    "member-service.MemberExitMarked.v1",
+    "contribution-service.TransferPosted.v1",
 ]
 
 
@@ -105,7 +108,21 @@ async def on_grievance_resolved(session: AsyncSession, event: dict[str, Any]) ->
                           .values(state="CLOSED", current_role=None, version=cases.c.version + 1))
 
 
+async def on_member_exit(session: AsyncSession, event: dict[str, Any]) -> None:
+    p = event["payload"]
+    await session.execute(update(member_accounts).where(member_accounts.c.account_link_id == p["account_link_id"])
+                          .values(date_of_exit=date.fromisoformat(p["date_of_exit"])))
+
+
+async def on_transfer_posted(session: AsyncSession, event: dict[str, Any]) -> None:
+    p = event["payload"]
+    await session.execute(update(member_accounts).where(member_accounts.c.account_link_id == p["from_account_link_id"])
+                          .values(transferred_to=p["to_account_link_id"]))
+
+
 HANDLERS = {
+    "MemberExitMarked.v1": on_member_exit,
+    "TransferPosted.v1": on_transfer_posted,
     "ClaimStateChanged.v1": on_claim_state,
     "PolicyPublished.v1": on_policy_published,
     "GrievanceRegistered.v1": on_grievance_registered,

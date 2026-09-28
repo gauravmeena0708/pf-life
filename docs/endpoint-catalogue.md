@@ -119,15 +119,15 @@ Rules that apply to every row:
 | `POST /employers/me/members/bulk-registrations` | Bulk registration file | P | 2 | member |
 | `POST /employers/me/members/{uan}/declarations` | **Form 11** new-joinee declaration | P | 2 | member |
 | `GET /employers/me/members/{uan}/contribution-ledger` | Wage and contribution ledger for own employee | P | 2 | contribution |
-| `POST /employers/me/members/{uan}/exits` 🔐 | Mark exit with date and reason | P | 2 | member |
+| `POST /employers/me/members/{uan}/exits` 🔐 | Mark exit with date and reason | W | 1 | member |
 | `POST /employers/me/members/{uan}/exit-corrections` 🔐 | Date-of-exit correction | P | 2 | member |
 | `GET /employers/me/kyc-approvals` | Member KYC requests awaiting employer approval | P | 2 | member |
 | `POST /employers/me/kyc-approvals/{requestId}/decisions` 🔐 | Approve / reject member KYC (bank, PAN, Aadhaar seeding) | P | 2 | member |
 | `GET /employers/me/joint-declarations` | Joint Declarations awaiting attestation (tier-2 process `joint_declaration`) | W | 1 | member |
 | `POST /employers/me/joint-declarations/{jdId}/decisions` 🔐 | Attest / reject Joint Declaration (tier-2 process `joint_declaration`) | W | 1 | member |
 | `POST /employers/me/joint-declarations` 🔐 | Employer-initiated Joint Declaration | P | 2 | member |
-| `GET /employers/me/transfer-requests` | Form 13 transfer requests awaiting attestation | P | 2 | claim |
-| `POST /employers/me/transfer-requests/{transferId}/decisions` 🔐 | Attest / reject transfer | P | 2 | claim |
+| `GET /employers/me/transfer-requests` | Form 13 transfer requests awaiting attestation | W | 1 | claim |
+| `POST /employers/me/transfer-requests/{transferId}/decisions` 🔐 | Attest / reject transfer | W | 1 | claim |
 | `GET /employers/me/claim-attestations` | Claims awaiting employer attestation | P | 2 | claim |
 | `POST /employers/me/claim-attestations/{claimId}/decisions` 🔐 | Attest / reject claim | P | 2 | claim |
 | `GET /employers/me/higher-pension-options` | Member joint options for higher pension awaiting validation | P | 2 | pension |
@@ -138,8 +138,8 @@ Rules that apply to every row:
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `GET /employers/me/approvals` | Member > Approvals queue (exits and other member changes awaiting the signatory) | P | 2 | member |
-| `POST /employers/me/approvals/{approvalId}/decisions` 🔐 | Approve / reject a queued member change | P | 2 | member |
+| `GET /employers/me/approvals` | Member > Approvals queue (exits and other member changes awaiting the signatory) | W | 1 | member |
+| `POST /employers/me/approvals/{approvalId}/decisions` 🔐 | Approve / reject a queued member change | W | 1 | member |
 | `POST /employers/me/kyc-bulk-uploads` | Member > KYC BULK upload | P | 2 | member |
 | `GET /employers/me/kyc-bulk-uploads/{uploadId}/errors` | Bulk KYC error list | P | 2 | member |
 | `POST /employers/me/members/exit-bulk-uploads` 🔐 | Member > Exit-Bulk upload | P | 2 | member |
@@ -227,8 +227,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /members/me/kyc/{kycType}` 🔐 | Seed PAN / other KYC (mock) | M | 2 | member |
 | `POST /members/me/joint-declarations` 🔐 | Profile correction request (Joint Declaration) (tier-2 process `joint_declaration`) | W | 1 | member |
 | `GET /members/me/employment-history` | Service history across linked employments | W | 1 | member |
-| `POST /members/me/exits` 🔐 | Member-marked exit (when employer has not marked it); refused while another process for the member ID is ongoing | P | 2 | member |
-| `GET /members/me/applications?status=` | *Recent Pending Applications* / *Recent Processed Applications* (Service History page); also the "process already ongoing" list that blocks a new Mark Exit | P | 2 | member |
+| `POST /members/me/exits` 🔐 | Member-marked exit (when employer has not marked it); refused while another process for the member ID is ongoing | W | 1 | member |
+| `GET /members/me/applications?status=` | *Recent Pending Applications* / *Recent Processed Applications* (Service History page); also the "process already ongoing" list that blocks a new Mark Exit | W | 1 | member |
 | `GET /members/me/passbook` | Passbook across all accounts linked to the caller (no member ID parameter) | W | 1 | contribution |
 | `GET /members/me/accounts/{accountLinkId}/passbook` | Passbook for one linked account; `accountLinkId` is an opaque ID validated against the caller | W | 1 | contribution |
 | `GET /members/me/annual-statements/{financialYear}` | Annual account slip | P | 2 | contribution |
@@ -246,7 +246,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /members/me/uan-card` | UAN card | P | 2 | member |
 | `GET /members/me/transfers/auto` | Auto-transfer status on job change | P | 2 | claim |
 | `POST /members/me/transfers/auto/{transferId}/confirmations` 🔐 | Confirm auto-transfer | P | 2 | claim |
-| `GET /members/me/transfers/{transferId}/annexure-k` | **Annexure K** transfer statement | P | 2 | claim |
+| `GET /members/me/transfers/{transferId}/annexure-k` | **Annexure K** transfer statement | W | 1 | contribution |
 | `GET /members/me/pension-scheme-certificate` | Scheme certificate status | P | 2 | pension |
 | `POST /members/me/higher-pension-options` 🔐 | Submit joint option for higher pension | P | 2 | pension |
 | `GET /members/me/higher-pension-options/{optionId}` | Higher-pension application status | P | 2 | pension |
@@ -257,7 +257,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
 | `GET /members/me/account-status` | **Pre-flight:** readiness of each linked member account before filing — KYC, UAN–member-ID link, exit date, freeze, active ledger locks, unmigrated legacy transactions — as explicit blocker codes | P | 2 | member |
-| `GET /members/me/service-history` | **Pre-flight:** service per member ID — contributory months, NCP days, pension-service months, transfer status — for pension and final-settlement decisions | P | 2 | member |
+| `GET /members/me/service-history` | **Pre-flight:** service per member ID — contributory months, NCP days, pension-service months, transfer status — for pension and final-settlement decisions | W | 1 | member |
 
 ## 7. Member claims, transfers and pension applications
 
@@ -271,8 +271,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /members/me/claims` 💰 (`formType=FORM_10C`) | **Pension withdrawal benefit** (cash benefit) | P | 2 | claim |
 | `POST /members/me/pension-scheme-certificates` 🔐 | **Scheme certificate** request (Form 10C option) | P | 2 | pension |
 | `POST /members/me/pension-applications` 💰 (`formType=FORM_10D`) | **Monthly pension** application | P | 2 | pension |
-| `POST /members/me/transfers` 💰 (`formType=FORM_13`) | **Transfer** of PF between member IDs / exempted trusts | P | 2 | claim |
-| `GET /members/me/transfers/{transferId}` | Transfer status | P | 2 | claim |
+| `POST /members/me/transfers` 💰🔐 (`formType=FORM_13`) | **Transfer** of PF between member IDs / exempted trusts | W | 1 | claim |
+| `GET /members/me/transfers/{transferId}` | Transfer status | W | 1 | claim |
 | `GET /members/me/claims` | List own claims | W | 1 | claim |
 | `GET /members/me/claims/{claimId}` | Claim detail + timeline (Journey B7) | W | 1 | claim |
 | `POST /members/me/claims/{claimId}/confirmations` 🔐 | Transaction-intent confirmation (Journey B3) | W | 1 | claim |
@@ -294,7 +294,9 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `POST /office/transfers/{transferId}/decisions` 🔐 | Process a Form 13 transfer between member IDs / offices | P | 2 | claim |
+| `GET /office/transfers` | Form 13 transfers awaiting the DA's verification or the AO's decision | W | 1 | claim |
+| `POST /office/transfers/{transferId}/verifications` | DA verifies service at both establishments before the AO decides | W | 1 | claim |
+| `POST /office/transfers/{transferId}/decisions` 🔐 | Process a Form 13 transfer between member IDs / offices | W | 1 | claim |
 | `POST /office/edli-claims/{claimId}/decisions` 💰🔐 | Decide EDLI assurance-benefit claim | P | 2 | claim |
 
 

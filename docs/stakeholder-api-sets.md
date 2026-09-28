@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 233 |
+| Activities | 234 |
 | Stakeholders with at least one API | 97 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 0 |
@@ -50,6 +50,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /grievances/{grievanceId}` | W |
 | `GET /members/me` | W |
 | `GET /members/me/accounts/{accountLinkId}/passbook` | W |
+| `GET /members/me/applications` | W |
 | `GET /members/me/claims` | W |
 | `GET /members/me/claims/eligible-types` | W |
 | `GET /members/me/claims/{claimId}` | W |
@@ -59,7 +60,10 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/notifications` | W |
 | `GET /members/me/passbook` | W |
 | `GET /members/me/pension-eligibility-preview` | W |
+| `GET /members/me/service-history` | W |
 | `GET /members/me/sessions` | W |
+| `GET /members/me/transfers/{transferId}` | W |
+| `GET /members/me/transfers/{transferId}/annexure-k` | W |
 | `PATCH /members/me/contact-details` | W |
 | `POST /ai/feedback` | W |
 | `POST /ai/knowledge/search` | W |
@@ -71,10 +75,12 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/me/claims` | W |
 | `POST /members/me/claims/{claimId}/confirmations` | W |
 | `POST /members/me/claims/{claimId}/re-disbursement-requests` | W |
+| `POST /members/me/exits` | W |
 | `POST /members/me/grievances` | W |
 | `POST /members/me/joint-declarations` | W |
 | `POST /members/me/security-reports` | W |
 | `POST /members/me/tax/form-15g-15h` | W |
+| `POST /members/me/transfers` | W |
 | `POST /security/step-up-challenges` | W |
 | `POST /security/step-up-challenges/{challengeId}/verifications` | W |
 | `POST /members/me/kyc/bank-accounts` | M |
@@ -83,31 +89,25 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/uan-allotments` | M |
 | `GET /members/me/account-status` | P |
 | `GET /members/me/annual-statements/{financialYear}` | P |
-| `GET /members/me/applications` | P |
 | `GET /members/me/claims/eligibility-preview` | P |
 | `GET /members/me/claims/{claimId}/audit-trail` | P |
 | `GET /members/me/higher-pension-options/{optionId}` | P |
 | `GET /members/me/kyc` | P |
 | `GET /members/me/nominations` | P |
 | `GET /members/me/pension-scheme-certificate` | P |
-| `GET /members/me/service-history` | P |
 | `GET /members/me/tax/form-16a` | P |
 | `GET /members/me/tax/taxable-interest` | P |
 | `GET /members/me/transfers/auto` | P |
-| `GET /members/me/transfers/{transferId}` | P |
-| `GET /members/me/transfers/{transferId}/annexure-k` | P |
 | `GET /members/me/uan-card` | P |
 | `POST /grievances/{grievanceId}/feedback` | P |
 | `POST /grievances/{grievanceId}/reminders` | P |
 | `POST /members/me/claims/{claimId}/cancellations` | P |
 | `POST /members/me/claims/{claimId}/documents` | P |
-| `POST /members/me/exits` | P |
 | `POST /members/me/higher-pension-options` | P |
 | `POST /members/me/nominations` | P |
 | `POST /members/me/pension-applications` | P |
 | `POST /members/me/pension-scheme-certificates` | P |
 | `POST /members/me/pension-scheme-certificates/{certId}/surrenders` | P |
-| `POST /members/me/transfers` | P |
 | `POST /members/me/transfers/auto/{transferId}/confirmations` | P |
 | `POST /members/uan-lookups` | P |
 | `POST /public/claims/status-lookups` | P |
@@ -234,30 +234,31 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | Endpoint | Status |
 |---|---|
 | `GET /employers/me` | W |
+| `GET /employers/me/approvals` | W |
 | `GET /employers/me/challans` | W |
 | `GET /employers/me/challans/{trrn}` | W |
 | `GET /employers/me/challans/{trrn}/receipt` | W |
 | `GET /employers/me/ecr-filings` | W |
 | `GET /employers/me/ecr-filings/{filingId}` | W |
 | `GET /employers/me/joint-declarations` | W |
+| `GET /employers/me/transfer-requests` | W |
+| `POST /employers/me/approvals/{approvalId}/decisions` | W |
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W |
 | `POST /employers/me/ecr-filings/{filingId}/submissions` | W |
 | `POST /employers/me/joint-declarations/{jdId}/decisions` | W |
+| `POST /employers/me/transfer-requests/{transferId}/decisions` | W |
 | `GET /international/coc-applications/{id}` | M |
 | `POST /employers/me/challans/{trrn}/payment-intents` | M |
 | `POST /employers/me/kyc/{kycType}` | M |
 | `POST /international/coc-applications` | M |
-| `GET /employers/me/approvals` | P |
 | `GET /employers/me/branches` | P |
 | `GET /employers/me/claim-attestations` | P |
 | `GET /employers/me/demands` | P |
 | `GET /employers/me/higher-pension-options` | P |
 | `GET /employers/me/kyc-approvals` | P |
 | `GET /employers/me/ownership-declaration` | P |
-| `GET /employers/me/transfer-requests` | P |
 | `GET /international/coc-applications/{id}/certificate` | P |
 | `PATCH /employers/me` | P |
-| `POST /employers/me/approvals/{approvalId}/decisions` | P |
 | `POST /employers/me/branches` | P |
 | `POST /employers/me/claim-attestations/{claimId}/decisions` | P |
 | `POST /employers/me/closure-requests` | P |
@@ -270,7 +271,6 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `POST /employers/me/kyc-approvals/{requestId}/decisions` | P |
 | `POST /employers/me/office-transfer-requests` | P |
 | `POST /employers/me/proceedings/{caseId}/submissions` | P |
-| `POST /employers/me/transfer-requests/{transferId}/decisions` | P |
 | `POST /employers/me/vishwas-applications` | P |
 | `POST /employers/voluntary-coverage-requests` | P |
 | `POST /international/coc-applications/{id}/extensions` | P |
@@ -293,6 +293,7 @@ Activities: **F01.profile** View establishment profile, configuration, KYC and h
 | `GET /employers/me/members` | W |
 | `POST /employers/me/ecr-filings` | W |
 | `POST /employers/me/ecr-filings/{filingId}/validations` | W |
+| `POST /employers/me/members/{uan}/exits` | W |
 | `POST /employers/me/members` | M |
 | `GET /employers/me/bank-accounts` | P |
 | `GET /employers/me/compliance-summary` | P |
@@ -310,7 +311,6 @@ Activities: **F01.profile** View establishment profile, configuration, KYC and h
 | `POST /employers/me/members/exit-bulk-uploads` | P |
 | `POST /employers/me/members/{uan}/declarations` | P |
 | `POST /employers/me/members/{uan}/exit-corrections` | P |
-| `POST /employers/me/members/{uan}/exits` | P |
 | `POST /employers/me/members/{uan}/location-mappings` | P |
 
 #### `principal_employer` — Principal employer monitoring contractors
@@ -384,18 +384,20 @@ Activities: **F09.trust_handover** Hand over member ledgers and past accumulatio
 
 #### `fo.da_accounts` — Dealing Assistant / SSA (Accounts) — claims, IDS, member records, VDR, Appendix-E
 
-Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; **F03.vdr_reconcile** Reconcile VDR entries with ECRs; TRRN adjustment; Member VDR deposits; **F03.ledger_exception** Appendix-E adjustment (e.g. PF → EPS) or VDR (Special) credit — exceptional; **F03.ecr_reject** Reject an ECR before posting; reverse a posted journal; **F04.physical_validate** UAN allocation / Aadhaar validation of a physical claim; **F04.process** Scrutinise and process the claim (Claims > Transaction); recommend; **F04.attestation_view** Open the employer-signed PDF / DSC document before the approve action is enabled; **F04.tds** Compute TDS on withdrawals and file with Income Tax; **F04.transfer_process** Process transfer between member IDs / offices; **F04.transfer_recredit** Recredit a rejected transfer-in to the member ledger; **F05.ids** Prepare Input Data Sheet (Claims > Transaction > Form-10D/10C); update service history in FO Interface; **F05.higher_deposit** Book dues deposit through Member VDR ('Pension on Higher Wages'); Appendix-E code for PF → EPS diversion; **F07.verify_member** Open e-file and verify the frozen MID / UAN (member ledger, crowdsourcing); **F09.annexure_k_reconcile** Reconcile Annexure K with receipts and member records; **F11.verify** Verify inoperative account (digital records, crowdsourcing through co-workers' logins)
+Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; **F03.vdr_reconcile** Reconcile VDR entries with ECRs; TRRN adjustment; Member VDR deposits; **F03.ledger_exception** Appendix-E adjustment (e.g. PF → EPS) or VDR (Special) credit — exceptional; **F03.ecr_reject** Reject an ECR before posting; reverse a posted journal; **F04.physical_validate** UAN allocation / Aadhaar validation of a physical claim; **F04.process** Scrutinise and process the claim (Claims > Transaction); recommend; **F04.attestation_view** Open the employer-signed PDF / DSC document before the approve action is enabled; **F04.tds** Compute TDS on withdrawals and file with Income Tax; **F04.transfer_process** Verify a transfer between member IDs / offices (service at both establishments); **F04.transfer_recredit** Recredit a rejected transfer-in to the member ledger; **F05.ids** Prepare Input Data Sheet (Claims > Transaction > Form-10D/10C); update service history in FO Interface; **F05.higher_deposit** Book dues deposit through Member VDR ('Pension on Higher Wages'); Appendix-E code for PF → EPS diversion; **F07.verify_member** Open e-file and verify the frozen MID / UAN (member ledger, crowdsourcing); **F09.annexure_k_reconcile** Reconcile Annexure K with receipts and member records; **F11.verify** Verify inoperative account (digital records, crowdsourcing through co-workers' logins)
 
 | Endpoint | Status |
 |---|---|
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/member-change-requests` | W |
+| `GET /office/transfers` | W |
 | `GET /office/work-queue` | W |
 | `POST /ai/claims/analyse` | W |
 | `POST /ai/feedback` | W |
 | `POST /office/cases/{caseId}/recommendations` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/member-change-requests/{requestId}/recommendations` | W |
+| `POST /office/transfers/{transferId}/verifications` | W |
 | `GET /office/accounts/inoperative` | P |
 | `GET /office/annexure-k-files` | P |
 | `GET /office/claims/{claimId}/additional-forms` | P |
@@ -413,7 +415,6 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /office/physical-claims/{intakeId}/identity-validations` | P |
 | `POST /office/receipts/{receiptId}/trrn-adjustments` | P |
 | `POST /office/tds/computations` | P |
-| `POST /office/transfers/{transferId}/decisions` | P |
 | `POST /office/transfers/{transferId}/recredits` | P |
 | `POST /office/vdr-entries/{vdrId}/rejections` | P |
 | `POST /office/ledger-adjustments` | ? |
@@ -455,16 +456,18 @@ Activities: **F02.jd_verify** Verifier (SS route): cross-check and recommend; **
 
 #### `fo.ao` — Accounts Officer
 
-Activities: **F02.jd_verify_ao** Verifier (AO route): cross-check and recommend; **F02.jd_approve_minor** Approver for minor changes (AO / SS per JD Table 3); **F04.approve_ao** Approve claims in the AO band; **F05.ids_approve** Approve the Input Data Sheet and send to the Pension section via inter-section diary; **F07.verify_ao** Review verification (AO route, accounts cases); **F11.approve** Approve reactivation / settlement in the AO band; forward higher bands
+Activities: **F02.jd_verify_ao** Verifier (AO route): cross-check and recommend; **F02.jd_approve_minor** Approver for minor changes (AO / SS per JD Table 3); **F04.approve_ao** Approve claims in the AO band; **F04.transfer_decide** Approve, reject or return a verified Form 13 transfer (the ledger moves the balance); **F05.ids_approve** Approve the Input Data Sheet and send to the Pension section via inter-section diary; **F07.verify_ao** Review verification (AO route, accounts cases); **F11.approve** Approve reactivation / settlement in the AO band; forward higher bands
 
 | Endpoint | Status |
 |---|---|
 | `GET /office/cases/{caseId}` | W |
+| `GET /office/transfers` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/decisions` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/member-change-requests/{requestId}/decisions` | W |
 | `POST /office/member-change-requests/{requestId}/verifications` | W |
+| `POST /office/transfers/{transferId}/decisions` | W |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P |
 | `POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals` | P |
 
@@ -1490,7 +1493,8 @@ flowchart LR
   F04_tds["fo.da_accounts<br/>Compute TDS on withdrawals and file with Income Tax"]
   F04_transfer["member<br/>Request Form 13 transfer; confirm auto-transfer; view Annexu"]
   F04_transfer_attest["employer.signatory<br/>Attest pending transfer claims (Online Services > Transfer C"]
-  F04_transfer_process["fo.da_accounts<br/>Process transfer between member IDs / offices"]
+  F04_transfer_process["fo.da_accounts<br/>Verify a transfer between member IDs / offices (service at b"]
+  F04_transfer_decide["fo.ao<br/>Approve, reject or return a verified Form 13 transfer (the l"]
   F04_transfer_recredit["fo.da_accounts<br/>Recredit a rejected transfer-in to the member ledger"]
   F04_death_claim["claimant<br/>File PF (Form 20), EDLI (Form 5IF) or composite death claim"]
   F04_co_beneficiary["claimant.nominee<br/>Inward as an additional beneficiary on an open death claim a"]
@@ -1524,6 +1528,7 @@ flowchart LR
   F04_pro_intake --> F04_process
   F04_transfer --> F04_transfer_attest
   F04_transfer_attest --> F04_transfer_process
+  F04_transfer_process --> F04_transfer_decide
   F04_death_claim --> F04_edli
   F04_co_beneficiary --> F04_shares
   F04_shares --> F04_edli

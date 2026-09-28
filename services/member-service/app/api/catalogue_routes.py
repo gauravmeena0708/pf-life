@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /members/me', 'GET /office/member-change-requests', 'GET /security/account-recovery-requests', 'GET /employers/me/joint-declarations', 'GET /employers/me/members', 'POST /members/me/account-recovery-requests', 'PATCH /members/me/contact-details', 'GET /members/me/employment-history', 'GET /members/me/identity-assurance', 'POST /members/me/joint-declarations', 'GET /members/me/notifications', 'POST /members/me/security-reports', 'GET /office/member-change-requests/pendency', 'POST /employers/me/joint-declarations/{jdId}/decisions', 'POST /office/member-change-requests/{requestId}/decisions', 'POST /office/member-change-requests/{requestId}/recommendations', 'POST /office/member-change-requests/{requestId}/verifications', 'POST /office/members/{uan}/defreezes', 'POST /office/members/{uan}/freezes', 'POST /security/account-recovery-requests/{requestId}/decisions']
+OPERATIONS = ['GET /members/me', 'GET /office/member-change-requests', 'GET /security/account-recovery-requests', 'GET /employers/me/approvals', 'GET /employers/me/joint-declarations', 'GET /employers/me/members', 'POST /members/me/account-recovery-requests', 'GET /members/me/applications', 'PATCH /members/me/contact-details', 'GET /members/me/employment-history', 'POST /members/me/exits', 'GET /members/me/identity-assurance', 'POST /members/me/joint-declarations', 'GET /members/me/notifications', 'POST /members/me/security-reports', 'GET /members/me/service-history', 'GET /office/member-change-requests/pendency', 'POST /employers/me/approvals/{approvalId}/decisions', 'POST /employers/me/joint-declarations/{jdId}/decisions', 'POST /employers/me/members/{uan}/exits', 'POST /office/member-change-requests/{requestId}/decisions', 'POST /office/member-change-requests/{requestId}/recommendations', 'POST /office/member-change-requests/{requestId}/verifications', 'POST /office/members/{uan}/defreezes', 'POST /office/members/{uan}/freezes', 'POST /security/account-recovery-requests/{requestId}/decisions']
 
 @router.api_route("/api/v1/members/me", methods=["GET"], include_in_schema=False)
 async def get_members_me(actor: Actor = Depends(require_actor)) -> None:
@@ -25,6 +25,11 @@ async def get_office_member_change_requests(actor: Actor = Depends(require_actor
 @router.api_route("/api/v1/security/account-recovery-requests", methods=["GET"], include_in_schema=False)
 async def get_security_account_recovery_requests(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Review queue of account-recovery requests (Journey D5)")
+
+
+@router.api_route("/api/v1/employers/me/approvals", methods=["GET"], include_in_schema=False)
+async def get_employers_me_approvals(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Member > Approvals queue (exits and other member changes awaiting the signatory)")
 
 
 @router.api_route("/api/v1/employers/me/joint-declarations", methods=["GET"], include_in_schema=False)
@@ -42,6 +47,11 @@ async def post_members_me_account_recovery_requests(actor: Actor = Depends(requi
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Controlled, reviewed account recovery (Journey D5)")
 
 
+@router.api_route("/api/v1/members/me/applications", methods=["GET"], include_in_schema=False)
+async def get_members_me_applications(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "*Recent Pending Applications* / *Recent Processed Applications* (Service History page); also the 'pr")
+
+
 @router.api_route("/api/v1/members/me/contact-details", methods=["PATCH"], include_in_schema=False)
 async def patch_members_me_contact_details(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Change mobile / email (Journey D1)")
@@ -50,6 +60,11 @@ async def patch_members_me_contact_details(actor: Actor = Depends(require_actor)
 @router.api_route("/api/v1/members/me/employment-history", methods=["GET"], include_in_schema=False)
 async def get_members_me_employment_history(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Service history across linked employments")
+
+
+@router.api_route("/api/v1/members/me/exits", methods=["POST"], include_in_schema=False)
+async def post_members_me_exits(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Member-marked exit (when employer has not marked it); refused while another process for the member I")
 
 
 @router.api_route("/api/v1/members/me/identity-assurance", methods=["GET"], include_in_schema=False)
@@ -72,14 +87,29 @@ async def post_members_me_security_reports(actor: Actor = Depends(require_actor)
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Report suspicious activity")
 
 
+@router.api_route("/api/v1/members/me/service-history", methods=["GET"], include_in_schema=False)
+async def get_members_me_service_history(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Pre-flight: service per member ID — contributory months, NCP days, pension-service months, transfer ")
+
+
 @router.api_route("/api/v1/office/member-change-requests/pendency", methods=["GET"], include_in_schema=False)
 async def get_office_member_change_requests_pendency(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "RPFC-I monitors JD pendency (tier-2 process joint_declaration)")
 
 
+@router.api_route("/api/v1/employers/me/approvals/{approvalId}/decisions", methods=["POST"], include_in_schema=False)
+async def post_employers_me_approvals_approvalId_decisions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Approve / reject a queued member change")
+
+
 @router.api_route("/api/v1/employers/me/joint-declarations/{jdId}/decisions", methods=["POST"], include_in_schema=False)
 async def post_employers_me_joint_declarations_jdId_decisions(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Attest / reject Joint Declaration (tier-2 process joint_declaration)")
+
+
+@router.api_route("/api/v1/employers/me/members/{uan}/exits", methods=["POST"], include_in_schema=False)
+async def post_employers_me_members_uan_exits(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Mark exit with date and reason")
 
 
 @router.api_route("/api/v1/office/member-change-requests/{requestId}/decisions", methods=["POST"], include_in_schema=False)

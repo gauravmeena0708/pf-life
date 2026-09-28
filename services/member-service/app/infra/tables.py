@@ -30,6 +30,26 @@ employments = Table(
     Column("establishment_name", String(200), nullable=False),
     Column("date_of_joining", Date, nullable=False),
     Column("date_of_exit", Date),
+    Column("exit_reason", String(40)),
+    Column("exit_marked_by", String(20)),                   # MEMBER | EMPLOYER | SEED
+    Column("last_contribution_month", String(7)),           # from ContributionPosted.v1 (seeded first)
+    Column("transferred_to", String(40)),                   # from TransferPosted.v1 (Form 13)
+)
+
+# The member's applications (profile corrections, exits, transfers) as the member sees them: *Recent Pending
+# Applications* and *Recent Processed Applications*. Kept from ProcessTransitioned.v1 and this service's own
+# Mark Exit; used also to refuse a new Mark Exit while another process for the member is ongoing.
+member_applications = Table(
+    "member_applications", metadata,
+    Column("application_id", String(40), primary_key=True),
+    Column("uan", String(12), nullable=False, index=True),
+    Column("process", String(40), nullable=False),
+    Column("title", String(120), nullable=False),
+    Column("state", String(40), nullable=False),
+    Column("terminal", Boolean, nullable=False),
+    Column("account_link_id", String(40)),
+    Column("submitted_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    Column("updated_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
 )
 
 notifications = Table(

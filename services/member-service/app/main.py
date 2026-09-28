@@ -8,6 +8,7 @@ import epfo_auth
 from app.api import catalogue_routes, routes
 from app.config import settings
 from app.domain.notifications import handle_notification_requested
+from app.domain.exits import on_contribution_posted, on_transfer_posted
 from app.domain.processes import on_process_transitioned
 from app.infra.db import database_ready, engine
 from epfo_observability import health_router, install
@@ -23,7 +24,8 @@ async def lifespan(app: FastAPI):
         consumer = Consumer(engine(), settings.rabbitmq_url, "member-service.notifications",
                             ["*.NotificationRequested.v1"], handle_notification_requested)
         processes = Consumer(engine(), settings.rabbitmq_url, "member-service.processes",
-                             ["workflow-service.ProcessTransitioned.v1"], on_process_transitioned)
+                             ["workflow-service.ProcessTransitioned.v1", "contribution-service.ContributionPosted.v1",
+                              "contribution-service.TransferPosted.v1"], _route)
         relay.start()
         consumer.start()
         processes.start()
@@ -50,3 +52,10 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
+
+
+async def _route(session, event):
+    handler = {"ProcessTransitioned.v1": on_process_transitioned, "ContributionPosted.v1": on_contribution_posted,
+               "TransferPosted.v1": on_transfer_posted}.get(event["event_type"])
+    if handler:
+        await handler(session, event)

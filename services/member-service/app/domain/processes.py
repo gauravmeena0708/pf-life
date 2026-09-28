@@ -3,14 +3,17 @@ processes (ADR-0005). On each ProcessTransitioned.v1 this service does what the 
 
 * member_freeze       records the account state and publishes AccountFrozen.v1 / AccountDefrozen.v1;
 * joint_declaration   tells the member at each step, and on APPROVED applies the correction, keeps the history
-                      and publishes MemberChangeApproved.v1 (so, for example, ECR name checks use the new name)."""
+                      and publishes MemberChangeApproved.v1 (so, for example, ECR name checks use the new name);
+* employer_exit       on APPROVED records the exit and publishes MemberExitMarked.v1;
+* every process marked visible_to_member is kept as one of the member's applications."""
 from datetime import date
 from typing import Any
 
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.infra.tables import member_changes, members
+from app.domain.exits import record_exit, track
+from app.infra.tables import employments, member_changes, members
 from epfo_persistence import add_event
 
 CORE_FIELDS = {"NAME": "name", "DATE_OF_BIRTH": "date_of_birth", "GENDER": "gender"}
@@ -20,10 +23,19 @@ JD_NOTICES = {"EMPLOYER_ATTESTED": "JD_EMPLOYER_ATTESTED", "RETURNED_BY_EMPLOYER
 
 async def on_process_transitioned(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
+    data = p.get("data") or {}
+    if p.get("visible_to_member"):                   # the member's pending / processed applications
+        await track(session, p["instance_id"], p["subject_ref"], p["process"], p.get("title", p["process"]), p["to_state"],
+                    bool(p.get("terminal")), data.get("account_link_id") or data.get("from_account_link_id"))
     if p["process"] == "member_freeze":
         await _freeze(session, event)
     elif p["process"] == "joint_declaration":
         await _joint_declaration(session, event)
+    elif p["process"] == "employer_exit" and p["to_state"] == "APPROVED":
+        job = (await session.execute(select(employments).where(employments.c.account_link_id == data["account_link_id"]))).mappings().first()
+        if job and not job["date_of_exit"]:
+            await record_exit(session, dict(job), date.fromisoformat(data["date_of_exit"]), data["reason"], "EMPLOYER",
+                              event["correlation_id"])
 
 
 async def _freeze(session: AsyncSession, event: dict[str, Any]) -> None:

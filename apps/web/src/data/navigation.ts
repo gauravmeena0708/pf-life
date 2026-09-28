@@ -12,15 +12,15 @@ const link = (label: string, to?: string): NavItem => ({ label, to });
 
 const MEMBER: NavGroup[] = [
   { label: "View", items: [
-    link("Profile", "/member/profile#member-profile-heading"), link("Service History", "/member/profile#employment-heading"),
+    link("Profile", "/member/profile#member-profile-heading"), link("Service History", "/member/service#service-heading"),
     link("UAN Card"), link("Passbook", "/member/passbook"), link("Pension estimate", "/member/profile#pension-estimate-heading")] },
   { label: "Manage", items: [
     link("Basic Details (Joint Declaration)", "/member/profile#correction-heading"), link("Contact Details", "/member/security#contact-heading"),
-    link("KYC", "/member/profile#assurance-heading"), link("E-Nomination"), link("Mark Exit")] },
+    link("KYC", "/member/profile#assurance-heading"), link("E-Nomination"), link("Mark Exit", "/member/service#exit-heading")] },
   { label: "Account", items: [link("Change Password"), { labelKey: "navigation.accountSecurity", to: "/member/security" }] },
   { label: "Online Services", items: [
-    link("Claim (Form-31, 19, 10C & 10D)", "/member/claims"), link("One Member – One EPF Account (Transfer Request)"),
-    link("Track Claim Status", "/member/claims"), link("Download Annexure K"), link("Joint Declaration", "/member/profile#correction-heading"),
+    link("Claim (Form-31, 19, 10C & 10D)", "/member/claims"), link("One Member – One EPF Account (Transfer Request)", "/member/service#transfer-heading"),
+    link("Track Claim Status", "/member/claims"), link("Download Annexure K", "/member/service#applications-heading"), link("Joint Declaration", "/member/profile#correction-heading"),
     link("Form 15G / 15H", "/member/claims#tax-declaration-heading")] },
   { label: "PMVBRY" },
   { labelKey: "navigation.help", items: [{ labelKey: "navigation.grievances", to: "/member/grievances" }, { labelKey: "navigation.assistant", to: "/member/assistant" }] },
@@ -28,7 +28,7 @@ const MEMBER: NavGroup[] = [
 
 const EMPLOYER: NavGroup[] = [
   { label: "Member", items: [
-    link("Register-Individual"), link("Register-Bulk"), link("Member Profile"), link("Approvals"),
+    link("Register-Individual"), link("Register-Bulk"), link("Member Profile (mark exit)", "/employer/members#exit-heading"), link("Approvals", "/employer/members#approvals-heading"),
     link("Approve KYC pending for Digital Signature"), link("Approve KYC seeded by member"), link("KYC Bulk"), link("Exit-Bulk"),
     link("Missing details"), link("Member Location Mapping"), link("KYC Verification / PAN Verification"),
     link("Joint Declaration requests", "/employer#jd-heading")] },
@@ -41,7 +41,7 @@ const EMPLOYER: NavGroup[] = [
   { label: "Dashboards", items: [link("Active Members details"), link("Missing details")] },
   { label: "User", items: [link("Sub-users (payroll operators)", "/employer#people-operator")] },
   { label: "Admin" },
-  { label: "Online Services", items: [link("Transfer Claims"), link("Claim attestation"), link("Higher-pension joint-option validation")] },
+  { label: "Online Services", items: [link("Transfer Claims", "/employer/members#transfers-heading"), link("Claim attestation"), link("Higher-pension joint-option validation")] },
   { label: "PMVBRY" },
   { label: "EEC-2026/VISHWAS" },
 ];

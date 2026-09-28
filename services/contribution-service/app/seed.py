@@ -15,16 +15,20 @@ async def seed() -> None:
     async with sessions()() as session, session.begin():
         # status is owned by EmployerVerified.v1 after the first load; a re-seed must not undo a verification
         await session.execute(text("INSERT INTO establishments (id,legal_name,status) VALUES (:id,:name,:status) ON CONFLICT (id) DO UPDATE SET legal_name=excluded.legal_name"), {"id": establishment["establishment_id"], "name": establishment["legal_name"], "status": establishment["status"]})
+        for e in data.get("public_establishments", []):   # earlier employers of members (other member IDs)
+            await session.execute(text("INSERT INTO establishments (id,legal_name,status) VALUES (:id,:name,'REGISTERED') ON CONFLICT (id) DO NOTHING"),
+                                  {"id": e["establishment_id"], "name": e["legal_name"]})
         for m in data["members"]:
-            await session.execute(text("""INSERT INTO establishment_members
-              (uan,name,date_of_birth,account_link_id,member_subject,establishment_id,date_of_joining,date_of_exit,status)
-              VALUES (:uan,:name,:dob,:account,:subject,:est,:joined,:exited,:status)
-              ON CONFLICT (uan) DO UPDATE SET name=excluded.name,date_of_birth=excluded.date_of_birth,
-              account_link_id=excluded.account_link_id,member_subject=excluded.member_subject,
-              establishment_id=excluded.establishment_id,date_of_joining=excluded.date_of_joining,
-              date_of_exit=excluded.date_of_exit,status=excluded.status"""),
-              {"uan":m["uan"],"name":m["name"],"dob":date.fromisoformat(m["date_of_birth"]),"account":m["account_link_id"],"subject":m.get("subject"),"est":establishment["establishment_id"],"joined":date.fromisoformat(m["date_of_joining"]),
-               "exited":date.fromisoformat(m["date_of_exit"]) if m.get("date_of_exit") else None,"status":"EXITED" if m.get("date_of_exit") else "ACTIVE"})
+            for job in [{**m, "establishment_id": establishment["establishment_id"]}, *m.get("previous_employments", [])]:
+                exited = date.fromisoformat(job["date_of_exit"]) if job.get("date_of_exit") else None
+                # Exits move with MemberExitMarked.v1 after the first load; a re-seed only refreshes identity fields.
+                await session.execute(text("""INSERT INTO establishment_members
+                  (uan,name,date_of_birth,account_link_id,member_subject,establishment_id,date_of_joining,date_of_exit,status)
+                  VALUES (:uan,:name,:dob,:account,:subject,:est,:joined,:exited,:status)
+                  ON CONFLICT (account_link_id) DO UPDATE SET uan=excluded.uan,name=excluded.name,date_of_birth=excluded.date_of_birth,
+                  member_subject=excluded.member_subject,establishment_id=excluded.establishment_id,date_of_joining=excluded.date_of_joining"""),
+                  {"uan":m["uan"],"name":m["name"],"dob":date.fromisoformat(m["date_of_birth"]),"account":job["account_link_id"],"subject":m.get("subject"),
+                   "est":job["establishment_id"],"joined":date.fromisoformat(job["date_of_joining"]),"exited":exited,"status":"EXITED" if exited else "ACTIVE"})
         demo = data["public_lookup_challan"]
         await session.execute(text("""INSERT INTO ecr_filings
           (id,establishment_id,wage_month,filing_type,format,content,version,state,preparer_subject,rule_version,trrn)

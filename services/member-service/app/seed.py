@@ -40,15 +40,19 @@ async def main() -> None:
                     await session.execute(contact_history.insert().values(
                         member_id=member["member_id"], mobile_masked=member["mobile_masked"],
                         email_masked=member["email_masked"], source="SEED", verified=True))
-                employment = {"account_link_id": member["account_link_id"], "member_id": member["member_id"],
-                              "establishment_id": establishment["establishment_id"],
-                              "establishment_name": establishment["legal_name"],
-                              "date_of_joining": date.fromisoformat(member["date_of_joining"]),
-                              "date_of_exit": date.fromisoformat(member["date_of_exit"]) if member.get("date_of_exit") else None}
-                statement = insert(employments).values(**employment)
-                await session.execute(statement.on_conflict_do_update(
-                    index_elements=[employments.c.account_link_id],
-                    set_={key: statement.excluded[key] for key in employment if key != "account_link_id"}))
+                names = {e["establishment_id"]: e["legal_name"] for e in [establishment, *seed.get("public_establishments", [])]}
+                for job in [{**member, "establishment_id": establishment["establishment_id"]}, *member.get("previous_employments", [])]:
+                    employment = {"account_link_id": job["account_link_id"], "member_id": member["member_id"],
+                                  "establishment_id": job["establishment_id"], "establishment_name": names[job["establishment_id"]],
+                                  "date_of_joining": date.fromisoformat(job["date_of_joining"]),
+                                  "date_of_exit": date.fromisoformat(job["date_of_exit"]) if job.get("date_of_exit") else None,
+                                  "exit_marked_by": "SEED" if job.get("date_of_exit") else None,
+                                  "last_contribution_month": job.get("last_contribution_month")}
+                    statement = insert(employments).values(**employment)
+                    # Exits, contributions and transfers move after the first load; a re-seed keeps them.
+                    await session.execute(statement.on_conflict_do_update(
+                        index_elements=[employments.c.account_link_id],
+                        set_={key: statement.excluded[key] for key in ("member_id", "establishment_id", "establishment_name", "date_of_joining")}))
     print(f"member-service seeded: {len(seed['members'])} synthetic members")
 
 

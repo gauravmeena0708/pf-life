@@ -11,6 +11,7 @@ export const PERSONAS: Persona[] = [
   { username: "member-a", label: "Member A", role: "member" },
   { username: "member-b", label: "Member B", role: "member" },
   { username: "member-c", label: "Member C (left employment)", role: "member" },
+  { username: "member-d", label: "Member D (two member IDs)", role: "member" },
   { username: "pensioner-a", label: "Pensioner A", role: "pensioner" },
   { username: "emp-owner", label: "Employer owner", role: "employer.owner" },
   { username: "emp-preparer", label: "Payroll preparer", role: "employer.operator" },

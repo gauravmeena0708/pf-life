@@ -29,6 +29,8 @@ TEMPLATES = {
     "JD_REJECTED": ("Correction request rejected", "Your {parameter} correction ({reference_id}) was rejected: {reason}"),
     "INTEREST_CREDITED": ("Interest credited", "Interest{amount} for {financial_year} at {rate} was credited to your PF account {reference_id}."),
     "INTEREST_REVISED": ("Interest revised", "The interest rate for {financial_year} was revised to {rate}; the difference{amount} was adjusted in your PF account {reference_id}."),
+    "EXIT_RECORDED": ("Date of exit recorded", "The date of exit {date_of_exit} was recorded for your member ID {reference_id} (marked by the {marked_by})."),
+    "TRANSFER_POSTED": ("Transfer completed", "Your PF balance{amount} was transferred from member ID {from_id} to {to_id} ({reference_id}). You can download Annexure K."),
     "ACCOUNT_RECOVERY_REJECTED": ("Account recovery not approved", "Your account recovery request {reference_id} was not approved. Please contact your regional office."),
 }
 
@@ -57,7 +59,9 @@ def render(template: str, reference_id: str, params: dict[str, Any] | None = Non
     return title, body.format(reference_id=reference_id, reason=reason, parameter=values.get("parameter") or "profile",
                               amount=amount, bank_ending=f" ending {ending}" if ending else "",
                               tax_note=f" Income tax of {rupees(int(tds))} was deducted at source (TDS)." if tds else "",
-                              financial_year=values.get("financial_year") or "", rate=values.get("rate") or "")
+                              financial_year=values.get("financial_year") or "", rate=values.get("rate") or "",
+                              date_of_exit=values.get("date_of_exit") or "", marked_by=values.get("marked_by") or "employer",
+                              from_id=values.get("from") or "", to_id=values.get("to") or "")
 
 
 async def handle_notification_requested(session: AsyncSession, event: dict[str, Any]) -> None:

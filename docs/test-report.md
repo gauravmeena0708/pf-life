@@ -70,6 +70,13 @@ Found and fixed on the way: a second pension revision from the same date paid ar
 into today's version proposed two revisions (now one); the publication guard refused any earlier change under a
 scheduled version even when that version already carried it, and refused a same-day correction.
 
+## Update — Phase 2, slice 1: exits and transfers (28 September 2026)
+
+Unit tests 259 passed (services 196, 8 of them new: member 4, workflow 2, contribution 1, claim 1; packages 40; gateway 23); end to end 26 passed
+(including `test_exit_transfer.py`); must-deny 18 passed. Found on the way: the catalogue did not mark the member's
+transfer request as needing step-up while the process asked for one (the gateway would never pass the
+confirmation), and employer exit marking was marked the other way round; both now agree.
+
 ## Known limits
 
 - Journey B spends ₹6,00,000 of member A's synthetic balance per run; after about six runs `make reset` restores it.

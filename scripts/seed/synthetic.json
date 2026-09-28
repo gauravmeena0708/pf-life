@@ -108,7 +108,8 @@
         "aadhaar": "VERIFIED",
         "pan": "VERIFIED",
         "bank": "VERIFIED"
-      }
+      },
+      "last_contribution_month": "2026-08"
     },
     {
       "uan": "100000000002",
@@ -127,7 +128,8 @@
         "aadhaar": "VERIFIED",
         "pan": "NOT_SEEDED",
         "bank": "VERIFIED"
-      }
+      },
+      "last_contribution_month": "2026-08"
     },
     {
       "uan": "100000000003",
@@ -146,7 +148,8 @@
         "aadhaar": "PENDING",
         "pan": "NOT_SEEDED",
         "bank": "PENDING"
-      }
+      },
+      "last_contribution_month": "2026-08"
     },
     {
       "uan": "100000000004",
@@ -165,7 +168,8 @@
         "aadhaar": "PENDING",
         "pan": "NOT_SEEDED",
         "bank": "NOT_SEEDED"
-      }
+      },
+      "last_contribution_month": "2026-08"
     },
     {
       "uan": "100000000005",
@@ -184,7 +188,8 @@
         "aadhaar": "NOT_SEEDED",
         "pan": "NOT_SEEDED",
         "bank": "NOT_SEEDED"
-      }
+      },
+      "last_contribution_month": "2026-08"
     },
     {
       "uan": "100000000006",
@@ -204,7 +209,39 @@
         "aadhaar": "VERIFIED",
         "pan": "VERIFIED",
         "bank": "VERIFIED"
-      }
+      },
+      "last_contribution_month": "2026-06"
+    },
+    {
+      "uan": "100000000007",
+      "name": "DINESH DEMO",
+      "date_of_birth": "1988-07-19",
+      "subject": "00000000-0000-4000-8000-000000000029",
+      "account_link_id": "AL-0009",
+      "member_id": "DEMO00001000000000007",
+      "date_of_joining": "2026-01-15",
+      "date_of_exit": null,
+      "gender": "MALE",
+      "mobile_masked": "******0007",
+      "email_masked": "d***@demo.invalid",
+      "bank_ifsc": "DEMO0000007",
+      "bank_account_last4": "0007",
+      "kyc": {
+        "aadhaar": "VERIFIED",
+        "pan": "VERIFIED",
+        "bank": "VERIFIED"
+      },
+      "last_contribution_month": "2026-08",
+      "previous_employments": [
+        {
+          "_comment": "Left without the employer marking an exit; the member marks it, then transfers this balance (Form 13).",
+          "account_link_id": "AL-0008",
+          "establishment_id": "EST-DEMO-0002",
+          "date_of_joining": "2019-04-01",
+          "date_of_exit": null,
+          "last_contribution_month": "2025-12"
+        }
+      ]
     }
   ],
   "demo_wage_month": "2026-08",
@@ -236,7 +273,8 @@
     "member-c": "00000000-0000-4000-8000-000000000025",
     "ho-finance": "00000000-0000-4000-8000-000000000026",
     "pensioner-a": "00000000-0000-4000-8000-000000000027",
-    "ro-pension": "00000000-0000-4000-8000-000000000028"
+    "ro-pension": "00000000-0000-4000-8000-000000000028",
+    "member-d": "00000000-0000-4000-8000-000000000029"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -253,6 +291,11 @@
     "AL-0006": {
       "employee_paise": 180000000,
       "employer_paise": 120000000,
+      "as_of": "2025-03-31"
+    },
+    "AL-0008": {
+      "employee_paise": 12000000,
+      "employer_paise": 8000000,
       "as_of": "2025-03-31"
     }
   },

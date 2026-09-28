@@ -13,6 +13,8 @@ import { PassbookPage } from "./features/member/PassbookPage";
 import { ClaimsPage } from "./features/member/ClaimsPage";
 import { ClaimDetailPage } from "./features/member/ClaimDetailPage";
 import { ProfilePage } from "./features/member/ProfilePage";
+import { ServicePage } from "./features/member/ServicePage";
+import { MemberActionsPage } from "./features/employer/MemberActionsPage";
 import { WorkQueuePage } from "./features/office/WorkQueuePage";
 import { CasePage } from "./features/office/CasePage";
 import { GrievanceDetailPage } from "./features/grievance/GrievanceDetailPage";
@@ -92,6 +94,8 @@ export function App() {
             <Route path="/member/claims" element={<ClaimsPage />} />
             <Route path="/member/claims/:claimId" element={<ClaimDetailPage />} />
             <Route path="/member/profile" element={<ProfilePage />} />
+            <Route path="/member/service" element={<ServicePage />} />
+            <Route path="/employer/members" element={<MemberActionsPage />} />
             <Route path="/office/work-queue" element={<WorkQueuePage />} />
             <Route path="/office/cases/:caseId" element={<CasePage />} />
             <Route path="/public" element={<PublicLookups />} />

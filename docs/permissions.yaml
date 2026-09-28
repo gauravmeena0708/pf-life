@@ -166,7 +166,7 @@ stakeholders:
     via:
     - F02.self_service
   - endpoint: POST /members/me/exits
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: true
     via:
@@ -184,7 +184,7 @@ stakeholders:
     via:
     - F02.self_service
   - endpoint: GET /members/me/applications
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
@@ -226,7 +226,7 @@ stakeholders:
     via:
     - F04.preflight
   - endpoint: GET /members/me/service-history
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
@@ -322,13 +322,13 @@ stakeholders:
     via:
     - F04.track
   - endpoint: POST /members/me/transfers
-    status: P
+    status: W
     scope: self — caller's own member record only
-    step_up: false
+    step_up: true
     via:
     - F04.transfer
   - endpoint: GET /members/me/transfers/{transferId}
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
@@ -346,7 +346,7 @@ stakeholders:
     via:
     - F04.transfer
   - endpoint: GET /members/me/transfers/{transferId}/annexure-k
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
@@ -801,13 +801,13 @@ stakeholders:
     via:
     - F02.kyc_approve
   - endpoint: GET /employers/me/approvals
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
     - F02.employer_approvals
   - endpoint: POST /employers/me/approvals/{approvalId}/decisions
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:
@@ -915,13 +915,13 @@ stakeholders:
     via:
     - F04.attest
   - endpoint: GET /employers/me/transfer-requests
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
     - F04.transfer_attest
   - endpoint: POST /employers/me/transfer-requests/{transferId}/decisions
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:
@@ -1078,7 +1078,7 @@ stakeholders:
     via:
     - F02.missing_details
   - endpoint: POST /employers/me/members/{uan}/exits
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:
@@ -1357,10 +1357,16 @@ stakeholders:
     step_up: false
     via:
     - F04.tds
-  - endpoint: POST /office/transfers/{transferId}/decisions
-    status: P
+  - endpoint: GET /office/transfers
+    status: W
     scope: office jurisdiction of the caller's posting
-    step_up: true
+    step_up: false
+    via:
+    - F04.transfer_process
+  - endpoint: POST /office/transfers/{transferId}/verifications
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
     via:
     - F04.transfer_process
   - endpoint: POST /office/transfers/{transferId}/recredits
@@ -1558,6 +1564,18 @@ stakeholders:
     step_up: true
     via:
     - F04.approve_ao
+  - endpoint: GET /office/transfers
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.transfer_decide
+  - endpoint: POST /office/transfers/{transferId}/decisions
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F04.transfer_decide
   - endpoint: POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals
     status: P
     scope: office jurisdiction of the caller's posting

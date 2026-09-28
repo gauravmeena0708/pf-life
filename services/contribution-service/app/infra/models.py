@@ -71,11 +71,12 @@ class Establishment(Base):
 
 
 class EstablishmentMember(Base):
+    """One row per member ID (account link): a UAN has one per establishment it has worked at."""
     __tablename__ = "establishment_members"
-    uan: Mapped[str] = mapped_column(String(32), primary_key=True)
+    uan: Mapped[str] = mapped_column(String(32), index=True)
     name: Mapped[str] = mapped_column(Text)
     date_of_birth: Mapped[date] = mapped_column(Date)
-    account_link_id: Mapped[str] = mapped_column(String(80), unique=True)
+    account_link_id: Mapped[str] = mapped_column(String(80), primary_key=True)
     member_subject: Mapped[str | None] = mapped_column(String(80))
     establishment_id: Mapped[str] = mapped_column(ForeignKey("establishments.id"))
     date_of_joining: Mapped[date | None] = mapped_column(Date)
@@ -161,4 +162,19 @@ class InterestPosting(Base):
     employer_paise: Mapped[int] = mapped_column(BigInteger)
     revision: Mapped[int] = mapped_column(Integer)          # 0 = first credit for the year, 1.. = rate revisions
     posted_by: Mapped[str] = mapped_column(String(80))
+    posted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class TransferPosting(Base):
+    """A Form 13 transfer posted to the ledger: the source of the member's Annexure K."""
+    __tablename__ = "transfer_postings"
+    transfer_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    uan: Mapped[str] = mapped_column(String(32), index=True)
+    member_subject: Mapped[str | None] = mapped_column(String(80), index=True)
+    from_account_link_id: Mapped[str] = mapped_column(String(80))
+    to_account_link_id: Mapped[str] = mapped_column(String(80))
+    employee_paise: Mapped[int] = mapped_column(BigInteger)
+    employer_paise: Mapped[int] = mapped_column(BigInteger)
+    journal_id: Mapped[str | None] = mapped_column(ForeignKey("journals.id"))
+    approved_by: Mapped[str] = mapped_column(String(80))
     posted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

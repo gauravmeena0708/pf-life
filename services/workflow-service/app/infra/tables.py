@@ -1,5 +1,5 @@
 """Tables owned by workflow-service (created by migration 0002)."""
-from sqlalchemy import JSON, BigInteger, Column, DateTime, Integer, MetaData, String, Table, Text, func
+from sqlalchemy import JSON, BigInteger, Column, Date, DateTime, Integer, MetaData, String, Table, Text, func
 
 from app.infra.models import IdType
 
@@ -74,4 +74,17 @@ subject_offices = Table(
     Column("zone_id", String(40)),
     Column("member_subject", String(80), index=True),        # who may start a self-service process about it
     Column("establishment_id", String(40)),                  # whose employer may attest
+)
+
+# Member accounts (member IDs), so process forms can be checked: whose account it is, at which establishment,
+# exited or not, already transferred. Synthetic seed, then MemberExitMarked.v1 and TransferPosted.v1.
+member_accounts = Table(
+    "member_accounts", metadata,
+    Column("account_link_id", String(40), primary_key=True),
+    Column("uan", String(12), nullable=False, index=True),
+    Column("member_subject", String(80), index=True),
+    Column("establishment_id", String(40), nullable=False),
+    Column("date_of_joining", Date, nullable=False),
+    Column("date_of_exit", Date),
+    Column("transferred_to", String(40)),
 )

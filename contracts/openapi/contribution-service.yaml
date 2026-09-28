@@ -748,6 +748,40 @@ paths:
       x-scope: self — caller's own member record only
       security:
       - bffSession: []
+  /members/me/transfers/{transferId}/annexure-k:
+    get:
+      operationId: getMembersTransfersTransferIdAnnexureK
+      summary: Annexure K transfer statement
+      tags:
+      - Member self-service
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: transferId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
   /office/accounts/inoperative:
     get:
       operationId: getOfficeAccountsInoperative

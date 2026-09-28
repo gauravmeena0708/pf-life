@@ -1,5 +1,6 @@
 """Events claim-service consumes. Each handler runs inside the inbox transaction (apply_once), so a
 redelivered event is applied once; state guards make an out-of-order event a logged no-op."""
+from datetime import date
 from typing import Any
 
 from sqlalchemy import insert, select, update
@@ -26,6 +27,8 @@ BINDINGS = [
     "platform-service.PolicyPublished.v1",
     "contribution-service.LedgerReversed.v1",
     "contribution-service.InterestCredited.v1",
+    "member-service.MemberExitMarked.v1",
+    "contribution-service.TransferPosted.v1",
 ]
 
 
@@ -56,6 +59,21 @@ async def on_interest_credited(session: AsyncSession, event: dict[str, Any]) -> 
         await session.execute(update(accounts).where(accounts.c.account_link_id == p["account_link_id"]).values(
             employee_paise=accounts.c.employee_paise + int(p["employee_paise"]),
             employer_paise=accounts.c.employer_paise + int(p["employer_paise"])))
+
+
+async def on_member_exit(session: AsyncSession, event: dict[str, Any]) -> None:
+    p = event["payload"]
+    await session.execute(update(accounts).where(accounts.c.account_link_id == p["account_link_id"])
+                          .values(date_of_exit=date.fromisoformat(p["date_of_exit"])))
+
+
+async def on_transfer_posted(session: AsyncSession, event: dict[str, Any]) -> None:
+    """Form 13: the previous member ID's shares move to the current one."""
+    p = event["payload"]
+    for link, sign in ((p["from_account_link_id"], -1), (p["to_account_link_id"], 1)):
+        await session.execute(update(accounts).where(accounts.c.account_link_id == link).values(
+            employee_paise=accounts.c.employee_paise + sign * int(p["employee_paise"]),
+            employer_paise=accounts.c.employer_paise + sign * int(p["employer_paise"])))
 
 
 async def on_claim_debit_posted(session: AsyncSession, event: dict[str, Any]) -> None:
@@ -175,6 +193,8 @@ HANDLERS = {
     "RiskSignalReviewed.v1": on_risk_signal,
     "ContributionPosted.v1": on_contribution_posted,
     "InterestCredited.v1": on_interest_credited,
+    "MemberExitMarked.v1": on_member_exit,
+    "TransferPosted.v1": on_transfer_posted,
     "ClaimDebitPosted.v1": on_claim_debit_posted,
     "CaseDecisionSubmitted.v1": on_case_decision,
     "PaymentConfirmed.v1": on_payment_result,

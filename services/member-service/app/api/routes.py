@@ -1,6 +1,6 @@
 """Member profile, employment and notification routes (Journey B)."""
 import secrets
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends
@@ -9,7 +9,8 @@ from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra.db import sessions
-from app.infra.tables import contact_history, employments, members, notifications, recovery_requests, security_reports
+from app.domain.exits import month_after, open_applications, record_exit, self_exit_problems, track
+from app.infra.tables import contact_history, employments, member_applications, members, notifications, recovery_requests, security_reports
 from epfo_auth import Actor, require_grant, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit
@@ -33,7 +34,9 @@ def _employment(row: Any) -> dict[str, Any]:
     return {"account_link_id": row["account_link_id"], "establishment_name": row["establishment_name"],
             "date_of_joining": row["date_of_joining"].isoformat(),
             "date_of_exit": row["date_of_exit"].isoformat() if row["date_of_exit"] else None,
-            "status": "EXITED" if row["date_of_exit"] else "ACTIVE"}
+            "exit_marked_by": row["exit_marked_by"], "last_contribution_month": row["last_contribution_month"],
+            "transferred_to": row["transferred_to"],
+            "status": "TRANSFERRED" if row["transferred_to"] else "EXITED" if row["date_of_exit"] else "ACTIVE"}
 
 
 @router.get("/api/v1/members/me")
@@ -235,3 +238,83 @@ async def decide_recovery(request_id: str, body: RecoveryDecisionInput,
     return envelope({"request_id": request_id, "state": state,
                      "next_step": "Revoke the member's other sessions from the sessions page if the account was used by someone else."
                      if state == "APPROVED" else "The member's details are unchanged."})
+
+
+# ── Phase 2, slice 1: Mark Exit, applications, service history ──────────────────────────────────
+
+MEMBER = require_stakeholder("member")
+
+
+class ExitInput(BaseModel):
+    account_link_id: str = Field(min_length=1, max_length=40)
+    date_of_exit: date
+    reason: str = Field(default="CESSATION", pattern="^(CESSATION|SUPERANNUATION|RETIREMENT)$")
+
+
+async def _own_jobs(session: AsyncSession, member: dict[str, Any]) -> list[dict[str, Any]]:
+    rows = (await session.execute(select(employments).where(employments.c.member_id == member["member_id"])
+                                  .order_by(employments.c.date_of_joining.desc()))).mappings().all()
+    return [dict(r) for r in rows]
+
+
+@router.post("/api/v1/members/me/exits")
+async def mark_exit(body: ExitInput, actor: Actor = Depends(MEMBER), session: AsyncSession = Depends(db)) -> dict:
+    """Manage › Mark Exit: the member marks the date of exit the employer has not marked (Aadhaar OTP → step-up)."""
+    async with session.begin():
+        member = await _member(session, actor.subject)
+        job = next((j for j in await _own_jobs(session, member) if j["account_link_id"] == body.account_link_id), None)
+        if not job:
+            raise Problem(404, "/problems/not-found", "Member ID not found")
+        ongoing = await open_applications(session, member["uan"])
+        if ongoing:
+            raise Problem(409, "/problems/process-ongoing", "Another process is already ongoing",
+                          "Please wait for it to complete before submitting a new Mark Exit request.",
+                          processes=[{"process": a["title"], "application_id": a["application_id"], "state": a["state"],
+                                      "since": a["submitted_at"].isoformat()} for a in ongoing])
+        problems = self_exit_problems(job, body.date_of_exit, datetime.now(UTC).date())
+        if problems:
+            raise Problem(422, "/problems/exit-not-allowed", "The exit cannot be marked", " ".join(problems), problems=problems)
+        require_step_up(actor, "mark-exit", body.account_link_id)
+        await record_exit(session, job, body.date_of_exit, body.reason, "MEMBER", actor.correlation_id)
+        application_id = f"EXIT-{body.account_link_id}"
+        await track(session, application_id, member["uan"], "mark_exit", "Mark Exit", "RECORDED", True, body.account_link_id)
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="member.exit_marked",
+                    target_type="member_account", target_id=body.account_link_id, detail=body.date_of_exit.isoformat())
+        job = (await session.execute(select(employments).where(employments.c.account_link_id == body.account_link_id))).mappings().one()
+    return envelope({**_employment(job), "application_id": application_id,
+                     "note": "The date of exit cannot be edited by you once marked; after a settlement it cannot be changed at all."})
+
+
+@router.get("/api/v1/members/me/applications")
+async def my_applications(status: str | None = None, actor: Actor = Depends(MEMBER), session: AsyncSession = Depends(db)) -> dict:
+    member = await _member(session, actor.subject)
+    q = select(member_applications).where(member_applications.c.uan == member["uan"]).order_by(member_applications.c.updated_at.desc())
+    if status == "pending":
+        q = q.where(member_applications.c.terminal.is_(False))
+    elif status == "processed":
+        q = q.where(member_applications.c.terminal.is_(True))
+    rows = (await session.execute(q)).mappings().all()
+    return envelope([{"application_id": r["application_id"], "process": r["process"], "title": r["title"], "state": r["state"],
+                      "pending": not r["terminal"], "account_link_id": r["account_link_id"],
+                      "submitted_at": r["submitted_at"].isoformat(), "updated_at": r["updated_at"].isoformat()} for r in rows])
+
+
+def _months(start: date, end: date) -> int:
+    return max(0, (end.year - start.year) * 12 + end.month - start.month + (1 if end.day >= start.day else 0))
+
+
+@router.get("/api/v1/members/me/service-history")
+async def service_history(actor: Actor = Depends(MEMBER), session: AsyncSession = Depends(db)) -> dict:
+    """Service per member ID: joining, exit, last contribution, months of service, and whether it was transferred."""
+    member = await _member(session, actor.subject)
+    today = datetime.now(UTC).date()
+    out = []
+    for j in await _own_jobs(session, member):
+        end = j["date_of_exit"] or today
+        out.append({**_employment(j), "service_months": _months(j["date_of_joining"], end),
+                    "mark_exit_allowed": bool(not j["date_of_exit"] and j["last_contribution_month"]
+                                              and today >= month_after(j["last_contribution_month"], 3)),
+                    "transfer_status": ("Transferred to " + j["transferred_to"]) if j["transferred_to"] else
+                                       ("Not transferred" if j["date_of_exit"] else "Current member ID")})
+    return envelope({"uan": member["uan"], "member_ids": out,
+                     "total_service_months": sum(x["service_months"] for x in out)})
