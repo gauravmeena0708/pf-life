@@ -94,3 +94,13 @@ async def reverse_claim_debit(session: AsyncSession, event: dict[str, Any]) -> N
                         aggregate_id=journal_id, correlation_id=event["correlation_id"], payload={
                             "journal_id": journal_id, "reverses_journal_id": debit[0], "reason": "Claim rejected after its account was debited",
                             "claim_id": claim_id, "postings": lines})
+
+
+async def on_tax_deducted(session: AsyncSession, event: dict[str, Any]) -> None:
+    """TDS withheld from a withdrawal: that part of CLAIMS_PAYABLE is owed to the tax department, not the bank."""
+    p = event["payload"]
+    tds = int(p["tds_paise"])
+    if tds:
+        await _post(session, f"TDS-{p['claim_id']}", "TDS", p["claim_id"], [
+            {"account_code": "CLAIMS_PAYABLE", "side": "debit", "amount_paise": tds},
+            {"account_code": "TDS_PAYABLE", "side": "credit", "amount_paise": tds}])

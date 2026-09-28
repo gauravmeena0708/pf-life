@@ -13,7 +13,7 @@ TEMPLATES = {
     "CLAIM_UNDER_REVIEW": ("Claim under review", "Your claim {reference_id} is being reviewed."),
     "CLAIM_APPROVED": ("Claim approved", "Your claim {reference_id}{amount} was approved. Payment is being arranged."),
     "CLAIM_REJECTED": ("Claim rejected", "Your claim {reference_id} was rejected. {reason}"),
-    "CLAIM_SETTLED": ("Claim paid", "Your claim {reference_id}{amount} was paid into your bank account{bank_ending}."),
+    "CLAIM_SETTLED": ("Claim paid", "Your claim {reference_id}{amount} was paid into your bank account{bank_ending}.{tax_note}"),
     "CLAIM_PAYMENT_RETURNED": ("Claim payment returned", "The payment for your claim {reference_id} was returned by the bank. {reason}"),
     "CLAIM_REISSUED": ("Claim payment reissued", "Payment for your claim {reference_id} was reissued."),
     "GRIEVANCE_REGISTERED": ("Grievance registered", "Your grievance {reference_id} was registered and sent to your regional office."),
@@ -27,6 +27,8 @@ TEMPLATES = {
     "JD_REJECTED_BY_EMPLOYER": ("Correction request not supported", "Your employer did not support your {parameter} correction ({reference_id}): {reason}"),
     "JD_APPROVED": ("Profile corrected", "Your {parameter} was corrected ({reference_id}). It now shows on your profile."),
     "JD_REJECTED": ("Correction request rejected", "Your {parameter} correction ({reference_id}) was rejected: {reason}"),
+    "INTEREST_CREDITED": ("Interest credited", "Interest{amount} for {financial_year} at {rate} was credited to your PF account {reference_id}."),
+    "INTEREST_REVISED": ("Interest revised", "The interest rate for {financial_year} was revised to {rate}; the difference{amount} was adjusted in your PF account {reference_id}."),
     "ACCOUNT_RECOVERY_REJECTED": ("Account recovery not approved", "Your account recovery request {reference_id} was not approved. Please contact your regional office."),
 }
 
@@ -50,9 +52,12 @@ def render(template: str, reference_id: str, params: dict[str, Any] | None = Non
     ending = values.get("bank_account_last4")
     reason = str(values.get("reason") or "Check your claim details for more information.")
     paise = values.get("amount_paise")
-    amount = f" for {rupees(int(paise))}" if paise is not None else ""
+    amount = f" for {rupees(abs(int(paise)))}" if paise is not None else ""
+    tds = values.get("tds_paise")
     return title, body.format(reference_id=reference_id, reason=reason, parameter=values.get("parameter") or "profile",
-                              amount=amount, bank_ending=f" ending {ending}" if ending else "")
+                              amount=amount, bank_ending=f" ending {ending}" if ending else "",
+                              tax_note=f" Income tax of {rupees(int(tds))} was deducted at source (TDS)." if tds else "",
+                              financial_year=values.get("financial_year") or "", rate=values.get("rate") or "")
 
 
 async def handle_notification_requested(session: AsyncSession, event: dict[str, Any]) -> None:

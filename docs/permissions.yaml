@@ -63,7 +63,7 @@ stakeholders:
     via:
     - F13.public
   - endpoint: POST /public/demo-calculations/pension
-    status: P
+    status: W
     scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
     step_up: false
     via:
@@ -256,7 +256,7 @@ stakeholders:
     via:
     - F04.claim_file
   - endpoint: POST /members/me/tax/form-15g-15h
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
@@ -364,7 +364,7 @@ stakeholders:
     via:
     - F05.apply
   - endpoint: GET /members/me/pension-eligibility-preview
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
@@ -493,7 +493,7 @@ stakeholders:
     - F05.disabled_apply
   pensioner:
   - endpoint: GET /pensioners/me
-    status: P
+    status: W
     scope: self — caller's own PPO only
     step_up: false
     via:
@@ -511,7 +511,7 @@ stakeholders:
     via:
     - F05.pensioner_view
   - endpoint: GET /pensioners/me/payments
-    status: P
+    status: W
     scope: self — caller's own PPO only
     step_up: false
     via:
@@ -572,7 +572,7 @@ stakeholders:
     via:
     - F05.family_apply
   - endpoint: GET /pensioners/me
-    status: P
+    status: W
     scope: self — caller's own PPO only
     step_up: false
     via:
@@ -1929,8 +1929,14 @@ stakeholders:
     step_up: true
     via:
     - F05.ppo_approve
+  - endpoint: GET /office/pensions/revisions
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F05.ppo_approve
   - endpoint: POST /office/pensions/{ppoId}/revisions
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -2462,8 +2468,14 @@ stakeholders:
     step_up: true
     via:
     - F03.interest
+  - endpoint: GET /office/accounts/interest-postings
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F03.interest
   - endpoint: POST /office/accounts/interest-postings
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:

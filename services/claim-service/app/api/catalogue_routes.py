@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /members/me/claims', 'POST /members/me/claims', 'GET /members/me/claims/eligible-types', 'GET /members/me/claims/{claimId}', 'POST /members/me/claims/{claimId}/confirmations', 'POST /members/me/claims/{claimId}/re-disbursement-requests', 'POST /office/claims/{claimId}/payment-instructions', 'POST /office/claims/{claimId}/re-disbursement-approvals', 'POST /office/claims/{claimId}/reissues']
+OPERATIONS = ['GET /members/me/claims', 'POST /members/me/claims', 'GET /members/me/claims/eligible-types', 'POST /members/me/tax/form-15g-15h', 'GET /members/me/claims/{claimId}', 'POST /members/me/claims/{claimId}/confirmations', 'POST /members/me/claims/{claimId}/re-disbursement-requests', 'POST /office/claims/{claimId}/payment-instructions', 'POST /office/claims/{claimId}/re-disbursement-approvals', 'POST /office/claims/{claimId}/reissues']
 
 @router.api_route("/api/v1/members/me/claims", methods=["GET"], include_in_schema=False)
 async def get_members_me_claims(actor: Actor = Depends(require_actor)) -> None:
@@ -25,6 +25,11 @@ async def post_members_me_claims(actor: Actor = Depends(require_actor)) -> None:
 @router.api_route("/api/v1/members/me/claims/eligible-types", methods=["GET"], include_in_schema=False)
 async def get_members_me_claims_eligible_types(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Available claim types with rule version and reasons (Journey B3)")
+
+
+@router.api_route("/api/v1/members/me/tax/form-15g-15h", methods=["POST"], include_in_schema=False)
+async def post_members_me_tax_form_15g_15h(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Upload Form 15G / 15H")
 
 
 @router.api_route("/api/v1/members/me/claims/{claimId}", methods=["GET"], include_in_schema=False)

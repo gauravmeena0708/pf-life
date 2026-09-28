@@ -1799,7 +1799,7 @@
     "callers": [
       "ho.fa_cao"
     ],
-    "summary": "Record the approved annual interest rate (CBT recommendation, Ministry concurrence) — illustrative in the POC",
+    "summary": "Record the approved annual interest rate (CBT recommendation, Ministry concurrence). In the POC the rate is a field of the rule set (interest.rates_bp), published through policy administration",
     "revocation": false
   },
   {
@@ -1838,8 +1838,8 @@
     "method": "GET",
     "path_template": "/members/me/pension-eligibility-preview",
     "regex": "^/members/me/pension\\-eligibility\\-preview$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "pension",
     "upstream": "http://pension-service:8000",
     "money": false,
@@ -2787,11 +2787,27 @@
     "revocation": false
   },
   {
+    "method": "GET",
+    "path_template": "/office/accounts/interest-postings",
+    "regex": "^/office/accounts/interest\\-postings$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.fa_cao"
+    ],
+    "summary": "Interest run preview: the rate in the rule set in force, interest due per account (monthly running balance), already credited, the difference to credit, and earlier runs",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/office/accounts/interest-postings",
     "regex": "^/office/accounts/interest\\-postings$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "contribution",
     "upstream": "http://contribution-service:8000",
     "money": true,
@@ -3002,8 +3018,8 @@
     "method": "POST",
     "path_template": "/public/demo-calculations/pension",
     "regex": "^/public/demo\\-calculations/pension$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "pension",
     "upstream": "http://pension-service:8000",
     "money": false,
@@ -3277,8 +3293,8 @@
     "method": "POST",
     "path_template": "/office/pensions/{ppoId}/revisions",
     "regex": "^/office/pensions/[^/]+/revisions$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "pension",
     "upstream": "http://pension-service:8000",
     "money": true,
@@ -3922,8 +3938,8 @@
     "method": "POST",
     "path_template": "/members/me/tax/form-15g-15h",
     "regex": "^/members/me/tax/form\\-15g\\-15h$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "claim",
     "upstream": "http://claim-service:8000",
     "money": false,
@@ -4335,6 +4351,22 @@
       "fo.da_accounts"
     ],
     "summary": "Appendix E — field-office adjustment of a member's opening balances (taxable / non-taxable / total), also used for PF→EPS diversion. Not an employer remittance",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/pensions/revisions",
+    "regex": "^/office/pensions/revisions$",
+    "status": "W",
+    "phase": 1,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc_pension"
+    ],
+    "summary": "Pension revisions proposed when a published formula change raises pensions in payment, with arrears to date",
     "revocation": false
   },
   {
@@ -4993,8 +5025,8 @@
     "method": "GET",
     "path_template": "/pensioners/me/payments",
     "regex": "^/pensioners/me/payments$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "pension",
     "upstream": "http://pension-service:8000",
     "money": false,
@@ -5919,8 +5951,8 @@
     "method": "GET",
     "path_template": "/pensioners/me",
     "regex": "^/pensioners/me$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "pension",
     "upstream": "http://pension-service:8000",
     "money": false,

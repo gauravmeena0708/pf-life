@@ -89,7 +89,10 @@
     "riskSignals": "Risk signals",
     "assistant": "Ask the assistant",
     "dashboards": "Dashboards",
-    "policy": "Rules and limits"
+    "policy": "Rules and limits",
+    "interest": "Interest crediting",
+    "pension": "My pension",
+    "pensionRevisions": "Pension revisions"
   },
   "passbook": {
     "eyebrow": "Member services · contributions",
@@ -162,7 +165,11 @@
     "newBankTitle": "Correct your bank details",
     "newBankHelp": "The bank could not pay into your account. Enter an account in your name; the bank checks it, then an APFC approves the re-payment.",
     "accountNumber": "Account number",
-    "sendBank": "Send new bank details"
+    "sendBank": "Send new bank details",
+    "gross": "Claim amount",
+    "tds": "Income tax deducted (TDS)",
+    "noTds": "None",
+    "net": "Paid to your bank"
   },
   "profile": {
     "eyebrow": "Member services · identity",
@@ -457,5 +464,23 @@
       "NATIONALITY": "Nationality",
       "DATE_OF_JOINING": "Date of joining"
     }
+  },
+  "tax": {
+    "title": "Form 15G / 15H — no tax payable this year",
+    "help": "If your total income this financial year is not taxable, declare it once so that no income tax is deducted from PF withdrawals paid this year (where the policy allows it). Form 15H is for people aged 60 or more. Illustrative only.",
+    "form": "Form",
+    "form15g": "Form 15G (below 60 years of age)",
+    "form15h": "Form 15H (60 years or older)",
+    "declare": "I declare that my estimated total income for this financial year is not chargeable to income tax.",
+    "submit": "Submit declaration",
+    "recorded": "Form {{form}} recorded for {{year}}."
+  },
+  "pensionEstimate": {
+    "title": "Your pension estimate (EPS)",
+    "help": "Service so far: {{years}} years {{months}} months; pensionable salary {{salary}} a month. A monthly pension needs at least {{min}} years of service.",
+    "scenario": "If",
+    "service": "Service counted",
+    "monthly": "Monthly pension",
+    "years": "years"
   }
 }

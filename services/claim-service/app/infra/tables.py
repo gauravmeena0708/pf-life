@@ -19,6 +19,7 @@ accounts = Table(
     Column("employer_paise", BigInteger, nullable=False, server_default="0"),
     Column("uan", String(12), index=True),
     Column("frozen", Boolean, nullable=False, server_default=sa_false()),   # from AccountFrozen.v1 / AccountDefrozen.v1
+    Column("pan_verified", Boolean, nullable=False, server_default=sa_false()),   # decides the TDS rate
 )
 
 # Office staff directory (synthetic seed): which office an officer acts for.
@@ -51,6 +52,7 @@ claims = Table(
     Column("recommended", Boolean, nullable=False, server_default=sa_false()),   # a recommendation was recorded
     Column("payee_ifsc", String(11)),                  # corrected bank details for a re-disbursement
     Column("payee_account_last4", String(4)),
+    Column("tax", JSON),                               # TDS worked out at the first payment instruction, then fixed
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
     Column("updated_at", DateTime(timezone=True), server_default=func.now()),
 )
@@ -73,4 +75,13 @@ risk_flags = Table(
     Column("signal_id", String(40), primary_key=True),
     Column("subject", String(80), nullable=False, index=True),
     Column("status", String(30), nullable=False),        # OPEN | NEEDS_MORE_EVIDENCE | CONFIRMED | BENIGN
+)
+
+# Form 15G / 15H self-declarations: one per member and financial year; waives TDS when the policy allows it.
+tax_declarations = Table(
+    "tax_declarations", metadata,
+    Column("member_subject", String(80), primary_key=True),
+    Column("financial_year", String(7), primary_key=True),
+    Column("form", String(3), nullable=False),
+    Column("submitted_at", DateTime(timezone=True), server_default=func.now()),
 )

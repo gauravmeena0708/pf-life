@@ -16,7 +16,8 @@ from app.infra.db import sessions
 from epfo_auth import Actor, require_actor, require_grant, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit, find_response, request_hash, store_response
-from epfo_persistence.policy import rules_on
+from app.infra.interest import interest_due, post_interest
+from epfo_persistence.policy import financial_year, financial_year_bounds, interest_rate_bp, rules_on
 
 router = APIRouter()
 
@@ -51,6 +52,7 @@ class PublicTrrnLookup(BaseModel):
 
 EMPLOYER = require_stakeholder("employer.owner", "employer.operator", "employer.signatory")
 MEMBER = require_stakeholder("member")
+FINANCE = require_stakeholder("ho.fa_cao")
 
 
 def _establishment(actor: Actor) -> str:
@@ -303,22 +305,25 @@ async def _passbook(subject: str, account_link_id: str | None):
         out=[]; pending=[]
         for a in accounts:
             lines = (await session.execute(text(
-                "SELECT j.id AS journal_id, j.kind, j.occurred_at, j.claim_id, f.wage_month, f.trrn, jl.side, jl.amount_paise, jl.share "
-                "FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id LEFT JOIN ecr_filings f ON f.id=j.filing_id "
-                "WHERE jl.account_link_id=:a AND jl.account_code='AC01_EPF' ORDER BY j.occurred_at, j.id"),
+                "SELECT j.id AS journal_id, j.kind, j.occurred_at, j.claim_id, f.wage_month, f.trrn, jl.side, jl.amount_paise, jl.share, "
+                "ip.financial_year, ip.rate_bp FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id "
+                "LEFT JOIN ecr_filings f ON f.id=j.filing_id LEFT JOIN interest_postings ip ON ip.journal_id=j.id "
+                "WHERE jl.account_link_id=:a AND jl.account_code='AC01_EPF' ORDER BY j.occurred_at, COALESCE(ip.revision, 0), j.id"),
                 {"a": a["account_link_id"]})).mappings().all()
             name = (await session.execute(text("SELECT legal_name FROM establishments WHERE id=:e"),
                                           {"e": a["establishment_id"]})).scalar_one_or_none()
             grouped = {}
             for ln in lines:
                 kind = {"CONTRIBUTION": "CONTRIBUTION", "OPENING_BALANCE": "OPENING_BALANCE", "CLAIM_DEBIT": "WITHDRAWAL",
-                        "CLAIM_REVERSAL": "WITHDRAWAL_REVERSED", "INTEREST": "INTEREST"}.get(ln["kind"], ln["kind"])
+                        "CLAIM_REVERSAL": "WITHDRAWAL_REVERSED", "INTEREST": "INTEREST", "INTEREST_REVISION": "INTEREST"}.get(ln["kind"], ln["kind"])
+                rate = f"{ln['rate_bp'] / 100:g}%" if ln["rate_bp"] is not None else ""
                 ent = grouped.setdefault(ln["journal_id"], {
                     "kind": kind, "wage_month": ln["wage_month"] or _month(ln["occurred_at"]),
                     "description": {"CONTRIBUTION": "Monthly contribution", "OPENING_BALANCE": "Balance brought forward",
                                     "WITHDRAWAL": f"Claim {ln['claim_id']} paid out",
                                     "WITHDRAWAL_REVERSED": f"Claim {ln['claim_id']} not paid: amount returned",
-                                    "INTEREST": "Interest credited"}.get(kind, kind),
+                                    "INTEREST": (f"Interest for {ln['financial_year']} at {rate}" if ln["kind"] == "INTEREST"
+                                                 else f"Interest for {ln['financial_year']} revised to {rate}: difference")}.get(kind, kind),
                     "employee_share_paise": 0, "employer_share_paise": 0, "establishment_name": name,
                     "trrn": ln["trrn"], "claim_id": ln["claim_id"], "posted_at": ln["occurred_at"]})
                 if ln["share"] in ("employee", "employer"):
@@ -335,3 +340,63 @@ async def _passbook(subject: str, account_link_id: str | None):
             if any(m["UAN"] == x["uan"] for m in members):
                 pending.append({"account_link_id":x["account_link_id"],"wage_month":x["wage_month"],"trrn":x["trrn"],"status":x["state"],"message":"filed by employer, awaiting payment"})
         return {"accounts":out,"pending":pending}
+
+
+# ── annual interest crediting (ho.fa_cao; the rate comes from the rule set in force today) ─────────────
+
+class InterestRunInput(BaseModel):
+    financial_year: str = Field(pattern=r"^\d{4}-\d{2}$")
+
+
+def _today() -> date:
+    return datetime.now(UTC).date()
+
+
+async def _interest_plan(session, fy: str) -> dict[str, Any]:
+    try:
+        _, last_day = financial_year_bounds(fy)
+    except ValueError as exc:
+        raise Problem(422, "/problems/validation", "Invalid financial year", str(exc)) from exc
+    rules = await rules_on(session, _today())
+    rate = interest_rate_bp(rules, fy)
+    accounts = await interest_due(session, fy, rate) if rate is not None else []
+    history = (await session.execute(text(
+        "SELECT rule_version, rate_bp, revision, COUNT(*) AS accounts, SUM(employee_paise + employer_paise) AS total_paise, "
+        "MAX(posted_at) AS posted_at FROM interest_postings WHERE financial_year = :y GROUP BY rule_version, rate_bp, revision "
+        "ORDER BY MAX(posted_at)"), {"y": fy})).mappings().all()
+    return {"financial_year": fy, "year_ended": last_day < _today(), "rate_bp": rate, "rule_version": rules["rule_version"],
+            "method": "Monthly running balance: the twelve month-end balances x rate / 12, per share, to the nearest rupee.",
+            "accounts": [{k: a[k] for k in ("account_link_id", "employee", "employer", "to_credit_paise")} for a in accounts],
+            "total_to_credit_paise": sum(a["to_credit_paise"] for a in accounts),
+            "history": [{**dict(h), "total_paise": int(h["total_paise"] or 0),
+                         "posted_at": h["posted_at"].isoformat() if hasattr(h["posted_at"], "isoformat") else h["posted_at"]} for h in history]}
+
+
+@router.get("/api/v1/office/accounts/interest-postings")
+async def interest_preview(financialYear: str | None = Query(default=None, pattern=r"^\d{4}-\d{2}$"), actor: Actor = Depends(FINANCE)):
+    fy = financialYear or financial_year(_today().replace(year=_today().year - 1, day=1))     # the last completed year
+    async with sessions()() as session:
+        return envelope(await _interest_plan(session, fy))
+
+
+@router.post("/api/v1/office/accounts/interest-postings")
+async def interest_run(body: InterestRunInput, actor: Actor = Depends(FINANCE)):
+    async with sessions()() as session, session.begin():
+        plan = await _interest_plan(session, body.financial_year)
+        if not plan["year_ended"]:
+            raise Problem(409, "/problems/financial-year-open", "The financial year has not ended",
+                          f"Interest for {body.financial_year} is credited after 31 March.")
+        if plan["rate_bp"] is None:
+            raise Problem(409, "/problems/interest-rate-not-declared", "No interest rate is declared for that year",
+                          "Publish a rule set with the rate for this financial year first (Policy administration).")
+        if not plan["total_to_credit_paise"] and not any(a["employee"]["now_paise"] or a["employer"]["now_paise"] for a in plan["accounts"]):
+            raise Problem(409, "/problems/nothing-to-credit", "Nothing to credit",
+                          f"Interest for {body.financial_year} at {plan['rate_bp'] / 100:g}% is already credited to every account.")
+        require_step_up(actor, "post-interest", body.financial_year, None, abs(plan["total_to_credit_paise"]))
+        posted = await post_interest(session, body.financial_year, plan["rate_bp"], plan["rule_version"], actor.subject, actor.correlation_id)
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="interest.posted",
+                    target_type="interest_run", target_id=f"{body.financial_year}-{plan['rule_version']}",
+                    detail=f"{len(posted)} accounts at {plan['rate_bp']} bp")
+    return envelope({"financial_year": body.financial_year, "rate_bp": plan["rate_bp"], "rule_version": plan["rule_version"],
+                     "accounts": len(posted), "credited_paise": plan["total_to_credit_paise"],
+                     "revision": any(p["revision"] for p in posted), "postings": posted})

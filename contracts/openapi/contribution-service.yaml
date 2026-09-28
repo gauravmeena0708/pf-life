@@ -592,7 +592,8 @@ paths:
   /ho/config/interest-rates/{financialYear}:
     put:
       operationId: putHoConfigInterestRatesFinancialYear
-      summary: Record the approved annual interest rate (CBT recommendation, Ministry concurrence) — illustrative in the POC
+      summary: Record the approved annual interest rate (CBT recommendation, Ministry concurrence). In the POC the rate is
+        a field of t
       tags:
       - Returns, challans and payments
       parameters:
@@ -618,6 +619,8 @@ paths:
       x-scope: national (Head Office role)
       security:
       - bffSession: []
+      description: Record the approved annual interest rate (CBT recommendation, Ministry concurrence). In the POC the rate
+        is a field of the rule set (interest.rates_bp), published through policy administration
       requestBody:
         required: true
         content:
@@ -770,6 +773,42 @@ paths:
       security:
       - bffSession: []
   /office/accounts/interest-postings:
+    get:
+      operationId: getOfficeAccountsInterestPostings
+      summary: 'Interest run preview: the rate in the rule set in force, interest due per account (monthly running balance),
+        already cre'
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: financialYear
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - ho.fa_cao
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Interest run preview: the rate in the rule set in force, interest due per account (monthly running balance),
+        already credited, the difference to credit, and earlier runs'
     post:
       operationId: postOfficeAccountsInterestPostings
       summary: Annual interest crediting run (illustrative rate)
@@ -781,14 +820,20 @@ paths:
       - $ref: '#/components/parameters/IfMatch'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: contribution
       x-callers:
       - ho.fa_cao

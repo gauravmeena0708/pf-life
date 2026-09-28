@@ -11,13 +11,13 @@ from pydantic import BaseModel, Field
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.claims import NEXT_STEP, OPEN_STATES, ROLE_LABELS, approval_chain, eligibility, route, summary
+from app.domain.claims import NEXT_STEP, OPEN_STATES, ROLE_LABELS, approval_chain, eligibility, months_between, route, summary
 from app.infra.db import sessions
-from app.infra.tables import accounts, claim_timeline, claims, office_staff, risk_flags
+from app.infra.tables import accounts, claim_timeline, claims, office_staff, risk_flags, tax_declarations
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit, find_response, request_hash, store_response
-from epfo_persistence.policy import rules_by_version, rules_on
+from epfo_persistence.policy import financial_year, rules_by_version, rules_on, tds_on
 
 router = APIRouter()
 PRODUCER = "claim-service"
@@ -96,7 +96,7 @@ async def claim_view(session: AsyncSession, claim: dict[str, Any]) -> dict[str, 
         "form_type": claim["form_type"], "amount_paise": claim["amount_paise"], "state": claim["state"],
         "version": claim["version"], "rule_version": claim["rule_version"], "summary": claim["summary"],
         "decision_reason": claim["decision_reason"], "payment_id": claim["payment_id"],
-        "next_step": NEXT_STEP.get(claim["state"], ""),
+        "next_step": NEXT_STEP.get(claim["state"], ""), "tax": claim.get("tax"),
         "timeline": [{"at": t["at"].isoformat() if t["at"] else None, "state": t["state"],
                       "by": ROLE_LABELS.get(t["actor_role"], t["actor_role"]), "note": t["note"]} for t in timeline],
     }
@@ -269,22 +269,46 @@ async def get_claim(claim_id: str, actor: Actor = Depends(MEMBER), session: Asyn
 
 # ── cash section ────────────────────────────────────────────────────────────────────────────────
 
+async def work_out_tax(session: AsyncSession, claim: dict[str, Any], day: date) -> dict[str, Any]:
+    """TDS under the rules in force on the payment date (illustrative), with the member's PAN status, service and
+    any Form 15G / 15H for that financial year. Worked out once, at the first payment instruction."""
+    account = (await session.execute(select(accounts).where(accounts.c.account_link_id == claim["account_link_id"]))).mappings().one()
+    fy = financial_year(day)
+    declared = (await session.execute(select(tax_declarations.c.form).where(
+        tax_declarations.c.member_subject == claim["member_subject"], tax_declarations.c.financial_year == fy))).scalar_one_or_none()
+    rules = await rules_on(session, day)
+    service = months_between(account["date_of_joining"], account["date_of_exit"] or day)
+    t = tds_on(claim["amount_paise"], claim["claim_type"], service, account["pan_verified"], declared is not None, rules)
+    return {**t, "gross_paise": claim["amount_paise"], "net_paise": claim["amount_paise"] - t["tds_paise"],
+            "rule_version": rules["rule_version"], "financial_year": fy, "service_months": service, "declaration": declared,
+            "payment_date": day.isoformat()}
+
+
 async def _instruct(session: AsyncSession, claim: dict[str, Any], actor: Actor, scenario: str, template: str | None) -> dict:
     attempt = claim["payment_attempt"] + 1
     payment_id = f"PAY-{claim['claim_id']}-{attempt}"
+    first_tax = claim.get("tax") is None
+    tax = await work_out_tax(session, claim, datetime.now(UTC).date()) if first_tax else claim["tax"]
+    withheld = f" Income tax of ₹{tax['tds_paise'] // 100:,} withheld (TDS, {tax['basis']})" if tax["tds_paise"] else ""
     claim = await transition(session, claim, "PAYMENT_PENDING", actor.stakeholder,
-                             "Payment sent to the bank." if attempt == 1 else f"Payment re-issued (attempt {attempt}).",
-                             payment_id=payment_id, payment_attempt=attempt)
+                             ("Payment sent to the bank." if attempt == 1 else f"Payment re-issued (attempt {attempt}).") + withheld,
+                             payment_id=payment_id, payment_attempt=attempt, tax=tax)
+    if first_tax and tax["tds_paise"]:
+        await add_event(session, producer=PRODUCER, event_type="TaxDeducted.v1", aggregate_type="claim",
+                        aggregate_id=claim["claim_id"], correlation_id=actor.correlation_id, payload={
+                            "claim_id": claim["claim_id"], "account_link_id": claim["account_link_id"], "gross_paise": tax["gross_paise"],
+                            "tds_paise": tax["tds_paise"], "net_paise": tax["net_paise"], "rate_bp": tax["rate_bp"],
+                            "rule_version": tax["rule_version"], "financial_year": tax["financial_year"], "basis": tax["basis"]})
     await add_event(session, producer=PRODUCER, event_type="PaymentInstructed.v1", aggregate_type="claim",
                     aggregate_id=claim["claim_id"], correlation_id=actor.correlation_id, payload={
-                        "claim_id": claim["claim_id"], "payment_id": payment_id, "amount_paise": claim["amount_paise"],
+                        "claim_id": claim["claim_id"], "payment_id": payment_id, "amount_paise": tax["net_paise"],
                         "attempt": attempt, "demo_scenario": scenario})
     if template:
         await notify(session, claim, template, actor.correlation_id)
     await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="claim.payment_instructed",
                 target_type="claim", target_id=claim["claim_id"], detail=payment_id)
     return {"claim_id": claim["claim_id"], "state": claim["state"], "payment_id": payment_id, "attempt": attempt,
-            "amount_paise": claim["amount_paise"], "mock": True}
+            "amount_paise": claim["amount_paise"], "tds_paise": tax["tds_paise"], "net_paise": tax["net_paise"], "mock": True}
 
 
 async def _cash_command(claim_id: str, action: str, allowed: set[str], body: PaymentInstructionInput, request: Request,
@@ -388,3 +412,28 @@ async def approve_redisbursement(claim_id: str, body: RedisbursementDecision,
                     action=f"claim.redisbursement_{body.decision.lower()}", target_type="claim", target_id=claim_id, detail=body.note)
         view = await claim_view(session, claim)
     return envelope(view)
+
+
+# ── Form 15G / 15H (self-declaration that no tax is payable; waives TDS when the policy allows it) ─────
+
+class TaxDeclaration(BaseModel):
+    form: str = Field(pattern=r"^15[GH]$")
+    declaration: bool                                   # "my estimated income for the year is not taxable"
+
+
+@router.post("/api/v1/members/me/tax/form-15g-15h", status_code=201)
+async def declare_no_tax(body: TaxDeclaration, actor: Actor = Depends(MEMBER), session: AsyncSession = Depends(db)) -> dict:
+    if not body.declaration:
+        raise Problem(422, "/problems/validation", "The declaration must be confirmed")
+    fy = financial_year(datetime.now(UTC).date())
+    async with session.begin():
+        existing = (await session.execute(select(tax_declarations).where(
+            tax_declarations.c.member_subject == actor.subject, tax_declarations.c.financial_year == fy))).mappings().first()
+        if existing:
+            raise Problem(409, "/problems/already-declared", f"Form {existing['form']} is already on file for {fy}")
+        await session.execute(insert(tax_declarations).values(member_subject=actor.subject, financial_year=fy, form=body.form))
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="tax.declaration",
+                    target_type="member", target_id=actor.subject, detail=f"Form {body.form} for {fy}")
+    return envelope({"form": body.form, "financial_year": fy,
+                     "effect": "No TDS on withdrawals paid this financial year, while the policy allows the waiver. "
+                               "A false declaration is an offence (illustrative)."})

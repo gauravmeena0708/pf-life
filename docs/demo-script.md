@@ -37,6 +37,9 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `auditor` | Audit division | C |
 | `ho-policy` | ACC (HQ) — drafts rule changes | Policy |
 | `ho-analyst` | CPFC — approves and publishes rule changes, dashboards | Policy |
+| `ho-finance` | FA & CAO — annual interest crediting | Money |
+| `member-c` | Member who left employment (final settlement, TDS) | Money |
+| `pensioner-a`, `ro-pension` | Pensioner; APFC (Pension) who approves revisions | Money |
 
 ---
 
@@ -66,9 +69,12 @@ simulation; point out that the dialog says exactly what is being authorised (act
    and recommend.
 4. **`ro-ss`** approves (one-time code); **`ro-apfc`** gives the second approval. The same officer can never
    both recommend and approve.
-5. **`ro-cashier`** pays — choose *Simulate bank return* to show the failure path — then re-issues.
+5. **`ro-cashier`** pays — choose *Simulate bank return* to show the failure path. The cashier cannot simply
+   re-issue: **`member-a`** gives a new bank account on the claim (a mock penny-drop check; numbers ending 0000
+   fail), **`ro-apfc`** approves the re-payment with a one-time code (adjudication is not reopened), and only then
+   **`ro-cashier`** re-issues.
 6. **`member-a` → the claim:** the full timeline (officers by role, never by name), and *Profile & notices*:
-   "Your claim … for ₹6,00,000 was paid into your bank account ending 0001."
+   "Your claim … for ₹6,00,000 was paid into your bank account ending 9012" (the corrected account).
 
 ## Journey C — Grievance and escalation
 *Test: `tests/e2e/test_journey_c_grievance.py`*
@@ -117,7 +123,20 @@ simulation; point out that the dialog says exactly what is being authorised (act
 2. **`member-b`** tries to file a claim → "This account is on hold".
 3. **`do-caseworker`, `ro-ss`, `ro-apfc`, `ro-oic`** each verify in turn (the generic process screen, driven
    by `config/processes/member-freeze.yaml`). Out of turn → refused.
-4. **`ro-oic`** de-freezes (only after a *genuine member* finding).
+4. **`ro-oic`** de-freezes (only after a *genuine member* finding). While frozen, open claims were *on hold*.
+   After the de-freeze a claim that officers had already recommended restarts under the stricter
+   after-de-freeze chain (for example DA → SS → APFC), its earlier approvals void; a claim frozen before any
+   recommendation carries on, or is checked again if it had been approved automatically.
+
+## Tier-2 process — Joint Declaration (member detail correction)
+*Tests: `tests/e2e/test_joint_declaration.py`, `services/workflow-service/tests/test_joint_declaration.py`*
+
+1. **`member-a` → Profile & notices → Correct my details.** Choose the detail (for example the name), the
+   corrected value and the documents; submit.
+2. **`emp-signatory`** attests it on the employer home (or returns it with a reason).
+3. **`do-caseworker`** verifies; a minor correction is approved by **`ro-ao`**, a major one (name, date of birth)
+   by **`ro-apfc`** with a one-time code. The profile shows the corrected value, the change history keeps the old
+   one, and returns (ECR) are checked against the corrected record from then on.
 
 ## Policy administration — changing rules without code
 *Tests: `tests/e2e/test_policy_admin.py`, `services/platform-service/tests/test_policy_admin.py`*
@@ -135,6 +154,37 @@ simulation; point out that the dialog says exactly what is being authorised (act
    service, 90% of the balance, always decided by officers, its own chain DA → AO → APFC), or retire one, or
    change the default approval matrix and automatic-settlement limits. Members see it on *My claims*
    immediately; claims already made keep their rules; the assistant quotes the new figures.
+
+## Policy changes that move money — interest, TDS and pensions
+*Tests: `tests/e2e/test_policy_money.py`, `services/contribution-service/tests/test_interest.py`,
+`services/claim-service/tests/test_tds.py`, `services/pension-service/tests/test_pensions.py`*
+
+The rule set has three more sections, changed the same way (drafted by `ho-policy`, published by `ho-analyst`
+with a one-time code). *Effect, with worked examples* shows each change before it is approved.
+
+1. **Interest.** Under *Interest on PF accounts* the rate for each financial year (8.25% for 2025-26).
+   **`ho-finance` → Interest crediting** shows, per account, the interest due on the twelve month-end balances,
+   what is already credited and what is to be credited; *Credit interest* (one-time code, bound to the total)
+   posts one balanced journal per account dated 31 March. Now revise the 2025-26 rate (say 8.50%) and publish:
+   the same screen shows only the difference, *Post the revision* credits it, and `member-b`'s passbook shows
+   "Interest for 2025-26 revised to 8.5%: difference". A year that has not ended, or has no declared rate, is
+   refused.
+2. **TDS.** Under *Tax deducted at source* the taxed claim types, the threshold, the rates with and without a
+   verified PAN, the service after which no tax is deducted, and whether Form 15G / 15H waives it. The tax is
+   worked out when **`ro-cashier`** instructs the payment, under the rules in force that day, then fixed:
+   **`member-c`** (left employment after about 3½ years, PAN verified) claims a ₹60,000 final settlement, it is
+   settled automatically, and the claim shows *Claim amount ₹60,000 · TDS ₹6,000 · Paid to your bank ₹54,000*.
+   Change the rate with a PAN to 5% and publish: the next payment deducts ₹3,000. A Form 15G / 15H filed on
+   *My claims* waives it for the year.
+3. **Pensions.** Under *Pension formula* the divisor, salary cap, weightage, early-pension reduction and minimum
+   pension, and whether a change also revises **pensions in payment** (never downwards), optionally with effect
+   from an earlier date. Raise the minimum pension with effect from two months ago and publish:
+   **`ro-pension` → Pension revisions** lists each pension it raises with the arrears for the months already
+   paid; approve with a one-time code. **`pensioner-a` → My pension** shows the new amount, how it is worked out,
+   the rule set, and the arrears credit. Members see their own estimate on *Profile & notices*.
+
+If a version is already scheduled for a later date, today's change must first be carried into it (a same-day
+correction of that version); otherwise it would undo the change from its date, and publishing is refused.
 
 ## What the tests cover
 

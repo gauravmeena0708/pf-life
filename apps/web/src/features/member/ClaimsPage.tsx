@@ -8,6 +8,7 @@ import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { roleLabel, stateLabel, dateTime } from "../journeyB";
 import { StepUpDialog } from "../stepup/StepUpDialog";
+import { TaxDeclaration } from "./TaxDeclaration";
 import { useStepUp } from "../stepup/useStepUp";
 
 interface ClaimType { claim_type: string; form_type: string; label: string; plain_rule: string; eligible: boolean; max_amount_paise: number; reasons: string[] }
@@ -122,6 +123,7 @@ export function ClaimsPage() {
         <td><Link to={`/member/claims/${claim.claim_id}`}><code>{claim.claim_id}</code></Link></td><td>{claim.form_type} · {claim.claim_type}</td><td className="numeric">{rupees(claim.amount_paise)}</td><td><span className="state-pill">{stateLabel(claim.state, t)}</span></td><td>{claim.next_step}</td><td>{dateTime(claim.created_at, i18n.language)}</td>
       </tr>)}</tbody></table></div> : null}
     </section>
+    <TaxDeclaration />
     <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
   </section>;
 }

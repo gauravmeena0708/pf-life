@@ -153,13 +153,58 @@ def test_backdating_and_editing_rules(ctx):
     assert client.get("/api/v1/ho/config/rule-sets", headers=hdr("x", "member")).status_code == 403
 
 
-def test_an_earlier_version_cannot_be_published_under_a_scheduled_later_one(ctx):
+def publish(client, version_id, version=2):
+    step = {"action": "publish-policy", "resource_id": version_id, "resource_version": version}
+    return client.post(f"/api/v1/ho/config/rule-sets/{version_id}/decisions", json={"decision": "APPROVE", "note": "Approved for the test"},
+                       headers=hdr(APPROVER, "ho.cpfc", step))
+
+
+def test_an_earlier_change_waits_until_the_scheduled_later_version_carries_it(ctx):
     client, _ = ctx
-    later = draft(client, name="demo-rules-2026.5", effective=(datetime.now(UTC).date() + timedelta(days=60)).isoformat()).json()["data"]
+    in_60 = (datetime.now(UTC).date() + timedelta(days=60)).isoformat()
+    later = draft(client, name="demo-rules-2026.5", effective=in_60).json()["data"]
     client.post(f"/api/v1/ho/config/rule-sets/{later['version_id']}/submissions", headers=drafter())
-    step = {"action": "publish-policy", "resource_id": later["version_id"], "resource_version": 2}
-    assert client.post(f"/api/v1/ho/config/rule-sets/{later['version_id']}/decisions", json={"decision": "APPROVE",
-                       "note": "Scheduled ceiling change"}, headers=hdr(APPROVER, "ho.cpfc", step)).status_code == 200
-    earlier = draft(client, name="demo-rules-2026.4", effective=(datetime.now(UTC).date() + timedelta(days=5)).isoformat()).json()["data"]
+    assert publish(client, later["version_id"]).status_code == 200
+
+    def revised_rate(d):
+        d["interest"]["rates_bp"]["2025-26"] = 850
+    earlier = draft(client, revised_rate, name="demo-rules-2026.4", effective=(datetime.now(UTC).date() + timedelta(days=5)).isoformat()).json()["data"]
     r = client.post(f"/api/v1/ho/config/rule-sets/{earlier['version_id']}/submissions", headers=drafter())
     assert r.status_code == 409 and r.json()["type"] == "/problems/later-version-scheduled"
+    # Amend the scheduled version on its own date (a same-day correction); then the earlier change can go.
+    doc = client.get(f"/api/v1/ho/config/rule-sets/{later['version_id']}", headers=drafter()).json()["data"]["document"]
+    revised_rate(doc)
+    amended = client.post("/api/v1/ho/config/rule-sets", json={"base_version_id": later["version_id"], "rule_version": "demo-rules-2026.5a",
+                          "effective_from": in_60, "change_note": "Carry the revised 2025-26 rate", "document": doc}, headers=drafter()).json()["data"]
+    client.post(f"/api/v1/ho/config/rule-sets/{amended['version_id']}/submissions", headers=drafter())
+    assert publish(client, amended["version_id"]).status_code == 200
+    assert client.post(f"/api/v1/ho/config/rule-sets/{earlier['version_id']}/submissions", headers=drafter()).status_code == 200
+    assert publish(client, earlier["version_id"]).status_code == 200
+    status = {i["rule_version"]: i["status"] for i in client.get("/api/v1/ho/config/rule-sets", headers=drafter()).json()["data"]["items"]}
+    assert status["demo-rules-2026.5"] == "SUPERSEDED" and status["demo-rules-2026.5a"] == "SCHEDULED"
+
+
+def test_interest_tds_and_pension_changes_show_their_effect(ctx):
+    client, _ = ctx
+
+    def change(d):
+        d["interest"]["rates_bp"]["2025-26"] = 850
+        d["tds"]["rate_with_pan_bp"] = 500
+        d["pension"]["minimum_pension_paise"] = 150000
+    d = draft(client, change, name="demo-rules-2026.6").json()["data"]
+    assert d["checks"] == []
+    p = d["preview"]
+    assert p["interest"] == [{"financial_year": "2025-26", "before": "8.25% · ₹8,250", "after": "8.5% · ₹8,500"}]
+    tds = {(r["amount"], r["pan"]): (r["before"], r["after"]) for r in p["tds"]}
+    assert tds == {("₹60,000", "verified"): ("₹6,000", "₹3,000"), ("₹3,00,000", "verified"): ("₹30,000", "₹15,000")}
+    assert p["pension"] == [{"salary": "₹6,500", "service_years": 12, "age": 58, "before": "₹1,114", "after": "₹1,500"}]
+    assert "revised from the effective date" in p["pensions_in_payment"]
+
+    def bad(d):
+        d["tds"]["rate_without_pan_bp"] = 100
+        d["interest"]["rates_bp"]["2025-27"] = 800
+        d["pension"]["earliest_age_years"] = 60
+    checks = draft(client, bad, name="demo-rules-2026.7").json()["data"]["checks"]
+    assert any("rate_without_pan_bp cannot be lower" in c for c in checks)
+    assert any("2025-27 is not a financial year" in c for c in checks)
+    assert any("earliest_age_years cannot be after" in c for c in checks)

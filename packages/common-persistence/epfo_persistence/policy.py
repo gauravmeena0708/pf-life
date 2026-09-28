@@ -11,6 +11,7 @@ Before any version has been published (a fresh stack) both fall back to the base
 `validate` is the one set of checks used by platform-service before publishing."""
 import json
 import os
+import re
 from datetime import date
 from functools import lru_cache
 from pathlib import Path
@@ -60,8 +61,10 @@ def _document(value: Any) -> dict[str, Any]:
 
 
 async def rules_on(session: AsyncSession, day: date) -> dict[str, Any]:
+    # On a date with two versions, the one published later (a same-day correction) applies.
     row = (await session.execute(select(policy_rules.c.document).where(policy_rules.c.effective_from <= day)
-                                 .order_by(policy_rules.c.effective_from.desc()).limit(1))).scalar_one_or_none()
+                                 .order_by(policy_rules.c.effective_from.desc(), policy_rules.c.published_at.desc())
+                                 .limit(1))).scalar_one_or_none()
     return _document(row) if row is not None else baseline()
 
 
@@ -123,6 +126,94 @@ def split(epf_wages_paise: int, eps_wages_paise: int, age_years: int, rules: dic
             "TOTAL": ee + er + eps + edli + admin + edli_admin}
 
 
+# ── interest, TDS and pension (used by contribution-, claim- and pension-service and by the preview) ──
+
+def section(rules: dict[str, Any], name: str) -> dict[str, Any]:
+    """A section of the rules; a version published before the section existed takes the baseline's."""
+    return rules.get(name) or baseline()[name]
+
+
+FY = re.compile(r"^(\d{4})-(\d{2})$")
+
+
+def financial_year(day: date) -> str:
+    start = day.year if day.month >= 4 else day.year - 1
+    return f"{start}-{(start + 1) % 100:02d}"
+
+
+def financial_year_bounds(fy: str) -> tuple[date, date]:
+    m = FY.match(fy)
+    if not m or (int(m.group(1)) + 1) % 100 != int(m.group(2)):
+        raise ValueError(f"{fy} is not a financial year like 2025-26")
+    start = int(m.group(1))
+    return date(start, 4, 1), date(start + 1, 3, 31)
+
+
+def month_ends(fy: str) -> list[date]:
+    start, _ = financial_year_bounds(fy)
+    ends = []
+    for i in range(12):
+        y, mth = start.year + (start.month - 1 + i) // 12, (start.month - 1 + i) % 12 + 1
+        nxt = date(y + (mth == 12), mth % 12 + 1, 1)
+        ends.append(date.fromordinal(nxt.toordinal() - 1))
+    return ends
+
+
+def interest_rate_bp(rules: dict[str, Any], fy: str) -> int | None:
+    return section(rules, "interest").get("rates_bp", {}).get(fy)
+
+
+def interest_on(monthly_closing_paise: list[int], rate_bp: int) -> int:
+    """Monthly running balance: the sum of the twelve month-end balances x rate / 12, to the nearest rupee."""
+    return round_rupee_half_up(sum(monthly_closing_paise) * rate_bp, 10_000 * 12)
+
+
+def tds_on(amount_paise: int, claim_type: str, service_months: int, pan_verified: bool, has_15g_15h: bool,
+           rules: dict[str, Any]) -> dict[str, Any]:
+    """TDS on a withdrawal under the rules in force on the payment date: {tds_paise, rate_bp, basis}."""
+    t = section(rules, "tds")
+    none = {"tds_paise": 0, "rate_bp": 0}
+    if claim_type not in t["applies_to_claim_types"]:
+        return {**none, "basis": "This type of withdrawal is not taxed at source."}
+    if service_months >= t["exempt_after_service_months"]:
+        return {**none, "basis": f"No TDS after {t['exempt_after_service_months'] // 12} years of service."}
+    if amount_paise < t["threshold_paise"]:
+        return {**none, "basis": "Below the TDS threshold."}
+    if has_15g_15h and t["form_15g_15h_waiver"]:
+        return {**none, "basis": "Form 15G / 15H on file for this financial year."}
+    rate = t["rate_with_pan_bp"] if pan_verified else t["rate_without_pan_bp"]
+    return {"tds_paise": round_rupee_half_up(amount_paise * rate), "rate_bp": rate,
+            "basis": f"{rate / 100:g}% {'with a verified PAN' if pan_verified else 'without a verified PAN'}."}
+
+
+def pension_on(salary_paise: int, service_months: int, age_years: int, rules: dict[str, Any]) -> dict[str, Any]:
+    """Monthly EPS pension under the formula in the rules, with the working shown."""
+    p = section(rules, "pension")
+    years = service_months // 12 + (1 if service_months % 12 >= 6 else 0)        # six months or more count as a year
+    if years < p["min_service_years"]:
+        return {"eligible": False, "monthly_paise": 0, "service_years": years,
+                "reason": f"At least {p['min_service_years']} years of service are needed for a monthly pension."}
+    if age_years < p["earliest_age_years"]:
+        return {"eligible": False, "monthly_paise": 0, "service_years": years,
+                "reason": f"A monthly pension starts at {p['earliest_age_years']} at the earliest."}
+    salary = min(salary_paise, p["pensionable_salary_cap_paise"])
+    weightage = p["weightage_years"] if years >= p["weightage_after_service_years"] else 0
+    formula = salary * (years + weightage) // p["divisor"]
+    early_years = max(0, p["normal_age_years"] - age_years)
+    reduction_bp = min(10_000, early_years * p["early_reduction_bp_per_year"])
+    reduced = formula * (10_000 - reduction_bp) // 10_000
+    by_formula = round_rupee_half_up(reduced * 10_000)
+    monthly = max(by_formula, p["minimum_pension_paise"])
+    working = f"₹{salary // 100:,} x ({years}{f' + {weightage} weightage' if weightage else ''} years) / {p['divisor']}"
+    if reduction_bp:
+        working += f", less {reduction_bp / 100:g}% for {early_years} years before age {p['normal_age_years']}"
+    if monthly > by_formula:
+        working += f"; raised to the minimum pension of ₹{monthly // 100:,}"
+    return {"eligible": True, "monthly_paise": monthly, "service_years": years, "weightage_years": weightage,
+            "pensionable_salary_paise": salary, "divisor": p["divisor"], "early_reduction_bp": reduction_bp,
+            "minimum_applied": monthly > by_formula, "working": working}
+
+
 # ── checks before publishing ─────────────────────────────────────────────────────────────────────
 
 def _bands_problems(bands: Any, where: str) -> list[str]:
@@ -151,6 +242,65 @@ def _bands_problems(bands: Any, where: str) -> list[str]:
             problems.append(f"{where} band {i + 1}: further approvers must be fo.apfc or fo.oic")
         if len(set(chain)) != len(chain):
             problems.append(f"{where} band {i + 1}: a role appears twice")
+    return problems
+
+
+def _whole(v: Any, low: int, high: int | None = None) -> bool:
+    return isinstance(v, int) and not isinstance(v, bool) and v >= low and (high is None or v <= high)
+
+
+def _money_sections_problems(document: dict[str, Any]) -> list[str]:
+    """Interest, TDS and pension sections (each optional: a missing section takes the baseline's)."""
+    problems: list[str] = []
+    if "interest" in document:
+        rates = (document["interest"] or {}).get("rates_bp")
+        if not isinstance(rates, dict) or not rates:
+            problems.append("interest.rates_bp needs at least one financial year")
+        for fy, rate in (rates or {}).items() if isinstance(rates, dict) else []:
+            try:
+                financial_year_bounds(fy)
+            except ValueError:
+                problems.append(f"interest: {fy} is not a financial year like 2025-26")
+            if not _whole(rate, 0, 2000):
+                problems.append(f"interest rate for {fy} must be between 0 and 2000 basis points (20%)")
+    if "tds" in document:
+        t = document["tds"] or {}
+        if not isinstance(t.get("applies_to_claim_types"), list):
+            problems.append("tds.applies_to_claim_types must be a list of claim types (it may be empty)")
+        else:
+            unknown = set(t["applies_to_claim_types"]) - set(((document.get("claims") or {}).get("types") or {}))
+            if unknown:
+                problems.append(f"tds.applies_to_claim_types names unknown claim types: {', '.join(sorted(unknown))}")
+        for key in ("rate_with_pan_bp", "rate_without_pan_bp"):
+            if not _whole(t.get(key), 0, 5000):
+                problems.append(f"tds.{key} must be between 0 and 5000 basis points")
+        if _whole(t.get("rate_with_pan_bp"), 0) and _whole(t.get("rate_without_pan_bp"), 0) and t["rate_without_pan_bp"] < t["rate_with_pan_bp"]:
+            problems.append("tds.rate_without_pan_bp cannot be lower than the rate with a PAN")
+        for key in ("threshold_paise", "exempt_after_service_months"):
+            if not _whole(t.get(key), 0):
+                problems.append(f"tds.{key} must be a non-negative whole number")
+        if not isinstance(t.get("form_15g_15h_waiver"), bool):
+            problems.append("tds.form_15g_15h_waiver must be true or false")
+    if "pension" in document:
+        p = document["pension"] or {}
+        checks = {"divisor": (1, 1000), "salary_months": (1, 120), "pensionable_salary_cap_paise": (100, None),
+                  "min_service_years": (1, 40), "weightage_years": (0, 10), "weightage_after_service_years": (1, 45),
+                  "normal_age_years": (50, 70), "earliest_age_years": (40, 70), "early_reduction_bp_per_year": (0, 2000),
+                  "minimum_pension_paise": (0, None)}
+        for key, (low, high) in checks.items():
+            if not _whole(p.get(key), low, high):
+                problems.append(f"pension.{key} must be a whole number" + (f" between {low} and {high}" if high else f" of at least {low}"))
+        if _whole(p.get("earliest_age_years"), 0) and _whole(p.get("normal_age_years"), 0) and p["earliest_age_years"] > p["normal_age_years"]:
+            problems.append("pension.earliest_age_years cannot be after the normal pension age")
+        if not isinstance(p.get("applies_to_pensions_in_payment"), bool):
+            problems.append("pension.applies_to_pensions_in_payment must be true or false")
+        back = p.get("revise_in_payment_from")
+        if back is not None:
+            try:
+                if date.fromisoformat(str(back)) > date.fromisoformat(str(document.get("effective_from"))):
+                    problems.append("pension.revise_in_payment_from cannot be after the rule set's effective date")
+            except ValueError:
+                problems.append("pension.revise_in_payment_from must be a date (YYYY-MM-DD) or empty")
     return problems
 
 
@@ -206,6 +356,7 @@ def validate(document: dict[str, Any]) -> list[str]:
         problems.extend(_bands_problems(claims["after_defreeze_bands"], "after-de-freeze bands"))
     if not isinstance(claims.get("settlement_sla_days"), int) or claims["settlement_sla_days"] < 1:
         problems.append("claims.settlement_sla_days must be at least 1")
+    problems.extend(_money_sections_problems(document))
     g = document.get("grievances") or {}
     if not g.get("categories") or "OTHER" not in g["categories"]:
         problems.append("grievances.categories must include OTHER")

@@ -6,6 +6,7 @@ import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { dateOnly, dateTime, stateLabel } from "../journeyB";
 import { CorrectionForm } from "./CorrectionForm";
+import { PensionEstimate } from "./PensionEstimate";
 
 interface Member { member_id: string; uan: string; name: string; date_of_birth: string; gender: string; mobile_masked: string; email_masked: string; bank: { ifsc: string; account_last4: string }; kyc: { aadhaar: string; pan: string; bank: string }; account_link_ids: string[] }
 interface Assurance { kyc: Member["kyc"]; level: "FULL" | "PARTIAL"; next_step: string }
@@ -40,6 +41,7 @@ export function ProfilePage() {
       {notices.data?.data.length === 0 ? <p className="muted">{t("profile.noNotices")}</p> : null}
       {notices.data?.data.length ? <ol className="notice-list">{[...notices.data.data].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)).map((notice) => <li key={notice.id}><h3>{notice.title}</h3><p>{notice.body}</p><time dateTime={notice.created_at} className="muted small">{dateTime(notice.created_at, i18n.language)}</time></li>)}</ol> : null}
     {member ? <CorrectionForm uan={member.uan} onDone={() => void profile.refetch()} /> : null}
+    <PensionEstimate />
     </section>
   </section>;
 }

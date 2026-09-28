@@ -25,6 +25,7 @@ BINDINGS = [
     "member-service.AccountDefrozen.v1",
     "platform-service.PolicyPublished.v1",
     "contribution-service.LedgerReversed.v1",
+    "contribution-service.InterestCredited.v1",
 ]
 
 
@@ -47,6 +48,14 @@ async def _claim_or_none(session: AsyncSession, claim_id: str) -> dict[str, Any]
 
 async def on_contribution_posted(session: AsyncSession, event: dict[str, Any]) -> None:
     await _member_lines(session, event["payload"]["postings"], +1)
+
+
+async def on_interest_credited(session: AsyncSession, event: dict[str, Any]) -> None:
+    """Annual interest (or a rate revision's difference; negative when a rate is lowered) moves the balances."""
+    for p in event["payload"]["postings"]:
+        await session.execute(update(accounts).where(accounts.c.account_link_id == p["account_link_id"]).values(
+            employee_paise=accounts.c.employee_paise + int(p["employee_paise"]),
+            employer_paise=accounts.c.employer_paise + int(p["employer_paise"])))
 
 
 async def on_claim_debit_posted(session: AsyncSession, event: dict[str, Any]) -> None:
@@ -95,8 +104,9 @@ async def on_payment_result(session: AsyncSession, event: dict[str, Any]) -> Non
         return
     if event["event_type"] == "PaymentConfirmed.v1":
         claim = await transition(session, claim, "SETTLED", "bank", "Paid into your bank account (mock bank).")
-        await notify(session, claim, "CLAIM_SETTLED", cid,        # a re-payment goes to the corrected account
-                     **({"bank_account_last4": claim["payee_account_last4"]} if claim.get("payee_account_last4") else {}))
+        await notify(session, claim, "CLAIM_SETTLED", cid,        # a re-payment goes to the corrected account; the net of TDS is paid
+                     **({"bank_account_last4": claim["payee_account_last4"]} if claim.get("payee_account_last4") else {}),
+                     **({"amount_paise": claim["tax"]["net_paise"], "tds_paise": claim["tax"]["tds_paise"]} if claim.get("tax") else {}))
     else:
         claim = await transition(session, claim, "PAYMENT_RETURNED", "bank",
                                  f"The bank returned the payment ({p.get('return_reason')}).")
@@ -164,6 +174,7 @@ HANDLERS = {
     "RiskSignalRaised.v1": on_risk_signal,
     "RiskSignalReviewed.v1": on_risk_signal,
     "ContributionPosted.v1": on_contribution_posted,
+    "InterestCredited.v1": on_interest_credited,
     "ClaimDebitPosted.v1": on_claim_debit_posted,
     "CaseDecisionSubmitted.v1": on_case_decision,
     "PaymentConfirmed.v1": on_payment_result,

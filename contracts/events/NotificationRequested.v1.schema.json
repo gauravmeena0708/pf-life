@@ -37,7 +37,8 @@
       "enum": [
         "claim-service",
         "grievance-service",
-        "member-service"
+        "member-service",
+        "contribution-service"
       ]
     },
     "occurred_at": {

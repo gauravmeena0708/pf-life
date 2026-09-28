@@ -35,7 +35,7 @@ Rules that apply to every row:
 | `GET /public/offices` | Office locator by state/district/pincode | W | 1 | workflow |
 | `GET /public/statistics` | Aggregate statistics, small-group suppression | W | 1 | reporting |
 | `POST /public/demo-calculations/epf` | Illustrative EPF contribution calculator | W | 1 | contribution |
-| `POST /public/demo-calculations/pension` | Illustrative pension estimate calculator | P | 2 | pension |
+| `POST /public/demo-calculations/pension` | Illustrative pension estimate calculator | W | 1 | pension |
 | `GET /public/establishments?query=&mode=&match=&office_id=&city=&district=&establishment_type=&exemption_status=&status=&page=` | **Establishment search** by code, registration, pincode, name or industry; filter by location, type, exemption and coverage | W | 1 | employer |
 | `GET /public/establishments/{estId}` | Public profile: name, registration, office, location, type, industry, coverage, verification and exemption | W | 1 | employer |
 | `GET /public/demo-challenges` | One-use arithmetic proof for synthetic public lookup demo | M | 1 | gateway |
@@ -196,7 +196,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/establishments/{estId}/damages-knock-offs` 💰🔐 | Knock off auto-calculated 14B / 7Q against a miscellaneous challan (FO INTERFACE >> 14B/7Q Knock Off) | P | 2 | contribution |
 | `POST /office/damages-knock-offs/{knockOffId}/approvals` 🔐 | SS approves the knock-off | P | 2 | contribution |
 | `POST /office/vdr-entries/{vdrId}/eo-certifications` 🔐 | Enforcement Officer certifies a revised ECR in the VDR-ECR correction process | ? | 3 | contribution |
-| `PUT /ho/config/interest-rates/{financialYear}` 🔐 | Record the approved annual interest rate (CBT recommendation, Ministry concurrence) — illustrative in the POC | P | 2 | contribution |
+| `PUT /ho/config/interest-rates/{financialYear}` 🔐 | Record the approved annual interest rate (CBT recommendation, Ministry concurrence). In the POC the rate is a field of the rule set (`interest.rates_bp`), published through policy administration | P | 2 | contribution |
 
 
 **Added from the Samadhan Setu integration spec** (`../samadhan-setu files/PF_LIFE_INTEGRATION_SPECIFICATION.md`, checked against the tracker issues)
@@ -227,7 +227,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /members/me/annual-statements/{financialYear}` | Annual account slip | P | 2 | contribution |
 | `GET /members/me/tax/taxable-interest?financialYear=` | Taxable vs non-taxable interest split | P | 2 | contribution |
 | `GET /members/me/tax/form-16a?financialYear=` | TDS certificate (Form 16A) | P | 3 | claim |
-| `POST /members/me/tax/form-15g-15h` | Upload Form 15G / 15H | P | 2 | claim |
+| `POST /members/me/tax/form-15g-15h` | Upload Form 15G / 15H | W | 1 | claim |
 | `GET /members/me/nominations` | e-Nomination (Form 2) — view | P | 2 | member |
 | `POST /members/me/nominations` 🔐 | e-Nomination — submit with mock e-sign | P | 2 | member |
 | `GET /members/me/sessions` | Session history | W | 1 | gateway |
@@ -326,7 +326,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /office/members/{uan}` | Member 360 view (jurisdiction + purpose checked, audited) | P | 2 | member |
 | `POST /office/members/{uan}/freezes` 🔐 | **UAN / member-ID freeze** with reason and evidence (tier-2 process `member_freeze`) | W | 1 | member |
 | `POST /office/members/{uan}/defreezes` 🔐 | De-freeze, maker-checker (tier-2 process `member_freeze`) | W | 1 | member |
-| `POST /office/accounts/interest-postings` 💰🔐 | Annual interest crediting run (illustrative rate) | P | 2 | contribution |
+| `POST /office/accounts/interest-postings` 💰🔐 | Annual interest crediting run (illustrative rate) | W | 1 | contribution |
+| `GET /office/accounts/interest-postings?financialYear=` | Interest run preview: the rate in the rule set in force, interest due per account (monthly running balance), already credited, the difference to credit, and earlier runs | W | 1 | contribution |
 | `GET /office/accounts/inoperative` | **Inoperative account** identification | P | 2 | contribution |
 | `POST /office/accounts/{accountLinkId}/reactivations` 🔐 | Inoperative account reactivation | P | 3 | contribution |
 | `POST /office/tds/computations` | TDS on withdrawal (illustrative rules) | P | 3 | claim |
@@ -371,15 +372,15 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 
 ## 9. Pension (EPS) and pensioners
 
-`pension-service` is phase 1 only as a **read-only seeded mock** behind the public life-certificate lookup and the pensioner's own status view. Everything else is planned.
+`pension-service` holds seeded pensions in payment (mock CPPS credits), recomputes them when a published rule set changes the pension formula (revisions with arrears, approved by an APFC (Pension)), and serves the member's estimate and the public calculator under the formula in force. Everything else is planned.
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
 | `GET /pensioners/me/life-certificate` | **Jeevan Pramaan / Digital Life Certificate** status: last submitted, valid till, source | M | 1 | pension |
-| `GET /pensioners/me` | Pensioner profile (PPO number, pension type, disbursing bank) | P | 2 | pension |
+| `GET /pensioners/me` | Pensioner profile (PPO number, pension type, disbursing bank) | W | 1 | pension |
 | `GET /pensioners/me/ppo` | **PPO** view / download | P | 2 | pension |
 | `GET /pensioners/me/pension-slips?month=` | **Pension slip** | P | 2 | pension |
-| `GET /pensioners/me/payments` | Pension payment history | P | 2 | pension |
+| `GET /pensioners/me/payments` | Pension payment history | W | 1 | pension |
 | `POST /pensioners/me/life-certificate/submissions` | Record DLC submission (mock Jeevan Pramaan / face-auth adapter) | M | 2 | pension |
 | `POST /integrations/mock-jeevan-pramaan/dlc-events` | Signed callback from mock Jeevan Pramaan | M | 2 | pension |
 | `POST /pensioners/me/bank-change-requests` 🔐 | Change disbursing bank | P | 2 | pension |
@@ -388,7 +389,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/pensions/{ppoId}/suspensions` 🔐 | Suspend pension on missing life certificate | P | 2 | pension |
 | `POST /office/pensions/{ppoId}/resumptions` 🔐 | Resume pension | P | 2 | pension |
 | `POST /office/pensions/ppo-issuances` 🔐 | Issue PPO after Form 10D settlement | P | 2 | pension |
-| `POST /office/pensions/{ppoId}/revisions` 💰🔐 | Pension revision (incl. higher-pension outcome) | P | 3 | pension |
+| `POST /office/pensions/{ppoId}/revisions` 💰🔐 | Pension revision (incl. higher-pension outcome) | W | 1 | pension |
+| `GET /office/pensions/revisions?state=` | Pension revisions proposed when a published formula change raises pensions in payment, with arrears to date | W | 1 | pension |
 | `POST /office/pensions/higher-pension-options/{optionId}/decisions` 🔐 | Decide on a validated option → dues demand event | P | 3 | pension |
 | `POST /office/pensions/higher-pension-options/{optionId}/ledger-transfers` 💰🔐 | PF→pension fund transfer after dues are paid → journal via `contribution-service` event | P | 3 | pension |
 
@@ -419,7 +421,7 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `GET /members/me/pension-eligibility-preview` | Pre-check pension eligibility across all member IDs under the UAN; flags untransferred service (threshold from illustrative config) | P | 2 | pension |
+| `GET /members/me/pension-eligibility-preview` | Pre-check pension eligibility across all member IDs under the UAN; flags untransferred service (threshold from illustrative config) | W | 1 | pension |
 | `POST /office/pensions/service-aggregations` 🔐 | DA (Pension) aggregates untransferred past service into the calculation sheet | P | 2 | pension |
 | `POST /members/me/pension-scheme-certificates/{certId}/surrenders` 💰🔐 | Surrender a Scheme Certificate to convert it to monthly pension (Form 10D) or withdrawal benefit (Form 10C) | P | 2 | pension |
 | `POST /office/pensions/scheme-certificates/{certId}/surrender-adjudications` 🔐 | DA (Pension) validates and cancels a surrendered Scheme Certificate | P | 2 | pension |

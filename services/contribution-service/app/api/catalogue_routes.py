@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['POST /public/trrn-status-lookups', 'GET /employers/me/challans', 'GET /employers/me/ecr-filings', 'POST /employers/me/ecr-filings', 'GET /members/me/passbook', 'POST /public/demo-calculations/epf', 'POST /partners/sandbox/payroll/ecr-filings', 'GET /employers/me/challans/{trrn}', 'GET /employers/me/ecr-filings/{filingId}', 'GET /employers/me/challans/{trrn}/receipt', 'POST /employers/me/ecr-filings/{filingId}/approvals', 'POST /employers/me/ecr-filings/{filingId}/submissions', 'POST /employers/me/ecr-filings/{filingId}/validations', 'GET /members/me/accounts/{accountLinkId}/passbook']
+OPERATIONS = ['POST /public/trrn-status-lookups', 'GET /employers/me/challans', 'GET /employers/me/ecr-filings', 'POST /employers/me/ecr-filings', 'GET /members/me/passbook', 'GET /office/accounts/interest-postings', 'POST /office/accounts/interest-postings', 'POST /public/demo-calculations/epf', 'POST /partners/sandbox/payroll/ecr-filings', 'GET /employers/me/challans/{trrn}', 'GET /employers/me/ecr-filings/{filingId}', 'GET /employers/me/challans/{trrn}/receipt', 'POST /employers/me/ecr-filings/{filingId}/approvals', 'POST /employers/me/ecr-filings/{filingId}/submissions', 'POST /employers/me/ecr-filings/{filingId}/validations', 'GET /members/me/accounts/{accountLinkId}/passbook']
 
 @router.api_route("/api/v1/public/trrn-status-lookups", methods=["POST"], include_in_schema=False)
 async def post_public_trrn_status_lookups(actor: Actor = Depends(require_actor)) -> None:
@@ -35,6 +35,16 @@ async def post_employers_me_ecr_filings(actor: Actor = Depends(require_actor)) -
 @router.api_route("/api/v1/members/me/passbook", methods=["GET"], include_in_schema=False)
 async def get_members_me_passbook(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Passbook across all accounts linked to the caller (no member ID parameter)")
+
+
+@router.api_route("/api/v1/office/accounts/interest-postings", methods=["GET"], include_in_schema=False)
+async def get_office_accounts_interest_postings(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Interest run preview: the rate in the rule set in force, interest due per account (monthly running b")
+
+
+@router.api_route("/api/v1/office/accounts/interest-postings", methods=["POST"], include_in_schema=False)
+async def post_office_accounts_interest_postings(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Annual interest crediting run (illustrative rate)")
 
 
 @router.api_route("/api/v1/public/demo-calculations/epf", methods=["POST"], include_in_schema=False)

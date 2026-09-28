@@ -5,7 +5,7 @@ reproduced from the stored evaluation snapshot."""
 from datetime import date
 from typing import Any
 
-from epfo_persistence.policy import approval_chain as chain_for, auto_settle_limit
+from epfo_persistence.policy import approval_chain as chain_for, auto_settle_limit, section
 
 OPEN_STATES = {"AWAITING_CONFIRMATION", "SUBMITTED", "UNDER_REVIEW", "RECOMMENDED", "AWAITING_NEXT_APPROVAL",
                "APPROVED", "AUTO_APPROVED", "PAYMENT_PENDING", "PAYMENT_RETURNED", "CORRECTION_PENDING",
@@ -104,6 +104,14 @@ def route(amount_paise: int, rules: dict[str, Any], claim_type: str) -> str:
     return "AUTO" if limit is not None and amount_paise <= limit else "REVIEW"
 
 
+def tax_note(claim_type: str, rules: dict[str, Any]) -> str:
+    t = section(rules, "tds")
+    if claim_type not in t["applies_to_claim_types"]:
+        return ""
+    return (f" Income tax may be deducted at source (TDS) under the rules in force on the payment date: from {rupees(t['threshold_paise'])}, "
+            f"before {t['exempt_after_service_months'] // 12} years of service, unless you have filed Form 15G / 15H for the year.")
+
+
 def summary(evaluation: dict[str, Any], amount_paise: int, rules: dict[str, Any]) -> str:
     claim_type = evaluation["claim_type"]
     chain = approval_chain(amount_paise, rules, claim_type)
@@ -116,5 +124,5 @@ def summary(evaluation: dict[str, Any], amount_paise: int, rules: dict[str, Any]
         path = f"{why}, so it will be reviewed by: " + " → ".join(ROLE_LABELS[r] for r in chain) + "."
     return (f"You are claiming {rupees(amount_paise)} as '{evaluation['label']}' (Form {evaluation['form_type']}). "
             f"Rule: {evaluation['plain_rule']} Your maximum today is {rupees(evaluation['max_amount_paise'])}. "
-            f"{path} The money will be paid to the bank account linked to your UAN. "
+            f"{path} The money will be paid to the bank account linked to your UAN.{tax_note(claim_type, rules)} "
             f"Illustrative rules {rules['rule_version']} (not official EPFO limits).")

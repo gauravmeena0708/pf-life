@@ -27,14 +27,17 @@ async def main() -> None:
                 accounts.c.account_link_id == m["account_link_id"]))).first()
             if exists:   # balances move with events after the first load; only refresh identity fields
                 await session.execute(update(accounts).where(accounts.c.account_link_id == m["account_link_id"])
-                                      .values(member_subject=m.get("subject"), office_id=office_id, uan=m["uan"]))
+                                      .values(member_subject=m.get("subject"), office_id=office_id, uan=m["uan"],
+                                              date_of_exit=date.fromisoformat(m["date_of_exit"]) if m.get("date_of_exit") else None,
+                                              pan_verified=m["kyc"]["pan"] == "VERIFIED"))
                 continue
             await session.execute(insert(accounts).values(
                 account_link_id=m["account_link_id"], member_subject=m.get("subject"), uan=m["uan"],
                 establishment_id=seed["establishment"]["establishment_id"], office_id=office_id,
                 date_of_joining=date.fromisoformat(m["date_of_joining"]),
                 date_of_exit=date.fromisoformat(m["date_of_exit"]) if m.get("date_of_exit") else None,
-                employee_paise=balance.get("employee_paise", 0), employer_paise=balance.get("employer_paise", 0)))
+                employee_paise=balance.get("employee_paise", 0), employer_paise=balance.get("employer_paise", 0),
+                pan_verified=m["kyc"]["pan"] == "VERIFIED"))
         for s in seed.get("office_staff", []):
             await session.execute(insert(office_staff).values(subject=s["subject"], stakeholder=s["stakeholder"],
                                                               office_id=s["office_id"]).on_conflict_do_nothing())

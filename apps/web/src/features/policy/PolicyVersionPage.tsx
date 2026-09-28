@@ -7,25 +7,14 @@ import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
+import { BenefitPreview, InterestSection, PensionSection, TdsSection } from "./BenefitRules";
+import { Money, Num, toPaise, toRupees } from "./fields";
 import type { Band, ClaimType, RuleDocument, RuleSet } from "./types";
 
 const ROLE: Record<string, string> = { "fo.da_accounts": "DA", "fo.ss": "SS", "fo.ao": "AO", "fo.apfc": "APFC", "fo.oic": "OIC" };
 const clone = <T,>(v: T): T => JSON.parse(JSON.stringify(v)) as T;
-const toPaise = (rupeesText: string): number | null => rupeesText.trim() === "" ? null : Math.round(Number(rupeesText) * 100);
-const toRupees = (paise: number | null | undefined): string => paise === null || paise === undefined ? "" : String(paise / 100);
 const shown = (v: unknown, path: string) => v === null || v === undefined ? "—"
   : typeof v === "number" && path.endsWith("_paise") ? rupees(v) : typeof v === "object" ? JSON.stringify(v) : String(v);
-
-function Money({ label, value, onChange, disabled, blank }: { label: string; value: number | null | undefined; onChange: (p: number | null) => void; disabled: boolean; blank?: string }) {
-  return <label>{label}<input inputMode="numeric" value={toRupees(value)} disabled={disabled} placeholder={blank}
-    onChange={(e) => onChange(toPaise(e.target.value.replace(/[^0-9.]/g, "")))} /></label>;
-}
-
-function Num({ label, value, onChange, disabled, suffix }: { label: string; value: number | null | undefined; onChange: (n: number | null) => void; disabled: boolean; suffix?: string }) {
-  return <label>{label}{suffix ? <span className="muted small"> ({suffix})</span> : null}<input inputMode="numeric" value={value ?? ""} disabled={disabled}
-    onChange={(e) => onChange(e.target.value.trim() === "" ? null : Number(e.target.value))} /></label>;
-}
-
 /** Approval chain by amount: DA, then SS or AO, then optionally APFC and/or OIC. */
 function BandsEditor({ bands, onChange, disabled }: { bands: Band[]; onChange: (b: Band[]) => void; disabled: boolean }) {
   const set = (i: number, band: Band) => onChange(bands.map((b, j) => j === i ? band : b));
@@ -203,6 +192,10 @@ export function PolicyVersionPage() {
             </div>
           </section>
 
+          <InterestSection value={doc.interest} disabled={!editable} onChange={(interest) => setDoc((d) => d && { ...d, interest })} />
+          <TdsSection value={doc.tds} claimTypes={Object.keys(doc.claims.types)} disabled={!editable} onChange={(tds) => setDoc((d) => d && { ...d, tds })} />
+          <PensionSection value={doc.pension} effectiveFrom={r.effective_from} disabled={!editable} onChange={(pension) => setDoc((d) => d && { ...d, pension })} />
+
           <section className="card stack" aria-labelledby="griev-heading"><h2 id="griev-heading">Grievances</h2>
             <label>Categories (comma separated; OTHER is required)<input value={doc.grievances.categories.join(", ")} disabled={!editable}
               onChange={(e) => setDoc((d) => d && { ...d, grievances: { ...d.grievances, categories: e.target.value.split(",").map((c) => c.trim().toUpperCase().replace(/\s+/g, "_")).filter(Boolean) } })} /></label>
@@ -237,6 +230,7 @@ export function PolicyVersionPage() {
             {r.preview.claims.length ? <div className="table-scroll"><table><thead><tr><th scope="col">Claim type</th><th scope="col">Amount</th><th scope="col">Decided by — before</th><th scope="col">After</th></tr></thead>
               <tbody>{r.preview.claims.map((c) => <tr key={`${c.claim_type}-${c.amount}`}><td>{c.claim_type}</td><td>{c.amount}</td><td>{c.before}</td><td><strong>{c.after}</strong></td></tr>)}</tbody>
             </table></div> : <p className="muted">Who decides claims is unchanged.</p>}
+            <BenefitPreview preview={r.preview} />
           </section> : null}
 
           {r.status === "SUBMITTED" && role === "ho.cpfc" ? (

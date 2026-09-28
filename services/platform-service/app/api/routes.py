@@ -75,10 +75,20 @@ def standing(row: dict[str, Any], live: list[dict[str, Any]], on: date) -> str:
     """IN_FORCE / SCHEDULED / SUPERSEDED for published versions; the workflow status otherwise."""
     if row["status"] != "PUBLISHED":
         return row["status"]
-    in_force = max((r for r in live if r["effective_from"] <= on), key=lambda r: r["effective_from"], default=None)
+    if any(r["effective_from"] == row["effective_from"] and later_published(r, row) for r in live):
+        return "SUPERSEDED"                                     # a same-day correction replaced it
+    in_force = max((r for r in live if r["effective_from"] <= on), key=published_order, default=None)
     if row["effective_from"] > on:
         return "SCHEDULED"
     return "IN_FORCE" if in_force and in_force["version_id"] == row["version_id"] else "SUPERSEDED"
+
+
+def published_order(r: dict[str, Any]) -> tuple:
+    return (r["effective_from"], r["decided_at"] or datetime.min.replace(tzinfo=UTC))
+
+
+def later_published(a: dict[str, Any], b: dict[str, Any]) -> bool:
+    return a["version_id"] != b["version_id"] and published_order(a) > published_order(b)
 
 
 def summary(row: dict[str, Any], live: list[dict[str, Any]]) -> dict[str, Any]:
@@ -96,8 +106,16 @@ async def load(session: AsyncSession, version_id: str) -> dict[str, Any]:
     return dict(row)
 
 
+SECTIONS = ("interest", "tds", "pension")
+
+
+def complete(document: dict[str, Any]) -> dict[str, Any]:
+    """A version published before a section existed used the baseline's; show and copy it explicitly."""
+    return {**{k: baseline()[k] for k in SECTIONS if k not in document}, **document}
+
+
 def stamp(document: dict[str, Any], rule_version: str, effective_from: date) -> dict[str, Any]:
-    return {**document, "ILLUSTRATIVE_ONLY": True, "rule_version": rule_version, "effective_from": effective_from.isoformat()}
+    return {**complete(document), "ILLUSTRATIVE_ONLY": True, "rule_version": rule_version, "effective_from": effective_from.isoformat()}
 
 
 async def check_names(session: AsyncSession, rule_version: str, effective_from: date, own_id: str | None) -> None:
@@ -112,15 +130,31 @@ async def check_names(session: AsyncSession, rule_version: str, effective_from: 
 
 
 async def refuse_if_overridden(session: AsyncSession, row: dict[str, Any]) -> None:
-    """A version already scheduled for a later date was copied from older rules; from its date it would silently
-    undo this change. Refuse, so the drafter prepares one combined version instead."""
-    later = (await session.execute(select(rule_sets.c.rule_version, rule_sets.c.effective_from).where(
-        rule_sets.c.status == "PUBLISHED", rule_sets.c.effective_from > row["effective_from"]))).first()
-    if later:
-        raise Problem(409, "/problems/later-version-scheduled", "A later version is already scheduled",
-                      f"{later[0]} takes effect on {later[1].isoformat()} and does not contain this change, so it would undo it "
-                      "from that date. Put both changes into one version, or choose a date after it.",
-                      scheduled_version=later[0])
+    """A version already scheduled for a later date may have been copied from older rules; from its date it would
+    silently undo this change. Refuse unless each later version already carries the change, so the drafter first
+    amends the scheduled version (a same-day correction) or prepares one combined version."""
+    base = complete((await load(session, row["base_version_id"]))["document"] if row["base_version_id"] else row["document"])
+    changes = [c for c in diff(base, row["document"]) if c["path"] not in ("rule_version", "effective_from")]
+    live = await published(session)
+    effective = {}                                              # the version that counts on each later date
+    for r in live:
+        if r["effective_from"] > row["effective_from"] and (r["effective_from"] not in effective
+                                                            or later_published(r, effective[r["effective_from"]])):
+            effective[r["effective_from"]] = r
+    for later in sorted(effective.values(), key=published_order):
+        if any(value_at(later["document"], c["path"]) != c["after"] for c in changes):
+            raise Problem(409, "/problems/later-version-scheduled", "A later version is already scheduled",
+                          f"{later['rule_version']} takes effect on {later['effective_from'].isoformat()} and does not contain this "
+                          "change, so it would undo it from that date. Amend that version first (same date), put both changes "
+                          "into one version, or choose a date after it.", scheduled_version=later["rule_version"])
+
+
+def value_at(document: Any, path: str) -> Any:
+    for key in path.split("."):
+        if not isinstance(document, dict):
+            return None
+        document = document.get(key)
+    return document
 
 
 # ── routes ──────────────────────────────────────────────────────────────────────────────────────
@@ -136,12 +170,12 @@ async def list_rule_sets(actor: Actor = Depends(READERS), session: AsyncSession 
 @router.get("/api/v1/ho/config/rule-sets/{version_id}")
 async def get_rule_set(version_id: str, actor: Actor = Depends(READERS), session: AsyncSession = Depends(db)) -> dict:
     row = await load(session, version_id)
-    base = (await load(session, row["base_version_id"]))["document"] if row["base_version_id"] else row["document"]
+    base = complete((await load(session, row["base_version_id"]))["document"] if row["base_version_id"] else row["document"])
     live = await published(session)
     checks = validate(row["document"])
     # Worked examples only make sense for a rule set that passes its checks (a draft may be half-edited).
-    return envelope({**summary(row, live), "document": row["document"], "checks": checks,
-                     "changes": diff(base, row["document"]), "preview": None if checks else preview(base, row["document"]),
+    return envelope({**summary(row, live), "document": complete(row["document"]), "checks": checks,
+                     "changes": diff(base, complete(row["document"])), "preview": None if checks else preview(base, row["document"]),
                      "decision_note": row["decision_note"]})
 
 
@@ -220,10 +254,6 @@ async def decide(version_id: str, body: Decision, actor: Actor = Depends(APPROVE
             if row["effective_from"] < today():
                 raise Problem(422, "/problems/backdated", "The effective date has passed",
                               "Return it so the drafter can choose a new date.")
-            same_day = (await session.execute(select(rule_sets.c.version_id).where(
-                rule_sets.c.status == "PUBLISHED", rule_sets.c.effective_from == row["effective_from"]))).scalar_one_or_none()
-            if same_day:
-                raise Problem(409, "/problems/same-effective-date", "Another published rule set takes effect on that date")
             await refuse_if_overridden(session, row)
             await session.execute(update(rule_sets).where(rule_sets.c.version_id == version_id).values(
                 status="PUBLISHED", decided_by=actor.subject, decision_note=body.note, decided_at=datetime.now(UTC),

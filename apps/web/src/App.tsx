@@ -21,6 +21,9 @@ import { AssistantPage } from "./features/ai/AssistantPage";
 import { AuditLogPage } from "./features/oversight/AuditLogPage";
 import { PolicyListPage } from "./features/policy/PolicyListPage";
 import { PolicyVersionPage } from "./features/policy/PolicyVersionPage";
+import { InterestPage } from "./features/finance/InterestPage";
+import { PensionerPage } from "./features/pension/PensionerPage";
+import { PensionRevisionsPage } from "./features/pension/PensionRevisionsPage";
 import { DashboardsPage } from "./features/oversight/DashboardsPage";
 import { GrievanceMetricsPage } from "./features/oversight/GrievanceMetricsPage";
 import { RiskSignalsPage } from "./features/oversight/RiskSignalsPage";
@@ -64,7 +67,10 @@ export function App() {
         <NavLink to="/public">{t("navigation.public")}</NavLink>
         {role?.startsWith("employer.") ? <><NavLink end to="/employer">{t("navigation.employer")}</NavLink><NavLink to="/employer/ecr">{t("navigation.ecr")}</NavLink></> : null}
         {role === "member" ? <><NavLink to="/member/passbook">{t("navigation.passbook")}</NavLink><NavLink end to="/member/claims">{t("navigation.claims")}</NavLink><NavLink to="/member/grievances">{t("navigation.grievances")}</NavLink><NavLink to="/member/profile">{t("navigation.profile")}</NavLink><NavLink to="/member/security">{t("navigation.accountSecurity")}</NavLink><NavLink to="/member/assistant">{t("navigation.assistant")}</NavLink></> : null}
-        {role?.startsWith("fo.") || role === "zo.acc" || role === "zo.rpfc1" ? <NavLink to="/office/work-queue">{t("navigation.workQueue")}</NavLink> : null}
+        {(role?.startsWith("fo.") && role !== "fo.apfc_pension") || role === "zo.acc" || role === "zo.rpfc1" ? <NavLink to="/office/work-queue">{t("navigation.workQueue")}</NavLink> : null}
+        {role === "fo.apfc_pension" ? <NavLink to="/office/pension-revisions">{t("navigation.pensionRevisions")}</NavLink> : null}
+        {role === "pensioner" ? <NavLink to="/pensioner">{t("navigation.pension")}</NavLink> : null}
+        {role === "ho.fa_cao" ? <NavLink to="/finance/interest">{t("navigation.interest")}</NavLink> : null}
         {role === "zo.acc" || role === "ho.cpfc" ? <NavLink to="/monitoring/grievances">{t("navigation.grievanceMetrics")}</NavLink> : null}
         {["zo.acc", "ho.cpfc", "gov.mole", "fo.oic"].includes(role ?? "") ? <NavLink to="/dashboards">{t("navigation.dashboards")}</NavLink> : null}
         {["ho.acc_hq", "ho.cpfc", "ho.pension", "ho.audit"].includes(role ?? "") ? <NavLink to="/policy">{t("navigation.policy")}</NavLink> : null}
@@ -99,6 +105,9 @@ export function App() {
             <Route path="/dashboards" element={<DashboardsPage />} />
             <Route path="/policy" element={<PolicyListPage />} />
             <Route path="/policy/:versionId" element={<PolicyVersionPage />} />
+            <Route path="/finance/interest" element={<InterestPage />} />
+            <Route path="/pensioner" element={<PensionerPage />} />
+            <Route path="/office/pension-revisions" element={<PensionRevisionsPage />} />
           </Routes>
         </main>
       </div>

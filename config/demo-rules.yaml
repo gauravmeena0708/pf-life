@@ -58,6 +58,33 @@ claims:
   # Re-disbursement after a bank return: the member's new account must pass the mock penny-drop check and
   # an APFC approves; adjudication is not reopened.
   redisbursement_approver: fo.apfc
+interest:
+  # Annual interest on EPF accounts: the rate declared for each financial year (illustrative figures). It is
+  # worked out on each month's closing balance (monthly running balance) and credited once the year has ended.
+  # A revised rate for a year already credited credits (or recovers) only the difference.
+  rates_bp: {"2025-26": 825}
+tds:
+  # Tax deducted at source on PF withdrawals, applied on the payment date (ILLUSTRATIVE — not the Income-tax Act).
+  applies_to_claim_types: [FINAL_SETTLEMENT]
+  threshold_paise: 5000000                # no TDS on a withdrawal below ₹50,000
+  rate_with_pan_bp: 1000                  # 10% when the member's PAN is verified
+  rate_without_pan_bp: 2000               # 20% without a verified PAN
+  exempt_after_service_months: 60         # no TDS after 5 years of continuous service
+  form_15g_15h_waiver: true               # a Form 15G / 15H for the year waives TDS
+pension:
+  # EPS monthly pension (ILLUSTRATIVE): pensionable salary x pensionable service / divisor.
+  divisor: 70
+  salary_months: 60                       # pensionable salary = average of the last 60 months' EPS wages
+  pensionable_salary_cap_paise: 1500000
+  min_service_years: 10
+  weightage_years: 2                      # added to service ...
+  weightage_after_service_years: 20       # ... once service reaches 20 years
+  normal_age_years: 58
+  earliest_age_years: 50
+  early_reduction_bp_per_year: 400        # 4% less for each year before the normal age
+  minimum_pension_paise: 100000           # ₹1,000 a month
+  applies_to_pensions_in_payment: true    # a change also revises pensions already in payment (never downwards)
+  revise_in_payment_from: null            # optional earlier date for those revisions (arrears are paid); null = the rule set's date
 grievances:
   categories: [CLAIM_DELAY, CLAIM_REJECTION, PASSBOOK, KYC, EMPLOYER, OTHER]
   sla_days: {RO: 15, ZO: 10, HO: 7}

@@ -9,7 +9,7 @@ from app.api import catalogue_routes, routes
 from app.config import settings
 from app.infra.db import database_ready
 from app.infra.db import engine
-from app.infra.claims_ledger import on_claim_decision, on_claim_paid
+from app.infra.claims_ledger import on_claim_decision, on_claim_paid, on_tax_deducted
 from app.infra.messaging import handle_employer_verified, handle_member_change, handle_payment_confirmed, handle_payment_returned
 from epfo_persistence import Consumer, OutboxRelay
 from epfo_persistence.policy import on_policy_published
@@ -27,7 +27,7 @@ def create_app() -> FastAPI:
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.employers",
                          ["employer-service.EmployerVerified.v1"], handle_employer_verified),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.claims",
-                         ["claim-service.ClaimDecisionRecorded.v1"], on_claim_decision),
+                         ["claim-service.ClaimDecisionRecorded.v1", "claim-service.TaxDeducted.v1"], _claims_router),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.policy",
                          ["platform-service.PolicyPublished.v1"], on_policy_published),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.members",
@@ -65,3 +65,10 @@ async def _payment_router(session, event):
 
 
 app = create_app()
+
+
+async def _claims_router(session, event):
+    if event.get("event_type") == "TaxDeducted.v1":
+        await on_tax_deducted(session, event)
+    else:
+        await on_claim_decision(session, event)

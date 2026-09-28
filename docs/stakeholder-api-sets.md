@@ -34,12 +34,12 @@ Activities: **F13.public** Browse schemes, offices, statistics, circulars; searc
 | `GET /public/statistics` | W |
 | `POST /ai/knowledge/search` | W |
 | `POST /public/demo-calculations/epf` | W |
+| `POST /public/demo-calculations/pension` | W |
 | `GET /public/demo-challenges` | M |
 | `POST /public/trrn-status-lookups` | M |
 | `GET /public/circulars` | P |
 | `GET /public/defaulting-establishments` | P |
 | `GET /public/establishments/{estId}/e-report-card` | P |
-| `POST /public/demo-calculations/pension` | P |
 
 #### `member` — Member — active contributor (UAN holder)
 
@@ -58,6 +58,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/identity-assurance` | W |
 | `GET /members/me/notifications` | W |
 | `GET /members/me/passbook` | W |
+| `GET /members/me/pension-eligibility-preview` | W |
 | `GET /members/me/sessions` | W |
 | `PATCH /members/me/contact-details` | W |
 | `POST /ai/feedback` | W |
@@ -73,6 +74,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/me/grievances` | W |
 | `POST /members/me/joint-declarations` | W |
 | `POST /members/me/security-reports` | W |
+| `POST /members/me/tax/form-15g-15h` | W |
 | `POST /security/step-up-challenges` | W |
 | `POST /security/step-up-challenges/{challengeId}/verifications` | W |
 | `POST /members/me/kyc/bank-accounts` | M |
@@ -86,7 +88,6 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/higher-pension-options/{optionId}` | P |
 | `GET /members/me/kyc` | P |
 | `GET /members/me/nominations` | P |
-| `GET /members/me/pension-eligibility-preview` | P |
 | `GET /members/me/pension-scheme-certificate` | P |
 | `GET /members/me/service-history` | P |
 | `GET /members/me/tax/form-16a` | P |
@@ -105,7 +106,6 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/me/pension-applications` | P |
 | `POST /members/me/pension-scheme-certificates` | P |
 | `POST /members/me/pension-scheme-certificates/{certId}/surrenders` | P |
-| `POST /members/me/tax/form-15g-15h` | P |
 | `POST /members/me/transfers` | P |
 | `POST /members/me/transfers/auto/{transferId}/confirmations` | P |
 | `POST /members/uan-lookups` | P |
@@ -137,11 +137,11 @@ Activities: **F05.pensioner_view** View PPO, pension slips, payments; change ban
 
 | Endpoint | Status |
 |---|---|
+| `GET /pensioners/me` | W |
+| `GET /pensioners/me/payments` | W |
 | `GET /pensioners/me/life-certificate` | M |
 | `POST /pensioners/me/life-certificate/submissions` | M |
 | `POST /public/pension/life-certificate-lookups` | M |
-| `GET /pensioners/me` | P |
-| `GET /pensioners/me/payments` | P |
 | `GET /pensioners/me/pension-slips` | P |
 | `GET /pensioners/me/ppo` | P |
 | `POST /pensioners/me/bank-change-requests` | P |
@@ -158,7 +158,7 @@ Activities: **F05.family_apply** Apply for widow / child / orphan / dependent-pa
 
 | Endpoint | Status |
 |---|---|
-| `GET /pensioners/me` | P |
+| `GET /pensioners/me` | W |
 | `POST /claimants/family-pension-applications` | P |
 | `POST /pensioners/me/declarations` | P |
 
@@ -593,13 +593,14 @@ Activities: **F05.ppo_approve** Approve worksheet, PPO and initial arrear; e-sig
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/pensions/revisions` | W |
+| `POST /office/pensions/{ppoId}/revisions` | W |
 | `GET /office/pensions/life-certificates/overdue` | P |
 | `POST /office/pensions/brs-reconciliations` | P |
 | `POST /office/pensions/higher-pension-options/{optionId}/decisions` | P |
 | `POST /office/pensions/ppos/{ppoId}/e-signatures` | P |
 | `POST /office/pensions/worksheets/{worksheetId}/approvals` | P |
 | `POST /office/pensions/{ppoId}/resumptions` | P |
-| `POST /office/pensions/{ppoId}/revisions` | P |
 | `POST /office/pensions/{ppoId}/suspensions` | P |
 
 #### `fo.pension_disbursement` — Pension Disbursement Section
@@ -849,8 +850,9 @@ Activities: **F03.interest** Record the approved annual interest rate and run in
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/accounts/interest-postings` | W |
+| `POST /office/accounts/interest-postings` | W |
 | `POST /office/members/{uan}/freezes` | W |
-| `POST /office/accounts/interest-postings` | P |
 | `POST /office/establishments/{estId}/freezes` | P |
 | `PUT /ho/config/interest-rates/{financialYear}` | P |
 

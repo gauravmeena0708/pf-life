@@ -108,12 +108,12 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /public/statistics` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `POST /ai/knowledge/search` | W | caller's own permissions; advisory output only |  |
 | `POST /public/demo-calculations/epf` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
+| `POST /public/demo-calculations/pension` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/demo-challenges` | M | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `POST /public/trrn-status-lookups` | M | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/circulars` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/defaulting-establishments` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/establishments/{estId}/e-report-card` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
-| `POST /public/demo-calculations/pension` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 
 **`member`** — Member — active contributor (UAN holder)
 
@@ -130,6 +130,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/identity-assurance` | W | self — caller's own member record only |  |
 | `GET /members/me/notifications` | W | self — caller's own member record only |  |
 | `GET /members/me/passbook` | W | self — caller's own member record only |  |
+| `GET /members/me/pension-eligibility-preview` | W | self — caller's own member record only |  |
 | `GET /members/me/sessions` | W | self — caller's own member record only |  |
 | `PATCH /members/me/contact-details` | W | self — caller's own member record only | yes |
 | `POST /ai/feedback` | W | caller's own permissions; advisory output only |  |
@@ -145,6 +146,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /members/me/grievances` | W | self — caller's own member record only |  |
 | `POST /members/me/joint-declarations` | W | self — caller's own member record only | yes |
 | `POST /members/me/security-reports` | W | self — caller's own member record only |  |
+| `POST /members/me/tax/form-15g-15h` | W | self — caller's own member record only |  |
 | `POST /security/step-up-challenges` | W | self — challenge bound to one action and resource version |  |
 | `POST /security/step-up-challenges/{challengeId}/verifications` | W | self — challenge bound to one action and resource version |  |
 | `POST /members/me/kyc/bank-accounts` | M | self — caller's own member record only | yes |
@@ -158,7 +160,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/higher-pension-options/{optionId}` | P | self — caller's own member record only |  |
 | `GET /members/me/kyc` | P | self — caller's own member record only |  |
 | `GET /members/me/nominations` | P | self — caller's own member record only |  |
-| `GET /members/me/pension-eligibility-preview` | P | self — caller's own member record only |  |
 | `GET /members/me/pension-scheme-certificate` | P | self — caller's own member record only |  |
 | `GET /members/me/service-history` | P | self — caller's own member record only |  |
 | `GET /members/me/tax/form-16a` | P | self — caller's own member record only |  |
@@ -177,7 +178,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /members/me/pension-applications` | P | self — caller's own member record only |  |
 | `POST /members/me/pension-scheme-certificates` | P | self — caller's own member record only | yes |
 | `POST /members/me/pension-scheme-certificates/{certId}/surrenders` | P | self — caller's own member record only | yes |
-| `POST /members/me/tax/form-15g-15h` | P | self — caller's own member record only |  |
 | `POST /members/me/transfers` | P | self — caller's own member record only |  |
 | `POST /members/me/transfers/auto/{transferId}/confirmations` | P | self — caller's own member record only | yes |
 | `POST /members/uan-lookups` | P | unauthenticated with OTP / face-auth proof |  |
@@ -201,11 +201,11 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /pensioners/me` | W | self — caller's own PPO only |  |
+| `GET /pensioners/me/payments` | W | self — caller's own PPO only |  |
 | `GET /pensioners/me/life-certificate` | M | self — caller's own PPO only |  |
 | `POST /pensioners/me/life-certificate/submissions` | M | self — caller's own PPO only |  |
 | `POST /public/pension/life-certificate-lookups` | M | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
-| `GET /pensioners/me` | P | self — caller's own PPO only |  |
-| `GET /pensioners/me/payments` | P | self — caller's own PPO only |  |
 | `GET /pensioners/me/pension-slips` | P | self — caller's own PPO only |  |
 | `GET /pensioners/me/ppo` | P | self — caller's own PPO only |  |
 | `POST /pensioners/me/bank-change-requests` | P | self — caller's own PPO only | yes |
@@ -218,7 +218,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /pensioners/me` | P | self — caller's own PPO only |  |
+| `GET /pensioners/me` | W | self — caller's own PPO only |  |
 | `POST /claimants/family-pension-applications` | P | self — claimant's own claims only |  |
 | `POST /pensioners/me/declarations` | P | self — caller's own PPO only |  |
 
@@ -585,13 +585,14 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /office/pensions/revisions` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/pensions/{ppoId}/revisions` | W | office jurisdiction of the caller's posting | yes |
 | `GET /office/pensions/life-certificates/overdue` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/pensions/brs-reconciliations` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/higher-pension-options/{optionId}/decisions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/ppos/{ppoId}/e-signatures` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/worksheets/{worksheetId}/approvals` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/{ppoId}/resumptions` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/pensions/{ppoId}/revisions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/{ppoId}/suspensions` | P | office jurisdiction of the caller's posting | yes |
 
 **`fo.pension_disbursement`** — Pension Disbursement Section
@@ -796,8 +797,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /office/accounts/interest-postings` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/accounts/interest-postings` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/members/{uan}/freezes` | W | office jurisdiction of the caller's posting | yes |
-| `POST /office/accounts/interest-postings` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/freezes` | P | office jurisdiction of the caller's posting | yes |
 | `PUT /ho/config/interest-rates/{financialYear}` | P | national (Head Office role) | yes |
 

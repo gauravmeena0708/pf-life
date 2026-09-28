@@ -376,12 +376,6 @@ paths:
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
         '200':
           description: Eligibility preview across all member IDs linked to the caller's UAN
           content:
@@ -393,8 +387,18 @@ paths:
                   properties:
                     data:
                       $ref: '#/components/schemas/PensionEligibilityPreview'
-      x-status: planned
-      x-phase: 2
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: pension
       x-callers:
       - member
@@ -863,6 +867,40 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/pensions/revisions:
+    get:
+      operationId: getOfficePensionsRevisions
+      summary: Pension revisions proposed when a published formula change raises pensions in payment, with arrears to date
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: state
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: pension
+      x-callers:
+      - fo.apfc_pension
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
   /office/pensions/scheme-certificates/{certId}/surrender-adjudications:
     post:
       operationId: postOfficePensionsSchemeCertificatesCertIdSurrenderAdjudications
@@ -1109,14 +1147,20 @@ paths:
       - $ref: '#/components/parameters/IfMatch'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: pension
       x-callers:
       - fo.apfc_pension
@@ -1175,14 +1219,20 @@ paths:
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: pension
       x-callers:
       - family_pensioner
@@ -1326,14 +1376,20 @@ paths:
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: pension
       x-callers:
       - pensioner
@@ -1400,14 +1456,20 @@ paths:
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: pension
       x-callers:
       - public

@@ -10,7 +10,8 @@ import { dateTime, stateLabel } from "../journeyB";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 
-interface ClaimDetail { claim_id: string; account_link_id: string; claim_type: string; form_type: string; amount_paise: number; state: string; version: number; rule_version: string; summary: string; decision_reason: string | null; payment_id: string | null; next_step: string; timeline: { at: string; state: string; by: string; note: string }[] }
+interface ClaimDetail { claim_id: string; account_link_id: string; claim_type: string; form_type: string; amount_paise: number; state: string; version: number; rule_version: string; summary: string; decision_reason: string | null; payment_id: string | null; next_step: string;
+  tax: { gross_paise: number; tds_paise: number; net_paise: number; rate_bp: number; basis: string; rule_version: string; financial_year: string; declaration: string | null } | null; timeline: { at: string; state: string; by: string; note: string }[] }
 
 export function ClaimDetailPage() {
   const { t, i18n } = useTranslation();
@@ -62,7 +63,10 @@ export function ClaimDetailPage() {
       <section className="card stack" aria-labelledby="claim-summary-heading"><h2 id="claim-summary-heading">{t("claimDetail.summary")}</h2><p>{item.summary}</p>
         <dl className="kv"><dt>{t("claims.claimId")}</dt><dd><code>{item.claim_id}</code></dd><dt>{t("claims.account")}</dt><dd><code>{item.account_link_id}</code></dd>
           <dt>{t("claims.type")}</dt><dd>{item.form_type} · {item.claim_type}</dd><dt>{t("claims.ruleVersion")}</dt><dd>{item.rule_version} <span className="state-pill">{t("claims.illustrative")}</span></dd>
-          {item.payment_id ? <><dt>{t("claimDetail.paymentId")}</dt><dd><code>{item.payment_id}</code></dd></> : null}</dl>
+          {item.payment_id ? <><dt>{t("claimDetail.paymentId")}</dt><dd><code>{item.payment_id}</code></dd></> : null}
+          {item.tax ? <><dt>{t("claimDetail.gross")}</dt><dd>{rupees(item.tax.gross_paise)}</dd>
+            <dt>{t("claimDetail.tds")}</dt><dd>{item.tax.tds_paise ? rupees(item.tax.tds_paise) : t("claimDetail.noTds")} <span className="muted small">— {item.tax.basis} ({item.tax.rule_version})</span></dd>
+            <dt>{t("claimDetail.net")}</dt><dd><strong>{rupees(item.tax.net_paise)}</strong></dd></> : null}</dl>
         {item.decision_reason ? <p className={item.state === "REJECTED_WITH_REASON" ? "ineligible-reasons" : "muted"}><strong>{t("claimDetail.decisionReason")}:</strong> {item.decision_reason}</p> : null}
       </section>
       <section className="card stack" aria-labelledby="claim-timeline-heading"><h2 id="claim-timeline-heading">{t("claimDetail.timeline")}</h2>

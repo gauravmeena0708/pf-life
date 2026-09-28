@@ -104,7 +104,11 @@
       "email_masked": "a***@demo.invalid",
       "bank_ifsc": "DEMO0000001",
       "bank_account_last4": "0001",
-      "kyc": {"aadhaar": "VERIFIED", "pan": "VERIFIED", "bank": "VERIFIED"}
+      "kyc": {
+        "aadhaar": "VERIFIED",
+        "pan": "VERIFIED",
+        "bank": "VERIFIED"
+      }
     },
     {
       "uan": "100000000002",
@@ -119,7 +123,11 @@
       "email_masked": "b***@demo.invalid",
       "bank_ifsc": "DEMO0000002",
       "bank_account_last4": "0002",
-      "kyc": {"aadhaar": "VERIFIED", "pan": "NOT_SEEDED", "bank": "VERIFIED"}
+      "kyc": {
+        "aadhaar": "VERIFIED",
+        "pan": "NOT_SEEDED",
+        "bank": "VERIFIED"
+      }
     },
     {
       "uan": "100000000003",
@@ -134,7 +142,11 @@
       "email_masked": "c***@demo.invalid",
       "bank_ifsc": "DEMO0000003",
       "bank_account_last4": "0003",
-      "kyc": {"aadhaar": "PENDING", "pan": "NOT_SEEDED", "bank": "PENDING"}
+      "kyc": {
+        "aadhaar": "PENDING",
+        "pan": "NOT_SEEDED",
+        "bank": "PENDING"
+      }
     },
     {
       "uan": "100000000004",
@@ -149,7 +161,11 @@
       "email_masked": "d***@demo.invalid",
       "bank_ifsc": "DEMO0000004",
       "bank_account_last4": "0004",
-      "kyc": {"aadhaar": "PENDING", "pan": "NOT_SEEDED", "bank": "NOT_SEEDED"}
+      "kyc": {
+        "aadhaar": "PENDING",
+        "pan": "NOT_SEEDED",
+        "bank": "NOT_SEEDED"
+      }
     },
     {
       "uan": "100000000005",
@@ -164,7 +180,31 @@
       "email_masked": "e***@demo.invalid",
       "bank_ifsc": "DEMO0000005",
       "bank_account_last4": "0005",
-      "kyc": {"aadhaar": "NOT_SEEDED", "pan": "NOT_SEEDED", "bank": "NOT_SEEDED"}
+      "kyc": {
+        "aadhaar": "NOT_SEEDED",
+        "pan": "NOT_SEEDED",
+        "bank": "NOT_SEEDED"
+      }
+    },
+    {
+      "uan": "100000000006",
+      "name": "FARAH DEMO",
+      "date_of_birth": "1992-02-14",
+      "subject": "00000000-0000-4000-8000-000000000025",
+      "account_link_id": "AL-0006",
+      "member_id": "DEMO00001000000000006",
+      "date_of_joining": "2023-01-02",
+      "date_of_exit": "2026-06-30",
+      "gender": "FEMALE",
+      "mobile_masked": "******0006",
+      "email_masked": "f***@demo.invalid",
+      "bank_ifsc": "DEMO0000006",
+      "bank_account_last4": "0006",
+      "kyc": {
+        "aadhaar": "VERIFIED",
+        "pan": "VERIFIED",
+        "bank": "VERIFIED"
+      }
     }
   ],
   "demo_wage_month": "2026-08",
@@ -192,22 +232,123 @@
     "vigilance-investigator": "00000000-0000-4000-8000-000000000021",
     "auditor": "00000000-0000-4000-8000-000000000022",
     "zo-rpfc": "00000000-0000-4000-8000-000000000023",
-    "ho-policy": "00000000-0000-4000-8000-000000000024"
+    "ho-policy": "00000000-0000-4000-8000-000000000024",
+    "member-c": "00000000-0000-4000-8000-000000000025",
+    "ho-finance": "00000000-0000-4000-8000-000000000026",
+    "pensioner-a": "00000000-0000-4000-8000-000000000027",
+    "ro-pension": "00000000-0000-4000-8000-000000000028"
   },
   "opening_balances": {
-    "_comment": "Balances brought forward on 2026-03-31 (synthetic), so Journey B can exercise the higher approval bands repeatedly.",
-    "AL-0001": {"employee_paise": 360000000, "employer_paise": 240000000, "as_of": "2026-03-31"},
-    "AL-0002": {"employee_paise": 3000000, "employer_paise": 2000000, "as_of": "2026-03-31"}
+    "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
+    "AL-0001": {
+      "employee_paise": 360000000,
+      "employer_paise": 240000000,
+      "as_of": "2025-03-31"
+    },
+    "AL-0002": {
+      "employee_paise": 3000000,
+      "employer_paise": 2000000,
+      "as_of": "2025-03-31"
+    },
+    "AL-0006": {
+      "employee_paise": 180000000,
+      "employer_paise": 120000000,
+      "as_of": "2025-03-31"
+    }
   },
   "office_staff": [
-    {"username": "do-caseworker", "subject": "00000000-0000-4000-8000-000000000006", "stakeholder": "fo.da_accounts", "office_id": "RO-DEMO-01"},
-    {"username": "ro-ss", "subject": "00000000-0000-4000-8000-000000000007", "stakeholder": "fo.ss", "office_id": "RO-DEMO-01"},
-    {"username": "ro-ao", "subject": "00000000-0000-4000-8000-000000000008", "stakeholder": "fo.ao", "office_id": "RO-DEMO-01"},
-    {"username": "ro-apfc", "subject": "00000000-0000-4000-8000-000000000009", "stakeholder": "fo.apfc", "office_id": "RO-DEMO-01"},
-    {"username": "ro-oic", "subject": "00000000-0000-4000-8000-000000000010", "stakeholder": "fo.oic", "office_id": "RO-DEMO-01"},
-    {"username": "ro-cashier", "subject": "00000000-0000-4000-8000-000000000011", "stakeholder": "fo.cash", "office_id": "RO-DEMO-01"},
-    {"username": "ro-pro", "subject": "00000000-0000-4000-8000-000000000012", "stakeholder": "fo.pro", "office_id": "RO-DEMO-01"},
-    {"username": "zo-acc", "subject": "00000000-0000-4000-8000-000000000013", "stakeholder": "zo.acc", "office_id": "ZO-DEMO-01"},
-    {"username": "zo-rpfc", "subject": "00000000-0000-4000-8000-000000000023", "stakeholder": "zo.rpfc1", "office_id": "ZO-DEMO-01"}
+    {
+      "username": "do-caseworker",
+      "subject": "00000000-0000-4000-8000-000000000006",
+      "stakeholder": "fo.da_accounts",
+      "office_id": "RO-DEMO-01"
+    },
+    {
+      "username": "ro-ss",
+      "subject": "00000000-0000-4000-8000-000000000007",
+      "stakeholder": "fo.ss",
+      "office_id": "RO-DEMO-01"
+    },
+    {
+      "username": "ro-ao",
+      "subject": "00000000-0000-4000-8000-000000000008",
+      "stakeholder": "fo.ao",
+      "office_id": "RO-DEMO-01"
+    },
+    {
+      "username": "ro-apfc",
+      "subject": "00000000-0000-4000-8000-000000000009",
+      "stakeholder": "fo.apfc",
+      "office_id": "RO-DEMO-01"
+    },
+    {
+      "username": "ro-oic",
+      "subject": "00000000-0000-4000-8000-000000000010",
+      "stakeholder": "fo.oic",
+      "office_id": "RO-DEMO-01"
+    },
+    {
+      "username": "ro-cashier",
+      "subject": "00000000-0000-4000-8000-000000000011",
+      "stakeholder": "fo.cash",
+      "office_id": "RO-DEMO-01"
+    },
+    {
+      "username": "ro-pro",
+      "subject": "00000000-0000-4000-8000-000000000012",
+      "stakeholder": "fo.pro",
+      "office_id": "RO-DEMO-01"
+    },
+    {
+      "username": "zo-acc",
+      "subject": "00000000-0000-4000-8000-000000000013",
+      "stakeholder": "zo.acc",
+      "office_id": "ZO-DEMO-01"
+    },
+    {
+      "username": "zo-rpfc",
+      "subject": "00000000-0000-4000-8000-000000000023",
+      "stakeholder": "zo.rpfc1",
+      "office_id": "ZO-DEMO-01"
+    },
+    {
+      "username": "ro-pension",
+      "subject": "00000000-0000-4000-8000-000000000028",
+      "stakeholder": "fo.apfc_pension",
+      "office_id": "RO-DEMO-01"
+    }
+  ],
+  "pensioners": [
+    {
+      "_comment": "Synthetic pensioners (no real person). Pension amounts are recomputed at seed time from the rules in force."
+    },
+    {
+      "ppo_id": "PPO-DEMO-0001",
+      "subject": "00000000-0000-4000-8000-000000000027",
+      "name": "GOPAL DEMO",
+      "uan": "100000000901",
+      "date_of_birth": "1965-05-10",
+      "pension_start": "2023-06-01",
+      "service_months": 144,
+      "pensionable_salary_paise": 650000,
+      "age_at_start": 58,
+      "office_id": "RO-DEMO-01",
+      "bank_ifsc": "DEMO0000901",
+      "bank_account_last4": "0901"
+    },
+    {
+      "ppo_id": "PPO-DEMO-0002",
+      "subject": null,
+      "name": "HEMA DEMO",
+      "uan": "100000000902",
+      "date_of_birth": "1967-01-22",
+      "pension_start": "2025-02-01",
+      "service_months": 300,
+      "pensionable_salary_paise": 1500000,
+      "age_at_start": 58,
+      "office_id": "RO-DEMO-01",
+      "bank_ifsc": "DEMO0000902",
+      "bank_account_last4": "0902"
+    }
   ]
 }

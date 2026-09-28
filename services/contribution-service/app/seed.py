@@ -18,11 +18,13 @@ async def seed() -> None:
         for m in data["members"]:
             await session.execute(text("""INSERT INTO establishment_members
               (uan,name,date_of_birth,account_link_id,member_subject,establishment_id,date_of_joining,date_of_exit,status)
-              VALUES (:uan,:name,:dob,:account,:subject,:est,:joined,NULL,'ACTIVE')
+              VALUES (:uan,:name,:dob,:account,:subject,:est,:joined,:exited,:status)
               ON CONFLICT (uan) DO UPDATE SET name=excluded.name,date_of_birth=excluded.date_of_birth,
               account_link_id=excluded.account_link_id,member_subject=excluded.member_subject,
-              establishment_id=excluded.establishment_id,date_of_joining=excluded.date_of_joining"""),
-              {"uan":m["uan"],"name":m["name"],"dob":date.fromisoformat(m["date_of_birth"]),"account":m["account_link_id"],"subject":m.get("subject"),"est":establishment["establishment_id"],"joined":date.fromisoformat(m["date_of_joining"])})
+              establishment_id=excluded.establishment_id,date_of_joining=excluded.date_of_joining,
+              date_of_exit=excluded.date_of_exit,status=excluded.status"""),
+              {"uan":m["uan"],"name":m["name"],"dob":date.fromisoformat(m["date_of_birth"]),"account":m["account_link_id"],"subject":m.get("subject"),"est":establishment["establishment_id"],"joined":date.fromisoformat(m["date_of_joining"]),
+               "exited":date.fromisoformat(m["date_of_exit"]) if m.get("date_of_exit") else None,"status":"EXITED" if m.get("date_of_exit") else "ACTIVE"})
         demo = data["public_lookup_challan"]
         await session.execute(text("""INSERT INTO ecr_filings
           (id,establishment_id,wage_month,filing_type,format,content,version,state,preparer_subject,rule_version,trrn)
@@ -38,13 +40,16 @@ async def seed() -> None:
             if account.startswith("_"):
                 continue
             key = f"OPENING-{account}"
+            at = datetime.fromisoformat(bal["as_of"] + "T23:59:59+00:00")
             if (await session.execute(text("SELECT 1 FROM journals WHERE business_key=:k"), {"k": key})).first():
+                # Keep the brought-forward date in step with the seed file (it decides which year earns interest on it).
+                await session.execute(text("UPDATE journals SET occurred_at=:at WHERE business_key=:k"), {"at": at, "k": key})
                 continue
             journal_id = str(uuid.uuid4())
             total = bal["employee_paise"] + bal["employer_paise"]
             await session.execute(text("""INSERT INTO journals (id,business_key,kind,occurred_at,filing_id,claim_id)
               VALUES (:id,:k,'OPENING_BALANCE',:at,NULL,NULL)"""),
-              {"id": journal_id, "k": key, "at": datetime.fromisoformat(bal["as_of"] + "T23:59:59+00:00")})
+              {"id": journal_id, "k": key, "at": at})
             for code, side, amount, link, share in (
                     ("OPENING_BALANCE_BF", "debit", total, None, None),
                     ("AC01_EPF", "credit", bal["employee_paise"], account, "employee"),

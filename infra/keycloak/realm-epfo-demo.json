@@ -109,6 +109,18 @@
       {
         "name": "zo.rpfc1",
         "description": "Stakeholder zo.rpfc1 (docs/stakeholders.md)"
+      },
+      {
+        "name": "ho.fa_cao",
+        "description": "Stakeholder ho.fa_cao (docs/stakeholders.md)"
+      },
+      {
+        "name": "fo.apfc_pension",
+        "description": "Stakeholder fo.apfc_pension (docs/stakeholders.md)"
+      },
+      {
+        "name": "pensioner",
+        "description": "Stakeholder pensioner (docs/stakeholders.md)"
       }
     ]
   },
@@ -469,6 +481,82 @@
         "ho.acc_hq"
       ],
       "id": "00000000-0000-4000-8000-000000000024"
+    },
+    {
+      "username": "member-c",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Member C exited",
+      "lastName": "Demo",
+      "email": "member-c@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "member"
+      ],
+      "id": "00000000-0000-4000-8000-000000000025"
+    },
+    {
+      "username": "ho-finance",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "HO finance FA CAO",
+      "lastName": "Demo",
+      "email": "ho-finance@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ho.fa_cao"
+      ],
+      "id": "00000000-0000-4000-8000-000000000026"
+    },
+    {
+      "username": "pensioner-a",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Pensioner A",
+      "lastName": "Demo",
+      "email": "pensioner-a@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "pensioner"
+      ],
+      "id": "00000000-0000-4000-8000-000000000027"
+    },
+    {
+      "username": "ro-pension",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "APFC Pension",
+      "lastName": "Demo",
+      "email": "ro-pension@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.apfc_pension"
+      ],
+      "id": "00000000-0000-4000-8000-000000000028"
     },
     {
       "username": "ndc-operator",

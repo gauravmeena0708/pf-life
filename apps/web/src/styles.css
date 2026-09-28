@@ -239,3 +239,6 @@ code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9em; }
   .claim-timeline time { width: 100%; }
   .claim-amount-form label, .claim-amount-form input { max-width: 100%; width: 100%; box-sizing: border-box; }
 }
+
+/* A headline amount (monthly pension, interest rate) */
+.figure { font-family: Georgia, "Times New Roman", serif; font-size: 2rem; color: var(--navy, #0b2a5b); line-height: 1.1; }

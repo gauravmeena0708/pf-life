@@ -10,13 +10,43 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /pensioners/me/life-certificate', 'POST /public/pension/life-certificate-lookups']
+OPERATIONS = ['GET /pensioners/me', 'GET /members/me/pension-eligibility-preview', 'GET /office/pensions/revisions', 'GET /pensioners/me/life-certificate', 'GET /pensioners/me/payments', 'POST /public/demo-calculations/pension', 'POST /public/pension/life-certificate-lookups', 'POST /office/pensions/{ppoId}/revisions']
+
+@router.api_route("/api/v1/pensioners/me", methods=["GET"], include_in_schema=False)
+async def get_pensioners_me(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Pensioner profile (PPO number, pension type, disbursing bank)")
+
+
+@router.api_route("/api/v1/members/me/pension-eligibility-preview", methods=["GET"], include_in_schema=False)
+async def get_members_me_pension_eligibility_preview(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Pre-check pension eligibility across all member IDs under the UAN; flags untransferred service (thre")
+
+
+@router.api_route("/api/v1/office/pensions/revisions", methods=["GET"], include_in_schema=False)
+async def get_office_pensions_revisions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Pension revisions proposed when a published formula change raises pensions in payment, with arrears ")
+
 
 @router.api_route("/api/v1/pensioners/me/life-certificate", methods=["GET"], include_in_schema=False)
 async def get_pensioners_me_life_certificate(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Jeevan Pramaan / Digital Life Certificate status: last submitted, valid till, source")
 
 
+@router.api_route("/api/v1/pensioners/me/payments", methods=["GET"], include_in_schema=False)
+async def get_pensioners_me_payments(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Pension payment history")
+
+
+@router.api_route("/api/v1/public/demo-calculations/pension", methods=["POST"], include_in_schema=False)
+async def post_public_demo_calculations_pension(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Illustrative pension estimate calculator")
+
+
 @router.api_route("/api/v1/public/pension/life-certificate-lookups", methods=["POST"], include_in_schema=False)
 async def post_public_pension_life_certificate_lookups(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Jeevan Pramaan / life-certificate status by PPO number or Jeevan Pramaan transaction ID (CAPTCHA, mi")
+
+
+@router.api_route("/api/v1/office/pensions/{ppoId}/revisions", methods=["POST"], include_in_schema=False)
+async def post_office_pensions_ppoId_revisions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Pension revision (incl. higher-pension outcome)")
