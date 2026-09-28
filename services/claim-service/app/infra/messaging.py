@@ -29,6 +29,8 @@ BINDINGS = [
     "contribution-service.InterestCredited.v1",
     "member-service.MemberExitMarked.v1",
     "contribution-service.TransferPosted.v1",
+    "member-service.MemberRegistered.v1",
+    "member-service.MemberKycUpdated.v1",
 ]
 
 
@@ -65,6 +67,24 @@ async def on_member_exit(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
     await session.execute(update(accounts).where(accounts.c.account_link_id == p["account_link_id"])
                           .values(date_of_exit=date.fromisoformat(p["date_of_exit"])))
+
+
+async def on_member_registered(session: AsyncSession, event: dict[str, Any]) -> None:
+    """A new member ID: it starts with no balance, in the office of the establishment's other accounts."""
+    p = event["payload"]
+    if (await session.execute(select(accounts.c.account_link_id).where(accounts.c.account_link_id == p["account_link_id"]))).first():
+        return
+    office = (await session.execute(select(accounts.c.office_id).where(accounts.c.establishment_id == p["establishment_id"]).limit(1))).scalar_one_or_none()
+    office = office or (await session.execute(select(accounts.c.office_id).limit(1))).scalar_one()
+    await session.execute(insert(accounts).values(
+        account_link_id=p["account_link_id"], member_subject=p.get("member_subject"), uan=p["uan"], establishment_id=p["establishment_id"],
+        office_id=office, date_of_joining=date.fromisoformat(p["date_of_joining"]), employee_paise=0, employer_paise=0,
+        pan_verified=bool(p.get("pan_verified"))))
+
+
+async def on_kyc_updated(session: AsyncSession, event: dict[str, Any]) -> None:
+    p = event["payload"]
+    await session.execute(update(accounts).where(accounts.c.uan == p["uan"]).values(pan_verified=bool(p["pan_verified"])))
 
 
 async def on_transfer_posted(session: AsyncSession, event: dict[str, Any]) -> None:
@@ -195,6 +215,8 @@ HANDLERS = {
     "InterestCredited.v1": on_interest_credited,
     "MemberExitMarked.v1": on_member_exit,
     "TransferPosted.v1": on_transfer_posted,
+    "MemberRegistered.v1": on_member_registered,
+    "MemberKycUpdated.v1": on_kyc_updated,
     "ClaimDebitPosted.v1": on_claim_debit_posted,
     "CaseDecisionSubmitted.v1": on_case_decision,
     "PaymentConfirmed.v1": on_payment_result,

@@ -306,7 +306,7 @@ async def _passbook(subject: str, account_link_id: str | None):
         for a in accounts:
             lines = (await session.execute(text(
                 "SELECT j.id AS journal_id, j.kind, j.business_key, j.occurred_at, j.claim_id, f.wage_month, f.trrn, jl.side, jl.amount_paise, jl.share, "
-                "ip.financial_year, ip.rate_bp FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id "
+                "ip.financial_year, ip.rate_bp, ip.account_link_id AS interest_account FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id "
                 "LEFT JOIN ecr_filings f ON f.id=j.filing_id LEFT JOIN interest_postings ip ON ip.journal_id=j.id "
                 "WHERE jl.account_link_id=:a AND jl.account_code='AC01_EPF' ORDER BY j.occurred_at, COALESCE(ip.revision, 0), j.id"),
                 {"a": a["account_link_id"]})).mappings().all()
@@ -326,7 +326,8 @@ async def _passbook(subject: str, account_link_id: str | None):
                                     "TRANSFER_OUT": f"Transferred to another member ID (Form 13, {ln['business_key'][9:]})",
                                     "TRANSFER_IN": f"Transferred in from a previous member ID (Form 13, {ln['business_key'][9:]})",
                                     "INTEREST": (f"Interest for {ln['financial_year']} at {rate}" if ln["kind"] == "INTEREST"
-                                                 else f"Interest for {ln['financial_year']} revised to {rate}: difference")}.get(kind, kind),
+                                                 else f"Interest for {ln['financial_year']} revised to {rate}: difference")
+                                                + (f" (earned on {ln['interest_account']}, transferred)" if ln["interest_account"] and ln["interest_account"] != a["account_link_id"] else "")}.get(kind, kind),
                     "employee_share_paise": 0, "employer_share_paise": 0, "establishment_name": name,
                     "trrn": ln["trrn"], "claim_id": ln["claim_id"], "posted_at": ln["occurred_at"]})
                 if ln["share"] in ("employee", "employer"):
@@ -432,3 +433,25 @@ async def annexure_k(transferId: str, actor: Actor = Depends(MEMBER)):
                      "total_paise": t["employee_paise"] + t["employer_paise"],
                      "posted_at": iso(t["posted_at"]),
                      "note": "Synthetic demonstration; the real Annexure K also carries pension service details."})
+
+
+# ── an employee's wage and contribution ledger, for their employer ─────────────────────────────────
+
+@router.get("/api/v1/employers/me/members/{uan}/contribution-ledger")
+async def employee_ledger(uan: str, actor: Actor = Depends(EMPLOYER)):
+    est = _establishment(actor)
+    async with sessions()() as session:
+        m = (await session.execute(text("SELECT account_link_id, name, date_of_joining, date_of_exit FROM establishment_members "
+                                        "WHERE uan=:u AND establishment_id=:e"), {"u": uan, "e": est})).mappings().first()
+        if not m:
+            raise Problem(404, "/problems/not-found", "No such employee of this establishment")
+        rows = (await session.execute(text(
+            "SELECT f.wage_month, f.trrn, jl.share, jl.side, jl.amount_paise FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id "
+            "JOIN ecr_filings f ON f.id=j.filing_id WHERE j.kind='CONTRIBUTION' AND jl.account_code='AC01_EPF' AND jl.account_link_id=:a "
+            "ORDER BY f.wage_month"), {"a": m["account_link_id"]})).mappings().all()
+    months: dict[str, dict] = {}
+    for r in rows:
+        row = months.setdefault(r["wage_month"], {"wage_month": r["wage_month"], "trrn": r["trrn"], "employee_paise": 0, "employer_paise": 0})
+        row[f"{r['share']}_paise"] += r["amount_paise"] if r["side"] == "credit" else -r["amount_paise"]
+    return envelope({"uan": uan, "member_id": m["account_link_id"], "name": m["name"], "months": list(months.values()),
+                     "note": "Employee and employer (EPF) shares credited from this establishment's paid returns."})

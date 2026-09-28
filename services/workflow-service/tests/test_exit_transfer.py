@@ -83,3 +83,14 @@ def test_transfer_from_an_exited_member_id_through_employer_da_and_ao(ctx):
     deliver("TransferPosted.v1", {"transfer_id": case["case_id"], "uan": UAN_D, "from_account_link_id": "AL-0008",
                                   "to_account_link_id": "AL-0009", "employee_paise": 1, "employer_paise": 1, "journal_id": "J"})
     assert "already transferred to AL-0009" in transfer(client).json()["detail"]
+
+
+def test_a_registered_joinee_can_be_exited_by_the_employer(ctx):
+    client, _, _ = ctx
+    deliver("MemberRegistered.v1", {"uan": "100000000008", "account_link_id": "AL-0010", "member_subject": None, "name": "KIRAN DEMO",
+                                    "date_of_birth": "1998-03-04", "gender": "FEMALE", "establishment_id": EST,
+                                    "date_of_joining": "2026-09-01", "new_uan": True, "pan_verified": False})
+    r = client.post("/api/v1/employers/me/members/100000000008/exits",
+                    json={"account_link_id": "AL-0010", "date_of_exit": "2026-09-15", "reason": "CESSATION"},
+                    headers=hdr(OPERATOR, "employer.operator", {"action": "mark-exit-employer", "resource_id": "100000000008"}, establishment=EST))
+    assert r.status_code == 200 and r.json()["data"]["state"] == "EXIT_MARKED", r.json()

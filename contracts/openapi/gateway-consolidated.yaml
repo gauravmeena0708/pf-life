@@ -2129,14 +2129,20 @@ paths:
       - $ref: '#/components/parameters/CorrelationId'
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - employer.signatory
@@ -2159,14 +2165,20 @@ paths:
       - $ref: '#/components/parameters/EstablishmentId'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - employer.signatory
@@ -2190,14 +2202,20 @@ paths:
       - $ref: '#/components/parameters/CorrelationId'
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - employer.operator
@@ -2226,14 +2244,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - employer.operator
@@ -2339,8 +2363,8 @@ paths:
           $ref: '#/components/responses/Problem'
         '409':
           $ref: '#/components/responses/Problem'
-      x-status: mock
-      x-phase: 2
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - employer.operator
@@ -2364,14 +2388,20 @@ paths:
       - $ref: '#/components/parameters/CorrelationId'
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - employer.operator
@@ -2388,14 +2418,20 @@ paths:
       - $ref: '#/components/parameters/CorrelationId'
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - employer.operator
@@ -2456,14 +2492,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: contribution
       x-callers:
       - employer.operator
@@ -2485,14 +2527,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - employer.operator
@@ -2625,7 +2673,7 @@ paths:
   /employers/me/members/{uan}/profile:
     patch:
       operationId: patchEmployersMembersUanProfile
-      summary: Fill missing member details (creates a change request)
+      summary: Fill missing member details (only details the record lacks; a recorded detail changes through a Joint Declaration)
       tags:
       - Employer-side member management
       parameters:
@@ -2638,14 +2686,20 @@ paths:
       - $ref: '#/components/parameters/EstablishmentId'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - employer.operator
@@ -5191,12 +5245,6 @@ paths:
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
         '200':
           description: Readiness per linked account
           content:
@@ -5208,8 +5256,18 @@ paths:
                   properties:
                     data:
                       $ref: '#/components/schemas/AccountStatus'
-      x-status: planned
-      x-phase: 2
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - member
@@ -6107,14 +6165,20 @@ paths:
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - member
@@ -6143,8 +6207,8 @@ paths:
           $ref: '#/components/responses/Problem'
         '409':
           $ref: '#/components/responses/Problem'
-      x-status: mock
-      x-phase: 2
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - member
@@ -6185,8 +6249,8 @@ paths:
           $ref: '#/components/responses/Problem'
         '409':
           $ref: '#/components/responses/Problem'
-      x-status: mock
-      x-phase: 2
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - member
@@ -6861,14 +6925,20 @@ paths:
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - member

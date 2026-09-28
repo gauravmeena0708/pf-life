@@ -49,3 +49,13 @@ async def on_process_transitioned(session: AsyncSession, event: dict[str, Any]) 
                         "transfer_id": transfer_id, "uan": p["subject_ref"], "from_account_link_id": frm, "to_account_link_id": to,
                         "employee_paise": max(shares["employee"], 0), "employer_paise": max(shares["employer"], 0),
                         "journal_id": journal_id or "", "postings": lines})
+
+
+async def on_member_registered(session: AsyncSession, event: dict[str, Any]) -> None:
+    """A joinee registered by the employer (a new UAN, or a new member ID under an existing one)."""
+    p = event["payload"]
+    await session.execute(text(
+        "INSERT INTO establishment_members (uan, name, date_of_birth, account_link_id, member_subject, establishment_id, "
+        "date_of_joining, date_of_exit, status) VALUES (:u, :n, :dob, :a, :s, :e, :j, NULL, 'ACTIVE') ON CONFLICT (account_link_id) DO NOTHING"),
+        {"u": p["uan"], "n": p["name"], "dob": date.fromisoformat(p["date_of_birth"]), "a": p["account_link_id"],
+         "s": p.get("member_subject"), "e": p["establishment_id"], "j": date.fromisoformat(p["date_of_joining"])})

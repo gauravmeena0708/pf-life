@@ -31,6 +31,8 @@ TEMPLATES = {
     "INTEREST_REVISED": ("Interest revised", "The interest rate for {financial_year} was revised to {rate}; the difference{amount} was adjusted in your PF account {reference_id}."),
     "EXIT_RECORDED": ("Date of exit recorded", "The date of exit {date_of_exit} was recorded for your member ID {reference_id} (marked by the {marked_by})."),
     "TRANSFER_POSTED": ("Transfer completed", "Your PF balance{amount} was transferred from member ID {from_id} to {to_id} ({reference_id}). You can download Annexure K."),
+    "KYC_APPROVED": ("KYC approved", "Your employer approved your {parameter} KYC ({reference_id}). It now shows as verified."),
+    "KYC_REJECTED": ("KYC not approved", "Your employer did not approve your {parameter} KYC ({reference_id}): {reason}"),
     "ACCOUNT_RECOVERY_REJECTED": ("Account recovery not approved", "Your account recovery request {reference_id} was not approved. Please contact your regional office."),
 }
 

@@ -106,19 +106,19 @@ stakeholders:
     via:
     - F02.uan_self
   - endpoint: GET /members/me/kyc
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
     - F02.kyc_seed
   - endpoint: POST /members/me/kyc/bank-accounts
-    status: M
+    status: W
     scope: self — caller's own member record only
     step_up: true
     via:
     - F02.kyc_seed
   - endpoint: POST /members/me/kyc/{kycType}
-    status: M
+    status: W
     scope: self — caller's own member record only
     step_up: true
     via:
@@ -142,7 +142,7 @@ stakeholders:
     via:
     - F02.self_service
   - endpoint: GET /members/me/uan-card
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
@@ -220,7 +220,7 @@ stakeholders:
     via:
     - F03.passbook
   - endpoint: GET /members/me/account-status
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
@@ -789,13 +789,13 @@ stakeholders:
     via:
     - F01.change_request
   - endpoint: GET /employers/me/kyc-approvals
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
     - F02.kyc_approve
   - endpoint: POST /employers/me/kyc-approvals/{requestId}/decisions
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:
@@ -1024,19 +1024,19 @@ stakeholders:
     via:
     - F01.profile
   - endpoint: POST /employers/me/members
-    status: M
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
     - F02.register
   - endpoint: POST /employers/me/members/bulk-registrations
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
     - F02.register
   - endpoint: POST /employers/me/members/{uan}/declarations
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
@@ -1048,19 +1048,19 @@ stakeholders:
     via:
     - F02.register
   - endpoint: POST /employers/me/kyc-bulk-uploads
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
     - F02.kyc_bulk
   - endpoint: GET /employers/me/kyc-bulk-uploads/{uploadId}/errors
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
     - F02.kyc_bulk
   - endpoint: PATCH /employers/me/members/{uan}/profile
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:
@@ -1072,7 +1072,7 @@ stakeholders:
     via:
     - F02.missing_details
   - endpoint: GET /employers/me/members/active-export
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
@@ -1138,7 +1138,7 @@ stakeholders:
     via:
     - F03.receipt
   - endpoint: GET /employers/me/members/{uan}/contribution-ledger
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:

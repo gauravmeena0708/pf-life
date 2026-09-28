@@ -115,14 +115,14 @@ Rules that apply to every row:
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
 | `GET /employers/me/members?status=` | Employees of this establishment (own establishment only; feeds the ECR wizard in Journey A3) | W | 1 | member |
-| `POST /employers/me/members` | Register new joinee / generate UAN (mock Aadhaar) | M | 2 | member |
-| `POST /employers/me/members/bulk-registrations` | Bulk registration file | P | 2 | member |
-| `POST /employers/me/members/{uan}/declarations` | **Form 11** new-joinee declaration | P | 2 | member |
-| `GET /employers/me/members/{uan}/contribution-ledger` | Wage and contribution ledger for own employee | P | 2 | contribution |
+| `POST /employers/me/members` | Register new joinee / generate UAN (mock Aadhaar) | W | 1 | member |
+| `POST /employers/me/members/bulk-registrations` | Bulk registration file | W | 1 | member |
+| `POST /employers/me/members/{uan}/declarations` | **Form 11** new-joinee declaration | W | 1 | member |
+| `GET /employers/me/members/{uan}/contribution-ledger` | Wage and contribution ledger for own employee | W | 1 | contribution |
 | `POST /employers/me/members/{uan}/exits` 🔐 | Mark exit with date and reason | W | 1 | member |
 | `POST /employers/me/members/{uan}/exit-corrections` 🔐 | Date-of-exit correction | P | 2 | member |
-| `GET /employers/me/kyc-approvals` | Member KYC requests awaiting employer approval | P | 2 | member |
-| `POST /employers/me/kyc-approvals/{requestId}/decisions` 🔐 | Approve / reject member KYC (bank, PAN, Aadhaar seeding) | P | 2 | member |
+| `GET /employers/me/kyc-approvals` | Member KYC requests awaiting employer approval | W | 1 | member |
+| `POST /employers/me/kyc-approvals/{requestId}/decisions` 🔐 | Approve / reject member KYC (bank, PAN, Aadhaar seeding) | W | 1 | member |
 | `GET /employers/me/joint-declarations` | Joint Declarations awaiting attestation (tier-2 process `joint_declaration`) | W | 1 | member |
 | `POST /employers/me/joint-declarations/{jdId}/decisions` 🔐 | Attest / reject Joint Declaration (tier-2 process `joint_declaration`) | W | 1 | member |
 | `POST /employers/me/joint-declarations` 🔐 | Employer-initiated Joint Declaration | P | 2 | member |
@@ -140,12 +140,12 @@ Rules that apply to every row:
 |---|---|---|---|---|
 | `GET /employers/me/approvals` | Member > Approvals queue (exits and other member changes awaiting the signatory) | W | 1 | member |
 | `POST /employers/me/approvals/{approvalId}/decisions` 🔐 | Approve / reject a queued member change | W | 1 | member |
-| `POST /employers/me/kyc-bulk-uploads` | Member > KYC BULK upload | P | 2 | member |
-| `GET /employers/me/kyc-bulk-uploads/{uploadId}/errors` | Bulk KYC error list | P | 2 | member |
+| `POST /employers/me/kyc-bulk-uploads` | Member > KYC BULK upload | W | 1 | member |
+| `GET /employers/me/kyc-bulk-uploads/{uploadId}/errors` | Bulk KYC error list | W | 1 | member |
 | `POST /employers/me/members/exit-bulk-uploads` 🔐 | Member > Exit-Bulk upload | P | 2 | member |
-| `PATCH /employers/me/members/{uan}/profile` 🔐 | Fill missing member details (creates a change request) | P | 2 | member |
+| `PATCH /employers/me/members/{uan}/profile` 🔐 | Fill missing member details (only details the record lacks; a recorded detail changes through a Joint Declaration) | W | 1 | member |
 | `POST /employers/me/members/{uan}/location-mappings` | Member Location Mapping to branches | P | 2 | member |
-| `GET /employers/me/members/active-export` | Download active members with UAN and KYC (Dashboards > Active Members) | P | 2 | member |
+| `GET /employers/me/members/active-export` | Download active members with UAN and KYC (Dashboards > Active Members) | W | 1 | member |
 
 ## 5. Returns, challans and payments
 
@@ -222,9 +222,9 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /members/me` | Profile | W | 1 | member |
 | `GET /members/me/identity-assurance` | Assurance level | W | 1 | member |
 | `PATCH /members/me/contact-details` 🔐 | Change mobile / email (Journey D1) | W | 1 | member |
-| `GET /members/me/kyc` | KYC status (Aadhaar, PAN, bank) | P | 2 | member |
-| `POST /members/me/kyc/bank-accounts` 🔐 | Seed / change bank account (mock penny-drop, employer approval) | M | 2 | member |
-| `POST /members/me/kyc/{kycType}` 🔐 | Seed PAN / other KYC (mock) | M | 2 | member |
+| `GET /members/me/kyc` | KYC status (Aadhaar, PAN, bank) | W | 1 | member |
+| `POST /members/me/kyc/bank-accounts` 🔐 | Seed / change bank account (mock penny-drop, employer approval) | W | 1 | member |
+| `POST /members/me/kyc/{kycType}` 🔐 | Seed PAN / other KYC (mock) | W | 1 | member |
 | `POST /members/me/joint-declarations` 🔐 | Profile correction request (Joint Declaration) (tier-2 process `joint_declaration`) | W | 1 | member |
 | `GET /members/me/employment-history` | Service history across linked employments | W | 1 | member |
 | `POST /members/me/exits` 🔐 | Member-marked exit (when employer has not marked it); refused while another process for the member ID is ongoing | W | 1 | member |
@@ -243,7 +243,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /security/account-recovery-requests` | Review queue of account-recovery requests (Journey D5) | W | 1 | member |
 | `POST /security/account-recovery-requests/{requestId}/decisions` 🔐 | Approve or reject an account-recovery request; approval restores the verified contact details (Journey D5) | W | 1 | member |
 | `GET /members/me/notifications` | Notifications (projection fed by claim / payment / grievance events — see §14) | W | 1 | member |
-| `GET /members/me/uan-card` | UAN card | P | 2 | member |
+| `GET /members/me/uan-card` | UAN card | W | 1 | member |
 | `GET /members/me/transfers/auto` | Auto-transfer status on job change | P | 2 | claim |
 | `POST /members/me/transfers/auto/{transferId}/confirmations` 🔐 | Confirm auto-transfer | P | 2 | claim |
 | `GET /members/me/transfers/{transferId}/annexure-k` | **Annexure K** transfer statement | W | 1 | contribution |
@@ -256,7 +256,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `GET /members/me/account-status` | **Pre-flight:** readiness of each linked member account before filing — KYC, UAN–member-ID link, exit date, freeze, active ledger locks, unmigrated legacy transactions — as explicit blocker codes | P | 2 | member |
+| `GET /members/me/account-status` | **Pre-flight:** readiness of each linked member account before filing — KYC, UAN–member-ID link, exit date, freeze, active ledger locks, unmigrated legacy transactions — as explicit blocker codes | W | 1 | member |
 | `GET /members/me/service-history` | **Pre-flight:** service per member ID — contributory months, NCP days, pension-service months, transfer status — for pension and final-settlement decisions | W | 1 | member |
 
 ## 7. Member claims, transfers and pension applications

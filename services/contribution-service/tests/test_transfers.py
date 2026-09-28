@@ -34,3 +34,39 @@ def test_approved_transfer_moves_the_whole_balance_once_and_gives_annexure_k(ctx
     assert client.get("/api/v1/members/me/transfers/CASE-T1/annexure-k", headers=hdr(other, "member", [], establishment=None)).status_code == 404
     events = [r[0] for r in q("SELECT event_type FROM outbox")]
     assert events.count("TransferPosted.v1") == 1
+
+
+def test_registered_joinee_joins_the_establishment_and_the_employer_sees_the_ledger(ctx):
+    client, q = ctx
+    from app.infra.transfers import on_member_registered
+    _deliver(on_member_registered, {"uan": "100000000008", "account_link_id": "AL-0010", "member_subject": None, "name": "KIRAN DEMO",
+                                    "date_of_birth": "1998-03-04", "gender": "FEMALE", "establishment_id": "EST-DEMO-0001",
+                                    "date_of_joining": "2026-09-01", "new_uan": True, "pan_verified": False}, "MemberRegistered.v1")
+    assert q("SELECT status FROM establishment_members WHERE account_link_id='AL-0010'") == [("ACTIVE",)]
+    signatory = SEED["keycloak_subjects"]["emp-signatory"]
+    ledger = client.get("/api/v1/employers/me/members/100000000001/contribution-ledger", headers=hdr(signatory, "employer.signatory", [])).json()["data"]
+    assert ledger["member_id"] == "AL-0001" and isinstance(ledger["months"], list)
+    other = client.get("/api/v1/employers/me/members/100000000001/contribution-ledger",
+                       headers=hdr(signatory, "employer.signatory", [], establishment="EST-DEMO-0002"))
+    assert other.status_code == 404
+
+
+def test_interest_on_a_transferred_member_id_is_credited_where_the_money_went(ctx):
+    client, q = ctx
+    from app.infra.transfers import on_member_exit, on_process_transitioned
+    _deliver(on_member_exit, {"uan": "100000000007", "account_link_id": "AL-0008", "date_of_exit": "2025-12-31",
+                              "reason": "CESSATION", "marked_by": "MEMBER"}, "MemberExitMarked.v1")
+    _deliver(on_process_transitioned, approved(), "ProcessTransitioned.v1")
+    finance = SEED["keycloak_subjects"]["ho-finance"]
+    plan = client.get("/api/v1/office/accounts/interest-postings?financialYear=2025-26", headers=hdr(finance, "ho.fa_cao", [], establishment=None)).json()["data"]
+    old = next(a for a in plan["accounts"] if a["account_link_id"] == "AL-0008")
+    assert old["to_credit_paise"] == 20000000 * 825 // 10000                  # earned on AL-0008 during 2025-26
+    step = {"action": "post-interest", "resource_id": "2025-26", "amount_paise": plan["total_to_credit_paise"]}
+    assert client.post("/api/v1/office/accounts/interest-postings", json={"financial_year": "2025-26"},
+                       headers=hdr(finance, "ho.fa_cao", [], step, establishment=None)).status_code == 200
+    book = {a["account_link_id"]: a["entries"] for a in client.get("/api/v1/members/me/passbook", headers=hdr(MEMBER_D, "member", [], establishment=None)).json()["data"]["accounts"]}
+    assert book["AL-0008"][-1]["running_balance_paise"] == 0                 # nothing lands on the transferred member ID
+    interest = [e for e in book["AL-0009"] if e["kind"] == "INTEREST"]
+    assert interest and "earned on AL-0008, transferred" in interest[0]["description"]
+    again = client.get("/api/v1/office/accounts/interest-postings?financialYear=2025-26", headers=hdr(finance, "ho.fa_cao", [], establishment=None)).json()["data"]
+    assert next(a for a in again["accounts"] if a["account_link_id"] == "AL-0008")["to_credit_paise"] == 0   # not credited twice

@@ -41,6 +41,11 @@ async def interest_due(session: AsyncSession, fy: str, rate_bp: int) -> list[dic
             "LEFT JOIN interest_postings ip ON ip.journal_id = j.id "
             "WHERE jl.account_code = 'AC01_EPF' AND jl.account_link_id = :a AND j.occurred_at <= :last"),
             {"a": a["account_link_id"], "last": ends[-1]})).mappings().all()
+        # What is already credited for the year, from the interest postings themselves (the credit may have gone
+        # to another member ID if this one was transferred).
+        done = (await session.execute(text("SELECT COALESCE(SUM(employee_paise), 0), COALESCE(SUM(employer_paise), 0) FROM interest_postings "
+                                           "WHERE financial_year = :y AND account_link_id = :a"), {"y": fy, "a": a["account_link_id"]})).one()
+        credited_by_share = {"employee": int(done[0]), "employer": int(done[1])}
         shares = {}
         for share in SHARES:
             own = [r for r in rows if r["share"] == share]
@@ -49,7 +54,7 @@ async def interest_due(session: AsyncSession, fy: str, rate_bp: int) -> list[dic
             # This year's own interest is not part of the balance it is worked out on.
             closing = [sum(v for at, v, year in signed if at <= end and year != fy) for end in ends]
             due = interest_on(closing, rate_bp)
-            credited = sum(v for _, v, year in signed if year == fy)
+            credited = credited_by_share.get(share, 0)
             shares[share] = {"due_paise": due, "credited_paise": credited, "now_paise": due - credited}
         out.append({"account_link_id": a["account_link_id"], "member_subject": a["member_subject"], **shares,
                     "to_credit_paise": sum(shares[s]["now_paise"] for s in SHARES)})
@@ -69,12 +74,15 @@ async def post_interest(session: AsyncSession, fy: str, rate_bp: int, rule_versi
             continue
         earlier = (await session.execute(text("SELECT COUNT(*) FROM interest_postings WHERE financial_year = :y AND account_link_id = :a"),
                                          {"y": fy, "a": a["account_link_id"]})).scalar_one()
+        # Interest follows the money: a member ID whose balance was transferred (Form 13) is credited in the one it went to.
+        target = (await session.execute(text("SELECT to_account_link_id FROM transfer_postings WHERE from_account_link_id = :a"),
+                                        {"a": a["account_link_id"]})).scalar_one_or_none() or a["account_link_id"]
         lines = []
         for share in SHARES:
             n = a[share]["now_paise"]
             if n:
                 lines.append({"account_code": "AC01_EPF", "side": "credit" if n > 0 else "debit", "amount_paise": abs(n),
-                              "account_link_id": a["account_link_id"], "share": share})
+                              "account_link_id": target, "share": share})
         net = a["to_credit_paise"]
         lines.append({"account_code": "INTEREST_EXPENSE", "side": "debit" if net > 0 else "credit", "amount_paise": abs(net)})
         if sum(x["amount_paise"] for x in lines if x["side"] == "debit") != sum(x["amount_paise"] for x in lines if x["side"] == "credit"):
@@ -93,7 +101,7 @@ async def post_interest(session: AsyncSession, fy: str, rate_bp: int, rule_versi
             "employer_paise, revision, posted_by, posted_at) VALUES (:j, :y, :a, :v, :r, :ee, :er, :n, :by, :at)"),
             {"j": journal_id, "y": fy, "a": a["account_link_id"], "v": rule_version, "r": rate_bp, "ee": a["employee"]["now_paise"],
              "er": a["employer"]["now_paise"], "n": earlier, "by": actor_subject, "at": datetime.now(UTC)})
-        posted.append({"account_link_id": a["account_link_id"], "journal_id": journal_id, "employee_paise": a["employee"]["now_paise"],
+        posted.append({"account_link_id": target, "earned_on": a["account_link_id"], "journal_id": journal_id, "employee_paise": a["employee"]["now_paise"],
                        "employer_paise": a["employer"]["now_paise"], "revision": earlier})
         if a["member_subject"]:
             await add_event(session, producer=PRODUCER, event_type="NotificationRequested.v1", aggregate_type="notification",

@@ -121,6 +121,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /grievances/{grievanceId}` | W | complainant or the assigned office |  |
 | `GET /members/me` | W | self — caller's own member record only |  |
+| `GET /members/me/account-status` | W | self — caller's own member record only |  |
 | `GET /members/me/accounts/{accountLinkId}/passbook` | W | self — caller's own member record only |  |
 | `GET /members/me/applications` | W | self — caller's own member record only |  |
 | `GET /members/me/claims` | W | self — caller's own member record only |  |
@@ -129,6 +130,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/employment-history` | W | self — caller's own member record only |  |
 | `GET /members/me/grievances` | W | self — caller's own member record only |  |
 | `GET /members/me/identity-assurance` | W | self — caller's own member record only |  |
+| `GET /members/me/kyc` | W | self — caller's own member record only |  |
 | `GET /members/me/notifications` | W | self — caller's own member record only |  |
 | `GET /members/me/passbook` | W | self — caller's own member record only |  |
 | `GET /members/me/pension-eligibility-preview` | W | self — caller's own member record only |  |
@@ -136,6 +138,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/sessions` | W | self — caller's own member record only |  |
 | `GET /members/me/transfers/{transferId}` | W | self — caller's own member record only |  |
 | `GET /members/me/transfers/{transferId}/annexure-k` | W | self — caller's own member record only |  |
+| `GET /members/me/uan-card` | W | self — caller's own member record only |  |
 | `PATCH /members/me/contact-details` | W | self — caller's own member record only | yes |
 | `POST /ai/feedback` | W | caller's own permissions; advisory output only |  |
 | `POST /ai/knowledge/search` | W | caller's own permissions; advisory output only |  |
@@ -150,27 +153,24 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /members/me/exits` | W | self — caller's own member record only | yes |
 | `POST /members/me/grievances` | W | self — caller's own member record only |  |
 | `POST /members/me/joint-declarations` | W | self — caller's own member record only | yes |
+| `POST /members/me/kyc/bank-accounts` | W | self — caller's own member record only | yes |
+| `POST /members/me/kyc/{kycType}` | W | self — caller's own member record only | yes |
 | `POST /members/me/security-reports` | W | self — caller's own member record only |  |
 | `POST /members/me/tax/form-15g-15h` | W | self — caller's own member record only |  |
 | `POST /members/me/transfers` | W | self — caller's own member record only | yes |
 | `POST /security/step-up-challenges` | W | self — challenge bound to one action and resource version |  |
 | `POST /security/step-up-challenges/{challengeId}/verifications` | W | self — challenge bound to one action and resource version |  |
-| `POST /members/me/kyc/bank-accounts` | M | self — caller's own member record only | yes |
-| `POST /members/me/kyc/{kycType}` | M | self — caller's own member record only | yes |
 | `POST /members/uan-activations` | M | unauthenticated with OTP / face-auth proof |  |
 | `POST /members/uan-allotments` | M | unauthenticated with OTP / face-auth proof |  |
-| `GET /members/me/account-status` | P | self — caller's own member record only |  |
 | `GET /members/me/annual-statements/{financialYear}` | P | self — caller's own member record only |  |
 | `GET /members/me/claims/eligibility-preview` | P | self — caller's own member record only |  |
 | `GET /members/me/claims/{claimId}/audit-trail` | P | self — caller's own member record only |  |
 | `GET /members/me/higher-pension-options/{optionId}` | P | self — caller's own member record only |  |
-| `GET /members/me/kyc` | P | self — caller's own member record only |  |
 | `GET /members/me/nominations` | P | self — caller's own member record only |  |
 | `GET /members/me/pension-scheme-certificate` | P | self — caller's own member record only |  |
 | `GET /members/me/tax/form-16a` | P | self — caller's own member record only |  |
 | `GET /members/me/tax/taxable-interest` | P | self — caller's own member record only |  |
 | `GET /members/me/transfers/auto` | P | self — caller's own member record only |  |
-| `GET /members/me/uan-card` | P | self — caller's own member record only |  |
 | `POST /grievances/{grievanceId}/feedback` | P | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/reminders` | P | complainant or the assigned office |  |
 | `POST /members/me/claims/{claimId}/cancellations` | P | self — caller's own member record only | yes |
@@ -285,11 +285,13 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /employers/me/ecr-filings` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ecr-filings/{filingId}` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/joint-declarations` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/kyc-approvals` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/transfer-requests` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/approvals/{approvalId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/ecr-filings/{filingId}/submissions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/joint-declarations/{jdId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
+| `POST /employers/me/kyc-approvals/{requestId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/transfer-requests/{transferId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `GET /international/coc-applications/{id}` | M | own application (employer) or IWU role |  |
 | `POST /employers/me/challans/{trrn}/payment-intents` | M | own establishment (X-Establishment-Id validated against grants) | yes |
@@ -299,7 +301,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /employers/me/claim-attestations` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/demands` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/higher-pension-options` | P | own establishment (X-Establishment-Id validated against grants) |  |
-| `GET /employers/me/kyc-approvals` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ownership-declaration` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /international/coc-applications/{id}/certificate` | P | own application (employer) or IWU role |  |
 | `PATCH /employers/me` | P | own establishment (X-Establishment-Id validated against grants) | yes |
@@ -312,7 +313,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /employers/me/ecr-filings/{filingId}/cancellations` | P | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/higher-pension-options/{optionId}/validations` | P | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/joint-declarations` | P | own establishment (X-Establishment-Id validated against grants) | yes |
-| `POST /employers/me/kyc-approvals/{requestId}/decisions` | P | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/office-transfer-requests` | P | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/proceedings/{caseId}/submissions` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/vishwas-applications` | P | own establishment (X-Establishment-Id validated against grants) |  |
@@ -330,26 +330,26 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /employers/me/configuration` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ecr-filings` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ecr-filings/{filingId}` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/kyc-bulk-uploads/{uploadId}/errors` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/members` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/members/active-export` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/members/{uan}/contribution-ledger` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `PATCH /employers/me/members/{uan}/profile` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/ecr-filings` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/ecr-filings/{filingId}/validations` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `POST /employers/me/kyc-bulk-uploads` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `POST /employers/me/members` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `POST /employers/me/members/bulk-registrations` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `POST /employers/me/members/{uan}/declarations` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/members/{uan}/exits` | W | own establishment (X-Establishment-Id validated against grants) | yes |
-| `POST /employers/me/members` | M | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/bank-accounts` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/compliance-summary` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/dashboard` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/exemption` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/kyc` | P | own establishment (X-Establishment-Id validated against grants) |  |
-| `GET /employers/me/kyc-bulk-uploads/{uploadId}/errors` | P | own establishment (X-Establishment-Id validated against grants) |  |
-| `GET /employers/me/members/active-export` | P | own establishment (X-Establishment-Id validated against grants) |  |
-| `GET /employers/me/members/{uan}/contribution-ledger` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/pending-approvals` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/returns/dashboard` | P | own establishment (X-Establishment-Id validated against grants) |  |
-| `PATCH /employers/me/members/{uan}/profile` | P | own establishment (X-Establishment-Id validated against grants) | yes |
-| `POST /employers/me/kyc-bulk-uploads` | P | own establishment (X-Establishment-Id validated against grants) |  |
-| `POST /employers/me/members/bulk-registrations` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/members/exit-bulk-uploads` | P | own establishment (X-Establishment-Id validated against grants) | yes |
-| `POST /employers/me/members/{uan}/declarations` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/members/{uan}/exit-corrections` | P | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/members/{uan}/location-mappings` | P | own establishment (X-Establishment-Id validated against grants) |  |
 

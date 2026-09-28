@@ -173,6 +173,20 @@ simulation; point out that the dialog says exactly what is being authorised (act
 7. Employer side: **`emp-preparer` → Member › Member Profile** marks a member's date of exit; it takes effect
    only when **`emp-signatory`** approves it under **Member › Approvals**.
 
+## Registering a joinee and approving KYC
+*Tests: `tests/e2e/test_registration_kyc.py`, `services/member-service/tests/test_onboarding.py`*
+
+1. **`emp-preparer` → Member › Register-Individual.** Name, date of birth, gender, Aadhaar (checked by a mock
+   UIDAI; a number ending 0000 fails), mobile, date of joining → a new UAN and member ID. With *Existing UAN*, a
+   new member ID under that UAN (name and date of birth must match). Then **Form 11**. The joinee is in the ECR
+   member list at once; *Dashboards › Active Members* downloads the list as CSV; *Missing details* fills only
+   what the record lacks.
+2. **`member-d` → Manage › KYC.** Add a bank account (mock penny-drop) or a PAN (mock NSDL; an individual PAN has P
+   as the fourth letter) with a one-time code → *waiting for your employer's approval*.
+3. **`emp-signatory` → Member › Approve KYC …** approves with DSC / e-sign (one-time code). The member's KYC,
+   bank for payments and *Ready to claim?* change; a verified PAN lowers TDS on a taxable withdrawal.
+4. *KYC Bulk* uploads many lines at once and lists the lines it could not accept.
+
 ## Policy changes that move money — interest, TDS and pensions
 *Tests: `tests/e2e/test_policy_money.py`, `services/contribution-service/tests/test_interest.py`,
 `services/claim-service/tests/test_tds.py`, `services/pension-service/tests/test_pensions.py`*

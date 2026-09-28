@@ -34,6 +34,40 @@ employments = Table(
     Column("exit_marked_by", String(20)),                   # MEMBER | EMPLOYER | SEED
     Column("last_contribution_month", String(7)),           # from ContributionPosted.v1 (seeded first)
     Column("transferred_to", String(40)),                   # from TransferPosted.v1 (Form 13)
+    Column("form11", JSON),                                 # the new joinee's declaration (previous PF / EPS, international worker)
+    Column("registered_by", String(80)),                    # the employer user who registered the joinee (none for seeded rows)
+)
+
+# KYC seeded by the member (or uploaded in bulk by the employer): checked by a mock verifier (UIDAI / NSDL /
+# penny-drop, labelled MOCK), then approved by the employer's authorised signatory with DSC / e-sign.
+kyc_requests = Table(
+    "kyc_requests", metadata,
+    Column("request_id", String(40), primary_key=True),
+    Column("member_id", String(40), nullable=False, index=True),
+    Column("uan", String(12), nullable=False),
+    Column("kyc_type", String(20), nullable=False),          # PAN | BANK | AADHAAR
+    Column("masked_value", String(40), nullable=False),
+    Column("details", JSON, nullable=False),                  # e.g. ifsc, account_last4, name_on_document
+    Column("source", String(20), nullable=False),             # MEMBER | EMPLOYER_BULK
+    Column("state", String(30), nullable=False),              # PENDING_EMPLOYER | APPROVED | REJECTED | FAILED_VERIFICATION
+    Column("verification", JSON, nullable=False),             # the mock verifier's answer
+    Column("establishment_id", String(40), nullable=False, index=True),
+    Column("submitted_by", String(80), nullable=False),
+    Column("decided_by", String(80)),
+    Column("decision_note", String(1000)),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    Column("decided_at", DateTime(timezone=True)),
+)
+
+kyc_uploads = Table(
+    "kyc_uploads", metadata,
+    Column("upload_id", String(40), primary_key=True),
+    Column("establishment_id", String(40), nullable=False, index=True),
+    Column("uploaded_by", String(80), nullable=False),
+    Column("rows", Integer, nullable=False),
+    Column("accepted", Integer, nullable=False),
+    Column("errors", JSON, nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
 )
 
 # The member's applications (profile corrections, exits, transfers) as the member sees them: *Recent Pending

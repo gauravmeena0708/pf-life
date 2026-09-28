@@ -7,8 +7,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | # | Interface | Coverage | Stakeholders | W | M | P | ? |
 |---|---|---|---|---|---|---|---|
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 9 | 2 | 5 | 0 |
-| 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 27 | 8 | 55 | 0 |
-| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 38 | 7 | 37 | 0 |
+| 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 37 | 7 | 46 | 0 |
+| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 43 | 5 | 34 | 0 |
 | 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 19 | 0 | 76 | 6 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 11 | 1 | 2 | 0 |
 | 6 | International worker | **Mock** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 0 | 1 | 4 | 0 |
@@ -64,17 +64,27 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /employers/me/ecr-filings` | W | contribution | employer.operator, employer.signatory |
 | `GET /employers/me/ecr-filings/{filingId}` | W | contribution | employer.operator, employer.signatory |
 | `GET /employers/me/joint-declarations` | W | member | employer.signatory |
+| `GET /employers/me/kyc-approvals` | W | member | employer.signatory |
+| `GET /employers/me/kyc-bulk-uploads/{uploadId}/errors` | W | member | employer.operator |
 | `GET /employers/me/members` | W | member | employer.operator |
+| `GET /employers/me/members/active-export` | W | member | employer.operator |
+| `GET /employers/me/members/{uan}/contribution-ledger` | W | contribution | employer.operator |
 | `GET /employers/me/operators` | W | employer | employer.owner |
 | `GET /employers/me/signatories` | W | employer | employer.owner |
 | `GET /employers/me/transfer-requests` | W | claim | employer.signatory |
 | `GET /employers/registration-requests/{reqId}` | W | employer | employer.owner |
+| `PATCH /employers/me/members/{uan}/profile` | W | member | employer.operator |
 | `POST /employers/me/approvals/{approvalId}/decisions` | W | member | employer.signatory |
 | `POST /employers/me/ecr-filings` | W | contribution | employer.operator |
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W | contribution | employer.signatory |
 | `POST /employers/me/ecr-filings/{filingId}/submissions` | W | contribution | employer.signatory |
 | `POST /employers/me/ecr-filings/{filingId}/validations` | W | contribution | employer.operator |
 | `POST /employers/me/joint-declarations/{jdId}/decisions` | W | member | employer.signatory |
+| `POST /employers/me/kyc-approvals/{requestId}/decisions` | W | member | employer.signatory |
+| `POST /employers/me/kyc-bulk-uploads` | W | member | employer.operator |
+| `POST /employers/me/members` | W | member | employer.operator |
+| `POST /employers/me/members/bulk-registrations` | W | member | employer.operator |
+| `POST /employers/me/members/{uan}/declarations` | W | member | employer.operator |
 | `POST /employers/me/members/{uan}/exits` | W | member | employer.operator |
 | `POST /employers/me/operators/invitations` | W | employer | employer.owner |
 | `POST /employers/me/operators/{operatorId}/revocations` | W | employer | employer.owner |
@@ -85,7 +95,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /international/coc-applications/{id}` | M | international | employer.signatory |
 | `POST /employers/me/challans/{trrn}/payment-intents` | M | payment-simulator | employer.signatory |
 | `POST /employers/me/kyc/{kycType}` | M | employer | employer.signatory |
-| `POST /employers/me/members` | M | member | employer.operator |
 | `POST /employers/me/signatories/{signatoryId}/dsc-registrations` | M | employer | employer.owner |
 | `POST /employers/me/signatories/{signatoryId}/esign-registrations` | M | employer | employer.owner |
 | `POST /employers/registration-requests/{reqId}/verification-evidence` | M | employer | employer.owner |
@@ -101,10 +110,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /employers/me/exemption` | P | employer | employer.operator |
 | `GET /employers/me/higher-pension-options` | P | pension | employer.signatory |
 | `GET /employers/me/kyc` | P | employer | employer.operator |
-| `GET /employers/me/kyc-approvals` | P | member | employer.signatory |
-| `GET /employers/me/kyc-bulk-uploads/{uploadId}/errors` | P | member | employer.operator |
-| `GET /employers/me/members/active-export` | P | member | employer.operator |
-| `GET /employers/me/members/{uan}/contribution-ledger` | P | contribution | employer.operator |
 | `GET /employers/me/ownership-declaration` | P | employer | employer.signatory |
 | `GET /employers/me/pending-approvals` | P | workflow | employer.operator |
 | `GET /employers/me/returns/dashboard` | P | contribution | employer.operator |
@@ -113,7 +118,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /international/coc-applications/{id}/certificate` | P | international | employer.signatory |
 | `GET /partners/liquidators/claims/{claimId}` | P | compliance | liquidator |
 | `PATCH /employers/me` | P | employer | employer.signatory |
-| `PATCH /employers/me/members/{uan}/profile` | P | member | employer.operator |
 | `POST /employers/me/branches` | P | employer | employer.signatory |
 | `POST /employers/me/claim-attestations/{claimId}/decisions` | P | claim | employer.signatory |
 | `POST /employers/me/closure-requests` | P | employer | employer.signatory |
@@ -125,11 +129,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /employers/me/ecr-filings/{filingId}/principal-employer-tags` | P | contribution | contractor |
 | `POST /employers/me/higher-pension-options/{optionId}/validations` | P | pension | employer.signatory |
 | `POST /employers/me/joint-declarations` | P | member | employer.signatory |
-| `POST /employers/me/kyc-approvals/{requestId}/decisions` | P | member | employer.signatory |
-| `POST /employers/me/kyc-bulk-uploads` | P | member | employer.operator |
-| `POST /employers/me/members/bulk-registrations` | P | member | employer.operator |
 | `POST /employers/me/members/exit-bulk-uploads` | P | member | employer.operator |
-| `POST /employers/me/members/{uan}/declarations` | P | member | employer.operator |
 | `POST /employers/me/members/{uan}/exit-corrections` | P | member | employer.operator |
 | `POST /employers/me/members/{uan}/location-mappings` | P | member | employer.operator |
 | `POST /employers/me/office-transfer-requests` | P | employer | employer.signatory |
@@ -152,6 +152,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 |---|---|---|---|
 | `GET /grievances/{grievanceId}` | W | grievance | member |
 | `GET /members/me` | W | member | member |
+| `GET /members/me/account-status` | W | member | member |
 | `GET /members/me/accounts/{accountLinkId}/passbook` | W | contribution | member |
 | `GET /members/me/applications` | W | member | member |
 | `GET /members/me/claims` | W | claim | member |
@@ -160,6 +161,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /members/me/employment-history` | W | member | member |
 | `GET /members/me/grievances` | W | grievance | member |
 | `GET /members/me/identity-assurance` | W | member | member |
+| `GET /members/me/kyc` | W | member | member |
 | `GET /members/me/notifications` | W | member | member |
 | `GET /members/me/passbook` | W | contribution | member |
 | `GET /members/me/pension-eligibility-preview` | W | pension | member |
@@ -167,6 +169,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /members/me/sessions` | W | gateway | member |
 | `GET /members/me/transfers/{transferId}` | W | claim | member |
 | `GET /members/me/transfers/{transferId}/annexure-k` | W | contribution | member |
+| `GET /members/me/uan-card` | W | member | member |
 | `GET /pensioners/me` | W | pension | family_pensioner, pensioner |
 | `GET /pensioners/me/payments` | W | pension | pensioner |
 | `PATCH /members/me/contact-details` | W | member | member |
@@ -183,31 +186,28 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /members/me/exits` | W | member | member |
 | `POST /members/me/grievances` | W | grievance | member |
 | `POST /members/me/joint-declarations` | W | member | member |
+| `POST /members/me/kyc/bank-accounts` | W | member | member |
+| `POST /members/me/kyc/{kycType}` | W | member | member |
 | `POST /members/me/security-reports` | W | member | member |
 | `POST /members/me/tax/form-15g-15h` | W | claim | member |
 | `POST /members/me/transfers` | W | claim | member |
 | `POST /security/step-up-challenges` | W | gateway | member |
 | `POST /security/step-up-challenges/{challengeId}/verifications` | W | gateway | member |
 | `GET /pensioners/me/life-certificate` | M | pension | pensioner |
-| `POST /members/me/kyc/bank-accounts` | M | member | member |
-| `POST /members/me/kyc/{kycType}` | M | member | member |
 | `POST /members/uan-activations` | M | member | member |
 | `POST /members/uan-allotments` | M | member | csc_operator, member |
 | `POST /pensioners/me/life-certificate/submissions` | M | pension | csc_operator, pensioner |
 | `POST /public/pension/life-certificate-lookups` | M | pension | pensioner |
 | `GET /claimants/death-claims/{claimId}` | P | claim | claimant |
-| `GET /members/me/account-status` | P | member | member |
 | `GET /members/me/annual-statements/{financialYear}` | P | contribution | member |
 | `GET /members/me/claims/eligibility-preview` | P | claim | member |
 | `GET /members/me/claims/{claimId}/audit-trail` | P | claim | member |
 | `GET /members/me/higher-pension-options/{optionId}` | P | pension | member |
-| `GET /members/me/kyc` | P | member | member |
 | `GET /members/me/nominations` | P | member | member |
 | `GET /members/me/pension-scheme-certificate` | P | pension | member |
 | `GET /members/me/tax/form-16a` | P | claim | member |
 | `GET /members/me/tax/taxable-interest` | P | contribution | member |
 | `GET /members/me/transfers/auto` | P | claim | member |
-| `GET /members/me/uan-card` | P | member | member |
 | `GET /pensioners/me/pension-slips` | P | pension | pensioner |
 | `GET /pensioners/me/ppo` | P | pension | pensioner |
 | `POST /claimants/death-claims` | P | claim | claimant |

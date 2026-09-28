@@ -77,6 +77,14 @@ Unit tests 259 passed (services 196, 8 of them new: member 4, workflow 2, contri
 transfer request as needing step-up while the process asked for one (the gateway would never pass the
 confirmation), and employer exit marking was marked the other way round; both now agree.
 
+## Update — Phase 2, slice 2: registration and KYC (28 September 2026)
+
+Unit tests 268 passed (services 205, including member 24, contribution 31, claim 26, workflow 27; packages 40; gateway 23);
+must-deny 18 passed; end to end 25 of 27 passed. The two failures are data left on the long-running stack, not
+defects in the new code: Journey B ran out of member A's synthetic balance (run `make reset`), and an interest
+run credited 2025-26 interest to member ID AL-0008 after its balance had been transferred — the defect is fixed
+(interest now goes to the member ID the money moved to), but the credit already posted stays until `make reset`.
+
 ## Known limits
 
 - Journey B spends ₹6,00,000 of member A's synthetic balance per run; after about six runs `make reset` restores it.

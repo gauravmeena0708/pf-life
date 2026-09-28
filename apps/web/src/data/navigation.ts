@@ -13,10 +13,10 @@ const link = (label: string, to?: string): NavItem => ({ label, to });
 const MEMBER: NavGroup[] = [
   { label: "View", items: [
     link("Profile", "/member/profile#member-profile-heading"), link("Service History", "/member/service#service-heading"),
-    link("UAN Card"), link("Passbook", "/member/passbook"), link("Pension estimate", "/member/profile#pension-estimate-heading")] },
+    link("UAN Card", "/member/uan-card"), link("Passbook", "/member/passbook"), link("Pension estimate", "/member/profile#pension-estimate-heading")] },
   { label: "Manage", items: [
     link("Basic Details (Joint Declaration)", "/member/profile#correction-heading"), link("Contact Details", "/member/security#contact-heading"),
-    link("KYC", "/member/profile#assurance-heading"), link("E-Nomination"), link("Mark Exit", "/member/service#exit-heading")] },
+    link("KYC", "/member/kyc"), link("E-Nomination"), link("Mark Exit", "/member/service#exit-heading")] },
   { label: "Account", items: [link("Change Password"), { labelKey: "navigation.accountSecurity", to: "/member/security" }] },
   { label: "Online Services", items: [
     link("Claim (Form-31, 19, 10C & 10D)", "/member/claims"), link("One Member – One EPF Account (Transfer Request)", "/member/service#transfer-heading"),
@@ -28,9 +28,10 @@ const MEMBER: NavGroup[] = [
 
 const EMPLOYER: NavGroup[] = [
   { label: "Member", items: [
-    link("Register-Individual"), link("Register-Bulk"), link("Member Profile (mark exit)", "/employer/members#exit-heading"), link("Approvals", "/employer/members#approvals-heading"),
-    link("Approve KYC pending for Digital Signature"), link("Approve KYC seeded by member"), link("KYC Bulk"), link("Exit-Bulk"),
-    link("Missing details"), link("Member Location Mapping"), link("KYC Verification / PAN Verification"),
+    link("Register-Individual", "/employer/registration#register-heading"), link("Register-Bulk", "/employer/registration#bulk-heading"), link("Member Profile (mark exit)", "/employer/members#exit-heading"), link("Approvals", "/employer/members#approvals-heading"),
+    link("Approve KYC pending for Digital Signature", "/employer/registration#kyc-approvals-heading"),
+    link("Approve KYC seeded by member", "/employer/registration#kyc-approvals-heading"), link("KYC Bulk", "/employer/registration#kyc-bulk-heading"), link("Exit-Bulk"),
+    link("Missing details", "/employer/registration#missing-heading"), link("Member Location Mapping"), link("KYC Verification / PAN Verification", "/employer/registration#kyc-approvals-heading"),
     link("Joint Declaration requests", "/employer#jd-heading")] },
   { label: "Establishment", items: [
     link("Establishment Profile", "/employer#emp-heading"), link("Form 5A"), link("Branches (Form 2A)"),
@@ -38,7 +39,7 @@ const EMPLOYER: NavGroup[] = [
   { label: "Payments", items: [
     link("ECR Upload", "/employer/ecr#ecr-prepare"), link("Return Filing", "/employer/ecr#ecr-returns"), link("Return monthly dashboard"),
     link("Direct Challan"), link("Monthly Return for Exempted Establishment"), link("TRRN query / challan status", "/employer/ecr#ecr-challans")] },
-  { label: "Dashboards", items: [link("Active Members details"), link("Missing details")] },
+  { label: "Dashboards", items: [link("Active Members details", "/employer/registration#active-heading"), link("Missing details", "/employer/registration#active-heading")] },
   { label: "User", items: [link("Sub-users (payroll operators)", "/employer#people-operator")] },
   { label: "Admin" },
   { label: "Online Services", items: [link("Transfer Claims", "/employer/members#transfers-heading"), link("Claim attestation"), link("Higher-pension joint-option validation")] },

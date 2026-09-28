@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /members/me', 'GET /office/member-change-requests', 'GET /security/account-recovery-requests', 'GET /employers/me/approvals', 'GET /employers/me/joint-declarations', 'GET /employers/me/members', 'POST /members/me/account-recovery-requests', 'GET /members/me/applications', 'PATCH /members/me/contact-details', 'GET /members/me/employment-history', 'POST /members/me/exits', 'GET /members/me/identity-assurance', 'POST /members/me/joint-declarations', 'GET /members/me/notifications', 'POST /members/me/security-reports', 'GET /members/me/service-history', 'GET /office/member-change-requests/pendency', 'POST /employers/me/approvals/{approvalId}/decisions', 'POST /employers/me/joint-declarations/{jdId}/decisions', 'POST /employers/me/members/{uan}/exits', 'POST /office/member-change-requests/{requestId}/decisions', 'POST /office/member-change-requests/{requestId}/recommendations', 'POST /office/member-change-requests/{requestId}/verifications', 'POST /office/members/{uan}/defreezes', 'POST /office/members/{uan}/freezes', 'POST /security/account-recovery-requests/{requestId}/decisions']
+OPERATIONS = ['GET /members/me', 'GET /office/member-change-requests', 'GET /security/account-recovery-requests', 'GET /employers/me/approvals', 'GET /employers/me/joint-declarations', 'GET /employers/me/kyc-approvals', 'POST /employers/me/kyc-bulk-uploads', 'GET /employers/me/members', 'POST /employers/me/members', 'POST /members/me/account-recovery-requests', 'GET /members/me/account-status', 'GET /members/me/applications', 'PATCH /members/me/contact-details', 'GET /members/me/employment-history', 'POST /members/me/exits', 'GET /members/me/identity-assurance', 'POST /members/me/joint-declarations', 'GET /members/me/kyc', 'GET /members/me/notifications', 'POST /members/me/security-reports', 'GET /members/me/service-history', 'GET /members/me/uan-card', 'GET /office/member-change-requests/pendency', 'GET /employers/me/members/active-export', 'POST /employers/me/members/bulk-registrations', 'POST /members/me/kyc/bank-accounts', 'POST /members/me/kyc/{kycType}', 'POST /employers/me/approvals/{approvalId}/decisions', 'POST /employers/me/joint-declarations/{jdId}/decisions', 'POST /employers/me/kyc-approvals/{requestId}/decisions', 'GET /employers/me/kyc-bulk-uploads/{uploadId}/errors', 'POST /employers/me/members/{uan}/declarations', 'POST /employers/me/members/{uan}/exits', 'PATCH /employers/me/members/{uan}/profile', 'POST /office/member-change-requests/{requestId}/decisions', 'POST /office/member-change-requests/{requestId}/recommendations', 'POST /office/member-change-requests/{requestId}/verifications', 'POST /office/members/{uan}/defreezes', 'POST /office/members/{uan}/freezes', 'POST /security/account-recovery-requests/{requestId}/decisions']
 
 @router.api_route("/api/v1/members/me", methods=["GET"], include_in_schema=False)
 async def get_members_me(actor: Actor = Depends(require_actor)) -> None:
@@ -37,14 +37,34 @@ async def get_employers_me_joint_declarations(actor: Actor = Depends(require_act
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Joint Declarations awaiting attestation (tier-2 process joint_declaration)")
 
 
+@router.api_route("/api/v1/employers/me/kyc-approvals", methods=["GET"], include_in_schema=False)
+async def get_employers_me_kyc_approvals(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Member KYC requests awaiting employer approval")
+
+
+@router.api_route("/api/v1/employers/me/kyc-bulk-uploads", methods=["POST"], include_in_schema=False)
+async def post_employers_me_kyc_bulk_uploads(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Member > KYC BULK upload")
+
+
 @router.api_route("/api/v1/employers/me/members", methods=["GET"], include_in_schema=False)
 async def get_employers_me_members(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Employees of this establishment (own establishment only; feeds the ECR wizard in Journey A3)")
 
 
+@router.api_route("/api/v1/employers/me/members", methods=["POST"], include_in_schema=False)
+async def post_employers_me_members(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Register new joinee / generate UAN (mock Aadhaar)")
+
+
 @router.api_route("/api/v1/members/me/account-recovery-requests", methods=["POST"], include_in_schema=False)
 async def post_members_me_account_recovery_requests(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Controlled, reviewed account recovery (Journey D5)")
+
+
+@router.api_route("/api/v1/members/me/account-status", methods=["GET"], include_in_schema=False)
+async def get_members_me_account_status(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Pre-flight: readiness of each linked member account before filing — KYC, UAN–member-ID link, exit da")
 
 
 @router.api_route("/api/v1/members/me/applications", methods=["GET"], include_in_schema=False)
@@ -77,6 +97,11 @@ async def post_members_me_joint_declarations(actor: Actor = Depends(require_acto
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Profile correction request (Joint Declaration) (tier-2 process joint_declaration)")
 
 
+@router.api_route("/api/v1/members/me/kyc", methods=["GET"], include_in_schema=False)
+async def get_members_me_kyc(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "KYC status (Aadhaar, PAN, bank)")
+
+
 @router.api_route("/api/v1/members/me/notifications", methods=["GET"], include_in_schema=False)
 async def get_members_me_notifications(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Notifications (projection fed by claim / payment / grievance events — see §14)")
@@ -92,9 +117,34 @@ async def get_members_me_service_history(actor: Actor = Depends(require_actor)) 
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Pre-flight: service per member ID — contributory months, NCP days, pension-service months, transfer ")
 
 
+@router.api_route("/api/v1/members/me/uan-card", methods=["GET"], include_in_schema=False)
+async def get_members_me_uan_card(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "UAN card")
+
+
 @router.api_route("/api/v1/office/member-change-requests/pendency", methods=["GET"], include_in_schema=False)
 async def get_office_member_change_requests_pendency(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "RPFC-I monitors JD pendency (tier-2 process joint_declaration)")
+
+
+@router.api_route("/api/v1/employers/me/members/active-export", methods=["GET"], include_in_schema=False)
+async def get_employers_me_members_active_export(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Download active members with UAN and KYC (Dashboards > Active Members)")
+
+
+@router.api_route("/api/v1/employers/me/members/bulk-registrations", methods=["POST"], include_in_schema=False)
+async def post_employers_me_members_bulk_registrations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Bulk registration file")
+
+
+@router.api_route("/api/v1/members/me/kyc/bank-accounts", methods=["POST"], include_in_schema=False)
+async def post_members_me_kyc_bank_accounts(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Seed / change bank account (mock penny-drop, employer approval)")
+
+
+@router.api_route("/api/v1/members/me/kyc/{kycType}", methods=["POST"], include_in_schema=False)
+async def post_members_me_kyc_kycType(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Seed PAN / other KYC (mock)")
 
 
 @router.api_route("/api/v1/employers/me/approvals/{approvalId}/decisions", methods=["POST"], include_in_schema=False)
@@ -107,9 +157,29 @@ async def post_employers_me_joint_declarations_jdId_decisions(actor: Actor = Dep
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Attest / reject Joint Declaration (tier-2 process joint_declaration)")
 
 
+@router.api_route("/api/v1/employers/me/kyc-approvals/{requestId}/decisions", methods=["POST"], include_in_schema=False)
+async def post_employers_me_kyc_approvals_requestId_decisions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Approve / reject member KYC (bank, PAN, Aadhaar seeding)")
+
+
+@router.api_route("/api/v1/employers/me/kyc-bulk-uploads/{uploadId}/errors", methods=["GET"], include_in_schema=False)
+async def get_employers_me_kyc_bulk_uploads_uploadId_errors(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Bulk KYC error list")
+
+
+@router.api_route("/api/v1/employers/me/members/{uan}/declarations", methods=["POST"], include_in_schema=False)
+async def post_employers_me_members_uan_declarations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Form 11 new-joinee declaration")
+
+
 @router.api_route("/api/v1/employers/me/members/{uan}/exits", methods=["POST"], include_in_schema=False)
 async def post_employers_me_members_uan_exits(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Mark exit with date and reason")
+
+
+@router.api_route("/api/v1/employers/me/members/{uan}/profile", methods=["PATCH"], include_in_schema=False)
+async def patch_employers_me_members_uan_profile(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Fill missing member details (only details the record lacks; a recorded detail changes through a Join")
 
 
 @router.api_route("/api/v1/office/member-change-requests/{requestId}/decisions", methods=["POST"], include_in_schema=False)

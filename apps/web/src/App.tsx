@@ -14,6 +14,8 @@ import { ClaimsPage } from "./features/member/ClaimsPage";
 import { ClaimDetailPage } from "./features/member/ClaimDetailPage";
 import { ProfilePage } from "./features/member/ProfilePage";
 import { ServicePage } from "./features/member/ServicePage";
+import { KycPage, UanCardPage } from "./features/member/KycPage";
+import { RegistrationPage } from "./features/employer/RegistrationPage";
 import { MemberActionsPage } from "./features/employer/MemberActionsPage";
 import { WorkQueuePage } from "./features/office/WorkQueuePage";
 import { CasePage } from "./features/office/CasePage";
@@ -95,6 +97,9 @@ export function App() {
             <Route path="/member/claims/:claimId" element={<ClaimDetailPage />} />
             <Route path="/member/profile" element={<ProfilePage />} />
             <Route path="/member/service" element={<ServicePage />} />
+            <Route path="/member/kyc" element={<KycPage />} />
+            <Route path="/member/uan-card" element={<UanCardPage />} />
+            <Route path="/employer/registration" element={<RegistrationPage />} />
             <Route path="/employer/members" element={<MemberActionsPage />} />
             <Route path="/office/work-queue" element={<WorkQueuePage />} />
             <Route path="/office/cases/:caseId" element={<CasePage />} />

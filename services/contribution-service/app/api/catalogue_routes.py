@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['POST /public/trrn-status-lookups', 'GET /employers/me/challans', 'GET /employers/me/ecr-filings', 'POST /employers/me/ecr-filings', 'GET /members/me/passbook', 'GET /office/accounts/interest-postings', 'POST /office/accounts/interest-postings', 'POST /public/demo-calculations/epf', 'POST /partners/sandbox/payroll/ecr-filings', 'GET /employers/me/challans/{trrn}', 'GET /employers/me/ecr-filings/{filingId}', 'GET /employers/me/challans/{trrn}/receipt', 'POST /employers/me/ecr-filings/{filingId}/approvals', 'POST /employers/me/ecr-filings/{filingId}/submissions', 'POST /employers/me/ecr-filings/{filingId}/validations', 'GET /members/me/accounts/{accountLinkId}/passbook', 'GET /members/me/transfers/{transferId}/annexure-k']
+OPERATIONS = ['POST /public/trrn-status-lookups', 'GET /employers/me/challans', 'GET /employers/me/ecr-filings', 'POST /employers/me/ecr-filings', 'GET /members/me/passbook', 'GET /office/accounts/interest-postings', 'POST /office/accounts/interest-postings', 'POST /public/demo-calculations/epf', 'POST /partners/sandbox/payroll/ecr-filings', 'GET /employers/me/challans/{trrn}', 'GET /employers/me/ecr-filings/{filingId}', 'GET /employers/me/challans/{trrn}/receipt', 'POST /employers/me/ecr-filings/{filingId}/approvals', 'POST /employers/me/ecr-filings/{filingId}/submissions', 'POST /employers/me/ecr-filings/{filingId}/validations', 'GET /employers/me/members/{uan}/contribution-ledger', 'GET /members/me/accounts/{accountLinkId}/passbook', 'GET /members/me/transfers/{transferId}/annexure-k']
 
 @router.api_route("/api/v1/public/trrn-status-lookups", methods=["POST"], include_in_schema=False)
 async def post_public_trrn_status_lookups(actor: Actor = Depends(require_actor)) -> None:
@@ -85,6 +85,11 @@ async def post_employers_me_ecr_filings_filingId_submissions(actor: Actor = Depe
 @router.api_route("/api/v1/employers/me/ecr-filings/{filingId}/validations", methods=["POST"], include_in_schema=False)
 async def post_employers_me_ecr_filings_filingId_validations(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Schema + business validation")
+
+
+@router.api_route("/api/v1/employers/me/members/{uan}/contribution-ledger", methods=["GET"], include_in_schema=False)
+async def get_employers_me_members_uan_contribution_ledger(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Wage and contribution ledger for own employee")
 
 
 @router.api_route("/api/v1/members/me/accounts/{accountLinkId}/passbook", methods=["GET"], include_in_schema=False)

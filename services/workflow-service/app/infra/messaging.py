@@ -2,11 +2,11 @@
 from datetime import date
 from typing import Any
 
-from sqlalchemy import select, update
+from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import grievance_case, open_case
-from app.infra.tables import cases, member_accounts
+from app.infra.tables import cases, member_accounts, subject_offices
 from epfo_persistence.policy import after_defreeze_chain, approval_chain, on_policy_published, rules_by_version
 
 BINDINGS = [
@@ -22,6 +22,7 @@ BINDINGS = [
     "claim-service.ClaimStateChanged.v1",
     "member-service.MemberExitMarked.v1",
     "contribution-service.TransferPosted.v1",
+    "member-service.MemberRegistered.v1",
 ]
 
 
@@ -120,7 +121,21 @@ async def on_transfer_posted(session: AsyncSession, event: dict[str, Any]) -> No
                           .values(transferred_to=p["to_account_link_id"]))
 
 
+async def on_member_registered(session: AsyncSession, event: dict[str, Any]) -> None:
+    """A new UAN becomes a process subject (in the office of its establishment); every member ID an account."""
+    p = event["payload"]
+    here = (await session.execute(select(subject_offices).where(subject_offices.c.establishment_id == p["establishment_id"]).limit(1))).mappings().first()
+    here = here or (await session.execute(select(subject_offices).limit(1))).mappings().first()
+    if not (await session.execute(select(subject_offices.c.subject_ref).where(subject_offices.c.subject_ref == p["uan"]))).first():
+        await session.execute(insert(subject_offices).values(subject_ref=p["uan"], office_id=here["office_id"], zone_id=here["zone_id"],
+                                                             member_subject=p.get("member_subject"), establishment_id=p["establishment_id"]))
+    if not (await session.execute(select(member_accounts.c.account_link_id).where(member_accounts.c.account_link_id == p["account_link_id"]))).first():
+        await session.execute(insert(member_accounts).values(account_link_id=p["account_link_id"], uan=p["uan"], member_subject=p.get("member_subject"),
+                                                             establishment_id=p["establishment_id"], date_of_joining=date.fromisoformat(p["date_of_joining"])))
+
+
 HANDLERS = {
+    "MemberRegistered.v1": on_member_registered,
     "MemberExitMarked.v1": on_member_exit,
     "TransferPosted.v1": on_transfer_posted,
     "ClaimStateChanged.v1": on_claim_state,
