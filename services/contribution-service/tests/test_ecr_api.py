@@ -272,3 +272,18 @@ def test_joint_declaration_name_correction_reaches_ecr_checks(ctx):
     _deliver(handle_member_change, {"request_id": "CASE-1", "uan": m["uan"], "approver_subject": "x",
                                     "parameters": [{"parameter": "NAME", "value": "ASHA RANI DEMO"}]}, "MemberChangeApproved.v1")
     assert q(f"SELECT name FROM establishment_members WHERE uan='{m['uan']}'")[0][0] == "ASHA RANI DEMO"
+
+
+def test_rejection_after_debit_reverses_it_once(ctx):
+    client, q = ctx
+    from app.infra.claims_ledger import on_claim_decision
+    account = SEED["members"][0]["account_link_id"]
+    base = {"claim_id": "CLM-R", "reason_code": "x", "rule_version": "r", "amount_paise": 1000000, "account_link_id": account}
+    _deliver(on_claim_decision, {**base, "decision": "APPROVED"}, "ClaimDecisionRecorded.v1")
+    _deliver(on_claim_decision, {**base, "decision": "REJECTED"}, "ClaimDecisionRecorded.v1")
+    _deliver(on_claim_decision, {**base, "decision": "REJECTED"}, "ClaimDecisionRecorded.v1")          # again: no second reversal
+    kinds = [k for (k,) in q("SELECT kind FROM journals WHERE claim_id='CLM-R' ORDER BY occurred_at")]
+    assert kinds == ["CLAIM_DEBIT", "CLAIM_REVERSAL"]
+    entries = client.get("/api/v1/members/me/passbook", headers=hdr(SEED["members"][0]["subject"], "member", [], establishment=None)).json()["data"]["accounts"][0]["entries"]
+    assert [e["kind"] for e in entries][-2:] == ["WITHDRAWAL", "WITHDRAWAL_REVERSED"]
+    assert entries[-1]["running_balance_paise"] == entries[0]["running_balance_paise"]   # back to where it was

@@ -158,7 +158,11 @@
     "paymentId": "Payment ID",
     "decisionReason": "Decision reason",
     "timeline": "Claim timeline",
-    "by": "By"
+    "by": "By",
+    "newBankTitle": "Correct your bank details",
+    "newBankHelp": "The bank could not pay into your account. Enter an account in your name; the bank checks it, then an APFC approves the re-payment.",
+    "accountNumber": "Account number",
+    "sendBank": "Send new bank details"
   },
   "profile": {
     "eyebrow": "Member services · identity",
@@ -246,7 +250,8 @@
       "decide": "Decide",
       "second-approve": "Second approval",
       "instruct-payment": "Instruct payment",
-      "reissue": "Reissue payment"
+      "reissue": "Reissue payment",
+      "approve-redisbursement": "Approve re-payment"
     },
     "chainStates": {
       "done": "Done",
@@ -255,7 +260,9 @@
     },
     "advisory": "Advisory security check",
     "advisoryHelp": "A routine check on recent account activity asks you to review this claim normally. It is not evidence and must not decide the outcome.",
-    "grievanceKind": "Grievance"
+    "grievanceKind": "Grievance",
+    "redisbursementSummary": "{{decision}} the re-payment of claim {{claimId}} to the member's new bank account.",
+    "redisbursementHelp": "The bank returned the payment and the member gave a new account that passed the (mock) penny-drop check. Approving changes only where the money goes; the claim decision is not reopened."
   },
   "journeyB": {
     "roles": {
@@ -296,7 +303,13 @@
       "ESCALATED": "Escalated",
       "RESOLVED": "Resolved",
       "REOPEN_REQUESTED": "Reopen requested",
-      "OPEN": "Open"
+      "OPEN": "Open",
+      "CORRECTION_PENDING": "New bank details under approval",
+      "REISSUE_APPROVED": "Re-payment approved",
+      "ON_HOLD_FROZEN": "On hold (account verification)",
+      "REDISBURSEMENT_REVIEW": "Re-payment approval",
+      "RETURNED_AWAITING_MEMBER": "Waiting for member's bank details",
+      "ON_HOLD": "On hold"
     }
   },
   "grievances": {

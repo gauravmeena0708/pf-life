@@ -202,6 +202,8 @@ def validate(document: dict[str, Any]) -> list[str]:
         if t.get("approval_bands") is not None:
             problems.extend(_bands_problems(t["approval_bands"], where))
     problems.extend(_bands_problems(claims.get("approval_bands"), "default approval bands"))
+    if claims.get("after_defreeze_bands") is not None:
+        problems.extend(_bands_problems(claims["after_defreeze_bands"], "after-de-freeze bands"))
     if not isinstance(claims.get("settlement_sla_days"), int) or claims["settlement_sla_days"] < 1:
         problems.append("claims.settlement_sla_days must be at least 1")
     g = document.get("grievances") or {}
@@ -212,3 +214,12 @@ def validate(document: dict[str, Any]) -> list[str]:
     if not isinstance(g.get("reopen_window_days"), int) or g["reopen_window_days"] < 0:
         problems.append("grievances.reopen_window_days must be a non-negative whole number")
     return problems
+
+
+def after_defreeze_chain(rules: dict[str, Any], amount_paise: int) -> list[str]:
+    # A version published before this matrix existed takes the baseline's; the normal chain is the last resort.
+    bands = rules["claims"].get("after_defreeze_bands") or baseline()["claims"].get("after_defreeze_bands")
+    for band in bands or rules["claims"]["approval_bands"]:
+        if band["upto_paise"] is None or amount_paise <= band["upto_paise"]:
+            return list(band["chain"])
+    raise ValueError("no approval band")

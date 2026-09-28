@@ -280,7 +280,7 @@ stakeholders:
     via:
     - F04.post_submission
   - endpoint: POST /members/me/claims/{claimId}/re-disbursement-requests
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
@@ -1591,7 +1591,7 @@ stakeholders:
     via:
     - F04.approve_apfc
   - endpoint: POST /office/claims/{claimId}/re-disbursement-approvals
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:

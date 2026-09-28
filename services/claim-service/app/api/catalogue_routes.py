@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /members/me/claims', 'POST /members/me/claims', 'GET /members/me/claims/eligible-types', 'GET /members/me/claims/{claimId}', 'POST /members/me/claims/{claimId}/confirmations', 'POST /office/claims/{claimId}/payment-instructions', 'POST /office/claims/{claimId}/reissues']
+OPERATIONS = ['GET /members/me/claims', 'POST /members/me/claims', 'GET /members/me/claims/eligible-types', 'GET /members/me/claims/{claimId}', 'POST /members/me/claims/{claimId}/confirmations', 'POST /members/me/claims/{claimId}/re-disbursement-requests', 'POST /office/claims/{claimId}/payment-instructions', 'POST /office/claims/{claimId}/re-disbursement-approvals', 'POST /office/claims/{claimId}/reissues']
 
 @router.api_route("/api/v1/members/me/claims", methods=["GET"], include_in_schema=False)
 async def get_members_me_claims(actor: Actor = Depends(require_actor)) -> None:
@@ -37,9 +37,19 @@ async def post_members_me_claims_claimId_confirmations(actor: Actor = Depends(re
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Transaction-intent confirmation (Journey B3)")
 
 
+@router.api_route("/api/v1/members/me/claims/{claimId}/re-disbursement-requests", methods=["POST"], include_in_schema=False)
+async def post_members_me_claims_claimId_re_disbursement_requests(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Member submits corrected bank details after a payment return, without re-filing the claim")
+
+
 @router.api_route("/api/v1/office/claims/{claimId}/payment-instructions", methods=["POST"], include_in_schema=False)
 async def post_office_claims_claimId_payment_instructions(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Settlement payment instruction → PaymentInstructed.v1 (Journey B6)")
+
+
+@router.api_route("/api/v1/office/claims/{claimId}/re-disbursement-approvals", methods=["POST"], include_in_schema=False)
+async def post_office_claims_claimId_re_disbursement_approvals(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "APFC authorises a new payment after a return, without reopening adjudication")
 
 
 @router.api_route("/api/v1/office/claims/{claimId}/reissues", methods=["POST"], include_in_schema=False)

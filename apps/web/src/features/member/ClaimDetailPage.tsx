@@ -45,6 +45,20 @@ export function ClaimDetailPage() {
     {item ? <>
       <aside className="pending-notice" aria-label={t("claims.nextStep")}><h2>{t("claims.nextStep")}</h2><p>{item.next_step}</p>
         {item.state === "AWAITING_CONFIRMATION" ? <button type="button" className="primary" disabled={busy} onClick={() => void confirm()}>{t("claims.confirmOtp")}</button> : null}</aside>
+      {item.state === "PAYMENT_RETURNED" ? <form className="card stack" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget);
+        void (async () => { setBusy(true); setError(null); try {
+          await command("POST", `/api/v1/members/me/claims/${item.claim_id}/re-disbursement-requests`,
+            { ifsc: String(f.get("ifsc")).trim().toUpperCase(), account_number: String(f.get("account_number")).trim() });
+          await qc.invalidateQueries({ queryKey: ["member-claim", item.claim_id] });
+        } catch (cause) { setError(cause); } finally { setBusy(false); } })(); }}>
+        <h2>{t("claimDetail.newBankTitle")}</h2>
+        <p className="muted small">{t("claimDetail.newBankHelp")}</p>
+        <div className="form-row">
+          <label>IFSC<input name="ifsc" required pattern="[A-Za-z]{4}0[A-Za-z0-9]{6}" maxLength={11} /></label>
+          <label>{t("claimDetail.accountNumber")}<input name="account_number" required inputMode="numeric" pattern="[0-9]{9,18}" /></label>
+        </div>
+        <div className="actions"><button type="submit" className="primary" disabled={busy}>{t("claimDetail.sendBank")}</button></div>
+      </form> : null}
       <section className="card stack" aria-labelledby="claim-summary-heading"><h2 id="claim-summary-heading">{t("claimDetail.summary")}</h2><p>{item.summary}</p>
         <dl className="kv"><dt>{t("claims.claimId")}</dt><dd><code>{item.claim_id}</code></dd><dt>{t("claims.account")}</dt><dd><code>{item.account_link_id}</code></dd>
           <dt>{t("claims.type")}</dt><dd>{item.form_type} · {item.claim_type}</dd><dt>{t("claims.ruleVersion")}</dt><dd>{item.rule_version} <span className="state-pill">{t("claims.illustrative")}</span></dd>

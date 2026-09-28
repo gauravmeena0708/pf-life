@@ -183,6 +183,13 @@ def test_auto_approved_claim_goes_straight_to_cash_and_payment_events_close_it(c
     assert queue(client, CASH, "fo.cash") == []
     deliver("PaymentReturned.v1", {"payment_id": "P1", "purpose": "CLAIM_SETTLEMENT", "reference_type": "claim",
                                    "reference": "CLM-0001", "return_reason": "X", "mock": True}, "payment-simulator")
+    assert queue(client, CASH, "fo.cash") == []                                # the member corrects the bank details first
+    base = {"claim_id": "CLM-0001", "reason": "", "claim_type": "ADVANCE_ILLNESS", "amount_paise": 5000000,
+            "rule_version": "demo-rules-2026.1", "office_id": "RO-DEMO-01", "account_link_id": "AL-0001"}
+    deliver("ClaimStateChanged.v1", {**base, "from_state": "PAYMENT_RETURNED", "to_state": "CORRECTION_PENDING"})
+    [task] = queue(client, APFC, "fo.apfc")
+    assert task["next_action"] == "approve-redisbursement"
+    deliver("ClaimStateChanged.v1", {**base, "from_state": "CORRECTION_PENDING", "to_state": "REISSUE_APPROVED"})
     [task] = queue(client, CASH, "fo.cash")
     assert task["next_action"] == "reissue"
 
@@ -250,3 +257,19 @@ def test_case_uses_the_chain_of_the_claims_rule_version_and_type(ctx):
                                   "advisory_signal_id": None, "claim_type": "ADVANCE_HOUSING"})
     [case] = queue(client, DA, "fo.da_accounts")
     assert case["chain"] == ["fo.da_accounts", "fo.ao", "fo.apfc"] and case["rule_version"] == "demo-rules-2026.9"
+
+
+
+def test_freeze_holds_the_case_and_defreeze_restarts_under_the_stricter_chain(ctx):
+    client, _, deliver = ctx
+    submitted(deliver)                                                        # ₹6,00,000 → DA → SS → APFC
+    [case] = queue(client, DA, "fo.da_accounts")
+    recommend(client, case)
+    base = {"claim_id": "CLM-0001", "claim_type": "ADVANCE_ILLNESS", "amount_paise": AMOUNT, "rule_version": "demo-rules-2026.1",
+            "office_id": "RO-DEMO-01", "account_link_id": "AL-0001"}
+    deliver("ClaimStateChanged.v1", {**base, "from_state": "RECOMMENDED", "to_state": "ON_HOLD_FROZEN", "reason": "ACCOUNT_FROZEN"})
+    assert queue(client, SS, "fo.ss") == []                                   # paused
+    deliver("ClaimStateChanged.v1", {**base, "from_state": "ON_HOLD_FROZEN", "to_state": "UNDER_REVIEW", "reason": "DEFROZEN_APPROVALS_VOID"})
+    [case] = queue(client, DA, "fo.da_accounts")
+    assert case["chain"] == ["fo.da_accounts", "fo.ao", "fo.apfc", "fo.oic"] and case["round"] == 2
+    assert recommend(client, case).status_code == 200                         # a new round: the same DA may act again

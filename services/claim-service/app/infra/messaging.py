@@ -2,13 +2,14 @@
 redelivered event is applied once; state guards make an out-of-order event a logged no-op."""
 from typing import Any
 
-from sqlalchemy import insert, update
+from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import load_claim, notify, record_decision, transition
+from app.domain.claims import HOLDABLE, route
 from app.infra.tables import accounts, claims, risk_flags
 from epfo_observability import Problem, get_logger
-from epfo_persistence.policy import on_policy_published
+from epfo_persistence.policy import on_policy_published, rules_by_version
 
 log = get_logger("claim-service")
 
@@ -23,6 +24,7 @@ BINDINGS = [
     "member-service.AccountFrozen.v1",
     "member-service.AccountDefrozen.v1",
     "platform-service.PolicyPublished.v1",
+    "contribution-service.LedgerReversed.v1",
 ]
 
 
@@ -68,7 +70,7 @@ async def on_case_decision(session: AsyncSession, event: dict[str, Any]) -> None
         log.warning("case_decision_ignored", claim_id=claim["claim_id"], state=claim["state"], decision=decision)
         return
     if decision == "RECOMMEND":
-        await transition(session, claim, "RECOMMENDED", role, "Reviewed and recommended for approval.")
+        await transition(session, claim, "RECOMMENDED", role, "Reviewed and recommended for approval.", recommended=True)
     elif decision == "RETURN":
         await transition(session, claim, "UNDER_REVIEW", role, f"Returned for rework: {reason}")
     elif decision == "REJECT":
@@ -93,7 +95,8 @@ async def on_payment_result(session: AsyncSession, event: dict[str, Any]) -> Non
         return
     if event["event_type"] == "PaymentConfirmed.v1":
         claim = await transition(session, claim, "SETTLED", "bank", "Paid into your bank account (mock bank).")
-        await notify(session, claim, "CLAIM_SETTLED", cid)
+        await notify(session, claim, "CLAIM_SETTLED", cid,        # a re-payment goes to the corrected account
+                     **({"bank_account_last4": claim["payee_account_last4"]} if claim.get("payee_account_last4") else {}))
     else:
         claim = await transition(session, claim, "PAYMENT_RETURNED", "bank",
                                  f"The bank returned the payment ({p.get('return_reason')}).")
@@ -109,13 +112,52 @@ async def on_risk_signal(session: AsyncSession, event: dict[str, Any]) -> None:
 
 
 async def on_freeze(session: AsyncSession, event: dict[str, Any]) -> None:
+    """Freeze: open claims before payment go on hold. De-freeze (init.md §7): a claim frozen before any
+    recommendation resumes (or is routed again if it had been approved automatically); a claim with a
+    recommendation restarts under the stricter after-de-freeze chain with earlier approvals void."""
     p = event["payload"]
-    if p["target_type"] == "member":
-        await session.execute(update(accounts).where(accounts.c.uan == p["target_id"]).values(
-            frozen=event["event_type"] == "AccountFrozen.v1"))
+    if p["target_type"] != "member":
+        return
+    frozen = event["event_type"] == "AccountFrozen.v1"
+    await session.execute(update(accounts).where(accounts.c.uan == p["target_id"]).values(frozen=frozen))
+    links = (await session.execute(select(accounts.c.account_link_id).where(accounts.c.uan == p["target_id"]))).scalars().all()
+    rows = (await session.execute(select(claims).where(claims.c.account_link_id.in_(links),
+                                                       claims.c.state.in_(HOLDABLE if frozen else {"ON_HOLD_FROZEN"})))).mappings().all()
+    cid = event["correlation_id"]
+    for row in rows:
+        claim = dict(row)
+        if frozen:
+            await transition(session, claim, "ON_HOLD_FROZEN", "system", "On hold while the account is being verified.",
+                             reason="ACCOUNT_FROZEN", prior_state=claim["state"])
+        elif claim["recommended"]:
+            await transition(session, claim, "UNDER_REVIEW", "system",
+                             "Account verified. Earlier approvals are void; the claim is reviewed again under the stricter chain.",
+                             reason="DEFROZEN_APPROVALS_VOID", recommended=False, prior_state=None)
+        elif claim["prior_state"] in ("SUBMITTED", "AUTO_APPROVED"):
+            claim = await transition(session, claim, "SUBMITTED", "system", "Account verified; the claim is checked again.",
+                                     reason="DEFROZEN_RESUBMITTED", prior_state=None)
+            rules = await rules_by_version(session, claim["rule_version"])
+            if route(claim["amount_paise"], rules, claim["claim_type"]) == "AUTO":
+                claim = await transition(session, claim, "AUTO_APPROVED", "system", "Within the automatic settlement limit.",
+                                         reason="DEFROZEN_AUTO")
+                await record_decision(session, claim, "AUTO_APPROVED", "WITHIN_AUTO_LIMIT", cid)
+            else:
+                await transition(session, claim, "UNDER_REVIEW", "system", "Sent to your regional office for review.",
+                                 reason="DEFROZEN_REVIEW")
+        else:
+            await transition(session, claim, claim["prior_state"] or "UNDER_REVIEW", "system", "Account verified; the claim continues.",
+                             reason="DEFROZEN_RESUMED", prior_state=None)
+
+
+async def on_ledger_reversed(session: AsyncSession, event: dict[str, Any]) -> None:
+    """A rejected claim's debit was reversed: the member's balance comes back."""
+    p = event["payload"]
+    await _member_lines(session, [x for x in p["postings"] if x["side"] == "credit"], +1)
+    await session.execute(update(claims).where(claims.c.claim_id == p["claim_id"]).values(debit_journal_id=None))
 
 
 HANDLERS = {
+    "LedgerReversed.v1": on_ledger_reversed,
     "PolicyPublished.v1": on_policy_published,
     "AccountFrozen.v1": on_freeze,
     "AccountDefrozen.v1": on_freeze,

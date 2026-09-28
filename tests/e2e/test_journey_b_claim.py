@@ -1,6 +1,6 @@
 """Journey B (init.md §9, slice 3) on the running stack: a member files a claim, the regional office
 approves it through the DA → SS → APFC chain, the cash section pays it, the mock bank returns it, the
-cash section re-issues it, and the member sees every step and the notices.
+member gives a new account, an APFC approves the re-payment, the cash section re-issues it, and the member sees every step and the notices.
 
 Every call goes browser → gateway → service with a real Keycloak session, CSRF, step-up and idempotency.
 Needs `make up migrate seed` and Playwright with Chromium:
@@ -138,6 +138,15 @@ def test_journey_b_claim_through_officers_payment_return_and_reissue(as_persona)
         cash(cashier, claim_id, "instruct-payment", "payment-instructions", "RETURN")), timeout=20, every=1)
     assert paid["data"]["attempt"] == 1
     wait_for(lambda: claim(member, claim_id)["state"] == "PAYMENT_RETURNED", timeout=30)
+    # The member gives a new account (mock penny-drop); an APFC approves the re-payment; adjudication is not reopened.
+    status, r = call(member, "POST", f"/api/v1/members/me/claims/{claim_id}/re-disbursement-requests",
+                     {"ifsc": "DEMO0000001", "account_number": "123456789012"})
+    assert status == 200 and r["data"]["state"] == "CORRECTION_PENDING", r
+    case = wait_for(lambda: (lambda x: x if x and x.get("next_action") == "approve-redisbursement" else None)(case_for(apfc, claim_id)))
+    token = step_up(apfc, "approve-redisbursement", claim_id, None, AMOUNT)
+    status, r = call(apfc, "POST", f"/api/v1/office/claims/{claim_id}/re-disbursement-approvals",
+                     {"decision": "APPROVE", "note": "New account verified by the bank"}, {"X-Step-Up-Token": token})
+    assert status == 200 and r["data"]["state"] == "REISSUE_APPROVED", r
     wait_for(lambda: (case_for(cashier, claim_id) or {}).get("next_action") == "reissue")
     status, again = cash(cashier, claim_id, "reissue-payment", "reissues", "SUCCESS")
     assert status == 200 and again["data"]["attempt"] == 2, again
@@ -147,10 +156,10 @@ def test_journey_b_claim_through_officers_payment_return_and_reissue(as_persona)
     final = claim(member, claim_id)
     assert [t["state"] for t in final["timeline"]] == [
         "AWAITING_CONFIRMATION", "SUBMITTED", "UNDER_REVIEW", "RECOMMENDED", "AWAITING_NEXT_APPROVAL", "APPROVED",
-        "PAYMENT_PENDING", "PAYMENT_RETURNED", "PAYMENT_PENDING", "SETTLED"]
+        "PAYMENT_PENDING", "PAYMENT_RETURNED", "CORRECTION_PENDING", "REISSUE_APPROVED", "PAYMENT_PENDING", "SETTLED"]
     notices = wait_for(lambda: [n for n in call(member, "GET", "/api/v1/members/me/notifications")[1]["data"]
                                 if n["reference_id"] == claim_id and n["template"] == "CLAIM_SETTLED"])
-    assert "₹6,00,000" in notices[0]["body"] and "ending 0001" in notices[0]["body"]
+    assert "₹6,00,000" in notices[0]["body"] and "ending 9012" in notices[0]["body"]
     book = call(member, "GET", "/api/v1/members/me/passbook")[1]["data"]
     assert any(e.get("claim_id") == claim_id and e["kind"] == "WITHDRAWAL" for a in book["accounts"] for e in a["entries"])
     shot(member, "b7-claim-settled", f"/member/claims/{claim_id}")

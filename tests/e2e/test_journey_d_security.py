@@ -95,10 +95,18 @@ def finish_leftovers(contexts, member):
             token = step_up(ss, "decide-case", case["case_id"], case["version"], case["amount_paise"])
             call(ss, "POST", f"/api/v1/office/cases/{case['case_id']}/decisions",
                  {"decision": "REJECT", "reason": "Test claim left open by an interrupted run"}, {"X-Step-Up-Token": token})
-        elif detail["state"] in ("APPROVED", "AUTO_APPROVED", "PAYMENT_RETURNED"):
+        elif detail["state"] in ("APPROVED", "AUTO_APPROVED", "PAYMENT_RETURNED", "CORRECTION_PENDING", "REISSUE_APPROVED"):
+            returned = detail["state"] in ("PAYMENT_RETURNED", "CORRECTION_PENDING", "REISSUE_APPROVED")
+            if detail["state"] == "PAYMENT_RETURNED":
+                call(member, "POST", f"/api/v1/members/me/claims/{c['claim_id']}/re-disbursement-requests",
+                     {"ifsc": "DEMO0000002", "account_number": "222233334444"})
+            if detail["state"] in ("PAYMENT_RETURNED", "CORRECTION_PENDING"):
+                apfc = as_persona(contexts, "ro-apfc", "/office/work-queue")
+                tok = step_up(apfc, "approve-redisbursement", c["claim_id"], None, detail["amount_paise"])
+                call(apfc, "POST", f"/api/v1/office/claims/{c['claim_id']}/re-disbursement-approvals",
+                     {"decision": "APPROVE", "note": "Closing an interrupted test run"}, {"X-Step-Up-Token": tok})
             cashier = as_persona(contexts, "ro-cashier", "/office/work-queue")
-            action, path = (("reissue-payment", "reissues") if detail["state"] == "PAYMENT_RETURNED"
-                            else ("instruct-payment", "payment-instructions"))
+            action, path = (("reissue-payment", "reissues") if returned else ("instruct-payment", "payment-instructions"))
 
             def pay():
                 tok = step_up(cashier, action, c["claim_id"], None, detail["amount_paise"])

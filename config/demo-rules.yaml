@@ -49,6 +49,15 @@ claims:
     - {upto_paise: 50000000, chain: [fo.da_accounts, fo.ao]}
     - {upto_paise: 250000000, chain: [fo.da_accounts, fo.ss, fo.apfc]}
     - {upto_paise: null, chain: [fo.da_accounts, fo.ao, fo.oic]}
+  # After an account is de-frozen, claims whose approvals were voided restart under this stricter matrix
+  # (stakeholder-activities.yaml → claim_settlement_after_defreeze).
+  after_defreeze_bands:
+    - {upto_paise: 5000000, chain: [fo.da_accounts, fo.ss, fo.apfc]}
+    - {upto_paise: 50000000, chain: [fo.da_accounts, fo.ao, fo.apfc]}
+    - {upto_paise: null, chain: [fo.da_accounts, fo.ao, fo.apfc, fo.oic]}
+  # Re-disbursement after a bank return: the member's new account must pass the mock penny-drop check and
+  # an APFC approves; adjudication is not reopened.
+  redisbursement_approver: fo.apfc
 grievances:
   categories: [CLAIM_DELAY, CLAIM_REJECTION, PASSBOOK, KYC, EMPLOYER, OTHER]
   sla_days: {RO: 15, ZO: 10, HO: 7}

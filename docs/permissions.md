@@ -141,6 +141,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /members/me/account-recovery-requests` | W | self — caller's own member record only | yes |
 | `POST /members/me/claims` | W | self — caller's own member record only |  |
 | `POST /members/me/claims/{claimId}/confirmations` | W | self — caller's own member record only | yes |
+| `POST /members/me/claims/{claimId}/re-disbursement-requests` | W | self — caller's own member record only |  |
 | `POST /members/me/grievances` | W | self — caller's own member record only |  |
 | `POST /members/me/joint-declarations` | W | self — caller's own member record only | yes |
 | `POST /members/me/security-reports` | W | self — caller's own member record only |  |
@@ -170,7 +171,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /grievances/{grievanceId}/reminders` | P | complainant or the assigned office |  |
 | `POST /members/me/claims/{claimId}/cancellations` | P | self — caller's own member record only | yes |
 | `POST /members/me/claims/{claimId}/documents` | P | self — caller's own member record only |  |
-| `POST /members/me/claims/{claimId}/re-disbursement-requests` | P | self — caller's own member record only |  |
 | `POST /members/me/exits` | P | self — caller's own member record only | yes |
 | `POST /members/me/higher-pension-options` | P | self — caller's own member record only | yes |
 | `POST /members/me/nominations` | P | self — caller's own member record only | yes |
@@ -488,12 +488,12 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/cases/{caseId}/second-approvals` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/claims/{claimId}/re-disbursement-approvals` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/member-change-requests/{requestId}/decisions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/members/{uan}/freezes` | W | office jurisdiction of the caller's posting | yes |
 | `GET /office/death-claims/{claimId}/shares-summary` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/claims/{claimId}/re-disbursement-approvals` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/cases/{caseId}/escaped-assessments-7c` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/cases/{caseId}/hearings` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/compliance/cases/{caseId}/notices` | P | office jurisdiction of the caller's posting | yes |

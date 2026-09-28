@@ -40,7 +40,8 @@ export function CasePage() {
   const role = session.data?.stakeholder;
   const action = item?.your_turn && item.current_role === role ? item.next_action : null;
   const allowed = action === "recommend" && role === "fo.da_accounts" || action === "decide" && (role === "fo.ss" || role === "fo.ao")
-    || action === "second-approve" && (role === "fo.apfc" || role === "fo.oic") || (action === "instruct-payment" || action === "reissue") && role === "fo.cash";
+    || action === "second-approve" && (role === "fo.apfc" || role === "fo.oic") || (action === "instruct-payment" || action === "reissue") && role === "fo.cash"
+    || action === "approve-redisbursement" && role === "fo.apfc";
 
   async function run(work: () => Promise<unknown>) {
     setBusy(true); setError(null); setNotice(false);
@@ -67,6 +68,16 @@ export function CasePage() {
       if (!token) return;
       await run(() => command("POST", `/api/v1/office/cases/${item.case_id}/${action === "decide" ? "decisions" : "second-approvals"}`,
         { decision, reason: reason.trim() || null }, { stepUpToken: token }));
+      return;
+    }
+    if (action === "approve-redisbursement") {
+      if (!reason.trim()) { setError(new Error(t("office.reasonRequired"))); return; }
+      const claimId = item.claim_id ?? "";
+      const token = await stepUp.ask({ action: "approve-redisbursement", resourceId: claimId, amountPaise: item.amount_paise,
+        summary: t("office.redisbursementSummary", { claimId, decision: t(`office.decisions.${decision === "APPROVE" ? "APPROVE" : "REJECT"}`) }) });
+      if (!token) return;
+      await run(() => command("POST", `/api/v1/office/claims/${claimId}/re-disbursement-approvals`,
+        { decision: decision === "APPROVE" ? "APPROVE" : "REJECT", note: reason.trim() }, { stepUpToken: token }));
       return;
     }
     const isReissue = action === "reissue";
@@ -122,6 +133,10 @@ export function CasePage() {
           {action === "decide" || action === "second-approve" ? <><fieldset className="case-options"><legend>{t("office.decision")}</legend>{(["APPROVE", "RETURN", "REJECT"] as const).map((value) => <label className="check-row" key={value}>
             <input type="radio" name="decision" value={value} checked={decision === value} onChange={() => setDecision(value)} />{t(`office.decisions.${value}`)}</label>)}</fieldset>
             <label>{t("office.reason")}<textarea value={reason} onChange={(event) => setReason(event.target.value)} required={decision !== "APPROVE"} /></label></> : null}
+          {action === "approve-redisbursement" ? <><p className="demo-tip">{t("office.redisbursementHelp")}</p>
+            <fieldset className="case-options"><legend>{t("office.decision")}</legend>{(["APPROVE", "REJECT"] as const).map((value) => <label className="check-row" key={value}>
+              <input type="radio" name="decision" value={value} checked={decision === value} onChange={() => setDecision(value)} />{t(`office.decisions.${value}`)}</label>)}</fieldset>
+            <label>{t("office.reason")}<textarea value={reason} onChange={(event) => setReason(event.target.value)} required /></label></> : null}
           {action === "instruct-payment" || action === "reissue" ? <><p className="demo-tip">{t("office.demoPaymentNotice")}</p>
             <label>{t("office.demoScenario")}<select value={scenario} onChange={(event) => { setScenario(event.target.value as Scenario); retryKey.current = null; }}>
               <option value="SUCCESS">{t("office.scenarios.SUCCESS")}</option><option value="RETURN">{t("office.scenarios.RETURN")}</option></select></label></> : null}

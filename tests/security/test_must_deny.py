@@ -266,8 +266,23 @@ def test_deny_15_20_21_22_frozen_account_step_up_binding_and_payment_order(perso
         {"X-Step-Up-Token": step_up(cashier, "instruct-payment", cid, None, c["amount_paise"]),
          "Idempotency-Key": str(uuid.uuid4())})), timeout=15)
 
-    # Leave the demo usable: verify, de-freeze, pay.
+    # Leave the demo usable: verify, de-freeze, pay. A claim that officers had approved restarts under the
+    # stricter after-de-freeze chain (init.md §7): approvals given before the freeze are void.
     _verify_and_defreeze(persona, frozen["data"]["case_id"], MEMBER_B_UAN)
+    state = wait_for(lambda: (lambda st: st if st in ("AUTO_APPROVED", "UNDER_REVIEW") else None)(
+        call(member, "GET", f"/api/v1/members/me/claims/{cid}")[1]["data"]["state"]), timeout=20)
+    if state == "UNDER_REVIEW":
+        for who, path in (("do-caseworker", "recommendations"), ("ro-ss", "decisions"), ("ro-apfc", "second-approvals")):
+            page = persona(who, "/office/work-queue")
+            case = wait_for(lambda: next((x for x in call(page, "GET", "/api/v1/office/work-queue")[1]["data"]["items"]
+                                          if x["claim_id"] == cid), None))
+            if path == "recommendations":
+                assert case["chain"] == ["fo.da_accounts", "fo.ss", "fo.apfc"], case
+                call(page, "POST", f"/api/v1/office/cases/{case['case_id']}/{path}", {"checks": [], "note": "Re-checked after de-freeze"})
+            else:
+                tok = step_up(page, "decide-case", case["case_id"], case["version"], case["amount_paise"])
+                assert call(page, "POST", f"/api/v1/office/cases/{case['case_id']}/{path}", {"decision": "APPROVE", "reason": None},
+                            {"X-Step-Up-Token": tok})[0] == 200
     wait_for(lambda: call(cashier, "POST", f"/api/v1/office/claims/{cid}/payment-instructions", {"demo_scenario": "SUCCESS"},
                           {"X-Step-Up-Token": step_up(cashier, "instruct-payment", cid, None, c["amount_paise"]),
                            "Idempotency-Key": str(uuid.uuid4())})[0] == 200, timeout=20, every=1)

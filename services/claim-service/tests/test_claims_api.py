@@ -17,6 +17,7 @@ SEED = json.load(open(ROOT / "scripts" / "seed" / "synthetic.json"))
 SUBJECTS = SEED["keycloak_subjects"]
 MEMBER_A, MEMBER_B = SUBJECTS["member-a"], SUBJECTS["member-b"]
 CASHIER = SUBJECTS["ro-cashier"]
+S_APFC = SUBJECTS["ro-apfc"]
 JOURNEY_B_AMOUNT = 60000000    # ₹6,00,000: above the auto limit, in the DA → SS → APFC band
 
 
@@ -243,8 +244,22 @@ def test_return_then_reissue(ctx):
     deliver("PaymentReturned.v1", {"payment_id": pid, "purpose": "CLAIM_SETTLEMENT", "reference_type": "claim",
                                    "reference": claim_id, "return_reason": "MOCK_ACCOUNT_CLOSED", "mock": True}, "payment-simulator")
     assert client.get(f"/api/v1/members/me/claims/{claim_id}", headers=member()).json()["data"]["state"] == "PAYMENT_RETURNED"
-    r = client.post(f"/api/v1/office/claims/{claim_id}/reissues", json={},
-                    headers=hdr(CASHIER, "fo.cash", {**step, "action": "reissue-payment"}, **{"Idempotency-Key": "b"}))
+    reissue = lambda key: client.post(f"/api/v1/office/claims/{claim_id}/reissues", json={},
+                                      headers=hdr(CASHIER, "fo.cash", {**step, "action": "reissue-payment"}, **{"Idempotency-Key": key}))
+    assert reissue("b0").status_code == 409                                        # not before the member and an APFC act
+    url = f"/api/v1/members/me/claims/{claim_id}/re-disbursement-requests"
+    closed = client.post(url, json={"ifsc": "DEMO0000001", "account_number": "123450000"}, headers=member())
+    assert closed.status_code == 422 and closed.json()["type"] == "/problems/penny-drop-failed"
+    r = client.post(url, json={"ifsc": "DEMO0000001", "account_number": "123456789"}, headers=member())
+    assert r.status_code == 200 and r.json()["data"]["state"] == "CORRECTION_PENDING"
+    apfc = S_APFC
+    approve = f"/api/v1/office/claims/{claim_id}/re-disbursement-approvals"
+    body = {"decision": "APPROVE", "note": "New account verified by the bank"}
+    assert client.post(approve, json=body, headers=hdr(apfc, "fo.apfc")).status_code == 428
+    r = client.post(approve, json=body, headers=hdr(apfc, "fo.apfc", {"action": "approve-redisbursement", "resource_id": claim_id,
+                                                                      "amount_paise": JOURNEY_B_AMOUNT}))
+    assert r.status_code == 200 and r.json()["data"]["state"] == "REISSUE_APPROVED"
+    r = reissue("b")
     assert r.status_code == 200 and r.json()["data"]["attempt"] == 2 and r.json()["data"]["payment_id"].endswith("-2")
     # A late confirmation for the first (returned) payment must not settle the re-issued one.
     deliver("PaymentConfirmed.v1", {"payment_id": pid, "purpose": "CLAIM_SETTLEMENT", "reference_type": "claim",
@@ -294,10 +309,12 @@ def test_frozen_account_blocks_new_claims_confirmation_and_payment(ctx):
     r = client.post(f"/api/v1/office/claims/{claim_id}/payment-instructions", json={},
                     headers=hdr(CASHIER, "fo.cash", step, **{"Idempotency-Key": "f1"}))   # DENY-22
     assert r.status_code == 409 and r.json()["type"] == "/problems/account-frozen"
+    assert client.get(f"/api/v1/members/me/claims/{claim_id}", headers=member()).json()["data"]["state"] == "ON_HOLD_FROZEN"
     deliver("AccountDefrozen.v1", {"target_type": "member", "target_id": uan, "order_ref": "CASE-1"}, "member-service")
-    r = client.post(f"/api/v1/office/claims/{claim_id}/payment-instructions", json={},
-                    headers=hdr(CASHIER, "fo.cash", step, **{"Idempotency-Key": "f2"}))
-    assert r.status_code == 200
+    d = client.get(f"/api/v1/members/me/claims/{claim_id}", headers=member()).json()["data"]
+    assert d["state"] == "UNDER_REVIEW" and "Earlier approvals are void" in d["timeline"][-1]["note"]   # it had a recommendation
+    changed = [e for e in events(q, "ClaimStateChanged.v1") if e["reason"] == "DEFROZEN_APPROVALS_VOID"]
+    assert changed and changed[0]["claim_id"] == claim_id
 
 
 def _publish(deliver, change, version="demo-rules-2026.9", effective="2026-01-01"):
@@ -347,3 +364,15 @@ def test_a_future_policy_does_not_apply_before_its_date(ctx):
     client, q, deliver = ctx
     _publish(deliver, lambda d: d["claims"]["types"]["ADVANCE_ILLNESS"].update(retired=True), effective="2099-01-01")
     assert create(client, amount=100000).status_code == 201
+
+
+def test_auto_approved_claim_frozen_then_defrozen_is_routed_again(ctx):
+    client, q, deliver = ctx
+    claim_id = confirm(client, create(client, amount=5000000).json()["data"]).json()["data"]["claim_id"]
+    uan = SEED["members"][0]["uan"]
+    deliver("AccountFrozen.v1", {"target_type": "member", "target_id": uan, "category": "B", "order_ref": "O"}, "member-service")
+    assert client.get(f"/api/v1/members/me/claims/{claim_id}", headers=member()).json()["data"]["state"] == "ON_HOLD_FROZEN"
+    deliver("AccountDefrozen.v1", {"target_type": "member", "target_id": uan, "order_ref": "C"}, "member-service")
+    d = client.get(f"/api/v1/members/me/claims/{claim_id}", headers=member()).json()["data"]
+    assert [t["state"] for t in d["timeline"]][-3:] == ["ON_HOLD_FROZEN", "SUBMITTED", "AUTO_APPROVED"]
+    assert [e["decision"] for e in events(q, "ClaimDecisionRecorded.v1")] == ["AUTO_APPROVED", "AUTO_APPROVED"]

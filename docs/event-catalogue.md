@@ -25,11 +25,12 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `RiskSignalRaised.v1` | intelligence | claim, workflow, reporting, audit | risk_signal | 1 |
 | `ProcessTransitioned.v1` | workflow | member, audit | process_instance | 1 |
 | `PolicyPublished.v1` | platform | claim, contribution, workflow, grievance, intelligence, audit | rule_set | 1 |
+| `ClaimStateChanged.v1` | claim | workflow, reporting, audit | claim | 1 |
 | `RiskSignalReviewed.v1` | intelligence | claim, reporting, audit | risk_signal | 1 |
 | `SecurityEventRecorded.v1` | audit | intelligence, member, gateway | security_event | 1 |
 | `NotificationRequested.v1` | claim, grievance, member | member | notification | 1 |
 | `DemandRaised.v1` | compliance | contribution, audit | compliance_case | 2 (contract only) |
-| `LedgerReversed.v1` | contribution | reporting, audit | ledger_journal | 2 (contract only) |
+| `LedgerReversed.v1` | contribution | claim, reporting, audit | ledger_journal | 1 |
 | `PaymentScrollGenerated.v1` | claim | payment-simulator, audit | payment_scroll | 2 (contract only) |
 | `MemberChangeApproved.v1` | member | contribution, claim, reporting, audit | member_change_request | 1 |
 | `AccountFrozen.v1` | member | gateway, claim, audit | account | 1 |

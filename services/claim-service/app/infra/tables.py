@@ -47,6 +47,10 @@ claims = Table(
     Column("debit_journal_id", String(40)),
     Column("payment_id", String(60)),
     Column("payment_attempt", Integer, nullable=False, server_default="0"),
+    Column("prior_state", String(40)),                 # the state a frozen claim was held in
+    Column("recommended", Boolean, nullable=False, server_default=sa_false()),   # a recommendation was recorded
+    Column("payee_ifsc", String(11)),                  # corrected bank details for a re-disbursement
+    Column("payee_account_last4", String(4)),
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
     Column("updated_at", DateTime(timezone=True), server_default=func.now()),
 )

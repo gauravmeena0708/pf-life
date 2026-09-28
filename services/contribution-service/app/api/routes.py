@@ -311,11 +311,14 @@ async def _passbook(subject: str, account_link_id: str | None):
                                           {"e": a["establishment_id"]})).scalar_one_or_none()
             grouped = {}
             for ln in lines:
-                kind = {"CONTRIBUTION": "CONTRIBUTION", "OPENING_BALANCE": "OPENING_BALANCE", "CLAIM_DEBIT": "WITHDRAWAL"}.get(ln["kind"], ln["kind"])
+                kind = {"CONTRIBUTION": "CONTRIBUTION", "OPENING_BALANCE": "OPENING_BALANCE", "CLAIM_DEBIT": "WITHDRAWAL",
+                        "CLAIM_REVERSAL": "WITHDRAWAL_REVERSED", "INTEREST": "INTEREST"}.get(ln["kind"], ln["kind"])
                 ent = grouped.setdefault(ln["journal_id"], {
                     "kind": kind, "wage_month": ln["wage_month"] or _month(ln["occurred_at"]),
                     "description": {"CONTRIBUTION": "Monthly contribution", "OPENING_BALANCE": "Balance brought forward",
-                                    "WITHDRAWAL": f"Claim {ln['claim_id']} paid out"}.get(kind, kind),
+                                    "WITHDRAWAL": f"Claim {ln['claim_id']} paid out",
+                                    "WITHDRAWAL_REVERSED": f"Claim {ln['claim_id']} not paid: amount returned",
+                                    "INTEREST": "Interest credited"}.get(kind, kind),
                     "employee_share_paise": 0, "employer_share_paise": 0, "establishment_name": name,
                     "trrn": ln["trrn"], "claim_id": ln["claim_id"], "posted_at": ln["occurred_at"]})
                 if ln["share"] in ("employee", "employer"):

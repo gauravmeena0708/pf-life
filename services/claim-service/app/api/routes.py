@@ -43,7 +43,7 @@ class PaymentInstructionInput(BaseModel):
 # ── helpers shared with the event handlers ─────────────────────────────────────────────────────
 
 async def transition(session: AsyncSession, claim: dict[str, Any], to: str, actor_role: str, note: str,
-                     **values: Any) -> dict[str, Any]:
+                     reason: str = "", **values: Any) -> dict[str, Any]:
     """Move a claim to `to` with optimistic locking on `version`."""
     result = await session.execute(update(claims).where(
         claims.c.claim_id == claim["claim_id"], claims.c.version == claim["version"]).values(
@@ -51,6 +51,12 @@ async def transition(session: AsyncSession, claim: dict[str, Any], to: str, acto
     if result.rowcount != 1:
         raise Problem(409, "/problems/version-conflict", "This claim changed meanwhile", "Reload the claim and try again.")
     await session.execute(insert(claim_timeline).values(claim_id=claim["claim_id"], state=to, actor_role=actor_role, note=note))
+    await add_event(session, producer=PRODUCER, event_type="ClaimStateChanged.v1", aggregate_type="claim",
+                    aggregate_id=claim["claim_id"], payload={
+                        "claim_id": claim["claim_id"], "from_state": claim["state"], "to_state": to, "reason": reason,
+                        "claim_type": claim["claim_type"], "amount_paise": claim["amount_paise"],
+                        "rule_version": claim["rule_version"], "office_id": claim["office_id"],
+                        "account_link_id": claim["account_link_id"]})
     return {**claim, **values, "state": to, "version": claim["version"] + 1}
 
 
@@ -294,10 +300,10 @@ async def _cash_command(claim_id: str, action: str, allowed: set[str], body: Pay
             return envelope(cached.body)
         claim = await load_claim(session, claim_id, office=await staff_office(session, actor), lock=True)
         require_step_up(actor, action, claim_id, None, claim["amount_paise"])
+        await ensure_not_frozen(session, claim, 409)
         if claim["state"] not in allowed:
             raise Problem(409, "/problems/invalid-state", "The claim is not ready for this payment step",
                           f"Current status: {claim['state']}.")
-        await ensure_not_frozen(session, claim, 409)
         if not claim["debit_journal_id"]:
             raise Problem(409, "/problems/ledger-debit-pending", "The ledger debit is not posted yet",
                           "The member's account is being debited; try again in a few seconds.")
@@ -319,7 +325,66 @@ async def payment_instruction(claim_id: str, body: PaymentInstructionInput, requ
 async def reissue(claim_id: str, body: PaymentInstructionInput, request: Request, actor: Actor = Depends(CASHIER),
                   idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
                   session: AsyncSession = Depends(db)) -> dict:
-    # Phase 1 re-issues straight from PAYMENT_RETURNED; the member bank-detail correction and APFC
-    # re-disbursement approval in between (init.md §7) are phase 2 endpoints.
-    return await _cash_command(claim_id, "reissue-payment", {"PAYMENT_RETURNED"}, body, request, actor,
+    # Only after the member corrected the bank details and an APFC approved the re-disbursement (init.md §7).
+    return await _cash_command(claim_id, "reissue-payment", {"REISSUE_APPROVED"}, body, request, actor,
                                idempotency_key, session, "CLAIM_REISSUED")
+
+
+
+# ── re-disbursement after a bank return (init.md §7) ────────────────────────────────────────────
+
+class BankDetails(BaseModel):
+    ifsc: str = Field(pattern=r"^[A-Z]{4}0[A-Z0-9]{6}$")
+    account_number: str = Field(pattern=r"^[0-9]{9,18}$")
+
+
+def penny_drop_ok(ifsc: str, account_number: str) -> bool:
+    """MOCK penny-drop verification: synthetic accounts ending in 0000 are treated as closed."""
+    return not account_number.endswith("0000")
+
+
+@router.post("/api/v1/members/me/claims/{claim_id}/re-disbursement-requests")
+async def request_redisbursement(claim_id: str, body: BankDetails, actor: Actor = Depends(MEMBER),
+                                 session: AsyncSession = Depends(db)) -> dict:
+    async with session.begin():
+        claim = await load_claim(session, claim_id, member=actor.subject, lock=True)
+        if claim["state"] != "PAYMENT_RETURNED":
+            raise Problem(409, "/problems/invalid-state", "Bank details can be corrected only after the bank returned the payment",
+                          f"Current status: {claim['state']}.")
+        if not penny_drop_ok(body.ifsc, body.account_number):
+            raise Problem(422, "/problems/penny-drop-failed", "The bank could not confirm this account",
+                          "Check the account number and IFSC with your bank (mock penny-drop check).")
+        claim = await transition(session, claim, "CORRECTION_PENDING", "member",
+                                 f"New bank account ending {body.account_number[-4:]} submitted; an APFC will approve the re-payment.",
+                                 payee_ifsc=body.ifsc, payee_account_last4=body.account_number[-4:])
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="claim.redisbursement_request",
+                    target_type="claim", target_id=claim_id)
+        view = await claim_view(session, claim)
+    return envelope(view)
+
+
+class RedisbursementDecision(BaseModel):
+    decision: str                                         # APPROVE | REJECT
+    note: str = Field(min_length=10, max_length=1000)
+
+
+@router.post("/api/v1/office/claims/{claim_id}/re-disbursement-approvals")
+async def approve_redisbursement(claim_id: str, body: RedisbursementDecision,
+                                 actor: Actor = Depends(require_stakeholder("fo.apfc")),
+                                 session: AsyncSession = Depends(db)) -> dict:
+    if body.decision not in ("APPROVE", "REJECT"):
+        raise Problem(422, "/problems/validation", "decision must be APPROVE or REJECT")
+    async with session.begin():
+        claim = await load_claim(session, claim_id, office=await staff_office(session, actor), lock=True)
+        require_step_up(actor, "approve-redisbursement", claim_id, None, claim["amount_paise"])
+        if claim["state"] != "CORRECTION_PENDING":
+            raise Problem(409, "/problems/invalid-state", "No re-disbursement is waiting for approval", f"Current status: {claim['state']}.")
+        if body.decision == "APPROVE":             # adjudication is not reopened: only the payee account changes
+            claim = await transition(session, claim, "REISSUE_APPROVED", actor.stakeholder,
+                                     f"Re-payment to the account ending {claim['payee_account_last4']} approved.")
+        else:
+            claim = await transition(session, claim, "PAYMENT_RETURNED", actor.stakeholder, f"New bank details not accepted: {body.note}")
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder,
+                    action=f"claim.redisbursement_{body.decision.lower()}", target_type="claim", target_id=claim_id, detail=body.note)
+        view = await claim_view(session, claim)
+    return envelope(view)

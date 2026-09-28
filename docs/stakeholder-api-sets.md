@@ -69,6 +69,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/me/account-recovery-requests` | W |
 | `POST /members/me/claims` | W |
 | `POST /members/me/claims/{claimId}/confirmations` | W |
+| `POST /members/me/claims/{claimId}/re-disbursement-requests` | W |
 | `POST /members/me/grievances` | W |
 | `POST /members/me/joint-declarations` | W |
 | `POST /members/me/security-reports` | W |
@@ -98,7 +99,6 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /grievances/{grievanceId}/reminders` | P |
 | `POST /members/me/claims/{claimId}/cancellations` | P |
 | `POST /members/me/claims/{claimId}/documents` | P |
-| `POST /members/me/claims/{claimId}/re-disbursement-requests` | P |
 | `POST /members/me/exits` | P |
 | `POST /members/me/higher-pension-options` | P |
 | `POST /members/me/nominations` | P |
@@ -478,12 +478,12 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
+| `POST /office/claims/{claimId}/re-disbursement-approvals` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/member-change-requests/{requestId}/decisions` | W |
 | `POST /office/members/{uan}/freezes` | W |
 | `GET /office/death-claims/{claimId}/shares-summary` | P |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P |
-| `POST /office/claims/{claimId}/re-disbursement-approvals` | P |
 | `POST /office/compliance/cases/{caseId}/escaped-assessments-7c` | P |
 | `POST /office/compliance/cases/{caseId}/hearings` | P |
 | `POST /office/compliance/cases/{caseId}/notices` | P |

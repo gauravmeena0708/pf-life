@@ -56,7 +56,9 @@
       "required": [
         "journal_id",
         "reverses_journal_id",
-        "reason"
+        "reason",
+        "claim_id",
+        "postings"
       ],
       "properties": {
         "journal_id": {
@@ -67,6 +69,58 @@
         },
         "reason": {
           "type": "string"
+        },
+        "claim_id": {
+          "type": "string"
+        },
+        "postings": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "account_code",
+              "side",
+              "amount_paise"
+            ],
+            "properties": {
+              "account_code": {
+                "enum": [
+                  "AC01_EPF",
+                  "AC02_ADMIN",
+                  "AC10_EPS",
+                  "AC21_EDLI",
+                  "AC22_EDLI_ADMIN",
+                  "BANK_COLLECTION",
+                  "SUSPENSE_RECEIPTS",
+                  "CLAIMS_PAYABLE",
+                  "BANK_SETTLEMENT",
+                  "DAMAGES_INTEREST"
+                ]
+              },
+              "side": {
+                "enum": [
+                  "debit",
+                  "credit"
+                ]
+              },
+              "account_link_id": {
+                "type": "string",
+                "description": "Opaque member account link, for member sub-ledger lines"
+              },
+              "share": {
+                "enum": [
+                  "employee",
+                  "employer"
+                ]
+              },
+              "amount_paise": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
         }
       }
     }

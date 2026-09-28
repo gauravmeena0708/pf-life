@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import grievance_case, open_case
 from app.infra.tables import cases
-from epfo_persistence.policy import on_policy_published
+from epfo_persistence.policy import after_defreeze_chain, approval_chain, on_policy_published, rules_by_version
 
 BINDINGS = [
     "claim-service.ClaimSubmitted.v1",
@@ -18,6 +18,7 @@ BINDINGS = [
     "grievance-service.GrievanceEscalated.v1",
     "grievance-service.GrievanceResolved.v1",
     "platform-service.PolicyPublished.v1",
+    "claim-service.ClaimStateChanged.v1",
 ]
 
 
@@ -50,8 +51,43 @@ async def on_payment_result(session: AsyncSession, event: dict[str, Any]) -> Non
         return
     if event["event_type"] == "PaymentConfirmed.v1":
         await _move(session, p["reference_id"], ("PAYMENT_ISSUED",), state="CLOSED", current_role=None)
-    else:
-        await _move(session, p["reference"], ("PAYMENT_ISSUED",), state="PAYMENT_RETURNED", current_role="fo.cash")
+    else:                                   # returned: the member corrects the bank details first (nobody's queue)
+        await _move(session, p["reference"], ("PAYMENT_ISSUED",), state="RETURNED_AWAITING_MEMBER", current_role=None)
+
+
+async def on_claim_state(session: AsyncSession, event: dict[str, Any]) -> None:
+    """Keep the case in step with the claim (init.md §7): holds, de-freeze restarts, re-disbursement."""
+    p = event["payload"]
+    row = (await session.execute(select(cases).where(cases.c.claim_id == p["claim_id"]))).mappings().first()
+    if not row:
+        return
+    case, to, reason = dict(row), p["to_state"], p["reason"]
+    if to == "ON_HOLD_FROZEN":
+        held = {"state": case["state"], "current_role": case["current_role"]}
+        await _set(session, case, state="ON_HOLD", current_role=None, data={**(case["data"] or {}), "held_from": held})
+    elif reason == "DEFROZEN_APPROVALS_VOID":
+        rules = await rules_by_version(session, p["rule_version"])
+        chain = after_defreeze_chain(rules, int(p["amount_paise"]))
+        await _set(session, case, state="IN_REVIEW", chain=chain, step=0, round=case["round"] + 1, current_role=chain[0])
+    elif reason == "DEFROZEN_RESUBMITTED":
+        await _set(session, case, state="AUTO_PENDING", current_role=None)
+    elif reason == "DEFROZEN_REVIEW":
+        rules = await rules_by_version(session, p["rule_version"])
+        chain = approval_chain(rules, p["claim_type"], int(p["amount_paise"]))
+        await _set(session, case, state="IN_REVIEW", chain=chain, step=0, round=case["round"] + 1, current_role=chain[0])
+    elif reason == "DEFROZEN_RESUMED":
+        held = (case["data"] or {}).get("held_from") or {}
+        await _set(session, case, state=held.get("state", "IN_REVIEW"), current_role=held.get("current_role"))
+    elif to == "CORRECTION_PENDING":
+        await _set(session, case, state="REDISBURSEMENT_REVIEW", current_role="fo.apfc")
+    elif to == "REISSUE_APPROVED":
+        await _set(session, case, state="PAYMENT_RETURNED", current_role="fo.cash")
+    elif to == "PAYMENT_RETURNED" and p["from_state"] == "CORRECTION_PENDING":
+        await _set(session, case, state="RETURNED_AWAITING_MEMBER", current_role=None)
+
+
+async def _set(session: AsyncSession, case: dict[str, Any], **values: Any) -> None:
+    await session.execute(update(cases).where(cases.c.case_id == case["case_id"]).values(version=case["version"] + 1, **values))
 
 
 async def on_grievance_registered(session: AsyncSession, event: dict[str, Any]) -> None:
@@ -70,6 +106,7 @@ async def on_grievance_resolved(session: AsyncSession, event: dict[str, Any]) ->
 
 
 HANDLERS = {
+    "ClaimStateChanged.v1": on_claim_state,
     "PolicyPublished.v1": on_policy_published,
     "GrievanceRegistered.v1": on_grievance_registered,
     "GrievanceEscalated.v1": on_grievance_escalated,

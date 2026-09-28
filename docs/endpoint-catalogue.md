@@ -296,7 +296,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
 | `POST /claimants/death-claims/{claimId}/beneficiaries` 💰 | Inward an additional co-beneficiary / legal heir on an open death claim | P | 2 | claim |
-| `POST /members/me/claims/{claimId}/re-disbursement-requests` 💰 | Member submits corrected bank details after a payment return, without re-filing the claim | P | 2 | claim |
+| `POST /members/me/claims/{claimId}/re-disbursement-requests` 💰 | Member submits corrected bank details after a payment return, without re-filing the claim | W | 1 | claim |
 
 
 **Designed from the Samadhan Setu analysis** (not in the spec files; see `docs/samadhan-setu-mapping.md`)
@@ -357,7 +357,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /office/system/cad-static-data` | Diagnostic view of CAD static reference data (interest tables, bank branch master) and its version (tracker: "Failed to load CAD static Data") | P | 2 | claim |
 | `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` 🔐 | Amend a beneficiary's share (nominee deceased, court order, share already settled in legacy, guardian appointment) | P | 2 | claim |
 | `GET /office/death-claims/{claimId}/shares-summary` | Allocated vs legacy-settled vs disbursed vs pending share of a death claim | P | 2 | claim |
-| `POST /office/claims/{claimId}/re-disbursement-approvals` 💰🔐 | APFC authorises a new payment after a return, without reopening adjudication | P | 2 | claim |
+| `POST /office/claims/{claimId}/re-disbursement-approvals` 💰🔐 | APFC authorises a new payment after a return, without reopening adjudication | W | 1 | claim |
 | `GET /office/members/{uan}/locks` | Active locks on a member ledger (annual accounts, claim adjudication, ECR posting) with owner and expiry | P | 2 | workflow |
 | `POST /office/system/locks/{lockId}/release` 🔐 | Supervised release of an orphaned lock (reason required) → `LockReleased.v1` (tracker: "Unable to lock process", phantom "concurrent claims already under processing") | P | 2 | workflow |
 | `POST /office/cases/{caseId}/documents/{docId}/attestation-views` | Record that the caseworker opened the employer-signed PDF / DSC document; enables the approve action (tracker: "View the employer signed pdf first") | P | 2 | workflow |

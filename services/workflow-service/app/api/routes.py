@@ -76,7 +76,8 @@ def next_action(case: dict[str, Any]) -> str | None:
         return _next(definition, case["state"])[0] if case["current_role"] else None
     if case["state"] == "IN_REVIEW":
         return "recommend" if case["step"] == 0 else "decide" if case["step"] == 1 else "second-approve"
-    return {"AWAITING_PAYMENT": "instruct-payment", "PAYMENT_RETURNED": "reissue", "OPEN": "handle-grievance"}.get(case["state"])
+    return {"AWAITING_PAYMENT": "instruct-payment", "PAYMENT_RETURNED": "reissue", "OPEN": "handle-grievance",
+            "REDISBURSEMENT_REVIEW": "approve-redisbursement"}.get(case["state"])
 
 
 async def history(session: AsyncSession, case_id: str) -> list[dict[str, Any]]:

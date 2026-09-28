@@ -8,12 +8,12 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 |---|---|---|---|---|---|---|---|
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 8 | 2 | 6 | 0 |
 | 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 22 | 8 | 58 | 0 |
-| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 27 | 7 | 47 | 0 |
+| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 28 | 7 | 46 | 0 |
 | 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 14 | 0 | 68 | 5 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 11 | 1 | 2 | 0 |
 | 6 | International worker | **Mock** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 0 | 1 | 4 | 0 |
 | 7 | District office | **Working** | `do.incharge`, `do.staff` | 1 | 0 | 2 | 0 |
-| 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 11 | 0 | 23 | 1 |
+| 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 12 | 0 | 22 | 1 |
 | 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 10 | 0 | 3 | 0 |
 | 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 11 | 0 | 12 | 0 |
 | 11 | NDC | **Working** | `tech.ndc`, `tech.adc`, `tech.cpps`, `tech.epfo3` | 3 | 0 | 4 | 0 |
@@ -170,6 +170,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /members/me/account-recovery-requests` | W | member | member |
 | `POST /members/me/claims` | W | claim | member, member.exited |
 | `POST /members/me/claims/{claimId}/confirmations` | W | claim | member |
+| `POST /members/me/claims/{claimId}/re-disbursement-requests` | W | claim | member |
 | `POST /members/me/grievances` | W | grievance | member |
 | `POST /members/me/joint-declarations` | W | member | member |
 | `POST /members/me/security-reports` | W | member | member |
@@ -209,7 +210,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /grievances/{grievanceId}/reminders` | P | grievance | member |
 | `POST /members/me/claims/{claimId}/cancellations` | P | claim | member |
 | `POST /members/me/claims/{claimId}/documents` | P | claim | member |
-| `POST /members/me/claims/{claimId}/re-disbursement-requests` | P | claim | member |
 | `POST /members/me/exits` | P | member | member |
 | `POST /members/me/higher-pension-options` | P | pension | member |
 | `POST /members/me/nominations` | P | member | member |
@@ -370,6 +370,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /office/member-change-requests/pendency` | W | member | fo.rpfc1 |
 | `GET /office/work-queue` | W | workflow | fo.apfc, fo.oic |
 | `POST /office/cases/{caseId}/second-approvals` | W | workflow | fo.apfc, fo.oic |
+| `POST /office/claims/{claimId}/re-disbursement-approvals` | W | claim | fo.apfc |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | workflow | fo.apfc, fo.oic |
 | `POST /office/member-change-requests/{requestId}/decisions` | W | member | fo.apfc |
 | `POST /office/members/{uan}/defreezes` | W | member | fo.oic |
@@ -380,7 +381,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /audit/concurrent/alerts/{alertId}/replies` | P | audit | fo.oic |
 | `POST /audit/internal/paras/{paraId}/replies` | P | audit | fo.oic |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P | contribution | fo.apfc |
-| `POST /office/claims/{claimId}/re-disbursement-approvals` | P | claim | fo.apfc |
 | `POST /office/compliance/cases/{caseId}/escaped-assessments-7c` | P | compliance | fo.apfc |
 | `POST /office/compliance/cases/{caseId}/hearings` | P | compliance | fo.apfc |
 | `POST /office/compliance/cases/{caseId}/notices` | P | compliance | fo.apfc |

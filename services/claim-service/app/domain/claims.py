@@ -8,7 +8,11 @@ from typing import Any
 from epfo_persistence.policy import approval_chain as chain_for, auto_settle_limit
 
 OPEN_STATES = {"AWAITING_CONFIRMATION", "SUBMITTED", "UNDER_REVIEW", "RECOMMENDED", "AWAITING_NEXT_APPROVAL",
-               "APPROVED", "AUTO_APPROVED", "PAYMENT_PENDING", "PAYMENT_RETURNED"}
+               "APPROVED", "AUTO_APPROVED", "PAYMENT_PENDING", "PAYMENT_RETURNED", "CORRECTION_PENDING",
+               "REISSUE_APPROVED", "ON_HOLD_FROZEN"}
+# Held while the account is frozen: any state before the payment has gone to the bank (init.md §7).
+HOLDABLE = {"SUBMITTED", "UNDER_REVIEW", "RECOMMENDED", "AWAITING_NEXT_APPROVAL", "APPROVED", "AUTO_APPROVED",
+            "PAYMENT_RETURNED", "CORRECTION_PENDING", "REISSUE_APPROVED"}
 
 ROLE_LABELS = {
     "member": "You", "system": "EPFO system (automatic)", "fo.da_accounts": "Dealing assistant (accounts)",
@@ -26,7 +30,10 @@ NEXT_STEP = {
     "AUTO_APPROVED": "Your claim was approved automatically. The payment will be sent to your bank.",
     "PAYMENT_PENDING": "The payment has been sent to the bank; it usually shows in a few seconds in this demo.",
     "SETTLED": "Paid. Nothing more to do.",
-    "PAYMENT_RETURNED": "The bank returned the payment. The cash section will re-issue it; check your bank details.",
+    "PAYMENT_RETURNED": "The bank returned the payment. Enter your correct bank details below; an APFC approves the re-payment.",
+    "CORRECTION_PENDING": "Your new bank details are with an APFC for approval.",
+    "REISSUE_APPROVED": "The re-payment is approved; the cash section will send it to your new account.",
+    "ON_HOLD_FROZEN": "Your claim is on hold while your account is being verified. You do not need to do anything.",
     "REJECTED_WITH_REASON": "Your claim was rejected. The reason is shown above; you can file a new claim once it is resolved.",
 }
 
