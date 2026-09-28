@@ -5,11 +5,12 @@ Each run registers a fresh synthetic joinee, so it can be repeated."""
 import secrets
 from datetime import UTC, datetime
 
-from tests.e2e.test_journey_a_ecr import SHOTS, WEB, call, step_up, wait_for
+from tests.e2e.test_journey_a_ecr import SHOTS, WEB, call, ensure_verified_and_granted, step_up, wait_for
 from tests.e2e.test_policy_admin import browser, persona  # noqa: F401  (fixtures)
 
 
 def test_employer_registers_a_joinee_and_approves_member_kyc(persona):
+    ensure_verified_and_granted(persona("emp-owner", "/employer"))     # a fresh stack: operator and signatory grants first
     operator = persona("emp-preparer", "/employer/registration")
     tag = secrets.token_hex(3).upper()
     aadhaar = f"{secrets.choice('23456789')}{secrets.randbelow(10**10):010d}9"
