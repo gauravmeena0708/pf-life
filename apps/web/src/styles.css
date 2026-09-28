@@ -25,7 +25,7 @@ a { color: #004d99; }
 .language-toggle button + button { border-left: 1px solid #8ba4bd; }
 .language-toggle button[aria-pressed="true"] { color: #f5d477; background: transparent; text-decoration: underline; text-underline-offset: 5px; }
 .primary-nav { background: #fff; border-bottom: 1px solid var(--line); box-shadow: 0 2px 7px #0033660d; }
-.primary-nav-inner { display: flex; gap: clamp(18px, 2.4vw, 36px); overflow-x: auto; }
+.primary-nav-inner { display: flex; flex-wrap: wrap; align-items: stretch; column-gap: clamp(16px, 2vw, 30px); }
 .primary-nav a { color: var(--navy); text-decoration: none; white-space: nowrap; padding: 14px 1px 11px; border-bottom: 3px solid transparent; font-size: .88rem; font-weight: 700; }
 .primary-nav a:hover, .primary-nav a.active { border-bottom-color: #d4af37; }
 .layout { flex: 1; padding-block: clamp(25px, 4vw, 50px) 70px; }
@@ -242,3 +242,17 @@ code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9em; }
 
 /* A headline amount (monthly pension, interest rate) */
 .figure { font-family: Georgia, "Times New Roman", serif; font-size: 2rem; color: var(--navy, #0b2a5b); line-height: 1.1; }
+
+/* Role menus: groups open a list; real menus not built in the POC are shown greyed out and are not links */
+.nav-group { position: relative; display: flex; }
+.nav-group > button { background: none; border: 0; border-bottom: 3px solid transparent; color: var(--navy); font: inherit; font-size: .88rem; font-weight: 700; padding: 14px 1px 11px; cursor: pointer; white-space: nowrap; }
+.nav-group > button:hover, .nav-group > button.active, .nav-group > button[aria-expanded="true"] { border-bottom-color: #d4af37; }
+.nav-group > button.nav-group-idle { color: #6b7a89; }
+.nav-menu { position: absolute; top: 100%; left: -12px; z-index: 20; min-width: 270px; max-width: 360px; margin: 0; padding: 6px 0; list-style: none; background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--navy); border-radius: 0 0 6px 6px; box-shadow: 0 12px 28px #00336626; }
+.nav-menu li > a, .nav-menu li > .nav-unavailable { display: block; padding: 8px 16px; font-size: .88rem; border: 0; white-space: normal; }
+.primary-nav .nav-menu a { font-weight: 600; padding: 8px 16px; }
+.primary-nav .nav-menu a:hover { background: #eef3f9; }
+.nav-unavailable { color: #6b7a89; cursor: not-allowed; font-size: .88rem; font-weight: 600; padding: 14px 1px 11px; white-space: nowrap; }
+.nav-menu li > .nav-unavailable { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.nav-tag { font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #6b7a89; border: 1px solid #cfd8e2; border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

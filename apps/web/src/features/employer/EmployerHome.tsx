@@ -144,7 +144,7 @@ export function EmployerHome() {
         const listError = (kind === "OPERATOR" ? operators : signatories).error;
         return (
           <div key={kind} className="card">
-            <h2>{kind === "OPERATOR" ? "Payroll operators (prepare returns)" : "Authorised signatories (approve, submit, pay)"}</h2>
+            <h2 id={`people-${kind.toLowerCase()}`}>{kind === "OPERATOR" ? "Payroll operators (prepare returns)" : "Authorised signatories (approve, submit, pay)"}</h2>
             <ProblemMessage error={listError} />
             <table>
               <thead><tr><th>User</th><th>Permissions</th><th>Status</th><th /></tr></thead>

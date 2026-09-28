@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Link, NavLink, Route, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, Route, Routes, useLocation } from "react-router-dom";
 
 import { getSession } from "./api/client";
 import { DemoBanner } from "./components/DemoBanner";
 import { PersonaSwitcher } from "./components/PersonaSwitcher";
+import { RoleNav } from "./components/RoleNav";
 import { EcrPage } from "./features/employer/EcrPage";
 import { EmployerHome } from "./features/employer/EmployerHome";
 import { PassbookPage } from "./features/member/PassbookPage";
@@ -33,6 +35,21 @@ import { InterfacePage } from "./pages/InterfacePage";
 import { PublicLookups } from "./pages/PublicLookups";
 import { SecurityActivity } from "./pages/SecurityActivity";
 
+/** Menu links point at sections (`/member/profile#correction-heading`); scroll there once the section has rendered. */
+function ScrollToHash() {
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    if (!hash) return;
+    let tries = 0;
+    const timer = window.setInterval(() => {
+      const el = document.getElementById(decodeURIComponent(hash.slice(1)));
+      if (el || ++tries > 20) { window.clearInterval(timer); el?.scrollIntoView({ behavior: "smooth", block: "start" }); }
+    }, 100);
+    return () => window.clearInterval(timer);
+  }, [pathname, hash]);
+  return null;
+}
+
 export function App() {
   const { t, i18n } = useTranslation();
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
@@ -46,6 +63,7 @@ export function App() {
       <a href="#main" className="skip">
         {t("skip")}
       </a>
+      <ScrollToHash />
       <DemoBanner />
       <header className="topbar">
         <div className="shell-width topbar-inner">
@@ -62,22 +80,7 @@ export function App() {
           </div>
         </div>
       </header>
-      <nav className="primary-nav" aria-label={t("navigation.primary")}><div className="shell-width primary-nav-inner">
-        <NavLink end to="/">{t("navigation.home")}</NavLink>
-        <NavLink to="/public">{t("navigation.public")}</NavLink>
-        {role?.startsWith("employer.") ? <><NavLink end to="/employer">{t("navigation.employer")}</NavLink><NavLink to="/employer/ecr">{t("navigation.ecr")}</NavLink></> : null}
-        {role === "member" ? <><NavLink to="/member/passbook">{t("navigation.passbook")}</NavLink><NavLink end to="/member/claims">{t("navigation.claims")}</NavLink><NavLink to="/member/grievances">{t("navigation.grievances")}</NavLink><NavLink to="/member/profile">{t("navigation.profile")}</NavLink><NavLink to="/member/security">{t("navigation.accountSecurity")}</NavLink><NavLink to="/member/assistant">{t("navigation.assistant")}</NavLink></> : null}
-        {(role?.startsWith("fo.") && role !== "fo.apfc_pension") || role === "zo.acc" || role === "zo.rpfc1" ? <NavLink to="/office/work-queue">{t("navigation.workQueue")}</NavLink> : null}
-        {role === "fo.apfc_pension" ? <NavLink to="/office/pension-revisions">{t("navigation.pensionRevisions")}</NavLink> : null}
-        {role === "pensioner" ? <NavLink to="/pensioner">{t("navigation.pension")}</NavLink> : null}
-        {role === "ho.fa_cao" ? <NavLink to="/finance/interest">{t("navigation.interest")}</NavLink> : null}
-        {role === "zo.acc" || role === "ho.cpfc" ? <NavLink to="/monitoring/grievances">{t("navigation.grievanceMetrics")}</NavLink> : null}
-        {["zo.acc", "ho.cpfc", "gov.mole", "fo.oic"].includes(role ?? "") ? <NavLink to="/dashboards">{t("navigation.dashboards")}</NavLink> : null}
-        {["ho.acc_hq", "ho.cpfc", "ho.pension", "ho.audit"].includes(role ?? "") ? <NavLink to="/policy">{t("navigation.policy")}</NavLink> : null}
-        {role === "ho.security" ? <><NavLink to="/security/activity">{t("navigation.security")}</NavLink><NavLink to="/security/sessions">{t("navigation.sessions")}</NavLink><NavLink to="/audit/log">{t("navigation.audit")}</NavLink></> : null}
-        {role === "ho.caiu" ? <NavLink to="/caiu/signals">{t("navigation.riskSignals")}</NavLink> : null}
-        {role === "ho.audit" ? <NavLink to="/audit/log">{t("navigation.audit")}</NavLink> : null}
-      </div></nav>
+      <nav className="primary-nav" aria-label={t("navigation.primary")}><RoleNav role={role} /></nav>
       <div className="shell-width layout">
         <main id="main">
           <Routes>

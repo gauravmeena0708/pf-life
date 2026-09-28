@@ -240,7 +240,7 @@ export function EcrPage() {
       {canPrepare ? (
         <form className="card stack" onSubmit={create}>
           <p className="eyebrow">01 · Payroll operator</p>
-          <h2>Prepare a regular return</h2>
+          <h2 id="ecr-prepare">Prepare a regular return</h2>
           <p className="muted">Upload an 11 field CSV or ECR TXT file. The service checks each member and explains any errors.</p>
           <div className="form-row">
             <label>Wage month <input type="month" value={wageMonth} onChange={(e) => setWageMonth(e.target.value)} required /></label>
@@ -259,7 +259,7 @@ export function EcrPage() {
       {canReadFilings ? (
         <div className="card stack">
           <p className="eyebrow">{canPrepare ? "02 · Validation" : "02 · Signatory review"}</p>
-          <h2>Returns</h2>
+          <h2 id="ecr-returns">Returns</h2>
           <ProblemMessage error={filings.error} />
           {filings.isLoading ? <p>Loading returns…</p> : null}
           {filings.data?.data.length === 0 ? <p className="muted">No returns have been created for this establishment.</p> : null}
@@ -303,7 +303,7 @@ export function EcrPage() {
       {canPay ? (
         <div className="card stack">
           <p className="eyebrow">03 · Authorised signatory</p>
-          <h2>Challans and mock bank</h2>
+          <h2 id="ecr-challans">Challans and mock bank</h2>
           <p className="muted">A submitted return creates a challan. Payments here are simulated; no funds move.</p>
           <ProblemMessage error={challans.error} />
           <label>Demo bank outcome

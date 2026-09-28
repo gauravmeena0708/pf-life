@@ -92,7 +92,10 @@
     "policy": "Rules and limits",
     "interest": "Interest crediting",
     "pension": "My pension",
-    "pensionRevisions": "Pension revisions"
+    "pensionRevisions": "Pension revisions",
+    "help": "Grievances & help",
+    "notInPoc": "Not available in this demonstration",
+    "notInPocShort": "Not in POC"
   },
   "passbook": {
     "eyebrow": "Member services · contributions",

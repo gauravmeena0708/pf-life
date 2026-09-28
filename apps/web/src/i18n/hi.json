@@ -92,7 +92,10 @@
     "policy": "नियम और सीमाएँ",
     "interest": "ब्याज जमा",
     "pension": "मेरी पेंशन",
-    "pensionRevisions": "पेंशन संशोधन"
+    "pensionRevisions": "पेंशन संशोधन",
+    "help": "शिकायत और सहायता",
+    "notInPoc": "इस प्रदर्शन में उपलब्ध नहीं",
+    "notInPocShort": "उपलब्ध नहीं"
   },
   "passbook": {
     "eyebrow": "सदस्य सेवाएँ · अंशदान",
