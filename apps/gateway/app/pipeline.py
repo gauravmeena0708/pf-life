@@ -12,6 +12,10 @@ from .stepup import consume_token, create_challenge, verify_challenge
 from .oidc import session_context, verify_token
 from .problems import problem
 from .public_access import create_demo_challenge, limit_public, verify_demo_challenge
+
+# Public lookups that disclose anything about a person or payment need the demo CAPTCHA first.
+CAPTCHA_PATHS = {"/public/trrn-status-lookups", "/public/pension/life-certificate-lookups", "/public/pension/ppo-lookups",
+                 "/public/pension/payment-enquiries", "/public/pension/status-enquiries"}
 from .request_activity import get_request_activity, lookup_fingerprint, summarize_body
 from .revocation import is_revoked, record_revocation
 from .routing import match_route
@@ -97,7 +101,7 @@ async def handle_api(request: Request, path: str):
 
     if route["status"] in ("P", "?") or int(route.get("phase", 1)) > 1:
         return planned(request, route)
-    if route["path_template"] == "/public/trrn-status-lookups":
+    if route["path_template"] in CAPTCHA_PATHS:
         rejected = await verify_demo_challenge(request)
         if rejected is not None:
             return rejected

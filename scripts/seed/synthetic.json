@@ -274,7 +274,8 @@
     "ho-finance": "00000000-0000-4000-8000-000000000026",
     "pensioner-a": "00000000-0000-4000-8000-000000000027",
     "ro-pension": "00000000-0000-4000-8000-000000000028",
-    "member-d": "00000000-0000-4000-8000-000000000029"
+    "member-d": "00000000-0000-4000-8000-000000000029",
+    "ro-da-pension": "00000000-0000-4000-8000-000000000030"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -359,6 +360,12 @@
       "subject": "00000000-0000-4000-8000-000000000028",
       "stakeholder": "fo.apfc_pension",
       "office_id": "RO-DEMO-01"
+    },
+    {
+      "username": "ro-da-pension",
+      "subject": "00000000-0000-4000-8000-000000000030",
+      "stakeholder": "fo.da_pension",
+      "office_id": "RO-DEMO-01"
     }
   ],
   "pensioners": [
@@ -377,7 +384,8 @@
       "age_at_start": 58,
       "office_id": "RO-DEMO-01",
       "bank_ifsc": "DEMO0000901",
-      "bank_account_last4": "0901"
+      "bank_account_last4": "0901",
+      "life_certificate_valid_till": "2026-11-30"
     },
     {
       "ppo_id": "PPO-DEMO-0002",
@@ -391,7 +399,8 @@
       "age_at_start": 58,
       "office_id": "RO-DEMO-01",
       "bank_ifsc": "DEMO0000902",
-      "bank_account_last4": "0902"
+      "bank_account_last4": "0902",
+      "life_certificate_valid_till": "2026-08-31"
     }
   ]
 }

@@ -35,7 +35,11 @@ async def main() -> None:
             values.update(date_of_birth=date.fromisoformat(p["date_of_birth"]), pension_start=date.fromisoformat(p["pension_start"]),
                           original_monthly_paise=result["monthly_paise"], original_rule_version=rules["rule_version"],
                           original_working=result["working"])
+            values.update(life_certificate_valid_till=date.fromisoformat(p["life_certificate_valid_till"]) if p.get("life_certificate_valid_till") else None,
+                          life_certificate_source="SEED")
             await session.execute(insert(pensioners).values(**values).on_conflict_do_nothing())
+            await session.execute(update(pensioners).where(pensioners.c.ppo_id == p["ppo_id"], pensioners.c.life_certificate_valid_till.is_(None))
+                                  .values(life_certificate_valid_till=values["life_certificate_valid_till"], life_certificate_source="SEED"))
             row = (await session.execute(select(pensioners).where(pensioners.c.ppo_id == p["ppo_id"]))).mappings().one()
             await catch_up_payments(session, dict(row))
         for m in seed["members"]:

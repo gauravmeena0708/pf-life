@@ -256,3 +256,5 @@ code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9em; }
 .nav-menu li > .nav-unavailable { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
 .nav-tag { font-size: .68rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #6b7a89; border: 1px solid #cfd8e2; border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.state-pill { white-space: nowrap; }

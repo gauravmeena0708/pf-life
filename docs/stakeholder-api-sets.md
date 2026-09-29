@@ -140,16 +140,17 @@ Activities: **F05.pensioner_view** View PPO, pension slips, payments; change ban
 |---|---|
 | `GET /pensioners/me` | W |
 | `GET /pensioners/me/payments` | W |
+| `GET /pensioners/me/pension-slips` | W |
+| `GET /pensioners/me/ppo` | W |
+| `POST /pensioners/me/bank-change-requests` | W |
+| `POST /pensioners/me/declarations` | W |
+| `POST /public/pension/payment-enquiries` | W |
+| `POST /public/pension/ppo-lookups` | W |
+| `POST /public/pension/status-enquiries` | W |
 | `GET /pensioners/me/life-certificate` | M |
 | `POST /pensioners/me/life-certificate/submissions` | M |
 | `POST /public/pension/life-certificate-lookups` | M |
-| `GET /pensioners/me/pension-slips` | P |
-| `GET /pensioners/me/ppo` | P |
-| `POST /pensioners/me/bank-change-requests` | P |
 | `POST /public/grievances` | P |
-| `POST /public/pension/payment-enquiries` | P |
-| `POST /public/pension/ppo-lookups` | P |
-| `POST /public/pension/status-enquiries` | P |
 
 Integration adapters: `jeevan_pramaan`
 
@@ -160,8 +161,8 @@ Activities: **F05.family_apply** Apply for widow / child / orphan / dependent-pa
 | Endpoint | Status |
 |---|---|
 | `GET /pensioners/me` | W |
+| `POST /pensioners/me/declarations` | W |
 | `POST /claimants/family-pension-applications` | P |
-| `POST /pensioners/me/declarations` | P |
 
 #### `claimant` — Nominee / legal heir / guardian claiming PF, EDLI or pension on death
 
@@ -585,8 +586,10 @@ Activities: **F05.worksheet** Generate pension worksheet (Pension > Transaction 
 
 | Endpoint | Status |
 |---|---|
-| `GET /office/pensions/enquiries` | P |
-| `GET /office/pensions/updation-activities` | P |
+| `GET /office/pensions/enquiries` | W |
+| `GET /office/pensions/life-certificates/overdue` | W |
+| `GET /office/pensions/updation-activities` | W |
+| `POST /office/pensions/{ppoId}/updation-activities` | W |
 | `POST /office/pensions/ppo-issuances` | P |
 | `POST /office/pensions/ppos/{ppoId}/dispatches` | P |
 | `POST /office/pensions/scheme-certificates/{certId}/surrender-adjudications` | P |
@@ -594,7 +597,6 @@ Activities: **F05.worksheet** Generate pension worksheet (Pension > Transaction 
 | `POST /office/pensions/special-10d-cases` | P |
 | `POST /office/pensions/transfers-in` | P |
 | `POST /office/pensions/worksheets` | P |
-| `POST /office/pensions/{ppoId}/updation-activities` | P |
 
 #### `fo.ss_pension` — SS (Pension)
 
@@ -610,15 +612,16 @@ Activities: **F05.ppo_approve** Approve worksheet, PPO and initial arrear; e-sig
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/pensions/life-certificates/overdue` | W |
 | `GET /office/pensions/revisions` | W |
+| `POST /office/pensions/updation-activities/{activityId}/decisions` | W |
+| `POST /office/pensions/{ppoId}/resumptions` | W |
 | `POST /office/pensions/{ppoId}/revisions` | W |
-| `GET /office/pensions/life-certificates/overdue` | P |
+| `POST /office/pensions/{ppoId}/suspensions` | W |
 | `POST /office/pensions/brs-reconciliations` | P |
 | `POST /office/pensions/higher-pension-options/{optionId}/decisions` | P |
 | `POST /office/pensions/ppos/{ppoId}/e-signatures` | P |
 | `POST /office/pensions/worksheets/{worksheetId}/approvals` | P |
-| `POST /office/pensions/{ppoId}/resumptions` | P |
-| `POST /office/pensions/{ppoId}/suspensions` | P |
 
 #### `fo.pension_disbursement` — Pension Disbursement Section
 

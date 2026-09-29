@@ -29,6 +29,8 @@ import { PolicyListPage } from "./features/policy/PolicyListPage";
 import { PolicyVersionPage } from "./features/policy/PolicyVersionPage";
 import { InterestPage } from "./features/finance/InterestPage";
 import { PensionerPage } from "./features/pension/PensionerPage";
+import { PensionerServicesPage } from "./features/pension/PensionerServicesPage";
+import { PensionOfficePage } from "./features/pension/PensionOfficePage";
 import { PensionRevisionsPage } from "./features/pension/PensionRevisionsPage";
 import { DashboardsPage } from "./features/oversight/DashboardsPage";
 import { GrievanceMetricsPage } from "./features/oversight/GrievanceMetricsPage";
@@ -119,6 +121,8 @@ export function App() {
             <Route path="/policy/:versionId" element={<PolicyVersionPage />} />
             <Route path="/finance/interest" element={<InterestPage />} />
             <Route path="/pensioner" element={<PensionerPage />} />
+            <Route path="/pensioner/services" element={<PensionerServicesPage />} />
+            <Route path="/office/pensions" element={<PensionOfficePage />} />
             <Route path="/office/pension-revisions" element={<PensionRevisionsPage />} />
           </Routes>
         </main>

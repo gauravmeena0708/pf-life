@@ -24,7 +24,31 @@ pensioners = Table(
     Column("original_monthly_paise", BigInteger, nullable=False),
     Column("original_rule_version", String(60), nullable=False),
     Column("original_working", Text, nullable=False),
-    Column("status", String(20), nullable=False, server_default="IN_PAYMENT"),
+    Column("status", String(20), nullable=False, server_default="IN_PAYMENT"),   # IN_PAYMENT | SUSPENDED | STOPPED
+    Column("status_reason", Text),
+    Column("life_certificate_valid_till", Date),
+    Column("life_certificate_source", String(30)),              # JEEVAN_PRAMAAN | PHYSICAL | SEED
+    Column("life_certificate_ref", String(40)),                 # Pramaan ID or the office's reference
+    Column("declarations", JSON),                                # latest non-remarriage / non-employment declarations
+)
+
+# Office updation activities on a pension (Pension > Track Claim Updation Activity Status): some come from the
+# PRO counter (physical life certificate, death, spouse remarriage), others the DA (Pension) starts (basic details,
+# pension start / stop, DLC revalidation, unhold transactions). The DA initiates, the APFC (Pension) settles.
+updation_activities = Table(
+    "updation_activities", metadata,
+    Column("activity_id", String(40), primary_key=True),
+    Column("ppo_id", String(40), nullable=False, index=True),
+    Column("activity", String(30), nullable=False),
+    Column("mode", String(10), nullable=False),                 # PHYSICAL | ONLINE
+    Column("status", String(20), nullable=False),               # NEW | PENDING | SETTLED | REJECTED | SENT_BACK_TO_DA
+    Column("details", JSON, nullable=False),
+    Column("initiated_by", String(80), nullable=False),
+    Column("initiated_role", String(60), nullable=False),
+    Column("decided_by", String(80)),
+    Column("decision_note", Text),
+    Column("created_at", DateTime(timezone=True), server_default=func.now()),
+    Column("updated_at", DateTime(timezone=True), server_default=func.now()),
 )
 
 # A pension recomputed under a newly published formula. Proposed automatically; an APFC (Pension) approves it

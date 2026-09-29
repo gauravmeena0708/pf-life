@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 
 import { api, command, Envelope } from "../api/client";
+import { PensionEnquiries } from "./PensionEnquiries";
 import { PageHeader } from "../components/PageHeader";
 import { ProblemMessage } from "../components/ProblemMessage";
 
@@ -196,5 +197,6 @@ export function PublicLookups() {
           <div><dt>Payment recorded</dt><dd>{dateTime(trrnResult.paid_at)}</dd></div><div><dt>Next step</dt><dd>{trrnResult.next_step}</dd></div></dl>
       </div>}
     </section>
+    <PensionEnquiries />
   </div>;
 }

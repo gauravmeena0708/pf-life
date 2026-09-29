@@ -85,6 +85,12 @@ data leftovers of the long-running stack (member A's used-up synthetic balance; 
 transferred member ID before that defect was fixed) and showed that the exit, transfer and registration tests
 assumed the employer grants Journey A creates; they now set them up themselves.
 
+## Update — Phase 2, slice 3: pension office and pensioner services (29 September 2026)
+
+Unit tests 271 passed (pension-service 9); end to end 30 passed (including `test_pension_services.py`);
+must-deny 18 passed. Found on the way: the pensioner could not make a declaration (the endpoint was granted only to
+family pensioners) and the DA (Pension) could not see overdue certificates; both grants were added.
+
 ## Known limits
 
 - Journey B spends ₹6,00,000 of member A's synthetic balance per run; after about six runs `make reset` restores it.

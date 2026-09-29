@@ -44,9 +44,9 @@ Rules that apply to every row:
 | `GET /public/defaulting-establishments` | Published defaulter list (synthetic) | P | 2 | compliance |
 | `GET /public/circulars` | Circulars / notifications catalogue (synthetic, versioned documents) | P | 2 | intelligence |
 | `POST /public/pension/life-certificate-lookups` | **Jeevan Pramaan / life-certificate status** by PPO number or Jeevan Pramaan transaction ID (CAPTCHA, minimal disclosure) | M | 1 | pension |
-| `POST /public/pension/ppo-lookups` | **Know your PPO** (by bank account + DoB / member ID) | P | 2 | pension |
-| `POST /public/pension/payment-enquiries` | Pension payment enquiry (month-wise credited / not credited) | P | 2 | pension |
-| `POST /public/pension/status-enquiries` | Pension application / PPO status enquiry | P | 2 | pension |
+| `POST /public/pension/ppo-lookups` | **Know your PPO** (by bank account + DoB / member ID) | W | 1 | pension |
+| `POST /public/pension/payment-enquiries` | Pension payment enquiry (month-wise credited / not credited) | W | 1 | pension |
+| `POST /public/pension/status-enquiries` | Pension application / PPO status enquiry | W | 1 | pension |
 | `POST /public/claims/status-lookups` | Claim status by reference (OTP proof; no PII in response) | P | 2 | claim |
 | `POST /public/inoperative-accounts/searches` | Inoperative-account helpdesk search (step-up before any balance is shown) | P | 3 | contribution |
 | `POST /public/grievances` | Grievance intake from a non-logged-in person (OTP-verified contact) | P | 2 | grievance |
@@ -391,19 +391,20 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 |---|---|---|---|---|
 | `GET /pensioners/me/life-certificate` | **Jeevan Pramaan / Digital Life Certificate** status: last submitted, valid till, source | M | 1 | pension |
 | `GET /pensioners/me` | Pensioner profile (PPO number, pension type, disbursing bank) | W | 1 | pension |
-| `GET /pensioners/me/ppo` | **PPO** view / download | P | 2 | pension |
-| `GET /pensioners/me/pension-slips?month=` | **Pension slip** | P | 2 | pension |
+| `GET /pensioners/me/ppo` | **PPO** view / download | W | 1 | pension |
+| `GET /pensioners/me/pension-slips?month=` | **Pension slip** | W | 1 | pension |
 | `GET /pensioners/me/payments` | Pension payment history | W | 1 | pension |
-| `POST /pensioners/me/life-certificate/submissions` | Record DLC submission (mock Jeevan Pramaan / face-auth adapter) | M | 2 | pension |
-| `POST /integrations/mock-jeevan-pramaan/dlc-events` | Signed callback from mock Jeevan Pramaan | M | 2 | pension |
-| `POST /pensioners/me/bank-change-requests` 🔐 | Change disbursing bank | P | 2 | pension |
-| `POST /pensioners/me/declarations` | Non-remarriage / non-employment declarations | P | 2 | pension |
-| `GET /office/pensions/life-certificates/overdue` | Pensioners with expired life certificates | P | 2 | pension |
-| `POST /office/pensions/{ppoId}/suspensions` 🔐 | Suspend pension on missing life certificate | P | 2 | pension |
-| `POST /office/pensions/{ppoId}/resumptions` 🔐 | Resume pension | P | 2 | pension |
-| `GET /office/pensions/enquiries?ppo=&memberId=&uan=` | **Pension Enquiry Details** — PPO, beneficiaries, pension payments, scheme certificate issue, service, arrears adjustment, recovery and TDS (restricted to the officer's office) | P | 2 | pension |
-| `POST /office/pensions/{ppoId}/updation-activities` 🔐 | DA (Pension) initiates an updation activity: `BASIC_DETAILS`, `PENSION_START`, `PENSION_STOP`, `DLC_REVALIDATION`, `UNHOLD_TRANSACTIONS` | P | 2 | pension |
-| `GET /office/pensions/updation-activities?activity=&mode=&status=` | **Track Claim Updation Activity Status** — PRO and DA activities by filing mode (physical / online) and status (new, pending, rejected, settled, sent back to DA), transfer cases separately | P | 2 | pension |
+| `POST /pensioners/me/life-certificate/submissions` | Record DLC submission (mock Jeevan Pramaan / face-auth adapter) | M | 1 | pension |
+| `POST /integrations/mock-jeevan-pramaan/dlc-events` | Signed callback from mock Jeevan Pramaan | M | 1 | pension |
+| `POST /pensioners/me/bank-change-requests` 🔐 | Change disbursing bank | W | 1 | pension |
+| `POST /pensioners/me/declarations` | Non-remarriage / non-employment declarations | W | 1 | pension |
+| `GET /office/pensions/life-certificates/overdue` | Pensioners with expired life certificates | W | 1 | pension |
+| `POST /office/pensions/{ppoId}/suspensions` 🔐 | Suspend pension on missing life certificate | W | 1 | pension |
+| `POST /office/pensions/{ppoId}/resumptions` 🔐 | Resume pension | W | 1 | pension |
+| `GET /office/pensions/enquiries?ppo=&memberId=&uan=` | **Pension Enquiry Details** — PPO, beneficiaries, pension payments, scheme certificate issue, service, arrears adjustment, recovery and TDS (restricted to the officer's office) | W | 1 | pension |
+| `POST /office/pensions/{ppoId}/updation-activities` 🔐 | DA (Pension) initiates an updation activity: `BASIC_DETAILS`, `PENSION_START`, `PENSION_STOP`, `DLC_REVALIDATION`, `UNHOLD_TRANSACTIONS` | W | 1 | pension |
+| `GET /office/pensions/updation-activities?activity=&mode=&status=` | **Track Claim Updation Activity Status** — PRO and DA activities by filing mode (physical / online) and status (new, pending, rejected, settled, sent back to DA), transfer cases separately | W | 1 | pension |
+| `POST /office/pensions/updation-activities/{activityId}/decisions` 🔐 | APFC (Pension) settles, rejects or sends back an updation activity (maker ≠ checker); a settled activity changes the pension (life certificate, start / stop, unhold, bank) | W | 1 | pension |
 | `POST /office/physical-claims` (`formType=PPO_AMENDMENT_BENEFICIARY` \| `PPO_AMENDMENT_SERVICE` \| `PPO_AMENDMENT_POHW`) | PRO counter intake of a **PPO amendment** (beneficiary, service, pension on higher wages) | P | 2 | pension |
 | `POST /office/physical-claims` (`formType=DEATH_UPDATION` \| `PHYSICAL_LC_UPDATION` \| `SPOUSE_REMARRIAGE_UPDATION`) | PRO counter intake of a pensioner **death**, **physical life certificate** or **spouse remarriage** updation | P | 2 | pension |
 | `POST /office/pensions/ppo-issuances` 🔐 | Issue PPO after Form 10D settlement | P | 2 | pension |

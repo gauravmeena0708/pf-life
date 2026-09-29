@@ -41,6 +41,7 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `member-c` | Member who left employment (final settlement, TDS) | Money |
 | `pensioner-a`, `ro-pension` | Pensioner; APFC (Pension) who approves revisions | Money |
 | `member-d` | Member with two member IDs (a previous job) | Exit and transfer |
+| `ro-da-pension` | Dealing assistant (Pension) | Pension office |
 
 ---
 
@@ -186,6 +187,20 @@ simulation; point out that the dialog says exactly what is being authorised (act
 3. **`emp-signatory` → Member › Approve KYC …** approves with DSC / e-sign (one-time code). The member's KYC,
    bank for payments and *Ready to claim?* change; a verified PAN lowers TDS on a taxable withdrawal.
 4. *KYC Bulk* uploads many lines at once and lists the lines it could not accept.
+
+## Pension office and pensioner services
+*Tests: `tests/e2e/test_pension_services.py`, `services/pension-service/tests/test_pensioner_services.py`*
+
+1. **`ro-pension` (APFC Pension) → Pension › Life certificates overdue.** PPO-DEMO-0002's certificate lapsed on
+   31 August → *Suspend* (reason, one-time code). Resuming without a certificate is refused.
+2. **`ro-da-pension` → Pension office › Initiate an activity**: *Physical life certificate (PRO)* for
+   PPO-DEMO-0002 (one-time code). The DA cannot settle it.
+3. **`ro-pension`** settles it in the tracker: the certificate is valid for a year, the pension resumes and the
+   months held back are credited that day. *Pension Enquiry Details* shows the eight tabs.
+4. **`pensioner-a` → Services**: submit a Digital Life Certificate (mock Jeevan Pramaan), print the PPO, see a
+   pension slip, ask to change the bank account (the APFC settles it) and make a declaration.
+5. **Public services → Pension enquiries** (no login; answer the one-use question): Know your PPO, pension
+   status, payment enquiry (months only, no amounts), life certificate.
 
 ## Policy changes that move money — interest, TDS and pensions
 *Tests: `tests/e2e/test_policy_money.py`, `services/contribution-service/tests/test_interest.py`,

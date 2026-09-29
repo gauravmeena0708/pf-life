@@ -505,13 +505,13 @@ stakeholders:
     via:
     - F05.pensioner_view
   - endpoint: GET /pensioners/me/ppo
-    status: P
+    status: W
     scope: self — caller's own PPO only
     step_up: false
     via:
     - F05.pensioner_view
   - endpoint: GET /pensioners/me/pension-slips
-    status: P
+    status: W
     scope: self — caller's own PPO only
     step_up: false
     via:
@@ -523,26 +523,32 @@ stakeholders:
     via:
     - F05.pensioner_view
   - endpoint: POST /pensioners/me/bank-change-requests
-    status: P
+    status: W
     scope: self — caller's own PPO only
     step_up: true
     via:
     - F05.pensioner_view
   - endpoint: POST /public/pension/ppo-lookups
-    status: P
+    status: W
     scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
     step_up: false
     via:
     - F05.pensioner_view
   - endpoint: POST /public/pension/payment-enquiries
-    status: P
+    status: W
     scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
     step_up: false
     via:
     - F05.pensioner_view
   - endpoint: POST /public/pension/status-enquiries
-    status: P
+    status: W
     scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
+    step_up: false
+    via:
+    - F05.pensioner_view
+  - endpoint: POST /pensioners/me/declarations
+    status: W
+    scope: self — caller's own PPO only
     step_up: false
     via:
     - F05.pensioner_view
@@ -584,7 +590,7 @@ stakeholders:
     via:
     - F05.family_view
   - endpoint: POST /pensioners/me/declarations
-    status: P
+    status: W
     scope: self — caller's own PPO only
     step_up: false
     via:
@@ -1988,19 +1994,25 @@ stakeholders:
     via:
     - F05.dispatch
   - endpoint: GET /office/pensions/enquiries
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F05.updation
   - endpoint: POST /office/pensions/{ppoId}/updation-activities
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F05.updation
   - endpoint: GET /office/pensions/updation-activities
-    status: P
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F05.updation
+  - endpoint: GET /office/pensions/life-certificates/overdue
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -2044,19 +2056,25 @@ stakeholders:
     via:
     - F05.ppo_approve
   - endpoint: GET /office/pensions/life-certificates/overdue
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F05.dlc_monitor
   - endpoint: POST /office/pensions/{ppoId}/suspensions
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F05.dlc_monitor
   - endpoint: POST /office/pensions/{ppoId}/resumptions
-    status: P
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F05.dlc_monitor
+  - endpoint: POST /office/pensions/updation-activities/{activityId}/decisions
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:

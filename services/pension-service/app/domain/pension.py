@@ -59,8 +59,13 @@ def amount_for(pensioner: dict[str, Any], revisions: list[dict[str, Any]], month
     return current
 
 
-async def catch_up_payments(session: AsyncSession, pensioner: dict[str, Any], on: date | None = None) -> None:
-    """Mock CPPS: credit every month up to the last completed one at the amount in force for it (idempotent)."""
+async def catch_up_payments(session: AsyncSession, pensioner: dict[str, Any], on: date | None = None,
+                            released_on: date | None = None) -> None:
+    """Mock CPPS: credit every month up to the last completed one at the amount in force for it (idempotent).
+    Nothing is credited while the pension is suspended or stopped; months held back are credited when it is
+    resumed (`released_on`: the date they are paid)."""
+    if pensioner.get("status", "IN_PAYMENT") != "IN_PAYMENT":
+        return
     revisions = await approved(session, pensioner["ppo_id"])
     paid = set((await session.execute(select(pension_payments.c.month).where(
         pension_payments.c.ppo_id == pensioner["ppo_id"], pension_payments.c.kind == "MONTHLY"))).scalars())
@@ -68,7 +73,8 @@ async def catch_up_payments(session: AsyncSession, pensioner: dict[str, Any], on
         if month not in paid:
             await session.execute(insert(pension_payments).values(
                 ppo_id=pensioner["ppo_id"], month=month, kind="MONTHLY", revision_id="",
-                amount_paise=amount_for(pensioner, revisions, month)["monthly_paise"], paid_on=last_day(month)))
+                amount_paise=amount_for(pensioner, revisions, month)["monthly_paise"],
+                paid_on=max(last_day(month), released_on) if released_on else last_day(month)))
 
 
 async def arrears(session: AsyncSession, revision: dict[str, Any]) -> int:

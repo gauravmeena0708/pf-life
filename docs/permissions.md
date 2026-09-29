@@ -204,24 +204,25 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /pensioners/me` | W | self — caller's own PPO only |  |
 | `GET /pensioners/me/payments` | W | self — caller's own PPO only |  |
+| `GET /pensioners/me/pension-slips` | W | self — caller's own PPO only |  |
+| `GET /pensioners/me/ppo` | W | self — caller's own PPO only |  |
+| `POST /pensioners/me/bank-change-requests` | W | self — caller's own PPO only | yes |
+| `POST /pensioners/me/declarations` | W | self — caller's own PPO only |  |
+| `POST /public/pension/payment-enquiries` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
+| `POST /public/pension/ppo-lookups` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
+| `POST /public/pension/status-enquiries` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /pensioners/me/life-certificate` | M | self — caller's own PPO only |  |
 | `POST /pensioners/me/life-certificate/submissions` | M | self — caller's own PPO only |  |
 | `POST /public/pension/life-certificate-lookups` | M | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
-| `GET /pensioners/me/pension-slips` | P | self — caller's own PPO only |  |
-| `GET /pensioners/me/ppo` | P | self — caller's own PPO only |  |
-| `POST /pensioners/me/bank-change-requests` | P | self — caller's own PPO only | yes |
 | `POST /public/grievances` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
-| `POST /public/pension/payment-enquiries` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
-| `POST /public/pension/ppo-lookups` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
-| `POST /public/pension/status-enquiries` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 
 **`family_pensioner`** — Widow(er), child, orphan, dependent-parent pensioner
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /pensioners/me` | W | self — caller's own PPO only |  |
+| `POST /pensioners/me/declarations` | W | self — caller's own PPO only |  |
 | `POST /claimants/family-pension-applications` | P | self — claimant's own claims only |  |
-| `POST /pensioners/me/declarations` | P | self — caller's own PPO only |  |
 
 **`claimant`** — Nominee / legal heir / guardian claiming PF, EDLI or pension on death
 
@@ -581,8 +582,10 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /office/pensions/enquiries` | P | office jurisdiction of the caller's posting |  |
-| `GET /office/pensions/updation-activities` | P | office jurisdiction of the caller's posting |  |
+| `GET /office/pensions/enquiries` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/pensions/life-certificates/overdue` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/pensions/updation-activities` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/pensions/{ppoId}/updation-activities` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/ppo-issuances` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/ppos/{ppoId}/dispatches` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/pensions/scheme-certificates/{certId}/surrender-adjudications` | P | office jurisdiction of the caller's posting | yes |
@@ -590,7 +593,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/pensions/special-10d-cases` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/pensions/transfers-in` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/pensions/worksheets` | P | office jurisdiction of the caller's posting |  |
-| `POST /office/pensions/{ppoId}/updation-activities` | P | office jurisdiction of the caller's posting | yes |
 
 **`fo.ss_pension`** — SS (Pension)
 
@@ -602,15 +604,16 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /office/pensions/life-certificates/overdue` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/pensions/revisions` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/pensions/updation-activities/{activityId}/decisions` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/pensions/{ppoId}/resumptions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/{ppoId}/revisions` | W | office jurisdiction of the caller's posting | yes |
-| `GET /office/pensions/life-certificates/overdue` | P | office jurisdiction of the caller's posting |  |
+| `POST /office/pensions/{ppoId}/suspensions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/brs-reconciliations` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/higher-pension-options/{optionId}/decisions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/ppos/{ppoId}/e-signatures` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/worksheets/{worksheetId}/approvals` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/pensions/{ppoId}/resumptions` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/pensions/{ppoId}/suspensions` | P | office jurisdiction of the caller's posting | yes |
 
 **`fo.pension_disbursement`** — Pension Disbursement Section
 

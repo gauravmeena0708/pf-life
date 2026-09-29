@@ -121,6 +121,10 @@
       {
         "name": "pensioner",
         "description": "Stakeholder pensioner (docs/stakeholders.md)"
+      },
+      {
+        "name": "fo.da_pension",
+        "description": "Stakeholder fo.da_pension (docs/stakeholders.md)"
       }
     ]
   },
@@ -744,6 +748,25 @@
       "realmRoles": [
         "tech.ai_service"
       ]
+    },
+    {
+      "username": "ro-da-pension",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "DA Pension",
+      "lastName": "Demo",
+      "email": "ro-da-pension@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.da_pension"
+      ],
+      "id": "00000000-0000-4000-8000-000000000030"
     }
   ]
 }

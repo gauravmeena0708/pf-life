@@ -8,7 +8,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 |---|---|---|
 | **P2.1** | Dates of exit (member Mark Exit; employer marks, signatory approves), service history, the member's pending / processed applications, Form 13 transfer (member → present employer → DA → AO; ledger moves the balance), Annexure K | **Done** (28 Sep 2026) |
 | **P2.2** | Employer member registration (single, bulk; new UAN or a new member ID under an existing one), Form 11, member KYC (PAN, bank) through mock verifiers and the signatory's approval, KYC bulk with error list, missing details, active-member export, the employee's contribution ledger, UAN card, account readiness | **Done** (28 Sep 2026) |
-| P2.3 | Pension office and pensioner self-service: pension enquiry, updation activities and tracker, suspend / resume, life-certificate monitoring, PPO, slips, public pension enquiries | |
+| **P2.3** | Pension office and pensioner self-service: pension enquiry (8 tabs), updation activities (DA initiates, APFC settles) and tracker, overdue life certificates, suspend / resume (held months released), mock Jeevan Pramaan DLC and signed callback, PPO, slips, bank change, declarations, public pension enquiries behind the demo CAPTCHA | **Done** (29 Sep 2026) |
 | P2.4 | Pension settlement: Form 10D, scheme certificate, IDS, worksheet, PPO issue, e-sign, dispatch, initial arrears, CPPS runs, BRS, service aggregation | |
 | P2.5 | Death and EDLI claims, CAD, payment scrolls, physical intake, claim documents, cancellations, audit trail | |
 | P2.6 | Establishment registration and configuration, Form 5A, branches, DSC / e-sign approvals | |
@@ -42,3 +42,15 @@ meaning is confirmed.
 - Found: interest for a year in which a member ID's balance was later transferred was credited to the emptied
   member ID. It is now credited to the member ID the money went to, and "already credited" is read from the
   interest postings themselves.
+
+## P2.3 — how it is built
+
+- pension-service owns it all. A pension is credited monthly only while IN_PAYMENT; a lapsed life certificate lets
+  the APFC (Pension) suspend it; a new certificate (Jeevan Pramaan, or a physical one recorded as an updation
+  activity) resumes it and the held months are credited on that day.
+- Updation activities are a small maker-checker inside pension-service (not the engine): the DA (Pension) — new
+  persona `ro-da-pension` — initiates, the APFC settles, rejects or sends back; only a settled activity changes the
+  pension. A pensioner's bank change is such an activity.
+- The gateway now asks the demo CAPTCHA for the four public pension enquiries as well as the TRRN lookup.
+- Not modelled: beneficiaries / family pension, commutation, recovery and TDS on pension (the enquiry shows them
+  empty), the pension-disbursing bank's own enquiry.

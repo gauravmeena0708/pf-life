@@ -68,16 +68,21 @@ function fieldOffice(role: string): NavGroup[] {
 /** The DA (Pension) login shows a short bar: Services · NPPS · Pension · CLAIMS. */
 const PENSION_OFFICE: NavGroup[] = [
   { label: "Services" }, { label: "NPPS" },
-  { label: "Pension", items: [link("Pension revisions", "/office/pension-revisions"), link("Pension Enquiry Details"), link("Track Pension Claims Updation Activities")] },
+  { label: "Pension", items: [link("Pension revisions", "/office/pension-revisions"), link("Pension Enquiry Details", "/office/pensions#enquiry-heading"),
+    link("Track Pension Claims Updation Activities", "/office/pensions#updation-heading"), link("Life certificates overdue", "/office/pensions#overdue-heading")] },
   { label: "CLAIMS" },
 ];
 
 /** Pensioners' portal: public enquiries (no pensioner login exists; the POC adds one for the pension view). */
 const PENSIONER: NavGroup[] = [
   { labelKey: "navigation.pension", to: "/pensioner" },
+  { label: "Services", items: [link("Life certificate (Jeevan Pramaan)", "/pensioner/services#lc-heading"), link("PPO", "/pensioner/services#ppo-heading"),
+    link("Pension slip", "/pensioner/services#slip-heading"), link("Change bank account", "/pensioner/services#bank-change-heading"),
+    link("Declarations", "/pensioner/services#declarations-heading")] },
   { label: "Pensioners' Portal", items: [
-    link("Jeevan Pramaan Enquiry"), link("Know your PPO No."), link("PPO Enquiry / Payment Enquiry", "/pensioner#pension-payments-heading"),
-    link("Know Your Pension Status", "/pensioner#monthly-pension-heading"), link("Know Your Pension Payee Bank")] },
+    link("Jeevan Pramaan Enquiry", "/public#pension-enquiries"), link("Know your PPO No.", "/public#pension-enquiries"),
+    link("PPO Enquiry / Payment Enquiry", "/pensioner#pension-payments-heading"), link("Know Your Pension Status", "/pensioner#monthly-pension-heading"),
+    link("Know Your Pension Payee Bank")] },
 ];
 
 /** Head office, zonal and oversight roles: no real menu is documented; the POC's own screens. */
@@ -110,6 +115,7 @@ export function homeFor(role: string | undefined): string {
   if (role?.startsWith("employer.")) return "/employer";
   if (role === "pensioner") return "/pensioner";
   if (role === "fo.apfc_pension") return "/office/pension-revisions";
+  if (role === "fo.da_pension") return "/office/pensions";
   if (role?.startsWith("fo.")) return "/office/work-queue";
   return "/";
 }

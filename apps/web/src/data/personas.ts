@@ -24,6 +24,7 @@ export const PERSONAS: Persona[] = [
   { username: "ro-cashier", label: "Cashier", role: "fo.cash" },
   { username: "ro-pro", label: "Grievance officer / PRO", role: "fo.pro" },
   { username: "ro-pension", label: "APFC (Pension)", role: "fo.apfc_pension" },
+  { username: "ro-da-pension", label: "Dealing assistant (Pension)", role: "fo.da_pension" },
   { username: "zo-acc", label: "Zonal supervisor (ACC)", role: "zo.acc" },
   { username: "zo-rpfc", label: "Zonal RPFC-I (freeze orders)", role: "zo.rpfc1" },
   { username: "ho-policy", label: "HO policy drafter (ACC HQ)", role: "ho.acc_hq" },

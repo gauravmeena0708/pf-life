@@ -8,8 +8,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 |---|---|---|---|---|---|---|---|
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 9 | 2 | 5 | 0 |
 | 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 37 | 7 | 46 | 0 |
-| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 43 | 5 | 34 | 0 |
-| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 19 | 0 | 76 | 6 |
+| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 50 | 5 | 27 | 0 |
+| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 26 | 0 | 70 | 6 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 11 | 1 | 2 | 0 |
 | 6 | International worker | **Mock** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 0 | 1 | 4 | 0 |
 | 7 | District office | **Working** | `do.incharge`, `do.staff` | 1 | 0 | 2 | 0 |
@@ -172,6 +172,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /members/me/uan-card` | W | member | member |
 | `GET /pensioners/me` | W | pension | family_pensioner, pensioner |
 | `GET /pensioners/me/payments` | W | pension | pensioner |
+| `GET /pensioners/me/pension-slips` | W | pension | pensioner |
+| `GET /pensioners/me/ppo` | W | pension | pensioner |
 | `PATCH /members/me/contact-details` | W | member | member |
 | `POST /ai/feedback` | W | intelligence | member |
 | `POST /ai/knowledge/search` | W | intelligence | member |
@@ -191,6 +193,11 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /members/me/security-reports` | W | member | member |
 | `POST /members/me/tax/form-15g-15h` | W | claim | member |
 | `POST /members/me/transfers` | W | claim | member |
+| `POST /pensioners/me/bank-change-requests` | W | pension | pensioner |
+| `POST /pensioners/me/declarations` | W | pension | family_pensioner, pensioner |
+| `POST /public/pension/payment-enquiries` | W | pension | pensioner |
+| `POST /public/pension/ppo-lookups` | W | pension | pensioner |
+| `POST /public/pension/status-enquiries` | W | pension | pensioner |
 | `POST /security/step-up-challenges` | W | gateway | member |
 | `POST /security/step-up-challenges/{challengeId}/verifications` | W | gateway | member |
 | `GET /pensioners/me/life-certificate` | M | pension | pensioner |
@@ -208,8 +215,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /members/me/tax/form-16a` | P | claim | member |
 | `GET /members/me/tax/taxable-interest` | P | contribution | member |
 | `GET /members/me/transfers/auto` | P | claim | member |
-| `GET /pensioners/me/pension-slips` | P | pension | pensioner |
-| `GET /pensioners/me/ppo` | P | pension | pensioner |
 | `POST /claimants/death-claims` | P | claim | claimant |
 | `POST /claimants/family-pension-applications` | P | pension | family_pensioner |
 | `POST /grievances/{grievanceId}/feedback` | P | grievance | member |
@@ -223,14 +228,9 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /members/me/pension-scheme-certificates/{certId}/surrenders` | P | pension | member |
 | `POST /members/me/transfers/auto/{transferId}/confirmations` | P | claim | member |
 | `POST /members/uan-lookups` | P | member | member |
-| `POST /pensioners/me/bank-change-requests` | P | pension | pensioner |
-| `POST /pensioners/me/declarations` | P | pension | family_pensioner |
 | `POST /public/claims/status-lookups` | P | claim | member |
 | `POST /public/grievances` | P | grievance | pensioner |
 | `POST /public/inoperative-accounts/searches` | P | contribution | member.exited |
-| `POST /public/pension/payment-enquiries` | P | pension | pensioner |
-| `POST /public/pension/ppo-lookups` | P | pension | pensioner |
-| `POST /public/pension/status-enquiries` | P | pension | pensioner |
 | `PUT /members/me/claims/{claimId}/bank-details` | P | claim | member |
 
 ### 4. Office — Working
@@ -240,7 +240,10 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /hrm/me` | W | workflow | fo.admin |
 | `GET /office/cases/{caseId}` | W | workflow | fo.ao, fo.cash, fo.da_accounts, fo.ss |
 | `GET /office/member-change-requests` | W | member | fo.da_accounts |
+| `GET /office/pensions/enquiries` | W | pension | fo.da_pension |
+| `GET /office/pensions/life-certificates/overdue` | W | pension | fo.apfc_pension, fo.da_pension |
 | `GET /office/pensions/revisions` | W | pension | fo.apfc_pension |
+| `GET /office/pensions/updation-activities` | W | pension | fo.da_pension |
 | `GET /office/transfers` | W | claim | fo.ao, fo.da_accounts |
 | `GET /office/work-queue` | W | workflow | fo.ao, fo.cash, fo.da_accounts, fo.ss |
 | `POST /ai/claims/analyse` | W | intelligence | fo.da_accounts |
@@ -253,7 +256,11 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/member-change-requests/{requestId}/decisions` | W | member | fo.ao |
 | `POST /office/member-change-requests/{requestId}/recommendations` | W | member | fo.da_accounts |
 | `POST /office/member-change-requests/{requestId}/verifications` | W | member | fo.ao, fo.ss |
+| `POST /office/pensions/updation-activities/{activityId}/decisions` | W | pension | fo.apfc_pension |
+| `POST /office/pensions/{ppoId}/resumptions` | W | pension | fo.apfc_pension |
 | `POST /office/pensions/{ppoId}/revisions` | W | pension | fo.apfc_pension |
+| `POST /office/pensions/{ppoId}/suspensions` | W | pension | fo.apfc_pension |
+| `POST /office/pensions/{ppoId}/updation-activities` | W | pension | fo.da_pension |
 | `POST /office/transfers/{transferId}/decisions` | W | claim | fo.ao |
 | `POST /office/transfers/{transferId}/verifications` | W | claim | fo.da_accounts |
 | `GET /office/accounts/inoperative` | P | contribution | fo.da_accounts |
@@ -269,9 +276,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /office/legal/cases` | P | compliance | fo.legal |
 | `GET /office/members/{uan}` | P | member | fo.da_accounts |
 | `GET /office/pensions/disbursement-lists` | P | pension | fo.pension_disbursement |
-| `GET /office/pensions/enquiries` | P | pension | fo.da_pension |
-| `GET /office/pensions/life-certificates/overdue` | P | pension | fo.apfc_pension |
-| `GET /office/pensions/updation-activities` | P | pension | fo.da_pension |
 | `GET /office/receipts/unreconciled` | P | contribution | fo.cash |
 | `POST /hrm/postings` | P | workflow | fo.admin |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | P | member | fo.da_accounts |
@@ -319,9 +323,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/pensions/transfers-in` | P | pension | fo.da_pension |
 | `POST /office/pensions/worksheets` | P | pension | fo.da_pension |
 | `POST /office/pensions/worksheets/{worksheetId}/approvals` | P | pension | fo.apfc_pension |
-| `POST /office/pensions/{ppoId}/resumptions` | P | pension | fo.apfc_pension |
-| `POST /office/pensions/{ppoId}/suspensions` | P | pension | fo.apfc_pension |
-| `POST /office/pensions/{ppoId}/updation-activities` | P | pension | fo.da_pension |
 | `POST /office/physical-claims` | P | claim | fo.diary |
 | `POST /office/physical-claims/{intakeId}/identity-validations` | P | member | fo.da_accounts |
 | `POST /office/receipts/{receiptId}/trrn-adjustments` | P | contribution | fo.da_accounts |
