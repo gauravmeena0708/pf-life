@@ -13,6 +13,34 @@ servers:
   description: Gateway (init.md §2.4)
 paths:
   /claimants/family-pension-applications:
+    get:
+      operationId: getClaimantsFamilyPensionApplications
+      summary: Status of the family pension application, desk by desk
+      tags:
+      - Member claims, transfers and pension applications
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: pension
+      x-callers:
+      - claimant
+      x-scope: self — claimant's own claims only
+      security:
+      - bffSession: []
     post:
       operationId: postClaimantsFamilyPensionApplications
       summary: Widow / child / orphan pension
@@ -22,26 +50,34 @@ paths:
       - $ref: '#/components/parameters/CorrelationId'
       - $ref: '#/components/parameters/IdempotencyKey'
       - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: pension
       x-callers:
+      - claimant
       - family_pensioner
       x-scope: self — claimant's own claims only
       security:
       - bffSession: []
       x-variants:
       - formType: FORM_10D
-        status: P
-        phase: 2
-      description: 'Variants by `formType`: `FORM_10D` (P, phase 2)'
+        status: W
+        phase: 1
+      description: 'Variants by `formType`: `FORM_10D` (W, phase 1)'
       requestBody:
         required: false
         content:

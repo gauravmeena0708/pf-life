@@ -99,3 +99,33 @@ def test_transfer_in_and_the_cpps_run_reconciled_with_brs(ctx):
     assert rec["state"] == "RECONCILED" and [e["ppo_id"] for e in rec["exceptions"]] == ["PPO-DEMO-0002"]
     brs = step(client, "POST", "/api/v1/office/pensions/brs-reconciliations", APFC_P, "fo.apfc_pension", {"month": "2026-08"}, "prepare-brs", "2026-08").json()["data"]
     assert brs["scroll_total_paise"] == 111400 + 578600 + 250000 and brs["bank_debit_total_paise"] == 361400 and brs["difference_paise"] == 578600
+
+
+def test_family_pension_from_the_widow_through_the_same_desks(ctx, monkeypatch):
+    client, q, _ = ctx
+    at(monkeypatch, date(2026, 9, 29))
+    widow = SUBJECTS["claimant-a"]
+    url = "/api/v1/claimants/family-pension-applications"
+    body = {"form_type": "FORM_10D", "deceased_uan": "100000000901"}
+    assert step(client, "POST", url, widow, "claimant", body).status_code == 428
+    assert step(client, "POST", url, MEMBER_E, "claimant", body, "file-family-pension", "100000000901").status_code == 404   # not family
+    r = step(client, "POST", url, widow, "claimant", body, "file-family-pension", "100000000901")
+    assert r.status_code == 201, r.json()
+    c = r.json()["data"]
+    # GANESH DEMO: 14 years' service at ₹15,000 → ₹15,000 x 14 / 70 = ₹3,000; the spouse gets 50%
+    assert (c["kind"], c["pension_from"], c["estimate"]["monthly_paise"]) == ("SPOUSE", "2026-07-16", 150000)
+    assert c["family"]["deceased_name"] == "GANESH DEMO" and c["name"] == "LAKSHMI DEMO"
+    cid = c["claim_id"]
+    c = step(client, "POST", f"/api/v1/office/pension-claims/{cid}/input-data-sheets", DA_ACC, "fo.da_accounts",
+             {"service_months": 171, "pensionable_salary_paise": 1500000, "note": "Service to the date of death checked"}).json()["data"]
+    ids = c["ids"]["ids_id"]
+    step(client, "POST", f"/api/v1/office/pension-claims/{cid}/input-data-sheets/{ids}/approvals", AO, "fo.ao",
+         {"decision": "APPROVE", "note": "IDS in order"}, "approve-ids", ids)
+    ws = step(client, "POST", "/api/v1/office/pensions/worksheets", DA_P, "fo.da_pension", {"claim_id": cid}).json()["data"]["worksheet"]
+    assert ws["monthly_paise"] == 150000 and "50%" in ws["working"]
+    step(client, "POST", f"/api/v1/office/pensions/worksheets/{ws['worksheet_id']}/approvals", APFC_P, "fo.apfc_pension",
+         {"decision": "APPROVE", "note": "Worksheet checked"}, "approve-worksheet", ws["worksheet_id"])
+    ppo = step(client, "POST", "/api/v1/office/pensions/ppo-issuances", DA_P, "fo.da_pension", {"claim_id": cid}, "issue-ppo", cid).json()["data"]["ppo_id"]
+    assert q(f"SELECT subject, name FROM pensioners WHERE ppo_id='{ppo}'") == [(widow, "LAKSHMI DEMO")]
+    mine = step(client, "GET", url, widow, "claimant").json()["data"]
+    assert mine[0]["ppo_id"] == ppo and mine[0]["kind"] == "SPOUSE"

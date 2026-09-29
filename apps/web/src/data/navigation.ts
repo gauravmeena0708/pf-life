@@ -37,7 +37,8 @@ const EMPLOYER: NavGroup[] = [
     link("Establishment Profile", "/employer/establishment#est-config-heading"), link("Form 5A", "/employer/establishment#est-form5a-heading"),
     link("Branches (Form 2A)", "/employer/establishment#est-branches-heading"), link("Establishment KYC and bank accounts", "/employer/establishment#est-kyc-heading"),
     link("Contractors", "/employer/establishment#est-contractors-heading"),
-    link("DSC/e-sign Registration"), link("e-sign Registration"), link("Authorized eSign List", "/employer#people-signatory")] },
+    link("DSC/e-sign Registration", "/employer/establishment#esign-heading"), link("e-sign Registration", "/employer/establishment#esign-heading"),
+    link("Authorized eSign List", "/employer/establishment#esign-heading")] },
   { label: "Payments", items: [
     link("ECR Upload", "/employer/ecr#ecr-prepare"), link("Return Filing", "/employer/ecr#ecr-returns"), link("Return monthly dashboard"),
     link("Direct Challan"), link("Monthly Return for Exempted Establishment"), link("TRRN query / challan status", "/employer/ecr#ecr-challans")] },
@@ -70,7 +71,7 @@ function fieldOffice(role: string): NavGroup[] {
     { label: "Establishments & compliance", items: [
       link("Establishment", ["fo.oic", "fo.apfc"].includes(role) ? "/office/work-queue" : undefined),
       link("OLRE", ["fo.da_compliance", "fo.apfc"].includes(role) ? "/office/olre" : undefined),
-      ...(role === "fo.apfc" ? [link("Establishment change requests", "/office/olre#est-changes-heading")] : []), link("7Q & 14B"), link("Exempted-Unexempted"), link("Past Accum. File Upload"),
+      ...(role === "fo.apfc" ? [link("Establishment change requests", "/office/olre#est-changes-heading"), link("DSC / e-sign approvals", "/office/olre#sig-heading")] : []), link("7Q & 14B"), link("Exempted-Unexempted"), link("Past Accum. File Upload"),
       link("PAST ACCUM BULK TRANSFER"), link("PAST ACCUM VDR RECO")] },
     { label: "Pension", items: [link("Pension"), link("NPPS")] },
     { label: "Accounts", items: [link("Annual Accounting")] },
@@ -103,7 +104,7 @@ const PENSIONER: NavGroup[] = [
 const CLAIMANT: NavGroup[] = [
   { label: "Death claims", items: [link("PF claim (Form 20)", "/claimant#file-heading"), link("EDLI claim (Form 5IF)", "/claimant#file-heading"),
     link("Track claim / beneficiaries", "/claimant#claim-status-heading"), link("Composite claim (CCF)")] },
-  { label: "Family pension (Form 10D)" },
+  { label: "Family pension (Form 10D)", to: "/claimant#family-pension-heading" },
 ];
 
 /** Head office, zonal and oversight roles: no real menu is documented; the POC's own screens. */

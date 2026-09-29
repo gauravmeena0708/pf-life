@@ -129,6 +129,19 @@ pension_claims = Table(
     Column("history", JSON, nullable=False),
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
     Column("updated_at", DateTime(timezone=True), server_default=func.now()),
+    Column("kind", String(10), nullable=False, server_default="MEMBER"),   # MEMBER | SPOUSE | CHILD (family pension)
+    Column("family", JSON),                                   # the deceased member and the claimant, for a family pension
+)
+
+# The family of a member (synthetic seed, from the nomination): who may claim a family pension on the member's death.
+family_members = Table(
+    "family_members", metadata,
+    Column("id", String(60), primary_key=True),
+    Column("uan", String(12), nullable=False, index=True),
+    Column("name", String(120), nullable=False),
+    Column("relation", String(20), nullable=False),
+    Column("date_of_birth", Date, nullable=False),
+    Column("subject", String(80)),
 )
 
 scheme_certificates = Table(

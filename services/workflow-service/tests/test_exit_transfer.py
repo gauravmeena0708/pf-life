@@ -71,6 +71,9 @@ def test_transfer_from_an_exited_member_id_through_employer_da_and_ao(ctx):
     assert client.get(f"/api/v1/members/me/transfers/{case['case_id']}", headers=hdr(MEMBER_B, "member")).status_code == 404
     queued = client.get("/api/v1/employers/me/transfer-requests", headers=hdr(SIGNATORY, "employer.signatory", establishment=EST)).json()["data"]
     assert [c["case_id"] for c in queued] == [case["case_id"]]
+    pending = client.get("/api/v1/employers/me/pending-approvals", headers=hdr(SIGNATORY, "employer.signatory", establishment=EST)).json()["data"]
+    assert [(i["case_id"], i["action"], i["title"]) for i in pending["items"]] == [(case["case_id"], "attest", "Transfer of PF (Form 13)")]
+    assert pending["items"][0]["operation"]["step_up"]["action"] == "attest-transfer"
     case = step(client, f"/api/v1/employers/me/transfer-requests/{case['case_id']}/decisions", case, SIGNATORY, "employer.signatory",
                 {"decision": "ATTEST", "note": "Present employee"}, "attest-transfer", EST).json()["data"]
     verify = {"service_checked": "YES", "note": "Service at both establishments checked"}

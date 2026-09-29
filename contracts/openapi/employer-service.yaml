@@ -800,7 +800,7 @@ paths:
         '409':
           $ref: '#/components/responses/Problem'
       x-status: mock
-      x-phase: 2
+      x-phase: 1
       x-owner-service: employer
       x-callers:
       - employer.owner
@@ -843,7 +843,7 @@ paths:
         '409':
           $ref: '#/components/responses/Problem'
       x-status: mock
-      x-phase: 2
+      x-phase: 1
       x-owner-service: employer
       x-callers:
       - employer.owner
@@ -873,14 +873,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
       - employer.owner
@@ -955,14 +961,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
       - employer.owner
@@ -978,6 +990,37 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /employers/me/signature-registrations:
+    get:
+      operationId: getEmployersSignatureRegistrations
+      summary: 'Authorized eSign List: each signatory''s DSC / e-sign registration and revoke requests with their status'
+      tags:
+      - Employer operators, signatories, DSC and e-sign
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/EstablishmentId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: employer
+      x-callers:
+      - employer.owner
+      - employer.signatory
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
   /employers/registration-requests:
     post:
       operationId: postEmployersRegistrationRequests
@@ -1642,14 +1685,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
       - fo.apfc
@@ -1688,6 +1737,35 @@ paths:
       x-owner-service: employer
       x-callers:
       - fo.exemption
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+  /office/signature-registrations:
+    get:
+      operationId: getOfficeSignatureRegistrations
+      summary: DSC / e-sign registrations and revoke letters of the office awaiting approval
+      tags:
+      - Employer operators, signatories, DSC and e-sign
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: employer
+      x-callers:
+      - fo.apfc
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []

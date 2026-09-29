@@ -140,3 +140,21 @@ contractors = Table(
     Column("linked_by", String(80), nullable=False),
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
 )
+
+# DSC / Aadhaar e-sign registration of an authorised signatory (Establishment > e-sign Registration), backed by the
+# scanned request letter, approved by the PF office; a revocation is backed by a revoke letter the office accepts.
+signature_registrations = Table(
+    "signature_registrations", metadata,
+    Column("reg_id", String(40), primary_key=True),
+    Column("establishment_id", String(40), nullable=False, index=True),
+    Column("grant_id", String(40), nullable=False, index=True),          # the signatory
+    Column("purpose", String(10), nullable=False),                       # REGISTER | REVOKE
+    Column("method", String(10)),                                        # DSC | ESIGN (registration)
+    Column("details", JSON, nullable=False),                             # certificate / e-sign particulars (mock, masked)
+    Column("letter", JSON),                                              # file name, size, SHA-256 of the signed letter
+    Column("state", String(20), nullable=False),                         # LETTER_PENDING | PENDING_OFFICE | APPROVED | REJECTED | REVOKED
+    Column("decided_by", String(80)),
+    Column("decision_note", Text),
+    Column("created_at", DateTime(timezone=True), server_default=func.now()),
+    Column("decided_at", DateTime(timezone=True)),
+)

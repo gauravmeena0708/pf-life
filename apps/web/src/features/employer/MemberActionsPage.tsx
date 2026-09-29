@@ -6,6 +6,7 @@ import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
+import { PendingApprovals } from "./SignaturePanels";
 
 interface CaseItem { case_id: string; subject_ref: string; state: string; version: number; data: Record<string, string> }
 
@@ -78,6 +79,7 @@ export function MemberActionsPage() {
       <ProblemMessage error={error} />
       {notice ? <p role="status" className="ok">{notice}</p> : null}
 
+      <PendingApprovals />
       {!signatory ? (
         <form className="card stack" aria-labelledby="exit-heading" onSubmit={markExit}><h2 id="exit-heading">Mark date of exit</h2>
           <p className="muted small">The exit takes effect only after the authorised signatory approves it (Member › Approvals).</p>

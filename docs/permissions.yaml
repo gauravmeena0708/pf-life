@@ -584,9 +584,9 @@ stakeholders:
     - F08.pensioner_file
   family_pensioner:
   - endpoint: POST /claimants/family-pension-applications
-    status: P
+    status: W
     scope: self — claimant's own claims only
-    step_up: false
+    step_up: true
     via:
     - F05.family_apply
   - endpoint: GET /pensioners/me
@@ -620,6 +620,18 @@ stakeholders:
     step_up: false
     via:
     - F04.death_claim
+  - endpoint: POST /claimants/family-pension-applications
+    status: W
+    scope: self — claimant's own claims only
+    step_up: true
+    via:
+    - F05.family_apply_claimant
+  - endpoint: GET /claimants/family-pension-applications
+    status: W
+    scope: self — claimant's own claims only
+    step_up: false
+    via:
+    - F05.family_apply_claimant
   claimant.nominee:
   - endpoint: POST /claimants/death-claims/{claimId}/beneficiaries
     status: W
@@ -710,13 +722,19 @@ stakeholders:
     via:
     - F01.signatories
   - endpoint: POST /employers/me/signatories/{signatoryId}/request-letters
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
     - F01.signatories
   - endpoint: POST /employers/me/signatories/{signatoryId}/revoke-letters
-    status: P
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.signatories
+  - endpoint: GET /employers/me/signature-registrations
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
@@ -849,6 +867,18 @@ stakeholders:
     via:
     - F01.form5a
   - endpoint: GET /employers/me
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.signatory_profile
+  - endpoint: GET /employers/me/pending-approvals
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.signatory_profile
+  - endpoint: GET /employers/me/signature-registrations
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
@@ -1120,7 +1150,7 @@ stakeholders:
     via:
     - F01.profile
   - endpoint: GET /employers/me/pending-approvals
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
@@ -1806,8 +1836,14 @@ stakeholders:
     step_up: true
     via:
     - F01.circle_review
+  - endpoint: GET /office/signature-registrations
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F01.dsc_approve
   - endpoint: POST /office/establishments/{estId}/signature-registrations/{regId}/decisions
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:

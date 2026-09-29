@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /hrm/me', 'GET /office/stopped-cases', 'GET /office/work-queue', 'GET /public/offices', 'POST /office/system/locks/{lockId}/release', 'GET /office/cases/{caseId}', 'POST /office/cases/{caseId}/assignments', 'POST /office/cases/{caseId}/decisions', 'POST /office/cases/{caseId}/recommendations', 'POST /office/cases/{caseId}/restarts', 'POST /office/cases/{caseId}/second-approvals', 'POST /office/cases/{caseId}/stops', 'POST /office/freeze-cases/{caseId}/verifications', 'GET /office/members/{uan}/locks', 'POST /office/cases/{caseId}/documents/{docId}/attestation-views']
+OPERATIONS = ['GET /hrm/me', 'GET /office/stopped-cases', 'GET /office/work-queue', 'GET /public/offices', 'GET /employers/me/pending-approvals', 'POST /office/system/locks/{lockId}/release', 'GET /office/cases/{caseId}', 'POST /office/cases/{caseId}/assignments', 'POST /office/cases/{caseId}/decisions', 'POST /office/cases/{caseId}/recommendations', 'POST /office/cases/{caseId}/restarts', 'POST /office/cases/{caseId}/second-approvals', 'POST /office/cases/{caseId}/stops', 'POST /office/freeze-cases/{caseId}/verifications', 'GET /office/members/{uan}/locks', 'POST /office/cases/{caseId}/documents/{docId}/attestation-views']
 
 @router.api_route("/api/v1/hrm/me", methods=["GET"], include_in_schema=False)
 async def get_hrm_me(actor: Actor = Depends(require_actor)) -> None:
@@ -30,6 +30,11 @@ async def get_office_work_queue(actor: Actor = Depends(require_actor)) -> None:
 @router.api_route("/api/v1/public/offices", methods=["GET"], include_in_schema=False)
 async def get_public_offices(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Office locator by state/district/pincode")
+
+
+@router.api_route("/api/v1/employers/me/pending-approvals", methods=["GET"], include_in_schema=False)
+async def get_employers_me_pending_approvals(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Items awaiting DSC/e-sign (KYC, transfers, claims, JD)")
 
 
 @router.api_route("/api/v1/office/system/locks/{lockId}/release", methods=["POST"], include_in_schema=False)

@@ -6,6 +6,7 @@ import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
+import { EsignList } from "./SignaturePanels";
 
 const base = "/api/v1/employers/me";
 const text = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
@@ -289,6 +290,7 @@ export function EstablishmentPage() {
           <label>Valid to (optional)<input name="valid_to" type="date" /></label></div>
         <div className="actions"><button type="submit" className="primary">Add contractor</button></div></form> : null}
     </section>
+    <EsignList canManage={role === "employer.owner"} />
     <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
   </section>;
 }

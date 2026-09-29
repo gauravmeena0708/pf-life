@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /employers/me', 'PATCH /employers/me', 'POST /employers/registration-requests', 'GET /office/establishment-change-requests', 'GET /office/establishment-registrations', 'GET /public/establishments', 'GET /employers/me/bank-accounts', 'GET /employers/me/branches', 'POST /employers/me/branches', 'GET /employers/me/change-requests', 'GET /employers/me/configuration', 'GET /employers/me/contractors', 'POST /employers/me/contractors', 'GET /employers/me/exemption', 'GET /employers/me/kyc', 'GET /employers/me/operators', 'GET /employers/me/ownership-declaration', 'PUT /employers/me/ownership-declaration', 'GET /employers/me/signatories', 'POST /employers/me/configuration/change-requests', 'POST /employers/me/operators/invitations', 'POST /employers/me/signatories/authorisations', 'POST /employers/me/kyc/{kycType}', 'POST /employers/me/operators/{operatorId}/revocations', 'POST /employers/me/signatories/{signatoryId}/revocations', 'GET /employers/registration-requests/{reqId}', 'GET /public/establishments/{estId}', 'POST /employers/registration-requests/{reqId}/verification-evidence', 'POST /office/establishment-registrations/{reqId}/coverage-decisions', 'GET /office/establishment-registrations/{reqId}/documents', 'POST /office/establishment-registrations/{reqId}/scrutiny-notes', 'POST /office/establishments/{estId}/defreezes', 'POST /office/establishments/{estId}/freezes', 'POST /office/establishments/{estId}/change-requests/{requestId}/decisions']
+OPERATIONS = ['GET /employers/me', 'PATCH /employers/me', 'POST /employers/registration-requests', 'GET /office/establishment-change-requests', 'GET /office/establishment-registrations', 'GET /office/signature-registrations', 'GET /public/establishments', 'GET /employers/me/bank-accounts', 'GET /employers/me/branches', 'POST /employers/me/branches', 'GET /employers/me/change-requests', 'GET /employers/me/configuration', 'GET /employers/me/contractors', 'POST /employers/me/contractors', 'GET /employers/me/exemption', 'GET /employers/me/kyc', 'GET /employers/me/operators', 'GET /employers/me/ownership-declaration', 'PUT /employers/me/ownership-declaration', 'GET /employers/me/signatories', 'GET /employers/me/signature-registrations', 'POST /employers/me/configuration/change-requests', 'POST /employers/me/operators/invitations', 'POST /employers/me/signatories/authorisations', 'POST /employers/me/kyc/{kycType}', 'POST /employers/me/operators/{operatorId}/revocations', 'POST /employers/me/signatories/{signatoryId}/dsc-registrations', 'POST /employers/me/signatories/{signatoryId}/esign-registrations', 'POST /employers/me/signatories/{signatoryId}/request-letters', 'POST /employers/me/signatories/{signatoryId}/revocations', 'POST /employers/me/signatories/{signatoryId}/revoke-letters', 'GET /employers/registration-requests/{reqId}', 'GET /public/establishments/{estId}', 'POST /employers/registration-requests/{reqId}/verification-evidence', 'POST /office/establishment-registrations/{reqId}/coverage-decisions', 'GET /office/establishment-registrations/{reqId}/documents', 'POST /office/establishment-registrations/{reqId}/scrutiny-notes', 'POST /office/establishments/{estId}/defreezes', 'POST /office/establishments/{estId}/freezes', 'POST /office/establishments/{estId}/change-requests/{requestId}/decisions', 'POST /office/establishments/{estId}/signature-registrations/{regId}/decisions']
 
 @router.api_route("/api/v1/employers/me", methods=["GET"], include_in_schema=False)
 async def get_employers_me(actor: Actor = Depends(require_actor)) -> None:
@@ -35,6 +35,11 @@ async def get_office_establishment_change_requests(actor: Actor = Depends(requir
 @router.api_route("/api/v1/office/establishment-registrations", methods=["GET"], include_in_schema=False)
 async def get_office_establishment_registrations(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "OLRE: new registrations of the office awaiting scrutiny / coverage")
+
+
+@router.api_route("/api/v1/office/signature-registrations", methods=["GET"], include_in_schema=False)
+async def get_office_signature_registrations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "DSC / e-sign registrations and revoke letters of the office awaiting approval")
 
 
 @router.api_route("/api/v1/public/establishments", methods=["GET"], include_in_schema=False)
@@ -107,6 +112,11 @@ async def get_employers_me_signatories(actor: Actor = Depends(require_actor)) ->
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "List authorised signatories")
 
 
+@router.api_route("/api/v1/employers/me/signature-registrations", methods=["GET"], include_in_schema=False)
+async def get_employers_me_signature_registrations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Authorized eSign List: each signatory's DSC / e-sign registration and revoke requests with their sta")
+
+
 @router.api_route("/api/v1/employers/me/configuration/change-requests", methods=["POST"], include_in_schema=False)
 async def post_employers_me_configuration_change_requests(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Request configuration change (office-approved)")
@@ -132,9 +142,29 @@ async def post_employers_me_operators_operatorId_revocations(actor: Actor = Depe
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Revoke operator (Journey A9)")
 
 
+@router.api_route("/api/v1/employers/me/signatories/{signatoryId}/dsc-registrations", methods=["POST"], include_in_schema=False)
+async def post_employers_me_signatories_signatoryId_dsc_registrations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Register DSC for signatory")
+
+
+@router.api_route("/api/v1/employers/me/signatories/{signatoryId}/esign-registrations", methods=["POST"], include_in_schema=False)
+async def post_employers_me_signatories_signatoryId_esign_registrations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Register Aadhaar e-sign for signatory")
+
+
+@router.api_route("/api/v1/employers/me/signatories/{signatoryId}/request-letters", methods=["POST"], include_in_schema=False)
+async def post_employers_me_signatories_signatoryId_request_letters(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Upload the scanned, signed signatory registration request letter; *Authorized eSign List* shows its ")
+
+
 @router.api_route("/api/v1/employers/me/signatories/{signatoryId}/revocations", methods=["POST"], include_in_schema=False)
 async def post_employers_me_signatories_signatoryId_revocations(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Revoke / replace signatory (Journey D5)")
+
+
+@router.api_route("/api/v1/employers/me/signatories/{signatoryId}/revoke-letters", methods=["POST"], include_in_schema=False)
+async def post_employers_me_signatories_signatoryId_revoke_letters(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Upload the signed signatory revoke letter that backs a revocation, with its own status (*Authorized ")
 
 
 @router.api_route("/api/v1/employers/registration-requests/{reqId}", methods=["GET"], include_in_schema=False)
@@ -180,3 +210,8 @@ async def post_office_establishments_estId_freezes(actor: Actor = Depends(requir
 @router.api_route("/api/v1/office/establishments/{estId}/change-requests/{requestId}/decisions", methods=["POST"], include_in_schema=False)
 async def post_office_establishments_estId_change_requests_requestId_decisions(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Decide configuration change / closure / office-transfer requests")
+
+
+@router.api_route("/api/v1/office/establishments/{estId}/signature-registrations/{regId}/decisions", methods=["POST"], include_in_schema=False)
+async def post_office_establishments_estId_signature_registrations_regId_decisions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Field office approval of DSC / e-sign registration")

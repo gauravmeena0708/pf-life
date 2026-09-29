@@ -23,7 +23,7 @@ from app.infra.tables import (brs_statements, disbursement_runs, member_service,
 from epfo_auth import Actor, require_actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import audit
-from epfo_persistence.policy import pension_on, rules_on, section
+from epfo_persistence.policy import family_pension_on, pension_on, rules_on, section
 
 router = APIRouter()
 MEMBER = require_stakeholder("member")
@@ -82,7 +82,7 @@ def _view(c: dict[str, Any]) -> dict[str, Any]:
             "service_months": c["service_months"], "aggregated": c["aggregated"], "pensionable_salary_paise": c["pensionable_salary_paise"],
             "ids": c.get("ids"), "worksheet": c.get("worksheet"), "ppo_id": c.get("ppo_id"), "arrears": c.get("arrears"),
             "history": [{**{k: v for k, v in h.items() if k != "by"}, "role": ROLE.get(h["role"], h["role"])} for h in c["history"]],
-            "next_step": NEXT.get(c["state"])}
+            "next_step": NEXT.get(c["state"]), "kind": c.get("kind", "MEMBER"), "family": c.get("family")}
 
 
 NEXT = {"SUBMITTED": "DA (Accounts) prepares the Input Data Sheet", "IDS_PREPARED": "AO approves the Input Data Sheet",
@@ -309,7 +309,8 @@ async def worksheet(body: WorksheetInput, actor: Actor = Depends(require_stakeho
         _separate(c, actor)
         rules = await rules_on(session, c["pension_from"])            # the formula in force when the pension starts
         total = c["service_months"] + sum(a["service_months"] for a in c["aggregated"])
-        r = pension_on(c["pensionable_salary_paise"], total, age_on(c["date_of_birth"], c["pension_from"]), rules)
+        r = (pension_on(c["pensionable_salary_paise"], total, age_on(c["date_of_birth"], c["pension_from"]), rules)
+             if c.get("kind", "MEMBER") == "MEMBER" else family_pension_on(c["pensionable_salary_paise"], total, c["kind"], rules))
         if not r["eligible"]:
             raise Problem(422, "/problems/not-eligible", "Not eligible on these data", r["reason"])
         ws = {"worksheet_id": f"WS-{secrets.token_hex(3).upper()}", "service_months": total, "monthly_paise": r["monthly_paise"],
@@ -347,7 +348,7 @@ async def issue_ppo(body: ClaimRef, actor: Actor = Depends(require_stakeholder("
         ws = c["worksheet"]
         m = (await session.execute(select(member_service).where(member_service.c.subject == c["member_subject"]))).mappings().first()
         await session.execute(insert(pensioners).values(
-            ppo_id=ppo_id, subject=None, name=c["name"], uan=c["uan"], date_of_birth=c["date_of_birth"], pension_start=c["pension_from"],
+            ppo_id=ppo_id, subject=c["member_subject"] if c.get("kind", "MEMBER") != "MEMBER" else None, name=c["name"], uan=c["uan"], date_of_birth=c["date_of_birth"], pension_start=c["pension_from"],
             service_months=ws["service_months"], pensionable_salary_paise=c["pensionable_salary_paise"], age_at_start=ws["age_at_start"],
             office_id=c["office_id"], bank_ifsc="DEMO0000000", bank_account_last4=(m["account_link_id"] or "0000")[-4:] if m else "0000",
             original_monthly_paise=ws["monthly_paise"], original_rule_version=ws["rule_version"], original_working=ws["working"],

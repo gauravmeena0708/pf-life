@@ -106,12 +106,14 @@ Rules that apply to every row:
 | `GET /employers/me/signatories` | List authorised signatories | W | 1 | employer |
 | `POST /employers/me/signatories/authorisations` 🔐 | Authorise signatory | W | 1 | employer |
 | `POST /employers/me/signatories/{signatoryId}/revocations` 🔐 | Revoke / replace signatory (Journey D5) | W | 1 | employer |
-| `POST /employers/me/signatories/{signatoryId}/request-letters` | Upload the scanned, signed **signatory registration request letter**; *Authorized eSign List* shows its status (Establishment > e-sign Registration) | P | 2 | employer |
-| `POST /employers/me/signatories/{signatoryId}/revoke-letters` | Upload the signed **signatory revoke letter** that backs a revocation, with its own status (*Authorized eSign List*: Signatory Revoke Request) | P | 2 | employer |
-| `POST /employers/me/signatories/{signatoryId}/dsc-registrations` 🔐 | Register DSC for signatory | M | 2 | employer |
-| `POST /employers/me/signatories/{signatoryId}/esign-registrations` 🔐 | Register Aadhaar e-sign for signatory | M | 2 | employer |
-| `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` 🔐 | Field office approval of DSC / e-sign registration | P | 2 | employer |
-| `GET /employers/me/pending-approvals` | Items awaiting DSC/e-sign (KYC, transfers, claims, JD) | P | 2 | workflow |
+| `POST /employers/me/signatories/{signatoryId}/request-letters` | Upload the scanned, signed **signatory registration request letter**; *Authorized eSign List* shows its status (Establishment > e-sign Registration) | W | 1 | employer |
+| `POST /employers/me/signatories/{signatoryId}/revoke-letters` | Upload the signed **signatory revoke letter** that backs a revocation, with its own status (*Authorized eSign List*: Signatory Revoke Request) | W | 1 | employer |
+| `POST /employers/me/signatories/{signatoryId}/dsc-registrations` 🔐 | Register DSC for signatory | M | 1 | employer |
+| `POST /employers/me/signatories/{signatoryId}/esign-registrations` 🔐 | Register Aadhaar e-sign for signatory | M | 1 | employer |
+| `GET /employers/me/signature-registrations` | **Authorized eSign List**: each signatory's DSC / e-sign registration and revoke requests with their status | W | 1 | employer |
+| `GET /office/signature-registrations` | DSC / e-sign registrations and revoke letters of the office awaiting approval | W | 1 | employer |
+| `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` 🔐 | Field office approval of DSC / e-sign registration | W | 1 | employer |
+| `GET /employers/me/pending-approvals` | Items awaiting DSC/e-sign (KYC, transfers, claims, JD) | W | 1 | workflow |
 
 ## 4. Employer-side member management
 
@@ -291,7 +293,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /claimants/death-claims` 💰 🔐 (`formType=FORM_5IF`) | **EDLI** insurance claim | W | 1 | claim |
 | `POST /claimants/death-claims` 💰 (`formType=CCF_DEATH`) | Composite claim covering several death benefits | P | 3 | claim |
 | `GET /claimants/death-claims/{claimId}` | Status (claimant verified separately; no member PII beyond entitlement) | W | 1 | claim |
-| `POST /claimants/family-pension-applications` 💰 (`formType=FORM_10D`) | Widow / child / orphan pension | P | 2 | pension |
+| `POST /claimants/family-pension-applications` 💰 🔐 (`formType=FORM_10D`) | Widow / child / orphan pension | W | 1 | pension |
+| `GET /claimants/family-pension-applications` | Status of the family pension application, desk by desk | W | 1 | pension |
 
 
 **Added from the stakeholder activity map** (`docs/stakeholder-activities.yaml`)

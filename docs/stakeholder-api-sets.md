@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 236 |
+| Activities | 237 |
 | Stakeholders with at least one API | 97 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 0 |
@@ -162,18 +162,20 @@ Activities: **F05.family_apply** Apply for widow / child / orphan / dependent-pa
 | Endpoint | Status |
 |---|---|
 | `GET /pensioners/me` | W |
+| `POST /claimants/family-pension-applications` | W |
 | `POST /pensioners/me/declarations` | W |
-| `POST /claimants/family-pension-applications` | P |
 
 #### `claimant` — Nominee / legal heir / guardian claiming PF, EDLI or pension on death
 
-Activities: **F04.death_claim** File PF (Form 20), EDLI (Form 5IF) or composite death claim
+Activities: **F04.death_claim** File PF (Form 20), EDLI (Form 5IF) or composite death claim; **F05.family_apply_claimant** The widow / widower or child of a member who died in service files Form 10D for a family pension and follows it
 
 | Endpoint | Status |
 |---|---|
 | `GET /claimants/death-claims/{claimId}` | W |
+| `GET /claimants/family-pension-applications` | W |
 | `POST /claimants/death-claims` | W |
 | `POST /claimants/death-claims/{claimId}/beneficiaries` | W |
+| `POST /claimants/family-pension-applications` | W |
 
 #### `claimant.nominee` — Co-beneficiary on a multi-beneficiary death claim (PF / EDLI / pension) holding an allocated percentage share, including shares already settled in the legacy system
 
@@ -226,6 +228,7 @@ Activities: **F01.register** Register establishment online and submit verificati
 | `GET /employers/me/operators` | W |
 | `GET /employers/me/ownership-declaration` | W |
 | `GET /employers/me/signatories` | W |
+| `GET /employers/me/signature-registrations` | W |
 | `GET /employers/registration-requests/{reqId}` | W |
 | `PATCH /employers/me` | W |
 | `POST /employers/me/branches` | W |
@@ -234,19 +237,19 @@ Activities: **F01.register** Register establishment online and submit verificati
 | `POST /employers/me/operators/invitations` | W |
 | `POST /employers/me/operators/{operatorId}/revocations` | W |
 | `POST /employers/me/signatories/authorisations` | W |
+| `POST /employers/me/signatories/{signatoryId}/request-letters` | W |
 | `POST /employers/me/signatories/{signatoryId}/revocations` | W |
+| `POST /employers/me/signatories/{signatoryId}/revoke-letters` | W |
 | `POST /employers/registration-requests` | W |
 | `PUT /employers/me/ownership-declaration` | W |
 | `POST /employers/me/kyc/{kycType}` | M |
 | `POST /employers/me/signatories/{signatoryId}/dsc-registrations` | M |
 | `POST /employers/me/signatories/{signatoryId}/esign-registrations` | M |
 | `POST /employers/registration-requests/{reqId}/verification-evidence` | M |
-| `POST /employers/me/signatories/{signatoryId}/request-letters` | P |
-| `POST /employers/me/signatories/{signatoryId}/revoke-letters` | P |
 
 #### `employer.signatory` — Authorised signatory (registered DSC / e-sign)
 
-Activities: **F01.form5a** File / update Form 5A ownership return and branches (Form 2A), signed with DSC / e-sign; **F01.signatory_profile** View the establishment before approving returns and payments; **F01.change_request** Request configuration change, closure / deregistration or office transfer; **F02.kyc_approve** Approve KYC seeded by member / pending for digital signature, with DSC or e-sign; **F02.employer_approvals** Approve queued member changes (Member > Approvals); **F02.jd_attest** Attest, return or reject the Joint Declaration; employer-initiated JD; **F03.ecr_approve** Review, approve and submit ECR (generates TRRN); cancel an unpaid TRRN; **F03.pay** Pay challan online (or via bank counter where allowed) and download the payment receipt; **F03.direct_challan** Create a Direct Challan: administrative / inspection charges, or miscellaneous challan for 14B damages and 7Q interest; pay demands; **F04.attest** Attest claims that need employer attestation; **F04.transfer_attest** Attest pending transfer claims (Online Services > Transfer Claims); **F05.higher_employer** Validate joint options and upload wage details; **F06.employer_reply** Reply and submit evidence in proceedings; **F06.vishwas_apply** Apply under VISHWAS to settle a 14B damages / penalty dispute at reduced rates; **F10.apply** Apply for / extend CoC for a posted worker (IWU portal EMPLOYER login); upload signed application; download CoC
+Activities: **F01.form5a** File / update Form 5A ownership return and branches (Form 2A), signed with DSC / e-sign; **F01.signatory_profile** View the establishment and what waits for its signature before approving returns and payments; **F01.change_request** Request configuration change, closure / deregistration or office transfer; **F02.kyc_approve** Approve KYC seeded by member / pending for digital signature, with DSC or e-sign; **F02.employer_approvals** Approve queued member changes (Member > Approvals); **F02.jd_attest** Attest, return or reject the Joint Declaration; employer-initiated JD; **F03.ecr_approve** Review, approve and submit ECR (generates TRRN); cancel an unpaid TRRN; **F03.pay** Pay challan online (or via bank counter where allowed) and download the payment receipt; **F03.direct_challan** Create a Direct Challan: administrative / inspection charges, or miscellaneous challan for 14B damages and 7Q interest; pay demands; **F04.attest** Attest claims that need employer attestation; **F04.transfer_attest** Attest pending transfer claims (Online Services > Transfer Claims); **F05.higher_employer** Validate joint options and upload wage details; **F06.employer_reply** Reply and submit evidence in proceedings; **F06.vishwas_apply** Apply under VISHWAS to settle a 14B damages / penalty dispute at reduced rates; **F10.apply** Apply for / extend CoC for a posted worker (IWU portal EMPLOYER login); upload signed application; download CoC
 
 | Endpoint | Status |
 |---|---|
@@ -262,6 +265,8 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `GET /employers/me/joint-declarations` | W |
 | `GET /employers/me/kyc-approvals` | W |
 | `GET /employers/me/ownership-declaration` | W |
+| `GET /employers/me/pending-approvals` | W |
+| `GET /employers/me/signature-registrations` | W |
 | `GET /employers/me/transfer-requests` | W |
 | `PATCH /employers/me` | W |
 | `POST /employers/me/approvals/{approvalId}/decisions` | W |
@@ -315,6 +320,7 @@ Activities: **F01.profile** View establishment profile, configuration, KYC and h
 | `GET /employers/me/members` | W |
 | `GET /employers/me/members/active-export` | W |
 | `GET /employers/me/members/{uan}/contribution-ledger` | W |
+| `GET /employers/me/pending-approvals` | W |
 | `PATCH /employers/me/members/{uan}/profile` | W |
 | `POST /employers/me/ecr-filings` | W |
 | `POST /employers/me/ecr-filings/{filingId}/validations` | W |
@@ -325,7 +331,6 @@ Activities: **F01.profile** View establishment profile, configuration, KYC and h
 | `POST /employers/me/members/{uan}/exits` | W |
 | `GET /employers/me/compliance-summary` | P |
 | `GET /employers/me/dashboard` | P |
-| `GET /employers/me/pending-approvals` | P |
 | `GET /employers/me/returns/dashboard` | P |
 | `POST /employers/me/members/exit-bulk-uploads` | P |
 | `POST /employers/me/members/{uan}/exit-corrections` | P |
@@ -522,6 +527,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `GET /office/establishment-change-requests` | W |
 | `GET /office/establishment-registrations` | W |
 | `GET /office/establishment-registrations/{reqId}/documents` | W |
+| `GET /office/signature-registrations` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
 | `POST /office/claims/{claimId}/cad` | W |
@@ -529,6 +535,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/establishment-registrations/{reqId}/coverage-decisions` | W |
 | `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | W |
 | `POST /office/establishments/{estId}/defreezes` | W |
+| `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/member-change-requests/{requestId}/decisions` | W |
 | `POST /office/members/{uan}/freezes` | W |
@@ -543,7 +550,6 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/compliance/inspections` | P |
 | `POST /office/compliance/membership-disputes` | P |
 | `POST /office/compliance/vishwas-applications/{applicationId}/decisions` | P |
-| `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` | P |
 | `GET /office/ecr-filings` | ? |
 | `POST /office/ecr-filings/{filingId}/approvals` | ? |
 | `POST /office/ledger-adjustments/{adjustmentId}/approvals` | ? |
@@ -1405,7 +1411,7 @@ flowchart LR
   F01_dsc_approve["fo.apfc<br/>Approve the DSC / e-sign registration at the PF office"]
   F01_signatories["employer.owner<br/>View the establishment; authorise or revoke signatories"]
   F01_operators["employer.owner<br/>Invite, scope and revoke employer sub-users (User / Admin me"]
-  F01_signatory_profile["employer.signatory<br/>View the establishment before approving returns and payments"]
+  F01_signatory_profile["employer.signatory<br/>View the establishment and what waits for its signature befo"]
   F01_profile["employer.operator<br/>View establishment profile, configuration, KYC and home-page"]
   F01_change_request["employer.signatory<br/>Request configuration change, closure / deregistration or of"]
   F01_change_decide["fo.apfc<br/>Decide establishment change, closure or transfer requests"]
@@ -1606,6 +1612,7 @@ flowchart LR
   F05_disbursement_section["fo.pension_disbursement<br/>Legacy bank-wise disbursement tasks until CPPS takes over"]
   F05_bank["ext.pension_bank<br/>Credit pensions; send paid statements"]
   F05_pensioner_view["pensioner<br/>View PPO, pension slips, payments; change bank; declarations"]
+  F05_family_apply_claimant["claimant<br/>The widow / widower or child of a member who died in service"]
   F05_family_view["family_pensioner<br/>View pension; submit non-remarriage / non-employment declara"]
   F05_dlc["pensioner<br/>Submit Digital Life Certificate; check status"]
   F05_dlc_event["ext.jeevan_pramaan<br/>Send the DLC result"]
@@ -1638,6 +1645,7 @@ flowchart LR
   F05_dispatch --> F05_cpps
   F05_cpps --> F05_bank
   F05_disbursement_section --> F05_cpps
+  F05_family_apply_claimant --> F05_ids
   F05_dlc --> F05_dlc_event
   F05_dlc_event --> F05_dlc_monitor
   F05_dlc_doorstep --> F05_dlc_event

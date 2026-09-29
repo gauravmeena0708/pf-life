@@ -85,6 +85,15 @@ pension:
   minimum_pension_paise: 100000           # ₹1,000 a month
   applies_to_pensions_in_payment: true    # a change also revises pensions already in payment (never downwards)
   revise_in_payment_from: null            # optional earlier date for those revisions (arrears are paid); null = the rule set's date
+  # Family pension on a member's death in service (ILLUSTRATIVE; no minimum service or age): the spouse gets
+  # spouse_share_bp of the member's formula pension (salary x service years / divisor), at least spouse_minimum_paise;
+  # each child (up to max_children) gets child_share_of_spouse_bp of the spouse's pension, at least child_minimum_paise.
+  family:
+    spouse_share_bp: 5000
+    spouse_minimum_paise: 100000
+    child_share_of_spouse_bp: 2500
+    child_minimum_paise: 25000
+    max_children: 2
 death_claims:
   # Claims on a member's death, filed by a nominee or legal heir (ILLUSTRATIVE). Form 20 pays the PF balance to the
   # beneficiaries in their shares; Form 5IF pays the EDLI assurance benefit from the EDLI fund:

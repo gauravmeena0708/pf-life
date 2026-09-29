@@ -205,3 +205,30 @@ async def view_document(caseId: str, docId: str, actor: Actor = Depends(require_
                     target_type="case", target_id=caseId, detail=docId)
     return envelope({"doc_id": docId, "doc_type": doc["doc_type"], "title": doc["title"], "sha256": doc["sha256"],
                      "content": doc["content"], "viewed_by": actor.stakeholder, "viewed_at": datetime.now(UTC).isoformat()})
+
+
+# ── the employer's pending approvals (Phase 2, slice 6b) ─────────────────────────────────────────
+
+@router.get("/api/v1/employers/me/pending-approvals")
+async def pending_approvals(actor: Actor = Depends(require_stakeholder("employer.owner", "employer.operator", "employer.signatory")),
+                            session: AsyncSession = Depends(db)) -> dict:
+    """What waits for the establishment's authorised signatory (DSC / e-sign): Joint Declarations, Form 13 transfers
+    to attest, exits marked by an operator — every engine step the signatory takes, in one list."""
+    from app.engine.engine import _describe, definitions, next_op, roles_for
+    if not actor.establishment_id:
+        raise Problem(403, "/problems/no-establishment", "No establishment selected")
+    rows = (await session.execute(select(cases, subject_offices.c.establishment_id).join(
+        subject_offices, subject_offices.c.subject_ref == cases.c.subject_ref).where(
+        cases.c.process.is_not(None), subject_offices.c.establishment_id == actor.establishment_id)
+        .order_by(cases.c.created_at))).mappings().all()
+    items = []
+    for r in rows:
+        definition = next((d for d in definitions() if d["process"] == r["process"]), None)
+        op = next_op(definition, r["state"]) if definition else None
+        if not op or op.get("scope") != "establishment" or "employer.signatory" not in roles_for(op, dict(r)):
+            continue
+        items.append({"case_id": r["case_id"], "title": definition["title"], "subject_ref": r["subject_ref"], "state": r["state"],
+                      "action": op["name"], "operation": _describe(definition, op, dict(r)), "since": _aware(r["created_at"]).isoformat()
+                      if r["created_at"] else None})
+    return envelope({"establishment_id": actor.establishment_id, "items": items,
+                     "note": "Member KYC approvals are listed separately (Member › Approve KYC)."})

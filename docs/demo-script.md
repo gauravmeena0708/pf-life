@@ -284,6 +284,20 @@ simulation; point out that the dialog says exactly what is being authorised (act
 4. **OLRE**: `emp-owner` registers a new establishment (PAN `AAAFD1234K`); **`ro-da-compliance`** views its
    documents and records scrutiny (compliance e-file); **`ro-apfc`** decides coverage.
 
+## DSC / e-sign registration, pending approvals, family pension
+*Tests: `tests/e2e/test_signatures_family_pension.py`, `services/employer-service/tests/test_signatures.py`,
+`services/pension-service/tests/test_settlement.py`*
+
+1. **`emp-owner` → Establishment › Authorized eSign List**: register the signatory's DSC (one-time code), then
+   upload the signed request letter (PDF).
+2. **`ro-apfc` → OLRE › DSC / e-sign registrations**: approve it. After a signatory is revoked, the revoke letter
+   comes here too.
+3. **`emp-signatory` → Member › Approvals**: *Pending approvals* lists what waits for the signature (e.g. a Form 13
+   to attest).
+4. **`claimant-a` → Family pension (Form 10D)**: file for GANESH DEMO (UAN 100000000901); the estimate is 50% of
+   his formula pension. **`do-caseworker`** sees it under *Form 10D pension claims* and it runs desk by desk as in
+   "Pension settlement"; the PPO is issued in the widow's name.
+
 ## Policy changes that move money — interest, TDS and pensions
 *Tests: `tests/e2e/test_policy_money.py`, `services/contribution-service/tests/test_interest.py`,
 `services/claim-service/tests/test_tds.py`, `services/pension-service/tests/test_pensions.py`*

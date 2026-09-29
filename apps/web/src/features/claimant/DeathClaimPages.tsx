@@ -94,6 +94,50 @@ export function ClaimantPage() {
         <h3>Timeline</h3>
         <ol className="claim-timeline">{claim.timeline.map((t, i) => <li key={i} className={i === claim.timeline.length - 1 ? "current" : ""}><strong>{t.state.replaceAll("_", " ")}</strong> — {t.by}. {t.note}</li>)}</ol>
       </section> : null}
+      <FamilyPensionSection />
+      <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
+    </section>
+  );
+}
+
+interface FamilyClaim { claim_id: string; state: string; kind: string; pension_from: string; ppo_id: string | null; next_step: string | null;
+  family: { deceased_name: string; relation: string; died_on: string } | null; worksheet: { monthly_paise: number; working: string } | null;
+  estimate?: { monthly_paise: number; working: string }; history: { state: string; role: string; note: string }[] }
+
+/** Family pension: the widow / widower or a child of a member who died in service files Form 10D. */
+export function FamilyPensionSection() {
+  const stepUp = useStepUp();
+  const [error, setError] = useState<unknown>(null);
+  const [filed, setFiled] = useState<FamilyClaim | null>(null);
+  const [list, setList] = useState<FamilyClaim[] | null>(null);
+  const load = async () => {
+    try { setList((await api<Envelope<FamilyClaim[]>>("/api/v1/claimants/family-pension-applications")).data); } catch (cause) { setError(cause); }
+  };
+  const file = (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); const uan = text(new FormData(e.currentTarget), "uan");
+    setError(null);
+    void (async () => {
+      try {
+        const token = await stepUp.ask({ action: "file-family-pension", resourceId: uan, summary: `File Form 10D for a family pension on UAN ending ${uan.slice(-4)}.` });
+        if (!token) return;
+        setFiled((await command<Envelope<FamilyClaim>>("POST", "/api/v1/claimants/family-pension-applications",
+          { form_type: "FORM_10D", deceased_uan: uan }, { stepUpToken: token })).data);
+        await load();
+      } catch (cause) { setError(cause); }
+    })(); };
+  return (
+    <section className="card stack" aria-labelledby="family-pension-heading"><h2 id="family-pension-heading">Family pension (Form 10D)</h2>
+      <p className="muted small">For the spouse or a child of a member who died in service. The regional office then works it out desk by desk,
+        as for a member's pension, and issues the PPO in your name.</p>
+      <ProblemMessage error={error} />
+      <form className="search-input-row" onSubmit={file}><label>Deceased member's UAN<input name="uan" required pattern="[0-9]{12}"
+        inputMode="numeric" defaultValue="100000000901" /></label><button type="submit" className="primary">File Form 10D</button></form>
+      {filed?.estimate ? <p role="status" className="ok">Filed {filed.claim_id}: about {rupees(filed.estimate.monthly_paise)} a month from {filed.pension_from}
+        ({filed.estimate.working}; illustrative rules).</p> : null}
+      <div className="actions"><button type="button" onClick={() => void load()}>Show my applications</button></div>
+      {list ? list.length ? <ul className="plain-list">{list.map((c) => <li key={c.claim_id}><strong>{c.claim_id}</strong> ·{" "}
+        <span className="state-pill">{c.state.replaceAll("_", " ")}</span> — {c.family?.relation.toLowerCase()} of {c.family?.deceased_name}
+        {c.worksheet ? `, ${rupees(c.worksheet.monthly_paise)} a month` : ""}{c.ppo_id ? `, PPO ${c.ppo_id}` : ""}.
+        {c.next_step ? <span className="muted small"> Next: {c.next_step}.</span> : null}</li>)}</ul> : <p className="muted">No applications.</p> : null}
       <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
     </section>
   );

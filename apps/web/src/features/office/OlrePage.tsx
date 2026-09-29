@@ -9,6 +9,7 @@ import { useStepUp } from "../stepup/useStepUp";
 
 const registrationsPath = "/api/v1/office/establishment-registrations";
 const changesPath = "/api/v1/office/establishment-change-requests?state=PENDING";
+const signaturesPath = "/api/v1/office/signature-registrations";
 const text = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
 const show = (value: unknown): string => value == null || value === "" ? "—" : typeof value === "boolean" ? value ? "Yes" : "No" : String(value);
 
@@ -19,6 +20,9 @@ interface Documents { establishment: Record<string, unknown>; documents: { type:
   mock_verification: string; note: string }
 interface ChangeRequest { request_id: string; establishment_id: string; legal_name: string; kind: string;
   changes: Record<string, { from: unknown; to: unknown }>; reason: string; state: string }
+interface SignatureRegistration { reg_id: string; establishment_id: string; legal_name: string; username: string;
+  purpose: string; method: string | null; details: Record<string, unknown>;
+  letter: { filename: string; sha256: string } | null; state: string }
 
 function Facts({ data }: { data: Record<string, unknown> }) {
   return <dl className="kv">{Object.entries(data).map(([key, value]) => <div key={key} style={{ display: "contents" }}>
@@ -41,7 +45,9 @@ export function OlrePage() {
     queryFn: () => api<Envelope<Registration[]>>(registrationsPath) });
   const changes = useQuery({ queryKey: ["olre-change-requests"], enabled: apfc, retry: false,
     queryFn: () => api<Envelope<ChangeRequest[]>>(changesPath) });
-  const loadError = [session.error, registrations.error, changes.error].find(Boolean);
+  const signatures = useQuery({ queryKey: ["olre-signature-registrations"], enabled: apfc, retry: false,
+    queryFn: () => api<Envelope<SignatureRegistration[]>>(signaturesPath) });
+  const loadError = [session.error, registrations.error, changes.error, signatures.error].find(Boolean);
 
   async function run(work: () => Promise<string | null>) {
     setError(null); setNotice(null);
@@ -94,6 +100,22 @@ export function OlrePage() {
         { decision, note: text(f, "note") }, { stepUpToken: token });
       form.reset(); await qc.invalidateQueries({ queryKey: ["olre-change-requests"] });
       return `Change request ${request.request_id} ${decision === "APPROVE" ? "approved" : "rejected"}.`;
+    });
+  }
+  function decideSignature(e: FormEvent<HTMLFormElement>, registration: SignatureRegistration) {
+    e.preventDefault(); const form = e.currentTarget; const f = new FormData(form);
+    const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+    const decision = submitter?.value;
+    if (decision !== "APPROVE" && decision !== "REJECT") return;
+    void run(async () => {
+      const token = await stepUp.ask({ action: "decide-signature-registration", resourceId: registration.reg_id,
+        summary: `${decision === "APPROVE" ? "Approve" : "Reject"} ${registration.purpose.toLowerCase()} request ${registration.reg_id} for ${registration.username}.` });
+      if (!token) return null;
+      await command<Envelope<SignatureRegistration>>("POST",
+        `/api/v1/office/establishments/${encodeURIComponent(registration.establishment_id)}/signature-registrations/${encodeURIComponent(registration.reg_id)}/decisions`,
+        { decision, note: text(f, "note") }, { stepUpToken: token });
+      form.reset(); await qc.invalidateQueries({ queryKey: ["olre-signature-registrations"] });
+      return `Signature registration ${registration.reg_id} ${decision === "APPROVE" ? "approved" : "rejected"}.`;
     });
   }
 
@@ -157,6 +179,23 @@ export function OlrePage() {
             <button type="submit" value="REJECT">Reject</button></div>
         </form>
       </li>)}</ul> : changes.data ? <p className="muted">No pending change requests.</p> : null}
+    </section> : null}
+    {apfc ? <section className="card stack" aria-labelledby="sig-heading"><h2 id="sig-heading">DSC / e-sign registrations</h2>
+      {signatures.data?.data.length ? <div className="table-scroll"><table><thead><tr>
+        <th scope="col">Establishment</th><th scope="col">Signatory</th><th scope="col">Purpose</th><th scope="col">Method</th>
+        <th scope="col">Details</th><th scope="col">Signed letter</th><th scope="col">State</th><th scope="col">Decision</th>
+      </tr></thead><tbody>{signatures.data.data.map((registration) => <tr key={registration.reg_id}>
+        <th scope="row">{registration.legal_name}</th><td>{registration.username}</td><td>{registration.purpose}</td>
+        <td>{registration.method ?? "—"}</td><td>{Object.entries(registration.details).map(([key, value]) =>
+          `${key.replaceAll("_", " ")}: ${show(value)}`).join("; ") || "—"}</td><td>{registration.letter?.filename ?? "—"}</td>
+        <td>{registration.state.replaceAll("_", " ")}</td><td>
+          <form className="stack" aria-label={`Decide signature registration ${registration.reg_id}`} onSubmit={(e) => decideSignature(e, registration)}>
+            <label>Decision note<input name="note" required minLength={5} maxLength={500} /></label>
+            <div className="actions"><button type="submit" value="APPROVE" className="primary">Approve</button>
+              <button type="submit" value="REJECT">Reject</button></div>
+          </form>
+        </td>
+      </tr>)}</tbody></table></div> : signatures.data ? <p className="muted">No pending signature registrations.</p> : null}
     </section> : null}
     <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
   </section>;

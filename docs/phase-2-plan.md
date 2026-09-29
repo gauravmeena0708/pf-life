@@ -15,7 +15,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.5c** | Ledger locks, document attestation views, establishment freeze / de-freeze, office Annexure K files and reconciliation | **Done** (29 Sep 2026) |
 | **P2.5d** | Claim scrutiny as the CITES manuals set it: the Claim Approval Docket at every level, recommend to approve / reject with the account status, rejection only at the final level (an intermediate "Recommend to Reject" returns to the initiator), Start-Stop Claim, one-time code on every officer action | **Done** (30 Sep 2026) |
 | **P2.6a** | Establishment record and changes: KYC through mock registries, bank accounts, exemption, branches (Form 2A), Form 5A, contractors of a principal employer; profile and configuration changes as requests the office decides; OLRE scrutiny (DA Compliance, e-file) and the APFC's coverage decision | **Done** (30 Sep 2026) |
-| P2.6b | Signatory request / revoke letters, DSC and e-sign registration with the office's approval, pending approvals; family pension (Form 10D by a widow / child) | Next |
+| **P2.6b** | Signatory request / revoke letters, DSC and e-sign registration with the office's approval (Authorized eSign List), the signatory's pending approvals; family pension (Form 10D by a widow / widower or child) | **Done** (30 Sep 2026) |
 | P2.7 | Returns, receipts and ledger: arrear / supplementary ECR, demands, direct challans, 14B/7Q knock-offs, VDR rejection, reversals, recredits | |
 | P2.8 | The rest: compliance and VISHWAS, international workers, grievance extras, public lookups, audit, NDC, HRM, DO dashboards | |
 
@@ -159,3 +159,19 @@ Source: the CITES user manuals (`../manuals`, reviewed in `docs/reviews/cites-ma
 - employer-service now has office postings (seeded) for jurisdiction. New persona `ro-da-compliance`.
 - The web pages *Establishment* (employer) and *OLRE and establishment changes* (office) were drafted by codex from
   a written spec and reviewed.
+
+## P2.6b — how it is built
+
+- employer-service (`app/api/signature_routes.py`): the owner registers a signatory's DSC (serial, issuer, validity;
+  an expired certificate is refused) or Aadhaar e-sign (mock), with a one-time code; uploads the signed request
+  letter (PDF, SHA-256 kept); the APFC approves or rejects it. After a signatory is revoked, the signed revoke letter
+  goes to the office; approving it ends the signatory's registration. The *Authorized eSign List* shows all of it.
+  Registration is not yet required before a signatory approves (returns, KYC, attestations) — noted for later.
+- workflow-service: `GET /employers/me/pending-approvals` lists the engine steps waiting for the establishment's
+  signatory (Form 13 attestation, Joint Declarations, operator-marked exits) with the operation to perform.
+- pension-service (`app/api/family_routes.py`): the spouse or a child on record (the member's nomination) files
+  Form 10D on the member's death; it runs through the same desks as a member's Form 10D, and the worksheet uses
+  the family-pension formula in the rules (`pension.family`: 50% of the member's formula pension for the spouse,
+  a quarter of that for a child, with minimums; no minimum service). The PPO is issued in the claimant's name.
+- Web: the Authorized eSign List on *Establishment*, pending approvals on *Member actions*, the office's DSC /
+  e-sign decisions on *OLRE* (drafted by codex, reviewed), and the family-pension section on the claimant page.

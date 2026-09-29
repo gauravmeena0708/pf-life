@@ -312,7 +312,8 @@
           "share_bp": 6000,
           "subject": "00000000-0000-4000-8000-000000000035",
           "bank_ifsc": "DEMO0000011",
-          "bank_account_last4": "1101"
+          "bank_account_last4": "1101",
+          "date_of_birth": "1978-02-02"
         },
         {
           "name": "ARJUN DEMO",
@@ -320,7 +321,8 @@
           "share_bp": 4000,
           "subject": null,
           "bank_ifsc": "DEMO0000011",
-          "bank_account_last4": "1102"
+          "bank_account_last4": "1102",
+          "date_of_birth": "2010-06-06"
         }
       ]
     }

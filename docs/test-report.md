@@ -98,6 +98,10 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 6b: DSC / e-sign registration, pending approvals, family pension (30 September 2026)
+
+Unit tests 300 passed; end to end 44 passed (including `test_signatures_family_pension.py`); must-deny 18 passed.
+
 ## Update — Phase 2, slice 6a: the establishment record, changes and OLRE (30 September 2026)
 
 Unit tests 298 passed; end to end 42 passed (including `test_establishment.py`); must-deny 18 passed.

@@ -19,8 +19,8 @@
     "method": "POST",
     "path_template": "/office/establishments/{estId}/signature-registrations/{regId}/decisions",
     "regex": "^/office/establishments/[^/]+/signature\\-registrations/[^/]+/decisions$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
@@ -260,7 +260,7 @@
     "path_template": "/employers/me/signatories/{signatoryId}/esign-registrations",
     "regex": "^/employers/me/signatories/[^/]+/esign\\-registrations$",
     "status": "M",
-    "phase": 2,
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
@@ -356,7 +356,7 @@
     "path_template": "/employers/me/signatories/{signatoryId}/dsc-registrations",
     "regex": "^/employers/me/signatories/[^/]+/dsc\\-registrations$",
     "status": "M",
-    "phase": 2,
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
@@ -500,8 +500,8 @@
     "method": "POST",
     "path_template": "/employers/me/signatories/{signatoryId}/request-letters",
     "regex": "^/employers/me/signatories/[^/]+/request\\-letters$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
@@ -549,8 +549,8 @@
     "method": "POST",
     "path_template": "/employers/me/signatories/{signatoryId}/revoke-letters",
     "regex": "^/employers/me/signatories/[^/]+/revoke\\-letters$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
@@ -2160,16 +2160,33 @@
     "revocation": false
   },
   {
+    "method": "GET",
+    "path_template": "/claimants/family-pension-applications",
+    "regex": "^/claimants/family\\-pension\\-applications$",
+    "status": "W",
+    "phase": 1,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "claimant"
+    ],
+    "summary": "Status of the family pension application, desk by desk",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/claimants/family-pension-applications",
     "regex": "^/claimants/family\\-pension\\-applications$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "pension",
     "upstream": "http://pension-service:8000",
     "money": true,
-    "step_up": false,
+    "step_up": true,
     "callers": [
+      "claimant",
       "family_pensioner"
     ],
     "summary": "Widow / child / orphan pension",
@@ -2430,6 +2447,23 @@
       "fo.da_accounts"
     ],
     "summary": "Recredit a rejected transfer-in back to the member ledger (VDR recredit; tracker: \"Recredit of transfer-in rejected cases\")",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/signature-registrations",
+    "regex": "^/employers/me/signature\\-registrations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.owner",
+      "employer.signatory"
+    ],
+    "summary": "Authorized eSign List: each signatory's DSC / e-sign registration and revoke requests with their status",
     "revocation": false
   },
   {
@@ -3655,14 +3689,15 @@
     "method": "GET",
     "path_template": "/employers/me/pending-approvals",
     "regex": "^/employers/me/pending\\-approvals$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "workflow",
     "upstream": "http://workflow-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
-      "employer.operator"
+      "employer.operator",
+      "employer.signatory"
     ],
     "summary": "Items awaiting DSC/e-sign (KYC, transfers, claims, JD)",
     "revocation": false
@@ -3777,6 +3812,22 @@
       "fo.da_compliance"
     ],
     "summary": "Case detail with full proceeding history",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/signature-registrations",
+    "regex": "^/office/signature\\-registrations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "DSC / e-sign registrations and revoke letters of the office awaiting approval",
     "revocation": false
   },
   {

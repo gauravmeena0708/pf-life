@@ -214,6 +214,29 @@ def pension_on(salary_paise: int, service_months: int, age_years: int, rules: di
             "minimum_applied": monthly > by_formula, "working": working}
 
 
+FAMILY_DEFAULTS = {"spouse_share_bp": 5000, "spouse_minimum_paise": 100000, "child_share_of_spouse_bp": 2500,
+                   "child_minimum_paise": 25000, "max_children": 2}
+
+
+def family_pension_on(salary_paise: int, service_months: int, relation: str, rules: dict[str, Any]) -> dict[str, Any]:
+    """Monthly family pension on a member's death in service (illustrative formula from the rules)."""
+    p = section(rules, "pension")
+    f = {**FAMILY_DEFAULTS, **(p.get("family") or {})}
+    years = max(1, service_months // 12 + (1 if service_months % 12 >= 6 else 0))
+    salary = min(salary_paise, p["pensionable_salary_cap_paise"])
+    member_formula = salary * years // p["divisor"]
+    spouse = max(round_rupee_half_up(member_formula * f["spouse_share_bp"]), f["spouse_minimum_paise"])
+    working = f"₹{salary // 100:,} x {years} years / {p['divisor']} x {f['spouse_share_bp'] / 100:g}%"
+    if relation == "SPOUSE":
+        monthly = spouse
+    else:
+        monthly = max(round_rupee_half_up(spouse * f["child_share_of_spouse_bp"]), f["child_minimum_paise"])
+        working = f"{f['child_share_of_spouse_bp'] / 100:g}% of the spouse's pension (₹{spouse // 100:,}; {working})"
+    if relation == "SPOUSE" and spouse == f["spouse_minimum_paise"]:
+        working += f"; raised to the minimum of ₹{spouse // 100:,}"
+    return {"eligible": True, "monthly_paise": monthly, "service_years": years, "relation": relation, "working": working}
+
+
 def edli_benefit(average_wages_paise: int, average_balance_paise: int, service_months: int, rules: dict[str, Any]) -> dict[str, Any]:
     """EDLI assurance benefit on a member's death (illustrative formula from the rules)."""
     e = section(rules, "death_claims")["edli"]
@@ -316,6 +339,11 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
             problems.append("pension.earliest_age_years cannot be after the normal pension age")
         if not isinstance(p.get("applies_to_pensions_in_payment"), bool):
             problems.append("pension.applies_to_pensions_in_payment must be true or false")
+        fam = p.get("family")
+        if fam is not None:
+            for key in FAMILY_DEFAULTS:
+                if key in fam and (not isinstance(fam[key], int) or fam[key] < 0 or (key.endswith("_bp") and fam[key] > 10000)):
+                    problems.append(f"pension.family.{key} must be a whole number" + (" between 0 and 10000" if key.endswith("_bp") else " of at least 0"))
         back = p.get("revise_in_payment_from")
         if back is not None:
             try:
