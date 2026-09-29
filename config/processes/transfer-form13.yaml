@@ -9,6 +9,7 @@ subject: uan
 case_kind: TRANSFER
 sla_days: 20
 visible_to_member: true
+ledger_lock: CLAIM_ADJUDICATION      # the member's ledger is locked while the transfer is open
 terminal_states: [APPROVED, REJECTED, REJECTED_BY_EMPLOYER]
 operations:
   - name: submit
@@ -42,6 +43,11 @@ operations:
     step_up: {action: attest-transfer, bind: case}
     from: SUBMITTED
     outcomes: {field: decision, map: {ATTEST: EMPLOYER_ATTESTED, REJECT: REJECTED_BY_EMPLOYER}}
+    produces_document:               # the employer's digitally signed Form 13 (a mock DSC)
+      type: FORM13_EMPLOYER_SIGNED
+      title: Employer-signed Form 13
+      declaration: Certified that the member's service and wages are as recorded; the transfer is attested.
+      on_states: [EMPLOYER_ATTESTED]
     form:
       decision: {enum: [ATTEST, REJECT]}
       note: {min_length: 5, max_length: 1000}
@@ -55,6 +61,7 @@ operations:
     roles: [fo.da_accounts]
     from: EMPLOYER_ATTESTED
     to: VERIFIED
+    requires_viewed: FORM13_EMPLOYER_SIGNED    # "View the employer signed pdf first"
     form:
       service_checked: {enum: ["YES"]}
       note: {min_length: 10}

@@ -354,8 +354,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/member-change-requests/{requestId}/decisions` 🔐 | JD approver decides (competent authority by change type) (tier-2 process `joint_declaration`) | W | 1 | member |
 | `GET /office/member-change-requests/pendency` | RPFC-I monitors JD pendency (tier-2 process `joint_declaration`) | W | 1 | member |
 | `POST /office/freeze-cases/{caseId}/verifications` | Freeze-case verification step (DA → SS/AO → APFC/RPFC-II → OIC; tier-2 process `member_freeze`) | W | 1 | workflow |
-| `POST /office/establishments/{estId}/freezes` 🔐 | Freeze an establishment | P | 2 | employer |
-| `POST /office/establishments/{estId}/defreezes` 🔐 | De-freeze an establishment, maker-checker | P | 2 | employer |
+| `POST /office/establishments/{estId}/freezes` 🔐 | Freeze an establishment | W | 1 | employer |
+| `POST /office/establishments/{estId}/defreezes` 🔐 | De-freeze an establishment, maker-checker | W | 1 | employer |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | Inoperative-account crowdsourcing verification through co-workers' logins | P | 3 | member |
 | `POST /office/outreach-camps/{campId}/assisted-requests` | Requests taken at Nidhi Aapke Nikat camps | P | 3 | workflow |
 
@@ -370,9 +370,9 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` 🔐 | Amend a beneficiary's share (nominee deceased, court order, share already settled in legacy, guardian appointment) | W | 1 | claim |
 | `GET /office/death-claims/{claimId}/shares-summary` | Allocated vs legacy-settled vs disbursed vs pending share of a death claim | W | 1 | claim |
 | `POST /office/claims/{claimId}/re-disbursement-approvals` 💰🔐 | APFC authorises a new payment after a return, without reopening adjudication | W | 1 | claim |
-| `GET /office/members/{uan}/locks` | Active locks on a member ledger (annual accounts, claim adjudication, ECR posting) with owner and expiry | P | 2 | workflow |
-| `POST /office/system/locks/{lockId}/release` 🔐 | Supervised release of an orphaned lock (reason required) → `LockReleased.v1` (tracker: "Unable to lock process", phantom "concurrent claims already under processing") | P | 2 | workflow |
-| `POST /office/cases/{caseId}/documents/{docId}/attestation-views` | Record that the caseworker opened the employer-signed PDF / DSC document; enables the approve action (tracker: "View the employer signed pdf first") | P | 2 | workflow |
+| `GET /office/members/{uan}/locks` | Active locks on a member ledger (annual accounts, claim adjudication, ECR posting) with owner and expiry | W | 1 | workflow |
+| `POST /office/system/locks/{lockId}/release` 🔐 | Supervised release of an orphaned lock (reason required) → `LockReleased.v1` (tracker: "Unable to lock process", phantom "concurrent claims already under processing") | W | 1 | workflow |
+| `POST /office/cases/{caseId}/documents/{docId}/attestation-views` | Record that the caseworker opened the employer-signed PDF / DSC document; enables the approve action (tracker: "View the employer signed pdf first") | W | 1 | workflow |
 
 
 **Designed from the Samadhan Setu analysis** (not in the spec files; see `docs/samadhan-setu-mapping.md`)
@@ -381,9 +381,9 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 |---|---|---|---|---|
 | `GET /office/claims/{claimId}/audit-trail` | Full claim audit trail for officers and auditors: transitions, actor IDs, approval level, rule version, lock events, CAD versions | W | 1 | claim |
 | `GET /office/claims/{claimId}/additional-forms` | **Additional Form Details** — forms filed with a claim (e.g. a Joint Declaration): filed / initiated dates, processing status, rejection reason, pending office | W | 1 | claim |
-| `GET /office/annexure-k-files?direction=` | **ANNEXURE K FILE** — Annexure K inward / outward between field offices for Form 13 transfers | P | 2 | claim |
-| `POST /office/annexure-k-files/{annexureId}/reconciliations` 🔐 | **ANNEXURE K RECO** — match an inter-office Annexure K with the transfer and member records | P | 2 | claim |
-| `POST /office/annexure-k-files/{annexureId}/vdr-reconciliations` 🔐 | **ANNEXURE K VDR RECO** — match the Annexure K amount with the VDR receipt | P | 2 | contribution |
+| `GET /office/annexure-k-files?direction=` | **ANNEXURE K FILE** — Annexure K inward / outward between field offices for Form 13 transfers | W | 1 | claim |
+| `POST /office/annexure-k-files/{annexureId}/reconciliations` 🔐 | **ANNEXURE K RECO** — match an inter-office Annexure K with the transfer and member records | W | 1 | claim |
+| `POST /office/annexure-k-files/{annexureId}/vdr-reconciliations` 🔐 | **ANNEXURE K VDR RECO** — match the Annexure K amount with the VDR receipt | W | 1 | contribution |
 
 ## 9. Pension (EPS) and pensioners
 

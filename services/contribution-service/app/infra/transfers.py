@@ -4,7 +4,7 @@ The transfer runs on the process engine (config/processes/transfer-form13.yaml);
 when the case is APPROVED the whole balance of the previous member ID (employee and employer shares) moves to
 the current one as one balanced journal, keyed by the case, so a redelivered event never posts twice. It then
 publishes TransferPosted.v1 and keeps the posting for the member's Annexure K."""
-from datetime import date
+from datetime import UTC, date, datetime
 from typing import Any
 
 from sqlalchemy import text
@@ -24,6 +24,14 @@ async def on_member_exit(session: AsyncSession, event: dict[str, Any]) -> None:
 
 async def on_process_transitioned(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
+    if p["process"] == "establishment_freeze":             # a frozen establishment files no ECR (P2.5c)
+        if p["to_state"] == "FROZEN":
+            if not (await session.execute(text("SELECT 1 FROM establishment_freezes WHERE establishment_id=:e"), {"e": p["subject_ref"]})).first():
+                await session.execute(text("INSERT INTO establishment_freezes (establishment_id, case_id, order_ref, frozen_at) VALUES (:e, :c, :o, :t)"),
+                                      {"e": p["subject_ref"], "c": p["instance_id"], "o": (p.get("data") or {}).get("order_ref"), "t": datetime.now(UTC)})
+        elif p["to_state"] == "ACTIVE":
+            await session.execute(text("DELETE FROM establishment_freezes WHERE establishment_id=:e"), {"e": p["subject_ref"]})
+        return
     if p["process"] != "transfer_form13" or p["to_state"] != "APPROVED":
         return
     transfer_id, data = p["instance_id"], p.get("data") or {}

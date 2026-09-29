@@ -176,3 +176,20 @@ payment_scrolls = Table(
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
     Column("reconciliation", JSON),
 )
+
+# ANNEXURE K FILE: the inter-office transfer statement of each posted Form 13, outward from the office of the
+# previous member ID and inward to the office of the new one, reconciled with the transfer and member records.
+annexure_k_files = Table(
+    "annexure_k_files", metadata,
+    Column("annexure_id", String(40), primary_key=True),          # the transfer's ID
+    Column("uan", String(12), nullable=False),
+    Column("from_account_link_id", String(40), nullable=False),
+    Column("to_account_link_id", String(40), nullable=False),
+    Column("from_office_id", String(40), nullable=False, index=True),
+    Column("to_office_id", String(40), nullable=False, index=True),
+    Column("employee_paise", BigInteger, nullable=False),
+    Column("employer_paise", BigInteger, nullable=False),
+    Column("reco_status", String(20), nullable=False),            # PENDING | MATCHED | MISMATCH
+    Column("reco", JSON),
+    Column("created_at", DateTime(timezone=True), server_default=func.now()),
+)

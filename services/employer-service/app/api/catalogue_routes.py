@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /employers/me', 'POST /employers/registration-requests', 'GET /public/establishments', 'GET /employers/me/configuration', 'GET /employers/me/operators', 'GET /employers/me/signatories', 'POST /employers/me/operators/invitations', 'POST /employers/me/signatories/authorisations', 'POST /employers/me/operators/{operatorId}/revocations', 'POST /employers/me/signatories/{signatoryId}/revocations', 'GET /employers/registration-requests/{reqId}', 'GET /public/establishments/{estId}', 'POST /employers/registration-requests/{reqId}/verification-evidence']
+OPERATIONS = ['GET /employers/me', 'POST /employers/registration-requests', 'GET /public/establishments', 'GET /employers/me/configuration', 'GET /employers/me/operators', 'GET /employers/me/signatories', 'POST /employers/me/operators/invitations', 'POST /employers/me/signatories/authorisations', 'POST /employers/me/operators/{operatorId}/revocations', 'POST /employers/me/signatories/{signatoryId}/revocations', 'GET /employers/registration-requests/{reqId}', 'GET /public/establishments/{estId}', 'POST /employers/registration-requests/{reqId}/verification-evidence', 'POST /office/establishments/{estId}/defreezes', 'POST /office/establishments/{estId}/freezes']
 
 @router.api_route("/api/v1/employers/me", methods=["GET"], include_in_schema=False)
 async def get_employers_me(actor: Actor = Depends(require_actor)) -> None:
@@ -75,3 +75,13 @@ async def get_public_establishments_estId(actor: Actor = Depends(require_actor))
 @router.api_route("/api/v1/employers/registration-requests/{reqId}/verification-evidence", methods=["POST"], include_in_schema=False)
 async def post_employers_registration_requests_reqId_verification_evidence(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Submit demo verification evidence (PAN/CIN/GSTIN/LIN) to mock registry adapter (Journey A1)")
+
+
+@router.api_route("/api/v1/office/establishments/{estId}/defreezes", methods=["POST"], include_in_schema=False)
+async def post_office_establishments_estId_defreezes(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "De-freeze an establishment, maker-checker")
+
+
+@router.api_route("/api/v1/office/establishments/{estId}/freezes", methods=["POST"], include_in_schema=False)
+async def post_office_establishments_estId_freezes(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Freeze an establishment")

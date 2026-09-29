@@ -244,20 +244,24 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
         '201':
           description: View recorded; the case's approve action is now enabled for this caseworker
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Envelope'
-      x-status: planned
-      x-phase: 2
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: workflow
       x-callers:
       - fo.da_accounts
@@ -417,12 +421,6 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
         '200':
           description: Active locks on the member ledger
           content:
@@ -436,8 +434,18 @@ paths:
                       type: array
                       items:
                         $ref: '#/components/schemas/LedgerLock'
-      x-status: planned
-      x-phase: 2
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: workflow
       x-callers:
       - fo.oic
@@ -495,26 +503,30 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-        '200':
-          description: Lock released; LockReleased.v1 emitted and audited
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Envelope'
+        '404':
+          $ref: '#/components/responses/Problem'
         '409':
           description: Lock is not stale (its owner is still alive); release refused
           content:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-      x-status: planned
-      x-phase: 2
+        '200':
+          description: Lock released; LockReleased.v1 emitted and audited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+      x-status: working
+      x-phase: 1
       x-owner-service: workflow
       x-callers:
       - fo.oic

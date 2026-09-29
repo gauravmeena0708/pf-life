@@ -7,6 +7,7 @@ import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 import { SharesSection } from "../claimant/DeathClaimPages";
+import { AnnexureKSection, LocksSection } from "./LedgerTools";
 
 type Json = Record<string, unknown>;
 const text = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
@@ -89,7 +90,7 @@ export function ClaimToolsPage() {
   return (
     <section className="stack" aria-labelledby="claim-tools-heading">
       <PageHeader id="claim-tools-heading" eyebrow="Regional office" title="Claim office tools" current="Claim tools"
-        description="Claim Authorization Document, payment scrolls, member 360 view, inoperative accounts, claim audit trails and death-claim shares." />
+        description="Claim Authorization Document, payment scrolls, member 360 view, inoperative accounts, claim audit trails, death-claim shares, ledger locks and Annexure K." />
       <ProblemMessage error={error} />
       {notice ? <p role="status" className="ok">{notice}</p> : null}
 
@@ -131,6 +132,8 @@ export function ClaimToolsPage() {
         </form> : null}
       </> : null}
       {role === "fo.apfc" ? <SharesSection /> : null}
+      {role === "fo.oic" ? <LocksSection /> : null}
+      {role === "fo.da_accounts" ? <AnnexureKSection /> : null}
       <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
     </section>
   );

@@ -259,6 +259,7 @@ activities:
   - {id: F07.verify_ss, actor: fo.ss, does: "Review verification (SS route)", api: ["POST /office/freeze-cases/{caseId}/verifications"], next: [F07.verify_apfc], src: FIA, ev: D}
   - {id: F07.verify_ao, actor: fo.ao, does: "Review verification (AO route, accounts cases)", api: ["POST /office/freeze-cases/{caseId}/verifications"], next: [F07.verify_apfc], src: FIA, ev: D}
   - {id: F07.verify_apfc, actor: fo.apfc, does: "Validate verification", api: ["POST /office/freeze-cases/{caseId}/verifications"], next: [F07.defreeze], src: FIA, ev: D}
+  - {id: F07.defreeze_est_maker, actor: fo.apfc, does: "Recommend de-freezing an establishment (maker); the OIC orders it (checker)", api: ["POST /office/establishments/{estId}/defreezes"], next: [F07.defreeze], src: FIA, ev: D}
   - {id: F07.defreeze, actor: fo.oic, does: "Recommend / order de-freezing; post-defreeze claims use the higher chain", api: ["POST /office/freeze-cases/{caseId}/verifications", "POST /office/members/{uan}/defreezes", "POST /office/establishments/{estId}/defreezes"], next: [F07.block], chain: claim_settlement_after_defreeze, src: FIA, ev: D}
   - {id: F07.committee, actor: zo.fraud_committee, does: "Review suspected fraud cases reported by OICs", api: ["GET /zo/fraud-risk/cases"], next: [F07.vig_referral], src: FIA, ev: D, fut: true}
   - {id: F07.vig_referral, actor: ho.caiu, does: "Refer a pattern to vigilance", api: ["POST /vigilance/referrals"], next: [F07.vig_zone], src: "EC, MAP", ev: U}

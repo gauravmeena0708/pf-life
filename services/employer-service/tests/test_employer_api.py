@@ -170,3 +170,24 @@ def test_public_search_minimal_fields(api):
     assert set(item) == {"establishment_id", "legal_name", "registration_number", "office_id", "pincode", "city",
                          "district", "establishment_type", "industry_group", "exemption_status", "status"}
     assert not {"pan", "gstin", "verified_at"} & set(item)  # public master fields only, never identifiers
+
+
+def test_establishment_freeze_is_recorded_and_shown_to_the_employer(api):
+    import asyncio
+    import uuid
+
+    import app.infra.db as db
+    from app.infra.messaging import dispatch
+    from epfo_persistence.consumer import apply_once
+    payload = {"process": "establishment_freeze", "instance_id": "CASE-F1", "subject_ref": EST, "from_state": None, "to_state": "FROZEN",
+               "operation": "freeze", "title": "Freeze of an establishment", "terminal": False, "visible_to_member": False,
+               "actor_subject": "rpfc", "actor_role": "zo.rpfc1", "data": {"category": "B", "order_ref": "ZO/FIA/7", "reason": "Ghost members"}}
+
+    def deliver(p):
+        event = {"event_id": str(uuid.uuid4()), "event_type": "ProcessTransitioned.v1", "correlation_id": str(uuid.uuid4()), "payload": p}
+        asyncio.run(apply_once(db.sessions(), event, dispatch))
+    deliver(payload)
+    me = api.get("/api/v1/employers/me", headers=owner()).json()["data"]
+    assert me["frozen"] is True and me["freeze"]["order_ref"] == "ZO/FIA/7"
+    deliver({**payload, "from_state": "FROZEN", "to_state": "ACTIVE", "operation": "defreeze", "terminal": True})
+    assert api.get("/api/v1/employers/me", headers=owner()).json()["data"]["frozen"] is False

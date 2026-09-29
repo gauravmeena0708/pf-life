@@ -21,6 +21,8 @@ establishments = Table(
     Column("status", String(30), nullable=False),        # REGISTERED | VERIFIED | REJECTED
     Column("verified_at", DateTime(timezone=True)),
     Column("version", Integer, nullable=False, server_default="1"),
+    Column("frozen_at", DateTime(timezone=True)),              # set while a freeze order stands (establishment_freeze)
+    Column("freeze", JSON),                                     # category, order reference, reason, case
 )
 
 registration_requests = Table(

@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['POST /public/trrn-status-lookups', 'GET /employers/me/challans', 'GET /employers/me/ecr-filings', 'POST /employers/me/ecr-filings', 'GET /members/me/passbook', 'GET /office/accounts/inoperative', 'GET /office/accounts/interest-postings', 'POST /office/accounts/interest-postings', 'POST /public/demo-calculations/epf', 'POST /partners/sandbox/payroll/ecr-filings', 'GET /employers/me/challans/{trrn}', 'GET /employers/me/ecr-filings/{filingId}', 'GET /employers/me/challans/{trrn}/receipt', 'POST /employers/me/ecr-filings/{filingId}/approvals', 'POST /employers/me/ecr-filings/{filingId}/submissions', 'POST /employers/me/ecr-filings/{filingId}/validations', 'GET /employers/me/members/{uan}/contribution-ledger', 'GET /members/me/accounts/{accountLinkId}/passbook', 'GET /members/me/transfers/{transferId}/annexure-k']
+OPERATIONS = ['POST /public/trrn-status-lookups', 'GET /employers/me/challans', 'GET /employers/me/ecr-filings', 'POST /employers/me/ecr-filings', 'GET /members/me/passbook', 'GET /office/accounts/inoperative', 'GET /office/accounts/interest-postings', 'POST /office/accounts/interest-postings', 'POST /public/demo-calculations/epf', 'POST /partners/sandbox/payroll/ecr-filings', 'GET /employers/me/challans/{trrn}', 'GET /employers/me/ecr-filings/{filingId}', 'GET /employers/me/challans/{trrn}/receipt', 'POST /employers/me/ecr-filings/{filingId}/approvals', 'POST /employers/me/ecr-filings/{filingId}/submissions', 'POST /employers/me/ecr-filings/{filingId}/validations', 'GET /employers/me/members/{uan}/contribution-ledger', 'GET /members/me/accounts/{accountLinkId}/passbook', 'GET /members/me/transfers/{transferId}/annexure-k', 'POST /office/annexure-k-files/{annexureId}/vdr-reconciliations']
 
 @router.api_route("/api/v1/public/trrn-status-lookups", methods=["POST"], include_in_schema=False)
 async def post_public_trrn_status_lookups(actor: Actor = Depends(require_actor)) -> None:
@@ -105,3 +105,8 @@ async def get_members_me_accounts_accountLinkId_passbook(actor: Actor = Depends(
 @router.api_route("/api/v1/members/me/transfers/{transferId}/annexure-k", methods=["GET"], include_in_schema=False)
 async def get_members_me_transfers_transferId_annexure_k(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Annexure K transfer statement")
+
+
+@router.api_route("/api/v1/office/annexure-k-files/{annexureId}/vdr-reconciliations", methods=["POST"], include_in_schema=False)
+async def post_office_annexure_k_files_annexureId_vdr_reconciliations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "ANNEXURE K VDR RECO — match the Annexure K amount with the VDR receipt")

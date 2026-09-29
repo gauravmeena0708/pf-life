@@ -258,3 +258,4 @@ code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9em; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 .state-pill { white-space: nowrap; }
+.plain-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }

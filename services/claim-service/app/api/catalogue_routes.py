@@ -10,11 +10,16 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['POST /claimants/death-claims', 'POST /office/payment-scrolls', 'POST /office/physical-claims', 'GET /office/transfers', 'GET /employers/me/transfer-requests', 'GET /members/me/claims', 'POST /members/me/claims', 'POST /members/me/transfers', 'GET /office/payment-scrolls/ready', 'GET /office/system/cad-static-data', 'GET /members/me/claims/eligibility-preview', 'GET /members/me/claims/eligible-types', 'POST /members/me/tax/form-15g-15h', 'GET /members/me/claims/{claimId}', 'GET /members/me/transfers/{transferId}', 'POST /employers/me/transfer-requests/{transferId}/decisions', 'GET /members/me/claims/{claimId}/audit-trail', 'POST /members/me/claims/{claimId}/cancellations', 'POST /members/me/claims/{claimId}/confirmations', 'POST /members/me/claims/{claimId}/documents', 'POST /members/me/claims/{claimId}/re-disbursement-requests', 'GET /claimants/death-claims/{claimId}', 'POST /claimants/death-claims/{claimId}/beneficiaries', 'GET /office/claims/{claimId}/additional-forms', 'GET /office/claims/{claimId}/audit-trail', 'GET /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/payment-instructions', 'POST /office/claims/{claimId}/re-disbursement-approvals', 'POST /office/claims/{claimId}/reissues', 'GET /office/death-claims/{claimId}/shares-summary', 'POST /office/payment-scrolls/{scrollId}/return-reconciliations', 'POST /office/transfers/{transferId}/decisions', 'POST /office/transfers/{transferId}/verifications', 'PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares']
+OPERATIONS = ['POST /claimants/death-claims', 'GET /office/annexure-k-files', 'POST /office/payment-scrolls', 'POST /office/physical-claims', 'GET /office/transfers', 'GET /employers/me/transfer-requests', 'GET /members/me/claims', 'POST /members/me/claims', 'POST /members/me/transfers', 'GET /office/payment-scrolls/ready', 'GET /office/system/cad-static-data', 'GET /members/me/claims/eligibility-preview', 'GET /members/me/claims/eligible-types', 'POST /members/me/tax/form-15g-15h', 'GET /members/me/claims/{claimId}', 'GET /members/me/transfers/{transferId}', 'POST /employers/me/transfer-requests/{transferId}/decisions', 'GET /members/me/claims/{claimId}/audit-trail', 'POST /members/me/claims/{claimId}/cancellations', 'POST /members/me/claims/{claimId}/confirmations', 'POST /members/me/claims/{claimId}/documents', 'POST /members/me/claims/{claimId}/re-disbursement-requests', 'GET /claimants/death-claims/{claimId}', 'POST /claimants/death-claims/{claimId}/beneficiaries', 'POST /office/annexure-k-files/{annexureId}/reconciliations', 'GET /office/claims/{claimId}/additional-forms', 'GET /office/claims/{claimId}/audit-trail', 'GET /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/payment-instructions', 'POST /office/claims/{claimId}/re-disbursement-approvals', 'POST /office/claims/{claimId}/reissues', 'GET /office/death-claims/{claimId}/shares-summary', 'POST /office/payment-scrolls/{scrollId}/return-reconciliations', 'POST /office/transfers/{transferId}/decisions', 'POST /office/transfers/{transferId}/verifications', 'PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares']
 
 @router.api_route("/api/v1/claimants/death-claims", methods=["POST"], include_in_schema=False)
 async def post_claimants_death_claims(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "PF death claim by nominee / legal heir")
+
+
+@router.api_route("/api/v1/office/annexure-k-files", methods=["GET"], include_in_schema=False)
+async def get_office_annexure_k_files(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "ANNEXURE K FILE — Annexure K inward / outward between field offices for Form 13 transfers")
 
 
 @router.api_route("/api/v1/office/payment-scrolls", methods=["POST"], include_in_schema=False)
@@ -125,6 +130,11 @@ async def get_claimants_death_claims_claimId(actor: Actor = Depends(require_acto
 @router.api_route("/api/v1/claimants/death-claims/{claimId}/beneficiaries", methods=["POST"], include_in_schema=False)
 async def post_claimants_death_claims_claimId_beneficiaries(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Inward an additional co-beneficiary / legal heir on an open death claim")
+
+
+@router.api_route("/api/v1/office/annexure-k-files/{annexureId}/reconciliations", methods=["POST"], include_in_schema=False)
+async def post_office_annexure_k_files_annexureId_reconciliations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "ANNEXURE K RECO — match an inter-office Annexure K with the transfer and member records")
 
 
 @router.api_route("/api/v1/office/claims/{claimId}/additional-forms", methods=["GET"], include_in_schema=False)

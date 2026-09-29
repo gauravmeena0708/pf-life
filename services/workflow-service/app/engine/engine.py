@@ -10,6 +10,8 @@ Each operation in a definition becomes a route. The engine enforces, generically
                   per round (maker ≠ checker), `requires_last_finding`;
 * lists           GET operations with `lists` return the open cases in given states within the caller's scope;
                   GET operations with `reads` return one case the caller may see (e.g. a member's own transfer);
+* documents       `produces_document` (a signed document kept on the case) and `requires_viewed` (the officer
+                  must have opened it first); `ledger_lock` on a definition locks the member's ledger while open;
 * accounts, dates form rules `account` (a member account of the actor or of the subject, exited or not, at the
                   caller's establishment, not yet transferred) and `date` (not in the future, not before joining),
                   checked against the member-account projection kept here.
@@ -28,6 +30,7 @@ from fastapi import APIRouter, Body, Depends, Request
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.locks_routes import acquire, add_document, ensure_unlocked, ensure_viewed
 from app.infra.db import sessions
 from app.infra.tables import case_actions, cases, member_accounts, office_staff, subject_offices
 from epfo_auth import Actor, require_actor, require_step_up
@@ -326,11 +329,14 @@ async def _start(session, definition, op, request, staff, data, actor) -> dict[s
     case = {"case_id": f"CASE-{secrets.token_hex(4).upper()}", "subject_ref": subject_ref, "state": op["to"], "step": 0,
             "chain": list(queue["chain"]) if queue and queue.get("chain") else [], "version": 1, "data": case_data, "round": 1}
     case["current_role"] = current_role(definition, case)
+    due = datetime.now(UTC) + timedelta(days=definition.get("sla_days", SLA_DAYS))
+    if definition.get("ledger_lock"):          # the case holds the member's ledger while it is open (P2.5c)
+        await acquire(session, subject_ref, definition["ledger_lock"], subject_ref, case["case_id"], subject["office_id"], due)
     await session.execute(insert(cases).values(
         **{k: case[k] for k in ("case_id", "subject_ref", "state", "step", "chain", "version", "data", "round", "current_role")},
         claim_id=None, grievance_id=None, office_id=subject["office_id"], kind=definition["case_kind"],
         process=definition["process"], form_type="-", account_link_id="-", amount_paise=0, rule_version="-",
-        sla_due_at=datetime.now(UTC) + timedelta(days=definition.get("sla_days", SLA_DAYS))))
+        sla_due_at=due))
     await session.execute(insert(case_actions).values(case_id=case["case_id"], round=1, officer_subject=actor.subject,
                                                       officer_role=actor.stakeholder, action=op["name"].upper(), checks=data,
                                                       reason=data.get("reason")))
@@ -361,6 +367,10 @@ async def _step(session, definition, op, request, staff, data, actor) -> dict[st
         if actor.subject in acted:
             raise Problem(403, "/problems/separation-of-duties", "You already acted on this case",
                           "A different officer must take each step.")
+    if definition["subject"] == "uan":
+        await ensure_unlocked(session, case)
+    if op.get("requires_viewed"):              # e.g. the employer-signed Form 13 must be opened first
+        await ensure_viewed(session, case, op["requires_viewed"], actor)
     bind_step_up(op, actor, case, case["subject_ref"])
     if op.get("requires_last_finding"):
         last = (await session.execute(select(case_actions.c.checks).where(case_actions.c.case_id == case["case_id"])
@@ -391,6 +401,9 @@ async def _step(session, definition, op, request, staff, data, actor) -> dict[st
                                                       approval_level=case["step"], checks=data,
                                                       reason=data.get("note") or data.get("reason")))
     updated.update(values)
+    doc = op.get("produces_document")
+    if doc and state in _as_list(doc.get("on_states")):
+        await add_document(session, updated, doc, actor, data)
     if state != before:
         await emit(session, definition, updated, op, before, state, data, actor)
     await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action=f"{definition['process']}.{op['name']}",

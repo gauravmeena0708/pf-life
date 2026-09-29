@@ -51,7 +51,8 @@ const EMPLOYER: NavGroup[] = [
 function fieldOffice(role: string): NavGroup[] {
   const queue = "/office/work-queue";
   return [
-    { label: "Claims & settlement", items: [link("CLAIMS", queue), link("Online Services", queue), link("ANNEXURE K FILE"),
+    { label: "Claims & settlement", items: [link("CLAIMS", queue), link("Online Services", queue),
+      link("ANNEXURE K FILE", role === "fo.da_accounts" ? "/office/claim-tools#annexure-heading" : undefined),
       ...(["fo.da_accounts", "fo.ao"].includes(role) ? [link("Form 10D pension claims (IDS)", "/office/pension-claims")] : []),
       ...(role === "fo.fa_accounts" ? [link("Claim Authorization Document (CAD)", "/office/claim-tools#cad-heading")] : []),
       ...(role === "fo.cash" ? [link("Payment scroll", "/office/claim-tools#scroll-heading")] : []),
@@ -59,12 +60,13 @@ function fieldOffice(role: string): NavGroup[] {
       ...(role === "fo.apfc" ? [link("Death claims: beneficiary shares", "/office/claim-tools#shares-heading")] : []),
       ...(role === "fo.pro_intake" ? [link("PRO counter: physical claims", "/office/pro-counter")] : [])] },
     { label: "Members", items: [link("Member", role === "fo.oic" ? queue : role === "fo.da_accounts" ? "/office/claim-tools#member360-heading" : undefined),
-      link("Query"), ...(["fo.da_accounts", "fo.oic"].includes(role) ? [link("Inoperative accounts", "/office/claim-tools#inoperative-heading")] : [])] },
+      link("Query"), ...(["fo.da_accounts", "fo.oic"].includes(role) ? [link("Inoperative accounts", "/office/claim-tools#inoperative-heading")] : []),
+      ...(role === "fo.oic" ? [link("Ledger locks", "/office/claim-tools#locks-heading")] : [])] },
     { label: "Receipts & reconciliation", items: [
       role === "fo.apfc" ? link("ECR Approval") : link("VDR Vs ECR filing"), link("Reco - ECR Vs VDR"), link("VDR Member Beneficiary"),
-      link("VDR Rejection"), link("ANNEXURE K RECO"), link("ANNEXURE K VDR RECO")] },
+      link("VDR Rejection"), ...["ANNEXURE K RECO", "ANNEXURE K VDR RECO"].map((l) => link(l, role === "fo.da_accounts" ? "/office/claim-tools#annexure-heading" : undefined))] },
     { label: "Establishments & compliance", items: [
-      link("Establishment"), link("OLRE"), link("7Q & 14B"), link("Exempted-Unexempted"), link("Past Accum. File Upload"),
+      link("Establishment", ["fo.oic", "fo.apfc"].includes(role) ? "/office/work-queue" : undefined), link("OLRE"), link("7Q & 14B"), link("Exempted-Unexempted"), link("Past Accum. File Upload"),
       link("PAST ACCUM BULK TRANSFER"), link("PAST ACCUM VDR RECO")] },
     { label: "Pension", items: [link("Pension"), link("NPPS")] },
     { label: "Accounts", items: [link("Annual Accounting")] },

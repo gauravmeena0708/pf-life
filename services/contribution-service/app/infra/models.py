@@ -178,3 +178,24 @@ class TransferPosting(Base):
     journal_id: Mapped[str | None] = mapped_column(ForeignKey("journals.id"))
     approved_by: Mapped[str] = mapped_column(String(80))
     posted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class EstablishmentFreeze(Base):
+    """An establishment under a freeze order (establishment_freeze process): no ECR is approved or submitted."""
+    __tablename__ = "establishment_freezes"
+    establishment_id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    case_id: Mapped[str] = mapped_column(String(40))
+    order_ref: Mapped[str | None] = mapped_column(String(80))
+    frozen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AnnexureKVdrReco(Base):
+    """ANNEXURE K VDR RECO: an inter-office Annexure K amount matched with the VDR receipt of the transfer."""
+    __tablename__ = "annexure_k_vdr_recos"
+    annexure_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    receipt_ref: Mapped[str] = mapped_column(String(60))
+    vdr_receipt_paise: Mapped[int] = mapped_column(BigInteger)
+    annexure_amount_paise: Mapped[int] = mapped_column(BigInteger)
+    result: Mapped[str] = mapped_column(String(20))
+    reconciled_by: Mapped[str] = mapped_column(String(80))
+    reconciled_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -73,8 +73,14 @@ def test_transfer_from_an_exited_member_id_through_employer_da_and_ao(ctx):
     assert [c["case_id"] for c in queued] == [case["case_id"]]
     case = step(client, f"/api/v1/employers/me/transfer-requests/{case['case_id']}/decisions", case, SIGNATORY, "employer.signatory",
                 {"decision": "ATTEST", "note": "Present employee"}, "attest-transfer", EST).json()["data"]
-    case = step(client, f"/api/v1/office/transfers/{case['case_id']}/verifications", case, DA, "fo.da_accounts",
-                {"service_checked": "YES", "note": "Service at both establishments checked"}).json()["data"]
+    verify = {"service_checked": "YES", "note": "Service at both establishments checked"}
+    unseen = step(client, f"/api/v1/office/transfers/{case['case_id']}/verifications", case, DA, "fo.da_accounts", verify)
+    assert unseen.status_code == 409 and unseen.json()["type"] == "/problems/attestation-not-viewed"   # open the signed PDF first
+    [doc] = client.get(f"/api/v1/office/cases/{case['case_id']}", headers=hdr(DA, "fo.da_accounts")).json()["data"]["documents"]
+    assert doc["doc_type"] == "FORM13_EMPLOYER_SIGNED" and doc["viewed_by_you"] is False
+    seen = client.post(f"/api/v1/office/cases/{case['case_id']}/documents/{doc['doc_id']}/attestation-views", headers=hdr(DA, "fo.da_accounts"))
+    assert seen.status_code == 201 and seen.json()["data"]["content"]["signed_by_role"] == "employer.signatory"
+    case = step(client, f"/api/v1/office/transfers/{case['case_id']}/verifications", case, DA, "fo.da_accounts", verify).json()["data"]
     assert case["state"] == "VERIFIED" and case["current_role"] == "fo.ao"
     done = step(client, f"/api/v1/office/transfers/{case['case_id']}/decisions", case, AO, "fo.ao",
                 {"decision": "APPROVE", "reason": "Service and balance verified"}, "decide-transfer").json()["data"]

@@ -1,0 +1,31 @@
+# Tier-2 process (ADR-0005): freeze of an establishment (FIA SOP, illustrative), executed by the engine in
+# workflow-service. The contract stays with the owner (employer-service), which records the freeze on the
+# establishment; contribution-service stops accepting ECR returns from a frozen establishment.
+# De-freeze is maker-checker: the APFC recommends it, the OIC orders it (neither may be the officer who froze it).
+process: establishment_freeze
+owner: employer
+title: Freeze of an establishment
+subject: estId
+case_kind: ESTABLISHMENT_FREEZE
+terminal_states: [ACTIVE]
+operations:
+  - name: freeze
+    operation: POST /office/establishments/{estId}/freezes
+    starts: true
+    roles: [fo.oic, zo.rpfc1, ho.fa_cao]
+    step_up: freeze-establishment      # bound to the establishment ID
+    to: FROZEN
+    queue: defreeze
+    form:
+      category: {enum: [A, B, C]}
+      reason: {min_length: 10}
+      order_ref: {min_length: 3}
+  - name: defreeze
+    operation: POST /office/establishments/{estId}/defreezes
+    case_from: path_subject:estId
+    chain: [fo.apfc, fo.oic]           # maker, then checker
+    step_up: defreeze-establishment
+    from: FROZEN
+    to: ACTIVE
+    form:
+      reason: {min_length: 10}

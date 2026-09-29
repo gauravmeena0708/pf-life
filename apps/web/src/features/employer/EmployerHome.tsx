@@ -17,6 +17,8 @@ interface Establishment {
   status: string;
   verified_at: string | null;
   registration_request_id: string | null;
+  frozen?: boolean;
+  freeze?: { category: string | null; order_ref: string | null; reason: string | null } | null;
   your_permissions: string[];
 }
 
@@ -117,6 +119,8 @@ export function EmployerHome() {
       <PageHeader id="emp-heading" eyebrow="Employer services · workspace" title={e.legal_name}
         description={`${e.establishment_id} · ${e.registration_number} · office ${e.office_id} · status ${e.status}`}
         current="Employer workspace" />
+      {e.frozen ? <p role="alert" className="pending-notice"><strong>This establishment is frozen</strong> under order {e.freeze?.order_ref ?? "—"}
+        {e.freeze?.category ? ` (category ${e.freeze.category})` : ""}. ECR returns cannot be approved or submitted until the regional office de-freezes it.</p> : null}
       <p>Your permissions: {perms.length ? perms.map((p) => <code key={p}>{p} </code>) : "none"}</p>
       {notice ? <p role="status" className="ok">{notice}</p> : null}
       <ProblemMessage error={error} />

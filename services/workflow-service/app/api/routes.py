@@ -17,7 +17,8 @@ from sqlalchemy import and_, insert, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra.db import sessions
-from app.infra.tables import case_actions, cases, office_staff, offices
+from app.api.locks_routes import acquire, documents_of, ensure_unlocked
+from app.infra.tables import case_actions, cases, member_accounts, office_staff, offices
 from epfo_auth import Actor, require_actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit
@@ -139,6 +140,7 @@ async def checker_turn(session: AsyncSession, case_id: str, actor: Actor, allowe
     if actor.subject in acted:
         raise Problem(403, "/problems/separation-of-duties", "You already acted on this case in this round",
                       "A different officer must take each step (recommender ≠ approver).")
+    await ensure_unlocked(session, case)
     return staff, case
 
 
@@ -197,6 +199,7 @@ async def get_case(case_id: str, actor: Actor = Depends(OFFICERS), session: Asyn
     case = await load_case(session, case_id, staff["office_id"])
     from app.engine.engine import next_operation
     return envelope({**case_json(case), "history": await history(session, case_id),
+                     "documents": await documents_of(session, case_id, actor.subject),
                      "your_turn": actor.stakeholder in (case["current_role"] or "").split("|"),
                      "operation": next_operation(case) if case.get("process") else None})
 
@@ -212,6 +215,7 @@ async def recommend(case_id: str, body: Recommendation, actor: Actor = Depends(r
                           f"The next action is {next_action(case)}.")
         if case["assignee_subject"] and case["assignee_subject"] != actor.subject:
             raise Problem(403, "/problems/assigned-elsewhere", "This case is assigned to another officer")
+        await ensure_unlocked(session, case)
         nxt = case["chain"][1]
         case = await act(session, case, actor, "RECOMMEND", 0, body.note, body.checks, step=1, current_role=nxt,
                          assignee_subject=None)
@@ -271,13 +275,17 @@ async def open_case(session: AsyncSession, payload: dict[str, Any], state: str) 
     # The chain and service level of the rule version the claim was made under (not whatever is in force now).
     rules = await rules_by_version(session, payload["rule_version"])
     chain = approval_chain(rules, payload.get("claim_type", ""), int(payload["amount_paise"]))
+    case_id, due = f"CASE-{secrets.token_hex(4).upper()}", datetime.now(UTC) + timedelta(days=rules["claims"]["settlement_sla_days"])
+    uan = (await session.execute(select(member_accounts.c.uan).where(member_accounts.c.account_link_id == payload["account_link_id"]))).scalar_one_or_none()
+    if uan:                                   # the case holds the member's ledger while it is open (P2.5c)
+        await acquire(session, uan, "CLAIM_ADJUDICATION", payload["account_link_id"], case_id, payload["office_id"], due)
     await session.execute(insert(cases).values(
-        case_id=f"CASE-{secrets.token_hex(4).upper()}", claim_id=payload["claim_id"], office_id=payload["office_id"],
+        case_id=case_id, claim_id=payload["claim_id"], office_id=payload["office_id"],
         kind="CLAIM_SETTLEMENT", form_type=payload["form_type"], account_link_id=payload["account_link_id"],
         amount_paise=payload["amount_paise"], rule_version=payload["rule_version"], chain=chain, step=0, round=1,
         advisory_signal_id=payload.get("advisory_signal_id"),
         state=state, current_role=chain[0] if state == "IN_REVIEW" else None, version=1,
-        sla_due_at=datetime.now(UTC) + timedelta(days=rules["claims"]["settlement_sla_days"])))
+        sla_due_at=due))
 
 
 async def grievance_case(session: AsyncSession, grievance_id: str, office_id: str, tier: str) -> None:

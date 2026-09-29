@@ -9,18 +9,21 @@ from app.api import catalogue_routes, routes
 from app.config import settings
 from app.infra.db import database_ready, engine
 from epfo_observability import health_router, install
-from epfo_persistence import OutboxRelay
+from app.infra.messaging import BINDINGS, dispatch
+from epfo_persistence import Consumer, OutboxRelay
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    relay = None
+    workers = []
     if os.environ.get("DISABLE_MESSAGING") != "1":
-        relay = OutboxRelay(engine(), settings.rabbitmq_url)
-        relay.start()
+        workers = [OutboxRelay(engine(), settings.rabbitmq_url),
+                   Consumer(engine(), settings.rabbitmq_url, "employer-service.events", BINDINGS, dispatch)]
+        for w in workers:
+            w.start()
     yield
-    if relay:
-        await relay.stop()
+    for w in workers:
+        await w.stop()
 
 
 def create_app() -> FastAPI:

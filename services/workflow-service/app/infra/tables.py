@@ -88,3 +88,45 @@ member_accounts = Table(
     Column("date_of_exit", Date),
     Column("transferred_to", String(40)),
 )
+
+# Locks on a member's ledger (Phase 2, slice 5c): a claim or transfer case holds one while it is open; the annual
+# accounts batch and ECR posting take them too. A lock whose owner is gone (a process that died) or that has
+# expired is orphaned: it blocks officers' decisions on the member until an OIC releases it with a reason.
+ledger_locks = Table(
+    "ledger_locks", metadata,
+    Column("lock_id", String(40), primary_key=True),
+    Column("uan", String(12), nullable=False, index=True),
+    Column("lock_scope", String(30), nullable=False),            # ANNUAL_ACCOUNTING | CLAIM_ADJUDICATION | ECR_POSTING
+    Column("resource_key", String(60), nullable=False),          # the member ID (or the UAN) locked
+    Column("owner_ref", String(60), nullable=False, index=True), # the case, batch run or filing that holds it
+    Column("office_id", String(40), nullable=False),
+    Column("acquired_at", DateTime(timezone=True), nullable=False),
+    Column("expires_at", DateTime(timezone=True), nullable=False),
+    Column("released_at", DateTime(timezone=True)),
+    Column("released_by", String(80)),
+    Column("release_reason", Text),
+)
+
+# Documents signed by someone outside the office (the employer's attestation of a Form 13) and who opened them:
+# an officer must open the signed document before the step that relies on it.
+case_documents = Table(
+    "case_documents", metadata,
+    Column("doc_id", String(40), primary_key=True),
+    Column("case_id", String(40), nullable=False, index=True),
+    Column("doc_type", String(40), nullable=False),
+    Column("title", String(200), nullable=False),
+    Column("signed_by_role", String(60), nullable=False),
+    Column("signed_by", String(80), nullable=False),
+    Column("sha256", String(64), nullable=False),
+    Column("content", JSON, nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now()),
+)
+
+document_views = Table(
+    "document_views", metadata,
+    Column("id", IdType, primary_key=True, autoincrement=True),
+    Column("doc_id", String(40), nullable=False, index=True),
+    Column("viewer", String(80), nullable=False),
+    Column("viewer_role", String(60), nullable=False),
+    Column("at", DateTime(timezone=True), server_default=func.now()),
+)

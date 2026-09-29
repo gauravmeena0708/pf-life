@@ -87,3 +87,40 @@ def test_an_account_without_credit_for_three_years_is_inoperative(ctx):
     found = client.get("/api/v1/office/accounts/inoperative", headers=da).json()["data"]["accounts"]
     assert [a["account_link_id"] for a in found] == ["AL-0002"] and found[0]["last_credit"] == "2020-03-31"
     assert client.get("/api/v1/office/accounts/inoperative", headers=hdr(MEMBER_D, "member", [], establishment=None)).status_code == 403
+
+
+def test_annexure_k_is_reconciled_with_the_vdr_receipt(ctx):
+    client, q = ctx
+    from app.infra.transfers import on_member_exit, on_process_transitioned
+    _deliver(on_member_exit, {"uan": "100000000007", "account_link_id": "AL-0008", "date_of_exit": "2025-12-31",
+                              "reason": "CESSATION", "marked_by": "MEMBER"}, "MemberExitMarked.v1")
+    _deliver(on_process_transitioned, approved(), "ProcessTransitioned.v1")
+    da = SEED["keycloak_subjects"]["do-caseworker"]
+    url = "/api/v1/office/annexure-k-files/CASE-T1/vdr-reconciliations"
+    body = {"receipt_ref": "VDR/2026/0042", "vdr_receipt_paise": 19000000}
+    assert client.post(url, json=body, headers=hdr(da, "fo.da_accounts", [], establishment=None)).status_code == 428
+    step = lambda amount: {"action": "reconcile-annexure-k-vdr", "resource_id": "CASE-T1", "amount_paise": amount}  # noqa: E731
+    short = client.post(url, json=body, headers=hdr(da, "fo.da_accounts", [], step(19000000), establishment=None)).json()["data"]
+    assert (short["result"], short["difference_paise"]) == ("MISMATCH", -1000000)
+    ok = client.post(url, json={**body, "vdr_receipt_paise": 20000000}, headers=hdr(da, "fo.da_accounts", [], step(20000000), establishment=None))
+    assert ok.json()["data"]["result"] == "MATCHED"
+    again = client.post(url, json={**body, "vdr_receipt_paise": 20000000}, headers=hdr(da, "fo.da_accounts", [], step(20000000), establishment=None))
+    assert again.status_code == 409
+
+
+def test_a_frozen_establishment_files_no_ecr_until_defrozen(ctx):
+    client, q = ctx
+    from app.infra.transfers import on_process_transitioned
+    from tests.test_ecr_api import EST, signatory, upload
+    freeze = {"process": "establishment_freeze", "instance_id": "CASE-F1", "subject_ref": EST, "from_state": None, "to_state": "FROZEN",
+              "operation": "freeze", "actor_subject": "rpfc", "actor_role": "zo.rpfc1", "terminal": False, "data": {"order_ref": "ZO/FIA/7"}}
+    _deliver(on_process_transitioned, freeze, "ProcessTransitioned.v1")
+    r = upload(client).json()["data"]
+    f, total = r["filing"], r["validation_report"]["summary"]["totals_paise"]["TOTAL"]
+    step = {"action": "approve-ecr", "resource_id": f["filing_id"], "resource_version": f["version"], "amount_paise": total}
+    url = f"/api/v1/employers/me/ecr-filings/{f['filing_id']}/approvals"
+    blocked = client.post(url, json={"decision": "APPROVE"}, headers=signatory(step))
+    assert blocked.status_code == 403 and blocked.json()["type"] == "/problems/establishment-frozen" and "ZO/FIA/7" in blocked.json()["detail"]
+    _deliver(on_process_transitioned, {**freeze, "from_state": "FROZEN", "to_state": "ACTIVE", "operation": "defreeze", "terminal": True},
+             "ProcessTransitioned.v1")
+    assert client.post(url, json={"decision": "APPROVE"}, headers=signatory(step)).status_code == 200

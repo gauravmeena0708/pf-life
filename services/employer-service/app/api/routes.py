@@ -154,6 +154,7 @@ async def get_me(actor: Actor = Depends(require_actor), session: AsyncSession = 
     return envelope({k: est[k] for k in ("establishment_id", "registration_number", "legal_name", "office_id", "status")}
                     | {"verified_at": est["verified_at"].isoformat() if est["verified_at"] else None,
                        "registration_request_id": req["request_id"] if req else None,
+                       "frozen": est["frozen_at"] is not None, "freeze": est["freeze"],
                        "your_permissions": actor.claims.get("grants", [])})
 
 

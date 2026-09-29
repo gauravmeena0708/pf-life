@@ -154,11 +154,19 @@ async def validate_filing(filingId: str, actor: Actor = Depends(EMPLOYER)):
         return envelope(report)
 
 
+async def _not_frozen(session, eid: str) -> None:
+    row = (await session.execute(text("SELECT order_ref FROM establishment_freezes WHERE establishment_id=:e"), {"e": eid})).first()
+    if row:
+        raise Problem(403, "/problems/establishment-frozen", "The establishment is frozen",
+                      f"No ECR is approved or submitted while freeze order {row[0] or ''} stands. Contact your regional office.".replace("  ", " "))
+
+
 @router.post("/api/v1/employers/me/ecr-filings/{filingId}/approvals")
 async def approve_filing(filingId: str, body: ApprovalInput, actor: Actor = Depends(EMPLOYER)):
     require_grant(actor, "ecr.approve"); eid = _establishment(actor)
     async with sessions()() as session, session.begin():
         f = await _fetch_filing(session, filingId, eid)
+        await _not_frozen(session, eid)
         if f["state"] != "VALIDATED": raise Problem(409, "/problems/invalid-state", "Filing must be validated")
         if f["preparer_subject"] == actor.subject: raise Problem(403, "/problems/self-approval", "Self approval is not allowed")
         report = f["validation_report"] if isinstance(f["validation_report"], dict) else json.loads(f["validation_report"])
@@ -194,6 +202,7 @@ async def submit_filing(filingId: str, actor: Actor = Depends(EMPLOYER), idempot
         if cached: return JSONResponse(cached.body, status_code=cached.status)
         f = await _fetch_filing(session, filingId, eid)
         if if_match is None or if_match.strip('"') != str(f["version"]): raise Problem(412, "/problems/version-mismatch", "Filing version does not match If-Match")
+        await _not_frozen(session, eid)
         if f["state"] != "APPROVED": raise Problem(409, "/problems/invalid-state", "Filing must be approved before submission")
         report = f["validation_report"] if isinstance(f["validation_report"], dict) else json.loads(f["validation_report"])
         total = report["summary"]["totals_paise"]["TOTAL"]
@@ -483,3 +492,35 @@ async def inoperative(months: int = Query(default=36, ge=12, le=120), actor: Act
                         "exited_on": r["date_of_exit"].isoformat() if hasattr(r["date_of_exit"], "isoformat") else r["date_of_exit"],
                         "status": "INOPERATIVE"})
     return envelope({"no_credit_since": cutoff.isoformat(), "months": months, "accounts": out})
+
+
+# ── ANNEXURE K VDR RECO: the inter-office Annexure K amount against the VDR receipt (P2.5c) ────────────
+
+class VdrReco(BaseModel):
+    receipt_ref: str = Field(min_length=3, max_length=60)
+    vdr_receipt_paise: int = Field(ge=0)
+
+
+@router.post("/api/v1/office/annexure-k-files/{annexureId}/vdr-reconciliations")
+async def annexure_k_vdr_reco(annexureId: str, body: VdrReco, actor: Actor = Depends(require_stakeholder("fo.da_accounts"))):
+    """The Annexure K of a Form 13 transfer is matched with the amount the VDR (receipt register) shows as received."""
+    async with sessions()() as session, session.begin():
+        t = (await session.execute(text("SELECT * FROM transfer_postings WHERE transfer_id=:t"), {"t": annexureId})).mappings().first()
+        if not t:
+            raise Problem(404, "/problems/not-found", "Annexure K not found")
+        done = (await session.execute(text("SELECT result FROM annexure_k_vdr_recos WHERE annexure_id=:a"), {"a": annexureId})).first()
+        if done and done[0] == "MATCHED":
+            raise Problem(409, "/problems/already-reconciled", "This Annexure K is already reconciled with the VDR")
+        require_step_up(actor, "reconcile-annexure-k-vdr", annexureId, None, body.vdr_receipt_paise)
+        amount = int(t["employee_paise"]) + int(t["employer_paise"])
+        result = "MATCHED" if body.vdr_receipt_paise == amount else "MISMATCH"
+        values = {"a": annexureId, "r": body.receipt_ref, "v": body.vdr_receipt_paise, "k": amount, "res": result, "by": actor.subject,
+                  "at": datetime.now(UTC)}
+        await session.execute(text("DELETE FROM annexure_k_vdr_recos WHERE annexure_id=:a"), {"a": annexureId})
+        await session.execute(text("INSERT INTO annexure_k_vdr_recos (annexure_id, receipt_ref, vdr_receipt_paise, annexure_amount_paise, result, "
+                                   "reconciled_by, reconciled_at) VALUES (:a, :r, :v, :k, :res, :by, :at)"), values)
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="annexure_k.vdr_reconciled",
+                    target_type="annexure_k", target_id=annexureId, detail=f"{result} {body.receipt_ref}")
+    return envelope({"annexure_id": annexureId, "receipt_ref": body.receipt_ref, "vdr_receipt_paise": body.vdr_receipt_paise,
+                     "annexure_amount_paise": amount, "difference_paise": body.vdr_receipt_paise - amount, "result": result,
+                     "next_step": "Nothing more to do." if result == "MATCHED" else "Trace the difference with the sending office before re-reconciling."})

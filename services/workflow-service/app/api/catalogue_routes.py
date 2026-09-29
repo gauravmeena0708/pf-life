@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /hrm/me', 'GET /office/work-queue', 'GET /public/offices', 'GET /office/cases/{caseId}', 'POST /office/cases/{caseId}/assignments', 'POST /office/cases/{caseId}/decisions', 'POST /office/cases/{caseId}/recommendations', 'POST /office/cases/{caseId}/second-approvals', 'POST /office/freeze-cases/{caseId}/verifications']
+OPERATIONS = ['GET /hrm/me', 'GET /office/work-queue', 'GET /public/offices', 'POST /office/system/locks/{lockId}/release', 'GET /office/cases/{caseId}', 'POST /office/cases/{caseId}/assignments', 'POST /office/cases/{caseId}/decisions', 'POST /office/cases/{caseId}/recommendations', 'POST /office/cases/{caseId}/second-approvals', 'POST /office/freeze-cases/{caseId}/verifications', 'GET /office/members/{uan}/locks', 'POST /office/cases/{caseId}/documents/{docId}/attestation-views']
 
 @router.api_route("/api/v1/hrm/me", methods=["GET"], include_in_schema=False)
 async def get_hrm_me(actor: Actor = Depends(require_actor)) -> None:
@@ -25,6 +25,11 @@ async def get_office_work_queue(actor: Actor = Depends(require_actor)) -> None:
 @router.api_route("/api/v1/public/offices", methods=["GET"], include_in_schema=False)
 async def get_public_offices(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Office locator by state/district/pincode")
+
+
+@router.api_route("/api/v1/office/system/locks/{lockId}/release", methods=["POST"], include_in_schema=False)
+async def post_office_system_locks_lockId_release(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Supervised release of an orphaned lock (reason required) → LockReleased.v1 (tracker: 'Unable to lock")
 
 
 @router.api_route("/api/v1/office/cases/{caseId}", methods=["GET"], include_in_schema=False)
@@ -55,3 +60,13 @@ async def post_office_cases_caseId_second_approvals(actor: Actor = Depends(requi
 @router.api_route("/api/v1/office/freeze-cases/{caseId}/verifications", methods=["POST"], include_in_schema=False)
 async def post_office_freeze_cases_caseId_verifications(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Freeze-case verification step (DA → SS/AO → APFC/RPFC-II → OIC; tier-2 process member_freeze)")
+
+
+@router.api_route("/api/v1/office/members/{uan}/locks", methods=["GET"], include_in_schema=False)
+async def get_office_members_uan_locks(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Active locks on a member ledger (annual accounts, claim adjudication, ECR posting) with owner and ex")
+
+
+@router.api_route("/api/v1/office/cases/{caseId}/documents/{docId}/attestation-views", methods=["POST"], include_in_schema=False)
+async def post_office_cases_caseId_documents_docId_attestation_views(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Record that the caseworker opened the employer-signed PDF / DSC document; enables the approve action")

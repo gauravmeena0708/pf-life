@@ -12,7 +12,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.4** | Pension settlement: Form 10D desk by desk (DA Accounts IDS → AO → DA Pension worksheet → APFC Pension → PPO → initial arrear DA → SS → APFC e-sign → dispatch), scheme certificate and its surrender, service aggregation, transfers-in, CPPS monthly run with the mock sponsor bank's paid statement and reconciliation, BRS | **Done** (29 Sep 2026) |
 | **P2.5a** | Claim lifecycle and office tools: eligibility preview for one form, documents, withdrawal before a decision, member and office audit trails, the CAD (accounts wing), payment scrolls with return reconciliation, forms filed with a claim, member 360 view (purpose recorded), inoperative accounts | **Done** (29 Sep 2026) |
 | **P2.5b** | Death and EDLI claims, beneficiary shares, physical intake at the PRO counter, identity validation (family pension deferred to P2.6) | **Done** (29 Sep 2026) |
-| P2.5c | Ledger locks, document attestation views, establishment freeze / de-freeze, office Annexure K files and reconciliation | |
+| **P2.5c** | Ledger locks, document attestation views, establishment freeze / de-freeze, office Annexure K files and reconciliation | **Done** (29 Sep 2026) |
 | P2.6 | Establishment registration and configuration, Form 5A, branches, DSC / e-sign approvals | |
 | P2.7 | Returns, receipts and ledger: arrear / supplementary ECR, demands, direct challans, 14B/7Q knock-offs, VDR rejection, reversals, recredits | |
 | P2.8 | The rest: compliance and VISHWAS, international workers, grievance extras, public lookups, audit, NDC, HRM, DO dashboards | |
@@ -101,3 +101,21 @@ meaning is confirmed.
   KYC status at that moment (audited). An exit marked `DEATH_IN_SERVICE` records the date of death in claim-service.
 - Deferred: family pension (Form 10D by a widow / child, P2.6), the composite claim (CCF), a dedicated EDLI
   decision step, and paying each beneficiary to their own bank account (one payment per claim for now).
+
+## P2.5c — how it is built
+
+- workflow-service (`app/api/locks_routes.py`): a claim case, and a Form 13 case (`ledger_lock:` in its YAML), lock
+  the member's ledger while open; the lock goes with the case when it finishes. A lock whose owner is gone or has
+  expired is orphaned and refuses officers' decisions on that member (`/problems/ledger-locked`) until the OIC
+  releases it with a reason and a one-time code (`LockReleased.v1`, now phase 1). Seed: a dead annual-accounts batch
+  left one on ESHA DEMO (UAN 100000000005).
+- Engine: `produces_document` keeps a signed document on the case (the employer's DSC on Form 13, mock) and
+  `requires_viewed` refuses the step until the officer has opened it (`attestation-views`, audited).
+- `config/processes/establishment-freeze.yaml`: the zone / OIC / HO freezes an establishment; de-freeze is
+  maker-checker (APFC recommends, OIC orders). employer-service now consumes `ProcessTransitioned.v1` and shows the
+  freeze to the employer; contribution-service refuses ECR approval and submission while it stands.
+- ANNEXURE K FILE / RECO (claim-service, a projection of `TransferPosted.v1`: inward, outward, within the office),
+  reconciled against the UAN, the amount and the previous member ID being emptied; ANNEXURE K VDR RECO
+  (contribution-service) against the VDR receipt amount. Both with one-time codes.
+- Not built: the annual-accounts batch and ECR posting do not take locks yet (only the seeded orphan shows those
+  scopes); Annexure K for exempted establishments (`/office/exempted/annexure-k/...`) stays planned.

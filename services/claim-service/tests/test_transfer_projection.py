@@ -27,3 +27,24 @@ def test_new_member_id_and_verified_pan_reach_the_projection(ctx):
     deliver("MemberKycUpdated.v1", {"uan": "100000000002", "kyc_type": "PAN", "status": "VERIFIED", "pan_verified": True,
                                     "bank_ifsc": "DEMO0000002", "bank_account_last4": "0002"}, "member-service")
     assert q("SELECT pan_verified FROM accounts WHERE uan='100000000002'")[0][0] in (True, 1)
+
+
+def test_annexure_k_file_is_listed_and_reconciled_with_the_member_records(ctx):
+    from tests.test_claims_api import hdr
+    client, q, deliver = ctx
+    da = SUBJECTS["do-caseworker"]
+    deliver("TransferPosted.v1", {"transfer_id": "CASE-T1", "uan": "100000000007", "from_account_link_id": "AL-0008",
+                                  "to_account_link_id": "AL-0009", "employee_paise": 12000000, "employer_paise": 8000000,
+                                  "journal_id": "J", "postings": []}, "contribution-service")
+    [f] = client.get("/api/v1/office/annexure-k-files?direction=INWARD", headers=hdr(da, "fo.da_accounts")).json()["data"]["files"]
+    assert (f["annexure_id"], f["amount_paise"], f["reco_status"]) == ("CASE-T1", 20000000, "PENDING")
+    url = "/api/v1/office/annexure-k-files/CASE-T1/reconciliations"
+    body = {"declared_uan": "100000000007", "declared_amount_paise": 20000001}
+    assert client.post(url, json=body, headers=hdr(da, "fo.da_accounts")).status_code == 428
+    step = {"action": "reconcile-annexure-k", "resource_id": "CASE-T1"}
+    off = client.post(url, json=body, headers=hdr(da, "fo.da_accounts", step)).json()["data"]
+    assert off["reco_status"] == "MISMATCH" and off["reco"]["checks"]["amount_matches"] is False
+    ok = client.post(url, json={**body, "declared_amount_paise": 20000000}, headers=hdr(da, "fo.da_accounts", step)).json()["data"]
+    assert ok["reco_status"] == "MATCHED" and all(ok["reco"]["checks"].values())
+    assert client.post(url, json=body, headers=hdr(da, "fo.da_accounts", step)).status_code == 409
+    assert client.get("/api/v1/office/annexure-k-files", headers=hdr(SUBJECTS["ro-apfc"], "fo.apfc")).status_code == 403

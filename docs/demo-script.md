@@ -245,6 +245,19 @@ simulation; point out that the dialog says exactly what is being authorised (act
    2 Nov 1985); inward a *physical life certificate* for PPO-DEMO-0001 — `ro-da-pension` sees it as NEW on the
    updation tracker.
 
+## Ledger locks, signed Form 13, establishment freeze, Annexure K
+*Tests: `tests/e2e/test_ledger_and_establishment.py`, `services/workflow-service/tests/test_locks_and_freeze.py`*
+
+1. **`ro-oic` → Members › Ledger locks**: UAN 100000000005 shows a lock left by a dead annual-accounts batch
+   (orphaned). Release it with a reason (one-time code). While it stood, officers' decisions on that member were
+   refused with "Unable to lock the member's ledger".
+2. **Form 13 (see "Date of exit and transfer")**: after the employer attests, the DA's case page lists the
+   *Employer-signed Form 13*; *Verify* is refused until the DA has opened it.
+3. **`zo-rpfc` → Work queue › Freeze of an establishment**: EST-DEMO-0001, category B, order reference. `emp-owner`
+   sees the freeze banner and cannot approve an ECR. **`ro-apfc`** recommends the de-freeze, **`ro-oic`** orders it.
+4. **`do-caseworker` → Claims & settlement › ANNEXURE K FILE**: list inward / outward files; reconcile one against
+   the transfer and member records, and against a VDR receipt (one-time code each).
+
 ## Policy changes that move money — interest, TDS and pensions
 *Tests: `tests/e2e/test_policy_money.py`, `services/contribution-service/tests/test_interest.py`,
 `services/claim-service/tests/test_tds.py`, `services/pension-service/tests/test_pensions.py`*

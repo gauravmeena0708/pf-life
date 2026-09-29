@@ -23,7 +23,7 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `GrievanceEscalated.v1` | grievance | workflow, reporting, audit | grievance | 1 |
 | `GrievanceResolved.v1` | grievance | workflow, reporting, audit | grievance | 1 |
 | `RiskSignalRaised.v1` | intelligence | claim, workflow, reporting, audit | risk_signal | 1 |
-| `ProcessTransitioned.v1` | workflow | member, contribution, audit | process_instance | 1 |
+| `ProcessTransitioned.v1` | workflow | member, contribution, employer, audit | process_instance | 1 |
 | `MemberExitMarked.v1` | member | contribution, claim, workflow, audit | member_account | 1 |
 | `MemberRegistered.v1` | member | contribution, claim, workflow, audit | member_account | 1 |
 | `MemberKycUpdated.v1` | member | claim, audit | member | 1 |
@@ -47,4 +47,4 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `PhysicalClaimInwarded.v1` | claim | pension, audit | physical_intake | 1 |
 | `BeneficiaryShareAmended.v1` | claim | reporting, audit | claim | 1 |
 | `SupplementaryClaimEligible.v1` | contribution | member, claim, audit | ledger_journal | 2 (contract only) |
-| `LockReleased.v1` | workflow | audit, reporting | ledger_lock | 2 (contract only) |
+| `LockReleased.v1` | workflow | audit, reporting | ledger_lock | 1 |

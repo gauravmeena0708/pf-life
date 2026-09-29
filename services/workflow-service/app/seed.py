@@ -7,9 +7,9 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
 from app.infra.db import sessions
-from datetime import date
+from datetime import date, datetime
 
-from app.infra.tables import member_accounts, office_staff, offices, subject_offices
+from app.infra.tables import ledger_locks, member_accounts, office_staff, offices, subject_offices
 
 SEED_FILE = os.getenv("SEED_FILE", "/srv/seed/synthetic.json")
 
@@ -34,6 +34,15 @@ async def main() -> None:
                     account_link_id=a["account_link_id"], uan=m["uan"], member_subject=m.get("subject"), establishment_id=a["establishment_id"],
                     date_of_joining=date.fromisoformat(a["date_of_joining"]),
                     date_of_exit=date.fromisoformat(a["date_of_exit"]) if a.get("date_of_exit") else None).on_conflict_do_nothing())
+        est = seed["establishment"]              # the establishment is a process subject too (establishment freeze)
+        values = {"office_id": est["office_id"], "zone_id": office.get("zone_id"), "member_subject": None, "establishment_id": est["establishment_id"]}
+        await session.execute(insert(subject_offices).values(subject_ref=est["establishment_id"], **values)
+                              .on_conflict_do_update(index_elements=[subject_offices.c.subject_ref], set_=values))
+        for lock in seed.get("ledger_locks", []):   # a lock left behind by a process that died (orphaned)
+            await session.execute(insert(ledger_locks).values(
+                **{k: v for k, v in lock.items() if not k.startswith("_") and k not in ("acquired_at", "expires_at")},
+                office_id=est["office_id"], acquired_at=datetime.fromisoformat(lock["acquired_at"]),
+                expires_at=datetime.fromisoformat(lock["expires_at"])).on_conflict_do_nothing())
         for s in seed.get("office_staff", []):
             await session.execute(insert(office_staff).values(
                 subject=s["subject"], username=s["username"], stakeholder=s["stakeholder"],

@@ -9,6 +9,7 @@ import { ProblemMessage } from "../../components/ProblemMessage";
 import { dateTime, roleLabel, stateLabel } from "../journeyB";
 import { ClaimAnalysisPanel } from "../ai/ClaimAnalysisPanel";
 import { ProcessForm } from "./ProcessForm";
+import { SignedDocuments } from "./SignedDocuments";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 import type { CaseDetail } from "./types";
@@ -101,6 +102,7 @@ export function CasePage() {
         <dl className="kv"><dt>Process</dt><dd><code>{item.process}</code> (tier-2, config/processes)</dd><dt>Subject</dt><dd><code>{item.subject_ref}</code></dd>
           <dt>State</dt><dd>{item.state}</dd><dt>{t("office.slaDue")}</dt><dd>{dateTime(item.sla_due_at, i18n.language)}</dd></dl>
         {item.data && Object.keys(item.data).length ? <dl className="kv">{Object.entries(item.data).map(([k, v]) => <Fragment key={k}><dt>{k.replaceAll("_", " ")}</dt><dd>{String(v)}</dd></Fragment>)}</dl> : null}
+        <SignedDocuments caseId={item.case_id} documents={item.documents ?? []} onViewed={() => void qc.invalidateQueries({ queryKey: ["office-case", caseId] })} />
         {item.your_turn && item.operation ? <ProcessForm operation={item.operation} caseRef={{ id: item.case_id, version: item.version }} onDone={(msg) => { setNotice(true); void msg; void qc.invalidateQueries({ queryKey: ["office-case", caseId] }); }} />
           : <p className="muted">{item.current_role ? `Waiting for ${roleLabel(item.current_role, t)}.` : "Finished."}</p>}
       </section> : null}

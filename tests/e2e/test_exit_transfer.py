@@ -53,6 +53,11 @@ def test_member_marks_exit_and_transfers_the_previous_member_id(persona):
             da = persona("do-caseworker", "/office/work-queue")
             status, r = call(da, "POST", f"/api/v1/office/transfers/{case['case_id']}/verifications",
                              {"service_checked": "YES", "note": "Service at both establishments checked"})
+            assert status == 409 and r["type"] == "/problems/attestation-not-viewed", r      # the signed Form 13 first
+            [doc] = call(da, "GET", f"/api/v1/office/cases/{case['case_id']}")[1]["data"]["documents"]
+            assert call(da, "POST", f"/api/v1/office/cases/{case['case_id']}/documents/{doc['doc_id']}/attestation-views")[0] == 201
+            status, r = call(da, "POST", f"/api/v1/office/transfers/{case['case_id']}/verifications",
+                             {"service_checked": "YES", "note": "Service at both establishments checked"})
             assert status == 200 and r["data"]["state"] == "VERIFIED", r
             case = r["data"]
         ao = persona("ro-ao", "/office/work-queue")

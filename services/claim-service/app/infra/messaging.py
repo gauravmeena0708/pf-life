@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import load_claim, notify, record_decision, transition
 from app.domain.claims import HOLDABLE, route
-from app.infra.tables import accounts, claim_beneficiaries, claims, risk_flags
+from app.infra.tables import accounts, annexure_k_files, claim_beneficiaries, claims, risk_flags
 from epfo_observability import Problem, get_logger
 from epfo_persistence.policy import on_policy_published, rules_by_version
 
@@ -92,6 +92,13 @@ async def on_kyc_updated(session: AsyncSession, event: dict[str, Any]) -> None:
 async def on_transfer_posted(session: AsyncSession, event: dict[str, Any]) -> None:
     """Form 13: the previous member ID's shares move to the current one."""
     p = event["payload"]
+    offices = dict((await session.execute(select(accounts.c.account_link_id, accounts.c.office_id).where(
+        accounts.c.account_link_id.in_((p["from_account_link_id"], p["to_account_link_id"]))))).all())
+    if not (await session.execute(select(annexure_k_files.c.annexure_id).where(annexure_k_files.c.annexure_id == p["transfer_id"]))).first():
+        await session.execute(insert(annexure_k_files).values(       # ANNEXURE K FILE, outward and inward (P2.5c)
+            annexure_id=p["transfer_id"], uan=p["uan"], from_account_link_id=p["from_account_link_id"], to_account_link_id=p["to_account_link_id"],
+            from_office_id=offices.get(p["from_account_link_id"], "-"), to_office_id=offices.get(p["to_account_link_id"], "-"),
+            employee_paise=int(p["employee_paise"]), employer_paise=int(p["employer_paise"]), reco_status="PENDING"))
     for link, sign in ((p["from_account_link_id"], -1), (p["to_account_link_id"], 1)):
         await session.execute(update(accounts).where(accounts.c.account_link_id == link).values(
             employee_paise=accounts.c.employee_paise + sign * int(p["employee_paise"]),

@@ -211,7 +211,7 @@ EVENTS = [
     ("GrievanceEscalated", "grievance", ["workflow", "reporting", "audit"], "grievance", 1, {"grievance_id": S, "from_tier": S, "to_tier": S, "office_id": S}),
     ("GrievanceResolved", "grievance", ["workflow", "reporting", "audit"], "grievance", 1, {"grievance_id": S, "office_id": S, "tier": {"enum": ["RO", "ZO", "HO"]}, "within_sla": B}),
     ("RiskSignalRaised", "intelligence", ["claim", "workflow", "reporting", "audit"], "risk_signal", 1, {"signal_id": S, "detection_type": S, "rule_version": S, "evidence_refs": "array", "subject_ref": S, "explanation": S}),
-    ("ProcessTransitioned", "workflow", ["member", "contribution", "audit"], "process_instance", 1, {"process": S, "instance_id": S, "subject_ref": S, "from_state": {"type": ["string", "null"]}, "to_state": S, "operation": S, "title": S, "terminal": B, "visible_to_member": B, "actor_subject": S, "actor_role": S, "data": {"type": "object"}}),
+    ("ProcessTransitioned", "workflow", ["member", "contribution", "employer", "audit"], "process_instance", 1, {"process": S, "instance_id": S, "subject_ref": S, "from_state": {"type": ["string", "null"]}, "to_state": S, "operation": S, "title": S, "terminal": B, "visible_to_member": B, "actor_subject": S, "actor_role": S, "data": {"type": "object"}}),
     ("MemberExitMarked", "member", ["contribution", "claim", "workflow", "audit"], "member_account", 1, {"uan": S, "account_link_id": S, "date_of_exit": S, "reason": S, "marked_by": {"enum": ["MEMBER", "EMPLOYER"]}}),
     ("MemberRegistered", "member", ["contribution", "claim", "workflow", "audit"], "member_account", 1, {"uan": S, "account_link_id": S, "member_subject": {"type": ["string", "null"]}, "name": S, "date_of_birth": S, "gender": S, "establishment_id": S, "date_of_joining": S, "new_uan": B, "pan_verified": B}),
     ("MemberKycUpdated", "member", ["claim", "audit"], "member", 1, {"uan": S, "kyc_type": {"enum": ["PAN", "BANK", "AADHAAR"]}, "status": S, "pan_verified": B, "bank_ifsc": S, "bank_account_last4": S}),
@@ -236,7 +236,7 @@ EVENTS = [
     ("PhysicalClaimInwarded", "claim", ["pension", "audit"], "physical_intake", 1, {"intake_id": S, "form_type": S, "uan": S, "ppo_id": S, "office_id": S, "filed_by": {"enum": ["MEMBER", "BENEFICIARY", "PENSIONER"]}, "details": {"type": "object"}}),
     ("BeneficiaryShareAmended", "claim", ["reporting", "audit"], "claim", 1, {"claim_id": S, "beneficiary_id": S, "previous_share_bp": {"type": "integer", "minimum": 0, "maximum": 10000}, "new_share_bp": {"type": "integer", "minimum": 0, "maximum": 10000}, "reason_code": {"enum": ["NOMINEE_DECEASED", "COURT_ORDER", "LEGACY_SETTLEMENT_OFFSET", "GUARDIAN_APPOINTMENT"]}, "amended_by": S}),
     ("SupplementaryClaimEligible", "contribution", ["member", "claim", "audit"], "ledger_journal", 2, {"account_link_id": S, "settled_claim_id": S, "late_credit_paise": N, "credit_source": {"enum": ["TRANSFER_IN", "CONTRIBUTION", "RECREDIT"]}}),
-    ("LockReleased", "workflow", ["audit", "reporting"], "ledger_lock", 2, {"lock_id": S, "lock_scope": {"enum": ["ANNUAL_ACCOUNTING", "CLAIM_ADJUDICATION", "ECR_POSTING"]}, "resource_key": S, "released_by": S, "reason": {"type": "string", "minLength": 10}}),
+    ("LockReleased", "workflow", ["audit", "reporting"], "ledger_lock", 1, {"lock_id": S, "lock_scope": {"enum": ["ANNUAL_ACCOUNTING", "CLAIM_ADJUDICATION", "ECR_POSTING"]}, "resource_key": S, "released_by": S, "reason": {"type": "string", "minLength": 10}}),
 ]
 
 

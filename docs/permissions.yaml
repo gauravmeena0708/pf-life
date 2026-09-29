@@ -1364,7 +1364,7 @@ stakeholders:
     via:
     - F04.process
   - endpoint: POST /office/cases/{caseId}/documents/{docId}/attestation-views
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1436,19 +1436,19 @@ stakeholders:
     via:
     - F09.annexure_k_reconcile
   - endpoint: GET /office/annexure-k-files
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F09.annexure_k_reconcile
   - endpoint: POST /office/annexure-k-files/{annexureId}/reconciliations
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F09.annexure_k_reconcile
   - endpoint: POST /office/annexure-k-files/{annexureId}/vdr-reconciliations
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -1788,6 +1788,12 @@ stakeholders:
     step_up: false
     via:
     - F07.verify_apfc
+  - endpoint: POST /office/establishments/{estId}/defreezes
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F07.defreeze_est_maker
   - endpoint: POST /office/accounts/{accountLinkId}/reactivations
     status: P
     scope: office jurisdiction of the caller's posting
@@ -1840,19 +1846,19 @@ stakeholders:
     via:
     - F04.approve_oic
   - endpoint: GET /office/members/{uan}/locks
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F04.lock_admin
   - endpoint: POST /office/system/locks/{lockId}/release
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F04.lock_admin
   - endpoint: POST /office/establishments/{estId}/freezes
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -1870,7 +1876,7 @@ stakeholders:
     via:
     - F07.defreeze
   - endpoint: POST /office/establishments/{estId}/defreezes
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -2493,7 +2499,7 @@ stakeholders:
     via:
     - F07.freeze_zo
   - endpoint: POST /office/establishments/{estId}/freezes
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -2681,7 +2687,7 @@ stakeholders:
     via:
     - F07.freeze_ho
   - endpoint: POST /office/establishments/{estId}/freezes
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:

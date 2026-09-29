@@ -1,5 +1,5 @@
 {
-  "_comment": "SYNTHETIC DEMO DATA \u2014 no real person, establishment, UAN or bank account. Deterministic so the guided tour and tests always find the same records. Keycloak user IDs are fixed in infra/keycloak/realm-epfo-demo.json.",
+  "_comment": "SYNTHETIC DEMO DATA — no real person, establishment, UAN or bank account. Deterministic so the guided tour and tests always find the same records. Keycloak user IDs are fixed in infra/keycloak/realm-epfo-demo.json.",
   "office": {
     "office_id": "RO-DEMO-01",
     "name": "Demo Regional Office (synthetic)",
@@ -477,6 +477,18 @@
       "bank_ifsc": "DEMO0000902",
       "bank_account_last4": "0902",
       "life_certificate_valid_till": "2026-08-31"
+    }
+  ],
+  "ledger_locks": [
+    {
+      "_note": "An annual-accounts batch that died mid-run and never released ESHA DEMO's ledger (the field's 'Unable to lock process').",
+      "lock_id": "LCK-LEGACY-0001",
+      "uan": "100000000005",
+      "lock_scope": "ANNUAL_ACCOUNTING",
+      "resource_key": "AL-0005",
+      "owner_ref": "BATCH-ANNUAL-2025-26",
+      "acquired_at": "2026-04-02T01:00:00+05:30",
+      "expires_at": "2026-04-02T06:00:00+05:30"
     }
   ]
 }

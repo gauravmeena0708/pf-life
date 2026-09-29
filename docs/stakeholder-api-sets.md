@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 234 |
+| Activities | 235 |
 | Stakeholders with at least one API | 97 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 0 |
@@ -392,6 +392,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | Endpoint | Status |
 |---|---|
 | `GET /office/accounts/inoperative` | W |
+| `GET /office/annexure-k-files` | W |
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/claims/{claimId}/additional-forms` | W |
 | `GET /office/claims/{claimId}/audit-trail` | W |
@@ -402,17 +403,16 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `GET /office/work-queue` | W |
 | `POST /ai/claims/analyse` | W |
 | `POST /ai/feedback` | W |
+| `POST /office/annexure-k-files/{annexureId}/reconciliations` | W |
+| `POST /office/annexure-k-files/{annexureId}/vdr-reconciliations` | W |
+| `POST /office/cases/{caseId}/documents/{docId}/attestation-views` | W |
 | `POST /office/cases/{caseId}/recommendations` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/member-change-requests/{requestId}/recommendations` | W |
 | `POST /office/pension-claims/{claimId}/input-data-sheets` | W |
 | `POST /office/physical-claims/{intakeId}/identity-validations` | W |
 | `POST /office/transfers/{transferId}/verifications` | W |
-| `GET /office/annexure-k-files` | P |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | P |
-| `POST /office/annexure-k-files/{annexureId}/reconciliations` | P |
-| `POST /office/annexure-k-files/{annexureId}/vdr-reconciliations` | P |
-| `POST /office/cases/{caseId}/documents/{docId}/attestation-views` | P |
 | `POST /office/ecr-filings/{filingId}/rejections` | P |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P |
 | `POST /office/ledger-journals/{journalId}/reversals` | P |
@@ -488,7 +488,7 @@ Activities: **F04.cad** Generate the Claim Authorization Document (interest spli
 
 #### `fo.apfc` — APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)
 
-Activities: **F01.circle_review** Circle officer reviews coverage of the new establishment; **F01.dsc_approve** Approve the DSC / e-sign registration at the PF office; **F01.change_decide** Decide establishment change, closure or transfer requests; **F02.jd_approve** Approver for major changes (APFC / RPFC-II / RPFC-I per JD Table 3): approve / reject / return; **F03.ledger_exception_approve** Approve an exceptional ledger adjustment (RPFC-II F&A); **F03.ecr_office_approval** Approve ECRs held for office approval (ECR Approval menu on the APFC login; scope to be confirmed); **F04.approve_apfc** Approve claims in the APFC / RPFC-II band; **F04.redisburse_approve** Authorise a new payment after a return without reopening adjudication; **F04.shares** Amend beneficiary shares (legacy-settled share, deceased nominee, court order) and check the share summary; **F06.schedule** Circle officer schedules inspection (incl. CAIU-allocated); **F06.proceed** Quasi-judicial authority: issue notice / summons, hold hearings (e-Proceedings Cause List, Daily Order); **F06.order** Pass 7A / 14B / 7Q order (e-Proceedings Final Order); 7B review; 7C; 26B disputes; **F06.vishwas_decide** Recalculate damages under VISHWAS and decide; revised demand is paid through a direct challan; **F06.prosecution** Initiate prosecution; **F07.freeze_ro_member** Order freezing of MID / UAN (Categories B / C); **F07.verify_apfc** Validate verification; **F11.approve_apfc** Approve inoperative-account settlement in higher amount bands
+Activities: **F01.circle_review** Circle officer reviews coverage of the new establishment; **F01.dsc_approve** Approve the DSC / e-sign registration at the PF office; **F01.change_decide** Decide establishment change, closure or transfer requests; **F02.jd_approve** Approver for major changes (APFC / RPFC-II / RPFC-I per JD Table 3): approve / reject / return; **F03.ledger_exception_approve** Approve an exceptional ledger adjustment (RPFC-II F&A); **F03.ecr_office_approval** Approve ECRs held for office approval (ECR Approval menu on the APFC login; scope to be confirmed); **F04.approve_apfc** Approve claims in the APFC / RPFC-II band; **F04.redisburse_approve** Authorise a new payment after a return without reopening adjudication; **F04.shares** Amend beneficiary shares (legacy-settled share, deceased nominee, court order) and check the share summary; **F06.schedule** Circle officer schedules inspection (incl. CAIU-allocated); **F06.proceed** Quasi-judicial authority: issue notice / summons, hold hearings (e-Proceedings Cause List, Daily Order); **F06.order** Pass 7A / 14B / 7Q order (e-Proceedings Final Order); 7B review; 7C; 26B disputes; **F06.vishwas_decide** Recalculate damages under VISHWAS and decide; revised demand is paid through a direct challan; **F06.prosecution** Initiate prosecution; **F07.freeze_ro_member** Order freezing of MID / UAN (Categories B / C); **F07.verify_apfc** Validate verification; **F07.defreeze_est_maker** Recommend de-freezing an establishment (maker); the OIC orders it (checker); **F11.approve_apfc** Approve inoperative-account settlement in higher amount bands
 
 | Endpoint | Status |
 |---|---|
@@ -497,6 +497,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
 | `POST /office/claims/{claimId}/re-disbursement-approvals` | W |
+| `POST /office/establishments/{estId}/defreezes` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/member-change-requests/{requestId}/decisions` | W |
 | `POST /office/members/{uan}/freezes` | W |
@@ -538,16 +539,16 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | `GET /monitoring/claims` | W |
 | `GET /office/accounts/inoperative` | W |
 | `GET /office/cases/{caseId}` | W |
+| `GET /office/members/{uan}/locks` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
+| `POST /office/establishments/{estId}/defreezes` | W |
+| `POST /office/establishments/{estId}/freezes` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/members/{uan}/defreezes` | W |
-| `GET /office/members/{uan}/locks` | P |
+| `POST /office/system/locks/{lockId}/release` | W |
 | `POST /audit/concurrent/alerts/{alertId}/replies` | P |
 | `POST /audit/internal/paras/{paraId}/replies` | P |
-| `POST /office/establishments/{estId}/defreezes` | P |
-| `POST /office/establishments/{estId}/freezes` | P |
-| `POST /office/system/locks/{lockId}/release` | P |
 
 #### `fo.cash` — Cashier / Cash branch
 
@@ -797,8 +798,8 @@ Activities: **F07.freeze_zo** Order freezing (Categories B / C) at zone level
 |---|---|
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/work-queue` | W |
+| `POST /office/establishments/{estId}/freezes` | W |
 | `POST /office/members/{uan}/freezes` | W |
-| `POST /office/establishments/{estId}/freezes` | P |
 
 #### `zo.rpfc1_audit` — RPFC-I (Audit) and **Zonal Concurrent Audit Cell (CAC)** — daily download from the Audit Portal, alerts to ROs
 
@@ -884,8 +885,8 @@ Activities: **F03.interest** Record the approved annual interest rate and run in
 |---|---|
 | `GET /office/accounts/interest-postings` | W |
 | `POST /office/accounts/interest-postings` | W |
+| `POST /office/establishments/{estId}/freezes` | W |
 | `POST /office/members/{uan}/freezes` | W |
-| `POST /office/establishments/{estId}/freezes` | P |
 | `PUT /ho/config/interest-rates/{financialYear}` | P |
 
 #### `ho.compliance` — Compliance Division
@@ -1685,6 +1686,7 @@ flowchart LR
   F07_verify_ss["fo.ss<br/>Review verification (SS route)"]
   F07_verify_ao["fo.ao<br/>Review verification (AO route, accounts cases)"]
   F07_verify_apfc["fo.apfc<br/>Validate verification"]
+  F07_defreeze_est_maker["fo.apfc<br/>Recommend de-freezing an establishment (maker); the OIC orde"]
   F07_defreeze["fo.oic<br/>Recommend / order de-freezing; post-defreeze claims use the "]
   F07_committee["zo.fraud_committee<br/>Review suspected fraud cases reported by OICs"]
   style F07_committee stroke-dasharray: 5 5
@@ -1707,6 +1709,7 @@ flowchart LR
   F07_verify_ss --> F07_verify_apfc
   F07_verify_ao --> F07_verify_apfc
   F07_verify_apfc --> F07_defreeze
+  F07_defreeze_est_maker --> F07_defreeze
   F07_defreeze --> F07_block
   F07_committee --> F07_vig_referral
   F07_vig_referral --> F07_vig_zone
