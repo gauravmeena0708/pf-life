@@ -91,6 +91,13 @@ Unit tests 271 passed (pension-service 9); end to end 30 passed (including `test
 must-deny 18 passed. Found on the way: the pensioner could not make a declaration (the endpoint was granted only to
 family pensioners) and the DA (Pension) could not see overdue certificates; both grants were added.
 
+## Update — Phase 2, slice 4: pension settlement (29 September 2026)
+
+Unit tests 274 passed (pension-service 12); end to end 32 passed (including `test_pension_settlement.py`);
+must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have stopped the APFC (Pension) from
+e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
+for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
+
 ## Known limits
 
 - Journey B spends ₹6,00,000 of member A's synthetic balance per run; after about six runs `make reset` restores it.

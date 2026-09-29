@@ -61,7 +61,9 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/kyc` | W |
 | `GET /members/me/notifications` | W |
 | `GET /members/me/passbook` | W |
+| `GET /members/me/pension-applications` | W |
 | `GET /members/me/pension-eligibility-preview` | W |
+| `GET /members/me/pension-scheme-certificate` | W |
 | `GET /members/me/service-history` | W |
 | `GET /members/me/sessions` | W |
 | `GET /members/me/transfers/{transferId}` | W |
@@ -83,6 +85,9 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/me/joint-declarations` | W |
 | `POST /members/me/kyc/bank-accounts` | W |
 | `POST /members/me/kyc/{kycType}` | W |
+| `POST /members/me/pension-applications` | W |
+| `POST /members/me/pension-scheme-certificates` | W |
+| `POST /members/me/pension-scheme-certificates/{certId}/surrenders` | W |
 | `POST /members/me/security-reports` | W |
 | `POST /members/me/tax/form-15g-15h` | W |
 | `POST /members/me/transfers` | W |
@@ -95,7 +100,6 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/claims/{claimId}/audit-trail` | P |
 | `GET /members/me/higher-pension-options/{optionId}` | P |
 | `GET /members/me/nominations` | P |
-| `GET /members/me/pension-scheme-certificate` | P |
 | `GET /members/me/tax/form-16a` | P |
 | `GET /members/me/tax/taxable-interest` | P |
 | `GET /members/me/transfers/auto` | P |
@@ -105,9 +109,6 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/me/claims/{claimId}/documents` | P |
 | `POST /members/me/higher-pension-options` | P |
 | `POST /members/me/nominations` | P |
-| `POST /members/me/pension-applications` | P |
-| `POST /members/me/pension-scheme-certificates` | P |
-| `POST /members/me/pension-scheme-certificates/{certId}/surrenders` | P |
 | `POST /members/me/transfers/auto/{transferId}/confirmations` | P |
 | `POST /members/uan-lookups` | P |
 | `POST /public/claims/status-lookups` | P |
@@ -130,7 +131,7 @@ Activities: **F05.disabled_apply** Apply for disablement pension
 
 | Endpoint | Status |
 |---|---|
-| `POST /members/me/pension-applications` | P |
+| `POST /members/me/pension-applications` | W |
 
 #### `pensioner` — Pensioner (member / early / disablement pension)
 
@@ -391,6 +392,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 |---|---|
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/member-change-requests` | W |
+| `GET /office/pension-claims` | W |
 | `GET /office/transfers` | W |
 | `GET /office/work-queue` | W |
 | `POST /ai/claims/analyse` | W |
@@ -398,6 +400,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /office/cases/{caseId}/recommendations` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/member-change-requests/{requestId}/recommendations` | W |
+| `POST /office/pension-claims/{claimId}/input-data-sheets` | W |
 | `POST /office/transfers/{transferId}/verifications` | W |
 | `GET /office/accounts/inoperative` | P |
 | `GET /office/annexure-k-files` | P |
@@ -411,7 +414,6 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /office/ecr-filings/{filingId}/rejections` | P |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P |
 | `POST /office/ledger-journals/{journalId}/reversals` | P |
-| `POST /office/pension-claims/{claimId}/input-data-sheets` | P |
 | `POST /office/pensions/higher-pension-options/{optionId}/ledger-transfers` | P |
 | `POST /office/physical-claims/{intakeId}/identity-validations` | P |
 | `POST /office/receipts/{receiptId}/trrn-adjustments` | P |
@@ -462,15 +464,16 @@ Activities: **F02.jd_verify_ao** Verifier (AO route): cross-check and recommend;
 | Endpoint | Status |
 |---|---|
 | `GET /office/cases/{caseId}` | W |
+| `GET /office/pension-claims` | W |
 | `GET /office/transfers` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/decisions` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/member-change-requests/{requestId}/decisions` | W |
 | `POST /office/member-change-requests/{requestId}/verifications` | W |
+| `POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals` | W |
 | `POST /office/transfers/{transferId}/decisions` | W |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P |
-| `POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals` | P |
 
 #### `fo.fa_accounts` — DA / SS in the F&A (Accounts) wing — ledger debit posting, **Claim Authorization Document (CAD)** generation, reconciliation of rejected / returned payments
 
@@ -586,17 +589,19 @@ Activities: **F05.worksheet** Generate pension worksheet (Pension > Transaction 
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/pension-claims` | W |
 | `GET /office/pensions/enquiries` | W |
 | `GET /office/pensions/life-certificates/overdue` | W |
 | `GET /office/pensions/updation-activities` | W |
+| `POST /office/pensions/ppo-issuances` | W |
+| `POST /office/pensions/ppos/{ppoId}/dispatches` | W |
+| `POST /office/pensions/ppos/{ppoId}/initial-arrears` | W |
+| `POST /office/pensions/scheme-certificates/{certId}/surrender-adjudications` | W |
+| `POST /office/pensions/service-aggregations` | W |
+| `POST /office/pensions/transfers-in` | W |
+| `POST /office/pensions/worksheets` | W |
 | `POST /office/pensions/{ppoId}/updation-activities` | W |
-| `POST /office/pensions/ppo-issuances` | P |
-| `POST /office/pensions/ppos/{ppoId}/dispatches` | P |
-| `POST /office/pensions/scheme-certificates/{certId}/surrender-adjudications` | P |
-| `POST /office/pensions/service-aggregations` | P |
 | `POST /office/pensions/special-10d-cases` | P |
-| `POST /office/pensions/transfers-in` | P |
-| `POST /office/pensions/worksheets` | P |
 
 #### `fo.ss_pension` — SS (Pension)
 
@@ -604,7 +609,8 @@ Activities: **F05.initial_arrear** Check initial arrear and forward
 
 | Endpoint | Status |
 |---|---|
-| `POST /office/pensions/ppos/{ppoId}/initial-arrears` | P |
+| `GET /office/pension-claims` | W |
+| `POST /office/pensions/ppos/{ppoId}/initial-arrears` | W |
 
 #### `fo.apfc_pension` — APFC / AC (Pension) — PPO approval and e-sign, DLC monitoring
 
@@ -612,16 +618,18 @@ Activities: **F05.ppo_approve** Approve worksheet, PPO and initial arrear; e-sig
 
 | Endpoint | Status |
 |---|---|
+| `GET /cpps/disbursement-runs` | W |
+| `GET /office/pension-claims` | W |
 | `GET /office/pensions/life-certificates/overdue` | W |
 | `GET /office/pensions/revisions` | W |
+| `POST /office/pensions/brs-reconciliations` | W |
+| `POST /office/pensions/ppos/{ppoId}/e-signatures` | W |
 | `POST /office/pensions/updation-activities/{activityId}/decisions` | W |
+| `POST /office/pensions/worksheets/{worksheetId}/approvals` | W |
 | `POST /office/pensions/{ppoId}/resumptions` | W |
 | `POST /office/pensions/{ppoId}/revisions` | W |
 | `POST /office/pensions/{ppoId}/suspensions` | W |
-| `POST /office/pensions/brs-reconciliations` | P |
 | `POST /office/pensions/higher-pension-options/{optionId}/decisions` | P |
-| `POST /office/pensions/ppos/{ppoId}/e-signatures` | P |
-| `POST /office/pensions/worksheets/{worksheetId}/approvals` | P |
 
 #### `fo.pension_disbursement` — Pension Disbursement Section
 
@@ -1146,8 +1154,9 @@ Activities: **F05.cpps** Monthly pan-India disbursement through the sponsor bank
 
 | Endpoint | Status |
 |---|---|
-| `POST /cpps/disbursement-runs` | P |
-| `POST /cpps/reconciliations` | P |
+| `GET /cpps/disbursement-runs` | W |
+| `POST /cpps/disbursement-runs` | W |
+| `POST /cpps/reconciliations` | W |
 
 Integration adapters: `pension_bank`
 

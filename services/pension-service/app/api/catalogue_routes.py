@@ -10,7 +10,27 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /pensioners/me', 'POST /integrations/mock-jeevan-pramaan/dlc-events', 'GET /members/me/pension-eligibility-preview', 'GET /office/pensions/enquiries', 'GET /office/pensions/revisions', 'GET /office/pensions/updation-activities', 'POST /pensioners/me/bank-change-requests', 'POST /pensioners/me/declarations', 'GET /pensioners/me/life-certificate', 'GET /pensioners/me/payments', 'GET /pensioners/me/pension-slips', 'GET /pensioners/me/ppo', 'POST /public/demo-calculations/pension', 'POST /public/pension/life-certificate-lookups', 'POST /public/pension/payment-enquiries', 'POST /public/pension/ppo-lookups', 'POST /public/pension/status-enquiries', 'GET /office/pensions/life-certificates/overdue', 'POST /pensioners/me/life-certificate/submissions', 'POST /office/pensions/updation-activities/{activityId}/decisions', 'POST /office/pensions/{ppoId}/resumptions', 'POST /office/pensions/{ppoId}/revisions', 'POST /office/pensions/{ppoId}/suspensions', 'POST /office/pensions/{ppoId}/updation-activities']
+OPERATIONS = ['GET /cpps/disbursement-runs', 'POST /cpps/disbursement-runs', 'POST /cpps/reconciliations', 'GET /office/pension-claims', 'GET /pensioners/me', 'POST /integrations/mock-jeevan-pramaan/dlc-events', 'POST /integrations/mock-pension-bank/paid-statements', 'GET /members/me/pension-applications', 'POST /members/me/pension-applications', 'GET /members/me/pension-eligibility-preview', 'GET /members/me/pension-scheme-certificate', 'POST /members/me/pension-scheme-certificates', 'POST /office/pensions/brs-reconciliations', 'GET /office/pensions/enquiries', 'POST /office/pensions/ppo-issuances', 'GET /office/pensions/revisions', 'POST /office/pensions/service-aggregations', 'POST /office/pensions/transfers-in', 'GET /office/pensions/updation-activities', 'POST /office/pensions/worksheets', 'POST /pensioners/me/bank-change-requests', 'POST /pensioners/me/declarations', 'GET /pensioners/me/life-certificate', 'GET /pensioners/me/payments', 'GET /pensioners/me/pension-slips', 'GET /pensioners/me/ppo', 'POST /public/demo-calculations/pension', 'POST /public/pension/life-certificate-lookups', 'POST /public/pension/payment-enquiries', 'POST /public/pension/ppo-lookups', 'POST /public/pension/status-enquiries', 'GET /office/pensions/life-certificates/overdue', 'POST /pensioners/me/life-certificate/submissions', 'POST /members/me/pension-scheme-certificates/{certId}/surrenders', 'POST /office/pensions/ppos/{ppoId}/dispatches', 'POST /office/pensions/ppos/{ppoId}/e-signatures', 'POST /office/pensions/ppos/{ppoId}/initial-arrears', 'POST /office/pensions/scheme-certificates/{certId}/surrender-adjudications', 'POST /office/pensions/updation-activities/{activityId}/decisions', 'POST /office/pensions/worksheets/{worksheetId}/approvals', 'POST /office/pension-claims/{claimId}/input-data-sheets', 'POST /office/pensions/{ppoId}/resumptions', 'POST /office/pensions/{ppoId}/revisions', 'POST /office/pensions/{ppoId}/suspensions', 'POST /office/pensions/{ppoId}/updation-activities', 'POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals']
+
+@router.api_route("/api/v1/cpps/disbursement-runs", methods=["GET"], include_in_schema=False)
+async def get_cpps_disbursement_runs(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "CPPS runs with their paid statements and reconciliation exceptions")
+
+
+@router.api_route("/api/v1/cpps/disbursement-runs", methods=["POST"], include_in_schema=False)
+async def post_cpps_disbursement_runs(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "CPPS monthly pan-India disbursement run through the sponsor bank")
+
+
+@router.api_route("/api/v1/cpps/reconciliations", methods=["POST"], include_in_schema=False)
+async def post_cpps_reconciliations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "CPPS reconciliation of paid statements")
+
+
+@router.api_route("/api/v1/office/pension-claims", methods=["GET"], include_in_schema=False)
+async def get_office_pension_claims(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Pension claims (Form 10D) of the office by state: each desk sees what is waiting for it")
+
 
 @router.api_route("/api/v1/pensioners/me", methods=["GET"], include_in_schema=False)
 async def get_pensioners_me(actor: Actor = Depends(require_actor)) -> None:
@@ -22,9 +42,39 @@ async def post_integrations_mock_jeevan_pramaan_dlc_events(actor: Actor = Depend
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Signed callback from mock Jeevan Pramaan")
 
 
+@router.api_route("/api/v1/integrations/mock-pension-bank/paid-statements", methods=["POST"], include_in_schema=False)
+async def post_integrations_mock_pension_bank_paid_statements(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Signed paid-statement callback from the pension bank")
+
+
+@router.api_route("/api/v1/members/me/pension-applications", methods=["GET"], include_in_schema=False)
+async def get_members_me_pension_applications(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The member's pension application: its desk-by-desk progress, the PPO number once issued")
+
+
+@router.api_route("/api/v1/members/me/pension-applications", methods=["POST"], include_in_schema=False)
+async def post_members_me_pension_applications(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Monthly pension application")
+
+
 @router.api_route("/api/v1/members/me/pension-eligibility-preview", methods=["GET"], include_in_schema=False)
 async def get_members_me_pension_eligibility_preview(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Pre-check pension eligibility across all member IDs under the UAN; flags untransferred service (thre")
+
+
+@router.api_route("/api/v1/members/me/pension-scheme-certificate", methods=["GET"], include_in_schema=False)
+async def get_members_me_pension_scheme_certificate(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Scheme certificate status")
+
+
+@router.api_route("/api/v1/members/me/pension-scheme-certificates", methods=["POST"], include_in_schema=False)
+async def post_members_me_pension_scheme_certificates(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Scheme certificate request (Form 10C option)")
+
+
+@router.api_route("/api/v1/office/pensions/brs-reconciliations", methods=["POST"], include_in_schema=False)
+async def post_office_pensions_brs_reconciliations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Monthly Bank Reconciliation Statement (BRS) of pension scrolls vs bank debit advices")
 
 
 @router.api_route("/api/v1/office/pensions/enquiries", methods=["GET"], include_in_schema=False)
@@ -32,14 +82,34 @@ async def get_office_pensions_enquiries(actor: Actor = Depends(require_actor)) -
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Pension Enquiry Details — PPO, beneficiaries, pension payments, scheme certificate issue, service, a")
 
 
+@router.api_route("/api/v1/office/pensions/ppo-issuances", methods=["POST"], include_in_schema=False)
+async def post_office_pensions_ppo_issuances(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Issue PPO after Form 10D settlement")
+
+
 @router.api_route("/api/v1/office/pensions/revisions", methods=["GET"], include_in_schema=False)
 async def get_office_pensions_revisions(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Pension revisions proposed when a published formula change raises pensions in payment, with arrears ")
 
 
+@router.api_route("/api/v1/office/pensions/service-aggregations", methods=["POST"], include_in_schema=False)
+async def post_office_pensions_service_aggregations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "DA (Pension) aggregates untransferred past service into the calculation sheet")
+
+
+@router.api_route("/api/v1/office/pensions/transfers-in", methods=["POST"], include_in_schema=False)
+async def post_office_pensions_transfers_in(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Transfer in with / without PPO")
+
+
 @router.api_route("/api/v1/office/pensions/updation-activities", methods=["GET"], include_in_schema=False)
 async def get_office_pensions_updation_activities(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Track Claim Updation Activity Status — PRO and DA activities by filing mode (physical / online) and ")
+
+
+@router.api_route("/api/v1/office/pensions/worksheets", methods=["POST"], include_in_schema=False)
+async def post_office_pensions_worksheets(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "DA (Pension) generates the worksheet (Pension > Transaction > Pension Worksheet)")
 
 
 @router.api_route("/api/v1/pensioners/me/bank-change-requests", methods=["POST"], include_in_schema=False)
@@ -107,9 +177,44 @@ async def post_pensioners_me_life_certificate_submissions(actor: Actor = Depends
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Record DLC submission (mock Jeevan Pramaan / face-auth adapter)")
 
 
+@router.api_route("/api/v1/members/me/pension-scheme-certificates/{certId}/surrenders", methods=["POST"], include_in_schema=False)
+async def post_members_me_pension_scheme_certificates_certId_surrenders(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Surrender a Scheme Certificate to convert it to monthly pension (Form 10D) or withdrawal benefit (Fo")
+
+
+@router.api_route("/api/v1/office/pensions/ppos/{ppoId}/dispatches", methods=["POST"], include_in_schema=False)
+async def post_office_pensions_ppos_ppoId_dispatches(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Dispatch PPO and scroll")
+
+
+@router.api_route("/api/v1/office/pensions/ppos/{ppoId}/e-signatures", methods=["POST"], include_in_schema=False)
+async def post_office_pensions_ppos_ppoId_e_signatures(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "APFC (Pension) e-signs the PPO")
+
+
+@router.api_route("/api/v1/office/pensions/ppos/{ppoId}/initial-arrears", methods=["POST"], include_in_schema=False)
+async def post_office_pensions_ppos_ppoId_initial_arrears(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Initial arrear (DA(P) → SS(P) → APFC(P))")
+
+
+@router.api_route("/api/v1/office/pensions/scheme-certificates/{certId}/surrender-adjudications", methods=["POST"], include_in_schema=False)
+async def post_office_pensions_scheme_certificates_certId_surrender_adjudications(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "DA (Pension) validates and cancels a surrendered Scheme Certificate")
+
+
 @router.api_route("/api/v1/office/pensions/updation-activities/{activityId}/decisions", methods=["POST"], include_in_schema=False)
 async def post_office_pensions_updation_activities_activityId_decisions(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "APFC (Pension) settles, rejects or sends back an updation activity (maker ≠ checker); a settled acti")
+
+
+@router.api_route("/api/v1/office/pensions/worksheets/{worksheetId}/approvals", methods=["POST"], include_in_schema=False)
+async def post_office_pensions_worksheets_worksheetId_approvals(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "APFC (Pension) approves the worksheet")
+
+
+@router.api_route("/api/v1/office/pension-claims/{claimId}/input-data-sheets", methods=["POST"], include_in_schema=False)
+async def post_office_pension_claims_claimId_input_data_sheets(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "DA (Accounts) prepares the Input Data Sheet (Claims > Transaction > Form-10D/10C)")
 
 
 @router.api_route("/api/v1/office/pensions/{ppoId}/resumptions", methods=["POST"], include_in_schema=False)
@@ -130,3 +235,8 @@ async def post_office_pensions_ppoId_suspensions(actor: Actor = Depends(require_
 @router.api_route("/api/v1/office/pensions/{ppoId}/updation-activities", methods=["POST"], include_in_schema=False)
 async def post_office_pensions_ppoId_updation_activities(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "DA (Pension) initiates an updation activity: BASIC_DETAILS, PENSION_START, PENSION_STOP, DLC_REVALID")
+
+
+@router.api_route("/api/v1/office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals", methods=["POST"], include_in_schema=False)
+async def post_office_pension_claims_claimId_input_data_sheets_idsId_approvals(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "AO approves the IDS")

@@ -125,6 +125,14 @@
       {
         "name": "fo.da_pension",
         "description": "Stakeholder fo.da_pension (docs/stakeholders.md)"
+      },
+      {
+        "name": "fo.ss_pension",
+        "description": "Stakeholder fo.ss_pension (docs/stakeholders.md)"
+      },
+      {
+        "name": "tech.cpps",
+        "description": "Stakeholder tech.cpps (docs/stakeholders.md)"
       }
     ]
   },
@@ -767,6 +775,63 @@
         "fo.da_pension"
       ],
       "id": "00000000-0000-4000-8000-000000000030"
+    },
+    {
+      "username": "member-e",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Member E retired",
+      "lastName": "Demo",
+      "email": "member-e@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "member"
+      ],
+      "id": "00000000-0000-4000-8000-000000000031"
+    },
+    {
+      "username": "ro-ss-pension",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "SS Pension",
+      "lastName": "Demo",
+      "email": "ro-ss-pension@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.ss_pension"
+      ],
+      "id": "00000000-0000-4000-8000-000000000032"
+    },
+    {
+      "username": "ndc-cpps",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "CPPS operator NDC",
+      "lastName": "Demo",
+      "email": "ndc-cpps@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "tech.cpps"
+      ],
+      "id": "00000000-0000-4000-8000-000000000033"
     }
   ]
 }

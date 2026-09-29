@@ -393,7 +393,7 @@ async def status_enquiry(body: PpoEnquiry, actor: Actor = Depends(require_actor)
     p = await load(session, body.ppo_id)
     if not p:
         return envelope({"found": False})
-    return envelope({"found": True, "ppo_id": p["ppo_id"], "pension_status": {"IN_PAYMENT": "Active", "SUSPENDED": "Suspended", "STOPPED": "Stopped"}[p["status"]],
+    return envelope({"found": True, "ppo_id": p["ppo_id"], "pension_status": {"IN_PAYMENT": "Active", "SUSPENDED": "Suspended", "STOPPED": "Stopped", "PENDING": "In process"}[p["status"]],
                      "life_certificate_due": iso(p["life_certificate_valid_till"]), "label": "SYNTHETIC_DEMO"})
 
 

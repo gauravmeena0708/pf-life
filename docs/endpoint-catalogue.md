@@ -247,7 +247,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /members/me/transfers/auto` | Auto-transfer status on job change | P | 2 | claim |
 | `POST /members/me/transfers/auto/{transferId}/confirmations` 🔐 | Confirm auto-transfer | P | 2 | claim |
 | `GET /members/me/transfers/{transferId}/annexure-k` | **Annexure K** transfer statement | W | 1 | contribution |
-| `GET /members/me/pension-scheme-certificate` | Scheme certificate status | P | 2 | pension |
+| `GET /members/me/pension-scheme-certificate` | Scheme certificate status | W | 1 | pension |
 | `POST /members/me/higher-pension-options` 🔐 | Submit joint option for higher pension | P | 2 | pension |
 | `GET /members/me/higher-pension-options/{optionId}` | Higher-pension application status | P | 2 | pension |
 
@@ -269,8 +269,9 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /members/me/claims` 💰 (`formType=FORM_31`) | **Advance / partial withdrawal** (purpose as sub-type) | W | 1 | claim |
 | `POST /members/me/claims` 💰 (`formType=FORM_19`) | **Final PF settlement** | P | 2 | claim |
 | `POST /members/me/claims` 💰 (`formType=FORM_10C`) | **Pension withdrawal benefit** (cash benefit) | P | 2 | claim |
-| `POST /members/me/pension-scheme-certificates` 🔐 | **Scheme certificate** request (Form 10C option) | P | 2 | pension |
-| `POST /members/me/pension-applications` 💰 (`formType=FORM_10D`) | **Monthly pension** application | P | 2 | pension |
+| `POST /members/me/pension-scheme-certificates` 🔐 | **Scheme certificate** request (Form 10C option) | W | 1 | pension |
+| `POST /members/me/pension-applications` 💰 (`formType=FORM_10D`) | **Monthly pension** application | W | 1 | pension |
+| `GET /members/me/pension-applications` | The member's pension application: its desk-by-desk progress, the PPO number once issued | W | 1 | pension |
 | `POST /members/me/transfers` 💰🔐 (`formType=FORM_13`) | **Transfer** of PF between member IDs / exempted trusts | W | 1 | claim |
 | `GET /members/me/transfers/{transferId}` | Transfer status | W | 1 | claim |
 | `GET /members/me/claims` | List own claims | W | 1 | claim |
@@ -407,7 +408,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/pensions/updation-activities/{activityId}/decisions` 🔐 | APFC (Pension) settles, rejects or sends back an updation activity (maker ≠ checker); a settled activity changes the pension (life certificate, start / stop, unhold, bank) | W | 1 | pension |
 | `POST /office/physical-claims` (`formType=PPO_AMENDMENT_BENEFICIARY` \| `PPO_AMENDMENT_SERVICE` \| `PPO_AMENDMENT_POHW`) | PRO counter intake of a **PPO amendment** (beneficiary, service, pension on higher wages) | P | 2 | pension |
 | `POST /office/physical-claims` (`formType=DEATH_UPDATION` \| `PHYSICAL_LC_UPDATION` \| `SPOUSE_REMARRIAGE_UPDATION`) | PRO counter intake of a pensioner **death**, **physical life certificate** or **spouse remarriage** updation | P | 2 | pension |
-| `POST /office/pensions/ppo-issuances` 🔐 | Issue PPO after Form 10D settlement | P | 2 | pension |
+| `POST /office/pensions/ppo-issuances` 🔐 | Issue PPO after Form 10D settlement | W | 1 | pension |
+| `GET /office/pension-claims?state=` | Pension claims (Form 10D) of the office by state: each desk sees what is waiting for it | W | 1 | pension |
 | `POST /office/pensions/{ppoId}/revisions` 💰🔐 | Pension revision (incl. higher-pension outcome) | W | 1 | pension |
 | `GET /office/pensions/revisions?state=` | Pension revisions proposed when a published formula change raises pensions in payment, with arrears to date | W | 1 | pension |
 | `POST /office/pensions/higher-pension-options/{optionId}/decisions` 🔐 | Decide on a validated option → dues demand event | P | 3 | pension |
@@ -420,19 +422,20 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `POST /office/pension-claims/{claimId}/input-data-sheets` | DA (Accounts) prepares the Input Data Sheet (Claims > Transaction > Form-10D/10C) | P | 2 | pension |
-| `POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals` 🔐 | AO approves the IDS | P | 2 | pension |
-| `POST /office/pensions/worksheets` | DA (Pension) generates the worksheet (Pension > Transaction > Pension Worksheet) | P | 2 | pension |
-| `POST /office/pensions/worksheets/{worksheetId}/approvals` 🔐 | APFC (Pension) approves the worksheet | P | 2 | pension |
+| `POST /office/pension-claims/{claimId}/input-data-sheets` | DA (Accounts) prepares the Input Data Sheet (Claims > Transaction > Form-10D/10C) | W | 1 | pension |
+| `POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals` 🔐 | AO approves the IDS | W | 1 | pension |
+| `POST /office/pensions/worksheets` | DA (Pension) generates the worksheet (Pension > Transaction > Pension Worksheet) | W | 1 | pension |
+| `POST /office/pensions/worksheets/{worksheetId}/approvals` 🔐 | APFC (Pension) approves the worksheet | W | 1 | pension |
 | `POST /office/pensions/special-10d-cases` | Special 10D module for incomplete service / wage data | P | 3 | pension |
-| `POST /office/pensions/transfers-in` | Transfer in with / without PPO | P | 2 | pension |
-| `POST /office/pensions/ppos/{ppoId}/initial-arrears` 💰 | Initial arrear (DA(P) → SS(P) → APFC(P)) | P | 2 | pension |
-| `POST /office/pensions/ppos/{ppoId}/e-signatures` 🔐 | APFC (Pension) e-signs the PPO | P | 2 | pension |
-| `POST /office/pensions/ppos/{ppoId}/dispatches` | Dispatch PPO and scroll | P | 2 | pension |
+| `POST /office/pensions/transfers-in` | Transfer in with / without PPO | W | 1 | pension |
+| `POST /office/pensions/ppos/{ppoId}/initial-arrears` 💰 | Initial arrear (DA(P) → SS(P) → APFC(P)) | W | 1 | pension |
+| `POST /office/pensions/ppos/{ppoId}/e-signatures` 🔐 | APFC (Pension) e-signs the PPO | W | 1 | pension |
+| `POST /office/pensions/ppos/{ppoId}/dispatches` | Dispatch PPO and scroll | W | 1 | pension |
 | `GET /office/pensions/disbursement-lists` | Legacy bank-wise disbursement lists (until CPPS) | P | 3 | pension |
-| `POST /cpps/disbursement-runs` 💰🔐 | CPPS monthly pan-India disbursement run through the sponsor bank | P | 2 | pension |
-| `POST /cpps/reconciliations` 🔐 | CPPS reconciliation of paid statements | P | 2 | pension |
-| `POST /integrations/mock-pension-bank/paid-statements` | Signed paid-statement callback from the pension bank | M | 2 | pension |
+| `POST /cpps/disbursement-runs` 💰🔐 | CPPS monthly pan-India disbursement run through the sponsor bank | W | 1 | pension |
+| `GET /cpps/disbursement-runs` | CPPS runs with their paid statements and reconciliation exceptions | W | 1 | pension |
+| `POST /cpps/reconciliations` 🔐 | CPPS reconciliation of paid statements | W | 1 | pension |
+| `POST /integrations/mock-pension-bank/paid-statements` | Signed paid-statement callback from the pension bank | M | 1 | pension |
 | `GET /ho/actuarial/extracts` | EPS data extract for actuarial valuation (no direct identifiers) | P | 3 | pension |
 
 
@@ -441,10 +444,10 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
 | `GET /members/me/pension-eligibility-preview` | Pre-check pension eligibility across all member IDs under the UAN; flags untransferred service (threshold from illustrative config) | W | 1 | pension |
-| `POST /office/pensions/service-aggregations` 🔐 | DA (Pension) aggregates untransferred past service into the calculation sheet | P | 2 | pension |
-| `POST /members/me/pension-scheme-certificates/{certId}/surrenders` 💰🔐 | Surrender a Scheme Certificate to convert it to monthly pension (Form 10D) or withdrawal benefit (Form 10C) | P | 2 | pension |
-| `POST /office/pensions/scheme-certificates/{certId}/surrender-adjudications` 🔐 | DA (Pension) validates and cancels a surrendered Scheme Certificate | P | 2 | pension |
-| `POST /office/pensions/brs-reconciliations` 💰🔐 | Monthly Bank Reconciliation Statement (BRS) of pension scrolls vs bank debit advices | P | 2 | pension |
+| `POST /office/pensions/service-aggregations` 🔐 | DA (Pension) aggregates untransferred past service into the calculation sheet | W | 1 | pension |
+| `POST /members/me/pension-scheme-certificates/{certId}/surrenders` 💰🔐 | Surrender a Scheme Certificate to convert it to monthly pension (Form 10D) or withdrawal benefit (Form 10C) | W | 1 | pension |
+| `POST /office/pensions/scheme-certificates/{certId}/surrender-adjudications` 🔐 | DA (Pension) validates and cancels a surrendered Scheme Certificate | W | 1 | pension |
+| `POST /office/pensions/brs-reconciliations` 💰🔐 | Monthly Bank Reconciliation Statement (BRS) of pension scrolls vs bank debit advices | W | 1 | pension |
 
 ## 10. Compliance, e-proceedings and enforcement
 

@@ -9,7 +9,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.1** | Dates of exit (member Mark Exit; employer marks, signatory approves), service history, the member's pending / processed applications, Form 13 transfer (member → present employer → DA → AO; ledger moves the balance), Annexure K | **Done** (28 Sep 2026) |
 | **P2.2** | Employer member registration (single, bulk; new UAN or a new member ID under an existing one), Form 11, member KYC (PAN, bank) through mock verifiers and the signatory's approval, KYC bulk with error list, missing details, active-member export, the employee's contribution ledger, UAN card, account readiness | **Done** (28 Sep 2026) |
 | **P2.3** | Pension office and pensioner self-service: pension enquiry (8 tabs), updation activities (DA initiates, APFC settles) and tracker, overdue life certificates, suspend / resume (held months released), mock Jeevan Pramaan DLC and signed callback, PPO, slips, bank change, declarations, public pension enquiries behind the demo CAPTCHA | **Done** (29 Sep 2026) |
-| P2.4 | Pension settlement: Form 10D, scheme certificate, IDS, worksheet, PPO issue, e-sign, dispatch, initial arrears, CPPS runs, BRS, service aggregation | |
+| **P2.4** | Pension settlement: Form 10D desk by desk (DA Accounts IDS → AO → DA Pension worksheet → APFC Pension → PPO → initial arrear DA → SS → APFC e-sign → dispatch), scheme certificate and its surrender, service aggregation, transfers-in, CPPS monthly run with the mock sponsor bank's paid statement and reconciliation, BRS | **Done** (29 Sep 2026) |
 | P2.5 | Death and EDLI claims, CAD, payment scrolls, physical intake, claim documents, cancellations, audit trail | |
 | P2.6 | Establishment registration and configuration, Form 5A, branches, DSC / e-sign approvals | |
 | P2.7 | Returns, receipts and ledger: arrear / supplementary ECR, demands, direct challans, 14B/7Q knock-offs, VDR rejection, reversals, recredits | |
@@ -54,3 +54,17 @@ meaning is confirmed.
 - The gateway now asks the demo CAPTCHA for the four public pension enquiries as well as the TRRN lookup.
 - Not modelled: beneficiaries / family pension, commutation, recovery and TDS on pension (the enquiry shows them
   empty), the pension-disbursing bank's own enquiry.
+
+## P2.4 — how it is built
+
+- pension-service holds the Form 10D claim as a small state machine; each step is its own endpoint and role, and
+  the officer who took a step cannot check it (the APFC (Pension) both approves the worksheet and e-signs the PPO,
+  as in the Pension Manual, with other officers in between). The worksheet uses the pension formula in the rule
+  set in force on the date the pension starts; the e-signature is bound (step-up) to the initial arrear amount.
+- Dispatching the PPO puts the pension in payment and credits the months since it started (the initial arrear).
+- CPPS: a run lists the month's credits; the sponsor bank's paid statement arrives by a signed callback, or — when
+  CPPS reconciles before one arrived — the mock bank answers at once (accounts ending 0000 are returned). The
+  office's BRS compares its scroll with the bank's debits.
+- New personas: `member-e` (retired member), `ro-ss-pension` (SS Pension), `ndc-cpps` (CPPS operator).
+- Not built: family pension (Form 10D by claimants), Special 10D, higher-pension options, the legacy bank-wise
+  disbursement lists.

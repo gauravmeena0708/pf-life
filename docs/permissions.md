@@ -133,7 +133,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/kyc` | W | self — caller's own member record only |  |
 | `GET /members/me/notifications` | W | self — caller's own member record only |  |
 | `GET /members/me/passbook` | W | self — caller's own member record only |  |
+| `GET /members/me/pension-applications` | W | self — caller's own member record only |  |
 | `GET /members/me/pension-eligibility-preview` | W | self — caller's own member record only |  |
+| `GET /members/me/pension-scheme-certificate` | W | self — caller's own member record only |  |
 | `GET /members/me/service-history` | W | self — caller's own member record only |  |
 | `GET /members/me/sessions` | W | self — caller's own member record only |  |
 | `GET /members/me/transfers/{transferId}` | W | self — caller's own member record only |  |
@@ -155,6 +157,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /members/me/joint-declarations` | W | self — caller's own member record only | yes |
 | `POST /members/me/kyc/bank-accounts` | W | self — caller's own member record only | yes |
 | `POST /members/me/kyc/{kycType}` | W | self — caller's own member record only | yes |
+| `POST /members/me/pension-applications` | W | self — caller's own member record only |  |
+| `POST /members/me/pension-scheme-certificates` | W | self — caller's own member record only | yes |
+| `POST /members/me/pension-scheme-certificates/{certId}/surrenders` | W | self — caller's own member record only | yes |
 | `POST /members/me/security-reports` | W | self — caller's own member record only |  |
 | `POST /members/me/tax/form-15g-15h` | W | self — caller's own member record only |  |
 | `POST /members/me/transfers` | W | self — caller's own member record only | yes |
@@ -167,7 +172,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/claims/{claimId}/audit-trail` | P | self — caller's own member record only |  |
 | `GET /members/me/higher-pension-options/{optionId}` | P | self — caller's own member record only |  |
 | `GET /members/me/nominations` | P | self — caller's own member record only |  |
-| `GET /members/me/pension-scheme-certificate` | P | self — caller's own member record only |  |
 | `GET /members/me/tax/form-16a` | P | self — caller's own member record only |  |
 | `GET /members/me/tax/taxable-interest` | P | self — caller's own member record only |  |
 | `GET /members/me/transfers/auto` | P | self — caller's own member record only |  |
@@ -177,9 +181,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /members/me/claims/{claimId}/documents` | P | self — caller's own member record only |  |
 | `POST /members/me/higher-pension-options` | P | self — caller's own member record only | yes |
 | `POST /members/me/nominations` | P | self — caller's own member record only | yes |
-| `POST /members/me/pension-applications` | P | self — caller's own member record only |  |
-| `POST /members/me/pension-scheme-certificates` | P | self — caller's own member record only | yes |
-| `POST /members/me/pension-scheme-certificates/{certId}/surrenders` | P | self — caller's own member record only | yes |
 | `POST /members/me/transfers/auto/{transferId}/confirmations` | P | self — caller's own member record only | yes |
 | `POST /members/uan-lookups` | P | unauthenticated with OTP / face-auth proof |  |
 | `POST /public/claims/status-lookups` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
@@ -196,7 +197,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `POST /members/me/pension-applications` | P | self — caller's own member record only |  |
+| `POST /members/me/pension-applications` | W | self — caller's own member record only |  |
 
 **`pensioner`** — Pensioner (member / early / disablement pension)
 
@@ -413,6 +414,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/member-change-requests` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/pension-claims` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/transfers` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /ai/claims/analyse` | W | caller's own permissions; advisory output only |  |
@@ -420,6 +422,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/cases/{caseId}/recommendations` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/member-change-requests/{requestId}/recommendations` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/pension-claims/{claimId}/input-data-sheets` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/transfers/{transferId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/accounts/inoperative` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/annexure-k-files` | P | office jurisdiction of the caller's posting |  |
@@ -433,7 +436,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/ecr-filings/{filingId}/rejections` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/ledger-journals/{journalId}/reversals` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/pension-claims/{claimId}/input-data-sheets` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/pensions/higher-pension-options/{optionId}/ledger-transfers` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/physical-claims/{intakeId}/identity-validations` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/receipts/{receiptId}/trrn-adjustments` | P | office jurisdiction of the caller's posting | yes |
@@ -476,15 +478,16 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/pension-claims` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/transfers` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/cases/{caseId}/decisions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/member-change-requests/{requestId}/decisions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/member-change-requests/{requestId}/verifications` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/transfers/{transferId}/decisions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals` | P | office jurisdiction of the caller's posting | yes |
 
 **`fo.fa_accounts`** — DA / SS in the F&A (Accounts) wing — ledger debit posting, **Claim Authorization Document (CAD)** generation, reconciliation of rejected / returned payments
 
@@ -582,38 +585,43 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /office/pension-claims` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/pensions/enquiries` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/pensions/life-certificates/overdue` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/pensions/updation-activities` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/pensions/ppo-issuances` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/pensions/ppos/{ppoId}/dispatches` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/pensions/ppos/{ppoId}/initial-arrears` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/pensions/scheme-certificates/{certId}/surrender-adjudications` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/pensions/service-aggregations` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/pensions/transfers-in` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/pensions/worksheets` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/pensions/{ppoId}/updation-activities` | W | office jurisdiction of the caller's posting | yes |
-| `POST /office/pensions/ppo-issuances` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/pensions/ppos/{ppoId}/dispatches` | P | office jurisdiction of the caller's posting |  |
-| `POST /office/pensions/scheme-certificates/{certId}/surrender-adjudications` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/pensions/service-aggregations` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/special-10d-cases` | P | office jurisdiction of the caller's posting |  |
-| `POST /office/pensions/transfers-in` | P | office jurisdiction of the caller's posting |  |
-| `POST /office/pensions/worksheets` | P | office jurisdiction of the caller's posting |  |
 
 **`fo.ss_pension`** — SS (Pension)
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `POST /office/pensions/ppos/{ppoId}/initial-arrears` | P | office jurisdiction of the caller's posting |  |
+| `GET /office/pension-claims` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/pensions/ppos/{ppoId}/initial-arrears` | W | office jurisdiction of the caller's posting |  |
 
 **`fo.apfc_pension`** — APFC / AC (Pension) — PPO approval and e-sign, DLC monitoring
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /cpps/disbursement-runs` | W | national (CPPS service role) |  |
+| `GET /office/pension-claims` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/pensions/life-certificates/overdue` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/pensions/revisions` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/pensions/brs-reconciliations` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/pensions/ppos/{ppoId}/e-signatures` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/updation-activities/{activityId}/decisions` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/pensions/worksheets/{worksheetId}/approvals` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/{ppoId}/resumptions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/{ppoId}/revisions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/{ppoId}/suspensions` | W | office jurisdiction of the caller's posting | yes |
-| `POST /office/pensions/brs-reconciliations` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/higher-pension-options/{optionId}/decisions` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/pensions/ppos/{ppoId}/e-signatures` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/pensions/worksheets/{worksheetId}/approvals` | P | office jurisdiction of the caller's posting | yes |
 
 **`fo.pension_disbursement`** — Pension Disbursement Section
 
@@ -1029,8 +1037,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `POST /cpps/disbursement-runs` | P | national (CPPS service role) | yes |
-| `POST /cpps/reconciliations` | P | national (CPPS service role) | yes |
+| `GET /cpps/disbursement-runs` | W | national (CPPS service role) |  |
+| `POST /cpps/disbursement-runs` | W | national (CPPS service role) | yes |
+| `POST /cpps/reconciliations` | W | national (CPPS service role) | yes |
 - `tech.epfo3` — EPFO 3.0 core-banking platform and auto-settlement engine (a system actor making automated decisions): *no endpoints (acts through an adapter or through another role)*
 - `tech.batch.annual_accounts` — Annual-accounts batch engine — year-end interest crediting; holds an exclusive lock on each member ledger while it runs (claims are blocked meanwhile): *no endpoints (acts through an adapter or through another role)*
 

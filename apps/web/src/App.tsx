@@ -15,6 +15,9 @@ import { ClaimDetailPage } from "./features/member/ClaimDetailPage";
 import { ProfilePage } from "./features/member/ProfilePage";
 import { ServicePage } from "./features/member/ServicePage";
 import { KycPage, UanCardPage } from "./features/member/KycPage";
+import { PensionApplicationPage } from "./features/member/PensionApplicationPage";
+import { PensionClaimsPage } from "./features/pension/PensionClaimsPage";
+import { CppsPage } from "./features/pension/CppsPage";
 import { RegistrationPage } from "./features/employer/RegistrationPage";
 import { MemberActionsPage } from "./features/employer/MemberActionsPage";
 import { WorkQueuePage } from "./features/office/WorkQueuePage";
@@ -100,6 +103,9 @@ export function App() {
             <Route path="/member/profile" element={<ProfilePage />} />
             <Route path="/member/service" element={<ServicePage />} />
             <Route path="/member/kyc" element={<KycPage />} />
+            <Route path="/member/pension" element={<PensionApplicationPage />} />
+            <Route path="/office/pension-claims" element={<PensionClaimsPage />} />
+            <Route path="/cpps" element={<CppsPage />} />
             <Route path="/member/uan-card" element={<UanCardPage />} />
             <Route path="/employer/registration" element={<RegistrationPage />} />
             <Route path="/employer/members" element={<MemberActionsPage />} />

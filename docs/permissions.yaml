@@ -352,19 +352,25 @@ stakeholders:
     via:
     - F04.transfer
   - endpoint: POST /members/me/pension-applications
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
     - F05.apply
   - endpoint: POST /members/me/pension-scheme-certificates
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: true
     via:
     - F05.apply
   - endpoint: GET /members/me/pension-scheme-certificate
-    status: P
+    status: W
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F05.apply
+  - endpoint: GET /members/me/pension-applications
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
@@ -376,7 +382,7 @@ stakeholders:
     via:
     - F05.preview
   - endpoint: POST /members/me/pension-scheme-certificates/{certId}/surrenders
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: true
     via:
@@ -492,7 +498,7 @@ stakeholders:
     - F11.search
   member.disabled:
   - endpoint: POST /members/me/pension-applications
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
@@ -1382,7 +1388,13 @@ stakeholders:
     via:
     - F04.transfer_recredit
   - endpoint: POST /office/pension-claims/{claimId}/input-data-sheets
-    status: P
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F05.ids
+  - endpoint: GET /office/pension-claims
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1583,9 +1595,15 @@ stakeholders:
     via:
     - F04.transfer_decide
   - endpoint: POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
+    via:
+    - F05.ids_approve
+  - endpoint: GET /office/pension-claims
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
     via:
     - F05.ids_approve
   - endpoint: POST /office/freeze-cases/{caseId}/verifications
@@ -1952,7 +1970,7 @@ stakeholders:
     - F04.pro_intake
   fo.da_pension:
   - endpoint: POST /office/pensions/worksheets
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1963,32 +1981,46 @@ stakeholders:
     step_up: false
     via:
     - F05.worksheet
+  - endpoint: GET /office/pension-claims
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F05.worksheet
+    - F05.ppo
+    - F05.dispatch
   - endpoint: POST /office/pensions/service-aggregations
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F05.aggregate
   - endpoint: POST /office/pensions/scheme-certificates/{certId}/surrender-adjudications
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F05.sc_adjudicate
   - endpoint: POST /office/pensions/ppo-issuances
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F05.ppo
   - endpoint: POST /office/pensions/transfers-in
-    status: P
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F05.ppo
+  - endpoint: POST /office/pensions/ppos/{ppoId}/initial-arrears
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F05.ppo
   - endpoint: POST /office/pensions/ppos/{ppoId}/dispatches
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -2019,20 +2051,26 @@ stakeholders:
     - F05.updation
   fo.ss_pension:
   - endpoint: POST /office/pensions/ppos/{ppoId}/initial-arrears
-    status: P
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F05.initial_arrear
+  - endpoint: GET /office/pension-claims
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F05.initial_arrear
   fo.apfc_pension:
   - endpoint: POST /office/pensions/worksheets/{worksheetId}/approvals
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F05.ppo_approve
   - endpoint: POST /office/pensions/ppos/{ppoId}/e-signatures
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -2053,6 +2091,12 @@ stakeholders:
     status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
+    via:
+    - F05.ppo_approve
+  - endpoint: GET /office/pension-claims
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
     via:
     - F05.ppo_approve
   - endpoint: GET /office/pensions/life-certificates/overdue
@@ -2080,9 +2124,15 @@ stakeholders:
     via:
     - F05.dlc_monitor
   - endpoint: POST /office/pensions/brs-reconciliations
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
+    via:
+    - F05.brs
+  - endpoint: GET /cpps/disbursement-runs
+    status: W
+    scope: national (CPPS service role)
+    step_up: false
     via:
     - F05.brs
   fo.pension_disbursement:
@@ -2997,15 +3047,21 @@ stakeholders:
     - F14.adc
   tech.cpps:
   - endpoint: POST /cpps/disbursement-runs
-    status: P
+    status: W
     scope: national (CPPS service role)
     step_up: true
     via:
     - F05.cpps
   - endpoint: POST /cpps/reconciliations
-    status: P
+    status: W
     scope: national (CPPS service role)
     step_up: true
+    via:
+    - F05.cpps
+  - endpoint: GET /cpps/disbursement-runs
+    status: W
+    scope: national (CPPS service role)
+    step_up: false
     via:
     - F05.cpps
   tech.epfo3: []

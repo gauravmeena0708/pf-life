@@ -48,7 +48,8 @@ async def main() -> None:
             values = {"subject": m["subject"], "name": m["name"], "date_of_birth": date.fromisoformat(m["date_of_birth"]),
                       "date_of_joining": date.fromisoformat(m["date_of_joining"]),
                       "date_of_exit": date.fromisoformat(m["date_of_exit"]) if m.get("date_of_exit") else None,
-                      "eps_wages_paise": SYNTHETIC_EPS_WAGES}
+                      "eps_wages_paise": SYNTHETIC_EPS_WAGES, "office_id": seed["establishment"]["office_id"], "uan": m["uan"],
+                      "account_link_id": m["account_link_id"]}
             if (await session.execute(select(member_service.c.subject).where(member_service.c.subject == m["subject"]))).first():
                 await session.execute(update(member_service).where(member_service.c.subject == m["subject"]).values(**values))
             else:

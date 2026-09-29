@@ -93,6 +93,9 @@ member_service = Table(
     Column("date_of_joining", Date, nullable=False),
     Column("date_of_exit", Date),
     Column("eps_wages_paise", BigInteger, nullable=False),
+    Column("office_id", String(40)),
+    Column("uan", String(12)),
+    Column("account_link_id", String(40)),
 )
 
 office_staff = Table(
@@ -100,4 +103,70 @@ office_staff = Table(
     Column("subject", String(80), primary_key=True),
     Column("stakeholder", String(60), nullable=False),
     Column("office_id", String(40), nullable=False),
+)
+
+# Pension settlement (Form 10D): member applies → DA (Accounts) Input Data Sheet → AO approves → DA (Pension)
+# worksheet → APFC (Pension) approves → DA (Pension) issues the PPO → initial arrear DA (P) → SS (P) → APFC (P)
+# e-signs the PPO (approving the arrear) → DA (Pension) dispatches; the pension is then in payment.
+pension_claims = Table(
+    "pension_claims", metadata,
+    Column("claim_id", String(40), primary_key=True),
+    Column("member_subject", String(80), nullable=False, index=True),
+    Column("uan", String(12), nullable=False),
+    Column("name", String(120), nullable=False),
+    Column("date_of_birth", Date, nullable=False),
+    Column("account_link_id", String(40)),
+    Column("office_id", String(40), nullable=False),
+    Column("pension_from", Date, nullable=False),
+    Column("state", String(30), nullable=False),
+    Column("service_months", Integer, nullable=False),
+    Column("aggregated", JSON, nullable=False),               # past service added by the DA (Pension)
+    Column("pensionable_salary_paise", BigInteger, nullable=False),
+    Column("ids", JSON),                                      # Input Data Sheet
+    Column("worksheet", JSON),                                # the pension worked out under the rules in force
+    Column("ppo_id", String(40)),
+    Column("arrears", JSON),                                  # initial arrear: proposed, checked
+    Column("history", JSON, nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now()),
+    Column("updated_at", DateTime(timezone=True), server_default=func.now()),
+)
+
+scheme_certificates = Table(
+    "scheme_certificates", metadata,
+    Column("cert_id", String(40), primary_key=True),
+    Column("member_subject", String(80), nullable=False, index=True),
+    Column("uan", String(12), nullable=False),
+    Column("service_months", Integer, nullable=False),
+    Column("pensionable_salary_paise", BigInteger, nullable=False),
+    Column("state", String(20), nullable=False),              # ISSUED | SURRENDERED | CANCELLED
+    Column("surrender_purpose", String(30)),
+    Column("issued_at", DateTime(timezone=True), server_default=func.now()),
+    Column("updated_at", DateTime(timezone=True), server_default=func.now()),
+    Column("adjudicated_by", String(80)),
+)
+
+# CPPS: a monthly disbursement run sent to the (mock) sponsor bank, its paid statement, and the office's BRS.
+disbursement_runs = Table(
+    "disbursement_runs", metadata,
+    Column("run_id", String(40), primary_key=True),
+    Column("month", String(7), nullable=False, unique=True),
+    Column("state", String(20), nullable=False),              # SENT | STATEMENT_RECEIVED | RECONCILED
+    Column("lines", JSON, nullable=False),                    # [{ppo_id, amount_paise, status}]
+    Column("total_paise", BigInteger, nullable=False),
+    Column("paid_total_paise", BigInteger),
+    Column("exceptions", JSON),
+    Column("created_by", String(80), nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now()),
+)
+
+brs_statements = Table(
+    "brs_statements", metadata,
+    Column("brs_id", String(40), primary_key=True),
+    Column("month", String(7), nullable=False),
+    Column("office_id", String(40), nullable=False),
+    Column("scroll_total_paise", BigInteger, nullable=False),
+    Column("bank_debit_total_paise", BigInteger, nullable=False),
+    Column("difference_paise", BigInteger, nullable=False),
+    Column("prepared_by", String(80), nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now()),
 )

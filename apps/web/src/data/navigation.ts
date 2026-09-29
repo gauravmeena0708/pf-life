@@ -21,7 +21,7 @@ const MEMBER: NavGroup[] = [
   { label: "Online Services", items: [
     link("Claim (Form-31, 19, 10C & 10D)", "/member/claims"), link("One Member – One EPF Account (Transfer Request)", "/member/service#transfer-heading"),
     link("Track Claim Status", "/member/claims"), link("Download Annexure K", "/member/service#applications-heading"), link("Joint Declaration", "/member/profile#correction-heading"),
-    link("Form 15G / 15H", "/member/claims#tax-declaration-heading")] },
+    link("Form 15G / 15H", "/member/claims#tax-declaration-heading"), link("Pension (Form 10D) / scheme certificate", "/member/pension")] },
   { label: "PMVBRY" },
   { labelKey: "navigation.help", items: [{ labelKey: "navigation.grievances", to: "/member/grievances" }, { labelKey: "navigation.assistant", to: "/member/assistant" }] },
 ];
@@ -51,7 +51,8 @@ const EMPLOYER: NavGroup[] = [
 function fieldOffice(role: string): NavGroup[] {
   const queue = "/office/work-queue";
   return [
-    { label: "Claims & settlement", items: [link("CLAIMS", queue), link("Online Services", queue), link("ANNEXURE K FILE")] },
+    { label: "Claims & settlement", items: [link("CLAIMS", queue), link("Online Services", queue), link("ANNEXURE K FILE"),
+      ...(["fo.da_accounts", "fo.ao"].includes(role) ? [link("Form 10D pension claims (IDS)", "/office/pension-claims")] : [])] },
     { label: "Members", items: [link("Member", role === "fo.oic" ? queue : undefined), link("Query")] },
     { label: "Receipts & reconciliation", items: [
       role === "fo.apfc" ? link("ECR Approval") : link("VDR Vs ECR filing"), link("Reco - ECR Vs VDR"), link("VDR Member Beneficiary"),
@@ -68,9 +69,10 @@ function fieldOffice(role: string): NavGroup[] {
 /** The DA (Pension) login shows a short bar: Services · NPPS · Pension · CLAIMS. */
 const PENSION_OFFICE: NavGroup[] = [
   { label: "Services" }, { label: "NPPS" },
-  { label: "Pension", items: [link("Pension revisions", "/office/pension-revisions"), link("Pension Enquiry Details", "/office/pensions#enquiry-heading"),
+  { label: "Pension", items: [link("Pension claims (Form 10D)", "/office/pension-claims"), link("Pension revisions", "/office/pension-revisions"),
+    link("Pension Enquiry Details", "/office/pensions#enquiry-heading"), link("CPPS runs and BRS", "/cpps"),
     link("Track Pension Claims Updation Activities", "/office/pensions#updation-heading"), link("Life certificates overdue", "/office/pensions#overdue-heading")] },
-  { label: "CLAIMS" },
+  { label: "CLAIMS", items: [link("Form 10D claims", "/office/pension-claims")] },
 ];
 
 /** Pensioners' portal: public enquiries (no pensioner login exists; the POC adds one for the pension view). */
@@ -104,7 +106,8 @@ export function menusFor(role: string | undefined): NavGroup[] {
   if (role === "member") return MEMBER;
   if (role.startsWith("employer.")) return EMPLOYER;
   if (role === "pensioner") return PENSIONER;
-  if (role === "fo.apfc_pension" || role === "fo.da_pension") return PENSION_OFFICE;
+  if (["fo.apfc_pension", "fo.da_pension", "fo.ss_pension"].includes(role)) return PENSION_OFFICE;
+  if (role === "tech.cpps") return [{ label: "CPPS disbursement", to: "/cpps" }];
   if (role.startsWith("fo.")) return fieldOffice(role);
   return poc(role);
 }
@@ -115,7 +118,8 @@ export function homeFor(role: string | undefined): string {
   if (role?.startsWith("employer.")) return "/employer";
   if (role === "pensioner") return "/pensioner";
   if (role === "fo.apfc_pension") return "/office/pension-revisions";
-  if (role === "fo.da_pension") return "/office/pensions";
+  if (role === "fo.da_pension" || role === "fo.ss_pension") return "/office/pension-claims";
+  if (role === "tech.cpps") return "/cpps";
   if (role?.startsWith("fo.")) return "/office/work-queue";
   return "/";
 }

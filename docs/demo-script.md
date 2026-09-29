@@ -42,6 +42,7 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `pensioner-a`, `ro-pension` | Pensioner; APFC (Pension) who approves revisions | Money |
 | `member-d` | Member with two member IDs (a previous job) | Exit and transfer |
 | `ro-da-pension` | Dealing assistant (Pension) | Pension office |
+| `member-e`, `ro-ss-pension`, `ndc-cpps` | Retired member; SS (Pension); CPPS operator | Pension settlement |
 
 ---
 
@@ -201,6 +202,20 @@ simulation; point out that the dialog says exactly what is being authorised (act
    pension slip, ask to change the bank account (the APFC settles it) and make a declaration.
 5. **Public services → Pension enquiries** (no login; answer the one-use question): Know your PPO, pension
    status, payment enquiry (months only, no amounts), life certificate.
+
+## Pension settlement: Form 10D to a pension in payment
+*Tests: `tests/e2e/test_pension_settlement.py`, `services/pension-service/tests/test_settlement.py`*
+
+1. **`member-e` → Online Services › Pension (Form 10D).** Retired on 31 January 2026 after 15 years 5 months:
+   *Apply* → pension from 1 February, estimated ₹3,214 a month (₹15,000 × 15 / 70).
+2. **`do-caseworker`** prepares the Input Data Sheet; **`ro-ao`** approves it (one-time code).
+3. **`ro-da-pension`** generates the worksheet (the formula in force when the pension starts; past service from a
+   cancelled scheme certificate can be added first); **`ro-pension`** approves it.
+4. **`ro-da-pension`** issues the PPO and proposes the initial arrear (February to last month); **`ro-ss-pension`**
+   checks it; **`ro-pension`** e-signs the PPO (one-time code bound to the arrear); **`ro-da-pension`** dispatches.
+   The member sees each desk; the pension is in payment and the arrear credited.
+5. **`ndc-cpps` → CPPS disbursement**: run last month, then *Reconcile* (the mock sponsor bank answers; accounts
+   ending 0000 are returned). **`ro-pension`** prepares the Bank Reconciliation Statement.
 
 ## Policy changes that move money — interest, TDS and pensions
 *Tests: `tests/e2e/test_policy_money.py`, `services/contribution-service/tests/test_interest.py`,
