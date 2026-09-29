@@ -2616,11 +2616,11 @@
     "owner": "workflow",
     "upstream": "http://workflow-service:8000",
     "money": false,
-    "step_up": false,
+    "step_up": true,
     "callers": [
       "fo.da_accounts"
     ],
-    "summary": "Dealing-hand recommendation",
+    "summary": "Initiator's \"Recommend to Approve / to Reject\" with the account status (Operative / Inoperative / Dormant)",
     "revocation": false
   },
   {
@@ -3903,7 +3903,7 @@
       "fo.ao",
       "fo.ss"
     ],
-    "summary": "Decision → CaseDecisionSubmitted.v1",
+    "summary": "Decision → CaseDecisionSubmitted.v1; only the final level rejects, an intermediate \"Recommend to Reject\" returns the claim to the initiator",
     "revocation": false
   },
   {
@@ -4016,6 +4016,22 @@
       "member"
     ],
     "summary": "Seed / change bank account (mock penny-drop, employer approval)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/cases/{caseId}/restarts",
+    "regex": "^/office/cases/[^/]+/restarts$",
+    "status": "W",
+    "phase": 1,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "Restart Claim from the stopped-claims list",
     "revocation": false
   },
   {
@@ -4567,6 +4583,22 @@
     "revocation": false
   },
   {
+    "method": "POST",
+    "path_template": "/office/cases/{caseId}/stops",
+    "regex": "^/office/cases/[^/]+/stops$",
+    "status": "W",
+    "phase": 1,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "Stop Claim Processing with a reason (initiator; a parallel activity must finish first)",
+    "revocation": false
+  },
+  {
     "method": "GET",
     "path_template": "/office/claims/{claimId}/cad",
     "regex": "^/office/claims/[^/]+/cad$",
@@ -4577,9 +4609,14 @@
     "money": false,
     "step_up": false,
     "callers": [
-      "fo.fa_accounts"
+      "fo.ao",
+      "fo.apfc",
+      "fo.da_accounts",
+      "fo.fa_accounts",
+      "fo.oic",
+      "fo.ss"
     ],
-    "summary": "View the generated CAD",
+    "summary": "View the latest Claim Approval Docket and every level's version",
     "revocation": false
   },
   {
@@ -4591,11 +4628,15 @@
     "owner": "claim",
     "upstream": "http://claim-service:8000",
     "money": true,
-    "step_up": true,
+    "step_up": false,
     "callers": [
-      "fo.fa_accounts"
+      "fo.ao",
+      "fo.apfc",
+      "fo.da_accounts",
+      "fo.oic",
+      "fo.ss"
     ],
-    "summary": "Generate the Claim Authorization Document (CAD): interest split, TDS and net payable, with the rule and static-data versions used",
+    "summary": "Generate the Claim Approval Docket (CAD) at this level (CITES: the initiator, each verifier and the approver regenerate it before acting): interest split, TDS and net payable, with the rule and static-data versions used",
     "revocation": false
   },
   {
@@ -5624,6 +5665,22 @@
       "member"
     ],
     "summary": "Transfer of PF between member IDs / exempted trusts",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/stopped-cases",
+    "regex": "^/office/stopped\\-cases$",
+    "status": "W",
+    "phase": 1,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "Stopped claims of the office",
     "revocation": false
   },
   {

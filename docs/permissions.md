@@ -418,9 +418,11 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/claims/{claimId}/additional-forms` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/claims/{claimId}/audit-trail` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/member-change-requests` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/members/{uan}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/pension-claims` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/stopped-cases` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/transfers` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /ai/claims/analyse` | W | caller's own permissions; advisory output only |  |
@@ -428,7 +430,10 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/annexure-k-files/{annexureId}/reconciliations` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/annexure-k-files/{annexureId}/vdr-reconciliations` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/cases/{caseId}/documents/{docId}/attestation-views` | W | office jurisdiction of the caller's posting |  |
-| `POST /office/cases/{caseId}/recommendations` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/cases/{caseId}/recommendations` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/cases/{caseId}/restarts` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/cases/{caseId}/stops` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/member-change-requests/{requestId}/recommendations` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/pension-claims/{claimId}/input-data-sheets` | W | office jurisdiction of the caller's posting |  |
@@ -468,8 +473,10 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/cases/{caseId}/decisions` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/member-change-requests/{requestId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/damages-knock-offs/{knockOffId}/approvals` | P | office jurisdiction of the caller's posting | yes |
@@ -479,10 +486,12 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/pension-claims` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/transfers` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/cases/{caseId}/decisions` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/member-change-requests/{requestId}/decisions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/member-change-requests/{requestId}/verifications` | W | office jurisdiction of the caller's posting |  |
@@ -490,22 +499,23 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/transfers/{transferId}/decisions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P | office jurisdiction of the caller's posting | yes |
 
-**`fo.fa_accounts`** — DA / SS in the F&A (Accounts) wing — ledger debit posting, **Claim Authorization Document (CAD)** generation, reconciliation of rejected / returned payments
+**`fo.fa_accounts`** — DA / SS in the F&A (Accounts) wing — ledger debit posting, viewing the **Claim Approval Dockets (CAD)** of each level, reconciliation of rejected / returned payments
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/system/cad-static-data` | W | office jurisdiction of the caller's posting |  |
-| `POST /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting | yes |
 
 **`fo.apfc`** — APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/death-claims/{claimId}/shares-summary` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/cases/{caseId}/second-approvals` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/claims/{claimId}/re-disbursement-approvals` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/defreezes` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
@@ -545,9 +555,11 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /monitoring/claims` | W | role jurisdiction; aggregates with small-group suppression |  |
 | `GET /office/accounts/inoperative` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/members/{uan}/locks` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/cases/{caseId}/second-approvals` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/establishments/{estId}/defreezes` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/freezes` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |

@@ -396,9 +396,11 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/claims/{claimId}/additional-forms` | W |
 | `GET /office/claims/{claimId}/audit-trail` | W |
+| `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/member-change-requests` | W |
 | `GET /office/members/{uan}` | W |
 | `GET /office/pension-claims` | W |
+| `GET /office/stopped-cases` | W |
 | `GET /office/transfers` | W |
 | `GET /office/work-queue` | W |
 | `POST /ai/claims/analyse` | W |
@@ -407,6 +409,9 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /office/annexure-k-files/{annexureId}/vdr-reconciliations` | W |
 | `POST /office/cases/{caseId}/documents/{docId}/attestation-views` | W |
 | `POST /office/cases/{caseId}/recommendations` | W |
+| `POST /office/cases/{caseId}/restarts` | W |
+| `POST /office/cases/{caseId}/stops` | W |
+| `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/member-change-requests/{requestId}/recommendations` | W |
 | `POST /office/pension-claims/{claimId}/input-data-sheets` | W |
@@ -452,8 +457,10 @@ Activities: **F02.jd_verify** Verifier (SS route): cross-check and recommend; **
 | Endpoint | Status |
 |---|---|
 | `GET /office/cases/{caseId}` | W |
+| `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/decisions` | W |
+| `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/member-change-requests/{requestId}/verifications` | W |
 | `POST /office/damages-knock-offs/{knockOffId}/approvals` | P |
@@ -465,10 +472,12 @@ Activities: **F02.jd_verify_ao** Verifier (AO route): cross-check and recommend;
 | Endpoint | Status |
 |---|---|
 | `GET /office/cases/{caseId}` | W |
+| `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/pension-claims` | W |
 | `GET /office/transfers` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/decisions` | W |
+| `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/member-change-requests/{requestId}/decisions` | W |
 | `POST /office/member-change-requests/{requestId}/verifications` | W |
@@ -476,15 +485,14 @@ Activities: **F02.jd_verify_ao** Verifier (AO route): cross-check and recommend;
 | `POST /office/transfers/{transferId}/decisions` | W |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P |
 
-#### `fo.fa_accounts` — DA / SS in the F&A (Accounts) wing — ledger debit posting, **Claim Authorization Document (CAD)** generation, reconciliation of rejected / returned payments
+#### `fo.fa_accounts` — DA / SS in the F&A (Accounts) wing — ledger debit posting, viewing the **Claim Approval Dockets (CAD)** of each level, reconciliation of rejected / returned payments
 
-Activities: **F04.cad** Generate the Claim Authorization Document (interest split, TDS, net payable) and post the ledger debit
+Activities: **F04.cad** View the Claim Approval Docket each level generated (interest split, TDS, net payable) and the CAD static data
 
 | Endpoint | Status |
 |---|---|
 | `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/system/cad-static-data` | W |
-| `POST /office/claims/{claimId}/cad` | W |
 
 #### `fo.apfc` — APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)
 
@@ -493,9 +501,11 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | Endpoint | Status |
 |---|---|
 | `GET /office/cases/{caseId}` | W |
+| `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/death-claims/{claimId}/shares-summary` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
+| `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/claims/{claimId}/re-disbursement-approvals` | W |
 | `POST /office/establishments/{estId}/defreezes` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
@@ -539,9 +549,11 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | `GET /monitoring/claims` | W |
 | `GET /office/accounts/inoperative` | W |
 | `GET /office/cases/{caseId}` | W |
+| `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/members/{uan}/locks` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
+| `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/establishments/{estId}/defreezes` | W |
 | `POST /office/establishments/{estId}/freezes` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
@@ -1497,7 +1509,7 @@ flowchart LR
   F04_approve_apfc["fo.apfc<br/>Approve claims in the APFC / RPFC-II band"]
   F04_approve_oic["fo.oic<br/>Approve claims above the top threshold"]
   F04_pay["fo.cash<br/>Issue payment instruction / payment scroll; reconcile return"]
-  F04_cad["fo.fa_accounts<br/>Generate the Claim Authorization Document (interest split, T"]
+  F04_cad["fo.fa_accounts<br/>View the Claim Approval Docket each level generated (interes"]
   F04_post_submission["member<br/>After filing: follow the claim's audit trail, cancel it befo"]
   F04_redisburse_request["member<br/>Submit corrected bank details after a payment return"]
   F04_redisburse_approve["fo.apfc<br/>Authorise a new payment after a return without reopening adj"]

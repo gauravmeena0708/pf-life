@@ -62,7 +62,8 @@
         "approval_level",
         "final",
         "next_role",
-        "reason"
+        "reason",
+        "recommendation"
       ],
       "properties": {
         "case_id": {
@@ -101,6 +102,13 @@
           "type": [
             "string",
             "null"
+          ]
+        },
+        "recommendation": {
+          "enum": [
+            "APPROVE",
+            "REJECT",
+            null
           ]
         }
       }

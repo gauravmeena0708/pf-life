@@ -60,6 +60,7 @@ def ctx(tmp_path, monkeypatch):
         event = {"event_id": str(uuid.uuid4()), "event_type": event_type, "producer": producer,
                  "correlation_id": str(uuid.uuid4()), "payload": payload}
         return asyncio.run(apply_once(db.sessions(), event, dispatch))
+    DELIVER["fn"] = deliver
     yield TestClient(application, raise_server_exceptions=False), q, deliver
     monkeypatch.undo()
     importlib.reload(config)
@@ -91,13 +92,28 @@ def step(case, action="decide-case"):
             "amount_paise": case["amount_paise"]}
 
 
-def recommend(client, case, subject=DA):
+DELIVER: dict = {}
+
+
+def docket(case, role):
+    """The officer generates the Claim Approval Docket in claim-service (CADGenerated.v1 reaches the work queue)."""
+    DELIVER["fn"]("CADGenerated.v1", {"claim_id": case["claim_id"], "cad_id": f"CAD-{uuid.uuid4().hex[:8]}", "net_payable_paise": 1,
+                                      "tds_paise": 0, "rule_version": "r", "static_data_version": "s", "officer_role": role})
+
+
+def recommend(client, case, subject=DA, recommendation="APPROVE", with_docket=True):
+    if with_docket:
+        docket(case, "fo.da_accounts")
     return client.post(f"/api/v1/office/cases/{case['case_id']}/recommendations",
-                       json={"checks": ["KYC verified", "Balance sufficient"], "note": "Documents in order"},
-                       headers=hdr(subject, "fo.da_accounts"))
+                       json={"checks": ["KYC verified", "Balance sufficient"], "note": "Documents in order",
+                             "recommendation": recommendation, "account_status": "OPERATIVE"},
+                       headers=hdr(subject, "fo.da_accounts", {"action": "recommend-case", "resource_id": case["case_id"],
+                                                               "resource_version": case["version"]}))
 
 
-def decide(client, case, subject, role, decision="APPROVE", reason=None, path="decisions"):
+def decide(client, case, subject, role, decision="APPROVE", reason=None, path="decisions", with_docket=True):
+    if with_docket:
+        docket(case, role)
     return client.post(f"/api/v1/office/cases/{case['case_id']}/{path}", json={"decision": decision, "reason": reason},
                        headers=hdr(subject, role, step(case)))
 
@@ -129,6 +145,9 @@ def test_full_chain_with_step_up_and_events(ctx):
     r = recommend(client, case)
     assert r.status_code == 200 and r.json()["data"]["current_role"] == "fo.ss"
     [case] = queue(client, SS, "fo.ss")
+    no_docket = client.post(f"/api/v1/office/cases/{case['case_id']}/decisions", json={"decision": "APPROVE"}, headers=hdr(SS, "fo.ss", step(case)))
+    assert no_docket.status_code == 409 and no_docket.json()["type"] == "/problems/docket-required"   # CAD at each level
+    docket(case, "fo.ss")
     assert client.post(f"/api/v1/office/cases/{case['case_id']}/decisions", json={"decision": "APPROVE"},
                        headers=hdr(SS, "fo.ss")).status_code == 428                  # no step-up
     assert decide(client, case, SS, "fo.ss", path="second-approvals").status_code == 403  # SS cannot call the 2nd level
@@ -166,9 +185,35 @@ def test_reject_and_return_need_a_reason_and_return_restarts_round(ctx):
     [case] = queue(client, DA, "fo.da_accounts")
     assert recommend(client, case).status_code == 200    # the same DA may act again in the new round
     [case] = queue(client, SS, "fo.ss")
-    r = decide(client, case, SS, "fo.ss", "REJECT", "Not eligible")
+    r = decide(client, case, SS, "fo.ss", "REJECT", "Not eligible")          # an intermediate level cannot reject
+    assert r.status_code == 200 and r.json()["data"]["current_role"] == "fo.da_accounts" and r.json()["data"]["state"] == "IN_REVIEW"
+    assert "Rejection recommended" in r.json()["data"]["data"]["returned_for_rejection"] and outbox(q)[-1]["decision"] == "RETURN"
+    [case] = queue(client, DA, "fo.da_accounts")
+    assert recommend(client, case, recommendation="REJECT").status_code == 200   # re-forwarded as "Recommend to Reject"
+    [case] = queue(client, SS, "fo.ss")
+    assert decide(client, case, SS, "fo.ss", "APPROVE").json()["type"] == "/problems/decision-not-offered"
+    r = decide(client, case, SS, "fo.ss", "REJECT", "Agree: not eligible")    # concurs and forwards
+    assert r.json()["data"]["current_role"] == "fo.apfc"
+    [case] = queue(client, APFC, "fo.apfc")
+    assert decide(client, case, APFC, "fo.apfc", "APPROVE", path="second-approvals").json()["type"] == "/problems/decision-not-offered"
+    r = decide(client, case, APFC, "fo.apfc", "REJECT", "Not eligible under para 68", path="second-approvals")
     assert r.status_code == 200 and r.json()["data"]["state"] == "REJECTED"
-    assert outbox(q)[-1]["final"] is True and outbox(q)[-1]["decision"] == "REJECT"
+    assert outbox(q)[-1]["final"] is True and outbox(q)[-1]["decision"] == "REJECT" and outbox(q)[-1]["recommendation"] == "REJECT"
+
+
+def test_the_initiator_stops_and_restarts_a_claim(ctx):
+    client, _, deliver = ctx
+    submitted(deliver)
+    [case] = queue(client, DA, "fo.da_accounts")
+    url = f"/api/v1/office/cases/{case['case_id']}"
+    assert client.post(f"{url}/stops", json={"reason": "short"}, headers=hdr(DA, "fo.da_accounts")).status_code == 400
+    stopped = client.post(f"{url}/stops", json={"reason": "Court case on the member ID pending"}, headers=hdr(DA, "fo.da_accounts")).json()["data"]
+    assert stopped["state"] == "STOPPED" and queue(client, DA, "fo.da_accounts") == []
+    assert [c["case_id"] for c in client.get("/api/v1/office/stopped-cases", headers=hdr(DA, "fo.da_accounts")).json()["data"]] == [case["case_id"]]
+    back = client.post(f"{url}/restarts", headers=hdr(DA, "fo.da_accounts")).json()["data"]
+    assert back["state"] == "IN_REVIEW" and back["current_role"] == "fo.da_accounts"
+    [case] = queue(client, DA, "fo.da_accounts")
+    assert recommend(client, case).status_code == 200
 
 
 def test_auto_approved_claim_goes_straight_to_cash_and_payment_events_close_it(ctx):

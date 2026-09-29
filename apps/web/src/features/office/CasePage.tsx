@@ -10,6 +10,7 @@ import { dateTime, roleLabel, stateLabel } from "../journeyB";
 import { ClaimAnalysisPanel } from "../ai/ClaimAnalysisPanel";
 import { ProcessForm } from "./ProcessForm";
 import { SignedDocuments } from "./SignedDocuments";
+import { ClaimDocket } from "./ClaimDocket";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 import type { CaseDetail } from "./types";
@@ -32,6 +33,9 @@ export function CasePage() {
   const [decision, setDecision] = useState<Decision>("APPROVE");
   const [reason, setReason] = useState("");
   const [scenario, setScenario] = useState<Scenario>("SUCCESS");
+  const [recommendation, setRecommendation] = useState<"APPROVE" | "REJECT">("APPROVE");
+  const [accountStatus, setAccountStatus] = useState("OPERATIVE");
+  const [stopReason, setStopReason] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [notice, setNotice] = useState(false);
@@ -43,6 +47,16 @@ export function CasePage() {
   const allowed = action === "recommend" && role === "fo.da_accounts" || action === "decide" && (role === "fo.ss" || role === "fo.ao")
     || action === "second-approve" && (role === "fo.apfc" || role === "fo.oic") || (action === "instruct-payment" || action === "reissue") && role === "fo.cash"
     || action === "approve-redisbursement" && role === "fo.apfc";
+  // CITES: only the final level decides; the options follow the initiator's recommendation.
+  const rec = String(item?.data?.recommendation ?? "APPROVE");
+  const finalLevel = !!item && item.step + 1 === item.chain.length;
+  const options: Decision[] = finalLevel ? (rec === "REJECT" ? ["REJECT", "RETURN"] : ["APPROVE", "RETURN"])
+    : rec === "REJECT" ? ["REJECT", "RETURN"] : ["APPROVE", "REJECT", "RETURN"];
+  const chosen: Decision = options.includes(decision) ? decision : options[0];
+  const optionLabel = (value: Decision) => value === "RETURN" ? "Send back to first level / initiator"
+    : value === "APPROVE" ? (finalLevel ? "Approve" : "Recommend to Approve (forward)")
+    : finalLevel ? "Reject" : rec === "REJECT" ? "Recommend to Reject (forward)" : "Recommend to Reject (returns to the initiator)";
+  const reviewing = !!item?.claim_id && (action === "recommend" || action === "decide" || action === "second-approve") && allowed;
 
   async function run(work: () => Promise<unknown>) {
     setBusy(true); setError(null); setNotice(false);
@@ -59,16 +73,20 @@ export function CasePage() {
     event.preventDefault();
     if (!item || !allowed || !action) return;
     if (action === "recommend") {
-      await run(() => command("POST", `/api/v1/office/cases/${item.case_id}/recommendations`, { checks: checks.map((key) => CHECK_VALUES[key]), note: note.trim() }));
+      const token = await stepUp.ask({ action: "recommend-case", resourceId: item.case_id, resourceVersion: item.version,
+        summary: `Recommend to ${recommendation === "APPROVE" ? "approve" : "reject"} claim ${item.claim_id ?? item.case_id}.` });
+      if (!token) return;
+      await run(() => command("POST", `/api/v1/office/cases/${item.case_id}/recommendations`, { checks: checks.map((key) => CHECK_VALUES[key]),
+        note: note.trim(), recommendation, account_status: accountStatus }, { stepUpToken: token }));
       return;
     }
     if (action === "decide" || action === "second-approve") {
-      if (decision !== "APPROVE" && !reason.trim()) { setError(new Error(t("office.reasonRequired"))); return; }
+      if (chosen !== "APPROVE" && !reason.trim()) { setError(new Error(t("office.reasonRequired"))); return; }
       const token = await stepUp.ask({ action: "decide-case", resourceId: item.case_id, resourceVersion: item.version,
-        amountPaise: item.amount_paise, summary: t("office.decisionSummary", { decision: t(`office.decisions.${decision}`), caseId: item.case_id }) });
+        amountPaise: item.amount_paise, summary: `${optionLabel(chosen)} — case ${item.case_id}.` });
       if (!token) return;
       await run(() => command("POST", `/api/v1/office/cases/${item.case_id}/${action === "decide" ? "decisions" : "second-approvals"}`,
-        { decision, reason: reason.trim() || null }, { stepUpToken: token }));
+        { decision: chosen, reason: reason.trim() || null }, { stepUpToken: token }));
       return;
     }
     if (action === "approve-redisbursement") {
@@ -127,14 +145,33 @@ export function CasePage() {
           <td>{dateTime(entry.at, i18n.language)}</td><td>{entry.round}</td><td>{roleLabel(entry.officer_role, t)}<br /><span className="muted small">{entry.officer_subject}</span></td><td>{entry.action} {entry.approval_level ?? ""}</td><td>{entry.reason}{entry.reason && entry.checks.length ? "; " : ""}{entry.checks.join(", ")}</td>
         </tr>)}</tbody></table></div>}
       </section>
+      {item.claim_id && (reviewing || role === "fo.fa_accounts") ? <ClaimDocket claimId={item.claim_id} ready={!!item.docket_ready} canGenerate={reviewing}
+        onGenerated={() => void qc.invalidateQueries({ queryKey: ["office-case", caseId] })} /> : null}
+      {item.data?.returned_for_rejection && action === "recommend" ? <p className="pending-notice">{String(item.data.returned_for_rejection)} — re-forward it as
+        "Recommend to Reject" if you agree.</p> : null}
+      {role === "fo.da_accounts" && item.claim_id && (item.state === "IN_REVIEW" || item.state === "STOPPED") ? <section className="card stack" aria-labelledby="stop-heading">
+        <h2 id="stop-heading">{item.state === "STOPPED" ? "Restart claim" : "Stop claim processing"}</h2>
+        {item.state === "STOPPED" ? <><p>Stopped: {String((item.data?.stopped as { reason?: string } | undefined)?.reason ?? "")}</p>
+          <div className="actions"><button type="button" className="primary" disabled={busy} onClick={() => void run(() => command("POST", `/api/v1/office/cases/${item.case_id}/restarts`))}>Restart claim</button></div></>
+          : <form className="stack" onSubmit={(event) => { event.preventDefault(); void run(() => command("POST", `/api/v1/office/cases/${item.case_id}/stops`, { reason: stopReason.trim() })); }}>
+            <p className="muted small">When a parallel activity must finish first. The claim leaves every work queue until restarted.</p>
+            <label>Reason (recorded)<input value={stopReason} onChange={(event) => setStopReason(event.target.value)} required minLength={10} /></label>
+            <div className="actions"><button type="submit" disabled={busy}>Stop claim processing</button></div></form>}
+      </section> : null}
       {allowed && action ? <section className="card stack" aria-labelledby="case-action-heading"><h2 id="case-action-heading">{t(`office.actions.${action}`)}</h2>
         <form className="stack" onSubmit={(event) => void submit(event)}>
           {action === "recommend" ? <><fieldset className="case-options"><legend>{t("office.checksTitle")}</legend>{CHECK_KEYS.map((key) => <label className="check-row" key={key}>
             <input type="checkbox" checked={checks.includes(key)} onChange={(event) => setChecks(event.target.checked ? [...checks, key] : checks.filter((value) => value !== key))} />{t(`office.checks.${key}`)}</label>)}</fieldset>
             <label>{t("office.note")}<textarea value={note} onChange={(event) => setNote(event.target.value)} required minLength={3} /></label></> : null}
-          {action === "decide" || action === "second-approve" ? <><fieldset className="case-options"><legend>{t("office.decision")}</legend>{(["APPROVE", "RETURN", "REJECT"] as const).map((value) => <label className="check-row" key={value}>
-            <input type="radio" name="decision" value={value} checked={decision === value} onChange={() => setDecision(value)} />{t(`office.decisions.${value}`)}</label>)}</fieldset>
-            <label>{t("office.reason")}<textarea value={reason} onChange={(event) => setReason(event.target.value)} required={decision !== "APPROVE"} /></label></> : null}
+          {action === "recommend" ? <><fieldset className="case-options"><legend>Recommendation</legend>{(["APPROVE", "REJECT"] as const).map((value) => <label className="check-row" key={value}>
+            <input type="radio" name="recommendation" value={value} checked={recommendation === value} onChange={() => setRecommendation(value)} />{value === "APPROVE" ? "Recommend to Approve" : "Recommend to Reject"}</label>)}</fieldset>
+            <label>Account status<select value={accountStatus} onChange={(event) => setAccountStatus(event.target.value)}>
+              <option value="OPERATIVE">Operative</option><option value="INOPERATIVE">Inoperative</option><option value="DORMANT">Dormant</option></select></label></> : null}
+          {action === "decide" || action === "second-approve" ? <><p className="muted small">{rec === "REJECT" ? "The initiator recommends rejection." : "The initiator recommends approval."}
+            {finalLevel ? " You are the final level for this amount." : " A higher level decides; only the final level may reject."}</p>
+            <fieldset className="case-options"><legend>{t("office.decision")}</legend>{options.map((value) => <label className="check-row" key={value}>
+            <input type="radio" name="decision" value={value} checked={chosen === value} onChange={() => setDecision(value)} />{optionLabel(value)}</label>)}</fieldset>
+            <label>{t("office.reason")}<textarea value={reason} onChange={(event) => setReason(event.target.value)} required={chosen !== "APPROVE"} /></label></> : null}
           {action === "approve-redisbursement" ? <><p className="demo-tip">{t("office.redisbursementHelp")}</p>
             <fieldset className="case-options"><legend>{t("office.decision")}</legend>{(["APPROVE", "REJECT"] as const).map((value) => <label className="check-row" key={value}>
               <input type="radio" name="decision" value={value} checked={decision === value} onChange={() => setDecision(value)} />{t(`office.decisions.${value}`)}</label>)}</fieldset>
@@ -142,7 +179,7 @@ export function CasePage() {
           {action === "instruct-payment" || action === "reissue" ? <><p className="demo-tip">{t("office.demoPaymentNotice")}</p>
             <label>{t("office.demoScenario")}<select value={scenario} onChange={(event) => { setScenario(event.target.value as Scenario); retryKey.current = null; }}>
               <option value="SUCCESS">{t("office.scenarios.SUCCESS")}</option><option value="RETURN">{t("office.scenarios.RETURN")}</option></select></label></> : null}
-          <div className="actions"><button type="submit" className="primary" disabled={busy}>{t("office.submitAction")}</button></div>
+          <div className="actions"><button type="submit" className="primary" disabled={busy || (reviewing && !item.docket_ready)}>{t("office.submitAction")}</button></div>
         </form>
       </section> : null}
     </> : null}

@@ -35,23 +35,35 @@ def test_preview_documents_and_cancellation_before_a_decision(ctx):
     assert create(client).status_code == 201                                   # a cancelled claim no longer blocks a new one
 
 
-def test_approved_claim_cannot_be_cancelled_and_gets_a_cad_that_payment_follows(ctx):
+def test_each_level_generates_the_claim_approval_docket_and_payment_follows_the_last(ctx):
     client, q, deliver = ctx
-    claim_id = _approved_claim(client, deliver)
+    claim_id = confirm(client, create(client).json()["data"]).json()["data"]["claim_id"]      # under review
+    url = f"/api/v1/office/claims/{claim_id}/cad"
+    assert client.post(url, headers=hdr(FA, "fo.fa_accounts")).status_code == 403              # scrutinising officers only
+    da = client.post(url, headers=hdr(SUBJECTS["do-caseworker"], "fo.da_accounts"))
+    assert da.status_code == 201, da.json()
+    assert (da.json()["data"]["gross_paise"], da.json()["data"]["tds_paise"], da.json()["data"]["generated_by_role"]) == (JOURNEY_B_AMOUNT, 0, "fo.da_accounts")
+    assert events(q, "CADGenerated.v1")[0]["officer_role"] == "fo.da_accounts"
+    base = {"case_id": "CASE-1", "claim_id": claim_id, "officer_subject": "x", "reason": None, "next_role": None, "recommendation": "APPROVE"}
+    deliver("CaseDecisionSubmitted.v1", {**base, "decision": "RECOMMEND", "officer_role": "fo.da_accounts", "approval_level": 0, "final": False}, "workflow-service")
+    assert client.post(url, headers=hdr(SUBJECTS["ro-ss"], "fo.ss")).status_code == 201           # regenerated at the next level
+    deliver("CaseDecisionSubmitted.v1", {**base, "decision": "APPROVE", "officer_role": "fo.ss", "approval_level": 1, "final": False}, "workflow-service")
+    last = client.post(url, headers=hdr(SUBJECTS["ro-apfc"], "fo.apfc")).json()["data"]
+    deliver("CaseDecisionSubmitted.v1", {**base, "decision": "APPROVE", "officer_role": "fo.apfc", "approval_level": 2, "final": True}, "workflow-service")
+    assert client.post(url, headers=hdr(SUBJECTS["ro-apfc"], "fo.apfc")).status_code == 409       # approved: no more dockets
     assert client.post(f"/api/v1/members/me/claims/{claim_id}/cancellations",
                        headers=member(step_up={"action": "cancel-claim", "resource_id": claim_id})).json()["type"] == "/problems/not-cancellable"
-    debit(deliver, claim_id)
-    step = {"action": "generate-cad", "resource_id": claim_id, "amount_paise": JOURNEY_B_AMOUNT}
-    cad = client.post(f"/api/v1/office/claims/{claim_id}/cad", headers=hdr(FA, "fo.fa_accounts", step))
-    assert cad.status_code == 201, cad.json()
-    cad = cad.json()["data"]
-    assert (cad["gross_paise"], cad["tds_paise"], cad["net_paise"]) == (JOURNEY_B_AMOUNT, 0, JOURNEY_B_AMOUNT)   # an advance: no TDS
-    assert cad["static_data_version"] and events(q, "CADGenerated.v1")[0]["cad_id"] == cad["cad_id"]
-    assert client.post(f"/api/v1/office/claims/{claim_id}/cad", headers=hdr(FA, "fo.fa_accounts", step)).status_code == 409
+    view = client.get(url, headers=hdr(FA, "fo.fa_accounts")).json()["data"]
+    assert view["cad_id"] == last["cad_id"] and [v["generated_by_role"] for v in view["versions"]] == ["fo.da_accounts", "fo.ss", "fo.apfc"]
     static = client.get("/api/v1/office/system/cad-static-data", headers=hdr(FA, "fo.fa_accounts")).json()["data"]
     assert static["loaded"] is True and static["bank_branch_master"]["branches"] > 0
-    trail = client.get(f"/api/v1/office/claims/{claim_id}/audit-trail", headers=hdr(FA, "fo.fa_accounts")).json()["data"]
-    assert trail["cad"]["cad_id"] == cad["cad_id"] and trail["transitions"]
+    debit(deliver, claim_id)
+    step = {"action": "instruct-payment", "resource_id": claim_id, "amount_paise": JOURNEY_B_AMOUNT}
+    paid = client.post(f"/api/v1/office/claims/{claim_id}/payment-instructions", json={},
+                       headers=hdr(CASHIER, "fo.cash", step, **{"Idempotency-Key": "cad-1"})).json()["data"]
+    assert paid["net_paise"] == last["net_paise"]
+    trail = client.get(f"/api/v1/office/claims/{claim_id}/audit-trail", headers=hdr(SUBJECTS["do-caseworker"], "fo.da_accounts")).json()["data"]
+    assert trail["cad"]["cad_id"] == last["cad_id"] and trail["transitions"]
 
 
 def test_payment_scroll_pays_every_approved_claim_and_reconciles_returns(ctx):

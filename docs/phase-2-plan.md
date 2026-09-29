@@ -13,6 +13,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.5a** | Claim lifecycle and office tools: eligibility preview for one form, documents, withdrawal before a decision, member and office audit trails, the CAD (accounts wing), payment scrolls with return reconciliation, forms filed with a claim, member 360 view (purpose recorded), inoperative accounts | **Done** (29 Sep 2026) |
 | **P2.5b** | Death and EDLI claims, beneficiary shares, physical intake at the PRO counter, identity validation (family pension deferred to P2.6) | **Done** (29 Sep 2026) |
 | **P2.5c** | Ledger locks, document attestation views, establishment freeze / de-freeze, office Annexure K files and reconciliation | **Done** (29 Sep 2026) |
+| **P2.5d** | Claim scrutiny as the CITES manuals set it: the Claim Approval Docket at every level, recommend to approve / reject with the account status, rejection only at the final level (an intermediate "Recommend to Reject" returns to the initiator), Start-Stop Claim, one-time code on every officer action | **Done** (30 Sep 2026) |
 | P2.6 | Establishment registration and configuration, Form 5A, branches, DSC / e-sign approvals | |
 | P2.7 | Returns, receipts and ledger: arrear / supplementary ECR, demands, direct challans, 14B/7Q knock-offs, VDR rejection, reversals, recredits | |
 | P2.8 | The rest: compliance and VISHWAS, international workers, grievance extras, public lookups, audit, NDC, HRM, DO dashboards | |
@@ -119,3 +120,26 @@ meaning is confirmed.
   (contribution-service) against the VDR receipt amount. Both with one-time codes.
 - Not built: the annual-accounts batch and ECR posting do not take locks yet (only the seeded orphan shows those
   scopes); Annexure K for exempted establishments (`/office/exempted/annexure-k/...`) stays planned.
+
+## P2.5d — how it is built
+
+Source: the CITES user manuals (`../manuals`, reviewed in `docs/reviews/cites-manuals-vs-poc.md`).
+
+- **Claim Approval Docket.** The CAD was an accounts-wing document made after approval; in CITES it is the Claim
+  Approval Docket the initiator generates and every verifier and the approver generates again before acting.
+  `POST /office/claims/{claimId}/cad` is now open to the scrutinising officers while the claim is under review and
+  keeps one version per level; `CADGenerated.v1` carries the officer's role, and the work queue refuses a
+  recommendation or decision without a docket of that role made since the last decision (`/problems/docket-required`).
+  Payment uses the last docket's figures. The accounts wing views the dockets.
+- **Recommendation.** The initiator recommends to approve or to reject and records the account status (Operative /
+  Inoperative / Dormant), confirmed with a one-time code like every other officer action.
+- **Rejection routing.** Only the final level of the amount's chain rejects. An intermediate level forwards the
+  recommendation, or — disagreeing with an approval — recommends rejection, which returns the claim to the
+  initiator's worklist; the initiator re-forwards it as "Recommend to Reject". The final level sees Approve / Send
+  back after a recommended approval and Reject / Send back after a recommended rejection.
+  `CaseDecisionSubmitted.v1` carries the recommendation, and the member's timeline says which was recommended.
+- **Start-Stop Claim.** The initiator stops a claim under scrutiny with a reason (it leaves every queue and shows
+  under Stopped claims) and restarts it later.
+- Kept: a verifier approving within its financial limit is our amount-band chain (the last role for the amount is
+  final). Not built from the review: the beneficiary login and uploads, the EDLI three-tab calculation screen and
+  officer e-sign of the summary sheet, full data entry at the PRO counter, Form 10C cash, Appendix E.

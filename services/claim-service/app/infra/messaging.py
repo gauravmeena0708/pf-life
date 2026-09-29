@@ -125,8 +125,10 @@ async def on_case_decision(session: AsyncSession, event: dict[str, Any]) -> None
     if claim["state"] not in expected[decision]:
         log.warning("case_decision_ignored", claim_id=claim["claim_id"], state=claim["state"], decision=decision)
         return
+    rejecting = p.get("recommendation") == "REJECT"
     if decision == "RECOMMEND":
-        await transition(session, claim, "RECOMMENDED", role, "Reviewed and recommended for approval.", recommended=True)
+        await transition(session, claim, "RECOMMENDED", role,
+                          "Reviewed; recommended for rejection." if rejecting else "Reviewed and recommended for approval.", recommended=True)
     elif decision == "RETURN":
         await transition(session, claim, "UNDER_REVIEW", role, f"Returned for rework: {reason}")
     elif decision == "REJECT":
@@ -138,7 +140,9 @@ async def on_case_decision(session: AsyncSession, event: dict[str, Any]) -> None
         await record_decision(session, claim, "APPROVED", "OFFICER_APPROVED", cid)
         await notify(session, claim, "CLAIM_APPROVED", cid)
     else:
-        await transition(session, claim, "AWAITING_NEXT_APPROVAL", role, "Approved at this level; sent to the next approver.")
+        await transition(session, claim, "AWAITING_NEXT_APPROVAL", role,
+                         "Rejection recommended at this level; sent to the next approver." if rejecting
+                         else "Approved at this level; sent to the next approver.")
 
 
 async def on_payment_result(session: AsyncSession, event: dict[str, Any]) -> None:

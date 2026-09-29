@@ -295,8 +295,9 @@ async def _instruct(session: AsyncSession, claim: dict[str, Any], actor: Actor, 
     attempt = claim["payment_attempt"] + 1
     payment_id = f"PAY-{claim['claim_id']}-{attempt}"
     first_tax = claim.get("tax") is None
-    cad = (await session.execute(select(cads.c.tax).where(cads.c.claim_id == claim["claim_id"]))).scalar_one_or_none()
-    # The CAD, when the accounts wing has generated one, fixes the figures; otherwise they are worked out now.
+    cad = (await session.execute(select(cads.c.tax).where(cads.c.claim_id == claim["claim_id"])            # the last docket
+                                 .order_by(cads.c.created_at.desc(), cads.c.cad_id).limit(1))).scalar_one_or_none()
+    # The last Claim Approval Docket (the approver's) fixes the figures; otherwise they are worked out now.
     tax = (cad or await work_out_tax(session, claim, datetime.now(UTC).date())) if first_tax else claim["tax"]
     withheld = f" Income tax of ₹{tax['tds_paise'] // 100:,} withheld (TDS, {tax['basis']})" if tax["tds_paise"] else ""
     claim = await transition(session, claim, "PAYMENT_PENDING", actor.stakeholder,

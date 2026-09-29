@@ -324,8 +324,11 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /office/work-queue` | Jurisdiction-filtered task queue | W | 1 | workflow |
 | `GET /office/cases/{caseId}` | Case detail | W | 1 | workflow |
 | `POST /office/cases/{caseId}/assignments` | Assign | W | 1 | workflow |
-| `POST /office/cases/{caseId}/recommendations` | Dealing-hand recommendation | W | 1 | workflow |
-| `POST /office/cases/{caseId}/decisions` 🔐 | Decision → `CaseDecisionSubmitted.v1` | W | 1 | workflow |
+| `POST /office/cases/{caseId}/recommendations` 🔐 | Initiator's "Recommend to Approve / to Reject" with the account status (Operative / Inoperative / Dormant) | W | 1 | workflow |
+| `POST /office/cases/{caseId}/stops` | **Stop Claim Processing** with a reason (initiator; a parallel activity must finish first) | W | 1 | workflow |
+| `POST /office/cases/{caseId}/restarts` | **Restart Claim** from the stopped-claims list | W | 1 | workflow |
+| `GET /office/stopped-cases` | Stopped claims of the office | W | 1 | workflow |
+| `POST /office/cases/{caseId}/decisions` 🔐 | Decision → `CaseDecisionSubmitted.v1`; only the final level rejects, an intermediate "Recommend to Reject" returns the claim to the initiator | W | 1 | workflow |
 | `POST /office/cases/{caseId}/second-approvals` 🔐 | Dual control for high-value / high-risk cases | W | 1 | workflow |
 | `POST /office/claims/{claimId}/payment-instructions` 💰🔐 | Settlement payment instruction → `PaymentInstructed.v1` (Journey B6) | W | 1 | claim |
 | `POST /office/claims/{claimId}/reissues` 💰🔐 | Re-issue after bank return (Journey B6) | W | 1 | claim |
@@ -364,8 +367,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `POST /office/claims/{claimId}/cad` 💰🔐 | Generate the **Claim Authorization Document (CAD)**: interest split, TDS and net payable, with the rule and static-data versions used | W | 1 | claim |
-| `GET /office/claims/{claimId}/cad` | View the generated CAD | W | 1 | claim |
+| `POST /office/claims/{claimId}/cad` 💰 | Generate the **Claim Approval Docket (CAD)** at this level (CITES: the initiator, each verifier and the approver regenerate it before acting): interest split, TDS and net payable, with the rule and static-data versions used | W | 1 | claim |
+| `GET /office/claims/{claimId}/cad` | View the latest Claim Approval Docket and every level's version | W | 1 | claim |
 | `GET /office/system/cad-static-data` | Diagnostic view of CAD static reference data (interest tables, bank branch master) and its version (tracker: "Failed to load CAD static Data") | W | 1 | claim |
 | `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` 🔐 | Amend a beneficiary's share (nominee deceased, court order, share already settled in legacy, guardian appointment) | W | 1 | claim |
 | `GET /office/death-claims/{claimId}/shares-summary` | Allocated vs legacy-settled vs disbursed vs pending share of a death claim | W | 1 | claim |

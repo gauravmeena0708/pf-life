@@ -59,7 +59,8 @@
         "net_payable_paise",
         "tds_paise",
         "rule_version",
-        "static_data_version"
+        "static_data_version",
+        "officer_role"
       ],
       "properties": {
         "claim_id": {
@@ -82,6 +83,9 @@
           "type": "string"
         },
         "static_data_version": {
+          "type": "string"
+        },
+        "officer_role": {
           "type": "string"
         }
       }

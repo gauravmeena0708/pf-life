@@ -149,12 +149,12 @@ async def get_office_claims_claimId_audit_trail(actor: Actor = Depends(require_a
 
 @router.api_route("/api/v1/office/claims/{claimId}/cad", methods=["GET"], include_in_schema=False)
 async def get_office_claims_claimId_cad(actor: Actor = Depends(require_actor)) -> None:
-    raise Problem(501, "/problems/not-yet-built", "Not built yet", "View the generated CAD")
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "View the latest Claim Approval Docket and every level's version")
 
 
 @router.api_route("/api/v1/office/claims/{claimId}/cad", methods=["POST"], include_in_schema=False)
 async def post_office_claims_claimId_cad(actor: Actor = Depends(require_actor)) -> None:
-    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Generate the Claim Authorization Document (CAD): interest split, TDS and net payable, with the rule ")
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Generate the Claim Approval Docket (CAD) at this level (CITES: the initiator, each verifier and the ")
 
 
 @router.api_route("/api/v1/office/claims/{claimId}/payment-instructions", methods=["POST"], include_in_schema=False)

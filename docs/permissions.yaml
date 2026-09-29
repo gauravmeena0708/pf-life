@@ -1333,6 +1333,36 @@ stakeholders:
     step_up: false
     via:
     - F04.process
+  - endpoint: POST /office/claims/{claimId}/cad
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.process
+  - endpoint: GET /office/claims/{claimId}/cad
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.process
+  - endpoint: POST /office/cases/{caseId}/stops
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.process
+  - endpoint: POST /office/cases/{caseId}/restarts
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.process
+  - endpoint: GET /office/stopped-cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.process
   - endpoint: GET /office/claims/{claimId}/audit-trail
     status: W
     scope: office jurisdiction of the caller's posting
@@ -1342,7 +1372,7 @@ stakeholders:
   - endpoint: POST /office/cases/{caseId}/recommendations
     status: W
     scope: office jurisdiction of the caller's posting
-    step_up: false
+    step_up: true
     via:
     - F04.process
   - endpoint: POST /ai/claims/analyse
@@ -1545,6 +1575,18 @@ stakeholders:
     step_up: false
     via:
     - F04.approve_ss
+  - endpoint: POST /office/claims/{claimId}/cad
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.approve_ss
+  - endpoint: GET /office/claims/{claimId}/cad
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.approve_ss
   - endpoint: POST /office/cases/{caseId}/decisions
     status: W
     scope: office jurisdiction of the caller's posting
@@ -1577,6 +1619,18 @@ stakeholders:
     via:
     - F04.approve_ao
   - endpoint: GET /office/cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.approve_ao
+  - endpoint: POST /office/claims/{claimId}/cad
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.approve_ao
+  - endpoint: GET /office/claims/{claimId}/cad
     status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
@@ -1625,12 +1679,6 @@ stakeholders:
     via:
     - F11.approve
   fo.fa_accounts:
-  - endpoint: POST /office/claims/{claimId}/cad
-    status: W
-    scope: office jurisdiction of the caller's posting
-    step_up: true
-    via:
-    - F04.cad
   - endpoint: GET /office/claims/{claimId}/cad
     status: W
     scope: office jurisdiction of the caller's posting
@@ -1693,6 +1741,18 @@ stakeholders:
     via:
     - F04.approve_apfc
   - endpoint: GET /office/cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.approve_apfc
+  - endpoint: POST /office/claims/{claimId}/cad
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.approve_apfc
+  - endpoint: GET /office/claims/{claimId}/cad
     status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
@@ -1834,6 +1894,18 @@ stakeholders:
     - F04.approve_oic
     - F13.oic
   - endpoint: GET /office/cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.approve_oic
+  - endpoint: POST /office/claims/{claimId}/cad
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.approve_oic
+  - endpoint: GET /office/claims/{claimId}/cad
     status: W
     scope: office jurisdiction of the caller's posting
     step_up: false

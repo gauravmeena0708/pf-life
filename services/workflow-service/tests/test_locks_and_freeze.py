@@ -19,16 +19,16 @@ def locks(client, uan, subject=OIC, role="fo.oic"):
 
 def test_an_open_claim_case_holds_the_ledger_and_lets_go_when_it_finishes(ctx):
     client, _, deliver = ctx
-    submitted(deliver)                                                     # AL-0001 → UAN …001
+    submitted(deliver, amount=1000000)                                     # AL-0001 → UAN …001; ₹10,000: DA → SS
     [held] = locks(client, "100000000001").json()["data"]["active"]
     assert held["status"] == "HELD" and held["lock_scope"] == "CLAIM_ADJUDICATION" and held["resource_key"] == "AL-0001"
     release = client.post(f"/api/v1/office/system/locks/{held['lock_id']}/release", json={"reason": "Trying to release a live lock"},
                           headers=hdr(OIC, "fo.oic", {"action": "release-lock", "resource_id": held["lock_id"]}))
     assert release.json()["type"] == "/problems/lock-in-use"
     case = client.get("/api/v1/office/work-queue", headers=hdr(DA, "fo.da_accounts")).json()["data"]["items"][0]
-    assert recommend(client, case).status_code == 200                      # its own lock does not block it
+    assert recommend(client, case, recommendation="REJECT").status_code == 200   # its own lock does not block it
     case = client.get(f"/api/v1/office/cases/{case['case_id']}", headers=hdr(SS, "fo.ss")).json()["data"]
-    assert decide(client, case, SS, "fo.ss", "REJECT", "Documents do not match").status_code == 200
+    assert decide(client, case, SS, "fo.ss", "REJECT", "Documents do not match").status_code == 200   # SS is the final level here
     body = locks(client, "100000000001").json()["data"]
     assert body["active"] == [] and "finished" in body["recently_released"][0]["release_reason"]
 

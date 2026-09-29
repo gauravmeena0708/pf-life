@@ -184,7 +184,8 @@ paths:
   /office/cases/{caseId}/decisions:
     post:
       operationId: postOfficeCasesCaseIdDecisions
-      summary: Decision → CaseDecisionSubmitted.v1
+      summary: Decision → CaseDecisionSubmitted.v1; only the final level rejects, an intermediate "Recommend to Reject" returns
+        the cla
       tags:
       - Office claim processing and member accounts
       parameters:
@@ -217,6 +218,8 @@ paths:
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+      description: Decision → CaseDecisionSubmitted.v1; only the final level rejects, an intermediate "Recommend to Reject"
+        returns the claim to the initiator
       requestBody:
         required: false
         content:
@@ -280,7 +283,49 @@ paths:
   /office/cases/{caseId}/recommendations:
     post:
       operationId: postOfficeCasesCaseIdRecommendations
-      summary: Dealing-hand recommendation
+      summary: Initiator's "Recommend to Approve / to Reject" with the account status (Operative / Inoperative / Dormant)
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: workflow
+      x-callers:
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/cases/{caseId}/restarts:
+    post:
+      operationId: postOfficeCasesCaseIdRestarts
+      summary: Restart Claim from the stopped-claims list
       tags:
       - Office claim processing and member accounts
       parameters:
@@ -351,6 +396,47 @@ paths:
       x-callers:
       - fo.apfc
       - fo.oic
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/cases/{caseId}/stops:
+    post:
+      operationId: postOfficeCasesCaseIdStops
+      summary: Stop Claim Processing with a reason (initiator; a parallel activity must finish first)
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: workflow
+      x-callers:
+      - fo.da_accounts
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -487,6 +573,35 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/stopped-cases:
+    get:
+      operationId: getOfficeStoppedCases
+      summary: Stopped claims of the office
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: workflow
+      x-callers:
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
   /office/system/locks/{lockId}/release:
     post:
       operationId: postOfficeSystemLocksLockIdRelease

@@ -14,6 +14,7 @@ from pathlib import Path
 import pytest
 
 from tests.e2e.test_journey_a_ecr import SHOTS, WEB, call, ensure_verified_and_granted, login, step_up, wait_for
+from tests.e2e.officers import decide as officer_decide, recommend
 
 playwright = pytest.importorskip("playwright.sync_api")
 
@@ -87,14 +88,13 @@ def finish_leftovers(contexts, member):
             case = wait_for(lambda: next((x for x in call(da, "GET", "/api/v1/office/work-queue")[1]["data"]["items"]
                                           if x["claim_id"] == c["claim_id"]), None) if detail["state"] == "UNDER_REVIEW" else True)
             if detail["state"] == "UNDER_REVIEW":
-                call(da, "POST", f"/api/v1/office/cases/{case['case_id']}/recommendations",
-                     {"checks": [], "note": "Closing a claim left open by an interrupted test run"})
+                recommend(da, case, "Closing a claim left open by an interrupted test run", recommendation="REJECT")
             ss = as_persona(contexts, "ro-ss", "/office/work-queue")
             case = wait_for(lambda: next((x for x in call(ss, "GET", "/api/v1/office/work-queue")[1]["data"]["items"]
                                           if x["claim_id"] == c["claim_id"]), None))
-            token = step_up(ss, "decide-case", case["case_id"], case["version"], case["amount_paise"])
-            call(ss, "POST", f"/api/v1/office/cases/{case['case_id']}/decisions",
-                 {"decision": "REJECT", "reason": "Test claim left open by an interrupted run"}, {"X-Step-Up-Token": token})
+            # only the final level rejects, and only a claim recommended for rejection (CITES); else send it back
+            rejectable = case["data"].get("recommendation") == "REJECT" and case["step"] + 1 == len(case["chain"])
+            officer_decide(ss, case, "decisions", "REJECT" if rejectable else "RETURN", "Test claim left open by an interrupted run")
         elif detail["state"] in ("APPROVED", "AUTO_APPROVED", "PAYMENT_RETURNED", "CORRECTION_PENDING", "REISSUE_APPROVED"):
             returned = detail["state"] in ("PAYMENT_RETURNED", "CORRECTION_PENDING", "REISSUE_APPROVED")
             if detail["state"] == "PAYMENT_RETURNED":
@@ -169,15 +169,12 @@ def test_journey_d_risk_signal_review_recovery_and_revocations(contexts):
     assert call(member, "GET", f"/api/v1/members/me/claims/{claim['claim_id']}")[1]["data"]["state"] == "UNDER_REVIEW"
 
     # The officers finish the claim normally (DA → SS for this amount); the cash section pays it.
-    status, _ = call(da, "POST", f"/api/v1/office/cases/{case['case_id']}/recommendations",
-                     {"checks": ["KYC verified"], "note": "Risk signal reviewed as benign by CAIU"})
+    status, _ = recommend(da, case, "Risk signal reviewed as benign by CAIU")
     assert status == 200
     ss = as_persona(contexts, "ro-ss", "/office/work-queue")
     case = wait_for(lambda: next((x for x in call(ss, "GET", "/api/v1/office/work-queue")[1]["data"]["items"]
                                   if x["claim_id"] == claim["claim_id"]), None))
-    token = step_up(ss, "decide-case", case["case_id"], case["version"], case["amount_paise"])
-    status, r = call(ss, "POST", f"/api/v1/office/cases/{case['case_id']}/decisions", {"decision": "APPROVE", "reason": None},
-                     {"X-Step-Up-Token": token})
+    status, r = officer_decide(ss, case, "decisions")
     assert status == 200, r
     cashier = as_persona(contexts, "ro-cashier", "/office/work-queue")
 

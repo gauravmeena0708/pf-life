@@ -114,13 +114,12 @@ def test_new_claim_type_with_its_own_chain_reaches_members_and_officers(persona)
     da = persona("do-caseworker", "/office/work-queue")
     case = wait_for(lambda: my_case(da), timeout=30)
     assert case["chain"] == ["fo.da_accounts", "fo.ao", "fo.apfc"]
-    call(da, "POST", f"/api/v1/office/cases/{case['case_id']}/recommendations", {"checks": ["KYC verified"], "note": "Policy e2e"})
+    from tests.e2e.officers import decide, recommend
+    assert recommend(da, case, "Policy e2e")[0] == 200
     for who, path in (("ro-ao", "decisions"), ("ro-apfc", "second-approvals")):
         page = persona(who, "/office/work-queue")
         case = wait_for(lambda: my_case(page), timeout=30)
-        tok = step_up(page, "decide-case", case["case_id"], case["version"], case["amount_paise"])
-        status, r = call(page, "POST", f"/api/v1/office/cases/{case['case_id']}/{path}", {"decision": "APPROVE", "reason": None},
-                         {"X-Step-Up-Token": tok})
+        status, r = decide(page, case, path)
         assert status == 200, r
     cashier = persona("ro-cashier", "/office/work-queue")
     wait_for(lambda: call(cashier, "POST", f"/api/v1/office/claims/{c['claim_id']}/payment-instructions", {"demo_scenario": "SUCCESS"},

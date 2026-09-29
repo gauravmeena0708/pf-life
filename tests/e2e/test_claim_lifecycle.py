@@ -48,17 +48,16 @@ def test_member_uploads_a_document_and_withdraws_before_a_decision(persona):
     wait_for(lambda: all(x["claim_id"] != c["claim_id"] for x in call(da, "GET", "/api/v1/office/work-queue")[1]["data"]["items"]), timeout=20)
 
 
-def test_cad_then_payment_scroll_and_the_das_lookups(persona):
+def test_payment_scroll_and_the_das_lookups(persona):
     member = persona("member-b", "/member/claims")
     c = file_claim(member, "AL-0002", 100000)                           # ₹1,000: settled automatically
     assert c["state"] == "AUTO_APPROVED"
     fa = persona("ro-fa-accounts", "/office/claim-tools")
-    status, cad = wait_for(lambda: (lambda r: r if r[0] == 201 or r[1].get("type") == "/problems/cad-exists" else None)(call(
-        fa, "POST", f"/api/v1/office/claims/{c['claim_id']}/cad", None,
-        {"X-Step-Up-Token": step_up(fa, "generate-cad", c["claim_id"], None, 100000)})), timeout=30, every=2)
-    if status == 409:                                                   # generated on an interrupted earlier run
-        cad = call(fa, "GET", f"/api/v1/office/claims/{c['claim_id']}/cad")[1]
-    assert cad["data"]["net_paise"] == 100000 and cad["data"]["static_data_version"]
+    assert call(fa, "POST", f"/api/v1/office/claims/{c['claim_id']}/cad")[0] == 403        # scrutinising officers generate dockets
+    da = persona("do-caseworker", "/office/claim-tools")
+    status, r = call(da, "POST", f"/api/v1/office/claims/{c['claim_id']}/cad")
+    assert status == 409 and r["type"] == "/problems/invalid-state", r                   # settled automatically: no scrutiny
+    assert call(fa, "GET", "/api/v1/office/system/cad-static-data")[1]["data"]["loaded"] is True
     cashier = persona("ro-cashier", "/office/claim-tools")
     preview = call(cashier, "GET", "/api/v1/office/payment-scrolls/ready")[1]["data"]
     assert c["claim_id"] in [x["claim_id"] for x in preview["claims"]]
@@ -76,10 +75,10 @@ def test_cad_then_payment_scroll_and_the_das_lookups(persona):
     assert call(da, "GET", "/api/v1/office/members/100000000002")[0] in (400, 422)                  # no purpose, no view
     assert call(da, "GET", "/api/v1/office/accounts/inoperative")[0] == 200
     trail = call(da, "GET", f"/api/v1/office/claims/{c['claim_id']}/audit-trail")[1]["data"]
-    assert trail["cad"]["cad_id"] == cad["data"]["cad_id"] and trail["state"] == "SETTLED"
+    assert trail["cad"] is None and trail["state"] == "SETTLED"                 # settled automatically: no docket
     SHOTS.mkdir(exist_ok=True)
     fa.goto(f"{WEB}/office/claim-tools")
     fa.get_by_label("Claim ID").fill(c["claim_id"])
-    fa.get_by_role("button", name="Generate or view CAD").click()
-    fa.get_by_text("A CAD already exists for this claim.").wait_for()
+    fa.get_by_role("button", name="View docket").click()
+    fa.get_by_text("No Claim Approval Docket for this claim yet").wait_for()   # the accounts wing views; officers generate
     fa.screenshot(path=str(SHOTS / "p2-cad.png"), full_page=True)

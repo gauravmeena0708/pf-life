@@ -1201,7 +1201,7 @@ paths:
   /office/claims/{claimId}/cad:
     get:
       operationId: getOfficeClaimsClaimIdCad
-      summary: View the generated CAD
+      summary: View the latest Claim Approval Docket and every level's version
       tags:
       - Office claim processing and member accounts
       parameters:
@@ -1237,14 +1237,19 @@ paths:
       x-phase: 1
       x-owner-service: claim
       x-callers:
+      - fo.ao
+      - fo.apfc
+      - fo.da_accounts
       - fo.fa_accounts
+      - fo.oic
+      - fo.ss
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
     post:
       operationId: postOfficeClaimsClaimIdCad
-      summary: 'Generate the Claim Authorization Document (CAD): interest split, TDS and net payable, with the rule and static-data
-        vers'
+      summary: 'Generate the Claim Approval Docket (CAD) at this level (CITES: the initiator, each verifier and the approver
+        regenerate '
       tags:
       - Office claim processing and member accounts
       parameters:
@@ -1256,7 +1261,6 @@ paths:
           type: string
       - $ref: '#/components/parameters/IdempotencyKey'
       - $ref: '#/components/parameters/IfMatch'
-      - $ref: '#/components/parameters/StepUpToken'
       responses:
         '201':
           description: CAD generated
@@ -1287,12 +1291,16 @@ paths:
       x-phase: 1
       x-owner-service: claim
       x-callers:
-      - fo.fa_accounts
+      - fo.ao
+      - fo.apfc
+      - fo.da_accounts
+      - fo.oic
+      - fo.ss
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
-      description: 'Generate the Claim Authorization Document (CAD): interest split, TDS and net payable, with the rule and
-        static-data versions used'
+      description: 'Generate the Claim Approval Docket (CAD) at this level (CITES: the initiator, each verifier and the approver
+        regenerate it before acting): interest split, TDS and net payable, with the rule and static-data versions used'
       requestBody:
         required: true
         content:

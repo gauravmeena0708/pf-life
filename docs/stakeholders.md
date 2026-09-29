@@ -60,7 +60,7 @@ EPFO field offices run branches (Accounts, Pension, Cash, Compliance, Recovery, 
 | `fo.da_compliance` | Dealing Assistant (Compliance) — establishment files, inspections, 14B/7Q knock-off | Login | Core | ➕ | FIA, CMP |
 | `fo.ss` | Section Supervisor (Accounts / Compliance) | Login | Core | ➕ | FIA, WSU, MAP |
 | `fo.ao` | Accounts Officer | Login | Core | ➕ | PEN, FIA, MAP |
-| `fo.fa_accounts` | DA / SS in the F&A (Accounts) wing — ledger debit posting, **Claim Authorization Document (CAD)** generation, reconciliation of rejected / returned payments | Login (FO Interface, Accounts wing) | Core | ➕ | SS, FIA, FRM |
+| `fo.fa_accounts` | DA / SS in the F&A (Accounts) wing — ledger debit posting, viewing the **Claim Approval Dockets (CAD)** of each level, reconciliation of rejected / returned payments | Login (FO Interface, Accounts wing) | Core | ➕ | SS, FIA, FRM |
 | `fo.apfc` | APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q) | Login + e-Proceedings | Core | ✔ (approving officer) | CMP, FIA, PEN |
 | `fo.rpfc1` | RPFC-I — regional head of wings | Login | Core | ➕ | CMP, PEN, AUD |
 | `fo.oic` | Officer-in-Charge of the office | Login | Core | ➕ | FIA, WSU, AUD |

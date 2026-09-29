@@ -1,5 +1,5 @@
 """Phase 2, slice 5a: the rest of a claim's life — the member's pre-flight check for one form, documents,
-cancellation before a decision and audit trail; the office's Claim Authorization Document (CAD), payment scrolls
+cancellation before a decision and audit trail; the Claim Approval Docket (CAD) each scrutinising officer generates, payment scrolls
 with return reconciliation, audit trail and the forms filed with a claim."""
 import base64
 import hashlib
@@ -28,7 +28,6 @@ BANK_BRANCHES = {"DEMO0000001": "Demo Bank, Connaught Place", "DEMO0000002": "De
                  "DEMO0000006": "Demo Bank, Dwarka", "DEMO0000007": "Demo Bank, Rohini", "UBIN0822124": "Union Bank (synthetic entry)"}
 OFFICE_READERS = require_stakeholder("fo.da_accounts", "fo.ss", "fo.ao", "fo.apfc", "fo.oic", "fo.cash", "fo.fa_accounts",
                                      "zo.rpfc1_audit", "ho.audit")
-ACCOUNTS_WING = require_stakeholder("fo.fa_accounts")
 CASHIER = require_stakeholder("fo.cash")
 TERMINAL = {"SETTLED", "REJECTED_WITH_REASON", "CANCELLED"}
 
@@ -117,34 +116,36 @@ async def cad_static(actor: Actor = Depends(OFFICE_READERS), session: AsyncSessi
 
 
 def _cad(c: Any) -> dict[str, Any]:
-    return {"cad_id": c["cad_id"], "claim_id": c["claim_id"], "gross_paise": c["gross_paise"], "interest_paise": c["interest_paise"],
-            "tds_paise": c["tds_paise"], "net_paise": c["net_paise"], "tax_basis": c["tax"]["basis"], "rule_version": c["rule_version"],
-            "static_data_version": c["static_data_version"], "created_at": iso(c["created_at"])}
+    return {"cad_id": c["cad_id"], "claim_id": c["claim_id"], "generated_by_role": c.get("officer_role"), "gross_paise": c["gross_paise"],
+            "interest_paise": c["interest_paise"], "tds_paise": c["tds_paise"], "net_paise": c["net_paise"], "tax_basis": c["tax"]["basis"],
+            "rule_version": c["rule_version"], "static_data_version": c["static_data_version"], "created_at": iso(c["created_at"])}
+
+
+REVIEWERS = require_stakeholder("fo.da_accounts", "fo.ss", "fo.ao", "fo.apfc", "fo.oic")
+IN_REVIEW = ("UNDER_REVIEW", "RECOMMENDED", "AWAITING_NEXT_APPROVAL")
 
 
 @router.post("/api/v1/office/claims/{claim_id}/cad", status_code=201)
-async def generate_cad(claim_id: str, actor: Actor = Depends(ACCOUNTS_WING), session: AsyncSession = Depends(db)) -> dict:
+async def generate_cad(claim_id: str, actor: Actor = Depends(REVIEWERS), session: AsyncSession = Depends(db)) -> dict:
+    """Claim Approval Docket (CITES manuals): the initiator generates it, and every verifier and the approver
+    generates it again before acting — gross, interest in it, TDS and net payable, with the rule and static-data
+    versions. The work queue refuses an officer's action without a docket of their own since the last action."""
     async with session.begin():
         claim = await load_claim(session, claim_id, office=await staff_office(session, actor), lock=True)
-        if claim["state"] not in ("APPROVED", "AUTO_APPROVED"):
-            raise Problem(409, "/problems/invalid-state", "A CAD is generated for an approved claim before payment", f"State: {claim['state']}.")
-        if not claim["debit_journal_id"]:
-            raise Problem(409, "/problems/ledger-debit-pending", "The ledger debit is not posted yet")
-        if (await session.execute(select(cads.c.cad_id).where(cads.c.claim_id == claim_id))).first():
-            raise Problem(409, "/problems/cad-exists", "A CAD already exists for this claim")
-        require_step_up(actor, "generate-cad", claim_id, None, claim["amount_paise"])
+        if claim["state"] not in IN_REVIEW:
+            raise Problem(409, "/problems/invalid-state", "A docket is generated while the claim is being scrutinised", f"State: {claim['state']}.")
         account = (await session.execute(select(accounts).where(accounts.c.account_link_id == claim["account_link_id"]))).mappings().one()
         tax = await work_out_tax(session, claim, date.today())
-        before = account["employee_paise"] + account["employer_paise"] + claim["amount_paise"]      # the debit is already posted
-        interest = claim["amount_paise"] * account["interest_paise"] // before if before else 0
-        row = {"cad_id": f"CAD-{secrets.token_hex(4).upper()}", "claim_id": claim_id, "gross_paise": claim["amount_paise"],
-               "interest_paise": interest, "tds_paise": tax["tds_paise"], "net_paise": tax["net_paise"], "tax": tax,
-               "rule_version": tax["rule_version"], "static_data_version": STATIC_DATA_VERSION, "created_by": actor.subject}
-        await session.execute(insert(cads).values(**row))
+        balance = account["employee_paise"] + account["employer_paise"] + (claim["amount_paise"] if claim["debit_journal_id"] else 0)
+        interest = claim["amount_paise"] * account["interest_paise"] // balance if balance else 0
+        row = {"cad_id": f"CAD-{secrets.token_hex(4).upper()}", "claim_id": claim_id, "officer_role": actor.stakeholder,
+               "gross_paise": claim["amount_paise"], "interest_paise": interest, "tds_paise": tax["tds_paise"], "net_paise": tax["net_paise"],
+               "tax": tax, "rule_version": tax["rule_version"], "static_data_version": STATIC_DATA_VERSION, "created_by": actor.subject}
+        await session.execute(insert(cads).values(**row, created_at=datetime.now(UTC)))
         await add_event(session, producer=PRODUCER, event_type="CADGenerated.v1", aggregate_type="claim", aggregate_id=claim_id,
                         correlation_id=actor.correlation_id, payload={"claim_id": claim_id, "cad_id": row["cad_id"], "net_payable_paise": row["net_paise"],
                                                                       "tds_paise": row["tds_paise"], "rule_version": row["rule_version"],
-                                                                      "static_data_version": STATIC_DATA_VERSION})
+                                                                      "static_data_version": STATIC_DATA_VERSION, "officer_role": actor.stakeholder})
         await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="claim.cad_generated",
                     target_type="claim", target_id=claim_id, detail=row["cad_id"])
     return envelope(_cad({**row, "created_at": datetime.now(UTC)}))
@@ -153,10 +154,10 @@ async def generate_cad(claim_id: str, actor: Actor = Depends(ACCOUNTS_WING), ses
 @router.get("/api/v1/office/claims/{claim_id}/cad")
 async def view_cad(claim_id: str, actor: Actor = Depends(OFFICE_READERS), session: AsyncSession = Depends(db)) -> dict:
     await load_claim(session, claim_id, office=await staff_office(session, actor))
-    row = (await session.execute(select(cads).where(cads.c.claim_id == claim_id))).mappings().first()
-    if not row:
-        raise Problem(404, "/problems/not-found", "No CAD for this claim yet")
-    return envelope(_cad(row))
+    rows = (await session.execute(select(cads).where(cads.c.claim_id == claim_id).order_by(cads.c.created_at, cads.c.cad_id))).mappings().all()
+    if not rows:
+        raise Problem(404, "/problems/not-found", "No Claim Approval Docket for this claim yet")
+    return envelope({**_cad(rows[-1]), "versions": [_cad(r) for r in rows]})
 
 
 # ── office: payment scrolls ────────────────────────────────────────────────────────────────────
@@ -236,7 +237,8 @@ async def _office_claim(session: AsyncSession, claim_id: str, actor: Actor) -> d
 async def office_trail(claim_id: str, actor: Actor = Depends(OFFICE_READERS), session: AsyncSession = Depends(db)) -> dict:
     claim = await _office_claim(session, claim_id, actor)
     view = await claim_view(session, claim)
-    cad = (await session.execute(select(cads).where(cads.c.claim_id == claim_id))).mappings().first()
+    cad = (await session.execute(select(cads).where(cads.c.claim_id == claim_id).order_by(cads.c.created_at.desc(), cads.c.cad_id)
+                                 .limit(1))).mappings().first()
     await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="claim.audit_trail_viewed",
                 target_type="claim", target_id=claim_id)
     await session.commit()

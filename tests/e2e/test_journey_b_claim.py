@@ -56,9 +56,8 @@ def case_for(page, claim_id):
 
 
 def decide(page, case, path, decision="APPROVE", reason=None):
-    token = step_up(page, "decide-case", case["case_id"], case["version"], case["amount_paise"])
-    return call(page, "POST", f"/api/v1/office/cases/{case['case_id']}/{path}", {"decision": decision, "reason": reason},
-                {"X-Step-Up-Token": token})
+    from tests.e2e.officers import decide as officer_decide
+    return officer_decide(page, case, path, decision, reason)
 
 
 def cash(page, claim_id, action, path, scenario):
@@ -117,8 +116,8 @@ def test_journey_b_claim_through_officers_payment_return_and_reissue(as_persona)
     case = wait_for(lambda: case_for(da, claim_id))
     assert case["chain"] == ["fo.da_accounts", "fo.ss", "fo.apfc"]
     shot(da, "b4-work-queue", "/office/work-queue")
-    status, r = call(da, "POST", f"/api/v1/office/cases/{case['case_id']}/recommendations",
-                     {"checks": ["KYC verified", "Balance sufficient"], "note": "Treatment estimate attached"})
+    from tests.e2e.officers import recommend
+    status, r = recommend(da, case, "Treatment estimate attached", checks=("KYC verified", "Balance sufficient"))
     assert status == 200, r
     ss = as_persona("ro-ss", "/office/work-queue")
     case = wait_for(lambda: case_for(ss, claim_id))
@@ -130,6 +129,8 @@ def test_journey_b_claim_through_officers_payment_return_and_reissue(as_persona)
     status, r = decide(apfc, case, "second-approvals", reason="Within band; documents in order")
     assert status == 200 and r["data"]["state"] == "AWAITING_PAYMENT", r
     wait_for(lambda: claim(member, claim_id)["state"] == "APPROVED")
+    dockets = call(apfc, "GET", f"/api/v1/office/claims/{claim_id}/cad")[1]["data"]            # one Claim Approval Docket per level
+    assert [v["generated_by_role"] for v in dockets["versions"]] == ["fo.da_accounts", "fo.ss", "fo.apfc"], dockets
 
     # B6: the cash section pays; the mock bank returns it; the cash section re-issues; the bank pays.
     cashier = as_persona("ro-cashier", "/office/work-queue")

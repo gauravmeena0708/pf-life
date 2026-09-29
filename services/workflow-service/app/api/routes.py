@@ -13,12 +13,12 @@ from typing import Any
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
-from sqlalchemy import and_, insert, or_, select, update
+from sqlalchemy import and_, func, insert, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra.db import sessions
 from app.api.locks_routes import acquire, documents_of, ensure_unlocked
-from app.infra.tables import case_actions, cases, member_accounts, office_staff, offices
+from app.infra.tables import case_actions, cases, claim_dockets, member_accounts, office_staff, offices
 from epfo_auth import Actor, require_actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit
@@ -40,6 +40,12 @@ async def db() -> AsyncSession:
 class Recommendation(BaseModel):
     checks: list[str] = Field(default_factory=list)   # e.g. ["KYC verified", "Balance sufficient"]
     note: str = Field(min_length=3, max_length=1000)
+    recommendation: str = Field(default="APPROVE", pattern="^(APPROVE|REJECT)$")   # "Recommend to Approve / to Reject"
+    account_status: str = Field(pattern="^(OPERATIVE|INOPERATIVE|DORMANT)$")     # set by the initiator (CITES manuals)
+
+
+class StopInput(BaseModel):
+    reason: str = Field(min_length=10, max_length=500)
 
 
 class Decision(BaseModel):
@@ -115,12 +121,44 @@ async def act(session: AsyncSession, case: dict[str, Any], actor: Actor, action:
 
 
 async def emit_decision(session: AsyncSession, case: dict[str, Any], actor: Actor, decision: str, level: int,
-                        final: bool, next_role: str | None, reason: str | None) -> None:
+                        final: bool, next_role: str | None, reason: str | None, recommendation: str | None = None) -> None:
     await add_event(session, producer=PRODUCER, event_type="CaseDecisionSubmitted.v1", aggregate_type="case",
                     aggregate_id=case["case_id"], correlation_id=actor.correlation_id, payload={
                         "case_id": case["case_id"], "claim_id": case["claim_id"], "decision": decision,
                         "officer_subject": actor.subject, "officer_role": actor.stakeholder, "approval_level": level,
-                        "final": final, "next_role": next_role, "reason": reason})
+                        "final": final, "next_role": next_role, "reason": reason, "recommendation": recommendation})
+
+
+DECISIONS = ("RECOMMEND", "APPROVE", "REJECT", "RETURN", "RECOMMEND_REJECT")
+
+
+async def last_decision(session: AsyncSession, case_id: str) -> int:
+    """The id of the last decision on the case (0 before any): a docket counts only if made after it."""
+    return (await session.execute(select(func.coalesce(func.max(case_actions.c.id), 0)).where(
+        case_actions.c.case_id == case_id, case_actions.c.action.in_(DECISIONS)))).scalar_one()
+
+
+async def require_docket(session: AsyncSession, case: dict[str, Any], actor: Actor) -> None:
+    """CITES manuals: each officer generates the Claim Approval Docket again before acting on the claim."""
+    since = await last_decision(session, case["case_id"])
+    if not (await session.execute(select(claim_dockets.c.cad_id).where(
+            claim_dockets.c.claim_id == case["claim_id"], claim_dockets.c.officer_role == actor.stakeholder,
+            claim_dockets.c.after_action == since))).first():
+        raise Problem(409, "/problems/docket-required", "Generate the Claim Approval Docket first",
+                      "Each officer generates the Claim Approval Docket (CAD) before recommending or deciding; "
+                      "it may take a moment to show after generating.")
+
+
+async def _has_docket(session: AsyncSession, case: dict[str, Any], actor: Actor) -> bool:
+    try:
+        await require_docket(session, case, actor)
+        return True
+    except Problem:
+        return False
+
+
+def recommendation_of(case: dict[str, Any]) -> str:
+    return (case.get("data") or {}).get("recommendation", "APPROVE")
 
 
 async def checker_turn(session: AsyncSession, case_id: str, actor: Actor, allowed_roles: tuple[str, ...],
@@ -145,6 +183,10 @@ async def checker_turn(session: AsyncSession, case_id: str, actor: Actor, allowe
 
 
 async def decide(case_id: str, body: Decision, actor: Actor, session: AsyncSession, step_rule: str) -> dict:
+    """CITES manuals: only the final level of the chain decides. An intermediate level forwards the initiator's
+    recommendation, or — disagreeing with an approval — recommends rejection, which returns the claim to the
+    initiator's worklist to be re-forwarded as "Recommend to Reject". The final level sees Approve / Send back when
+    approval is recommended and Reject / Send back when rejection is."""
     if body.decision not in ("APPROVE", "REJECT", "RETURN"):
         raise Problem(422, "/problems/validation", "decision must be APPROVE, REJECT or RETURN")
     if body.decision != "APPROVE" and not (body.reason and body.reason.strip()):
@@ -152,25 +194,38 @@ async def decide(case_id: str, body: Decision, actor: Actor, session: AsyncSessi
     roles = FIRST_CHECKERS if step_rule == "first" else SECOND_CHECKERS
     async with session.begin():
         _, case = await checker_turn(session, case_id, actor, roles, step_rule)
+        await require_docket(session, case, actor)
         require_step_up(actor, "decide-case", case_id, case["version"], case["amount_paise"])
-        level = case["step"]
-        if body.decision == "RETURN":
-            case = await act(session, case, actor, "RETURN", level, body.reason, None, step=0, round=case["round"] + 1,
-                             current_role=case["chain"][0], assignee_subject=None)
-            await emit_decision(session, case, actor, "RETURN", level, False, case["chain"][0], body.reason)
-        elif body.decision == "REJECT":
-            case = await act(session, case, actor, "REJECT", level, body.reason, None, state="REJECTED", current_role=None,
-                             assignee_subject=None)
-            await emit_decision(session, case, actor, "REJECT", level, True, None, body.reason)
-        elif level + 1 < len(case["chain"]):
-            nxt = case["chain"][level + 1]
-            case = await act(session, case, actor, "APPROVE", level, body.reason, None, step=level + 1, current_role=nxt,
-                             assignee_subject=None)
-            await emit_decision(session, case, actor, "APPROVE", level, False, nxt, body.reason)
-        else:
+        level, rec = case["step"], recommendation_of(case)
+        final = level + 1 == len(case["chain"])
+        back = {"step": 0, "round": case["round"] + 1, "current_role": case["chain"][0], "assignee_subject": None}
+        if body.decision == "RETURN":                                   # "Send Back to First Level / Initiator"
+            case = await act(session, case, actor, "RETURN", level, body.reason, None, **back)
+            await emit_decision(session, case, actor, "RETURN", level, False, case["chain"][0], body.reason, rec)
+        elif final and body.decision != rec:
+            raise Problem(409, "/problems/decision-not-offered",
+                          f"{'Rejection' if rec == 'REJECT' else 'Approval'} was recommended",
+                          f"You may {'reject' if rec == 'REJECT' else 'approve'} it or send it back to the first level.")
+        elif final and rec == "REJECT":
+            case = await act(session, case, actor, "REJECT", level, body.reason, None, state="REJECTED", current_role=None, assignee_subject=None)
+            await emit_decision(session, case, actor, "REJECT", level, True, None, body.reason, rec)
+        elif final:
             case = await act(session, case, actor, "APPROVE", level, body.reason, None, state="AWAITING_PAYMENT",
                              current_role="fo.cash", assignee_subject=None)
-            await emit_decision(session, case, actor, "APPROVE", level, True, "fo.cash", body.reason)
+            await emit_decision(session, case, actor, "APPROVE", level, True, "fo.cash", body.reason, rec)
+        elif body.decision == "REJECT" and rec == "APPROVE":        # disagrees: back to the initiator's worklist
+            note = f"Rejection recommended by {actor.stakeholder}: {body.reason}"
+            case = await act(session, case, actor, "RECOMMEND_REJECT", level, body.reason, None,
+                             data={**(case.get("data") or {}), "returned_for_rejection": note}, **back)
+            await emit_decision(session, case, actor, "RETURN", level, False, case["chain"][0], note, rec)
+        elif body.decision == "APPROVE" and rec == "REJECT":
+            raise Problem(409, "/problems/decision-not-offered", "Rejection was recommended",
+                          "Forward the rejection (Recommend to Reject) or send the claim back to the first level.")
+        else:                                                           # forward the recommendation upward
+            nxt = case["chain"][level + 1]
+            case = await act(session, case, actor, body.decision, level, body.reason, None, step=level + 1, current_role=nxt,
+                             assignee_subject=None)
+            await emit_decision(session, case, actor, "APPROVE", level, False, nxt, body.reason, rec)
         await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder,
                     action=f"case.{body.decision.lower()}", target_type="case", target_id=case_id, detail=body.reason)
         return envelope(case_json(case))
@@ -200,6 +255,7 @@ async def get_case(case_id: str, actor: Actor = Depends(OFFICERS), session: Asyn
     from app.engine.engine import next_operation
     return envelope({**case_json(case), "history": await history(session, case_id),
                      "documents": await documents_of(session, case_id, actor.subject),
+                     "docket_ready": bool(case["claim_id"]) and await _has_docket(session, case, actor),
                      "your_turn": actor.stakeholder in (case["current_role"] or "").split("|"),
                      "operation": next_operation(case) if case.get("process") else None})
 
@@ -216,10 +272,14 @@ async def recommend(case_id: str, body: Recommendation, actor: Actor = Depends(r
         if case["assignee_subject"] and case["assignee_subject"] != actor.subject:
             raise Problem(403, "/problems/assigned-elsewhere", "This case is assigned to another officer")
         await ensure_unlocked(session, case)
+        await require_docket(session, case, actor)
+        require_step_up(actor, "recommend-case", case_id, case["version"])       # OTP on every officer action
         nxt = case["chain"][1]
+        data = {**(case.get("data") or {}), "recommendation": body.recommendation, "account_status": body.account_status}
+        data.pop("returned_for_rejection", None)
         case = await act(session, case, actor, "RECOMMEND", 0, body.note, body.checks, step=1, current_role=nxt,
-                         assignee_subject=None)
-        await emit_decision(session, case, actor, "RECOMMEND", 0, False, nxt, body.note)
+                         assignee_subject=None, data=data)
+        await emit_decision(session, case, actor, "RECOMMEND", 0, False, nxt, body.note, body.recommendation)
         await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="case.recommend",
                     target_type="case", target_id=case_id)
         return envelope(case_json(case))
@@ -268,6 +328,48 @@ async def hrm_me(actor: Actor = Depends(require_actor), session: AsyncSession = 
 
 
 # ── case creation from events (used by app/infra/messaging.py) ─────────────────────────────────
+
+# ── Start-Stop Claim (CITES manuals): the initiator parks a claim while a parallel activity finishes ──────────
+
+@router.post("/api/v1/office/cases/{case_id}/stops")
+async def stop_case(case_id: str, body: StopInput, actor: Actor = Depends(require_stakeholder("fo.da_accounts")),
+                    session: AsyncSession = Depends(db)) -> dict:
+    async with session.begin():
+        staff = await posting(session, actor)
+        case = await load_case(session, case_id, staff["office_id"], lock=True)
+        if not case["claim_id"] or case["state"] != "IN_REVIEW":
+            raise Problem(409, "/problems/invalid-state", "Only a claim under scrutiny can be stopped", f"State: {case['state']}.")
+        held = {"step": case["step"], "current_role": case["current_role"], "reason": body.reason, "by": actor.stakeholder}
+        case = await act(session, case, actor, "STOP", None, body.reason, None, state="STOPPED", current_role=None,
+                         data={**(case.get("data") or {}), "stopped": held})
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="case.stopped",
+                    target_type="case", target_id=case_id, detail=body.reason)
+    return envelope(case_json(case))
+
+
+@router.post("/api/v1/office/cases/{case_id}/restarts")
+async def restart_case(case_id: str, actor: Actor = Depends(require_stakeholder("fo.da_accounts")), session: AsyncSession = Depends(db)) -> dict:
+    async with session.begin():
+        staff = await posting(session, actor)
+        case = await load_case(session, case_id, staff["office_id"], lock=True)
+        if case["state"] != "STOPPED":
+            raise Problem(409, "/problems/invalid-state", "This claim is not stopped")
+        held = dict((case.get("data") or {}).get("stopped") or {})
+        data = {k: v for k, v in (case.get("data") or {}).items() if k != "stopped"}
+        case = await act(session, case, actor, "RESTART", None, None, None, state="IN_REVIEW", current_role=held.get("current_role"),
+                         step=held.get("step", case["step"]), data=data)
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="case.restarted",
+                    target_type="case", target_id=case_id)
+    return envelope(case_json(case))
+
+
+@router.get("/api/v1/office/stopped-cases")
+async def stopped_cases(actor: Actor = Depends(require_stakeholder("fo.da_accounts", "fo.oic")), session: AsyncSession = Depends(db)) -> dict:
+    staff = await posting(session, actor)
+    rows = (await session.execute(select(cases).where(cases.c.office_id == staff["office_id"], cases.c.state == "STOPPED")
+                                  .order_by(cases.c.updated_at))).mappings().all()
+    return envelope([case_json(dict(r)) for r in rows])
+
 
 async def open_case(session: AsyncSession, payload: dict[str, Any], state: str) -> None:
     if (await session.execute(select(cases.c.case_id).where(cases.c.claim_id == payload["claim_id"]))).first():

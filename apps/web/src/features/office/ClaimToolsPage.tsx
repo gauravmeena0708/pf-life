@@ -39,16 +39,10 @@ export function ClaimToolsPage() {
     try { const done = await work(); if (done) setNotice(done); } catch (cause) { setError(cause); }
   }
 
-  const generateCad = (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); const id = text(new FormData(e.currentTarget), "claim");
+  const viewCad = (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); const id = text(new FormData(e.currentTarget), "claim");
     void run(async () => {
-      const existing = await api<Envelope<Json>>(`/api/v1/office/claims/${id}/cad`).catch(() => null);
-      if (existing) { setCad(existing.data); return "A CAD already exists for this claim."; }
-      const trailData = (await api<Envelope<{ amount_paise: number }>>(`/api/v1/office/claims/${id}/audit-trail`).catch(() => null))?.data;
-      const token = await stepUp.ask({ action: "generate-cad", resourceId: id, amountPaise: trailData?.amount_paise,
-        summary: `Generate the Claim Authorization Document for ${id}${trailData ? ` (${rupees(trailData.amount_paise)})` : ""}.` });
-      if (!token) return null;
-      setCad((await command<Envelope<Json>>("POST", `/api/v1/office/claims/${id}/cad`, undefined, { stepUpToken: token })).data);
-      return `CAD generated for ${id}.`;
+      setCad((await api<Envelope<Json>>(`/api/v1/office/claims/${id}/cad`)).data);
+      return null;
     }); };
 
   const previewScroll = () => void run(async () => {
@@ -90,13 +84,14 @@ export function ClaimToolsPage() {
   return (
     <section className="stack" aria-labelledby="claim-tools-heading">
       <PageHeader id="claim-tools-heading" eyebrow="Regional office" title="Claim office tools" current="Claim tools"
-        description="Claim Authorization Document, payment scrolls, member 360 view, inoperative accounts, claim audit trails, death-claim shares, ledger locks and Annexure K." />
+        description="Claim Approval Dockets, payment scrolls, member 360 view, inoperative accounts, claim audit trails, death-claim shares, ledger locks and Annexure K." />
       <ProblemMessage error={error} />
       {notice ? <p role="status" className="ok">{notice}</p> : null}
 
-      {role === "fo.fa_accounts" ? <section className="card stack" aria-labelledby="cad-heading"><h2 id="cad-heading">Claim Authorization Document (CAD)</h2>
-        <form className="search-input-row" onSubmit={generateCad}><label>Claim ID<input name="claim" required placeholder="CLM-…" /></label>
-          <button type="submit" className="primary">Generate or view CAD</button></form>
+      {role === "fo.fa_accounts" ? <section className="card stack" aria-labelledby="cad-heading"><h2 id="cad-heading">Claim Approval Docket (CAD)</h2>
+        <p className="muted small">Each scrutinising officer generates the docket before acting (CITES); the accounts wing views the latest and every level's version.</p>
+        <form className="search-input-row" onSubmit={viewCad}><label>Claim ID<input name="claim" required placeholder="CLM-…" /></label>
+          <button type="submit" className="primary">View docket</button></form>
         {cad ? <Facts data={cad} /> : null}
         {staticData.data ? <details><summary>CAD static data {String(staticData.data.data.version)}</summary><Facts data={staticData.data.data} /></details> : null}
       </section> : null}

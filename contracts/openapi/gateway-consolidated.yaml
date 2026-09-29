@@ -7904,7 +7904,8 @@ paths:
   /office/cases/{caseId}/decisions:
     post:
       operationId: postOfficeCasesCaseIdDecisions
-      summary: Decision → CaseDecisionSubmitted.v1
+      summary: Decision → CaseDecisionSubmitted.v1; only the final level rejects, an intermediate "Recommend to Reject" returns
+        the cla
       tags:
       - Office claim processing and member accounts
       parameters:
@@ -7937,6 +7938,8 @@ paths:
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+      description: Decision → CaseDecisionSubmitted.v1; only the final level rejects, an intermediate "Recommend to Reject"
+        returns the claim to the initiator
       requestBody:
         required: false
         content:
@@ -8000,7 +8003,49 @@ paths:
   /office/cases/{caseId}/recommendations:
     post:
       operationId: postOfficeCasesCaseIdRecommendations
-      summary: Dealing-hand recommendation
+      summary: Initiator's "Recommend to Approve / to Reject" with the account status (Operative / Inoperative / Dormant)
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: workflow
+      x-callers:
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/cases/{caseId}/restarts:
+    post:
+      operationId: postOfficeCasesCaseIdRestarts
+      summary: Restart Claim from the stopped-claims list
       tags:
       - Office claim processing and member accounts
       parameters:
@@ -8071,6 +8116,47 @@ paths:
       x-callers:
       - fo.apfc
       - fo.oic
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/cases/{caseId}/stops:
+    post:
+      operationId: postOfficeCasesCaseIdStops
+      summary: Stop Claim Processing with a reason (initiator; a parallel activity must finish first)
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: workflow
+      x-callers:
+      - fo.da_accounts
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -8170,7 +8256,7 @@ paths:
   /office/claims/{claimId}/cad:
     get:
       operationId: getOfficeClaimsClaimIdCad
-      summary: View the generated CAD
+      summary: View the latest Claim Approval Docket and every level's version
       tags:
       - Office claim processing and member accounts
       parameters:
@@ -8206,14 +8292,19 @@ paths:
       x-phase: 1
       x-owner-service: claim
       x-callers:
+      - fo.ao
+      - fo.apfc
+      - fo.da_accounts
       - fo.fa_accounts
+      - fo.oic
+      - fo.ss
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
     post:
       operationId: postOfficeClaimsClaimIdCad
-      summary: 'Generate the Claim Authorization Document (CAD): interest split, TDS and net payable, with the rule and static-data
-        vers'
+      summary: 'Generate the Claim Approval Docket (CAD) at this level (CITES: the initiator, each verifier and the approver
+        regenerate '
       tags:
       - Office claim processing and member accounts
       parameters:
@@ -8225,7 +8316,6 @@ paths:
           type: string
       - $ref: '#/components/parameters/IdempotencyKey'
       - $ref: '#/components/parameters/IfMatch'
-      - $ref: '#/components/parameters/StepUpToken'
       responses:
         '201':
           description: CAD generated
@@ -8256,12 +8346,16 @@ paths:
       x-phase: 1
       x-owner-service: claim
       x-callers:
-      - fo.fa_accounts
+      - fo.ao
+      - fo.apfc
+      - fo.da_accounts
+      - fo.oic
+      - fo.ss
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
-      description: 'Generate the Claim Authorization Document (CAD): interest split, TDS and net payable, with the rule and
-        static-data versions used'
+      description: 'Generate the Claim Approval Docket (CAD) at this level (CITES: the initiator, each verifier and the approver
+        regenerate it before acting): interest split, TDS and net payable, with the rule and static-data versions used'
       requestBody:
         required: true
         content:
@@ -12089,6 +12183,35 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/stopped-cases:
+    get:
+      operationId: getOfficeStoppedCases
+      summary: Stopped claims of the office
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: workflow
+      x-callers:
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
   /office/system/cad-static-data:
     get:
       operationId: getOfficeSystemCadStaticData

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
-import { api, rupees, type Envelope } from "../../api/client";
+import { api, getSession, rupees, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { dateTime, roleLabel } from "../journeyB";
@@ -16,6 +16,10 @@ export function WorkQueuePage() {
   const queue = useQuery({ queryKey: ["office-work-queue"], queryFn: () => api<Envelope<Queue>>("/api/v1/office/work-queue"), retry: false, refetchInterval: 5000 });
   const data = queue.data?.data;
   const qc = useQueryClient();
+  const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
+  const isDa = session.data?.stakeholder === "fo.da_accounts";
+  const stopped = useQuery({ queryKey: ["stopped-cases"], enabled: isDa, retry: false, refetchInterval: 10000,
+    queryFn: () => api<Envelope<OfficeCase[]>>("/api/v1/office/stopped-cases") });
   const [notice, setNotice] = useState<string | null>(null);
   return <section className="stack" aria-labelledby="work-queue-heading">
     <PageHeader id="work-queue-heading" eyebrow={t("office.eyebrow")} title={t("office.queueTitle")}
@@ -37,5 +41,10 @@ export function WorkQueuePage() {
         <td>{item.chain.length ? t("office.stepOf", { step: Math.min(item.step + 1, item.chain.length), total: item.chain.length }) : "—"}</td><td>{dateTime(item.sla_due_at, i18n.language)}</td><td>{item.next_action ? <span className="state-pill">{t(`office.actions.${item.next_action}`, { defaultValue: item.next_action })}</span> : "—"}</td>
       </tr>)}</tbody></table></div> : null}
     </section>
+    {isDa ? <section className="card stack" aria-labelledby="stopped-heading"><h2 id="stopped-heading">Stopped claims</h2>
+      {stopped.data?.data.length ? <ul className="plain-list">{stopped.data.data.map((c) => <li key={c.case_id}>
+        <Link to={`/office/cases/${c.case_id}`}><code>{c.case_id}</code></Link> — claim <code>{c.claim_id}</code>:{" "}
+        {String((c.data?.stopped as { reason?: string } | undefined)?.reason ?? "")}</li>)}</ul> : <p className="muted">No stopped claims.</p>}
+    </section> : null}
   </section>;
 }

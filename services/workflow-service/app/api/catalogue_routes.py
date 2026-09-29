@@ -10,11 +10,16 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /hrm/me', 'GET /office/work-queue', 'GET /public/offices', 'POST /office/system/locks/{lockId}/release', 'GET /office/cases/{caseId}', 'POST /office/cases/{caseId}/assignments', 'POST /office/cases/{caseId}/decisions', 'POST /office/cases/{caseId}/recommendations', 'POST /office/cases/{caseId}/second-approvals', 'POST /office/freeze-cases/{caseId}/verifications', 'GET /office/members/{uan}/locks', 'POST /office/cases/{caseId}/documents/{docId}/attestation-views']
+OPERATIONS = ['GET /hrm/me', 'GET /office/stopped-cases', 'GET /office/work-queue', 'GET /public/offices', 'POST /office/system/locks/{lockId}/release', 'GET /office/cases/{caseId}', 'POST /office/cases/{caseId}/assignments', 'POST /office/cases/{caseId}/decisions', 'POST /office/cases/{caseId}/recommendations', 'POST /office/cases/{caseId}/restarts', 'POST /office/cases/{caseId}/second-approvals', 'POST /office/cases/{caseId}/stops', 'POST /office/freeze-cases/{caseId}/verifications', 'GET /office/members/{uan}/locks', 'POST /office/cases/{caseId}/documents/{docId}/attestation-views']
 
 @router.api_route("/api/v1/hrm/me", methods=["GET"], include_in_schema=False)
 async def get_hrm_me(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "HRM staff profile and assignment metadata (interface 15)")
+
+
+@router.api_route("/api/v1/office/stopped-cases", methods=["GET"], include_in_schema=False)
+async def get_office_stopped_cases(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Stopped claims of the office")
 
 
 @router.api_route("/api/v1/office/work-queue", methods=["GET"], include_in_schema=False)
@@ -44,17 +49,27 @@ async def post_office_cases_caseId_assignments(actor: Actor = Depends(require_ac
 
 @router.api_route("/api/v1/office/cases/{caseId}/decisions", methods=["POST"], include_in_schema=False)
 async def post_office_cases_caseId_decisions(actor: Actor = Depends(require_actor)) -> None:
-    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Decision → CaseDecisionSubmitted.v1")
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Decision → CaseDecisionSubmitted.v1; only the final level rejects, an intermediate 'Recommend to Rej")
 
 
 @router.api_route("/api/v1/office/cases/{caseId}/recommendations", methods=["POST"], include_in_schema=False)
 async def post_office_cases_caseId_recommendations(actor: Actor = Depends(require_actor)) -> None:
-    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Dealing-hand recommendation")
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Initiator's 'Recommend to Approve / to Reject' with the account status (Operative / Inoperative / Do")
+
+
+@router.api_route("/api/v1/office/cases/{caseId}/restarts", methods=["POST"], include_in_schema=False)
+async def post_office_cases_caseId_restarts(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Restart Claim from the stopped-claims list")
 
 
 @router.api_route("/api/v1/office/cases/{caseId}/second-approvals", methods=["POST"], include_in_schema=False)
 async def post_office_cases_caseId_second_approvals(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Dual control for high-value / high-risk cases")
+
+
+@router.api_route("/api/v1/office/cases/{caseId}/stops", methods=["POST"], include_in_schema=False)
+async def post_office_cases_caseId_stops(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Stop Claim Processing with a reason (initiator; a parallel activity must finish first)")
 
 
 @router.api_route("/api/v1/office/freeze-cases/{caseId}/verifications", methods=["POST"], include_in_schema=False)

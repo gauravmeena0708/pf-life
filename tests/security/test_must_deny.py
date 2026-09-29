@@ -17,6 +17,7 @@ from pathlib import Path
 import pytest
 
 from tests.e2e.test_journey_a_ecr import call, ensure_verified_and_granted, login, step_up, wait_for
+from tests.e2e.officers import decide as officer_decide, recommend
 from tests.e2e.test_journey_d_security import finish_leftovers
 
 playwright = pytest.importorskip("playwright.sync_api")
@@ -247,11 +248,9 @@ def test_deny_15_20_21_22_frozen_account_step_up_binding_and_payment_order(perso
             case = wait_for(lambda: next((x for x in call(page, "GET", "/api/v1/office/work-queue")[1]["data"]["items"]
                                           if x["claim_id"] == cid), None))
             if path == "recommendations":
-                call(page, "POST", f"/api/v1/office/cases/{case['case_id']}/{path}", {"checks": [], "note": "Must-deny test claim"})
+                recommend(page, case, "Must-deny test claim")
             else:
-                tok = step_up(page, "decide-case", case["case_id"], case["version"], case["amount_paise"])
-                call(page, "POST", f"/api/v1/office/cases/{case['case_id']}/{path}", {"decision": "APPROVE", "reason": None},
-                     {"X-Step-Up-Token": tok})
+                officer_decide(page, case, path)
     wait_for(lambda: call(member, "GET", f"/api/v1/members/me/claims/{cid}")[1]["data"]["state"] in ("APPROVED", "AUTO_APPROVED"))
 
     # DENY-15 / 22: the account is frozen (tier-2 process) after approval — no new claim, no payment.
@@ -278,11 +277,9 @@ def test_deny_15_20_21_22_frozen_account_step_up_binding_and_payment_order(perso
                                           if x["claim_id"] == cid), None))
             if path == "recommendations":
                 assert case["chain"] == ["fo.da_accounts", "fo.ss", "fo.apfc"], case
-                call(page, "POST", f"/api/v1/office/cases/{case['case_id']}/{path}", {"checks": [], "note": "Re-checked after de-freeze"})
+                assert recommend(page, case, "Re-checked after de-freeze")[0] == 200
             else:
-                tok = step_up(page, "decide-case", case["case_id"], case["version"], case["amount_paise"])
-                assert call(page, "POST", f"/api/v1/office/cases/{case['case_id']}/{path}", {"decision": "APPROVE", "reason": None},
-                            {"X-Step-Up-Token": tok})[0] == 200
+                assert officer_decide(page, case, path)[0] == 200
     wait_for(lambda: call(cashier, "POST", f"/api/v1/office/claims/{cid}/payment-instructions", {"demo_scenario": "SUCCESS"},
                           {"X-Step-Up-Token": step_up(cashier, "instruct-payment", cid, None, c["amount_paise"]),
                            "Idempotency-Key": str(uuid.uuid4())})[0] == 200, timeout=20, every=1)

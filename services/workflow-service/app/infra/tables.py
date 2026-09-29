@@ -130,3 +130,13 @@ document_views = Table(
     Column("viewer_role", String(60), nullable=False),
     Column("at", DateTime(timezone=True), server_default=func.now()),
 )
+
+# Claim Approval Dockets generated in claim-service (CADGenerated.v1), per officer role. `after_action` is the last
+# decision on the case when the docket was made: an officer acts only with a docket made since that decision.
+claim_dockets = Table(
+    "claim_dockets", metadata,
+    Column("cad_id", String(40), primary_key=True),
+    Column("claim_id", String(40), nullable=False, index=True),
+    Column("officer_role", String(60), nullable=False),
+    Column("after_action", Integer, nullable=False),
+)

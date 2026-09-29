@@ -5,6 +5,7 @@ lands on the pension office's tracker and matches a filer with the member record
 import uuid
 
 from tests.e2e.test_journey_a_ecr import call, step_up, wait_for
+from tests.e2e.officers import recommend
 from tests.e2e.test_journey_b_claim import case_for, decide
 from tests.e2e.test_policy_admin import browser, persona  # noqa: F401  (fixtures)
 
@@ -34,8 +35,7 @@ def test_nominee_claims_pf_and_edli_and_is_paid_in_shares(persona):
         assert status == 200 and r["data"]["payable"], r
         da = persona("do-caseworker", "/office/work-queue")
         case = wait_for(lambda: case_for(da, claim_id))
-        status, r = call(da, "POST", f"/api/v1/office/cases/{case['case_id']}/recommendations",
-                         {"checks": ["Death certificate seen", "Nomination on record"], "note": "Nominee's claim"})
+        status, r = recommend(da, case, "Nominee's claim", checks=("Death certificate seen", "Nomination on record"))
         assert status == 200, r
         ao = persona("ro-ao", "/office/work-queue")
         case = wait_for(lambda: case_for(ao, claim_id))

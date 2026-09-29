@@ -5,8 +5,8 @@ from typing import Any
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.routes import grievance_case, open_case
-from app.infra.tables import cases, member_accounts, subject_offices
+from app.api.routes import grievance_case, last_decision, open_case
+from app.infra.tables import cases, claim_dockets, member_accounts, subject_offices
 from epfo_persistence.policy import after_defreeze_chain, approval_chain, on_policy_published, rules_by_version
 
 BINDINGS = [
@@ -23,6 +23,7 @@ BINDINGS = [
     "member-service.MemberExitMarked.v1",
     "contribution-service.TransferPosted.v1",
     "member-service.MemberRegistered.v1",
+    "claim-service.CADGenerated.v1",
 ]
 
 
@@ -136,7 +137,19 @@ async def on_member_registered(session: AsyncSession, event: dict[str, Any]) -> 
                                                              establishment_id=p["establishment_id"], date_of_joining=date.fromisoformat(p["date_of_joining"])))
 
 
+async def on_cad_generated(session: AsyncSession, event: dict[str, Any]) -> None:
+    """A Claim Approval Docket was generated: it counts for that role until the next decision on the case."""
+    p = event["payload"]
+    case = (await session.execute(select(cases.c.case_id).where(cases.c.claim_id == p["claim_id"]))).scalar_one_or_none()
+    if not case:
+        raise LookupError(f"case for {p['claim_id']} not opened yet")
+    if not (await session.execute(select(claim_dockets.c.cad_id).where(claim_dockets.c.cad_id == p["cad_id"]))).first():
+        await session.execute(insert(claim_dockets).values(cad_id=p["cad_id"], claim_id=p["claim_id"], officer_role=p["officer_role"],
+                                                           after_action=await last_decision(session, case)))
+
+
 HANDLERS = {
+    "CADGenerated.v1": on_cad_generated,
     "MemberRegistered.v1": on_member_registered,
     "MemberExitMarked.v1": on_member_exit,
     "TransferPosted.v1": on_transfer_posted,

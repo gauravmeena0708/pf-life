@@ -26,5 +26,6 @@ export interface CaseDetail extends OfficeCase {
   history: { at: string; round: number; officer_role: string; officer_subject: string; action: string; approval_level: string | null; reason: string | null; checks: string[] }[];
   your_turn: boolean;
   documents?: import("./SignedDocuments").CaseDocument[];
+  docket_ready?: boolean;
   operation: import("./ProcessForm").ProcessOperation | null;
 }

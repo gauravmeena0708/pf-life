@@ -43,7 +43,7 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `member-d` | Member with two member IDs (a previous job) | Exit and transfer |
 | `ro-da-pension` | Dealing assistant (Pension) | Pension office |
 | `member-e`, `ro-ss-pension`, `ndc-cpps` | Retired member; SS (Pension); CPPS operator | Pension settlement |
-| `ro-fa-accounts` | Accounts wing (F&A) — Claim Authorization Document | Claim tools |
+| `ro-fa-accounts` | Accounts wing (F&A) — views the Claim Approval Dockets | Claim tools |
 
 ---
 
@@ -223,8 +223,8 @@ simulation; point out that the dialog says exactly what is being authorised (act
 
 1. **`member-a` → a claim under review → Documents and withdrawal**: upload a PDF, then *Withdraw this claim*
    (one-time code). It closes in the work queue too. After an approving officer decides, withdrawal is refused.
-2. **`ro-fa-accounts` → Claims & settlement › CAD**: enter an approved claim's ID → gross, interest included, TDS,
-   net, rule and static-data versions (one-time code).
+2. **`ro-fa-accounts` → Claims & settlement › Claim Approval Docket (CAD)**: enter a claim's ID → each level's docket
+   (gross, interest included, TDS, net, rule and static-data versions).
 3. **`ro-cashier` → Payment scroll**: see the claims ready, send them to the bank in one scroll (one-time code
    bound to the total; *simulate bank return* to show the failure path), then *Reconcile returns*.
 4. **`do-caseworker` → Members › Member**: the member 360 view needs a purpose, which the audit log keeps;
@@ -257,6 +257,18 @@ simulation; point out that the dialog says exactly what is being authorised (act
    sees the freeze banner and cannot approve an ECR. **`ro-apfc`** recommends the de-freeze, **`ro-oic`** orders it.
 4. **`do-caseworker` → Claims & settlement › ANNEXURE K FILE**: list inward / outward files; reconcile one against
    the transfer and member records, and against a VDR receipt (one-time code each).
+
+## Claim scrutiny as in the CITES manuals: docket, recommendation, rejection, stop
+*Tests: `tests/e2e/test_cites_claim_rules.py`, `services/workflow-service/tests/test_cases_api.py`*
+
+1. **`member-a`** files an advance of ₹1,50,000 (DA → AO).
+2. **`do-caseworker` → the case**: *Stop claim processing* with a reason — the claim moves to *Stopped claims* on
+   the work queue; *Restart claim* brings it back. *Generate docket* (Claim Approval Docket), then choose *Recommend
+   to Approve* or *to Reject* and the account status; confirm with the one-time code.
+3. **`ro-ao` → the case**: generate the docket; the options follow the recommendation — after "approve" only
+   *Approve* or *Send back to first level*. Send it back; the DA re-forwards it as *Recommend to Reject*; the AO
+   now sees *Reject*. At a middle level (a larger claim: DA → SS → APFC) *Recommend to Reject* returns it to the DA.
+4. **`ro-fa-accounts` → Claim Approval Docket**: every level's version of the docket.
 
 ## Policy changes that move money — interest, TDS and pensions
 *Tests: `tests/e2e/test_policy_money.py`, `services/contribution-service/tests/test_interest.py`,
