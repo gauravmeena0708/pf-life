@@ -739,27 +739,111 @@ stakeholders:
     step_up: true
     via:
     - F01.operators
+  - endpoint: GET /employers/me/configuration
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.establishment_owner
+  - endpoint: GET /employers/me/kyc
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.establishment_owner
+  - endpoint: POST /employers/me/kyc/{kycType}
+    status: M
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: true
+    via:
+    - F01.establishment_owner
+  - endpoint: GET /employers/me/bank-accounts
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.establishment_owner
+  - endpoint: GET /employers/me/exemption
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.establishment_owner
+  - endpoint: GET /employers/me/branches
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.establishment_owner
+  - endpoint: POST /employers/me/branches
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.establishment_owner
+  - endpoint: GET /employers/me/ownership-declaration
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.establishment_owner
+  - endpoint: PUT /employers/me/ownership-declaration
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: true
+    via:
+    - F01.establishment_owner
+  - endpoint: GET /employers/me/contractors
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.establishment_owner
+  - endpoint: POST /employers/me/contractors
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.establishment_owner
+  - endpoint: PATCH /employers/me
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: true
+    via:
+    - F01.establishment_owner
+  - endpoint: POST /employers/me/configuration/change-requests
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: true
+    via:
+    - F01.establishment_owner
+  - endpoint: GET /employers/me/change-requests
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.establishment_owner
   employer.signatory:
   - endpoint: GET /employers/me/ownership-declaration
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
     - F01.form5a
   - endpoint: PUT /employers/me/ownership-declaration
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:
     - F01.form5a
   - endpoint: GET /employers/me/branches
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
     - F01.form5a
   - endpoint: POST /employers/me/branches
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
@@ -770,14 +854,20 @@ stakeholders:
     step_up: false
     via:
     - F01.signatory_profile
+  - endpoint: GET /employers/me/change-requests
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.change_request
   - endpoint: POST /employers/me/configuration/change-requests
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:
     - F01.change_request
   - endpoint: PATCH /employers/me
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:
@@ -1012,19 +1102,19 @@ stakeholders:
     via:
     - F01.profile
   - endpoint: GET /employers/me/kyc
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
     - F01.profile
   - endpoint: GET /employers/me/bank-accounts
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
     - F01.profile
   - endpoint: GET /employers/me/exemption
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
@@ -1163,13 +1253,13 @@ stakeholders:
     - F03.receipt
   principal_employer:
   - endpoint: GET /employers/me/contractors
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
     - F01.contractors
   - endpoint: POST /employers/me/contractors
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
@@ -1496,14 +1586,20 @@ stakeholders:
     via:
     - F11.verify
   fo.da_compliance:
+  - endpoint: GET /office/establishment-registrations
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F01.olre_scrutiny
   - endpoint: GET /office/establishment-registrations/{reqId}/documents
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F01.olre_scrutiny
   - endpoint: POST /office/establishment-registrations/{reqId}/scrutiny-notes
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1692,8 +1788,20 @@ stakeholders:
     via:
     - F04.cad
   fo.apfc:
+  - endpoint: GET /office/establishment-registrations
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F01.circle_review
+  - endpoint: GET /office/establishment-registrations/{reqId}/documents
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F01.circle_review
   - endpoint: POST /office/establishment-registrations/{reqId}/coverage-decisions
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -1704,8 +1812,14 @@ stakeholders:
     step_up: true
     via:
     - F01.dsc_approve
+  - endpoint: GET /office/establishment-change-requests
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F01.change_decide
   - endpoint: POST /office/establishments/{estId}/change-requests/{requestId}/decisions
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:

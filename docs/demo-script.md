@@ -44,6 +44,8 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `ro-da-pension` | Dealing assistant (Pension) | Pension office |
 | `member-e`, `ro-ss-pension`, `ndc-cpps` | Retired member; SS (Pension); CPPS operator | Pension settlement |
 | `ro-fa-accounts` | Accounts wing (F&A) — views the Claim Approval Dockets | Claim tools |
+| `claimant-a`, `ro-pro-counter` | Nominee of a deceased member; PRO counter (physical claims) | Death and EDLI claims |
+| `ro-da-compliance` | Dealing assistant (Compliance) — OLRE scrutiny | The establishment record, changes and OLRE |
 
 ---
 
@@ -269,6 +271,18 @@ simulation; point out that the dialog says exactly what is being authorised (act
    *Approve* or *Send back to first level*. Send it back; the DA re-forwards it as *Recommend to Reject*; the AO
    now sees *Reject*. At a middle level (a larger claim: DA → SS → APFC) *Recommend to Reject* returns it to the DA.
 4. **`ro-fa-accounts` → Claim Approval Docket**: every level's version of the docket.
+
+## The establishment record, changes and OLRE
+*Tests: `tests/e2e/test_establishment.py`, `services/employer-service/tests/test_establishment.py`*
+
+1. **`emp-owner` → Establishment › Establishment KYC and bank accounts**: verify a TAN (`DELD12345A`; one containing
+   `00000` is not found in the mock registry). *Branches (Form 2A)*: add a department. *Form 5A*: file the
+   ownership return (one-time code for DSC / e-sign). *Contractors*: link one with its work order.
+2. **Establishment Profile**: ask for an address change — it becomes a request, the record does not change yet.
+3. **`ro-apfc` → Establishments & compliance › Establishment change requests**: approve it; the owner's
+   configuration now shows the new address.
+4. **OLRE**: `emp-owner` registers a new establishment (PAN `AAAFD1234K`); **`ro-da-compliance`** views its
+   documents and records scrutiny (compliance e-file); **`ro-apfc`** decides coverage.
 
 ## Policy changes that move money — interest, TDS and pensions
 *Tests: `tests/e2e/test_policy_money.py`, `services/contribution-service/tests/test_interest.py`,

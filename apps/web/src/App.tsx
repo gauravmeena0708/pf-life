@@ -20,6 +20,8 @@ import { PensionClaimsPage } from "./features/pension/PensionClaimsPage";
 import { CppsPage } from "./features/pension/CppsPage";
 import { RegistrationPage } from "./features/employer/RegistrationPage";
 import { MemberActionsPage } from "./features/employer/MemberActionsPage";
+import { EstablishmentPage } from "./features/employer/EstablishmentPage";
+import { OlrePage } from "./features/office/OlrePage";
 import { WorkQueuePage } from "./features/office/WorkQueuePage";
 import { CasePage } from "./features/office/CasePage";
 import { ClaimToolsPage } from "./features/office/ClaimToolsPage";
@@ -114,6 +116,8 @@ export function App() {
             <Route path="/member/uan-card" element={<UanCardPage />} />
             <Route path="/employer/registration" element={<RegistrationPage />} />
             <Route path="/employer/members" element={<MemberActionsPage />} />
+            <Route path="/employer/establishment" element={<EstablishmentPage />} />
+            <Route path="/office/olre" element={<OlrePage />} />
             <Route path="/office/work-queue" element={<WorkQueuePage />} />
             <Route path="/office/cases/:caseId" element={<CasePage />} />
             <Route path="/public" element={<PublicLookups />} />

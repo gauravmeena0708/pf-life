@@ -19,7 +19,47 @@
     "exemption_status": "NOT_EXEMPT",
     "status": "REGISTERED",
     "pan": "AAAPD0000D",
-    "gstin": "07AAAPD0000D1Z5"
+    "gstin": "07AAAPD0000D1Z5",
+    "address": {
+      "line": "Plot 7, Synthetic Industrial Area (DEMO)",
+      "city": "New Delhi",
+      "district": "Central Delhi",
+      "pincode": "110001",
+      "email": "hr@synthetic-textiles.demo.invalid",
+      "phone": "******0100"
+    },
+    "kyc": {
+      "PAN": {
+        "value": "AAAPD0000D",
+        "status": "VERIFIED"
+      },
+      "GSTIN": {
+        "value": "07AAAPD0000D1Z5",
+        "status": "VERIFIED"
+      },
+      "TAN": {
+        "value": null,
+        "status": "NOT_SEEDED"
+      },
+      "CIN": {
+        "value": "U17100DL2022PTC000001",
+        "status": "VERIFIED"
+      },
+      "LIN": {
+        "value": null,
+        "status": "NOT_SEEDED"
+      }
+    },
+    "bank_accounts": [
+      {
+        "account_id": "BA-1",
+        "bank": "Demo Bank",
+        "ifsc": "DEMO0000100",
+        "account_last4": "0100",
+        "purpose": "REMITTANCE",
+        "verified": true
+      }
+    ]
   },
   "public_establishments": [
     {
@@ -322,7 +362,8 @@
     "ndc-cpps": "00000000-0000-4000-8000-000000000033",
     "ro-fa-accounts": "00000000-0000-4000-8000-000000000034",
     "claimant-a": "00000000-0000-4000-8000-000000000035",
-    "ro-pro-counter": "00000000-0000-4000-8000-000000000036"
+    "ro-pro-counter": "00000000-0000-4000-8000-000000000036",
+    "ro-da-compliance": "00000000-0000-4000-8000-000000000037"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -441,6 +482,12 @@
       "username": "ro-pro-counter",
       "subject": "00000000-0000-4000-8000-000000000036",
       "stakeholder": "fo.pro_intake",
+      "office_id": "RO-DEMO-01"
+    },
+    {
+      "username": "ro-da-compliance",
+      "subject": "00000000-0000-4000-8000-000000000037",
+      "stakeholder": "fo.da_compliance",
       "office_id": "RO-DEMO-01"
     }
   ],

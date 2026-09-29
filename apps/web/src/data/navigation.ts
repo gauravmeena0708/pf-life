@@ -34,7 +34,9 @@ const EMPLOYER: NavGroup[] = [
     link("Missing details", "/employer/registration#missing-heading"), link("Member Location Mapping"), link("KYC Verification / PAN Verification", "/employer/registration#kyc-approvals-heading"),
     link("Joint Declaration requests", "/employer#jd-heading")] },
   { label: "Establishment", items: [
-    link("Establishment Profile", "/employer#emp-heading"), link("Form 5A"), link("Branches (Form 2A)"),
+    link("Establishment Profile", "/employer/establishment#est-config-heading"), link("Form 5A", "/employer/establishment#est-form5a-heading"),
+    link("Branches (Form 2A)", "/employer/establishment#est-branches-heading"), link("Establishment KYC and bank accounts", "/employer/establishment#est-kyc-heading"),
+    link("Contractors", "/employer/establishment#est-contractors-heading"),
     link("DSC/e-sign Registration"), link("e-sign Registration"), link("Authorized eSign List", "/employer#people-signatory")] },
   { label: "Payments", items: [
     link("ECR Upload", "/employer/ecr#ecr-prepare"), link("Return Filing", "/employer/ecr#ecr-returns"), link("Return monthly dashboard"),
@@ -66,7 +68,9 @@ function fieldOffice(role: string): NavGroup[] {
       role === "fo.apfc" ? link("ECR Approval") : link("VDR Vs ECR filing"), link("Reco - ECR Vs VDR"), link("VDR Member Beneficiary"),
       link("VDR Rejection"), ...["ANNEXURE K RECO", "ANNEXURE K VDR RECO"].map((l) => link(l, role === "fo.da_accounts" ? "/office/claim-tools#annexure-heading" : undefined))] },
     { label: "Establishments & compliance", items: [
-      link("Establishment", ["fo.oic", "fo.apfc"].includes(role) ? "/office/work-queue" : undefined), link("OLRE"), link("7Q & 14B"), link("Exempted-Unexempted"), link("Past Accum. File Upload"),
+      link("Establishment", ["fo.oic", "fo.apfc"].includes(role) ? "/office/work-queue" : undefined),
+      link("OLRE", ["fo.da_compliance", "fo.apfc"].includes(role) ? "/office/olre" : undefined),
+      ...(role === "fo.apfc" ? [link("Establishment change requests", "/office/olre#est-changes-heading")] : []), link("7Q & 14B"), link("Exempted-Unexempted"), link("Past Accum. File Upload"),
       link("PAST ACCUM BULK TRANSFER"), link("PAST ACCUM VDR RECO")] },
     { label: "Pension", items: [link("Pension"), link("NPPS")] },
     { label: "Accounts", items: [link("Annual Accounting")] },
@@ -138,6 +142,7 @@ export function homeFor(role: string | undefined): string {
   if (role === "fo.apfc_pension") return "/office/pension-revisions";
   if (role === "fo.da_pension" || role === "fo.ss_pension") return "/office/pension-claims";
   if (role === "tech.cpps") return "/cpps";
+  if (role === "fo.da_compliance") return "/office/olre";
   if (role?.startsWith("fo.")) return "/office/work-queue";
   return "/";
 }

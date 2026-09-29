@@ -7,13 +7,13 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | # | Interface | Coverage | Stakeholders | W | M | P | ? |
 |---|---|---|---|---|---|---|---|
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 9 | 2 | 5 | 0 |
-| 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 37 | 7 | 46 | 0 |
+| 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 49 | 7 | 35 | 0 |
 | 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 62 | 5 | 17 | 0 |
-| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 58 | 0 | 46 | 6 |
+| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 61 | 0 | 44 | 6 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 11 | 1 | 2 | 0 |
 | 6 | International worker | **Mock** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 0 | 1 | 4 | 0 |
 | 7 | District office | **Working** | `do.incharge`, `do.staff` | 1 | 0 | 2 | 0 |
-| 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 21 | 0 | 15 | 3 |
+| 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 26 | 0 | 13 | 3 |
 | 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 11 | 0 | 2 | 0 |
 | 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 14 | 0 | 10 | 0 |
 | 11 | NDC | **Working** | `tech.ndc`, `tech.adc`, `tech.cpps`, `tech.epfo3` | 6 | 0 | 2 | 0 |
@@ -57,24 +57,35 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 |---|---|---|---|
 | `GET /employers/me` | W | employer | employer.operator, employer.owner, employer.signatory |
 | `GET /employers/me/approvals` | W | member | employer.signatory |
+| `GET /employers/me/bank-accounts` | W | employer | employer.operator, employer.owner |
+| `GET /employers/me/branches` | W | employer | employer.owner, employer.signatory |
 | `GET /employers/me/challans` | W | contribution | employer.signatory |
 | `GET /employers/me/challans/{trrn}` | W | contribution | employer.signatory |
 | `GET /employers/me/challans/{trrn}/receipt` | W | contribution | employer.operator, employer.signatory |
-| `GET /employers/me/configuration` | W | employer | employer.operator |
+| `GET /employers/me/change-requests` | W | employer | employer.owner, employer.signatory |
+| `GET /employers/me/configuration` | W | employer | employer.operator, employer.owner |
+| `GET /employers/me/contractors` | W | employer | employer.owner, principal_employer |
 | `GET /employers/me/ecr-filings` | W | contribution | employer.operator, employer.signatory |
 | `GET /employers/me/ecr-filings/{filingId}` | W | contribution | employer.operator, employer.signatory |
+| `GET /employers/me/exemption` | W | employer | employer.operator, employer.owner |
 | `GET /employers/me/joint-declarations` | W | member | employer.signatory |
+| `GET /employers/me/kyc` | W | employer | employer.operator, employer.owner |
 | `GET /employers/me/kyc-approvals` | W | member | employer.signatory |
 | `GET /employers/me/kyc-bulk-uploads/{uploadId}/errors` | W | member | employer.operator |
 | `GET /employers/me/members` | W | member | employer.operator |
 | `GET /employers/me/members/active-export` | W | member | employer.operator |
 | `GET /employers/me/members/{uan}/contribution-ledger` | W | contribution | employer.operator |
 | `GET /employers/me/operators` | W | employer | employer.owner |
+| `GET /employers/me/ownership-declaration` | W | employer | employer.owner, employer.signatory |
 | `GET /employers/me/signatories` | W | employer | employer.owner |
 | `GET /employers/me/transfer-requests` | W | claim | employer.signatory |
 | `GET /employers/registration-requests/{reqId}` | W | employer | employer.owner |
+| `PATCH /employers/me` | W | employer | employer.owner, employer.signatory |
 | `PATCH /employers/me/members/{uan}/profile` | W | member | employer.operator |
 | `POST /employers/me/approvals/{approvalId}/decisions` | W | member | employer.signatory |
+| `POST /employers/me/branches` | W | employer | employer.owner, employer.signatory |
+| `POST /employers/me/configuration/change-requests` | W | employer | employer.owner, employer.signatory |
+| `POST /employers/me/contractors` | W | employer | employer.owner, principal_employer |
 | `POST /employers/me/ecr-filings` | W | contribution | employer.operator |
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W | contribution | employer.signatory |
 | `POST /employers/me/ecr-filings/{filingId}/submissions` | W | contribution | employer.signatory |
@@ -92,37 +103,28 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /employers/me/signatories/{signatoryId}/revocations` | W | employer | employer.owner |
 | `POST /employers/me/transfer-requests/{transferId}/decisions` | W | claim | employer.signatory |
 | `POST /employers/registration-requests` | W | employer | employer.owner |
+| `PUT /employers/me/ownership-declaration` | W | employer | employer.owner, employer.signatory |
 | `GET /international/coc-applications/{id}` | M | international | employer.signatory |
 | `POST /employers/me/challans/{trrn}/payment-intents` | M | payment-simulator | employer.signatory |
-| `POST /employers/me/kyc/{kycType}` | M | employer | employer.signatory |
+| `POST /employers/me/kyc/{kycType}` | M | employer | employer.owner, employer.signatory |
 | `POST /employers/me/signatories/{signatoryId}/dsc-registrations` | M | employer | employer.owner |
 | `POST /employers/me/signatories/{signatoryId}/esign-registrations` | M | employer | employer.owner |
 | `POST /employers/registration-requests/{reqId}/verification-evidence` | M | employer | employer.owner |
 | `POST /international/coc-applications` | M | international | employer.signatory |
-| `GET /employers/me/bank-accounts` | P | employer | employer.operator |
-| `GET /employers/me/branches` | P | employer | employer.signatory |
 | `GET /employers/me/claim-attestations` | P | claim | employer.signatory |
 | `GET /employers/me/compliance-summary` | P | reporting | employer.operator |
-| `GET /employers/me/contractors` | P | employer | principal_employer |
 | `GET /employers/me/contractors/{contractorId}/compliance` | P | reporting | principal_employer |
 | `GET /employers/me/dashboard` | P | reporting | employer.operator |
 | `GET /employers/me/demands` | P | contribution | employer.signatory |
-| `GET /employers/me/exemption` | P | employer | employer.operator |
 | `GET /employers/me/higher-pension-options` | P | pension | employer.signatory |
-| `GET /employers/me/kyc` | P | employer | employer.operator |
-| `GET /employers/me/ownership-declaration` | P | employer | employer.signatory |
 | `GET /employers/me/pending-approvals` | P | workflow | employer.operator |
 | `GET /employers/me/returns/dashboard` | P | contribution | employer.operator |
 | `GET /exempted/me/annexure-k-requests` | P | claim | exempted.trust |
 | `GET /exempted/me/profile` | P | employer | exempted.trust |
 | `GET /international/coc-applications/{id}/certificate` | P | international | employer.signatory |
 | `GET /partners/liquidators/claims/{claimId}` | P | compliance | liquidator |
-| `PATCH /employers/me` | P | employer | employer.signatory |
-| `POST /employers/me/branches` | P | employer | employer.signatory |
 | `POST /employers/me/claim-attestations/{claimId}/decisions` | P | claim | employer.signatory |
 | `POST /employers/me/closure-requests` | P | employer | employer.signatory |
-| `POST /employers/me/configuration/change-requests` | P | employer | employer.signatory |
-| `POST /employers/me/contractors` | P | employer | principal_employer |
 | `POST /employers/me/demands/{demandId}/payment-intents` | P | payment-simulator | employer.signatory |
 | `POST /employers/me/direct-challans` | P | contribution | employer.signatory |
 | `POST /employers/me/ecr-filings/{filingId}/cancellations` | P | contribution | employer.signatory |
@@ -144,7 +146,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /exempted/me/surrender-requests` | P | employer | exempted.trust |
 | `POST /international/coc-applications/{id}/extensions` | P | international | employer.signatory |
 | `POST /international/coc-applications/{id}/signed-uploads` | P | international | employer.signatory |
-| `PUT /employers/me/ownership-declaration` | P | employer | employer.signatory |
 
 ### 3. Member — Working
 
@@ -247,6 +248,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /office/claims/{claimId}/additional-forms` | W | claim | fo.da_accounts |
 | `GET /office/claims/{claimId}/audit-trail` | W | claim | fo.da_accounts |
 | `GET /office/claims/{claimId}/cad` | W | claim | fo.ao, fo.da_accounts, fo.ss |
+| `GET /office/establishment-registrations` | W | employer | fo.da_compliance |
+| `GET /office/establishment-registrations/{reqId}/documents` | W | employer | fo.da_compliance |
 | `GET /office/member-change-requests` | W | member | fo.da_accounts |
 | `GET /office/members/{uan}` | W | member | fo.da_accounts |
 | `GET /office/payment-scrolls/ready` | W | claim | fo.cash |
@@ -270,6 +273,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/claims/{claimId}/cad` | W | claim | fo.ao, fo.da_accounts, fo.ss |
 | `POST /office/claims/{claimId}/payment-instructions` | W | claim | fo.cash |
 | `POST /office/claims/{claimId}/reissues` | W | claim | fo.cash |
+| `POST /office/establishment-registrations/{reqId}/scrutiny-notes` | W | employer | fo.da_compliance |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | workflow | fo.ao, fo.da_accounts, fo.da_compliance, fo.ss |
 | `POST /office/member-change-requests/{requestId}/decisions` | W | member | fo.ao |
 | `POST /office/member-change-requests/{requestId}/recommendations` | W | member | fo.da_accounts |
@@ -300,7 +304,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /office/compliance/cases` | P | compliance | fo.da_compliance |
 | `GET /office/compliance/cases/{caseId}` | P | compliance | fo.da_compliance |
 | `GET /office/compliance/defaulters` | P | reporting | fo.da_compliance |
-| `GET /office/establishment-registrations/{reqId}/documents` | P | employer | fo.da_compliance |
 | `GET /office/exempted/{estId}/audits` | P | employer | fo.exemption |
 | `GET /office/exempted/{estId}/returns` | P | contribution | fo.exemption |
 | `GET /office/legal/cases` | P | compliance | fo.legal |
@@ -321,7 +324,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/ecr-filings/{filingId}/payment-rejections` | P | contribution | fo.cash |
 | `POST /office/ecr-filings/{filingId}/rejections` | P | contribution | fo.da_accounts |
 | `POST /office/edli-claims/{claimId}/decisions` | P | claim | fo.edli |
-| `POST /office/establishment-registrations/{reqId}/scrutiny-notes` | P | employer | fo.da_compliance |
 | `POST /office/establishments/{estId}/damages-knock-offs` | P | contribution | fo.da_compliance |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P | claim | fo.da_accounts |
 | `POST /office/exempted/past-accumulation-bulk-transfers` | P | contribution | fo.exemption |
@@ -398,12 +400,17 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /office/cases/{caseId}` | W | workflow | fo.apfc, fo.oic |
 | `GET /office/claims/{claimId}/cad` | W | claim | fo.apfc, fo.oic |
 | `GET /office/death-claims/{claimId}/shares-summary` | W | claim | fo.apfc |
+| `GET /office/establishment-change-requests` | W | employer | fo.apfc |
+| `GET /office/establishment-registrations` | W | employer | fo.apfc |
+| `GET /office/establishment-registrations/{reqId}/documents` | W | employer | fo.apfc |
 | `GET /office/member-change-requests/pendency` | W | member | fo.rpfc1 |
 | `GET /office/members/{uan}/locks` | W | workflow | fo.oic |
 | `GET /office/work-queue` | W | workflow | fo.apfc, fo.oic |
 | `POST /office/cases/{caseId}/second-approvals` | W | workflow | fo.apfc, fo.oic |
 | `POST /office/claims/{claimId}/cad` | W | claim | fo.apfc, fo.oic |
 | `POST /office/claims/{claimId}/re-disbursement-approvals` | W | claim | fo.apfc |
+| `POST /office/establishment-registrations/{reqId}/coverage-decisions` | W | employer | fo.apfc |
+| `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | W | employer | fo.apfc |
 | `POST /office/establishments/{estId}/defreezes` | W | employer | fo.apfc, fo.oic |
 | `POST /office/establishments/{estId}/freezes` | W | employer | fo.oic |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | workflow | fo.apfc, fo.oic |
@@ -424,8 +431,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/compliance/inspections` | P | compliance | fo.apfc |
 | `POST /office/compliance/membership-disputes` | P | compliance | fo.apfc |
 | `POST /office/compliance/vishwas-applications/{applicationId}/decisions` | P | compliance | fo.apfc |
-| `POST /office/establishment-registrations/{reqId}/coverage-decisions` | P | employer | fo.apfc |
-| `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | P | employer | fo.apfc |
 | `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` | P | employer | fo.apfc |
 | `GET /office/ecr-filings` | ? | contribution | fo.apfc |
 | `POST /office/ecr-filings/{filingId}/approvals` | ? | contribution | fo.apfc |

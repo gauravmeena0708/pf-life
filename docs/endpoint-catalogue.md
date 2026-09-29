@@ -61,21 +61,22 @@ Rules that apply to every row:
 | `GET /employers/registration-requests/{reqId}` | Registration status | W | 1 | employer |
 | `GET /employers/me` | Establishment profile (active establishment chosen via `X-Establishment-Id`, validated server-side) | W | 1 | employer |
 | `GET /employers/me/configuration` | **Establishment configuration** (read-only, seeded): coverage date, exemption status, coverage type, jurisdiction office, sub-codes, applicable schemes | W | 1 | employer |
-| `POST /employers/me/configuration/change-requests` 🔐 | Request configuration change (office-approved) | P | 2 | employer |
-| `PATCH /employers/me` 🔐 | Update address / contact — creates a change request, not a direct edit | P | 2 | employer |
-| `GET /employers/me/ownership-declaration` | **Form 5A** ownership / management declaration — view | P | 2 | employer |
-| `PUT /employers/me/ownership-declaration` 🔐 | Form 5A — submit / amend | P | 2 | employer |
+| `POST /employers/me/configuration/change-requests` 🔐 | Request configuration change (office-approved) | W | 1 | employer |
+| `GET /employers/me/change-requests` | The establishment's change requests and the office's decisions | W | 1 | employer |
+| `PATCH /employers/me` 🔐 | Update address / contact — creates a change request, not a direct edit | W | 1 | employer |
+| `GET /employers/me/ownership-declaration` | **Form 5A** ownership / management declaration — view | W | 1 | employer |
+| `PUT /employers/me/ownership-declaration` 🔐 | Form 5A — submit / amend | W | 1 | employer |
 | `POST /employers/voluntary-coverage-requests` | Voluntary coverage request | P | 3 | employer |
-| `GET /employers/me/kyc` | Establishment KYC status: PAN, TAN, GSTIN, CIN, LIN | P | 2 | employer |
-| `POST /employers/me/kyc/{kycType}` 🔐 | Seed / update establishment KYC (mock registry verification) | M | 2 | employer |
-| `GET /employers/me/branches` | Sub-codes / branches / departments | P | 2 | employer |
-| `POST /employers/me/branches` | Create sub-code | P | 2 | employer |
-| `GET /employers/me/bank-accounts` | Establishment bank accounts used for remittance | P | 2 | employer |
-| `GET /employers/me/exemption` | Exemption details (PF trust, relaxation) | P | 2 | employer |
+| `GET /employers/me/kyc` | Establishment KYC status: PAN, TAN, GSTIN, CIN, LIN | W | 1 | employer |
+| `POST /employers/me/kyc/{kycType}` 🔐 | Seed / update establishment KYC (mock registry verification) | M | 1 | employer |
+| `GET /employers/me/branches` | Sub-codes / branches / departments | W | 1 | employer |
+| `POST /employers/me/branches` | Create sub-code | W | 1 | employer |
+| `GET /employers/me/bank-accounts` | Establishment bank accounts used for remittance | W | 1 | employer |
+| `GET /employers/me/exemption` | Exemption details (PF trust, relaxation) | W | 1 | employer |
 | `POST /employers/me/closure-requests` 🔐 | Closure / business-discontinued declaration | P | 3 | employer |
 | `POST /employers/me/office-transfer-requests` 🔐 | Transfer establishment to another office jurisdiction | P | 3 | employer |
-| `GET /employers/me/contractors` | Principal employer: linked contractors | P | 2 | employer |
-| `POST /employers/me/contractors` | Principal employer: register / link contractor | P | 2 | employer |
+| `GET /employers/me/contractors` | Principal employer: linked contractors | W | 1 | employer |
+| `POST /employers/me/contractors` | Principal employer: register / link contractor | W | 1 | employer |
 | `GET /employers/me/contractors/{contractorId}/compliance` | Principal employer: contractor remittance compliance | P | 2 | reporting |
 | `POST /employers/me/ecr-filings/{filingId}/principal-employer-tags` | Contractor: tag ECR members to a principal employer | P | 2 | contribution |
 
@@ -84,10 +85,12 @@ Rules that apply to every row:
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `GET /office/establishment-registrations/{reqId}/documents` | DA (Compliance) views documents of a new registration (FO-interface >> OLRE >> View Documents) | P | 2 | employer |
-| `POST /office/establishment-registrations/{reqId}/scrutiny-notes` | DA (Compliance) records scrutiny and opens the compliance e-file | P | 2 | employer |
-| `POST /office/establishment-registrations/{reqId}/coverage-decisions` 🔐 | Circle officer's coverage decision on a new establishment | P | 2 | employer |
-| `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` 🔐 | Decide configuration change / closure / office-transfer requests | P | 2 | employer |
+| `GET /office/establishment-registrations` | **OLRE**: new registrations of the office awaiting scrutiny / coverage | W | 1 | employer |
+| `GET /office/establishment-registrations/{reqId}/documents` | DA (Compliance) views documents of a new registration (FO-interface >> OLRE >> View Documents) | W | 1 | employer |
+| `POST /office/establishment-registrations/{reqId}/scrutiny-notes` | DA (Compliance) records scrutiny and opens the compliance e-file | W | 1 | employer |
+| `POST /office/establishment-registrations/{reqId}/coverage-decisions` 🔐 | Circle officer's coverage decision on a new establishment | W | 1 | employer |
+| `GET /office/establishment-change-requests` | Establishment change requests of the office, by state | W | 1 | employer |
+| `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` 🔐 | Decide configuration change / closure / office-transfer requests | W | 1 | employer |
 | `POST /integrations/mca/registrations` | MCA SPICe+ / AGILE-PRO auto-registration feed (signed) | M | 2 | employer |
 | `POST /integrations/shram-suvidha/registrations` | Shram Suvidha common-registration feed (signed) | M | 3 | employer |
 | `GET /partners/liquidators/claims/{claimId}` | Liquidator / resolution professional views EPFO dues claim | P | 3 | compliance |

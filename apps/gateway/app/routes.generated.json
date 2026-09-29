@@ -67,8 +67,8 @@
     "method": "POST",
     "path_template": "/office/establishments/{estId}/change-requests/{requestId}/decisions",
     "regex": "^/office/establishments/[^/]+/change\\-requests/[^/]+/decisions$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
@@ -179,8 +179,8 @@
     "method": "POST",
     "path_template": "/office/establishment-registrations/{reqId}/coverage-decisions",
     "regex": "^/office/establishment\\-registrations/[^/]+/coverage\\-decisions$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
@@ -323,8 +323,8 @@
     "method": "POST",
     "path_template": "/office/establishment-registrations/{reqId}/scrutiny-notes",
     "regex": "^/office/establishment\\-registrations/[^/]+/scrutiny\\-notes$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
@@ -646,13 +646,14 @@
     "method": "GET",
     "path_template": "/office/establishment-registrations/{reqId}/documents",
     "regex": "^/office/establishment\\-registrations/[^/]+/documents$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
+      "fo.apfc",
       "fo.da_compliance"
     ],
     "summary": "DA (Compliance) views documents of a new registration (FO-interface >> OLRE >> View Documents)",
@@ -1353,13 +1354,14 @@
     "method": "POST",
     "path_template": "/employers/me/configuration/change-requests",
     "regex": "^/employers/me/configuration/change\\-requests$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
     "step_up": true,
     "callers": [
+      "employer.owner",
       "employer.signatory"
     ],
     "summary": "Request configuration change (office-approved)",
@@ -2496,6 +2498,22 @@
     "revocation": false
   },
   {
+    "method": "GET",
+    "path_template": "/office/establishment-change-requests",
+    "regex": "^/office/establishment\\-change\\-requests$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "Establishment change requests of the office, by state",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/office/pensions/service-aggregations",
     "regex": "^/office/pensions/service\\-aggregations$",
@@ -2758,13 +2776,14 @@
     "method": "GET",
     "path_template": "/employers/me/ownership-declaration",
     "regex": "^/employers/me/ownership\\-declaration$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
+      "employer.owner",
       "employer.signatory"
     ],
     "summary": "Form 5A ownership / management declaration — view",
@@ -2774,13 +2793,14 @@
     "method": "PUT",
     "path_template": "/employers/me/ownership-declaration",
     "regex": "^/employers/me/ownership\\-declaration$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
     "step_up": true,
     "callers": [
+      "employer.owner",
       "employer.signatory"
     ],
     "summary": "Form 5A — submit / amend",
@@ -2834,6 +2854,23 @@
       "tech.ndc"
     ],
     "summary": "Replay a dead-lettered event (idempotent consumers)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/establishment-registrations",
+    "regex": "^/office/establishment\\-registrations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc",
+      "fo.da_compliance"
+    ],
+    "summary": "OLRE: new registrations of the office awaiting scrutiny / coverage",
     "revocation": false
   },
   {
@@ -3987,6 +4024,23 @@
     "revocation": false
   },
   {
+    "method": "GET",
+    "path_template": "/employers/me/change-requests",
+    "regex": "^/employers/me/change\\-requests$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.owner",
+      "employer.signatory"
+    ],
+    "summary": "The establishment's change requests and the office's decisions",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/employers/me/direct-challans",
     "regex": "^/employers/me/direct\\-challans$",
@@ -4295,14 +4349,15 @@
     "method": "GET",
     "path_template": "/employers/me/bank-accounts",
     "regex": "^/employers/me/bank\\-accounts$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
-      "employer.operator"
+      "employer.operator",
+      "employer.owner"
     ],
     "summary": "Establishment bank accounts used for remittance",
     "revocation": false
@@ -4334,7 +4389,8 @@
     "money": false,
     "step_up": false,
     "callers": [
-      "employer.operator"
+      "employer.operator",
+      "employer.owner"
     ],
     "summary": "Establishment configuration (read-only, seeded): coverage date, exemption status, coverage type, jurisdiction office, sub-codes, applicable schemes",
     "revocation": false
@@ -4707,13 +4763,14 @@
     "method": "GET",
     "path_template": "/employers/me/contractors",
     "regex": "^/employers/me/contractors$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
+      "employer.owner",
       "principal_employer"
     ],
     "summary": "Principal employer: linked contractors",
@@ -4723,13 +4780,14 @@
     "method": "POST",
     "path_template": "/employers/me/contractors",
     "regex": "^/employers/me/contractors$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
+      "employer.owner",
       "principal_employer"
     ],
     "summary": "Principal employer: register / link contractor",
@@ -4773,12 +4831,13 @@
     "path_template": "/employers/me/kyc/{kycType}",
     "regex": "^/employers/me/kyc/[^/]+$",
     "status": "M",
-    "phase": 2,
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
     "step_up": true,
     "callers": [
+      "employer.owner",
       "employer.signatory"
     ],
     "summary": "Seed / update establishment KYC (mock registry verification)",
@@ -5177,14 +5236,15 @@
     "method": "GET",
     "path_template": "/employers/me/exemption",
     "regex": "^/employers/me/exemption$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
-      "employer.operator"
+      "employer.operator",
+      "employer.owner"
     ],
     "summary": "Exemption details (PF trust, relaxation)",
     "revocation": false
@@ -5424,13 +5484,14 @@
     "method": "GET",
     "path_template": "/employers/me/branches",
     "regex": "^/employers/me/branches$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
+      "employer.owner",
       "employer.signatory"
     ],
     "summary": "Sub-codes / branches / departments",
@@ -5440,13 +5501,14 @@
     "method": "POST",
     "path_template": "/employers/me/branches",
     "regex": "^/employers/me/branches$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
+      "employer.owner",
       "employer.signatory"
     ],
     "summary": "Create sub-code",
@@ -6225,14 +6287,15 @@
     "method": "GET",
     "path_template": "/employers/me/kyc",
     "regex": "^/employers/me/kyc$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
-      "employer.operator"
+      "employer.operator",
+      "employer.owner"
     ],
     "summary": "Establishment KYC status: PAN, TAN, GSTIN, CIN, LIN",
     "revocation": false
@@ -6458,13 +6521,14 @@
     "method": "PATCH",
     "path_template": "/employers/me",
     "regex": "^/employers/me$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
     "step_up": true,
     "callers": [
+      "employer.owner",
       "employer.signatory"
     ],
     "summary": "Update address / contact — creates a change request, not a direct edit",

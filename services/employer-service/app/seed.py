@@ -7,7 +7,7 @@ from datetime import date, datetime
 from sqlalchemy import select, update
 
 from app.infra.db import sessions
-from app.infra.tables import directory, establishments, grants, registration_requests
+from app.infra.tables import directory, establishments, grants, office_staff, registration_requests
 
 SEED_FILE = os.environ.get("SEED_FILE", "/srv/seed/synthetic.json")
 PUBLIC_FIELDS = ("pincode", "city", "district", "coverage_date", "establishment_type",
@@ -65,6 +65,14 @@ async def main() -> None:
                     if missing:
                         await s.execute(update(establishments).where(
                             establishments.c.establishment_id == public_est["establishment_id"]).values(**missing))
+            profile = {k: est.get(k) for k in ("address", "kyc", "bank_accounts")}    # P2.6: set once, then changed by requests
+            current = (await s.execute(select(establishments).where(establishments.c.establishment_id == est["establishment_id"]))).mappings().one()
+            unset = {k: v for k, v in profile.items() if v is not None and current[k] is None}
+            if unset:
+                await s.execute(update(establishments).where(establishments.c.establishment_id == est["establishment_id"]).values(**unset))
+            for st in seed.get("office_staff", []):
+                if not (await s.execute(select(office_staff.c.subject).where(office_staff.c.subject == st["subject"]))).first():
+                    await s.execute(office_staff.insert().values(subject=st["subject"], stakeholder=st["stakeholder"], office_id=st["office_id"]))
             for username, subject in seed["keycloak_subjects"].items():
                 if not (await s.execute(select(directory.c.username).where(directory.c.username == username))).first():
                     role = next((u["role"] for u in seed["employer_users"] if u["username"] == username), "other")

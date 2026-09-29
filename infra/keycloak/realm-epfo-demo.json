@@ -145,6 +145,10 @@
       {
         "name": "fo.pro_intake",
         "description": "Stakeholder fo.pro_intake (docs/stakeholders.md)"
+      },
+      {
+        "name": "fo.da_compliance",
+        "description": "Dealing assistant (Compliance) — OLRE scrutiny of new registrations"
       }
     ]
   },
@@ -901,6 +905,25 @@
         "fo.pro_intake"
       ],
       "id": "00000000-0000-4000-8000-000000000036"
+    },
+    {
+      "username": "ro-da-compliance",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "DA Compliance",
+      "lastName": "Demo",
+      "email": "ro-da-compliance@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.da_compliance"
+      ],
+      "id": "00000000-0000-4000-8000-000000000037"
     }
   ]
 }

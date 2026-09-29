@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 235 |
+| Activities | 236 |
 | Stakeholders with at least one API | 97 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 0 |
@@ -211,19 +211,33 @@ Integration adapters: `rti_portal`
 
 #### `employer.owner` — Establishment owner / employer (legal entity)
 
-Activities: **F01.register** Register establishment online and submit verification evidence; **F01.dsc_register** Register DSC or e-sign of an authorised signatory and submit the request letter; **F01.signatories** View the establishment; authorise or revoke signatories; **F01.operators** Invite, scope and revoke employer sub-users (User / Admin menus)
+Activities: **F01.register** Register establishment online and submit verification evidence; **F01.dsc_register** Register DSC or e-sign of an authorised signatory and submit the request letter; **F01.signatories** View the establishment; authorise or revoke signatories; **F01.operators** Invite, scope and revoke employer sub-users (User / Admin menus); **F01.establishment_owner** Keep the establishment record: KYC, branches (Form 2A), Form 5A, contractors; ask the office for profile or configuration changes
 
 | Endpoint | Status |
 |---|---|
 | `GET /employers/me` | W |
+| `GET /employers/me/bank-accounts` | W |
+| `GET /employers/me/branches` | W |
+| `GET /employers/me/change-requests` | W |
+| `GET /employers/me/configuration` | W |
+| `GET /employers/me/contractors` | W |
+| `GET /employers/me/exemption` | W |
+| `GET /employers/me/kyc` | W |
 | `GET /employers/me/operators` | W |
+| `GET /employers/me/ownership-declaration` | W |
 | `GET /employers/me/signatories` | W |
 | `GET /employers/registration-requests/{reqId}` | W |
+| `PATCH /employers/me` | W |
+| `POST /employers/me/branches` | W |
+| `POST /employers/me/configuration/change-requests` | W |
+| `POST /employers/me/contractors` | W |
 | `POST /employers/me/operators/invitations` | W |
 | `POST /employers/me/operators/{operatorId}/revocations` | W |
 | `POST /employers/me/signatories/authorisations` | W |
 | `POST /employers/me/signatories/{signatoryId}/revocations` | W |
 | `POST /employers/registration-requests` | W |
+| `PUT /employers/me/ownership-declaration` | W |
+| `POST /employers/me/kyc/{kycType}` | M |
 | `POST /employers/me/signatories/{signatoryId}/dsc-registrations` | M |
 | `POST /employers/me/signatories/{signatoryId}/esign-registrations` | M |
 | `POST /employers/registration-requests/{reqId}/verification-evidence` | M |
@@ -238,35 +252,37 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 |---|---|
 | `GET /employers/me` | W |
 | `GET /employers/me/approvals` | W |
+| `GET /employers/me/branches` | W |
 | `GET /employers/me/challans` | W |
 | `GET /employers/me/challans/{trrn}` | W |
 | `GET /employers/me/challans/{trrn}/receipt` | W |
+| `GET /employers/me/change-requests` | W |
 | `GET /employers/me/ecr-filings` | W |
 | `GET /employers/me/ecr-filings/{filingId}` | W |
 | `GET /employers/me/joint-declarations` | W |
 | `GET /employers/me/kyc-approvals` | W |
+| `GET /employers/me/ownership-declaration` | W |
 | `GET /employers/me/transfer-requests` | W |
+| `PATCH /employers/me` | W |
 | `POST /employers/me/approvals/{approvalId}/decisions` | W |
+| `POST /employers/me/branches` | W |
+| `POST /employers/me/configuration/change-requests` | W |
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W |
 | `POST /employers/me/ecr-filings/{filingId}/submissions` | W |
 | `POST /employers/me/joint-declarations/{jdId}/decisions` | W |
 | `POST /employers/me/kyc-approvals/{requestId}/decisions` | W |
 | `POST /employers/me/transfer-requests/{transferId}/decisions` | W |
+| `PUT /employers/me/ownership-declaration` | W |
 | `GET /international/coc-applications/{id}` | M |
 | `POST /employers/me/challans/{trrn}/payment-intents` | M |
 | `POST /employers/me/kyc/{kycType}` | M |
 | `POST /international/coc-applications` | M |
-| `GET /employers/me/branches` | P |
 | `GET /employers/me/claim-attestations` | P |
 | `GET /employers/me/demands` | P |
 | `GET /employers/me/higher-pension-options` | P |
-| `GET /employers/me/ownership-declaration` | P |
 | `GET /international/coc-applications/{id}/certificate` | P |
-| `PATCH /employers/me` | P |
-| `POST /employers/me/branches` | P |
 | `POST /employers/me/claim-attestations/{claimId}/decisions` | P |
 | `POST /employers/me/closure-requests` | P |
-| `POST /employers/me/configuration/change-requests` | P |
 | `POST /employers/me/demands/{demandId}/payment-intents` | P |
 | `POST /employers/me/direct-challans` | P |
 | `POST /employers/me/ecr-filings/{filingId}/cancellations` | P |
@@ -278,7 +294,6 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `POST /employers/voluntary-coverage-requests` | P |
 | `POST /international/coc-applications/{id}/extensions` | P |
 | `POST /international/coc-applications/{id}/signed-uploads` | P |
-| `PUT /employers/me/ownership-declaration` | P |
 
 Integration adapters: `collecting_bank`, `npci`
 
@@ -289,10 +304,13 @@ Activities: **F01.profile** View establishment profile, configuration, KYC and h
 | Endpoint | Status |
 |---|---|
 | `GET /employers/me` | W |
+| `GET /employers/me/bank-accounts` | W |
 | `GET /employers/me/challans/{trrn}/receipt` | W |
 | `GET /employers/me/configuration` | W |
 | `GET /employers/me/ecr-filings` | W |
 | `GET /employers/me/ecr-filings/{filingId}` | W |
+| `GET /employers/me/exemption` | W |
+| `GET /employers/me/kyc` | W |
 | `GET /employers/me/kyc-bulk-uploads/{uploadId}/errors` | W |
 | `GET /employers/me/members` | W |
 | `GET /employers/me/members/active-export` | W |
@@ -305,11 +323,8 @@ Activities: **F01.profile** View establishment profile, configuration, KYC and h
 | `POST /employers/me/members/bulk-registrations` | W |
 | `POST /employers/me/members/{uan}/declarations` | W |
 | `POST /employers/me/members/{uan}/exits` | W |
-| `GET /employers/me/bank-accounts` | P |
 | `GET /employers/me/compliance-summary` | P |
 | `GET /employers/me/dashboard` | P |
-| `GET /employers/me/exemption` | P |
-| `GET /employers/me/kyc` | P |
 | `GET /employers/me/pending-approvals` | P |
 | `GET /employers/me/returns/dashboard` | P |
 | `POST /employers/me/members/exit-bulk-uploads` | P |
@@ -322,9 +337,9 @@ Activities: **F01.contractors** Link contractors, upload work orders, watch cont
 
 | Endpoint | Status |
 |---|---|
-| `GET /employers/me/contractors` | P |
+| `GET /employers/me/contractors` | W |
+| `POST /employers/me/contractors` | W |
 | `GET /employers/me/contractors/{contractorId}/compliance` | P |
-| `POST /employers/me/contractors` | P |
 
 #### `contractor` — Contractor establishment (tags its workers to a principal employer)
 
@@ -440,14 +455,15 @@ Activities: **F01.olre_scrutiny** Scrutinise documents of a newly registered est
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/establishment-registrations` | W |
+| `GET /office/establishment-registrations/{reqId}/documents` | W |
+| `POST /office/establishment-registrations/{reqId}/scrutiny-notes` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `GET /office/compliance/cases` | P |
 | `GET /office/compliance/cases/{caseId}` | P |
 | `GET /office/compliance/defaulters` | P |
-| `GET /office/establishment-registrations/{reqId}/documents` | P |
 | `POST /office/compliance/cases` | P |
 | `POST /office/compliance/inspections/{inspectionId}/processing-notes` | P |
-| `POST /office/establishment-registrations/{reqId}/scrutiny-notes` | P |
 | `POST /office/establishments/{estId}/damages-knock-offs` | P |
 
 #### `fo.ss` — Section Supervisor (Accounts / Compliance)
@@ -503,10 +519,15 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/death-claims/{claimId}/shares-summary` | W |
+| `GET /office/establishment-change-requests` | W |
+| `GET /office/establishment-registrations` | W |
+| `GET /office/establishment-registrations/{reqId}/documents` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
 | `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/claims/{claimId}/re-disbursement-approvals` | W |
+| `POST /office/establishment-registrations/{reqId}/coverage-decisions` | W |
+| `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | W |
 | `POST /office/establishments/{estId}/defreezes` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/member-change-requests/{requestId}/decisions` | W |
@@ -522,8 +543,6 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/compliance/inspections` | P |
 | `POST /office/compliance/membership-disputes` | P |
 | `POST /office/compliance/vishwas-applications/{applicationId}/decisions` | P |
-| `POST /office/establishment-registrations/{reqId}/coverage-decisions` | P |
-| `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | P |
 | `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` | P |
 | `GET /office/ecr-filings` | ? |
 | `POST /office/ecr-filings/{filingId}/approvals` | ? |
@@ -1390,6 +1409,7 @@ flowchart LR
   F01_profile["employer.operator<br/>View establishment profile, configuration, KYC and home-page"]
   F01_change_request["employer.signatory<br/>Request configuration change, closure / deregistration or of"]
   F01_change_decide["fo.apfc<br/>Decide establishment change, closure or transfer requests"]
+  F01_establishment_owner["employer.owner<br/>Keep the establishment record: KYC, branches (Form 2A), Form"]
   F01_contractors["principal_employer<br/>Link contractors, upload work orders, watch contractor compl"]
   F01_contractor_tag["contractor<br/>Tag ECR members to the principal employer"]
   F01_liquidation["liquidator<br/>Receive EPFO dues claim for an employer in liquidation / ins"]
@@ -1402,6 +1422,7 @@ flowchart LR
   F03_ecr_approve["employer.signatory<br/>Review, approve and submit ECR (generates TRRN); cancel an u"]
   F01_signatory_profile --> F03_ecr_approve
   F01_change_request --> F01_change_decide
+  F01_establishment_owner --> F01_change_decide
   F01_contractor_tag --> F01_contractors
   F06_recovery["fo.recovery_officer<br/>Take up recovery certificate for unpaid assessed dues"]
   F01_liquidation --> F06_recovery

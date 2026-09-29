@@ -262,14 +262,28 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /employers/me` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/bank-accounts` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/branches` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/change-requests` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/configuration` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/contractors` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/exemption` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/kyc` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/operators` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/ownership-declaration` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/signatories` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/registration-requests/{reqId}` | W | own registration request |  |
+| `PATCH /employers/me` | W | own establishment (X-Establishment-Id validated against grants) | yes |
+| `POST /employers/me/branches` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `POST /employers/me/configuration/change-requests` | W | own establishment (X-Establishment-Id validated against grants) | yes |
+| `POST /employers/me/contractors` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/operators/invitations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/operators/{operatorId}/revocations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/signatories/authorisations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/signatories/{signatoryId}/revocations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/registration-requests` | W | own registration request |  |
+| `PUT /employers/me/ownership-declaration` | W | own establishment (X-Establishment-Id validated against grants) | yes |
+| `POST /employers/me/kyc/{kycType}` | M | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/signatories/{signatoryId}/dsc-registrations` | M | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/signatories/{signatoryId}/esign-registrations` | M | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/registration-requests/{reqId}/verification-evidence` | M | own registration request |  |
@@ -282,35 +296,37 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /employers/me` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/approvals` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/branches` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/challans` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/challans/{trrn}` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/challans/{trrn}/receipt` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/change-requests` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ecr-filings` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ecr-filings/{filingId}` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/joint-declarations` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/kyc-approvals` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/ownership-declaration` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/transfer-requests` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `PATCH /employers/me` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/approvals/{approvalId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
+| `POST /employers/me/branches` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `POST /employers/me/configuration/change-requests` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/ecr-filings/{filingId}/submissions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/joint-declarations/{jdId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/kyc-approvals/{requestId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/transfer-requests/{transferId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
+| `PUT /employers/me/ownership-declaration` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `GET /international/coc-applications/{id}` | M | own application (employer) or IWU role |  |
 | `POST /employers/me/challans/{trrn}/payment-intents` | M | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/kyc/{kycType}` | M | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /international/coc-applications` | M | own application (employer) or IWU role |  |
-| `GET /employers/me/branches` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/claim-attestations` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/demands` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/higher-pension-options` | P | own establishment (X-Establishment-Id validated against grants) |  |
-| `GET /employers/me/ownership-declaration` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /international/coc-applications/{id}/certificate` | P | own application (employer) or IWU role |  |
-| `PATCH /employers/me` | P | own establishment (X-Establishment-Id validated against grants) | yes |
-| `POST /employers/me/branches` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/claim-attestations/{claimId}/decisions` | P | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/closure-requests` | P | own establishment (X-Establishment-Id validated against grants) | yes |
-| `POST /employers/me/configuration/change-requests` | P | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/demands/{demandId}/payment-intents` | P | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/direct-challans` | P | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/ecr-filings/{filingId}/cancellations` | P | own establishment (X-Establishment-Id validated against grants) | yes |
@@ -322,17 +338,19 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /employers/voluntary-coverage-requests` | P | own registration request |  |
 | `POST /international/coc-applications/{id}/extensions` | P | own application (employer) or IWU role |  |
 | `POST /international/coc-applications/{id}/signed-uploads` | P | own application (employer) or IWU role |  |
-| `PUT /employers/me/ownership-declaration` | P | own establishment (X-Establishment-Id validated against grants) | yes |
 
 **`employer.operator`** — Employer sub-user / payroll preparer
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /employers/me` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/bank-accounts` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/challans/{trrn}/receipt` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/configuration` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ecr-filings` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ecr-filings/{filingId}` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/exemption` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/kyc` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/kyc-bulk-uploads/{uploadId}/errors` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/members` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/members/active-export` | W | own establishment (X-Establishment-Id validated against grants) |  |
@@ -345,11 +363,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /employers/me/members/bulk-registrations` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/members/{uan}/declarations` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/members/{uan}/exits` | W | own establishment (X-Establishment-Id validated against grants) | yes |
-| `GET /employers/me/bank-accounts` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/compliance-summary` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/dashboard` | P | own establishment (X-Establishment-Id validated against grants) |  |
-| `GET /employers/me/exemption` | P | own establishment (X-Establishment-Id validated against grants) |  |
-| `GET /employers/me/kyc` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/pending-approvals` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/returns/dashboard` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/members/exit-bulk-uploads` | P | own establishment (X-Establishment-Id validated against grants) | yes |
@@ -360,9 +375,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /employers/me/contractors` | P | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/contractors` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `POST /employers/me/contractors` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/contractors/{contractorId}/compliance` | P | own establishment (X-Establishment-Id validated against grants) |  |
-| `POST /employers/me/contractors` | P | own establishment (X-Establishment-Id validated against grants) |  |
 
 **`contractor`** — Contractor establishment (tags its workers to a principal employer)
 
@@ -458,14 +473,15 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /office/establishment-registrations` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/establishment-registrations/{reqId}/documents` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/establishment-registrations/{reqId}/scrutiny-notes` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/compliance/cases` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/compliance/cases/{caseId}` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/compliance/defaulters` | P | office jurisdiction of the caller's posting |  |
-| `GET /office/establishment-registrations/{reqId}/documents` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/compliance/cases` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/compliance/inspections/{inspectionId}/processing-notes` | P | office jurisdiction of the caller's posting |  |
-| `POST /office/establishment-registrations/{reqId}/scrutiny-notes` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/establishments/{estId}/damages-knock-offs` | P | office jurisdiction of the caller's posting | yes |
 
 **`fo.ss`** — Section Supervisor (Accounts / Compliance)
@@ -513,10 +529,15 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/death-claims/{claimId}/shares-summary` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/establishment-change-requests` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/establishment-registrations` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/establishment-registrations/{reqId}/documents` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/cases/{caseId}/second-approvals` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/claims/{claimId}/re-disbursement-approvals` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/establishment-registrations/{reqId}/coverage-decisions` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/defreezes` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/member-change-requests/{requestId}/decisions` | W | office jurisdiction of the caller's posting | yes |
@@ -532,8 +553,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/compliance/inspections` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/compliance/membership-disputes` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/vishwas-applications/{applicationId}/decisions` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/establishment-registrations/{reqId}/coverage-decisions` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` | P | office jurisdiction of the caller's posting | yes |
 | `GET /office/ecr-filings` | ? | office jurisdiction of the caller's posting |  |
 | `POST /office/ecr-filings/{filingId}/approvals` | ? | office jurisdiction of the caller's posting | yes |

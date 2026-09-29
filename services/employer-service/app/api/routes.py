@@ -163,9 +163,15 @@ async def get_configuration(actor: Actor = Depends(require_actor), session: Asyn
     est_id = _establishment_of(actor)
     await _require_member_of(session, actor, est_id)
     est = await _load_establishment(session, est_id)
-    return envelope({"establishment_id": est_id, "coverage_type": "Statutory (demo)", "exemption_status": "UN_EXEMPTED",
-                     "jurisdiction_office": est["office_id"], "schemes": ["EPF", "EPS", "EDLI"], "sub_codes": [],
-                     "source": "seeded synthetic configuration"})
+    from app.infra.tables import branches
+    subs = (await session.execute(select(branches.c.sub_code).where(branches.c.establishment_id == est_id).order_by(branches.c.sub_code))).scalars().all()
+    coverage = est["coverage"] or {}
+    return envelope({"establishment_id": est_id, "coverage_type": coverage.get("coverage_type", "STATUTORY"),
+                     "coverage_date": est["coverage_date"].isoformat() if est["coverage_date"] else None,
+                     "exemption_status": est["exemption_status"] or "NOT_EXEMPT", "establishment_type": est["establishment_type"],
+                     "industry_group": est["industry_group"], "jurisdiction_office": est["office_id"], "schemes": ["EPF", "EPS", "EDLI"],
+                     "sub_codes": list(subs), "address": est["address"],
+                     "source": "synthetic; changes go through a change request the office decides"})
 
 
 # ── Operators and signatories (Journey A2, A9) ───────────────────────────────────────────────

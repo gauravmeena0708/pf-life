@@ -14,7 +14,8 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.5b** | Death and EDLI claims, beneficiary shares, physical intake at the PRO counter, identity validation (family pension deferred to P2.6) | **Done** (29 Sep 2026) |
 | **P2.5c** | Ledger locks, document attestation views, establishment freeze / de-freeze, office Annexure K files and reconciliation | **Done** (29 Sep 2026) |
 | **P2.5d** | Claim scrutiny as the CITES manuals set it: the Claim Approval Docket at every level, recommend to approve / reject with the account status, rejection only at the final level (an intermediate "Recommend to Reject" returns to the initiator), Start-Stop Claim, one-time code on every officer action | **Done** (30 Sep 2026) |
-| P2.6 | Establishment registration and configuration, Form 5A, branches, DSC / e-sign approvals | |
+| **P2.6a** | Establishment record and changes: KYC through mock registries, bank accounts, exemption, branches (Form 2A), Form 5A, contractors of a principal employer; profile and configuration changes as requests the office decides; OLRE scrutiny (DA Compliance, e-file) and the APFC's coverage decision | **Done** (30 Sep 2026) |
+| P2.6b | Signatory request / revoke letters, DSC and e-sign registration with the office's approval, pending approvals; family pension (Form 10D by a widow / child) | Next |
 | P2.7 | Returns, receipts and ledger: arrear / supplementary ECR, demands, direct challans, 14B/7Q knock-offs, VDR rejection, reversals, recredits | |
 | P2.8 | The rest: compliance and VISHWAS, international workers, grievance extras, public lookups, audit, NDC, HRM, DO dashboards | |
 
@@ -143,3 +144,18 @@ Source: the CITES user manuals (`../manuals`, reviewed in `docs/reviews/cites-ma
 - Kept: a verifier approving within its financial limit is our amount-band chain (the last role for the amount is
   final). Not built from the review: the beneficiary login and uploads, the EDLI three-tab calculation screen and
   officer e-sign of the summary sheet, full data entry at the PRO counter, Form 10C cash, Appendix E.
+
+## P2.6a — how it is built
+
+- employer-service (`app/api/establishment_routes.py`): KYC of the establishment (PAN, GSTIN, TAN, CIN, LIN)
+  through a mock registry (a number containing `00000` is "not found"); remittance bank accounts and exemption
+  (seeded); branches with sub-codes `<registration no>/001…`, shown in the configuration; Form 5A kept by version,
+  signed with a one-time code standing in for DSC / e-sign; a principal employer's contractors with the work order.
+- Changes are not edits: `PATCH /employers/me` (address, contact) and configuration changes (establishment type,
+  industry) open a change request; the APFC of the establishment's office approves (the record changes) or
+  rejects it. One open request of each kind at a time.
+- OLRE: a registration verified by the mock registry waits for the DA (Compliance), who views the documents and
+  records scrutiny, opening the compliance e-file; then the APFC decides coverage (date and type).
+- employer-service now has office postings (seeded) for jurisdiction. New persona `ro-da-compliance`.
+- The web pages *Establishment* (employer) and *OLRE and establishment changes* (office) were drafted by codex from
+  a written spec and reviewed.

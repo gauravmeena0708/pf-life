@@ -914,16 +914,23 @@ paths:
       - $ref: '#/components/parameters/EstablishmentId'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
+      - employer.owner
       - employer.signatory
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
@@ -1018,17 +1025,24 @@ paths:
       - $ref: '#/components/parameters/CorrelationId'
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
       - employer.operator
+      - employer.owner
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []
@@ -1042,16 +1056,23 @@ paths:
       - $ref: '#/components/parameters/CorrelationId'
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
+      - employer.owner
       - employer.signatory
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
@@ -1065,16 +1086,23 @@ paths:
       - $ref: '#/components/parameters/CorrelationId'
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
+      - employer.owner
       - employer.signatory
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
@@ -1240,6 +1268,37 @@ paths:
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []
+  /employers/me/change-requests:
+    get:
+      operationId: getEmployersChangeRequests
+      summary: The establishment's change requests and the office's decisions
+      tags:
+      - Establishment registration and configuration
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/EstablishmentId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: employer
+      x-callers:
+      - employer.owner
+      - employer.signatory
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
   /employers/me/claim-attestations:
     get:
       operationId: getEmployersClaimAttestations
@@ -1385,6 +1444,7 @@ paths:
       x-owner-service: employer
       x-callers:
       - employer.operator
+      - employer.owner
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []
@@ -1401,16 +1461,23 @@ paths:
       - $ref: '#/components/parameters/EstablishmentId'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
+      - employer.owner
       - employer.signatory
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
@@ -1432,16 +1499,23 @@ paths:
       - $ref: '#/components/parameters/CorrelationId'
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
+      - employer.owner
       - principal_employer
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
@@ -1455,16 +1529,23 @@ paths:
       - $ref: '#/components/parameters/CorrelationId'
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
+      - employer.owner
       - principal_employer
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
@@ -1971,17 +2052,24 @@ paths:
       - $ref: '#/components/parameters/CorrelationId'
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
       - employer.operator
+      - employer.owner
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []
@@ -2160,17 +2248,24 @@ paths:
       - $ref: '#/components/parameters/CorrelationId'
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
       - employer.operator
+      - employer.owner
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []
@@ -2348,9 +2443,10 @@ paths:
         '409':
           $ref: '#/components/responses/Problem'
       x-status: mock
-      x-phase: 2
+      x-phase: 1
       x-owner-service: employer
       x-callers:
+      - employer.owner
       - employer.signatory
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
@@ -2921,16 +3017,23 @@ paths:
       - $ref: '#/components/parameters/CorrelationId'
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
+      - employer.owner
       - employer.signatory
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
@@ -2945,16 +3048,23 @@ paths:
       - $ref: '#/components/parameters/EstablishmentId'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
+      - employer.owner
       - employer.signatory
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
@@ -9504,6 +9614,65 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/establishment-change-requests:
+    get:
+      operationId: getOfficeEstablishmentChangeRequests
+      summary: Establishment change requests of the office, by state
+      tags:
+      - Establishment registration and configuration
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: employer
+      x-callers:
+      - fo.apfc
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+  /office/establishment-registrations:
+    get:
+      operationId: getOfficeEstablishmentRegistrations
+      summary: 'OLRE: new registrations of the office awaiting scrutiny / coverage'
+      tags:
+      - Establishment registration and configuration
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: employer
+      x-callers:
+      - fo.apfc
+      - fo.da_compliance
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
   /office/establishment-registrations/{reqId}/coverage-decisions:
     post:
       operationId: postOfficeEstablishmentRegistrationsReqIdCoverageDecisions
@@ -9519,14 +9688,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
       - fo.apfc
@@ -9554,16 +9729,23 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
+      - fo.apfc
       - fo.da_compliance
       x-scope: office jurisdiction of the caller's posting
       security:
@@ -9582,14 +9764,20 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
       - fo.da_compliance
@@ -9623,14 +9811,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
       - fo.apfc
