@@ -1,5 +1,5 @@
 """Tables owned by claim-service (created by migration 0002)."""
-from sqlalchemy import JSON, BigInteger, Boolean, Column, Date, DateTime, Integer, MetaData, String, Table, Text, false as sa_false, func
+from sqlalchemy import JSON, BigInteger, Boolean, Column, Date, DateTime, Integer, LargeBinary, MetaData, String, Table, Text, false as sa_false, func
 
 from app.infra.models import IdType
 
@@ -20,6 +20,7 @@ accounts = Table(
     Column("uan", String(12), index=True),
     Column("frozen", Boolean, nullable=False, server_default=sa_false()),   # from AccountFrozen.v1 / AccountDefrozen.v1
     Column("pan_verified", Boolean, nullable=False, server_default=sa_false()),   # decides the TDS rate
+    Column("interest_paise", BigInteger, nullable=False, server_default="0"),     # interest credited (InterestCredited.v1), for the CAD
 )
 
 # Office staff directory (synthetic seed): which office an officer acts for.
@@ -84,4 +85,47 @@ tax_declarations = Table(
     Column("financial_year", String(7), primary_key=True),
     Column("form", String(3), nullable=False),
     Column("submitted_at", DateTime(timezone=True), server_default=func.now()),
+)
+
+# Documents a member uploads with a claim. POC stand-in for the object store: kept here, capped at 1 MB,
+# with the SHA-256 recorded so a later copy can be checked.
+claim_documents = Table(
+    "claim_documents", metadata,
+    Column("doc_id", String(40), primary_key=True),
+    Column("claim_id", String(40), nullable=False, index=True),
+    Column("filename", String(200), nullable=False),
+    Column("content_type", String(60), nullable=False),
+    Column("size_bytes", Integer, nullable=False),
+    Column("sha256", String(64), nullable=False),
+    Column("content", LargeBinary, nullable=False),
+    Column("uploaded_at", DateTime(timezone=True), server_default=func.now()),
+)
+
+# Claim Authorization Document: what the F&A (Accounts) wing authorises before payment — gross, the interest
+# included in the balance, TDS and net payable — with the rule set and static-data versions it used.
+cads = Table(
+    "cads", metadata,
+    Column("cad_id", String(40), primary_key=True),
+    Column("claim_id", String(40), nullable=False, unique=True),
+    Column("gross_paise", BigInteger, nullable=False),
+    Column("interest_paise", BigInteger, nullable=False),
+    Column("tds_paise", BigInteger, nullable=False),
+    Column("net_paise", BigInteger, nullable=False),
+    Column("tax", JSON, nullable=False),
+    Column("rule_version", String(60), nullable=False),
+    Column("static_data_version", String(40), nullable=False),
+    Column("created_by", String(80), nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now()),
+)
+
+# A payment scroll: approved claims of an office sent to the bank together; returns are reconciled against it.
+payment_scrolls = Table(
+    "payment_scrolls", metadata,
+    Column("scroll_id", String(40), primary_key=True),
+    Column("office_id", String(40), nullable=False),
+    Column("claim_ids", JSON, nullable=False),
+    Column("total_paise", BigInteger, nullable=False),
+    Column("created_by", String(80), nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now()),
+    Column("reconciliation", JSON),
 )

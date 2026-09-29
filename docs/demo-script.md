@@ -43,6 +43,7 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `member-d` | Member with two member IDs (a previous job) | Exit and transfer |
 | `ro-da-pension` | Dealing assistant (Pension) | Pension office |
 | `member-e`, `ro-ss-pension`, `ndc-cpps` | Retired member; SS (Pension); CPPS operator | Pension settlement |
+| `ro-fa-accounts` | Accounts wing (F&A) — Claim Authorization Document | Claim tools |
 
 ---
 
@@ -216,6 +217,18 @@ simulation; point out that the dialog says exactly what is being authorised (act
    The member sees each desk; the pension is in payment and the arrear credited.
 5. **`ndc-cpps` → CPPS disbursement**: run last month, then *Reconcile* (the mock sponsor bank answers; accounts
    ending 0000 are returned). **`ro-pension`** prepares the Bank Reconciliation Statement.
+
+## Claim tools: withdrawal, CAD, payment scroll, member 360
+*Tests: `tests/e2e/test_claim_lifecycle.py`, `services/claim-service/tests/test_lifecycle.py`*
+
+1. **`member-a` → a claim under review → Documents and withdrawal**: upload a PDF, then *Withdraw this claim*
+   (one-time code). It closes in the work queue too. After an approving officer decides, withdrawal is refused.
+2. **`ro-fa-accounts` → Claims & settlement › CAD**: enter an approved claim's ID → gross, interest included, TDS,
+   net, rule and static-data versions (one-time code).
+3. **`ro-cashier` → Payment scroll**: see the claims ready, send them to the bank in one scroll (one-time code
+   bound to the total; *simulate bank return* to show the failure path), then *Reconcile returns*.
+4. **`do-caseworker` → Members › Member**: the member 360 view needs a purpose, which the audit log keeps;
+   *Inoperative accounts*; *Claim audit trail* with the forms filed with the claim.
 
 ## Policy changes that move money — interest, TDS and pensions
 *Tests: `tests/e2e/test_policy_money.py`, `services/contribution-service/tests/test_interest.py`,

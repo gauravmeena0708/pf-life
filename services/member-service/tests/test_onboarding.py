@@ -124,3 +124,12 @@ def test_bulk_registration_reports_each_line(api):
     assert r["lines"] == 3 and r["registered"] == 1
     assert [x["status"] for x in r["results"]] == ["REGISTERED", "ERROR", "ERROR"]
     assert "14 years" in r["results"][2]["error"]
+
+
+def test_member_360_needs_a_purpose_and_the_officers_office(api):
+    da = hdr(S["do-caseworker"], "fo.da_accounts", establishment=None)
+    assert api.get("/api/v1/office/members/100000000002", headers=da).status_code == 400                 # purpose required
+    r = api.get("/api/v1/office/members/100000000002?purpose=Freeze%20verification%20of%20the%20member", headers=da)
+    assert r.status_code == 200 and r.json()["data"]["member_ids"][0]["office_id"] == "RO-DEMO-01"
+    assert api.get("/api/v1/office/members/999999999999?purpose=Checking%20a%20complaint", headers=da).status_code == 404
+    assert api.get("/api/v1/office/members/100000000002?purpose=Just%20looking%20around", headers=hdr(S["member-a"], "member", establishment=None)).status_code == 403

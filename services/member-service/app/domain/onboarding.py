@@ -86,9 +86,11 @@ async def register(session: AsyncSession, *, establishment_id: str, establishmen
             member_id=member_id, uan=uan, subject=None, name=name.upper(), date_of_birth=date_of_birth, gender=gender,
             mobile_masked=mask(mobile), email_masked="-", bank_ifsc="-", bank_account_last4="-",
             kyc={"aadhaar": "VERIFIED", "pan": "NOT_SEEDED", "bank": "NOT_SEEDED", "aadhaar_masked": mask(aadhaar)}))
+    office = (await session.execute(select(employments.c.office_id).where(employments.c.establishment_id == establishment_id,
+                                                                          employments.c.office_id.is_not(None)).limit(1))).scalar_one_or_none()
     await session.execute(insert(employments).values(
         account_link_id=link, member_id=member_id, establishment_id=establishment_id, establishment_name=establishment_name,
-        date_of_joining=date_of_joining, registered_by=actor_subject))
+        date_of_joining=date_of_joining, registered_by=actor_subject, office_id=office))
     member = (await session.execute(select(members).where(members.c.member_id == member_id))).mappings().one()
     await add_event(session, producer=PRODUCER, event_type="MemberRegistered.v1", aggregate_type="member_account",
                     aggregate_id=link, correlation_id=correlation_id, payload={

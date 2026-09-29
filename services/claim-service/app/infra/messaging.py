@@ -59,6 +59,7 @@ async def on_interest_credited(session: AsyncSession, event: dict[str, Any]) -> 
     """Annual interest (or a rate revision's difference; negative when a rate is lowered) moves the balances."""
     for p in event["payload"]["postings"]:
         await session.execute(update(accounts).where(accounts.c.account_link_id == p["account_link_id"]).values(
+            interest_paise=accounts.c.interest_paise + int(p["employee_paise"]) + int(p["employer_paise"]),
             employee_paise=accounts.c.employee_paise + int(p["employee_paise"]),
             employer_paise=accounts.c.employer_paise + int(p["employer_paise"])))
 

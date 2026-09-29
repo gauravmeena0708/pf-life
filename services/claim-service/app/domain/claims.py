@@ -18,7 +18,10 @@ ROLE_LABELS = {
     "member": "You", "system": "EPFO system (automatic)", "fo.da_accounts": "Dealing assistant (accounts)",
     "fo.ss": "Section supervisor", "fo.ao": "Accounts officer", "fo.apfc": "Assistant PF commissioner",
     "fo.oic": "Officer in charge", "fo.cash": "Cash section", "bank": "Bank (mock)",
+    "fo.fa_accounts": "Accounts wing (F&A)",
 }
+# A member may withdraw a claim only before an approving officer has decided on it.
+CANCELLABLE = {"AWAITING_CONFIRMATION", "SUBMITTED", "UNDER_REVIEW", "RECOMMENDED"}
 
 NEXT_STEP = {
     "AWAITING_CONFIRMATION": "Check the summary and confirm the claim with the one-time code.",
@@ -35,6 +38,7 @@ NEXT_STEP = {
     "REISSUE_APPROVED": "The re-payment is approved; the cash section will send it to your new account.",
     "ON_HOLD_FROZEN": "Your claim is on hold while your account is being verified. You do not need to do anything.",
     "REJECTED_WITH_REASON": "Your claim was rejected. The reason is shown above; you can file a new claim once it is resolved.",
+    "CANCELLED": "You withdrew this claim. You can file a new one.",
 }
 
 

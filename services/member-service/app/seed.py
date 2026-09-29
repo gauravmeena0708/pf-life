@@ -9,7 +9,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
 from app.infra.db import sessions
-from app.infra.tables import contact_history, employments, members
+from app.infra.tables import office_staff, contact_history, employments, members
 
 SEED_FILE = os.environ.get("SEED_FILE", "/srv/seed/synthetic.json")
 
@@ -41,18 +41,22 @@ async def main() -> None:
                         member_id=member["member_id"], mobile_masked=member["mobile_masked"],
                         email_masked=member["email_masked"], source="SEED", verified=True))
                 names = {e["establishment_id"]: e["legal_name"] for e in [establishment, *seed.get("public_establishments", [])]}
+                offices = {e["establishment_id"]: e["office_id"] for e in [establishment, *seed.get("public_establishments", [])]}
                 for job in [{**member, "establishment_id": establishment["establishment_id"]}, *member.get("previous_employments", [])]:
                     employment = {"account_link_id": job["account_link_id"], "member_id": member["member_id"],
                                   "establishment_id": job["establishment_id"], "establishment_name": names[job["establishment_id"]],
                                   "date_of_joining": date.fromisoformat(job["date_of_joining"]),
                                   "date_of_exit": date.fromisoformat(job["date_of_exit"]) if job.get("date_of_exit") else None,
                                   "exit_marked_by": "SEED" if job.get("date_of_exit") else None,
-                                  "last_contribution_month": job.get("last_contribution_month")}
+                                  "last_contribution_month": job.get("last_contribution_month"), "office_id": offices[job["establishment_id"]]}
                     statement = insert(employments).values(**employment)
                     # Exits, contributions and transfers move after the first load; a re-seed keeps them.
                     await session.execute(statement.on_conflict_do_update(
                         index_elements=[employments.c.account_link_id],
-                        set_={key: statement.excluded[key] for key in ("member_id", "establishment_id", "establishment_name", "date_of_joining")}))
+                        set_={key: statement.excluded[key] for key in ("member_id", "establishment_id", "establishment_name", "date_of_joining", "office_id")}))
+            for st in seed.get("office_staff", []):
+                statement = insert(office_staff).values(subject=st["subject"], stakeholder=st["stakeholder"], office_id=st["office_id"])
+                await session.execute(statement.on_conflict_do_nothing())
     print(f"member-service seeded: {len(seed['members'])} synthetic members")
 
 

@@ -279,7 +279,8 @@
     "ro-da-pension": "00000000-0000-4000-8000-000000000030",
     "member-e": "00000000-0000-4000-8000-000000000031",
     "ro-ss-pension": "00000000-0000-4000-8000-000000000032",
-    "ndc-cpps": "00000000-0000-4000-8000-000000000033"
+    "ndc-cpps": "00000000-0000-4000-8000-000000000033",
+    "ro-fa-accounts": "00000000-0000-4000-8000-000000000034"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -382,6 +383,12 @@
       "subject": "00000000-0000-4000-8000-000000000033",
       "stakeholder": "tech.cpps",
       "office_id": "NDC-DWARKA"
+    },
+    {
+      "username": "ro-fa-accounts",
+      "subject": "00000000-0000-4000-8000-000000000034",
+      "stakeholder": "fo.fa_accounts",
+      "office_id": "RO-DEMO-01"
     }
   ],
   "pensioners": [

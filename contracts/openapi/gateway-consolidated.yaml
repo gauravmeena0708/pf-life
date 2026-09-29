@@ -5484,12 +5484,12 @@ paths:
         status: W
         phase: 1
       - formType: FORM_19
-        status: P
-        phase: 2
+        status: W
+        phase: 1
       - formType: FORM_10C
         status: P
         phase: 2
-      description: 'Variants by `formType`: `FORM_31` (W, phase 1); `FORM_19` (P, phase 2); `FORM_10C` (P, phase 2)'
+      description: 'Variants by `formType`: `FORM_31` (W, phase 1); `FORM_19` (W, phase 1); `FORM_10C` (P, phase 2)'
       requestBody:
         required: false
         content:
@@ -5523,12 +5523,6 @@ paths:
           type: string
         description: Account to evaluate; defaults to the primary account
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
         '200':
           description: Eligibility of one form type, evaluated before filing
           content:
@@ -5540,8 +5534,18 @@ paths:
                   properties:
                     data:
                       $ref: '#/components/schemas/ClaimEligibilityPreview'
-      x-status: planned
-      x-phase: 2
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: claim
       x-callers:
       - member
@@ -5628,12 +5632,6 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
         '200':
           description: Member view of every state change on the caller's own claim
           content:
@@ -5647,8 +5645,18 @@ paths:
                       type: array
                       items:
                         $ref: '#/components/schemas/ClaimAuditEntryMemberView'
-      x-status: planned
-      x-phase: 2
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: claim
       x-callers:
       - member
@@ -5721,26 +5729,28 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
         '201':
           description: Claim moved to CANCELLED; ClaimCancelled audit entry written
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Envelope'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
         '409':
           description: Claim is past the cancellable states (see ClaimStateMachine)
           content:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-      x-status: planned
-      x-phase: 2
+      x-status: working
+      x-phase: 1
       x-owner-service: claim
       x-callers:
       - member
@@ -5800,7 +5810,8 @@ paths:
   /members/me/claims/{claimId}/documents:
     post:
       operationId: postMembersClaimsClaimIdDocuments
-      summary: Upload supporting document (object store, scanned)
+      summary: Upload supporting document (PDF / JPEG / PNG up to 1 MB, content checked, SHA-256 kept; stored by claim-service
+        in the P
       tags:
       - Member claims, transfers and pension applications
       parameters:
@@ -5811,20 +5822,28 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: claim
       x-callers:
       - member
       x-scope: self — caller's own member record only
       security:
       - bffSession: []
+      description: Upload supporting document (PDF / JPEG / PNG up to 1 MB, content checked, SHA-256 kept; stored by claim-service
+        in the POC in place of the object store)
       requestBody:
         required: false
         content:
@@ -7499,14 +7518,20 @@ paths:
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: contribution
       x-callers:
       - fo.da_accounts
@@ -8035,14 +8060,20 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: claim
       x-callers:
       - fo.da_accounts
@@ -8066,12 +8097,6 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
         '200':
           description: Full audit trail for officers and auditors
           content:
@@ -8085,8 +8110,18 @@ paths:
                       type: array
                       items:
                         $ref: '#/components/schemas/ClaimAuditEntry'
-      x-status: planned
-      x-phase: 2
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: claim
       x-callers:
       - fo.da_accounts
@@ -8110,12 +8145,6 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
         '200':
           description: The generated CAD
           content:
@@ -8127,8 +8156,18 @@ paths:
                   properties:
                     data:
                       $ref: '#/components/schemas/ClaimCad'
-      x-status: planned
-      x-phase: 2
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: claim
       x-callers:
       - fo.fa_accounts
@@ -8152,12 +8191,6 @@ paths:
       - $ref: '#/components/parameters/IfMatch'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
         '201':
           description: CAD generated
           content:
@@ -8169,14 +8202,22 @@ paths:
                   properties:
                     data:
                       $ref: '#/components/schemas/ClaimCad'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
         '409':
           description: CAD static reference data missing or stale, or the claim is not in an approvable state
           content:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-      x-status: planned
-      x-phase: 2
+      x-status: working
+      x-phase: 1
       x-owner-service: claim
       x-callers:
       - fo.fa_accounts
@@ -10346,14 +10387,20 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: member
       x-callers:
       - fo.da_accounts
@@ -10534,14 +10581,20 @@ paths:
       - $ref: '#/components/parameters/IfMatch'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: claim
       x-callers:
       - fo.cash
@@ -10555,6 +10608,38 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/payment-scrolls/ready:
+    get:
+      operationId: getOfficePaymentScrollsReady
+      summary: Approved claims of the office ready for the next payment scroll (ledger debit posted, account not frozen),
+        with the tota
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: claim
+      x-callers:
+      - fo.cash
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: Approved claims of the office ready for the next payment scroll (ledger debit posted, account not frozen),
+        with the total
   /office/payment-scrolls/{scrollId}/return-reconciliations:
     post:
       operationId: postOfficePaymentScrollsScrollIdReturnReconciliations
@@ -10572,14 +10657,20 @@ paths:
       - $ref: '#/components/parameters/IfMatch'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: claim
       x-callers:
       - fo.cash
@@ -11935,12 +12026,6 @@ paths:
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
         '200':
           description: Versions and load status of CAD static reference data
           content:
@@ -11952,8 +12037,18 @@ paths:
                   properties:
                     data:
                       $ref: '#/components/schemas/CadStaticDataStatus'
-      x-status: planned
-      x-phase: 2
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: claim
       x-callers:
       - fo.fa_accounts

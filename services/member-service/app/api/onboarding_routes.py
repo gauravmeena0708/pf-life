@@ -365,3 +365,39 @@ async def account_status(actor: Actor = Depends(MEMBER), session: AsyncSession =
                          "ready_for": [k for k in ("ADVANCE", "FINAL_SETTLEMENT") if not any(
                              "ALL_CLAIMS" in b["blocks"] or k in b["blocks"] for b in blockers)]})
     return envelope({"uan": m["uan"], "accounts": accounts})
+
+
+# ── office: member 360 view (jurisdiction and purpose checked, audited) ──────────────────────────
+
+OFFICE_360 = require_stakeholder("fo.da_accounts", "fo.ss", "fo.ao", "fo.apfc", "fo.oic", "fo.pro", "fo.da_pension", "fo.apfc_pension", "zo.rpfc1")
+
+
+@router.get("/api/v1/office/members/{uan}")
+async def member_360(uan: str, purpose: str = Query(min_length=10, max_length=300), actor: Actor = Depends(OFFICE_360),
+                     session: AsyncSession = Depends(db)) -> dict:
+    from app.infra.tables import member_applications, office_staff
+    async with session.begin():
+        office = (await session.execute(select(office_staff.c.office_id).where(office_staff.c.subject == actor.subject))).scalar_one_or_none()
+        m = (await session.execute(select(members).where(members.c.uan == uan))).mappings().first()
+        jobs = [dict(j) for j in (await session.execute(select(employments).where(employments.c.member_id == (m["member_id"] if m else ""))
+                                                        .order_by(employments.c.date_of_joining.desc()))).mappings().all()]
+        zone = office and office.startswith("ZO")
+        if not m or not office or not (zone or any(j["office_id"] == office for j in jobs)):
+            raise Problem(404, "/problems/not-found", "No member of your office with that UAN")   # outside jurisdiction looks the same
+        apps = (await session.execute(select(member_applications).where(member_applications.c.uan == uan)
+                                      .order_by(member_applications.c.updated_at.desc()))).mappings().all()
+        pending_kyc = (await session.execute(select(kyc_requests).where(kyc_requests.c.member_id == m["member_id"],
+                                                                        kyc_requests.c.state == "PENDING_EMPLOYER"))).mappings().all()
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="member.viewed_360",
+                    target_type="member", target_id=uan, detail=purpose)
+    kyc = m["kyc"] or {}
+    return envelope({"uan": uan, "name": m["name"], "date_of_birth": m["date_of_birth"].isoformat(), "gender": m["gender"],
+                     "account_state": m["account_state"], "mobile_masked": m["mobile_masked"], "email_masked": m["email_masked"],
+                     "kyc": {"aadhaar": kyc.get("aadhaar"), "pan": kyc.get("pan"), "bank": kyc.get("bank"), "bank_account_last4": m["bank_account_last4"]},
+                     "profile_extra": m["profile_extra"] or {},
+                     "member_ids": [{"account_link_id": j["account_link_id"], "establishment": j["establishment_name"], "office_id": j["office_id"],
+                                     "date_of_joining": j["date_of_joining"].isoformat(), "date_of_exit": j["date_of_exit"].isoformat() if j["date_of_exit"] else None,
+                                     "transferred_to": j["transferred_to"]} for j in jobs],
+                     "applications": [{"application_id": a["application_id"], "title": a["title"], "state": a["state"], "pending": not a["terminal"]} for a in apps],
+                     "pending_kyc": [{"request_id": r["request_id"], "kyc_type": r["kyc_type"]} for r in pending_kyc],
+                     "viewed_for": purpose, "note": "This view is recorded in the audit log with its purpose."})

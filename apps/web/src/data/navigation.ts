@@ -52,8 +52,12 @@ function fieldOffice(role: string): NavGroup[] {
   const queue = "/office/work-queue";
   return [
     { label: "Claims & settlement", items: [link("CLAIMS", queue), link("Online Services", queue), link("ANNEXURE K FILE"),
-      ...(["fo.da_accounts", "fo.ao"].includes(role) ? [link("Form 10D pension claims (IDS)", "/office/pension-claims")] : [])] },
-    { label: "Members", items: [link("Member", role === "fo.oic" ? queue : undefined), link("Query")] },
+      ...(["fo.da_accounts", "fo.ao"].includes(role) ? [link("Form 10D pension claims (IDS)", "/office/pension-claims")] : []),
+      ...(role === "fo.fa_accounts" ? [link("Claim Authorization Document (CAD)", "/office/claim-tools#cad-heading")] : []),
+      ...(role === "fo.cash" ? [link("Payment scroll", "/office/claim-tools#scroll-heading")] : []),
+      ...(role === "fo.da_accounts" ? [link("Claim audit trail", "/office/claim-tools#trail-heading")] : [])] },
+    { label: "Members", items: [link("Member", role === "fo.oic" ? queue : role === "fo.da_accounts" ? "/office/claim-tools#member360-heading" : undefined),
+      link("Query"), ...(["fo.da_accounts", "fo.oic"].includes(role) ? [link("Inoperative accounts", "/office/claim-tools#inoperative-heading")] : [])] },
     { label: "Receipts & reconciliation", items: [
       role === "fo.apfc" ? link("ECR Approval") : link("VDR Vs ECR filing"), link("Reco - ECR Vs VDR"), link("VDR Member Beneficiary"),
       link("VDR Rejection"), link("ANNEXURE K RECO"), link("ANNEXURE K VDR RECO")] },

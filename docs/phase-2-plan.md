@@ -10,7 +10,9 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.2** | Employer member registration (single, bulk; new UAN or a new member ID under an existing one), Form 11, member KYC (PAN, bank) through mock verifiers and the signatory's approval, KYC bulk with error list, missing details, active-member export, the employee's contribution ledger, UAN card, account readiness | **Done** (28 Sep 2026) |
 | **P2.3** | Pension office and pensioner self-service: pension enquiry (8 tabs), updation activities (DA initiates, APFC settles) and tracker, overdue life certificates, suspend / resume (held months released), mock Jeevan Pramaan DLC and signed callback, PPO, slips, bank change, declarations, public pension enquiries behind the demo CAPTCHA | **Done** (29 Sep 2026) |
 | **P2.4** | Pension settlement: Form 10D desk by desk (DA Accounts IDS → AO → DA Pension worksheet → APFC Pension → PPO → initial arrear DA → SS → APFC e-sign → dispatch), scheme certificate and its surrender, service aggregation, transfers-in, CPPS monthly run with the mock sponsor bank's paid statement and reconciliation, BRS | **Done** (29 Sep 2026) |
-| P2.5 | Death and EDLI claims, CAD, payment scrolls, physical intake, claim documents, cancellations, audit trail | |
+| **P2.5a** | Claim lifecycle and office tools: eligibility preview for one form, documents, withdrawal before a decision, member and office audit trails, the CAD (accounts wing), payment scrolls with return reconciliation, forms filed with a claim, member 360 view (purpose recorded), inoperative accounts | **Done** (29 Sep 2026) |
+| P2.5b | Death and EDLI claims, beneficiary shares, physical intake at the PRO counter, identity validation, family pension | Next |
+| P2.5c | Ledger locks, document attestation views, establishment freeze / de-freeze, office Annexure K files and reconciliation | |
 | P2.6 | Establishment registration and configuration, Form 5A, branches, DSC / e-sign approvals | |
 | P2.7 | Returns, receipts and ledger: arrear / supplementary ECR, demands, direct challans, 14B/7Q knock-offs, VDR rejection, reversals, recredits | |
 | P2.8 | The rest: compliance and VISHWAS, international workers, grievance extras, public lookups, audit, NDC, HRM, DO dashboards | |
@@ -68,3 +70,15 @@ meaning is confirmed.
 - New personas: `member-e` (retired member), `ro-ss-pension` (SS Pension), `ndc-cpps` (CPPS operator).
 - Not built: family pension (Form 10D by claimants), Special 10D, higher-pension options, the legacy bank-wise
   disbursement lists.
+
+## P2.5a — how it is built
+
+- claim-service: a member may withdraw a claim only before an approving officer decides (the work-queue case
+  closes); documents are checked (type, magic bytes, 1 MB) and kept with their SHA-256 — a stand-in for the object
+  store. The CAD (new persona `ro-fa-accounts`, F&A accounts wing) fixes gross, interest included, TDS and net,
+  with the rule and static-data versions; a payment made after it uses its figures. A payment scroll pays every
+  approved claim of the office whose debit is posted; its reconciliation lists paid, pending and returned claims.
+- member-service: the member 360 view needs a purpose, is limited to the officer's office (a zonal officer sees
+  the zone) and is written to the audit log. contribution-service: inoperative accounts (no credit for 36 months).
+- Found: the gateway asks for step-up on every POST of an operation marked for it, so a "preview" flag on the
+  scroll POST could never work; the preview is its own read-only endpoint (`GET /office/payment-scrolls/ready`).

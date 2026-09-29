@@ -21,8 +21,31 @@ export function ClaimDetailPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const claim = useQuery({ queryKey: ["member-claim", claimId], queryFn: () => api<Envelope<ClaimDetail>>(`/api/v1/members/me/claims/${claimId}`), enabled: !!claimId, retry: false,
-    refetchInterval: (query) => query.state.data && !["SETTLED", "REJECTED_WITH_REASON"].includes(query.state.data.data.state) ? 3000 : false });
+    refetchInterval: (query) => query.state.data && !["SETTLED", "REJECTED_WITH_REASON", "CANCELLED"].includes(query.state.data.data.state) ? 3000 : false });
   const item = claim.data?.data;
+  const [docNotice, setDocNotice] = useState<string | null>(null);
+  async function withdraw() {
+    if (!item) return;
+    const token = await stepUp.ask({ action: "cancel-claim", resourceId: item.claim_id, summary: `Withdraw claim ${item.claim_id} (${rupees(item.amount_paise)}). You can file a new one afterwards.` });
+    if (!token) return;
+    setBusy(true); setError(null);
+    try {
+      await command("POST", `/api/v1/members/me/claims/${item.claim_id}/cancellations`, undefined, { stepUpToken: token });
+      await Promise.all([qc.invalidateQueries({ queryKey: ["member-claim", item.claim_id] }), qc.invalidateQueries({ queryKey: ["member-claims"] })]);
+    } catch (cause) { setError(cause); }
+    finally { setBusy(false); }
+  }
+  async function upload(file: File | undefined) {
+    if (!item || !file) return;
+    setError(null); setDocNotice(null);
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      let binary = ""; bytes.forEach((b) => { binary += String.fromCharCode(b); });
+      const r = await command<Envelope<{ doc_id: string }>>("POST", `/api/v1/members/me/claims/${item.claim_id}/documents`,
+        { filename: file.name, content_type: file.type, content_base64: btoa(binary) });
+      setDocNotice(`${file.name} uploaded (${r.data.doc_id}).`);
+    } catch (cause) { setError(cause); }
+  }
   async function confirm() {
     if (!item || item.state !== "AWAITING_CONFIRMATION") return;
     const token = await stepUp.ask({ action: "confirm-claim", resourceId: item.claim_id, resourceVersion: item.version,
@@ -44,6 +67,14 @@ export function ClaimDetailPage() {
     <ProblemMessage error={error} />
     {claim.isLoading ? <p role="status">{t("claimDetail.loading")}</p> : null}
     {item ? <>
+      {!["SETTLED", "REJECTED_WITH_REASON", "CANCELLED"].includes(item.state) ? <section className="card stack" aria-labelledby="claim-actions-heading">
+        <h2 id="claim-actions-heading">Documents and withdrawal</h2>
+        {docNotice ? <p role="status" className="ok">{docNotice}</p> : null}
+        <label>Upload a supporting document (PDF, JPEG or PNG, up to 1 MB)<input type="file" accept="application/pdf,image/jpeg,image/png" onChange={(e) => void upload(e.target.files?.[0])} /></label>
+        {["AWAITING_CONFIRMATION", "SUBMITTED", "UNDER_REVIEW", "RECOMMENDED"].includes(item.state)
+          ? <div className="actions"><button type="button" disabled={busy} onClick={() => void withdraw()}>Withdraw this claim</button>
+            <span className="muted small">Possible until an approving officer decides.</span></div> : null}
+      </section> : null}
       <aside className="pending-notice" aria-label={t("claims.nextStep")}><h2>{t("claims.nextStep")}</h2><p>{item.next_step}</p>
         {item.state === "AWAITING_CONFIRMATION" ? <button type="button" className="primary" disabled={busy} onClick={() => void confirm()}>{t("claims.confirmOtp")}</button> : null}</aside>
       {item.state === "PAYMENT_RETURNED" ? <form className="card stack" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget);

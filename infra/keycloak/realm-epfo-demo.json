@@ -133,6 +133,10 @@
       {
         "name": "tech.cpps",
         "description": "Stakeholder tech.cpps (docs/stakeholders.md)"
+      },
+      {
+        "name": "fo.fa_accounts",
+        "description": "Stakeholder fo.fa_accounts (docs/stakeholders.md)"
       }
     ]
   },
@@ -832,6 +836,25 @@
         "tech.cpps"
       ],
       "id": "00000000-0000-4000-8000-000000000033"
+    },
+    {
+      "username": "ro-fa-accounts",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Accounts wing FA",
+      "lastName": "Demo",
+      "email": "ro-fa-accounts@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.fa_accounts"
+      ],
+      "id": "00000000-0000-4000-8000-000000000034"
     }
   ]
 }

@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.claims import NEXT_STEP, OPEN_STATES, ROLE_LABELS, approval_chain, eligibility, months_between, route, summary
 from app.infra.db import sessions
-from app.infra.tables import accounts, claim_timeline, claims, office_staff, risk_flags, tax_declarations
+from app.infra.tables import accounts, cads, claim_timeline, claims, office_staff, risk_flags, tax_declarations
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit, find_response, request_hash, store_response
@@ -288,7 +288,9 @@ async def _instruct(session: AsyncSession, claim: dict[str, Any], actor: Actor, 
     attempt = claim["payment_attempt"] + 1
     payment_id = f"PAY-{claim['claim_id']}-{attempt}"
     first_tax = claim.get("tax") is None
-    tax = await work_out_tax(session, claim, datetime.now(UTC).date()) if first_tax else claim["tax"]
+    cad = (await session.execute(select(cads.c.tax).where(cads.c.claim_id == claim["claim_id"]))).scalar_one_or_none()
+    # The CAD, when the accounts wing has generated one, fixes the figures; otherwise they are worked out now.
+    tax = (cad or await work_out_tax(session, claim, datetime.now(UTC).date())) if first_tax else claim["tax"]
     withheld = f" Income tax of ₹{tax['tds_paise'] // 100:,} withheld (TDS, {tax['basis']})" if tax["tds_paise"] else ""
     claim = await transition(session, claim, "PAYMENT_PENDING", actor.stakeholder,
                              ("Payment sent to the bank." if attempt == 1 else f"Payment re-issued (attempt {attempt}).") + withheld,

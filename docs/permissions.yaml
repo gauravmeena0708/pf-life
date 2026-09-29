@@ -232,7 +232,7 @@ stakeholders:
     via:
     - F04.preflight
   - endpoint: GET /members/me/claims/eligibility-preview
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
@@ -256,7 +256,7 @@ stakeholders:
     via:
     - F04.claim_file
   - endpoint: POST /members/me/claims/{claimId}/documents
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
@@ -268,13 +268,13 @@ stakeholders:
     via:
     - F04.claim_file
   - endpoint: GET /members/me/claims/{claimId}/audit-trail
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
     - F04.post_submission
   - endpoint: POST /members/me/claims/{claimId}/cancellations
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: true
     via:
@@ -1328,7 +1328,7 @@ stakeholders:
     via:
     - F04.process
   - endpoint: GET /office/claims/{claimId}/audit-trail
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1352,7 +1352,7 @@ stakeholders:
     via:
     - F04.process
   - endpoint: GET /office/claims/{claimId}/additional-forms
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1412,7 +1412,7 @@ stakeholders:
     via:
     - F05.higher_deposit
   - endpoint: GET /office/members/{uan}
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1448,7 +1448,7 @@ stakeholders:
     via:
     - F09.annexure_k_reconcile
   - endpoint: GET /office/accounts/inoperative
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1620,19 +1620,19 @@ stakeholders:
     - F11.approve
   fo.fa_accounts:
   - endpoint: POST /office/claims/{claimId}/cad
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F04.cad
   - endpoint: GET /office/claims/{claimId}/cad
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F04.cad
   - endpoint: GET /office/system/cad-static-data
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1870,7 +1870,7 @@ stakeholders:
     via:
     - F07.defreeze
   - endpoint: GET /office/accounts/inoperative
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1931,13 +1931,13 @@ stakeholders:
     via:
     - F04.pay
   - endpoint: POST /office/payment-scrolls
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F04.pay
   - endpoint: POST /office/payment-scrolls/{scrollId}/return-reconciliations
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -1946,6 +1946,12 @@ stakeholders:
     status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
+    via:
+    - F04.pay
+  - endpoint: GET /office/payment-scrolls/ready
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
     via:
     - F04.pay
   fo.diary:
@@ -2506,7 +2512,7 @@ stakeholders:
     via:
     - F12.concurrent
   - endpoint: GET /office/claims/{claimId}/audit-trail
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:

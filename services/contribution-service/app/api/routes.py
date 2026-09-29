@@ -455,3 +455,31 @@ async def employee_ledger(uan: str, actor: Actor = Depends(EMPLOYER)):
         row[f"{r['share']}_paise"] += r["amount_paise"] if r["side"] == "credit" else -r["amount_paise"]
     return envelope({"uan": uan, "member_id": m["account_link_id"], "name": m["name"], "months": list(months.values()),
                      "note": "Employee and employer (EPF) shares credited from this establishment's paid returns."})
+
+
+# ── inoperative accounts (SOP 01/2024 on transaction-less and inoperative accounts; illustrative) ─────
+
+@router.get("/api/v1/office/accounts/inoperative")
+async def inoperative(months: int = Query(default=36, ge=12, le=120), actor: Actor = Depends(require_stakeholder("fo.da_accounts", "fo.oic"))):
+    """A member ID with a balance but no credit (contribution, transfer in, interest) for `months` months."""
+    async with sessions()() as session:
+        rows = (await session.execute(text(
+            "SELECT m.account_link_id, m.uan, m.name, m.establishment_id, m.date_of_exit, "
+            "SUM(CASE WHEN jl.side='credit' THEN jl.amount_paise ELSE -jl.amount_paise END) AS balance, "
+            "MAX(CASE WHEN jl.side='credit' THEN j.occurred_at END) AS last_credit "
+            "FROM establishment_members m JOIN journal_lines jl ON jl.account_link_id=m.account_link_id AND jl.account_code='AC01_EPF' "
+            "JOIN journals j ON j.id=jl.journal_id GROUP BY m.account_link_id, m.uan, m.name, m.establishment_id, m.date_of_exit"))).mappings().all()
+    today = datetime.now(UTC).date()
+    year, month = divmod(today.year * 12 + today.month - 1 - months, 12)
+    cutoff = date(year, month + 1, 1)                           # the first day of the month `months` months ago
+    out = []
+    for r in rows:
+        last = r["last_credit"]
+        last_day = last.date() if hasattr(last, "date") else date.fromisoformat(str(last)[:10]) if last else None
+        if int(r["balance"] or 0) > 0 and (last_day is None or last_day < cutoff):
+            out.append({"account_link_id": r["account_link_id"], "uan_masked": "********" + r["uan"][-4:], "name": r["name"],
+                        "establishment_id": r["establishment_id"], "balance_paise": int(r["balance"]),
+                        "last_credit": last_day.isoformat() if last_day else None,
+                        "exited_on": r["date_of_exit"].isoformat() if hasattr(r["date_of_exit"], "isoformat") else r["date_of_exit"],
+                        "status": "INOPERATIVE"})
+    return envelope({"no_credit_since": cutoff.isoformat(), "months": months, "accounts": out})

@@ -53,8 +53,10 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/accounts/{accountLinkId}/passbook` | W |
 | `GET /members/me/applications` | W |
 | `GET /members/me/claims` | W |
+| `GET /members/me/claims/eligibility-preview` | W |
 | `GET /members/me/claims/eligible-types` | W |
 | `GET /members/me/claims/{claimId}` | W |
+| `GET /members/me/claims/{claimId}/audit-trail` | W |
 | `GET /members/me/employment-history` | W |
 | `GET /members/me/grievances` | W |
 | `GET /members/me/identity-assurance` | W |
@@ -78,7 +80,9 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /grievances/{grievanceId}/reopen-requests` | W |
 | `POST /members/me/account-recovery-requests` | W |
 | `POST /members/me/claims` | W |
+| `POST /members/me/claims/{claimId}/cancellations` | W |
 | `POST /members/me/claims/{claimId}/confirmations` | W |
+| `POST /members/me/claims/{claimId}/documents` | W |
 | `POST /members/me/claims/{claimId}/re-disbursement-requests` | W |
 | `POST /members/me/exits` | W |
 | `POST /members/me/grievances` | W |
@@ -96,8 +100,6 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/uan-activations` | M |
 | `POST /members/uan-allotments` | M |
 | `GET /members/me/annual-statements/{financialYear}` | P |
-| `GET /members/me/claims/eligibility-preview` | P |
-| `GET /members/me/claims/{claimId}/audit-trail` | P |
 | `GET /members/me/higher-pension-options/{optionId}` | P |
 | `GET /members/me/nominations` | P |
 | `GET /members/me/tax/form-16a` | P |
@@ -105,8 +107,6 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/transfers/auto` | P |
 | `POST /grievances/{grievanceId}/feedback` | P |
 | `POST /grievances/{grievanceId}/reminders` | P |
-| `POST /members/me/claims/{claimId}/cancellations` | P |
-| `POST /members/me/claims/{claimId}/documents` | P |
 | `POST /members/me/higher-pension-options` | P |
 | `POST /members/me/nominations` | P |
 | `POST /members/me/transfers/auto/{transferId}/confirmations` | P |
@@ -390,8 +390,12 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/accounts/inoperative` | W |
 | `GET /office/cases/{caseId}` | W |
+| `GET /office/claims/{claimId}/additional-forms` | W |
+| `GET /office/claims/{claimId}/audit-trail` | W |
 | `GET /office/member-change-requests` | W |
+| `GET /office/members/{uan}` | W |
 | `GET /office/pension-claims` | W |
 | `GET /office/transfers` | W |
 | `GET /office/work-queue` | W |
@@ -402,11 +406,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /office/member-change-requests/{requestId}/recommendations` | W |
 | `POST /office/pension-claims/{claimId}/input-data-sheets` | W |
 | `POST /office/transfers/{transferId}/verifications` | W |
-| `GET /office/accounts/inoperative` | P |
 | `GET /office/annexure-k-files` | P |
-| `GET /office/claims/{claimId}/additional-forms` | P |
-| `GET /office/claims/{claimId}/audit-trail` | P |
-| `GET /office/members/{uan}` | P |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | P |
 | `POST /office/annexure-k-files/{annexureId}/reconciliations` | P |
 | `POST /office/annexure-k-files/{annexureId}/vdr-reconciliations` | P |
@@ -481,9 +481,9 @@ Activities: **F04.cad** Generate the Claim Authorization Document (interest spli
 
 | Endpoint | Status |
 |---|---|
-| `GET /office/claims/{claimId}/cad` | P |
-| `GET /office/system/cad-static-data` | P |
-| `POST /office/claims/{claimId}/cad` | P |
+| `GET /office/claims/{claimId}/cad` | W |
+| `GET /office/system/cad-static-data` | W |
+| `POST /office/claims/{claimId}/cad` | W |
 
 #### `fo.apfc` — APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)
 
@@ -535,12 +535,12 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | Endpoint | Status |
 |---|---|
 | `GET /monitoring/claims` | W |
+| `GET /office/accounts/inoperative` | W |
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/members/{uan}/defreezes` | W |
-| `GET /office/accounts/inoperative` | P |
 | `GET /office/members/{uan}/locks` | P |
 | `POST /audit/concurrent/alerts/{alertId}/replies` | P |
 | `POST /audit/internal/paras/{paraId}/replies` | P |
@@ -555,13 +555,14 @@ Activities: **F03.receipts** Handle cheques / DDs and receipts outside the onlin
 | Endpoint | Status |
 |---|---|
 | `GET /office/cases/{caseId}` | W |
+| `GET /office/payment-scrolls/ready` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/claims/{claimId}/payment-instructions` | W |
 | `POST /office/claims/{claimId}/reissues` | W |
+| `POST /office/payment-scrolls` | W |
+| `POST /office/payment-scrolls/{scrollId}/return-reconciliations` | W |
 | `GET /office/receipts/unreconciled` | P |
 | `POST /office/ecr-filings/{filingId}/payment-rejections` | P |
-| `POST /office/payment-scrolls` | P |
-| `POST /office/payment-scrolls/{scrollId}/return-reconciliations` | P |
 | `POST /office/vdr-entries` | ? |
 
 Integration adapters: `collecting_bank`
@@ -806,8 +807,8 @@ Activities: **F12.concurrent** Download daily functionality data from the Audit 
 |---|---|
 | `GET /audit/correlations/{correlationId}` | W |
 | `GET /audit/events` | W |
+| `GET /office/claims/{claimId}/audit-trail` | W |
 | `GET /audit/concurrent/extracts` | P |
-| `GET /office/claims/{claimId}/audit-trail` | P |
 | `POST /audit/concurrent/alerts` | P |
 
 #### `zo.internal_audit` — Internal audit parties auditing ROs

@@ -36,6 +36,15 @@ employments = Table(
     Column("transferred_to", String(40)),                   # from TransferPosted.v1 (Form 13)
     Column("form11", JSON),                                 # the new joinee's declaration (previous PF / EPS, international worker)
     Column("registered_by", String(80)),                    # the employer user who registered the joinee (none for seeded rows)
+    Column("office_id", String(40)),                        # the field office of the establishment (jurisdiction)
+)
+
+# Office postings (synthetic seed): an officer sees members of their own office only (member 360 view).
+office_staff = Table(
+    "office_staff", metadata,
+    Column("subject", String(80), primary_key=True),
+    Column("stakeholder", String(60), nullable=False),
+    Column("office_id", String(40), nullable=False),
 )
 
 # KYC seeded by the member (or uploaded in bulk by the employer): checked by a mock verifier (UIDAI / NSDL /

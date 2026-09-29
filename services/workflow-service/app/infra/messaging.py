@@ -88,6 +88,8 @@ async def on_claim_state(session: AsyncSession, event: dict[str, Any]) -> None:
         await _set(session, case, state="PAYMENT_RETURNED", current_role="fo.cash")
     elif to == "PAYMENT_RETURNED" and p["from_state"] == "CORRECTION_PENDING":
         await _set(session, case, state="RETURNED_AWAITING_MEMBER", current_role=None)
+    elif to == "CANCELLED":                                     # the member withdrew it before a checker decided
+        await _set(session, case, state="CLOSED", current_role=None, data={**(case["data"] or {}), "closed": "cancelled by the member"})
 
 
 async def _set(session: AsyncSession, case: dict[str, Any], **values: Any) -> None:

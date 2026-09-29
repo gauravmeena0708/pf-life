@@ -267,7 +267,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 |---|---|---|---|---|
 | `GET /members/me/claims/eligible-types` | Available claim types with rule version and reasons (Journey B3) | W | 1 | claim |
 | `POST /members/me/claims` 💰 (`formType=FORM_31`) | **Advance / partial withdrawal** (purpose as sub-type) | W | 1 | claim |
-| `POST /members/me/claims` 💰 (`formType=FORM_19`) | **Final PF settlement** | P | 2 | claim |
+| `POST /members/me/claims` 💰 (`formType=FORM_19`) | **Final PF settlement** | W | 1 | claim |
 | `POST /members/me/claims` 💰 (`formType=FORM_10C`) | **Pension withdrawal benefit** (cash benefit) | P | 2 | claim |
 | `POST /members/me/pension-scheme-certificates` 🔐 | **Scheme certificate** request (Form 10C option) | W | 1 | pension |
 | `POST /members/me/pension-applications` 💰 (`formType=FORM_10D`) | **Monthly pension** application | W | 1 | pension |
@@ -277,8 +277,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /members/me/claims` | List own claims | W | 1 | claim |
 | `GET /members/me/claims/{claimId}` | Claim detail + timeline (Journey B7) | W | 1 | claim |
 | `POST /members/me/claims/{claimId}/confirmations` 🔐 | Transaction-intent confirmation (Journey B3) | W | 1 | claim |
-| `POST /members/me/claims/{claimId}/cancellations` 🔐 | **Cancel** an unsettled claim (renamed from `…/withdrawals`; allowed only before a checker decision — see `ClaimStateMachine` in `claim-service.yaml`) | P | 2 | claim |
-| `POST /members/me/claims/{claimId}/documents` | Upload supporting document (object store, scanned) | P | 2 | claim |
+| `POST /members/me/claims/{claimId}/cancellations` 🔐 | **Cancel** an unsettled claim (renamed from `…/withdrawals`; allowed only before a checker decision — see `ClaimStateMachine` in `claim-service.yaml`) | W | 1 | claim |
+| `POST /members/me/claims/{claimId}/documents` | Upload supporting document (PDF / JPEG / PNG up to 1 MB, content checked, SHA-256 kept; stored by claim-service in the POC in place of the object store) | W | 1 | claim |
 
 **Death and EDLI (claimant ≠ member)**
 
@@ -313,8 +313,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `GET /members/me/claims/eligibility-preview?formType=` | **Pre-flight:** evaluate one form type before filing — eligible or not, blockers from account status, maximum amount, required documents, rule version | P | 2 | claim |
-| `GET /members/me/claims/{claimId}/audit-trail` | **Post-submission:** member's view of every state change on own claim (time, state, role, reason; officer names withheld) | P | 2 | claim |
+| `GET /members/me/claims/eligibility-preview?formType=` | **Pre-flight:** evaluate one form type before filing — eligible or not, blockers from account status, maximum amount, required documents, rule version | W | 1 | claim |
+| `GET /members/me/claims/{claimId}/audit-trail` | **Post-submission:** member's view of every state change on own claim (time, state, role, reason; officer names withheld) | W | 1 | claim |
 | `PUT /members/me/claims/{claimId}/bank-details` 🔐 | **Post-submission:** switch a claim not yet in payment to another **KYC-verified** bank account of the member (after a return, use `…/re-disbursement-requests`) | P | 2 | claim |
 
 ## 8. Office claim processing and member accounts
@@ -329,16 +329,17 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/cases/{caseId}/second-approvals` 🔐 | Dual control for high-value / high-risk cases | W | 1 | workflow |
 | `POST /office/claims/{claimId}/payment-instructions` 💰🔐 | Settlement payment instruction → `PaymentInstructed.v1` (Journey B6) | W | 1 | claim |
 | `POST /office/claims/{claimId}/reissues` 💰🔐 | Re-issue after bank return (Journey B6) | W | 1 | claim |
-| `POST /office/payment-scrolls` 💰🔐 | Batch approved settlements into a payment scroll → `PaymentScrollGenerated.v1` | P | 2 | claim |
-| `POST /office/payment-scrolls/{scrollId}/return-reconciliations` 💰🔐 | Reconcile a bank return scroll, open re-settlement cases | P | 2 | claim |
+| `GET /office/payment-scrolls/ready` | Approved claims of the office ready for the next payment scroll (ledger debit posted, account not frozen), with the total | W | 1 | claim |
+| `POST /office/payment-scrolls` 💰🔐 | Batch approved settlements into a payment scroll → `PaymentScrollGenerated.v1` | W | 1 | claim |
+| `POST /office/payment-scrolls/{scrollId}/return-reconciliations` 💰🔐 | Reconcile a bank return scroll, open re-settlement cases | W | 1 | claim |
 | `POST /office/physical-claims` | **Physical claim intake**: register a paper claim, scan, data entry | P | 2 | claim |
 | `POST /office/physical-claims/{intakeId}/identity-validations` | UAN allocation / Aadhaar validation before settlement (mock) | P | 2 | member |
-| `GET /office/members/{uan}` | Member 360 view (jurisdiction + purpose checked, audited) | P | 2 | member |
+| `GET /office/members/{uan}` | Member 360 view (jurisdiction + purpose checked, audited) | W | 1 | member |
 | `POST /office/members/{uan}/freezes` 🔐 | **UAN / member-ID freeze** with reason and evidence (tier-2 process `member_freeze`) | W | 1 | member |
 | `POST /office/members/{uan}/defreezes` 🔐 | De-freeze, maker-checker (tier-2 process `member_freeze`) | W | 1 | member |
 | `POST /office/accounts/interest-postings` 💰🔐 | Annual interest crediting run (illustrative rate) | W | 1 | contribution |
 | `GET /office/accounts/interest-postings?financialYear=` | Interest run preview: the rate in the rule set in force, interest due per account (monthly running balance), already credited, the difference to credit, and earlier runs | W | 1 | contribution |
-| `GET /office/accounts/inoperative` | **Inoperative account** identification | P | 2 | contribution |
+| `GET /office/accounts/inoperative` | **Inoperative account** identification | W | 1 | contribution |
 | `POST /office/accounts/{accountLinkId}/reactivations` 🔐 | Inoperative account reactivation | P | 3 | contribution |
 | `POST /office/tds/computations` | TDS on withdrawal (illustrative rules) | P | 3 | claim |
 
@@ -363,9 +364,9 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `POST /office/claims/{claimId}/cad` 💰🔐 | Generate the **Claim Authorization Document (CAD)**: interest split, TDS and net payable, with the rule and static-data versions used | P | 2 | claim |
-| `GET /office/claims/{claimId}/cad` | View the generated CAD | P | 2 | claim |
-| `GET /office/system/cad-static-data` | Diagnostic view of CAD static reference data (interest tables, bank branch master) and its version (tracker: "Failed to load CAD static Data") | P | 2 | claim |
+| `POST /office/claims/{claimId}/cad` 💰🔐 | Generate the **Claim Authorization Document (CAD)**: interest split, TDS and net payable, with the rule and static-data versions used | W | 1 | claim |
+| `GET /office/claims/{claimId}/cad` | View the generated CAD | W | 1 | claim |
+| `GET /office/system/cad-static-data` | Diagnostic view of CAD static reference data (interest tables, bank branch master) and its version (tracker: "Failed to load CAD static Data") | W | 1 | claim |
 | `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` 🔐 | Amend a beneficiary's share (nominee deceased, court order, share already settled in legacy, guardian appointment) | P | 2 | claim |
 | `GET /office/death-claims/{claimId}/shares-summary` | Allocated vs legacy-settled vs disbursed vs pending share of a death claim | P | 2 | claim |
 | `POST /office/claims/{claimId}/re-disbursement-approvals` 💰🔐 | APFC authorises a new payment after a return, without reopening adjudication | W | 1 | claim |
@@ -378,8 +379,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `GET /office/claims/{claimId}/audit-trail` | Full claim audit trail for officers and auditors: transitions, actor IDs, approval level, rule version, lock events, CAD versions | P | 2 | claim |
-| `GET /office/claims/{claimId}/additional-forms` | **Additional Form Details** — forms filed with a claim (e.g. a Joint Declaration): filed / initiated dates, processing status, rejection reason, pending office | P | 2 | claim |
+| `GET /office/claims/{claimId}/audit-trail` | Full claim audit trail for officers and auditors: transitions, actor IDs, approval level, rule version, lock events, CAD versions | W | 1 | claim |
+| `GET /office/claims/{claimId}/additional-forms` | **Additional Form Details** — forms filed with a claim (e.g. a Joint Declaration): filed / initiated dates, processing status, rejection reason, pending office | W | 1 | claim |
 | `GET /office/annexure-k-files?direction=` | **ANNEXURE K FILE** — Annexure K inward / outward between field offices for Form 13 transfers | P | 2 | claim |
 | `POST /office/annexure-k-files/{annexureId}/reconciliations` 🔐 | **ANNEXURE K RECO** — match an inter-office Annexure K with the transfer and member records | P | 2 | claim |
 | `POST /office/annexure-k-files/{annexureId}/vdr-reconciliations` 🔐 | **ANNEXURE K VDR RECO** — match the Annexure K amount with the VDR receipt | P | 2 | contribution |

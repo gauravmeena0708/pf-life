@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 import epfo_auth
-from app.api import catalogue_routes, routes
+from app.api import catalogue_routes, lifecycle_routes, routes
 from app.config import settings
 from app.infra.db import database_ready, engine
 from app.infra.messaging import BINDINGS, dispatch
@@ -32,6 +32,7 @@ def create_app() -> FastAPI:
     epfo_auth.configure(audience=settings.service_name,
                         jwks=epfo_auth.JwksCache(settings.gateway_jwks_url))
     app.include_router(health_router(database_ready))
+    app.include_router(lifecycle_routes.router)       # first: /members/me/claims/eligibility-preview before /{claim_id}
     app.include_router(routes.router)
     handled = {(m, r.path) for r in app.router.routes for m in getattr(r, "methods", set())}
     for route in catalogue_routes.router.routes:

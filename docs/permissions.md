@@ -125,8 +125,10 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/accounts/{accountLinkId}/passbook` | W | self — caller's own member record only |  |
 | `GET /members/me/applications` | W | self — caller's own member record only |  |
 | `GET /members/me/claims` | W | self — caller's own member record only |  |
+| `GET /members/me/claims/eligibility-preview` | W | self — caller's own member record only |  |
 | `GET /members/me/claims/eligible-types` | W | self — caller's own member record only |  |
 | `GET /members/me/claims/{claimId}` | W | self — caller's own member record only |  |
+| `GET /members/me/claims/{claimId}/audit-trail` | W | self — caller's own member record only |  |
 | `GET /members/me/employment-history` | W | self — caller's own member record only |  |
 | `GET /members/me/grievances` | W | self — caller's own member record only |  |
 | `GET /members/me/identity-assurance` | W | self — caller's own member record only |  |
@@ -150,7 +152,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /grievances/{grievanceId}/reopen-requests` | W | complainant or the assigned office |  |
 | `POST /members/me/account-recovery-requests` | W | self — caller's own member record only | yes |
 | `POST /members/me/claims` | W | self — caller's own member record only |  |
+| `POST /members/me/claims/{claimId}/cancellations` | W | self — caller's own member record only | yes |
 | `POST /members/me/claims/{claimId}/confirmations` | W | self — caller's own member record only | yes |
+| `POST /members/me/claims/{claimId}/documents` | W | self — caller's own member record only |  |
 | `POST /members/me/claims/{claimId}/re-disbursement-requests` | W | self — caller's own member record only |  |
 | `POST /members/me/exits` | W | self — caller's own member record only | yes |
 | `POST /members/me/grievances` | W | self — caller's own member record only |  |
@@ -168,8 +172,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /members/uan-activations` | M | unauthenticated with OTP / face-auth proof |  |
 | `POST /members/uan-allotments` | M | unauthenticated with OTP / face-auth proof |  |
 | `GET /members/me/annual-statements/{financialYear}` | P | self — caller's own member record only |  |
-| `GET /members/me/claims/eligibility-preview` | P | self — caller's own member record only |  |
-| `GET /members/me/claims/{claimId}/audit-trail` | P | self — caller's own member record only |  |
 | `GET /members/me/higher-pension-options/{optionId}` | P | self — caller's own member record only |  |
 | `GET /members/me/nominations` | P | self — caller's own member record only |  |
 | `GET /members/me/tax/form-16a` | P | self — caller's own member record only |  |
@@ -177,8 +179,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/transfers/auto` | P | self — caller's own member record only |  |
 | `POST /grievances/{grievanceId}/feedback` | P | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/reminders` | P | complainant or the assigned office |  |
-| `POST /members/me/claims/{claimId}/cancellations` | P | self — caller's own member record only | yes |
-| `POST /members/me/claims/{claimId}/documents` | P | self — caller's own member record only |  |
 | `POST /members/me/higher-pension-options` | P | self — caller's own member record only | yes |
 | `POST /members/me/nominations` | P | self — caller's own member record only | yes |
 | `POST /members/me/transfers/auto/{transferId}/confirmations` | P | self — caller's own member record only | yes |
@@ -412,8 +412,12 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /office/accounts/inoperative` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/claims/{claimId}/additional-forms` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/claims/{claimId}/audit-trail` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/member-change-requests` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/members/{uan}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/pension-claims` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/transfers` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
@@ -424,11 +428,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/member-change-requests/{requestId}/recommendations` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/pension-claims/{claimId}/input-data-sheets` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/transfers/{transferId}/verifications` | W | office jurisdiction of the caller's posting |  |
-| `GET /office/accounts/inoperative` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/annexure-k-files` | P | office jurisdiction of the caller's posting |  |
-| `GET /office/claims/{claimId}/additional-forms` | P | office jurisdiction of the caller's posting |  |
-| `GET /office/claims/{claimId}/audit-trail` | P | office jurisdiction of the caller's posting |  |
-| `GET /office/members/{uan}` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/annexure-k-files/{annexureId}/reconciliations` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/annexure-k-files/{annexureId}/vdr-reconciliations` | P | office jurisdiction of the caller's posting | yes |
@@ -493,9 +493,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /office/claims/{claimId}/cad` | P | office jurisdiction of the caller's posting |  |
-| `GET /office/system/cad-static-data` | P | office jurisdiction of the caller's posting |  |
-| `POST /office/claims/{claimId}/cad` | P | office jurisdiction of the caller's posting | yes |
+| `GET /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/system/cad-static-data` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting | yes |
 
 **`fo.apfc`** — APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)
 
@@ -541,12 +541,12 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /monitoring/claims` | W | role jurisdiction; aggregates with small-group suppression |  |
+| `GET /office/accounts/inoperative` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/cases/{caseId}/second-approvals` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/members/{uan}/defreezes` | W | office jurisdiction of the caller's posting | yes |
-| `GET /office/accounts/inoperative` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/members/{uan}/locks` | P | office jurisdiction of the caller's posting |  |
 | `POST /audit/concurrent/alerts/{alertId}/replies` | P | read-only for auditors; audit writes by audit roles only |  |
 | `POST /audit/internal/paras/{paraId}/replies` | P | read-only for auditors; audit writes by audit roles only |  |
@@ -559,13 +559,14 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/payment-scrolls/ready` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/claims/{claimId}/payment-instructions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/claims/{claimId}/reissues` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/payment-scrolls` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/payment-scrolls/{scrollId}/return-reconciliations` | W | office jurisdiction of the caller's posting | yes |
 | `GET /office/receipts/unreconciled` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/ecr-filings/{filingId}/payment-rejections` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/payment-scrolls` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/payment-scrolls/{scrollId}/return-reconciliations` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/vdr-entries` | ? | office jurisdiction of the caller's posting | yes |
 
 **`fo.diary`** — Diary / Receipt section (physical documents, inter-section diary)
@@ -766,8 +767,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /audit/correlations/{correlationId}` | W | read-only for auditors; audit writes by audit roles only |  |
 | `GET /audit/events` | W | read-only for auditors; audit writes by audit roles only |  |
+| `GET /office/claims/{claimId}/audit-trail` | W | office jurisdiction of the caller's posting |  |
 | `GET /audit/concurrent/extracts` | P | read-only for auditors; audit writes by audit roles only |  |
-| `GET /office/claims/{claimId}/audit-trail` | P | office jurisdiction of the caller's posting |  |
 | `POST /audit/concurrent/alerts` | P | read-only for auditors; audit writes by audit roles only |  |
 
 **`zo.internal_audit`** — Internal audit parties auditing ROs

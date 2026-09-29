@@ -22,6 +22,7 @@ import { RegistrationPage } from "./features/employer/RegistrationPage";
 import { MemberActionsPage } from "./features/employer/MemberActionsPage";
 import { WorkQueuePage } from "./features/office/WorkQueuePage";
 import { CasePage } from "./features/office/CasePage";
+import { ClaimToolsPage } from "./features/office/ClaimToolsPage";
 import { GrievanceDetailPage } from "./features/grievance/GrievanceDetailPage";
 import { GrievanceOfficePage } from "./features/grievance/GrievanceOfficePage";
 import { GrievancesPage } from "./features/grievance/GrievancesPage";
@@ -105,6 +106,7 @@ export function App() {
             <Route path="/member/kyc" element={<KycPage />} />
             <Route path="/member/pension" element={<PensionApplicationPage />} />
             <Route path="/office/pension-claims" element={<PensionClaimsPage />} />
+            <Route path="/office/claim-tools" element={<ClaimToolsPage />} />
             <Route path="/cpps" element={<CppsPage />} />
             <Route path="/member/uan-card" element={<UanCardPage />} />
             <Route path="/employer/registration" element={<RegistrationPage />} />

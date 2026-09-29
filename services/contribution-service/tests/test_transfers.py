@@ -70,3 +70,20 @@ def test_interest_on_a_transferred_member_id_is_credited_where_the_money_went(ct
     assert interest and "earned on AL-0008, transferred" in interest[0]["description"]
     again = client.get("/api/v1/office/accounts/interest-postings?financialYear=2025-26", headers=hdr(finance, "ho.fa_cao", [], establishment=None)).json()["data"]
     assert next(a for a in again["accounts"] if a["account_link_id"] == "AL-0008")["to_credit_paise"] == 0   # not credited twice
+
+
+def test_an_account_without_credit_for_three_years_is_inoperative(ctx):
+    client, q = ctx
+    da = hdr(SEED["keycloak_subjects"]["do-caseworker"], "fo.da_accounts", [], establishment=None)
+    assert client.get("/api/v1/office/accounts/inoperative", headers=da).json()["data"]["accounts"] == []   # the demo balances are recent
+    import asyncio
+    import app.infra.db as db
+    from sqlalchemy import text as t
+
+    async def backdate():
+        async with db.engine().begin() as c:
+            await c.execute(t("UPDATE journals SET occurred_at='2020-03-31 23:59:59' WHERE business_key='OPENING-AL-0002'"))
+    asyncio.run(backdate())
+    found = client.get("/api/v1/office/accounts/inoperative", headers=da).json()["data"]["accounts"]
+    assert [a["account_link_id"] for a in found] == ["AL-0002"] and found[0]["last_credit"] == "2020-03-31"
+    assert client.get("/api/v1/office/accounts/inoperative", headers=hdr(MEMBER_D, "member", [], establishment=None)).status_code == 403

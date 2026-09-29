@@ -37,13 +37,13 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `LedgerReversed.v1` | contribution | claim, reporting, audit | ledger_journal | 1 |
 | `InterestCredited.v1` | contribution | claim, reporting, audit | interest_run | 1 |
 | `TaxDeducted.v1` | claim | contribution, reporting, audit | claim | 1 |
-| `PaymentScrollGenerated.v1` | claim | payment-simulator, audit | payment_scroll | 2 (contract only) |
+| `PaymentScrollGenerated.v1` | claim | payment-simulator, audit | payment_scroll | 1 |
 | `MemberChangeApproved.v1` | member | contribution, claim, reporting, audit | member_change_request | 1 |
 | `AccountFrozen.v1` | member | gateway, claim, audit | account | 1 |
 | `AccountDefrozen.v1` | member | gateway, claim, audit | account | 1 |
 | `PpoIssued.v1` | pension | member, reporting, audit | pension_claim | 2 (contract only) |
 | `LifeCertificateRecorded.v1` | pension | reporting, audit | pensioner | 2 (contract only) |
-| `CADGenerated.v1` | claim | contribution, payment-simulator, audit | claim | 2 (contract only) |
+| `CADGenerated.v1` | claim | contribution, payment-simulator, audit | claim | 1 |
 | `BeneficiaryShareAmended.v1` | claim | reporting, audit | claim | 2 (contract only) |
 | `SupplementaryClaimEligible.v1` | contribution | member, claim, audit | ledger_journal | 2 (contract only) |
 | `LockReleased.v1` | workflow | audit, reporting | ledger_lock | 2 (contract only) |
