@@ -9,7 +9,7 @@ from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.infra.db import sessions
-from app.infra.tables import accounts, office_staff
+from app.infra.tables import accounts, nominations, office_staff
 
 SEED_FILE = os.getenv("SEED_FILE", "/srv/seed/synthetic.json")
 
@@ -38,7 +38,13 @@ async def main() -> None:
                 date_of_joining=date.fromisoformat(m["date_of_joining"]),
                 date_of_exit=date.fromisoformat(m["date_of_exit"]) if m.get("date_of_exit") else None,
                 employee_paise=balance.get("employee_paise", 0), employer_paise=balance.get("employer_paise", 0),
-                pan_verified=m["kyc"]["pan"] == "VERIFIED"))
+                pan_verified=m["kyc"]["pan"] == "VERIFIED",
+                deceased_on=date.fromisoformat(m["deceased_on"]) if m.get("deceased_on") else None))
+        for m in seed["members"]:                                 # nominations on record (e-nomination is planned)
+            for i, n in enumerate(m.get("nominations", []), start=1):
+                await session.execute(insert(nominations).values(
+                    nomination_id=f"NOM-{m['uan']}-{i}", uan=m["uan"], name=n["name"], relation=n["relation"], share_bp=n["share_bp"],
+                    subject=n.get("subject"), bank_ifsc=n.get("bank_ifsc"), bank_account_last4=n.get("bank_account_last4")).on_conflict_do_nothing())
         for s in seed.get("office_staff", []):
             await session.execute(insert(office_staff).values(subject=s["subject"], stakeholder=s["stakeholder"],
                                                               office_id=s["office_id"]).on_conflict_do_nothing())

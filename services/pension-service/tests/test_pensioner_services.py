@@ -93,3 +93,21 @@ def test_public_enquiries_disclose_little(ctx):
     assert status["pension_status"] == "Active" and status["life_certificate_due"] == "2026-08-31"
     lc = client.post("/api/v1/public/pension/life-certificate-lookups", json={"ppo_id": "PPO-DEMO-0002"}, headers=anyone).json()["data"]
     assert lc == {"found": True, "state": "EXPIRED", "valid_till_month": "2026-08", "label": "SYNTHETIC_DEMO"}
+
+
+def test_a_pension_updation_inwarded_at_the_pro_counter_lands_on_the_tracker(ctx):
+    import asyncio
+    import uuid
+
+    import app.infra.db as db
+    from app.infra.messaging import dispatch
+    from epfo_persistence.consumer import apply_once
+    client, _, _ = ctx
+    payload = {"intake_id": "INW-0001", "form_type": "PHYSICAL_LC_UPDATION", "uan": "100000000001", "ppo_id": "PPO-DEMO-0002",
+               "office_id": "RO-DEMO-01", "filed_by": "PENSIONER", "details": {"certificate_signed_by": "Bank manager"}}
+    event = {"event_id": str(uuid.uuid4()), "event_type": "PhysicalClaimInwarded.v1", "producer": "claim-service",
+             "correlation_id": str(uuid.uuid4()), "payload": payload}
+    assert asyncio.run(apply_once(db.sessions(), event, dispatch))
+    asyncio.run(apply_once(db.sessions(), {**event, "event_id": str(uuid.uuid4())}, dispatch))       # re-sent: still one activity
+    new = client.get("/api/v1/office/pensions/updation-activities?status=NEW", headers=hdr(DA_P, "fo.da_pension")).json()["data"]
+    assert [(a["activity"], a["mode"], a["initiated_role"]) for a in new] == [("PHYSICAL_LC", "PHYSICAL", "fo.pro_intake")]

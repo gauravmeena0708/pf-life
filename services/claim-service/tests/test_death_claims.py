@@ -1,0 +1,102 @@
+"""Phase 2, slice 5b: death claims (Form 20 PF, Form 5IF EDLI) filed by a nominee, beneficiaries and their shares,
+and paper claims inwarded at the PRO counter."""
+from tests.test_claims_api import CASHIER, SUBJECTS, ctx, events, hdr  # noqa: F401
+
+CLAIMANT, APFC, PRO = SUBJECTS["claimant-a"], SUBJECTS["ro-apfc"], SUBJECTS["ro-pro-counter"]
+UAN = "100000000901"
+BALANCE = 40000000                                   # ₹4,00,000 opening balance of AL-0901
+
+
+def claimant(step_up=None):
+    return hdr(CLAIMANT, "claimant", step_up)
+
+
+def file(client, form="FORM_20", **extra):
+    body = {"form_type": form, "deceased_uan": UAN, **extra}
+    return client.post("/api/v1/claimants/death-claims", json=body,
+                       headers=claimant({"action": "file-death-claim", "resource_id": UAN}))
+
+
+def approve(deliver, claim_id):
+    base = {"case_id": "CASE-D", "claim_id": claim_id, "officer_subject": "x", "reason": None, "next_role": None}
+    deliver("CaseDecisionSubmitted.v1", {**base, "decision": "RECOMMEND", "officer_role": "fo.da_accounts", "approval_level": 0, "final": False}, "workflow-service")
+    deliver("CaseDecisionSubmitted.v1", {**base, "decision": "APPROVE", "officer_role": "fo.ao", "approval_level": 1, "final": True,
+                                         "reason": "Nomination in order"}, "workflow-service")
+
+
+def test_nominee_files_form_20_and_is_paid_in_shares(ctx):
+    client, q, deliver = ctx
+    body = {"form_type": "FORM_20", "deceased_uan": UAN}
+    assert client.post("/api/v1/claimants/death-claims", json=body, headers=claimant()).status_code == 428
+    r = file(client)
+    assert r.status_code == 201, r.json()
+    c = r.json()["data"]
+    assert (c["claim_type"], c["form_type"], c["amount_paise"], c["state"]) == ("DEATH_PF", "20", BALANCE, "UNDER_REVIEW")
+    assert [(b["name"], b["share_pct"]) for b in c["beneficiaries"]] == [("LAKSHMI DEMO", 60), ("ARJUN DEMO", 40)]
+    assert events(q, "ClaimSubmitted.v1")[0]["route"] == "REVIEW"
+    assert file(client).status_code == 409                                      # one Form 20 at a time
+    assert client.get(f"/api/v1/claimants/death-claims/{c['claim_id']}", headers=claimant()).json()["data"]["claim_id"] == c["claim_id"]
+    approve(deliver, c["claim_id"])
+    [decision] = events(q, "ClaimDecisionRecorded.v1")
+    assert decision["fund"] == "MEMBER_ACCOUNT" and decision["account_link_id"] == "AL-0901"
+    deliver("ClaimDebitPosted.v1", {"journal_id": "JD", "claim_id": c["claim_id"], "postings": [
+        {"account_code": "CLAIMS_PAYABLE", "side": "credit", "amount_paise": BALANCE}]}, "contribution-service")
+    step = {"action": "instruct-payment", "resource_id": c["claim_id"], "amount_paise": BALANCE}
+    paid = client.post(f"/api/v1/office/claims/{c['claim_id']}/payment-instructions", json={},
+                       headers=hdr(CASHIER, "fo.cash", step, **{"Idempotency-Key": "d1"}))
+    assert paid.status_code == 200, paid.json()
+    deliver("PaymentConfirmed.v1", {"payment_id": paid.json()["data"]["payment_id"], "purpose": "CLAIM_SETTLEMENT", "reference_type": "claim",
+                                    "reference_id": c["claim_id"], "amount_paise": BALANCE, "mock": True}, "payment-simulator")
+    summary = client.get(f"/api/v1/office/death-claims/{c['claim_id']}/shares-summary", headers=hdr(APFC, "fo.apfc")).json()["data"]
+    assert summary["state"] == "SETTLED" and [b["disbursed_paise"] for b in summary["beneficiaries"]] == [24000000, 16000000]
+
+
+def test_edli_is_worked_out_and_paid_from_the_edli_fund(ctx):
+    client, q, deliver = ctx
+    c = file(client, "FORM_5IF").json()["data"]
+    assert c["claim_type"] == "DEATH_EDLI" and c["amount_paise"] >= 25000000           # at least the assured minimum
+    approve(deliver, c["claim_id"])
+    assert events(q, "ClaimDecisionRecorded.v1")[0]["fund"] == "EDLI"
+
+
+def test_only_a_nominee_files_and_the_apfc_amends_shares_before_payment(ctx):
+    client, q, deliver = ctx
+    stranger = client.post("/api/v1/claimants/death-claims", json={"form_type": "FORM_20", "deceased_uan": UAN},
+                           headers=hdr(SUBJECTS["member-a"], "claimant", {"action": "file-death-claim", "resource_id": UAN}))
+    assert stranger.status_code == 404
+    c = file(client).json()["data"]
+    added = client.post(f"/api/v1/claimants/death-claims/{c['claim_id']}/beneficiaries",
+                        json={"name": "Meera Demo", "relation": "DAUGHTER"}, headers=claimant())
+    assert added.status_code == 201 and added.json()["data"]["beneficiaries"][2]["share_pct"] == 0
+    son, daughter = c["beneficiaries"][1]["beneficiary_id"], f"{c['claim_id']}-B3"
+    url = f"/api/v1/office/death-claims/{c['claim_id']}/beneficiaries"
+    body = {"share_bp": 3000, "reason": "COURT_ORDER", "note": "Succession certificate dated 2026-08-01"}
+    assert client.put(f"{url}/{daughter}/shares", json=body, headers=hdr(APFC, "fo.apfc")).status_code == 428
+    over = client.put(f"{url}/{daughter}/shares", json=body, headers=hdr(APFC, "fo.apfc", {"action": "amend-share", "resource_id": daughter}))
+    assert over.json()["type"] == "/problems/shares-exceed"                     # 60 + 40 + 30 > 100
+    approve(deliver, c["claim_id"])
+    assert client.put(f"{url}/{son}/shares", json={**body, "share_bp": 2000}, headers=hdr(APFC, "fo.apfc", {"action": "amend-share", "resource_id": son})).status_code == 200
+    deliver("ClaimDebitPosted.v1", {"journal_id": "JD2", "claim_id": c["claim_id"], "postings": [
+        {"account_code": "CLAIMS_PAYABLE", "side": "credit", "amount_paise": BALANCE}]}, "contribution-service")
+    step = {"action": "instruct-payment", "resource_id": c["claim_id"], "amount_paise": BALANCE}
+    blocked = client.post(f"/api/v1/office/claims/{c['claim_id']}/payment-instructions", json={},
+                          headers=hdr(CASHIER, "fo.cash", step, **{"Idempotency-Key": "d2"}))
+    assert blocked.json()["type"] == "/problems/shares-incomplete"             # 60 + 20 + 0 = 80 %
+    fixed = client.put(f"{url}/{daughter}/shares", json={**body, "share_bp": 2000},
+                       headers=hdr(APFC, "fo.apfc", {"action": "amend-share", "resource_id": daughter})).json()["data"]
+    assert fixed["payable"] is True and fixed["shares_total_pct"] == 100
+    amended = events(q, "BeneficiaryShareAmended.v1")
+    assert [(e["previous_share_bp"], e["new_share_bp"]) for e in amended] == [(4000, 2000), (0, 2000)]
+
+
+def test_pro_counter_inwards_paper_claims_and_pension_updations(ctx):
+    client, q, _ = ctx
+    body = {"form_type": "FORM_19", "uan": "100000000001", "filed_by": "MEMBER", "details": {"pages": 3}}
+    assert client.post("/api/v1/office/physical-claims", json=body, headers=hdr(SUBJECTS["member-a"], "member")).status_code == 403
+    r = client.post("/api/v1/office/physical-claims", json=body, headers=hdr(PRO, "fo.pro_intake"))
+    assert r.status_code == 201 and r.json()["data"]["state"] == "INWARDED"
+    lc = {"form_type": "PHYSICAL_LC_UPDATION", "uan": "100000000001", "filed_by": "PENSIONER"}
+    assert client.post("/api/v1/office/physical-claims", json=lc, headers=hdr(PRO, "fo.pro_intake")).status_code == 422   # needs the PPO
+    routed = client.post("/api/v1/office/physical-claims", json={**lc, "ppo_id": "PPO-DEMO-1"}, headers=hdr(PRO, "fo.pro_intake")).json()["data"]
+    assert routed["state"] == "ROUTED"
+    assert [e["form_type"] for e in events(q, "PhysicalClaimInwarded.v1")] == ["FORM_19", "PHYSICAL_LC_UPDATION"]

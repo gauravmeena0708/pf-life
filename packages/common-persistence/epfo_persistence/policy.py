@@ -214,6 +214,20 @@ def pension_on(salary_paise: int, service_months: int, age_years: int, rules: di
             "minimum_applied": monthly > by_formula, "working": working}
 
 
+def edli_benefit(average_wages_paise: int, average_balance_paise: int, service_months: int, rules: dict[str, Any]) -> dict[str, Any]:
+    """EDLI assurance benefit on a member's death (illustrative formula from the rules)."""
+    e = section(rules, "death_claims")["edli"]
+    wages = min(average_wages_paise, section(rules, "contribution").get("edli_wage_ceiling_paise", average_wages_paise)) \
+        if isinstance(rules.get("contribution"), dict) else average_wages_paise
+    bonus = min(average_balance_paise * e["average_balance_share_bp"] // 10_000, e["balance_bonus_cap_paise"])
+    raw = wages * e["wage_multiplier"] + bonus
+    floor = e["minimum_paise"] if service_months >= e["minimum_needs_service_months"] else 0
+    amount = max(min(raw, e["maximum_paise"]), floor)
+    return {"amount_paise": amount, "working": (f"₹{wages // 100:,} x {e['wage_multiplier']} + ₹{bonus // 100:,} (balance share) = ₹{raw // 100:,}"
+                                                f"{'; capped at the maximum' if raw > e['maximum_paise'] else ''}"
+                                                f"{'; raised to the minimum' if raw < floor else ''}")}
+
+
 # ── checks before publishing ─────────────────────────────────────────────────────────────────────
 
 def _bands_problems(bands: Any, where: str) -> list[str]:
@@ -281,6 +295,14 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
                 problems.append(f"tds.{key} must be a non-negative whole number")
         if not isinstance(t.get("form_15g_15h_waiver"), bool):
             problems.append("tds.form_15g_15h_waiver must be true or false")
+    if "death_claims" in document:
+        e = ((document["death_claims"] or {}).get("edli")) or {}
+        for key, (low, high) in {"wage_multiplier": (1, 100), "average_balance_share_bp": (0, 10000), "balance_bonus_cap_paise": (0, None),
+                                 "minimum_paise": (0, None), "maximum_paise": (1, None), "minimum_needs_service_months": (0, 120)}.items():
+            if not _whole(e.get(key), low, high):
+                problems.append(f"death_claims.edli.{key} must be a whole number" + (f" between {low} and {high}" if high else f" of at least {low}"))
+        if _whole(e.get("minimum_paise"), 0) and _whole(e.get("maximum_paise"), 0) and e["minimum_paise"] > e["maximum_paise"]:
+            problems.append("death_claims.edli.minimum_paise cannot exceed the maximum")
     if "pension" in document:
         p = document["pension"] or {}
         checks = {"divisor": (1, 1000), "salary_months": (1, 120), "pensionable_salary_cap_paise": (100, None),

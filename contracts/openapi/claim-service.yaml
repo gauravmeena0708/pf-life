@@ -22,15 +22,22 @@ paths:
       - $ref: '#/components/parameters/CorrelationId'
       - $ref: '#/components/parameters/IdempotencyKey'
       - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: claim
       x-callers:
       - claimant
@@ -39,15 +46,15 @@ paths:
       - bffSession: []
       x-variants:
       - formType: FORM_20
-        status: P
-        phase: 2
+        status: W
+        phase: 1
       - formType: FORM_5IF
-        status: P
-        phase: 2
+        status: W
+        phase: 1
       - formType: CCF_DEATH
         status: P
         phase: 3
-      description: 'Variants by `formType`: `FORM_20` (P, phase 2); `FORM_5IF` (P, phase 2); `CCF_DEATH` (P, phase 3)'
+      description: 'Variants by `formType`: `FORM_20` (W, phase 1); `FORM_5IF` (W, phase 1); `CCF_DEATH` (P, phase 3)'
       requestBody:
         required: false
         content:
@@ -69,12 +76,6 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
         '200':
           description: Composite death claim with each beneficiary's share and payment status
           content:
@@ -86,8 +87,18 @@ paths:
                   properties:
                     data:
                       $ref: '#/components/schemas/DeathClaimRecord'
-      x-status: planned
-      x-phase: 2
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: claim
       x-callers:
       - claimant
@@ -111,12 +122,6 @@ paths:
       - $ref: '#/components/parameters/IdempotencyKey'
       - $ref: '#/components/parameters/IfMatch'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
         '201':
           description: Beneficiary registered on the claim
           content:
@@ -128,16 +133,25 @@ paths:
                   properties:
                     data:
                       $ref: '#/components/schemas/BeneficiaryRecord'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
         '409':
           description: Proposed share would take the allocated total above 100%
           content:
             application/problem+json:
               schema:
                 $ref: '#/components/schemas/Problem'
-      x-status: planned
-      x-phase: 2
+      x-status: working
+      x-phase: 1
       x-owner-service: claim
       x-callers:
+      - claimant
       - claimant.nominee
       x-scope: self — claimant's own claims only
       security:
@@ -1426,12 +1440,6 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
         '200':
           description: Share amended; summary rebalanced
           content:
@@ -1443,8 +1451,18 @@ paths:
                   properties:
                     data:
                       $ref: '#/components/schemas/SharesSummary'
-      x-status: planned
-      x-phase: 2
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: claim
       x-callers:
       - fo.apfc
@@ -1471,12 +1489,6 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
         '200':
           description: Share summary of the death claim
           content:
@@ -1488,8 +1500,18 @@ paths:
                   properties:
                     data:
                       $ref: '#/components/schemas/SharesSummary'
-      x-status: planned
-      x-phase: 2
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: claim
       x-callers:
       - fo.apfc
@@ -1694,14 +1716,20 @@ paths:
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: claim
       x-callers:
       - fo.diary

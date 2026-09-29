@@ -6,6 +6,7 @@ import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
+import { SharesSection } from "../claimant/DeathClaimPages";
 
 type Json = Record<string, unknown>;
 const text = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
@@ -88,7 +89,7 @@ export function ClaimToolsPage() {
   return (
     <section className="stack" aria-labelledby="claim-tools-heading">
       <PageHeader id="claim-tools-heading" eyebrow="Regional office" title="Claim office tools" current="Claim tools"
-        description="Claim Authorization Document, payment scrolls, member 360 view, inoperative accounts and claim audit trails." />
+        description="Claim Authorization Document, payment scrolls, member 360 view, inoperative accounts, claim audit trails and death-claim shares." />
       <ProblemMessage error={error} />
       {notice ? <p role="status" className="ok">{notice}</p> : null}
 
@@ -129,6 +130,7 @@ export function ClaimToolsPage() {
           {trail ? <Facts data={trail} /> : null}
         </form> : null}
       </> : null}
+      {role === "fo.apfc" ? <SharesSection /> : null}
       <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
     </section>
   );

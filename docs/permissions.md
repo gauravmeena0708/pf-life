@@ -229,15 +229,16 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /claimants/death-claims/{claimId}` | P | self — claimant's own claims only |  |
-| `POST /claimants/death-claims` | P | self — claimant's own claims only |  |
+| `GET /claimants/death-claims/{claimId}` | W | self — claimant's own claims only |  |
+| `POST /claimants/death-claims` | W | self — claimant's own claims only | yes |
+| `POST /claimants/death-claims/{claimId}/beneficiaries` | W | self — claimant's own claims only |  |
 
 **`claimant.nominee`** — Co-beneficiary on a multi-beneficiary death claim (PF / EDLI / pension) holding an allocated percentage share, including shares already settled in the legacy system
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /claimants/death-claims/{claimId}` | P | self — claimant's own claims only |  |
-| `POST /claimants/death-claims/{claimId}/beneficiaries` | P | self — claimant's own claims only |  |
+| `GET /claimants/death-claims/{claimId}` | W | self — claimant's own claims only |  |
+| `POST /claimants/death-claims/{claimId}/beneficiaries` | W | self — claimant's own claims only |  |
 
 **`intl_worker`** — International worker (inbound or outbound, CoC holder)
 
@@ -427,6 +428,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/member-change-requests/{requestId}/recommendations` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/pension-claims/{claimId}/input-data-sheets` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/physical-claims/{intakeId}/identity-validations` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/transfers/{transferId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/annexure-k-files` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | P | office jurisdiction of the caller's posting |  |
@@ -437,7 +439,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/ledger-journals/{journalId}/reversals` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/pensions/higher-pension-options/{optionId}/ledger-transfers` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/physical-claims/{intakeId}/identity-validations` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/receipts/{receiptId}/trrn-adjustments` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/tds/computations` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/transfers/{transferId}/recredits` | P | office jurisdiction of the caller's posting | yes |
@@ -502,13 +503,14 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/death-claims/{claimId}/shares-summary` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/cases/{caseId}/second-approvals` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/claims/{claimId}/re-disbursement-approvals` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/member-change-requests/{requestId}/decisions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/members/{uan}/freezes` | W | office jurisdiction of the caller's posting | yes |
-| `GET /office/death-claims/{claimId}/shares-summary` | P | office jurisdiction of the caller's posting |  |
+| `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/cases/{caseId}/escaped-assessments-7c` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/cases/{caseId}/hearings` | P | office jurisdiction of the caller's posting |  |
@@ -522,7 +524,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/establishment-registrations/{reqId}/coverage-decisions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` | P | office jurisdiction of the caller's posting | yes |
-| `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | P | office jurisdiction of the caller's posting | yes |
 | `GET /office/ecr-filings` | ? | office jurisdiction of the caller's posting |  |
 | `POST /office/ecr-filings/{filingId}/approvals` | ? | office jurisdiction of the caller's posting | yes |
 | `POST /office/ledger-adjustments/{adjustmentId}/approvals` | ? | office jurisdiction of the caller's posting | yes |
@@ -573,14 +574,14 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `POST /office/physical-claims` | P | office jurisdiction of the caller's posting |  |
+| `POST /office/physical-claims` | W | office jurisdiction of the caller's posting |  |
 
 **`fo.pro_intake`** — PRO counter inwarding officer — inwards claims at the PRO counter (physical dockets, death-certificate checks, UAN registration problems surfaced at intake)
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `POST /office/physical-claims` | P | office jurisdiction of the caller's posting |  |
-| `POST /office/physical-claims/{intakeId}/identity-validations` | P | office jurisdiction of the caller's posting |  |
+| `POST /office/physical-claims` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/physical-claims/{intakeId}/identity-validations` | W | office jurisdiction of the caller's posting |  |
 
 **`fo.da_pension`** — DA (Pension) — worksheet, PPO, transfer-in, Special 10D
 

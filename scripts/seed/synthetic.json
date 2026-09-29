@@ -243,6 +243,46 @@
           "last_contribution_month": "2025-12"
         }
       ]
+    },
+    {
+      "uan": "100000000901",
+      "name": "GANESH DEMO",
+      "date_of_birth": "1975-05-05",
+      "subject": null,
+      "account_link_id": "AL-0901",
+      "member_id": "DEMO00001000000000901",
+      "date_of_joining": "2012-04-01",
+      "date_of_exit": "2026-07-15",
+      "deceased_on": "2026-07-15",
+      "gender": "MALE",
+      "mobile_masked": "******0011",
+      "email_masked": "g***@demo.invalid",
+      "bank_ifsc": "DEMO0000011",
+      "bank_account_last4": "0011",
+      "kyc": {
+        "aadhaar": "VERIFIED",
+        "pan": "VERIFIED",
+        "bank": "VERIFIED"
+      },
+      "last_contribution_month": "2026-06",
+      "nominations": [
+        {
+          "name": "LAKSHMI DEMO",
+          "relation": "SPOUSE",
+          "share_bp": 6000,
+          "subject": "00000000-0000-4000-8000-000000000035",
+          "bank_ifsc": "DEMO0000011",
+          "bank_account_last4": "1101"
+        },
+        {
+          "name": "ARJUN DEMO",
+          "relation": "SON",
+          "share_bp": 4000,
+          "subject": null,
+          "bank_ifsc": "DEMO0000011",
+          "bank_account_last4": "1102"
+        }
+      ]
     }
   ],
   "demo_wage_month": "2026-08",
@@ -280,7 +320,9 @@
     "member-e": "00000000-0000-4000-8000-000000000031",
     "ro-ss-pension": "00000000-0000-4000-8000-000000000032",
     "ndc-cpps": "00000000-0000-4000-8000-000000000033",
-    "ro-fa-accounts": "00000000-0000-4000-8000-000000000034"
+    "ro-fa-accounts": "00000000-0000-4000-8000-000000000034",
+    "claimant-a": "00000000-0000-4000-8000-000000000035",
+    "ro-pro-counter": "00000000-0000-4000-8000-000000000036"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -302,6 +344,11 @@
     "AL-0008": {
       "employee_paise": 12000000,
       "employer_paise": 8000000,
+      "as_of": "2025-03-31"
+    },
+    "AL-0901": {
+      "employee_paise": 24000000,
+      "employer_paise": 16000000,
       "as_of": "2025-03-31"
     }
   },
@@ -388,6 +435,12 @@
       "username": "ro-fa-accounts",
       "subject": "00000000-0000-4000-8000-000000000034",
       "stakeholder": "fo.fa_accounts",
+      "office_id": "RO-DEMO-01"
+    },
+    {
+      "username": "ro-pro-counter",
+      "subject": "00000000-0000-4000-8000-000000000036",
+      "stakeholder": "fo.pro_intake",
       "office_id": "RO-DEMO-01"
     }
   ],

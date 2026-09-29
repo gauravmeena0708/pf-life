@@ -98,6 +98,14 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 5b: death and EDLI claims, the PRO counter (29 September 2026)
+
+Unit tests 286 passed; end to end 36 passed (including `test_death_claims.py`); must-deny 18 passed.
+
+- The deceased member is seeded at UAN 100000000901 / AL-0901. UANs from …900 and member IDs from AL-0900 are
+  reserved for such cases and skipped by the registration allocator: seed data that sat inside the allocator's
+  range was written over a joinee registered by an earlier e2e run on a long-lived stack.
+
 ## Update — Phase 2, slice 5a: claim lifecycle and office tools (29 September 2026)
 
 Unit tests 279 passed; end to end 34 passed (including `test_claim_lifecycle.py`); must-deny 18 passed.

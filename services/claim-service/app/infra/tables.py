@@ -21,6 +21,7 @@ accounts = Table(
     Column("frozen", Boolean, nullable=False, server_default=sa_false()),   # from AccountFrozen.v1 / AccountDefrozen.v1
     Column("pan_verified", Boolean, nullable=False, server_default=sa_false()),   # decides the TDS rate
     Column("interest_paise", BigInteger, nullable=False, server_default="0"),     # interest credited (InterestCredited.v1), for the CAD
+    Column("deceased_on", Date),                                                  # a death in service (exit reason) or seeded
 )
 
 # Office staff directory (synthetic seed): which office an officer acts for.
@@ -54,6 +55,7 @@ claims = Table(
     Column("payee_ifsc", String(11)),                  # corrected bank details for a re-disbursement
     Column("payee_account_last4", String(4)),
     Column("tax", JSON),                               # TDS worked out at the first payment instruction, then fixed
+    Column("death_of_uan", String(12)),                # a death claim (Form 20 / 5IF): the deceased member's UAN; member_subject is the claimant
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
     Column("updated_at", DateTime(timezone=True), server_default=func.now()),
 )
@@ -115,6 +117,51 @@ cads = Table(
     Column("rule_version", String(60), nullable=False),
     Column("static_data_version", String(40), nullable=False),
     Column("created_by", String(80), nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now()),
+)
+
+# Nominations on record for a member (synthetic seed; e-nomination is planned): who may claim on the member's death.
+nominations = Table(
+    "nominations", metadata,
+    Column("nomination_id", String(40), primary_key=True),
+    Column("uan", String(12), nullable=False, index=True),
+    Column("name", String(120), nullable=False),
+    Column("relation", String(30), nullable=False),
+    Column("share_bp", Integer, nullable=False),
+    Column("subject", String(80), index=True),                  # the nominee's login, when there is one
+    Column("bank_ifsc", String(11)),
+    Column("bank_account_last4", String(4)),
+)
+
+# The beneficiaries of a death claim and their shares: from the latest nomination, a list of surviving family
+# members, or added. The APFC amends a share (with a reason); a share already settled in the legacy system is kept.
+claim_beneficiaries = Table(
+    "claim_beneficiaries", metadata,
+    Column("beneficiary_id", String(40), primary_key=True),
+    Column("claim_id", String(40), nullable=False, index=True),
+    Column("name", String(120), nullable=False),
+    Column("relation", String(30), nullable=False),
+    Column("share_bp", Integer, nullable=False),
+    Column("source", String(30), nullable=False),               # E_NOMINATION | LSM | ADDED_BY_CLAIMANT
+    Column("bank_account_last4", String(4)),
+    Column("legacy_settled_paise", BigInteger, nullable=False, server_default="0"),
+    Column("disbursed_paise", BigInteger, nullable=False, server_default="0"),
+    Column("amendments", JSON, nullable=False),
+)
+
+# Paper claims and updations inwarded at the PRO counter.
+physical_intakes = Table(
+    "physical_intakes", metadata,
+    Column("intake_id", String(40), primary_key=True),
+    Column("form_type", String(40), nullable=False),
+    Column("uan", String(12), nullable=False),
+    Column("ppo_id", String(40)),
+    Column("filed_by", String(20), nullable=False),
+    Column("claim_mode", String(20), nullable=False),
+    Column("details", JSON, nullable=False),
+    Column("office_id", String(40), nullable=False),
+    Column("inwarded_by", String(80), nullable=False),
+    Column("state", String(20), nullable=False),                # INWARDED | ROUTED
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
 )
 

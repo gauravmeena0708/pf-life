@@ -50,10 +50,14 @@ def mask(value: str, keep: int = 4) -> str:
     return "*" * max(0, len(value) - keep) + value[-keep:]
 
 
+RESERVED_UAN, RESERVED_LINK = "100000000900", 900
+
+
 async def _next_numbers(session: AsyncSession) -> tuple[str, str]:
-    top_uan = (await session.execute(select(func.max(members.c.uan)))).scalar_one()
+    # UANs …900 onwards and member IDs AL-0900 onwards are reserved for special synthetic cases (a deceased member).
+    top_uan = (await session.execute(select(func.max(members.c.uan)).where(members.c.uan < RESERVED_UAN))).scalar_one()
     links = (await session.execute(select(employments.c.account_link_id))).scalars().all()
-    top_link = max((int(x.split("-")[1]) for x in links if x.startswith("AL-")), default=0)
+    top_link = max((n for x in links if x.startswith("AL-") and (n := int(x.split("-")[1])) < RESERVED_LINK), default=0)
     return str(int(top_uan) + 1), f"AL-{top_link + 1:04d}"
 
 

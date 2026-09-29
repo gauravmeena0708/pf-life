@@ -603,26 +603,32 @@ stakeholders:
     - F05.family_view
   claimant:
   - endpoint: POST /claimants/death-claims
-    status: P
+    status: W
+    scope: self — claimant's own claims only
+    step_up: true
+    via:
+    - F04.death_claim
+  - endpoint: GET /claimants/death-claims/{claimId}
+    status: W
     scope: self — claimant's own claims only
     step_up: false
     via:
     - F04.death_claim
-  - endpoint: GET /claimants/death-claims/{claimId}
-    status: P
+  - endpoint: POST /claimants/death-claims/{claimId}/beneficiaries
+    status: W
     scope: self — claimant's own claims only
     step_up: false
     via:
     - F04.death_claim
   claimant.nominee:
   - endpoint: POST /claimants/death-claims/{claimId}/beneficiaries
-    status: P
+    status: W
     scope: self — claimant's own claims only
     step_up: false
     via:
     - F04.co_beneficiary
   - endpoint: GET /claimants/death-claims/{claimId}
-    status: P
+    status: W
     scope: self — claimant's own claims only
     step_up: false
     via:
@@ -1310,7 +1316,7 @@ stakeholders:
     via:
     - F03.ecr_reject
   - endpoint: POST /office/physical-claims/{intakeId}/identity-validations
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1705,13 +1711,13 @@ stakeholders:
     via:
     - F04.redisburse_approve
   - endpoint: PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F04.shares
   - endpoint: GET /office/death-claims/{claimId}/shares-summary
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1956,20 +1962,20 @@ stakeholders:
     - F04.pay
   fo.diary:
   - endpoint: POST /office/physical-claims
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F04.physical
   fo.pro_intake:
   - endpoint: POST /office/physical-claims
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F04.pro_intake
   - endpoint: POST /office/physical-claims/{intakeId}/identity-validations
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:

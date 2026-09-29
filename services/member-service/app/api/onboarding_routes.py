@@ -401,3 +401,39 @@ async def member_360(uan: str, purpose: str = Query(min_length=10, max_length=30
                      "applications": [{"application_id": a["application_id"], "title": a["title"], "state": a["state"], "pending": not a["terminal"]} for a in apps],
                      "pending_kyc": [{"request_id": r["request_id"], "kyc_type": r["kyc_type"]} for r in pending_kyc],
                      "viewed_for": purpose, "note": "This view is recorded in the audit log with its purpose."})
+
+
+# ── the PRO counter: identity of the person filing a paper claim (Phase 2, slice 5b) ─────────────
+
+class IdentityCheck(BaseModel):
+    uan: str = Field(pattern=r"^[0-9]{12}$")
+    name: str = Field(min_length=2, max_length=200)
+    date_of_birth: date
+    evidence: str = Field(pattern="^(AADHAAR_OTP|AADHAAR_BIOMETRIC|DOCUMENTS_SEEN)$")
+
+
+@router.post("/api/v1/office/physical-claims/{intakeId}/identity-validations", status_code=201)
+async def validate_identity(intakeId: str, body: IdentityCheck, actor: Actor = Depends(require_stakeholder("fo.pro_intake", "fo.diary")),
+                            session: AsyncSession = Depends(db)) -> dict:
+    """The name and date of birth on the paper form are matched with the member's record; the KYC status at this
+    moment is kept with the result. Aadhaar is verified by the mock; nothing is sent anywhere."""
+    from app.infra.tables import office_staff
+    async with session.begin():
+        office = (await session.execute(select(office_staff.c.office_id).where(office_staff.c.subject == actor.subject))).scalar_one_or_none()
+        m = (await session.execute(select(members).where(members.c.uan == body.uan))).mappings().first()
+        offices = set() if not m else set((await session.execute(select(employments.c.office_id).where(
+            employments.c.member_id == m["member_id"]))).scalars())
+        if not m or not office or office not in offices:
+            raise Problem(404, "/problems/not-found", "No member of your office with that UAN")
+        kyc = m["kyc"] or {}
+        checks = {"name": " ".join(body.name.upper().split()) == " ".join(m["name"].upper().split()),
+                  "date_of_birth": body.date_of_birth == m["date_of_birth"], "aadhaar_verified": kyc.get("aadhaar") == "VERIFIED"}
+        result = "MATCHED" if all(checks.values()) else "MISMATCH"
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="intake.identity_validated",
+                    target_type="physical_intake", target_id=intakeId, detail=f"{body.uan} {result} {body.evidence}")
+    return envelope({"intake_id": intakeId, "uan": body.uan, "result": result, "checks": checks, "evidence": body.evidence,
+                     "kyc_snapshot": {"aadhaar": kyc.get("aadhaar"), "pan": kyc.get("pan"), "bank": kyc.get("bank"),
+                                      "bank_account_last4": m["bank_account_last4"]},
+                     "checked_at": datetime.now(UTC).isoformat(),
+                     "next_step": "Hand the file to the dealing assistant." if result == "MATCHED"
+                     else "Do not accept the claim until the mismatch is resolved (Joint Declaration or KYC update)."})

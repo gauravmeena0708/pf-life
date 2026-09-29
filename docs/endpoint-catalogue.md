@@ -284,10 +284,10 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `POST /claimants/death-claims` 💰 (`formType=FORM_20`) | PF death claim by nominee / legal heir | P | 2 | claim |
-| `POST /claimants/death-claims` 💰 (`formType=FORM_5IF`) | **EDLI** insurance claim | P | 2 | claim |
+| `POST /claimants/death-claims` 💰 🔐 (`formType=FORM_20`) | PF death claim by nominee / legal heir | W | 1 | claim |
+| `POST /claimants/death-claims` 💰 🔐 (`formType=FORM_5IF`) | **EDLI** insurance claim | W | 1 | claim |
 | `POST /claimants/death-claims` 💰 (`formType=CCF_DEATH`) | Composite claim covering several death benefits | P | 3 | claim |
-| `GET /claimants/death-claims/{claimId}` | Status (claimant verified separately; no member PII beyond entitlement) | P | 2 | claim |
+| `GET /claimants/death-claims/{claimId}` | Status (claimant verified separately; no member PII beyond entitlement) | W | 1 | claim |
 | `POST /claimants/family-pension-applications` 💰 (`formType=FORM_10D`) | Widow / child / orphan pension | P | 2 | pension |
 
 
@@ -305,7 +305,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `POST /claimants/death-claims/{claimId}/beneficiaries` 💰 | Inward an additional co-beneficiary / legal heir on an open death claim | P | 2 | claim |
+| `POST /claimants/death-claims/{claimId}/beneficiaries` 💰 | Inward an additional co-beneficiary / legal heir on an open death claim | W | 1 | claim |
 | `POST /members/me/claims/{claimId}/re-disbursement-requests` 💰 | Member submits corrected bank details after a payment return, without re-filing the claim | W | 1 | claim |
 
 
@@ -332,8 +332,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /office/payment-scrolls/ready` | Approved claims of the office ready for the next payment scroll (ledger debit posted, account not frozen), with the total | W | 1 | claim |
 | `POST /office/payment-scrolls` 💰🔐 | Batch approved settlements into a payment scroll → `PaymentScrollGenerated.v1` | W | 1 | claim |
 | `POST /office/payment-scrolls/{scrollId}/return-reconciliations` 💰🔐 | Reconcile a bank return scroll, open re-settlement cases | W | 1 | claim |
-| `POST /office/physical-claims` | **Physical claim intake**: register a paper claim, scan, data entry | P | 2 | claim |
-| `POST /office/physical-claims/{intakeId}/identity-validations` | UAN allocation / Aadhaar validation before settlement (mock) | P | 2 | member |
+| `POST /office/physical-claims` | **Physical claim intake**: register a paper claim, scan, data entry | W | 1 | claim |
+| `POST /office/physical-claims/{intakeId}/identity-validations` | UAN allocation / Aadhaar validation before settlement (mock) | W | 1 | member |
 | `GET /office/members/{uan}` | Member 360 view (jurisdiction + purpose checked, audited) | W | 1 | member |
 | `POST /office/members/{uan}/freezes` 🔐 | **UAN / member-ID freeze** with reason and evidence (tier-2 process `member_freeze`) | W | 1 | member |
 | `POST /office/members/{uan}/defreezes` 🔐 | De-freeze, maker-checker (tier-2 process `member_freeze`) | W | 1 | member |
@@ -367,8 +367,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/claims/{claimId}/cad` 💰🔐 | Generate the **Claim Authorization Document (CAD)**: interest split, TDS and net payable, with the rule and static-data versions used | W | 1 | claim |
 | `GET /office/claims/{claimId}/cad` | View the generated CAD | W | 1 | claim |
 | `GET /office/system/cad-static-data` | Diagnostic view of CAD static reference data (interest tables, bank branch master) and its version (tracker: "Failed to load CAD static Data") | W | 1 | claim |
-| `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` 🔐 | Amend a beneficiary's share (nominee deceased, court order, share already settled in legacy, guardian appointment) | P | 2 | claim |
-| `GET /office/death-claims/{claimId}/shares-summary` | Allocated vs legacy-settled vs disbursed vs pending share of a death claim | P | 2 | claim |
+| `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` 🔐 | Amend a beneficiary's share (nominee deceased, court order, share already settled in legacy, guardian appointment) | W | 1 | claim |
+| `GET /office/death-claims/{claimId}/shares-summary` | Allocated vs legacy-settled vs disbursed vs pending share of a death claim | W | 1 | claim |
 | `POST /office/claims/{claimId}/re-disbursement-approvals` 💰🔐 | APFC authorises a new payment after a return, without reopening adjudication | W | 1 | claim |
 | `GET /office/members/{uan}/locks` | Active locks on a member ledger (annual accounts, claim adjudication, ECR posting) with owner and expiry | P | 2 | workflow |
 | `POST /office/system/locks/{lockId}/release` 🔐 | Supervised release of an orphaned lock (reason required) → `LockReleased.v1` (tracker: "Unable to lock process", phantom "concurrent claims already under processing") | P | 2 | workflow |
@@ -407,8 +407,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/pensions/{ppoId}/updation-activities` 🔐 | DA (Pension) initiates an updation activity: `BASIC_DETAILS`, `PENSION_START`, `PENSION_STOP`, `DLC_REVALIDATION`, `UNHOLD_TRANSACTIONS` | W | 1 | pension |
 | `GET /office/pensions/updation-activities?activity=&mode=&status=` | **Track Claim Updation Activity Status** — PRO and DA activities by filing mode (physical / online) and status (new, pending, rejected, settled, sent back to DA), transfer cases separately | W | 1 | pension |
 | `POST /office/pensions/updation-activities/{activityId}/decisions` 🔐 | APFC (Pension) settles, rejects or sends back an updation activity (maker ≠ checker); a settled activity changes the pension (life certificate, start / stop, unhold, bank) | W | 1 | pension |
-| `POST /office/physical-claims` (`formType=PPO_AMENDMENT_BENEFICIARY` \| `PPO_AMENDMENT_SERVICE` \| `PPO_AMENDMENT_POHW`) | PRO counter intake of a **PPO amendment** (beneficiary, service, pension on higher wages) | P | 2 | pension |
-| `POST /office/physical-claims` (`formType=DEATH_UPDATION` \| `PHYSICAL_LC_UPDATION` \| `SPOUSE_REMARRIAGE_UPDATION`) | PRO counter intake of a pensioner **death**, **physical life certificate** or **spouse remarriage** updation | P | 2 | pension |
+| `POST /office/physical-claims` (`formType=PPO_AMENDMENT_BENEFICIARY` \| `PPO_AMENDMENT_SERVICE` \| `PPO_AMENDMENT_POHW`) | PRO counter intake of a **PPO amendment** (beneficiary, service, pension on higher wages) | W | 1 | pension |
+| `POST /office/physical-claims` (`formType=DEATH_UPDATION` \| `PHYSICAL_LC_UPDATION` \| `SPOUSE_REMARRIAGE_UPDATION`) | PRO counter intake of a pensioner **death**, **physical life certificate** or **spouse remarriage** updation | W | 1 | pension |
 | `POST /office/pensions/ppo-issuances` 🔐 | Issue PPO after Form 10D settlement | W | 1 | pension |
 | `GET /office/pension-claims?state=` | Pension claims (Form 10D) of the office by state: each desk sees what is waiting for it | W | 1 | pension |
 | `POST /office/pensions/{ppoId}/revisions` 💰🔐 | Pension revision (incl. higher-pension outcome) | W | 1 | pension |

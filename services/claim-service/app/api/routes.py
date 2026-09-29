@@ -8,12 +8,12 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, Header, Request
 from pydantic import BaseModel, Field
-from sqlalchemy import insert, select, update
+from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.claims import NEXT_STEP, OPEN_STATES, ROLE_LABELS, approval_chain, eligibility, months_between, route, summary
 from app.infra.db import sessions
-from app.infra.tables import accounts, cads, claim_timeline, claims, office_staff, risk_flags, tax_declarations
+from app.infra.tables import accounts, cads, claim_beneficiaries, claim_timeline, claims, office_staff, risk_flags, tax_declarations
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit, find_response, request_hash, store_response
@@ -74,7 +74,8 @@ async def record_decision(session: AsyncSession, claim: dict[str, Any], decision
                     aggregate_id=claim["claim_id"], correlation_id=correlation_id, payload={
                         "claim_id": claim["claim_id"], "decision": decision, "reason_code": reason_code,
                         "rule_version": claim["rule_version"], "amount_paise": claim["amount_paise"],
-                        "account_link_id": claim["account_link_id"]})
+                        "account_link_id": claim["account_link_id"],
+                        "fund": "EDLI" if claim["claim_type"] == "DEATH_EDLI" else "MEMBER_ACCOUNT"})   # EDLI is paid from the EDLI fund
 
 
 async def load_claim(session: AsyncSession, claim_id: str, *, member: str | None = None, office: str | None = None,
@@ -285,6 +286,12 @@ async def work_out_tax(session: AsyncSession, claim: dict[str, Any], day: date) 
 
 
 async def _instruct(session: AsyncSession, claim: dict[str, Any], actor: Actor, scenario: str, template: str | None) -> dict:
+    if claim.get("death_of_uan"):                              # a death claim is paid only when the shares add up
+        shares = (await session.execute(select(func.coalesce(func.sum(claim_beneficiaries.c.share_bp), 0)).where(
+            claim_beneficiaries.c.claim_id == claim["claim_id"]))).scalar_one()
+        if int(shares) != 10_000:
+            raise Problem(409, "/problems/shares-incomplete", "The beneficiaries' shares do not add up to 100%",
+                          f"They add up to {int(shares) / 100:g}%. The APFC amends the shares first.")
     attempt = claim["payment_attempt"] + 1
     payment_id = f"PAY-{claim['claim_id']}-{attempt}"
     first_tax = claim.get("tax") is None

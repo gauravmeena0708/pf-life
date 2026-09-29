@@ -10,11 +10,21 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['POST /office/payment-scrolls', 'GET /office/transfers', 'GET /employers/me/transfer-requests', 'GET /members/me/claims', 'POST /members/me/claims', 'POST /members/me/transfers', 'GET /office/system/cad-static-data', 'GET /members/me/claims/eligibility-preview', 'GET /members/me/claims/eligible-types', 'POST /members/me/tax/form-15g-15h', 'GET /members/me/claims/{claimId}', 'GET /members/me/transfers/{transferId}', 'POST /employers/me/transfer-requests/{transferId}/decisions', 'GET /members/me/claims/{claimId}/audit-trail', 'POST /members/me/claims/{claimId}/cancellations', 'POST /members/me/claims/{claimId}/confirmations', 'POST /members/me/claims/{claimId}/documents', 'POST /members/me/claims/{claimId}/re-disbursement-requests', 'GET /office/claims/{claimId}/additional-forms', 'GET /office/claims/{claimId}/audit-trail', 'GET /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/payment-instructions', 'POST /office/claims/{claimId}/re-disbursement-approvals', 'POST /office/claims/{claimId}/reissues', 'POST /office/payment-scrolls/{scrollId}/return-reconciliations', 'POST /office/transfers/{transferId}/decisions', 'POST /office/transfers/{transferId}/verifications']
+OPERATIONS = ['POST /claimants/death-claims', 'POST /office/payment-scrolls', 'POST /office/physical-claims', 'GET /office/transfers', 'GET /employers/me/transfer-requests', 'GET /members/me/claims', 'POST /members/me/claims', 'POST /members/me/transfers', 'GET /office/payment-scrolls/ready', 'GET /office/system/cad-static-data', 'GET /members/me/claims/eligibility-preview', 'GET /members/me/claims/eligible-types', 'POST /members/me/tax/form-15g-15h', 'GET /members/me/claims/{claimId}', 'GET /members/me/transfers/{transferId}', 'POST /employers/me/transfer-requests/{transferId}/decisions', 'GET /members/me/claims/{claimId}/audit-trail', 'POST /members/me/claims/{claimId}/cancellations', 'POST /members/me/claims/{claimId}/confirmations', 'POST /members/me/claims/{claimId}/documents', 'POST /members/me/claims/{claimId}/re-disbursement-requests', 'GET /claimants/death-claims/{claimId}', 'POST /claimants/death-claims/{claimId}/beneficiaries', 'GET /office/claims/{claimId}/additional-forms', 'GET /office/claims/{claimId}/audit-trail', 'GET /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/payment-instructions', 'POST /office/claims/{claimId}/re-disbursement-approvals', 'POST /office/claims/{claimId}/reissues', 'GET /office/death-claims/{claimId}/shares-summary', 'POST /office/payment-scrolls/{scrollId}/return-reconciliations', 'POST /office/transfers/{transferId}/decisions', 'POST /office/transfers/{transferId}/verifications', 'PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares']
+
+@router.api_route("/api/v1/claimants/death-claims", methods=["POST"], include_in_schema=False)
+async def post_claimants_death_claims(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "PF death claim by nominee / legal heir")
+
 
 @router.api_route("/api/v1/office/payment-scrolls", methods=["POST"], include_in_schema=False)
 async def post_office_payment_scrolls(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Batch approved settlements into a payment scroll → PaymentScrollGenerated.v1")
+
+
+@router.api_route("/api/v1/office/physical-claims", methods=["POST"], include_in_schema=False)
+async def post_office_physical_claims(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Physical claim intake: register a paper claim, scan, data entry")
 
 
 @router.api_route("/api/v1/office/transfers", methods=["GET"], include_in_schema=False)
@@ -40,6 +50,11 @@ async def post_members_me_claims(actor: Actor = Depends(require_actor)) -> None:
 @router.api_route("/api/v1/members/me/transfers", methods=["POST"], include_in_schema=False)
 async def post_members_me_transfers(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Transfer of PF between member IDs / exempted trusts")
+
+
+@router.api_route("/api/v1/office/payment-scrolls/ready", methods=["GET"], include_in_schema=False)
+async def get_office_payment_scrolls_ready(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Approved claims of the office ready for the next payment scroll (ledger debit posted, account not fr")
 
 
 @router.api_route("/api/v1/office/system/cad-static-data", methods=["GET"], include_in_schema=False)
@@ -102,6 +117,16 @@ async def post_members_me_claims_claimId_re_disbursement_requests(actor: Actor =
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Member submits corrected bank details after a payment return, without re-filing the claim")
 
 
+@router.api_route("/api/v1/claimants/death-claims/{claimId}", methods=["GET"], include_in_schema=False)
+async def get_claimants_death_claims_claimId(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Status (claimant verified separately; no member PII beyond entitlement)")
+
+
+@router.api_route("/api/v1/claimants/death-claims/{claimId}/beneficiaries", methods=["POST"], include_in_schema=False)
+async def post_claimants_death_claims_claimId_beneficiaries(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Inward an additional co-beneficiary / legal heir on an open death claim")
+
+
 @router.api_route("/api/v1/office/claims/{claimId}/additional-forms", methods=["GET"], include_in_schema=False)
 async def get_office_claims_claimId_additional_forms(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Additional Form Details — forms filed with a claim (e.g. a Joint Declaration): filed / initiated dat")
@@ -137,6 +162,11 @@ async def post_office_claims_claimId_reissues(actor: Actor = Depends(require_act
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Re-issue after bank return (Journey B6)")
 
 
+@router.api_route("/api/v1/office/death-claims/{claimId}/shares-summary", methods=["GET"], include_in_schema=False)
+async def get_office_death_claims_claimId_shares_summary(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Allocated vs legacy-settled vs disbursed vs pending share of a death claim")
+
+
 @router.api_route("/api/v1/office/payment-scrolls/{scrollId}/return-reconciliations", methods=["POST"], include_in_schema=False)
 async def post_office_payment_scrolls_scrollId_return_reconciliations(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Reconcile a bank return scroll, open re-settlement cases")
@@ -150,3 +180,8 @@ async def post_office_transfers_transferId_decisions(actor: Actor = Depends(requ
 @router.api_route("/api/v1/office/transfers/{transferId}/verifications", methods=["POST"], include_in_schema=False)
 async def post_office_transfers_transferId_verifications(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "DA verifies service at both establishments before the AO decides")
+
+
+@router.api_route("/api/v1/office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares", methods=["PUT"], include_in_schema=False)
+async def put_office_death_claims_claimId_beneficiaries_beneficiaryId_shares(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Amend a beneficiary's share (nominee deceased, court order, share already settled in legacy, guardia")

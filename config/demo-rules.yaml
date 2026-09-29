@@ -85,6 +85,18 @@ pension:
   minimum_pension_paise: 100000           # ₹1,000 a month
   applies_to_pensions_in_payment: true    # a change also revises pensions already in payment (never downwards)
   revise_in_payment_from: null            # optional earlier date for those revisions (arrears are paid); null = the rule set's date
+death_claims:
+  # Claims on a member's death, filed by a nominee or legal heir (ILLUSTRATIVE). Form 20 pays the PF balance to the
+  # beneficiaries in their shares; Form 5IF pays the EDLI assurance benefit from the EDLI fund:
+  # wage_multiplier x average monthly wages (capped at the EDLI ceiling) + a share of the average PF balance
+  # (capped), not less than the minimum (with at least minimum_needs_service_months of service) and not more than the maximum.
+  edli:
+    wage_multiplier: 35
+    average_balance_share_bp: 5000
+    balance_bonus_cap_paise: 17500000
+    minimum_paise: 25000000
+    maximum_paise: 70000000
+    minimum_needs_service_months: 12
 grievances:
   categories: [CLAIM_DELAY, CLAIM_REJECTION, PASSBOOK, KYC, EMPLOYER, OTHER]
   sla_days: {RO: 15, ZO: 10, HO: 7}

@@ -55,7 +55,9 @@ function fieldOffice(role: string): NavGroup[] {
       ...(["fo.da_accounts", "fo.ao"].includes(role) ? [link("Form 10D pension claims (IDS)", "/office/pension-claims")] : []),
       ...(role === "fo.fa_accounts" ? [link("Claim Authorization Document (CAD)", "/office/claim-tools#cad-heading")] : []),
       ...(role === "fo.cash" ? [link("Payment scroll", "/office/claim-tools#scroll-heading")] : []),
-      ...(role === "fo.da_accounts" ? [link("Claim audit trail", "/office/claim-tools#trail-heading")] : [])] },
+      ...(role === "fo.da_accounts" ? [link("Claim audit trail", "/office/claim-tools#trail-heading")] : []),
+      ...(role === "fo.apfc" ? [link("Death claims: beneficiary shares", "/office/claim-tools#shares-heading")] : []),
+      ...(role === "fo.pro_intake" ? [link("PRO counter: physical claims", "/office/pro-counter")] : [])] },
     { label: "Members", items: [link("Member", role === "fo.oic" ? queue : role === "fo.da_accounts" ? "/office/claim-tools#member360-heading" : undefined),
       link("Query"), ...(["fo.da_accounts", "fo.oic"].includes(role) ? [link("Inoperative accounts", "/office/claim-tools#inoperative-heading")] : [])] },
     { label: "Receipts & reconciliation", items: [
@@ -91,6 +93,13 @@ const PENSIONER: NavGroup[] = [
     link("Know Your Pension Payee Bank")] },
 ];
 
+/** A nominee or legal heir of a deceased member: no portal login exists (claims are filed on paper or via UMANG). */
+const CLAIMANT: NavGroup[] = [
+  { label: "Death claims", items: [link("PF claim (Form 20)", "/claimant#file-heading"), link("EDLI claim (Form 5IF)", "/claimant#file-heading"),
+    link("Track claim / beneficiaries", "/claimant#claim-status-heading"), link("Composite claim (CCF)")] },
+  { label: "Family pension (Form 10D)" },
+];
+
 /** Head office, zonal and oversight roles: no real menu is documented; the POC's own screens. */
 function poc(role: string): NavGroup[] {
   const out: NavGroup[] = [];
@@ -110,6 +119,7 @@ export function menusFor(role: string | undefined): NavGroup[] {
   if (role === "member") return MEMBER;
   if (role.startsWith("employer.")) return EMPLOYER;
   if (role === "pensioner") return PENSIONER;
+  if (role === "claimant") return CLAIMANT;
   if (["fo.apfc_pension", "fo.da_pension", "fo.ss_pension"].includes(role)) return PENSION_OFFICE;
   if (role === "tech.cpps") return [{ label: "CPPS disbursement", to: "/cpps" }];
   if (role.startsWith("fo.")) return fieldOffice(role);
@@ -121,6 +131,8 @@ export function homeFor(role: string | undefined): string {
   if (role === "member") return "/member/passbook";
   if (role?.startsWith("employer.")) return "/employer";
   if (role === "pensioner") return "/pensioner";
+  if (role === "claimant") return "/claimant";
+  if (role === "fo.pro_intake") return "/office/pro-counter";
   if (role === "fo.apfc_pension") return "/office/pension-revisions";
   if (role === "fo.da_pension" || role === "fo.ss_pension") return "/office/pension-claims";
   if (role === "tech.cpps") return "/cpps";

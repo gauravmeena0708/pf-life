@@ -287,3 +287,15 @@ def test_rejection_after_debit_reverses_it_once(ctx):
     entries = client.get("/api/v1/members/me/passbook", headers=hdr(SEED["members"][0]["subject"], "member", [], establishment=None)).json()["data"]["accounts"][0]["entries"]
     assert [e["kind"] for e in entries][-2:] == ["WITHDRAWAL", "WITHDRAWAL_REVERSED"]
     assert entries[-1]["running_balance_paise"] == entries[0]["running_balance_paise"]   # back to where it was
+
+
+def test_edli_claim_is_paid_from_the_edli_fund_not_the_member_account(ctx):
+    client, q = ctx
+    from app.infra.claims_ledger import on_claim_decision
+    account = SEED["members"][0]["account_link_id"]
+    _deliver(on_claim_decision, {"claim_id": "CLM-E", "decision": "APPROVED", "reason_code": "x", "rule_version": "r", "fund": "EDLI",
+                                 "amount_paise": 10**11, "account_link_id": account}, "ClaimDecisionRecorded.v1")   # above the balance: no matter
+    [(payload,)] = q("SELECT payload FROM outbox WHERE event_type='ClaimDebitPosted.v1'")
+    postings = json.loads(payload)["envelope"]["payload"]["postings"]
+    assert [(p["account_code"], p["side"]) for p in postings] == [("AC21_EDLI", "debit"), ("CLAIMS_PAYABLE", "credit")]
+    assert not q(f"SELECT 1 FROM journal_lines WHERE account_link_id='{account}' AND account_code='AC01_EPF' AND side='debit'")

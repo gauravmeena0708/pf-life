@@ -137,6 +137,14 @@
       {
         "name": "fo.fa_accounts",
         "description": "Stakeholder fo.fa_accounts (docs/stakeholders.md)"
+      },
+      {
+        "name": "claimant",
+        "description": "Stakeholder claimant (docs/stakeholders.md)"
+      },
+      {
+        "name": "fo.pro_intake",
+        "description": "Stakeholder fo.pro_intake (docs/stakeholders.md)"
       }
     ]
   },
@@ -855,6 +863,44 @@
         "fo.fa_accounts"
       ],
       "id": "00000000-0000-4000-8000-000000000034"
+    },
+    {
+      "username": "claimant-a",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Claimant nominee",
+      "lastName": "Demo",
+      "email": "claimant-a@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "claimant"
+      ],
+      "id": "00000000-0000-4000-8000-000000000035"
+    },
+    {
+      "username": "ro-pro-counter",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "PRO counter",
+      "lastName": "Demo",
+      "email": "ro-pro-counter@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.pro_intake"
+      ],
+      "id": "00000000-0000-4000-8000-000000000036"
     }
   ]
 }

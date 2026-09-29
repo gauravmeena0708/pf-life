@@ -18,7 +18,7 @@ ROLE_LABELS = {
     "member": "You", "system": "EPFO system (automatic)", "fo.da_accounts": "Dealing assistant (accounts)",
     "fo.ss": "Section supervisor", "fo.ao": "Accounts officer", "fo.apfc": "Assistant PF commissioner",
     "fo.oic": "Officer in charge", "fo.cash": "Cash section", "bank": "Bank (mock)",
-    "fo.fa_accounts": "Accounts wing (F&A)",
+    "fo.fa_accounts": "Accounts wing (F&A)", "claimant": "Claimant (nominee)",
 }
 # A member may withdraw a claim only before an approving officer has decided on it.
 CANCELLABLE = {"AWAITING_CONFIRMATION", "SUBMITTED", "UNDER_REVIEW", "RECOMMENDED"}

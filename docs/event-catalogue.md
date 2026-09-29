@@ -44,6 +44,7 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `PpoIssued.v1` | pension | member, reporting, audit | pension_claim | 2 (contract only) |
 | `LifeCertificateRecorded.v1` | pension | reporting, audit | pensioner | 2 (contract only) |
 | `CADGenerated.v1` | claim | contribution, payment-simulator, audit | claim | 1 |
-| `BeneficiaryShareAmended.v1` | claim | reporting, audit | claim | 2 (contract only) |
+| `PhysicalClaimInwarded.v1` | claim | pension, audit | physical_intake | 1 |
+| `BeneficiaryShareAmended.v1` | claim | reporting, audit | claim | 1 |
 | `SupplementaryClaimEligible.v1` | contribution | member, claim, audit | ledger_journal | 2 (contract only) |
 | `LockReleased.v1` | workflow | audit, reporting | ledger_lock | 2 (contract only) |

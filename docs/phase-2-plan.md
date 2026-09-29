@@ -11,7 +11,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.3** | Pension office and pensioner self-service: pension enquiry (8 tabs), updation activities (DA initiates, APFC settles) and tracker, overdue life certificates, suspend / resume (held months released), mock Jeevan Pramaan DLC and signed callback, PPO, slips, bank change, declarations, public pension enquiries behind the demo CAPTCHA | **Done** (29 Sep 2026) |
 | **P2.4** | Pension settlement: Form 10D desk by desk (DA Accounts IDS → AO → DA Pension worksheet → APFC Pension → PPO → initial arrear DA → SS → APFC e-sign → dispatch), scheme certificate and its surrender, service aggregation, transfers-in, CPPS monthly run with the mock sponsor bank's paid statement and reconciliation, BRS | **Done** (29 Sep 2026) |
 | **P2.5a** | Claim lifecycle and office tools: eligibility preview for one form, documents, withdrawal before a decision, member and office audit trails, the CAD (accounts wing), payment scrolls with return reconciliation, forms filed with a claim, member 360 view (purpose recorded), inoperative accounts | **Done** (29 Sep 2026) |
-| P2.5b | Death and EDLI claims, beneficiary shares, physical intake at the PRO counter, identity validation, family pension | Next |
+| **P2.5b** | Death and EDLI claims, beneficiary shares, physical intake at the PRO counter, identity validation (family pension deferred to P2.6) | **Done** (29 Sep 2026) |
 | P2.5c | Ledger locks, document attestation views, establishment freeze / de-freeze, office Annexure K files and reconciliation | |
 | P2.6 | Establishment registration and configuration, Form 5A, branches, DSC / e-sign approvals | |
 | P2.7 | Returns, receipts and ledger: arrear / supplementary ECR, demands, direct challans, 14B/7Q knock-offs, VDR rejection, reversals, recredits | |
@@ -82,3 +82,22 @@ meaning is confirmed.
   the zone) and is written to the audit log. contribution-service: inoperative accounts (no credit for 36 months).
 - Found: the gateway asks for step-up on every POST of an operation marked for it, so a "preview" flag on the
   scroll POST could never work; the preview is its own read-only endpoint (`GET /office/payment-scrolls/ready`).
+
+## P2.5b — how it is built
+
+- Synthetic data: GANESH DEMO (UAN 100000000901, AL-0901) died in service on 15 Jul 2026; nominations LAKSHMI
+  DEMO (spouse, 60 %, persona `claimant-a`) and ARJUN DEMO (son, 40 %). New persona `ro-pro-counter` (fo.pro_intake).
+- claim-service (`app/api/death_routes.py`): a nominee files Form 20 (PF: the member ID's balance) or Form 5IF
+  (EDLI: `edli_benefit` under the rules in force — wages × multiplier, plus a share of the average balance
+  capped, between the assured minimum and maximum; synthetic average wages ₹15,000). The claim goes straight to
+  review through the normal officer chain; beneficiaries come from the nomination (or a list given with the claim,
+  or are added later with no share). The APFC amends a share with a reason (one-time code); payment is refused
+  until the shares add up to 100 %; at settlement each beneficiary's paid amount is recorded, net of any share
+  settled in the legacy system. The PRO counter inwards paper forms; pension updations go to the pension office.
+- `ClaimDecisionRecorded.v1` now carries `fund`: an EDLI claim is debited to AC21_EDLI, not the member's account.
+  New event `PhysicalClaimInwarded.v1` (pension-service turns a pension updation into a NEW, PHYSICAL activity);
+  `BeneficiaryShareAmended.v1` moved to phase 1.
+- member-service: identity validation at the counter matches name and date of birth with the record and keeps the
+  KYC status at that moment (audited). An exit marked `DEATH_IN_SERVICE` records the date of death in claim-service.
+- Deferred: family pension (Form 10D by a widow / child, P2.6), the composite claim (CCF), a dedicated EDLI
+  decision step, and paying each beneficiary to their own bank account (one payment per claim for now).

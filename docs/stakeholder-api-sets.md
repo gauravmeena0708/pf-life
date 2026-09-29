@@ -171,8 +171,9 @@ Activities: **F04.death_claim** File PF (Form 20), EDLI (Form 5IF) or composite 
 
 | Endpoint | Status |
 |---|---|
-| `GET /claimants/death-claims/{claimId}` | P |
-| `POST /claimants/death-claims` | P |
+| `GET /claimants/death-claims/{claimId}` | W |
+| `POST /claimants/death-claims` | W |
+| `POST /claimants/death-claims/{claimId}/beneficiaries` | W |
 
 #### `claimant.nominee` — Co-beneficiary on a multi-beneficiary death claim (PF / EDLI / pension) holding an allocated percentage share, including shares already settled in the legacy system
 
@@ -180,8 +181,8 @@ Activities: **F04.co_beneficiary** Inward as an additional beneficiary on an ope
 
 | Endpoint | Status |
 |---|---|
-| `GET /claimants/death-claims/{claimId}` | P |
-| `POST /claimants/death-claims/{claimId}/beneficiaries` | P |
+| `GET /claimants/death-claims/{claimId}` | W |
+| `POST /claimants/death-claims/{claimId}/beneficiaries` | W |
 
 #### `intl_worker` — International worker (inbound or outbound, CoC holder)
 
@@ -405,6 +406,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/member-change-requests/{requestId}/recommendations` | W |
 | `POST /office/pension-claims/{claimId}/input-data-sheets` | W |
+| `POST /office/physical-claims/{intakeId}/identity-validations` | W |
 | `POST /office/transfers/{transferId}/verifications` | W |
 | `GET /office/annexure-k-files` | P |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | P |
@@ -415,7 +417,6 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P |
 | `POST /office/ledger-journals/{journalId}/reversals` | P |
 | `POST /office/pensions/higher-pension-options/{optionId}/ledger-transfers` | P |
-| `POST /office/physical-claims/{intakeId}/identity-validations` | P |
 | `POST /office/receipts/{receiptId}/trrn-adjustments` | P |
 | `POST /office/tds/computations` | P |
 | `POST /office/transfers/{transferId}/recredits` | P |
@@ -492,13 +493,14 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | Endpoint | Status |
 |---|---|
 | `GET /office/cases/{caseId}` | W |
+| `GET /office/death-claims/{claimId}/shares-summary` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
 | `POST /office/claims/{claimId}/re-disbursement-approvals` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/member-change-requests/{requestId}/decisions` | W |
 | `POST /office/members/{uan}/freezes` | W |
-| `GET /office/death-claims/{claimId}/shares-summary` | P |
+| `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | W |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P |
 | `POST /office/compliance/cases/{caseId}/escaped-assessments-7c` | P |
 | `POST /office/compliance/cases/{caseId}/hearings` | P |
@@ -512,7 +514,6 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/establishment-registrations/{reqId}/coverage-decisions` | P |
 | `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | P |
 | `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` | P |
-| `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | P |
 | `GET /office/ecr-filings` | ? |
 | `POST /office/ecr-filings/{filingId}/approvals` | ? |
 | `POST /office/ledger-adjustments/{adjustmentId}/approvals` | ? |
@@ -573,7 +574,7 @@ Activities: **F04.physical** Diarise physical claims and documents
 
 | Endpoint | Status |
 |---|---|
-| `POST /office/physical-claims` | P |
+| `POST /office/physical-claims` | W |
 
 #### `fo.pro_intake` — PRO counter inwarding officer — inwards claims at the PRO counter (physical dockets, death-certificate checks, UAN registration problems surfaced at intake)
 
@@ -581,8 +582,8 @@ Activities: **F04.pro_intake** Inward claims at the PRO counter; check death cer
 
 | Endpoint | Status |
 |---|---|
-| `POST /office/physical-claims` | P |
-| `POST /office/physical-claims/{intakeId}/identity-validations` | P |
+| `POST /office/physical-claims` | W |
+| `POST /office/physical-claims/{intakeId}/identity-validations` | W |
 
 #### `fo.da_pension` — DA (Pension) — worksheet, PPO, transfer-in, Special 10D
 

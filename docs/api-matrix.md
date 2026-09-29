@@ -8,12 +8,12 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 |---|---|---|---|---|---|---|---|
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 9 | 2 | 5 | 0 |
 | 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 37 | 7 | 46 | 0 |
-| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 59 | 5 | 19 | 0 |
-| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 47 | 0 | 52 | 6 |
+| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 62 | 5 | 17 | 0 |
+| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 49 | 0 | 50 | 6 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 11 | 1 | 2 | 0 |
 | 6 | International worker | **Mock** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 0 | 1 | 4 | 0 |
 | 7 | District office | **Working** | `do.incharge`, `do.staff` | 1 | 0 | 2 | 0 |
-| 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 13 | 0 | 21 | 3 |
+| 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 15 | 0 | 19 | 3 |
 | 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 10 | 0 | 3 | 0 |
 | 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 13 | 0 | 11 | 0 |
 | 11 | NDC | **Working** | `tech.ndc`, `tech.adc`, `tech.cpps`, `tech.epfo3` | 6 | 0 | 2 | 0 |
@@ -150,6 +150,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 
 | Endpoint | Status | Owner | Called by |
 |---|---|---|---|
+| `GET /claimants/death-claims/{claimId}` | W | claim | claimant |
 | `GET /grievances/{grievanceId}` | W | grievance | member |
 | `GET /members/me` | W | member | member |
 | `GET /members/me/account-status` | W | member | member |
@@ -181,6 +182,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `PATCH /members/me/contact-details` | W | member | member |
 | `POST /ai/feedback` | W | intelligence | member |
 | `POST /ai/knowledge/search` | W | intelligence | member |
+| `POST /claimants/death-claims` | W | claim | claimant |
+| `POST /claimants/death-claims/{claimId}/beneficiaries` | W | claim | claimant |
 | `POST /grievances/{grievanceId}/documents` | W | grievance | member |
 | `POST /grievances/{grievanceId}/escalations` | W | grievance | member |
 | `POST /grievances/{grievanceId}/messages` | W | grievance | member |
@@ -214,14 +217,12 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /members/uan-allotments` | M | member | csc_operator, member |
 | `POST /pensioners/me/life-certificate/submissions` | M | pension | csc_operator, pensioner |
 | `POST /public/pension/life-certificate-lookups` | M | pension | pensioner |
-| `GET /claimants/death-claims/{claimId}` | P | claim | claimant |
 | `GET /members/me/annual-statements/{financialYear}` | P | contribution | member |
 | `GET /members/me/higher-pension-options/{optionId}` | P | pension | member |
 | `GET /members/me/nominations` | P | member | member |
 | `GET /members/me/tax/form-16a` | P | claim | member |
 | `GET /members/me/tax/taxable-interest` | P | contribution | member |
 | `GET /members/me/transfers/auto` | P | claim | member |
-| `POST /claimants/death-claims` | P | claim | claimant |
 | `POST /claimants/family-pension-applications` | P | pension | family_pensioner |
 | `POST /grievances/{grievanceId}/feedback` | P | grievance | member |
 | `POST /grievances/{grievanceId}/reminders` | P | grievance | member |
@@ -283,6 +284,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/pensions/{ppoId}/revisions` | W | pension | fo.apfc_pension |
 | `POST /office/pensions/{ppoId}/suspensions` | W | pension | fo.apfc_pension |
 | `POST /office/pensions/{ppoId}/updation-activities` | W | pension | fo.da_pension |
+| `POST /office/physical-claims` | W | claim | fo.diary |
+| `POST /office/physical-claims/{intakeId}/identity-validations` | W | member | fo.da_accounts |
 | `POST /office/transfers/{transferId}/decisions` | W | claim | fo.ao |
 | `POST /office/transfers/{transferId}/verifications` | W | claim | fo.da_accounts |
 | `GET /office/annexure-k-files` | P | claim | fo.da_accounts |
@@ -327,8 +330,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/pensions/higher-pension-options/{optionId}/decisions` | P | pension | fo.apfc_pension |
 | `POST /office/pensions/higher-pension-options/{optionId}/ledger-transfers` | P | pension | fo.da_accounts |
 | `POST /office/pensions/special-10d-cases` | P | pension | fo.da_pension |
-| `POST /office/physical-claims` | P | claim | fo.diary |
-| `POST /office/physical-claims/{intakeId}/identity-validations` | P | member | fo.da_accounts |
 | `POST /office/receipts/{receiptId}/trrn-adjustments` | P | contribution | fo.da_accounts |
 | `POST /office/recovery/{caseId}/arrest-warrants` | P | compliance | fo.recovery_officer |
 | `POST /office/recovery/{caseId}/attachments` | P | compliance | fo.recovery_officer |
@@ -390,6 +391,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /monitoring/grievances` | W | reporting | fo.rpfc1 |
 | `GET /office/accounts/inoperative` | W | contribution | fo.oic |
 | `GET /office/cases/{caseId}` | W | workflow | fo.apfc, fo.oic |
+| `GET /office/death-claims/{claimId}/shares-summary` | W | claim | fo.apfc |
 | `GET /office/member-change-requests/pendency` | W | member | fo.rpfc1 |
 | `GET /office/work-queue` | W | workflow | fo.apfc, fo.oic |
 | `POST /office/cases/{caseId}/second-approvals` | W | workflow | fo.apfc, fo.oic |
@@ -398,7 +400,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/member-change-requests/{requestId}/decisions` | W | member | fo.apfc |
 | `POST /office/members/{uan}/defreezes` | W | member | fo.oic |
 | `POST /office/members/{uan}/freezes` | W | member | fo.apfc |
-| `GET /office/death-claims/{claimId}/shares-summary` | P | claim | fo.apfc |
+| `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | W | claim | fo.apfc |
 | `GET /office/members/{uan}/locks` | P | workflow | fo.oic |
 | `POST /audit/concurrent/alerts/{alertId}/replies` | P | audit | fo.oic |
 | `POST /audit/internal/paras/{paraId}/replies` | P | audit | fo.oic |
@@ -418,7 +420,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/establishments/{estId}/freezes` | P | employer | fo.oic |
 | `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` | P | employer | fo.apfc |
 | `POST /office/system/locks/{lockId}/release` | P | workflow | fo.oic |
-| `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | P | claim | fo.apfc |
 | `GET /office/ecr-filings` | ? | contribution | fo.apfc |
 | `POST /office/ecr-filings/{filingId}/approvals` | ? | contribution | fo.apfc |
 | `POST /office/ledger-adjustments/{adjustmentId}/approvals` | ? | contribution | fo.apfc |

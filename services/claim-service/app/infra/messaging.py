@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import load_claim, notify, record_decision, transition
 from app.domain.claims import HOLDABLE, route
-from app.infra.tables import accounts, claims, risk_flags
+from app.infra.tables import accounts, claim_beneficiaries, claims, risk_flags
 from epfo_observability import Problem, get_logger
 from epfo_persistence.policy import on_policy_published, rules_by_version
 
@@ -68,6 +68,7 @@ async def on_member_exit(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
     await session.execute(update(accounts).where(accounts.c.account_link_id == p["account_link_id"])
                           .values(date_of_exit=date.fromisoformat(p["date_of_exit"])))
+    await on_member_death(session, event)
 
 
 async def on_member_registered(session: AsyncSession, event: dict[str, Any]) -> None:
@@ -143,6 +144,8 @@ async def on_payment_result(session: AsyncSession, event: dict[str, Any]) -> Non
         return
     if event["event_type"] == "PaymentConfirmed.v1":
         claim = await transition(session, claim, "SETTLED", "bank", "Paid into your bank account (mock bank).")
+        if claim.get("death_of_uan"):                          # each beneficiary gets their share, less any legacy settlement
+            await record_disbursements(session, claim)
         await notify(session, claim, "CLAIM_SETTLED", cid,        # a re-payment goes to the corrected account; the net of TDS is paid
                      **({"bank_account_last4": claim["payee_account_last4"]} if claim.get("payee_account_last4") else {}),
                      **({"amount_paise": claim["tax"]["net_paise"], "tds_paise": claim["tax"]["tds_paise"]} if claim.get("tax") else {}))
@@ -150,6 +153,20 @@ async def on_payment_result(session: AsyncSession, event: dict[str, Any]) -> Non
         claim = await transition(session, claim, "PAYMENT_RETURNED", "bank",
                                  f"The bank returned the payment ({p.get('return_reason')}).")
         await notify(session, claim, "CLAIM_PAYMENT_RETURNED", cid, reason=p.get("return_reason"))
+
+
+async def record_disbursements(session: AsyncSession, claim: dict[str, Any]) -> None:
+    net = (claim.get("tax") or {}).get("net_paise", claim["amount_paise"])
+    for b in (await session.execute(select(claim_beneficiaries).where(claim_beneficiaries.c.claim_id == claim["claim_id"]))).mappings().all():
+        await session.execute(update(claim_beneficiaries).where(claim_beneficiaries.c.beneficiary_id == b["beneficiary_id"]).values(
+            disbursed_paise=max(0, net * b["share_bp"] // 10_000 - b["legacy_settled_paise"])))
+
+
+async def on_member_death(session: AsyncSession, event: dict[str, Any]) -> None:
+    """An exit marked for death in service records the date of death on the member's accounts."""
+    p = event["payload"]
+    if p.get("reason") == "DEATH_IN_SERVICE":
+        await session.execute(update(accounts).where(accounts.c.uan == p["uan"]).values(deceased_on=date.fromisoformat(p["date_of_exit"])))
 
 
 async def on_risk_signal(session: AsyncSession, event: dict[str, Any]) -> None:

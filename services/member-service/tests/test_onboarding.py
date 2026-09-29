@@ -133,3 +133,14 @@ def test_member_360_needs_a_purpose_and_the_officers_office(api):
     assert r.status_code == 200 and r.json()["data"]["member_ids"][0]["office_id"] == "RO-DEMO-01"
     assert api.get("/api/v1/office/members/999999999999?purpose=Checking%20a%20complaint", headers=da).status_code == 404
     assert api.get("/api/v1/office/members/100000000002?purpose=Just%20looking%20around", headers=hdr(S["member-a"], "member", establishment=None)).status_code == 403
+
+
+def test_pro_counter_matches_the_filer_with_the_member_record(api):
+    pro = hdr(S["ro-pro-counter"], "fo.pro_intake", establishment=None)
+    url = "/api/v1/office/physical-claims/INW-0001/identity-validations"
+    body = {"uan": "100000000002", "name": "Bharat  demo", "date_of_birth": "1985-11-02", "evidence": "AADHAAR_OTP"}
+    ok = api.post(url, json=body, headers=pro)
+    assert ok.status_code == 201 and ok.json()["data"]["result"] == "MATCHED" and ok.json()["data"]["kyc_snapshot"]["aadhaar"] == "VERIFIED"
+    assert api.post(url, json={**body, "date_of_birth": "1985-11-03"}, headers=pro).json()["data"]["result"] == "MISMATCH"
+    assert api.post(url, json={**body, "uan": "999999999999"}, headers=pro).status_code == 404
+    assert api.post(url, json=body, headers=hdr(S["member-a"], "member", establishment=None)).status_code == 403

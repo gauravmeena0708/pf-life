@@ -230,6 +230,21 @@ simulation; point out that the dialog says exactly what is being authorised (act
 4. **`do-caseworker` → Members › Member**: the member 360 view needs a purpose, which the audit log keeps;
    *Inoperative accounts*; *Claim audit trail* with the forms filed with the claim.
 
+## Death and EDLI claims; the PRO counter
+*Tests: `tests/e2e/test_death_claims.py`, `services/claim-service/tests/test_death_claims.py`*
+
+1. **`claimant-a` → Death claims › PF claim (Form 20)**: UAN 100000000901 (pre-filled), one-time code. The claim
+   shows the two nominees and their shares. *Add a co-beneficiary* adds a legal heir with no share.
+2. **`ro-apfc` → Claims & settlement › Death claims: beneficiary shares**: enter the claim ID; amend a share with a
+   reason (court order, share settled earlier, …; one-time code). Payment is held until shares total 100 %.
+3. **`do-caseworker` recommends, `ro-ao` approves, `ro-cashier` pays**, as for any claim. The shares table then
+   shows what each beneficiary was paid.
+4. **`claimant-a` → EDLI claim (Form 5IF)**: the amount is worked out from the published EDLI rules and paid from
+   the EDLI fund.
+5. **`ro-pro-counter` → PRO counter**: inward a Form 19 for UAN 100000000002 and validate the filer (BHARAT DEMO,
+   2 Nov 1985); inward a *physical life certificate* for PPO-DEMO-0001 — `ro-da-pension` sees it as NEW on the
+   updation tracker.
+
 ## Policy changes that move money — interest, TDS and pensions
 *Tests: `tests/e2e/test_policy_money.py`, `services/contribution-service/tests/test_interest.py`,
 `services/claim-service/tests/test_tds.py`, `services/pension-service/tests/test_pensions.py`*
