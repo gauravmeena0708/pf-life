@@ -10,6 +10,7 @@ import { RoleNav } from "./components/RoleNav";
 import { EcrPage } from "./features/employer/EcrPage";
 import { EmployerHome } from "./features/employer/EmployerHome";
 import { PassbookPage } from "./features/member/PassbookPage";
+import { MemberHomePage } from "./features/member/MemberHomePage";
 import { ClaimsPage } from "./features/member/ClaimsPage";
 import { ClaimDetailPage } from "./features/member/ClaimDetailPage";
 import { ProfilePage } from "./features/member/ProfilePage";
@@ -123,6 +124,7 @@ export function App() {
             <Route path="/i/:slug" element={<InterfacePage />} />
             <Route path="/employer" element={<EmployerHome />} />
             <Route path="/employer/ecr" element={<EcrPage />} />
+            <Route path="/member" element={<MemberHomePage />} />
             <Route path="/member/passbook" element={<PassbookPage />} />
             <Route path="/member/claims" element={<ClaimsPage />} />
             <Route path="/member/claims/:claimId" element={<ClaimDetailPage />} />

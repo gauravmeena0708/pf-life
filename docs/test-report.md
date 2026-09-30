@@ -98,6 +98,15 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 9c: the member's home page and the phone layout (30 September 2026)
+
+Web 148 passed (new `memberHome.test.ts` for the savings, nudge and pending rules, `MemberHome.test.tsx` for the page,
+including one failing API leaving the rest of the page in place); end to end 71 passed (new `test_member_home.py`:
+the home page's sections and the KYC nudge for `member-b`, and every member page at 360px with no sideways scroll and
+the menu behind one button); must-deny 18 passed; UI smoke 2 passed, now landing members on `/member`. No service
+changed, so the unit suites of P2.9a stand. Reviewing the first draft found a second `<main>` inside the page, a
+duplicate *Home* menu item and a balance table that showed only its first column on a phone; all fixed.
+
 ## Update — Phase 2, slice 9a: international workers are members (30 September 2026)
 
 Unit tests on the changed services all pass: claim-service 56 (new `test_international_workers.py`),

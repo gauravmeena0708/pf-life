@@ -1,0 +1,19 @@
+.member-home { min-width: 0; }
+.member-home .card { min-width: 0; }
+.member-home-identity { display: grid; gap: .2rem; border-left: 3px solid var(--gold); padding: .45rem .8rem; background: #fff; color: var(--navy); }
+.member-home-identity span { font-size: .9rem; }
+.member-home-total { display: grid; gap: .2rem; border-bottom: 1px solid var(--line); padding-bottom: .8rem; color: var(--navy); }
+.member-home-total strong { font-family: Georgia, serif; font-size: clamp(1.8rem, 5vw, 2.6rem); line-height: 1.2; }
+.member-home-primary { margin-left: .4rem; }
+.member-home-list { display: grid; gap: .6rem; padding: 0; margin: 0; list-style: none; }
+.member-home-list a { display: grid; gap: .25rem; padding: .8rem 1rem; border: 1px solid var(--line); border-left: 3px solid var(--gold); border-radius: .25rem; background: #fff; text-decoration: none; color: var(--navy); }
+.member-home-list a:hover, .member-home-list a:focus-visible { text-decoration: underline; }
+.member-home-list a span { color: var(--muted); }
+.member-home-list a.member-home-info { border-left-color: var(--navy); }
+.member-home-events { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.member-home-events .actions { display: flex; flex-wrap: wrap; gap: .5rem 1rem; }
+@media (max-width: 620px) { .member-home-events { grid-template-columns: 1fr; } .member-home .table-scroll { max-width: 100%; } }
+.member-home-accounts { display: grid; gap: 0; padding: 0; margin: 0; list-style: none; }
+.member-home-accounts li { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: .65rem 0; border-bottom: 1px solid var(--line); }
+.member-home-accounts li > span { display: grid; gap: .15rem; min-width: 0; }
+.member-home-accounts small { color: var(--muted); }

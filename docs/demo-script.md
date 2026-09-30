@@ -397,6 +397,16 @@ contribution- and platform-service*
 4. **Death claims**: after the officers admit the Form 5IF claim, **`ro-edli` → EDLI claims** enters the verified
    average wages, works out the benefit and sanctions it (one-time code bound to the amount).
 
+## The member's home page and the phone layout
+*Tests: `tests/e2e/test_member_home.py`, `apps/web/src/features/member/memberHome.test.ts`, `apps/web/src/features/MemberHome.test.tsx`*
+
+1. **`member-b`** signs in and lands on *Your PF at a glance*: the total across member IDs, service, the pension
+   estimate; *To do* shows "Complete your KYC (PAN)" and, without a nomination, "Add your nominee".
+2. **`member-g`** (changed jobs) sees both member IDs with their balances and statuses.
+3. *What do you want to do?* — pick "I changed jobs" and follow *Transfer my PF* into the existing transfer form.
+4. Narrow the browser to phone width (or use the device toolbar at 360px): the menu becomes one *Menu* button,
+   the page is a single column and nothing scrolls sideways.
+
 ## International workers are members
 *Tests: `tests/e2e/test_international_worker_member.py`, `services/claim-service/tests/test_international_workers.py`*
 

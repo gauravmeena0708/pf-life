@@ -123,6 +123,9 @@ OTHER_FAMILIES = [
          "tests/e2e/test_member_mobility.py"),
         ("ENR-LOCATION", "Member location mapping", "Serving and exited member IDs", "Branch mapped for a serving member; exited refused",
          "tests/e2e/test_oversight_administration.py"),
+        ("ENR-MEMBER-HOME", "Member home and phone layout", "Missing PAN; no nomination; phone width 360px",
+         "Savings, pending, nudges and life events shown; every member page fits a phone; menu behind one button",
+         "tests/e2e/test_member_home.py"),
     ]),
     ("Contributions", "tests/e2e/test_journey_a_ecr.py", [
         ("ECR-PAID", "ECR to member credit", "Valid monthly return", "TRRN paid, journal posted, member shares/passbook credited"),

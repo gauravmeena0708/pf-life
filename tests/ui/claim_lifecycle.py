@@ -30,7 +30,7 @@ class ClaimJourney:
         self.officers = {}
         self.claim_id = None
         self.done = False
-        switch_persona(self.member, persona, "/member/passbook", "My passbook", record, "Member")
+        switch_persona(self.member, persona, "/member", "Your PF at a glance", record, "Member")
         navigate_claims(self.member)
         metrics = account_section(self.member, account).locator(".metrics strong")
         expect(metrics).to_have_count(3)

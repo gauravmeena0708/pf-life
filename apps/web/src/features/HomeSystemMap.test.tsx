@@ -104,7 +104,7 @@ it("expands named roles to show activities and persona login links", () => {
   expect(summary.parentElement?.hasAttribute("open")).toBe(true);
   expect(within(card).getByText(STAKEHOLDERS.member.activities[0].does)).toBeTruthy();
   const link = within(card).getByRole("link", { name: "Try as Member A" });
-  expect(link.getAttribute("href")).toBe("/auth/login?persona=member-a&return_to=%2Fmember%2Fpassbook");
+  expect(link.getAttribute("href")).toBe("/auth/login?persona=member-a&return_to=%2Fmember");
 });
 
 it("reads interface and stakeholder lists directly from the generator", () => {

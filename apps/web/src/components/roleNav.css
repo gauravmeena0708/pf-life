@@ -1,0 +1,12 @@
+/* The primary menu on a phone: one "Menu" button instead of three rows of links (P2.9c). */
+.primary-nav .nav-toggle { display: none; }
+.primary-nav .nav-items { display: contents; }
+@media (max-width: 620px) {
+  .primary-nav .nav-toggle { display: inline-flex; gap: 8px; align-items: center; margin: 8px 0; padding: 8px 14px; border: 1px solid var(--navy);
+    border-radius: 4px; background: #fff; color: var(--navy); font-weight: 700; }
+  .primary-nav .nav-items { display: none; }
+  .primary-nav .nav-expanded .nav-items { display: flex; flex-direction: column; width: 100%; padding-bottom: 8px; }
+  .primary-nav .nav-expanded .nav-items > a, .primary-nav .nav-expanded .nav-group > button { text-align: left; }
+  .primary-nav .nav-expanded .nav-group { flex-direction: column; }
+  .primary-nav .nav-expanded .nav-menu { position: static; min-width: 0; max-width: none; box-shadow: none; }
+}

@@ -5,6 +5,7 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 
 import { api, type Envelope } from "../api/client";
 import { homeFor, memberMenus, menusFor, type NavGroup, type NavItem } from "../data/navigation";
+import "./roleNav.css";
 
 /** A menu item is the current page when its path matches and, for a link to a section, its section too. */
 const current = (to: string, pathname: string, hash: string) => {
@@ -21,10 +22,11 @@ export function RoleNav({ role }: { role: string | undefined }) {
     queryFn: () => api<Envelope<{ international_worker?: boolean }>>("/api/v1/members/me") });
   const menus = role === "member" ? memberMenus(profile.data?.data.international_worker === true) : menusFor(role);
   const [open, setOpen] = useState<number | null>(null);
+  const [expanded, setExpanded] = useState(false);          // the whole bar, on a phone (see roleNav.css)
   const bar = useRef<HTMLDivElement>(null);
   const text = (x: NavItem | NavGroup) => (x.labelKey ? t(x.labelKey) : x.label) ?? "";
 
-  useEffect(() => { setOpen(null); }, [location.pathname, location.hash]);
+  useEffect(() => { setOpen(null); setExpanded(false); }, [location.pathname, location.hash]);
   useEffect(() => {
     const outside = (e: PointerEvent) => { if (bar.current && !bar.current.contains(e.target as Node)) setOpen(null); };
     const escape = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(null); };
@@ -41,7 +43,10 @@ export function RoleNav({ role }: { role: string | undefined }) {
   );
 
   return (
-    <div className="primary-nav-inner shell-width" ref={bar}>
+    <div className={`primary-nav-inner shell-width ${expanded ? "nav-expanded" : ""}`} ref={bar}>
+      <button type="button" className="nav-toggle" aria-expanded={expanded} aria-controls="primary-nav-items"
+        onClick={() => setExpanded(!expanded)}>{expanded ? "Close menu" : "Menu"} <span aria-hidden="true">☰</span></button>
+      <div id="primary-nav-items" className="nav-items">
       <NavLink end to={homeFor(role)}>{t("navigation.home")}</NavLink>
       <NavLink to="/public">{t("navigation.public")}</NavLink>
       <NavLink to="/system-map">{t("navigation.systemMap")}</NavLink>
@@ -65,6 +70,7 @@ export function RoleNav({ role }: { role: string | undefined }) {
           </div>
         );
       })}
+      </div>
     </div>
   );
 }

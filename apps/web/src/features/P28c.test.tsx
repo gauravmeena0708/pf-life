@@ -293,7 +293,7 @@ it("keeps the member menu available while loading and then adds international co
 
 it.each([
   ["fo.edli", "/office/edli-claims"], ["fo.iw", "/office/international"],
-  ["ho.iwu", "/ho/agreements"], ["member", "/member/passbook"],
+  ["ho.iwu", "/ho/agreements"], ["member", "/member"],
 ])("provides the %s landing path and a working menu link", (role, path) => {
   expect(homeFor(role)).toBe(path); expect(menusFor(role).some((group) => group.to?.startsWith(path) || group.items?.some((item) => item.to?.startsWith(path)))).toBe(true);
 });

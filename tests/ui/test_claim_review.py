@@ -31,7 +31,7 @@ def test_member_submits_and_officers_return_claim_through_ui(ui_pages, recording
     claim_id = None
     withdrawn = False
     try:
-        switch_persona(member, "member-a", "/member/passbook", "My passbook", record, "Member")
+        switch_persona(member, "member-a", "/member", "Your PF at a glance", record, "Member")
         navigate_claims(member)
         choice = member.locator("label.claim-type").filter(has_text="Advance for medical treatment")
         expect(choice).to_have_count(1)

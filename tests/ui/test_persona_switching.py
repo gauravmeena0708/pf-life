@@ -15,7 +15,7 @@ def test_persona_switching_uses_real_login_and_role_landing(ui_pages, recording)
          "The security-role gate is checked through its rendered screen; backend permission coverage is in the security suite."],
     )
     page = ui_pages()
-    switch_persona(page, "member-a", "/member/passbook", "My passbook", record, "Portal user")
+    switch_persona(page, "member-a", "/member", "Your PF at a glance", record, "Portal user")
     expect(page.locator(".account-menu > summary")).to_contain_text("member")
     record.step(page, "Portal user", "Check the member workspace", "Confirm that the member passbook is displayed.",
                 "The landing page is My passbook and the active account identifies the member role.",

@@ -27,7 +27,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.8e** | Security incidents with CERT-In reporting (mock); the Concurrent Audit Cell's daily extract, alerts and OIC replies; the NDC Issue Tracker (freeze / de-freeze / login notice); the zonal fraud-risk case list; HR postings that move jurisdiction everywhere; district and employer dashboards; member location mapping | **Done** (30 Sep 2026) |
 | **P2.9a** | International workers are members: one member login and menu, with what does not apply to them disabled and explained, from rules in the rule set | **Done** (30 Sep 2026) |
 | P2.9b | Members of exempted establishments: PF held by the trust (passbook, claims and transfers say so and route correctly), pension and EDLI with EPFO; the trust's Annexure K | Planned — needs the Exemption Manual |
-| P2.9c | Member experience: a life-event home page, one consolidated view, plain-language status, nudges, a mobile pass | Planned |
+| **P2.9c** | Member experience: a life-event home page, one consolidated view, plain-language status, nudges, a mobile pass | **Done** (30 Sep 2026; built before P2.9b, which waits for the Exemption Manual) |
 
 ## P2.9 — plan
 
@@ -472,3 +472,24 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
   international-service `test_international.py` (404 for other members, status events), web `P28c.test.tsx`;
   end to end `tests/e2e/test_international_worker_member.py` (the persona's menu, passbook, refusals, an advance
   refused; a domestic member has no coverage page).
+
+## P2.9c — how it is built
+
+- **Member home** (`/member`, now the member's landing page; `MemberHomePage.tsx`): built only from APIs that
+  already exist, each loaded on its own so one failing call shows its error in its section and the rest still render.
+  *Your savings* — the total across every member ID of the member (claim-service's eligible-types balances joined
+  with member-service's service history), each member ID with its status, the total service and the best eligible
+  pension scenario. *What is pending* — open claims and pending applications, each led by the API's `next_step` and
+  the claim type's plain label. *To do* — nudges. *What do you want to do?* — six life events (changed jobs, need
+  money, leaving work, retiring, a death in the family, a wrong record) that lead into the existing forms; EPFO's menu
+  stays as it is.
+- **Nudges** (`memberHome.ts`, pure and unit-tested): an old member ID with a balance and no transfer; KYC not
+  verified (which parts); no current e-Nomination; a member ID with no exit and no contribution for two months while
+  a later one exists; contributions not yet in the passbook.
+- **Plain language**: the claims list leads with the next step and the claim type's label (the form number in small
+  text; no internal codes); applications show their state in words.
+- **Phone**: below 620px the menu bar is one *Menu* button (`roleNav.css`) that closes after navigating; life events
+  stack in one column; balances are a list, not a table. `tests/e2e/test_member_home.py` checks the home page's
+  sections and a nudge, and that every member page fits 360px with no sideways scroll.
+- **Not yet**: the Hindi translation of the new page (its strings are English literals); plain language in the
+  office screens.

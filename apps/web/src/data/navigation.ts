@@ -177,7 +177,7 @@ export function homeFor(role: string | undefined): string {
   if (role === "zo.fraud_committee") return "/zo/fraud-risk";
   if (role === "do.incharge") return "/do/dashboard";
   if (role === "ho.hr") return "/i/hrm";
-  if (role === "member") return "/member/passbook";
+  if (role === "member") return "/member";
   if (role?.startsWith("employer.")) return "/employer";
   if (role === "pensioner") return "/pensioner";
   if (role === "claimant") return "/claimant";

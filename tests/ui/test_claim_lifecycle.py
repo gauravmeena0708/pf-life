@@ -219,7 +219,7 @@ def test_claim_business_outcome(ui_pages, recording, case_id):
         journey.create(amount, chain=chain)
         if case_id == "CLM-OPEN-DUPLICATE":
             other = ui_pages()
-            switch_persona(other, "member-b", "/member/passbook", "My passbook", record, "Other member")
+            switch_persona(other, "member-b", "/member", "Your PF at a glance", record, "Other member")
             other.goto(BASE_URL + "/member/claims/" + journey.claim_id)
             expect(other.get_by_role("alert").first).to_contain_text(re.compile("not found", re.I))
             expect(other.locator("#claim-summary-heading")).to_have_count(0)

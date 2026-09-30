@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { api, command, rupees, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
-import { dateOnly } from "../journeyB";
+import { dateOnly, stateLabel } from "../journeyB";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 
@@ -34,7 +34,7 @@ const years = (months: number) => `${Math.floor(months / 12)} years ${months % 1
 
 /** View › Service History, Manage › Mark Exit, Online Services › One Member – One EPF Account (Form 13) and Annexure K. */
 export function ServicePage() {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const qc = useQueryClient();
   const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
@@ -179,7 +179,7 @@ export function ServicePage() {
           <thead><tr><th scope="col">Application</th><th scope="col">Reference</th><th scope="col">Status</th><th scope="col">Updated</th><th scope="col" /></tr></thead>
           <tbody>{apps.data.data.map((a) => (
             <tr key={a.application_id}><td>{a.title}{a.account_link_id ? <span className="muted small"> · {a.account_link_id}</span> : null}</td><td><code>{a.application_id}</code></td>
-              <td><span className="state-pill">{a.pending ? "pending" : "processed"} · {a.state.replaceAll("_", " ").toLowerCase()}</span></td>
+              <td><span className="state-pill">{stateLabel(a.state, t) || a.state.replaceAll("_", " ").toLowerCase()}</span></td>
               <td>{dateOnly(a.updated_at, i18n.language)}</td>
               <td>{a.process === "transfer_form13" && a.state === "APPROVED" ? <button type="button" disabled={busy || !!stepUp.request} onClick={() => showAnnexure(a.application_id)}>Annexure K</button> : null}</td></tr>
           ))}</tbody>
