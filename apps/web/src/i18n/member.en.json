@@ -1,0 +1,118 @@
+{
+  "memberHome": {
+    "eyebrow": "Member services",
+    "title": "Your PF at a glance",
+    "description": "Your accounts, requests and next steps in one place.",
+    "current": "My PF",
+    "uan": "UAN",
+    "loadingProfile": "Loading your profile…",
+    "savings": "Your savings",
+    "loadingSavings": "Loading your savings…",
+    "totalAcrossIds": "Total across all member IDs",
+    "balanceById": "Balance by member ID",
+    "memberId": "Member ID",
+    "primary": "Primary",
+    "totalService": "Total service:",
+    "serviceDuration": "{{years}} years {{months}} months",
+    "bestPension": "Best eligible pension estimate:",
+    "pensionPerMonth": "{{amount}} per month ({{label}})",
+    "noPension": "No eligible scenario yet.",
+    "seePension": "See the pension estimate",
+    "illustrative": "Illustrative figures for this demonstration. Check the account and pension details before making a decision.",
+    "pending": "What is pending",
+    "loadingPending": "Loading pending requests…",
+    "nothingPending": "Nothing is pending.",
+    "todo": "To do",
+    "loadingNext": "Loading your next steps…",
+    "allSet": "You are all set.",
+    "eventsHeading": "What do you want to do?",
+    "status": {
+      "ACTIVE": "active",
+      "EXITED": "exited",
+      "TRANSFERRED": "transferred"
+    },
+    "nudges": {
+      "transferTitle": "Move {{amount}} from {{establishment}} to your current account",
+      "transferDetail": "Member ID {{memberId}} still has a balance.",
+      "kycTitle": "Complete your KYC ({{fields}})",
+      "kycDetail": "Verify your identity and bank details for member services.",
+      "nominationTitle": "Add your nominee",
+      "nominationDetail": "Record a current e-Nomination for your family.",
+      "exitTitle": "Mark your exit from {{establishment}}",
+      "exitDetail": "The last contribution for member ID {{memberId}} was {{month}}.",
+      "passbookTitle": "{{count}} contribution(s) not yet in your passbook",
+      "passbookDetail": "{{message}}"
+    },
+    "events": {
+      "changedJobs": {
+        "title": "I changed jobs",
+        "description": "Bring your earlier PF balance into your current member account.",
+        "transfer": "Transfer my PF",
+        "autoTransfer": "Check auto-transfer",
+        "uan": "Know your UAN"
+      },
+      "needMoney": {
+        "title": "I need money for illness, a house, education or a wedding",
+        "description": "Check the advances available to you and their conditions.",
+        "advances": "See advances"
+      },
+      "leavingWork": {
+        "title": "I am leaving work",
+        "description": "Record your exit and review the claims available after leaving.",
+        "exit": "Mark exit",
+        "settlement": "Final settlement"
+      },
+      "retiring": {
+        "title": "I am retiring or want my pension",
+        "description": "Estimate your pension and explore pension applications.",
+        "estimate": "Pension estimate",
+        "form10d": "Form 10D",
+        "higher": "Higher pension"
+      },
+      "familyDeath": {
+        "title": "Someone in my family has died",
+        "description": "The nominee or family files the death claims — Forms 20, 10D and 5IF (EDLI) — at the regional office or through the claimant login.",
+        "public": "Public services"
+      },
+      "wrongRecord": {
+        "title": "Something in my record is wrong",
+        "description": "Request a correction or raise a grievance.",
+        "declaration": "Joint Declaration",
+        "grievance": "Raise a grievance"
+      }
+    }
+  },
+  "nav": {
+    "menu": "Menu",
+    "closeMenu": "Close menu"
+  },
+  "iw": {
+    "title": "International worker coverage",
+    "description": "Review your employment and coverage under the demonstration scheme.",
+    "current": "International worker",
+    "loading": "Loading coverage…",
+    "unavailable": "This service is available to members recorded as international workers.",
+    "details": "Worker details",
+    "name": "Name",
+    "worker": "International worker",
+    "yes": "Yes",
+    "no": "No",
+    "nationality": "Nationality",
+    "passport": "Passport",
+    "agreement": "Agreement",
+    "inForce": "In force from",
+    "maximumPosting": "Maximum posting:",
+    "maximumExtension": "Maximum extension:",
+    "months": "months",
+    "totalisation": "Totalisation:",
+    "noAgreement": "No agreement in this catalogue for your nationality.",
+    "employment": "Employment",
+    "memberId": "Member ID",
+    "establishment": "Establishment",
+    "joining": "Date of joining",
+    "exit": "Date of exit",
+    "inService": "In service",
+    "noEmployment": "No employment records.",
+    "profileNote": "As an international worker your EPF is on full wages (no wage ceiling) and it is paid out as a final settlement on leaving service in India at 58, or earlier under a social-security agreement with your country."
+  }
+}

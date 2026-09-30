@@ -12,7 +12,8 @@ export interface MemberHomeInput {
   passbook?: { pending: { message: string }[] };
 }
 
-export interface Nudge { id: string; title: string; detail: string; to: string; tone: "action" | "info" }
+export interface Nudge { id: string; titleKey: string; titleValues?: Record<string, string | number>;
+  detailKey: string; detailValues?: Record<string, string | number>; to: string; tone: "action" | "info" }
 export interface PendingItem { id: string; title: string; next: string; to: string }
 
 export function balances(input: MemberHomeInput) {
@@ -28,24 +29,30 @@ export function nudges(input: MemberHomeInput, today: Date): Nudge[] {
   const { accounts } = balances(input);
   for (const row of accounts) {
     if (row.date_of_exit && !row.transferred_to && !row.primary && row.balance_paise > 0) actions.push({
-      id: `old-id-balance:${row.account_link_id}`, title: `Move ${rupees(row.balance_paise)} from ${row.establishment_name} to your current account`,
-      detail: `Member ID ${row.account_link_id} still has a balance.`, to: "/member/service#transfer-heading", tone: "action" });
+      id: `old-id-balance:${row.account_link_id}`, titleKey: "memberHome.nudges.transferTitle",
+      titleValues: { amount: rupees(row.balance_paise), establishment: row.establishment_name },
+      detailKey: "memberHome.nudges.transferDetail", detailValues: { memberId: row.account_link_id },
+      to: "/member/service#transfer-heading", tone: "action" });
   }
   const missing = input.profile && (["aadhaar", "pan", "bank"] as const).filter((key) => input.profile?.kyc[key] !== "VERIFIED");
-  if (missing?.length) actions.push({ id: "kyc", title: `Complete your KYC (${missing.map((key) => key === "pan" ? "PAN" : key === "aadhaar" ? "Aadhaar" : "bank").join(", ")})`,
-    detail: "Verify your identity and bank details for member services.", to: "/member/kyc", tone: "action" });
-  if (input.nominations && input.nominations.current?.state !== "CURRENT") actions.push({ id: "nomination", title: "Add your nominee",
-    detail: "Record a current e-Nomination for your family.", to: "/member/nomination#nomination-heading", tone: "action" });
+  if (missing?.length) actions.push({ id: "kyc", titleKey: "memberHome.nudges.kycTitle",
+    titleValues: { fields: missing.map((key) => key === "pan" ? "PAN" : key === "aadhaar" ? "Aadhaar" : "bank").join(", ") },
+    detailKey: "memberHome.nudges.kycDetail", to: "/member/kyc", tone: "action" });
+  if (input.nominations && input.nominations.current?.state !== "CURRENT") actions.push({ id: "nomination", titleKey: "memberHome.nudges.nominationTitle",
+    detailKey: "memberHome.nudges.nominationDetail", to: "/member/nomination#nomination-heading", tone: "action" });
   const cutoffMonth = new Date(Date.UTC(today.getFullYear(), today.getMonth() - 2, 1)).toISOString().slice(0, 7);
   for (const row of accounts) {
     if (!row.date_of_exit && row.mark_exit_allowed && row.last_contribution_month && row.last_contribution_month <= cutoffMonth
       && accounts.some((other) => other.account_link_id !== row.account_link_id && other.date_of_joining > row.date_of_joining)) actions.push({
-      id: `exit-not-marked:${row.account_link_id}`, title: `Mark your exit from ${row.establishment_name}`,
-      detail: `The last contribution for member ID ${row.account_link_id} was ${row.last_contribution_month}.`, to: "/member/service#exit-heading", tone: "action" });
+      id: `exit-not-marked:${row.account_link_id}`, titleKey: "memberHome.nudges.exitTitle",
+      titleValues: { establishment: row.establishment_name }, detailKey: "memberHome.nudges.exitDetail",
+      detailValues: { memberId: row.account_link_id, month: row.last_contribution_month },
+      to: "/member/service#exit-heading", tone: "action" });
   }
   const count = input.passbook?.pending.length ?? 0;
-  if (count) actions.push({ id: "passbook-pending", title: `${count} contribution(s) not yet in your passbook`,
-    detail: input.passbook!.pending[0].message, to: "/member/passbook", tone: "info" });
+  if (count) actions.push({ id: "passbook-pending", titleKey: "memberHome.nudges.passbookTitle",
+    titleValues: { count }, detailKey: "memberHome.nudges.passbookDetail", detailValues: { message: input.passbook!.pending[0].message },
+    to: "/member/passbook", tone: "info" });
   return actions;
 }
 

@@ -30,7 +30,8 @@ describe("balances", () => {
 describe("nudges", () => {
   it("prompts transfer only for a non-primary exited account with balance", () => {
     expect(nudges(input, today).find((item) => item.id.startsWith("old-id-balance"))).toMatchObject({
-      title: "Move ₹1,200.50 from Old Works to your current account", to: "/member/service#transfer-heading" });
+      titleKey: "memberHome.nudges.transferTitle", titleValues: { amount: "₹1,200.50", establishment: "Old Works" },
+      detailKey: "memberHome.nudges.transferDetail", detailValues: { memberId: "OLD" }, to: "/member/service#transfer-heading" });
     for (const change of [{ date_of_exit: null }, { transferred_to: "NEW" }, { primary: true }]) {
       expect(nudges(withInput({ service: { ...input.service!, member_ids: [{ ...old, ...change }, current] } }), today).some((item) => item.id.startsWith("old-id-balance"))).toBe(false);
     }
@@ -41,7 +42,7 @@ describe("nudges", () => {
   it("prompts KYC only for unverified fields", () => {
     expect(nudges(input, today).some((item) => item.id === "kyc")).toBe(false);
     expect(nudges(withInput({ profile: { ...input.profile!, kyc: { aadhaar: "PENDING", pan: "VERIFIED", bank: "NOT_VERIFIED" } } }), today)
-      .find((item) => item.id === "kyc")?.title).toBe("Complete your KYC (Aadhaar, bank)");
+      .find((item) => item.id === "kyc")).toMatchObject({ titleKey: "memberHome.nudges.kycTitle", titleValues: { fields: "Aadhaar, bank" } });
   });
 
   it("prompts nomination for absent or inactive records", () => {
@@ -66,7 +67,8 @@ describe("nudges", () => {
   it("shows pending passbook entries after actions and omits the notice when clear", () => {
     expect(nudges(input, today).some((item) => item.id === "passbook-pending")).toBe(false);
     const result = nudges(withInput({ passbook: { pending: [{ message: "Awaiting posting" }] } }), today);
-    expect(result.at(-1)).toMatchObject({ id: "passbook-pending", tone: "info", title: "1 contribution(s) not yet in your passbook" });
+    expect(result.at(-1)).toMatchObject({ id: "passbook-pending", tone: "info", titleKey: "memberHome.nudges.passbookTitle",
+      titleValues: { count: 1 }, detailValues: { message: "Awaiting posting" } });
   });
 });
 

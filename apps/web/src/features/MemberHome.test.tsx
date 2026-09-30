@@ -1,10 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { act, cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 
 import { api } from "../api/client";
-import "../i18n";
+import i18n from "../i18n";
 import { MemberHomePage } from "./member/MemberHomePage";
 
 vi.mock("../api/client", async (importOriginal) => ({ ...await importOriginal<typeof import("../api/client")>(), api: vi.fn() }));
@@ -55,4 +55,16 @@ it("keeps the other sections visible when nominations fails", async () => {
   expect(await screen.findByText("Error: Nomination service unavailable")).toBeTruthy();
   expect(screen.getByRole("heading", { name: "What is pending" })).toBeTruthy();
   expect(screen.getByRole("heading", { name: "What do you want to do?" })).toBeTruthy();
+});
+
+it("renders the member home heading in Hindi and switches back to English", async () => {
+  try {
+    await act(async () => { await i18n.changeLanguage("hi"); });
+    mount();
+    expect(screen.getByRole("heading", { name: "आपकी भविष्य निधि एक नज़र में" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "मैंने नौकरी बदली है" })).toBeTruthy();
+  } finally {
+    await act(async () => { await i18n.changeLanguage("en"); });
+  }
+  expect(screen.getByRole("heading", { name: "Your PF at a glance" })).toBeTruthy();
 });

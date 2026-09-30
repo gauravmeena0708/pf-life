@@ -45,7 +45,7 @@ export function RoleNav({ role }: { role: string | undefined }) {
   return (
     <div className={`primary-nav-inner shell-width ${expanded ? "nav-expanded" : ""}`} ref={bar}>
       <button type="button" className="nav-toggle" aria-expanded={expanded} aria-controls="primary-nav-items"
-        onClick={() => setExpanded(!expanded)}>{expanded ? "Close menu" : "Menu"} <span aria-hidden="true">☰</span></button>
+        onClick={() => setExpanded(!expanded)}>{t(expanded ? "nav.closeMenu" : "nav.menu")} <span aria-hidden="true">☰</span></button>
       <div id="primary-nav-items" className="nav-items">
       <NavLink end to={homeFor(role)}>{t("navigation.home")}</NavLink>
       <NavLink to="/public">{t("navigation.public")}</NavLink>

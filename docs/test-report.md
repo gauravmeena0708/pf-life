@@ -106,6 +106,8 @@ the home page's sections and the KYC nudge for `member-b`, and every member page
 the menu behind one button); must-deny 18 passed; UI smoke 2 passed, now landing members on `/member`. No service
 changed, so the unit suites of P2.9a stand. Reviewing the first draft found a second `<main>` inside the page, a
 duplicate *Home* menu item and a balance table that showed only its first column on a phone; all fixed.
+Then the Hindi translations: web 149 passed (a new test renders the member home in Hindi); `test_member_home.py` and
+`test_international_worker_member.py` pass unchanged, as the English text is the same.
 
 ## Update — Phase 2, slice 9a: international workers are members (30 September 2026)
 

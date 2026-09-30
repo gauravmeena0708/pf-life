@@ -491,5 +491,7 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 - **Phone**: below 620px the menu bar is one *Menu* button (`roleNav.css`) that closes after navigating; life events
   stack in one column; balances are a list, not a table. `tests/e2e/test_member_home.py` checks the home page's
   sections and a nudge, and that every member page fits 360px with no sideways scroll.
-- **Not yet**: the Hindi translation of the new page (its strings are English literals); plain language in the
-  office screens.
+- **Hindi**: the member home, life events, nudges, the phone menu and the international-worker screens are translated
+  (`i18n/member.en.json` / `member.hi.json`, merged into the resources); the 17 strings left marked `[TODO-translate]`
+  since Phase 1 (banner, title, persona menu, interface page) are translated too.
+- **Not yet**: plain language in the office screens.
