@@ -1,3 +1,5 @@
+import { statusLabel } from "../statusLabel";
+import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 
@@ -58,6 +60,7 @@ function fileAsBase64(file: File): Promise<string> {
 }
 
 export function EsignList({ canManage }: { canManage: boolean }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
@@ -122,7 +125,7 @@ export function EsignList({ canManage }: { canManage: boolean }) {
     {notice ? <p role="status" className="ok">{notice}</p> : null}
     {signatories.data?.data.length ? <ul className="plain-list">{signatories.data.data.map((signatory) =>
       <li key={signatory.grant_id} className="stack">
-        <h3>{signatory.username} <span className="state-pill">{signatory.status}</span></h3>
+        <h3>{signatory.username} <span className="state-pill">{statusLabel(signatory.status, t)}</span></h3>
         {canManage && signatory.status === "ACTIVE" ? <>
           <form className="stack" aria-label={`Register DSC for ${signatory.username}`} onSubmit={(e) => register(e, signatory, "DSC")}>
             <h4>Register DSC</h4><div className="form-row">
@@ -155,7 +158,7 @@ export function EsignList({ canManage }: { canManage: boolean }) {
       <th scope="col">Letter file name</th><th scope="col">Office note</th>
     </tr></thead><tbody>{registrations.data.data.map((registration) => <tr key={registration.reg_id}>
       <th scope="row">{registration.username}</th><td>{registration.purpose}</td><td>{registration.method ?? "—"}</td>
-      <td>{registration.state.replaceAll("_", " ")}</td><td>{registration.letter?.filename ?? "—"}</td>
+      <td>{statusLabel(registration.state, t)}</td><td>{registration.letter?.filename ?? "—"}</td>
       <td>{registration.decision_note || "—"}</td>
     </tr>)}</tbody></table></div> : registrations.data ? <p className="muted">No signature registrations recorded.</p> : null}
     <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />

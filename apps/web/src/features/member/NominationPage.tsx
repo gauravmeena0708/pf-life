@@ -1,3 +1,5 @@
+import { statusLabel } from "../statusLabel";
+import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState, type FormEvent } from "react";
 
@@ -24,7 +26,8 @@ interface UanLookup {
 }
 
 function NominationDetails({ item }: { item: Nomination }) {
-  return <div className="stack"><p><code>{item.nomination_id}</code> · {item.state.replaceAll("_", " ")}
+  const { t } = useTranslation();
+  return <div className="stack"><p><code>{item.nomination_id}</code> · {statusLabel(item.state, t)}
     {item.has_family ? " · Has family" : " · No family"}</p>
     <p>Signed with {item.signed_with ?? "—"} · {item.signed_at ?? "—"}</p>
     <div className="table-scroll"><table><thead><tr><th scope="col">Name</th><th scope="col">Relation</th>
@@ -37,6 +40,7 @@ function NominationDetails({ item }: { item: Nomination }) {
 }
 
 export function NominationPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const stepUp = useStepUp();
   const nextRow = useRef(1);
@@ -160,7 +164,7 @@ export function NominationPage() {
           {lookup.found.length ? <div className="table-scroll"><table><thead><tr><th scope="col">UAN</th><th scope="col">Aadhaar verified</th>
             <th scope="col">Latest establishment</th><th scope="col">Status</th></tr></thead><tbody>{lookup.found.map((item) => <tr key={item.uan}>
             <th scope="row"><code>{item.uan}</code></th><td>{item.aadhaar_verified ? "Yes" : "No"}</td>
-            <td>{item.latest_establishment || "—"}</td><td>{item.status.replaceAll("_", " ")}</td>
+            <td>{item.latest_establishment || "—"}</td><td>{statusLabel(item.status, t)}</td>
           </tr>)}</tbody></table></div> : <p className="muted">No matching UAN found.</p>}
         </div> : null}
       </section>

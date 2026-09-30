@@ -1,3 +1,5 @@
+import { statusLabel } from "../statusLabel";
+import { useTranslation } from "react-i18next";
 import { rupees } from "../../api/client";
 
 export interface HigherPensionWage {
@@ -24,8 +26,9 @@ export function HigherPensionDues({ data }: { data: Omit<HigherPensionPreview, "
 }
 
 export function HigherPensionDetails({ option }: { option: HigherPensionOption }) {
+  const { t } = useTranslation();
   return <div className="stack"><dl className="kv"><dt>UAN</dt><dd>{option.uan}</dd>
-    <dt>Member ID</dt><dd>{option.account_link_id}</dd><dt>State</dt><dd>{option.state.replaceAll("_", " ")}</dd>
+    <dt>Member ID</dt><dd>{option.account_link_id}</dd><dt>State</dt><dd>{statusLabel(option.state, t)}</dd>
     <dt>Higher wages from</dt><dd>{option.higher_wages_from}</dd><dt>Rule version</dt><dd>{option.rule_version ?? "—"}</dd>
     <dt>Submitted</dt><dd>{option.submitted_at ?? "—"}</dd><dt>Validated</dt><dd>{option.validated_at ?? "—"}</dd>
     <dt>Employer note</dt><dd>{option.employer_note ?? "—"}</dd></dl>

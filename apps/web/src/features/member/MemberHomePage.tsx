@@ -1,3 +1,4 @@
+import { statusLabel } from "../statusLabel";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
@@ -12,7 +13,6 @@ import "./memberHome.css";
 type Data<K extends keyof MemberHomeInput> = NonNullable<MemberHomeInput[K]>;
 const base = "/api/v1/members/me";
 const load = <K extends keyof MemberHomeInput>(path: string) => api<Envelope<Data<K>>>(`${base}${path}`);
-const words = (value: string) => value.replaceAll("_", " ").toLowerCase();
 
 export function MemberHomePage() {
   const { t } = useTranslation();
@@ -28,7 +28,7 @@ export function MemberHomePage() {
     claims: claims.data?.data, applications: applications.data?.data, nominations: nominations.data?.data,
     pension: pension.data?.data, passbook: passbook.data?.data };
   const savings = balances(input);
-  const pending = pendingItems(input);
+  const pending = pendingItems(input, t);
   const tasks = nudges(input, new Date());
   const best = input.pension?.scenarios.filter((scenario) => scenario.eligible)
     .reduce<(typeof input.pension.scenarios)[number] | null>((top, scenario) => !top || scenario.monthly_paise > top.monthly_paise ? scenario : top, null);
@@ -44,7 +44,7 @@ export function MemberHomePage() {
       {service.isLoading || eligibility.isLoading || pension.isLoading ? <p role="status">{t("memberHome.loadingSavings")}</p> : null}
       {input.eligibility ? <div className="member-home-total"><span>{t("memberHome.totalAcrossIds")}</span><strong>{rupees(savings.total_paise)}</strong></div> : null}
       {input.service && input.eligibility ? <ul className="member-home-accounts" aria-label={t("memberHome.balanceById")}>{savings.accounts.map((row) => <li key={row.account_link_id}>
-        <span><strong>{row.establishment_name}</strong><small>{t("memberHome.memberId")} <code>{row.account_link_id}</code>{row.primary ? <span className="state-pill member-home-primary">{t("memberHome.primary")}</span> : null} · {t(`memberHome.status.${row.status}`, { defaultValue: words(row.status) })}</small></span>
+        <span><strong>{row.establishment_name}</strong><small>{t("memberHome.memberId")} <code>{row.account_link_id}</code>{row.primary ? <span className="state-pill member-home-primary">{t("memberHome.primary")}</span> : null} · {statusLabel(row.status, t)}</small></span>
         <strong className="numeric">{rupees(row.balance_paise)}</strong></li>)}</ul> : null}
       {input.service ? <p><strong>{t("memberHome.totalService")}</strong> {t("memberHome.serviceDuration", { years: Math.floor(input.service.total_service_months / 12), months: input.service.total_service_months % 12 })}</p> : null}
       {input.pension ? <p><strong>{t("memberHome.bestPension")}</strong> {best ? t("memberHome.pensionPerMonth", { amount: rupees(best.monthly_paise), label: best.label }) : t("memberHome.noPension")} <Link to="/member/profile#pension-estimate-heading">{t("memberHome.seePension")}</Link></p> : null}

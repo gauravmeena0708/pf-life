@@ -1,3 +1,6 @@
+import { statusLabel } from "../statusLabel";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
@@ -12,10 +15,11 @@ interface KycRequest { request_id: string; kyc_type: string; masked_value: strin
 interface Kyc { aadhaar: string; pan: string; bank: string; pan_masked: string | null; bank_ifsc: string; bank_account_last4: string; requests: KycRequest[] }
 interface Readiness { uan: string; accounts: { account_link_id: string; establishment_name: string; ready_for: string[]; blockers: { code: string; blocks: string[]; fix: string }[] }[] }
 
-const pill = (v: string) => <span className="state-pill">{v.replaceAll("_", " ").toLowerCase()}</span>;
+const pill = (v: string, t: TFunction) => <span className="state-pill">{statusLabel(v, t)}</span>;
 
 /** Manage › KYC: status, seeding PAN and bank (mock NSDL / penny-drop), the employer's approval, and readiness. */
 export function KycPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
@@ -54,9 +58,9 @@ export function KycPage() {
       {k ? (
         <section className="card stack" aria-labelledby="kyc-heading"><h2 id="kyc-heading">KYC status</h2>
           <dl className="kv">
-            <dt>Aadhaar</dt><dd>{pill(k.aadhaar)}</dd>
-            <dt>PAN</dt><dd>{pill(k.pan)} {k.pan_masked ? <code>{k.pan_masked}</code> : null}</dd>
-            <dt>Bank account</dt><dd>{pill(k.bank)} {k.bank_account_last4 !== "-" ? <>ending <code>{k.bank_account_last4}</code> · IFSC <code>{k.bank_ifsc}</code></> : null}</dd>
+            <dt>Aadhaar</dt><dd>{pill(k.aadhaar, t)}</dd>
+            <dt>PAN</dt><dd>{pill(k.pan, t)} {k.pan_masked ? <code>{k.pan_masked}</code> : null}</dd>
+            <dt>Bank account</dt><dd>{pill(k.bank, t)} {k.bank_account_last4 !== "-" ? <>ending <code>{k.bank_account_last4}</code> · IFSC <code>{k.bank_ifsc}</code></> : null}</dd>
           </dl>
           <p className="muted small"><Link to="/member/uan-card">View your UAN card</Link></p>
         </section>
@@ -82,7 +86,7 @@ export function KycPage() {
             <thead><tr><th scope="col">Request</th><th scope="col">Type</th><th scope="col">Detail</th><th scope="col">Check</th><th scope="col">Status</th></tr></thead>
             <tbody>{k.requests.map((r) => <tr key={r.request_id}><td><code>{r.request_id}</code></td><td>{r.kyc_type}</td><td><code>{r.masked_value}</code></td>
               <td>{r.verification.verifier}: {r.verification.verified ? "verified" : r.verification.reason}</td>
-              <td>{pill(r.state)}{r.decision_note ? <span className="muted small"> — {r.decision_note}</span> : null}</td></tr>)}</tbody>
+              <td>{pill(r.state, t)}{r.decision_note ? <span className="muted small"> — {r.decision_note}</span> : null}</td></tr>)}</tbody>
           </table></div>
         </section>
       ) : null}
@@ -91,7 +95,7 @@ export function KycPage() {
           {ready.data.data.accounts.map((a) => (
             <div key={a.account_link_id} className="stack">
               <p><strong>{a.account_link_id}</strong> · {a.establishment_name} — {a.ready_for.length ? `ready for: ${a.ready_for.map((x) => x.replace("_", " ").toLowerCase()).join(", ")}` : "not ready for any claim"}</p>
-              {a.blockers.length ? <ul>{a.blockers.map((b) => <li key={b.code}><code>{b.code}</code> — {b.fix}</li>)}</ul> : null}
+              {a.blockers.length ? <ul>{a.blockers.map((b) => <li key={b.code}>{b.fix} <code className="muted small">{b.code}</code></li>)}</ul> : null}
             </div>
           ))}
         </section>
@@ -105,6 +109,7 @@ interface Card { uan: string; name: string; father_or_spouse_name: string | null
 
 /** View › UAN Card (printable). */
 export function UanCardPage() {
+  const { t } = useTranslation();
   const card = useQuery({ queryKey: ["uan-card"], retry: false, queryFn: () => api<Envelope<Card>>("/api/v1/members/me/uan-card") });
   const c = card.data?.data;
   return (
@@ -117,7 +122,7 @@ export function UanCardPage() {
           <p className="figure">UAN {c.uan.replace(/(\d{4})(?=\d)/g, "$1 ")}</p>
           <dl className="kv"><dt>Name</dt><dd>{c.name}</dd><dt>Father's / spouse's name</dt><dd>{c.father_or_spouse_name ?? "—"}</dd>
             <dt>Date of birth</dt><dd>{c.date_of_birth}</dd><dt>Gender</dt><dd>{c.gender}</dd>
-            <dt>KYC</dt><dd>Aadhaar {c.kyc.aadhaar?.toLowerCase()} · PAN {c.kyc.pan?.toLowerCase().replaceAll("_", " ")} · bank {c.kyc.bank?.toLowerCase().replaceAll("_", " ")}</dd></dl>
+            <dt>KYC</dt><dd>Aadhaar {statusLabel(c.kyc.aadhaar, t)} · PAN {statusLabel(c.kyc.pan, t)} · bank {statusLabel(c.kyc.bank, t)}</dd></dl>
           <p className="muted small">{c.issued_by}</p>
           <div className="actions"><button type="button" onClick={() => window.print()}>Print</button></div>
         </div>

@@ -26,11 +26,6 @@
     "loadingNext": "Loading your next steps…",
     "allSet": "You are all set.",
     "eventsHeading": "What do you want to do?",
-    "status": {
-      "ACTIVE": "active",
-      "EXITED": "exited",
-      "TRANSFERRED": "transferred"
-    },
     "nudges": {
       "transferTitle": "Move {{amount}} from {{establishment}} to your current account",
       "transferDetail": "Member ID {{memberId}} still has a balance.",

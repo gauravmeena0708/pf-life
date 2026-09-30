@@ -1,3 +1,5 @@
+import { statusLabel } from "../statusLabel";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -14,6 +16,7 @@ export interface Circular {
 interface CircularList { circulars: Circular[]; categories: string[]; note: string }
 
 export function CircularsList() {
+  const { t } = useTranslation();
   const [params, setParams] = useSearchParams();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const category = params.get("category") ?? "";
@@ -49,7 +52,7 @@ export function CircularsList() {
     {list.data?.data.circulars.length === 0 ? <p>No matching circulars.</p> : null}
     <ul className="result-cards">{list.data?.data.circulars.map((item) => <li key={item.circular_id}>
       <div className="stack"><h3><button type="button" className="lookup-link" onClick={() => setSelectedId(item.circular_id)}>{item.title}</button></h3>
-        <p>{item.number} · Version {item.version} · {item.issued_on} · {item.state.replaceAll("_", " ").toLowerCase()}</p>
+        <p>{item.number} · Version {item.version} · {item.issued_on} · {statusLabel(item.state, t)}</p>
         <p>{item.summary}</p><Link to={`?${new URLSearchParams({ number: item.number })}`}>Versions of {item.number}</Link>
       </div>
     </li>)}</ul>

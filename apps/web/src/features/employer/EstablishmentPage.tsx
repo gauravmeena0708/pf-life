@@ -1,3 +1,5 @@
+import { statusLabel } from "../statusLabel";
+import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState, type FormEvent } from "react";
 
@@ -37,6 +39,7 @@ function Facts({ rows }: { rows: [string, unknown][] }) {
 }
 
 export function EstablishmentPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
@@ -179,7 +182,7 @@ export function EstablishmentPage() {
 
     <section className="card stack" aria-labelledby="est-config-heading"><h2 id="est-config-heading">Configuration</h2>
       {config.data ? <Facts rows={[["Coverage type", config.data.data.coverage_type], ["Coverage date", config.data.data.coverage_date],
-        ["Exemption status", config.data.data.exemption_status], ["Establishment type", config.data.data.establishment_type],
+        ["Exemption status", statusLabel(config.data.data.exemption_status, t)], ["Establishment type", config.data.data.establishment_type],
         ["Industry group", config.data.data.industry_group], ["Jurisdiction office", config.data.data.jurisdiction_office],
         ["Schemes", config.data.data.schemes.join(", ")], ["Sub codes", config.data.data.sub_codes.join(", ")],
         ["Address", [config.data.data.address?.line, config.data.data.address?.city, config.data.data.address?.district,
@@ -205,7 +208,7 @@ export function EstablishmentPage() {
       </> : null}
       <h3>Your change requests</h3>
       {changes.data?.data.length ? <ul className="plain-list">{changes.data.data.map((request) => <li key={request.request_id}>
-        <strong>{request.request_id}</strong> · {request.kind} <span className="state-pill">{request.state}</span>
+        <strong>{request.request_id}</strong> · {request.kind} <span className="state-pill">{statusLabel(request.state, t)}</span>
         <ul>{Object.entries(request.changes).map(([field, value]) => <li key={field}>{field.replaceAll("_", " ")}: {show(value.from)} → {show(value.to)}</li>)}</ul>
         <p className="small">Reason: {request.reason}{request.decision_note ? ` · Decision note: ${request.decision_note}` : ""}</p>
       </li>)}</ul> : changes.data ? <p className="muted">No change requests.</p> : null}
@@ -215,7 +218,7 @@ export function EstablishmentPage() {
       {kyc.data ? <><p className="muted small">{kyc.data.data.note}</p><div className="table-scroll"><table><thead><tr>
         <th scope="col">Type</th><th scope="col">Value</th><th scope="col">Status</th><th scope="col">Reference</th>
       </tr></thead><tbody>{(["PAN", "GSTIN", "TAN", "CIN", "LIN"] as KycType[]).map((kind) => <tr key={kind}>
-        <th scope="row">{kind}</th><td>{show(kyc.data.data.kyc[kind]?.value)}</td><td>{show(kyc.data.data.kyc[kind]?.status)}</td>
+        <th scope="row">{kind}</th><td>{show(kyc.data.data.kyc[kind]?.value)}</td><td>{statusLabel(kyc.data.data.kyc[kind]?.status, t)}</td>
         <td>{show(kyc.data.data.kyc[kind]?.reference)}</td></tr>)}</tbody></table></div></> : null}
       {canChange ? <form className="stack" aria-labelledby="seed-kyc-heading" onSubmit={seedKyc}><h3 id="seed-kyc-heading">Verify a KYC identifier</h3>
         <div className="form-row"><label>Type<select name="type">{(["PAN", "GSTIN", "TAN", "CIN", "LIN"] as KycType[]).map((kind) =>
@@ -223,7 +226,7 @@ export function EstablishmentPage() {
           <label>Value<input name="value" required minLength={5} maxLength={30} /></label></div>
         <div className="actions"><button type="submit" className="primary" disabled={!establishmentId}>Verify</button></div></form> : null}
       {kycResult ? <p role="status" className={kycResult.result === "VERIFIED" ? "ok" : "pending-notice"}>
-        {kycResult.result}: {kycResult.reason} Reference: {kycResult.reference}</p> : null}
+        {statusLabel(kycResult.result, t)}: {kycResult.reason} Reference: {kycResult.reference}</p> : null}
     </section>
 
     <section className="card stack" aria-labelledby="est-bank-heading"><h2 id="est-bank-heading">Bank accounts</h2>
@@ -232,7 +235,7 @@ export function EstablishmentPage() {
         {banks.data.data.map((bank) => <tr key={bank.account_id}><td>{bank.bank}</td><td>{bank.ifsc}</td>
           <td>•••• {bank.account_last4}</td><td>{bank.purpose}</td><td>{show(bank.verified)}</td></tr>)}</tbody></table></div>
         : banks.data ? <p className="muted">No bank accounts recorded.</p> : null}
-      <h3>Exemption</h3>{exemption.data ? <Facts rows={[["Status", exemption.data.data.exemption_status],
+      <h3>Exemption</h3>{exemption.data ? <Facts rows={[["Status", statusLabel(exemption.data.data.exemption_status, t)],
         ["Exempted", exemption.data.data.exempted], ["Note", exemption.data.data.note]]} /> : null}
     </section>
 

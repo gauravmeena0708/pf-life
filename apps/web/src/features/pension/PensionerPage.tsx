@@ -1,3 +1,5 @@
+import { statusLabel } from "../statusLabel";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -43,6 +45,7 @@ interface PensionPayment {
 }
 
 export function PensionerPage() {
+  const { t } = useTranslation();
   const [showAllPayments, setShowAllPayments] = useState(false);
   const pension = useQuery({
     queryKey: ["pensioner-me"],
@@ -92,7 +95,7 @@ export function PensionerPage() {
               <td>{revision.effective_from}</td>
               <td>{rupees(revision.old_monthly_paise)} → {rupees(revision.new_monthly_paise)}</td>
               <td>{rupees(revision.arrears_paise)}</td>
-              <td><span className="state-pill">{revision.state.toLowerCase()}</span></td>
+              <td><span className="state-pill">{statusLabel(revision.state, t)}</span></td>
               <td>{revision.from_rule_version} → {revision.to_rule_version}</td>
             </tr>)}</tbody>
           </table></div> : <p className="muted small">No revisions.</p>}

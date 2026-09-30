@@ -194,7 +194,7 @@ it("shows employer rejection and the returned next step, without offering a bank
   renderPage(<ClaimDetailPage />, "/member/claims/CLM-1");
   expect(await screen.findByText("The bank account cannot be switched at this claim stage.")).toBeTruthy();
   expect(screen.getByText("Review the employer's rejection note.")).toBeTruthy();
-  expect(screen.getByText("rejected by employer")).toBeTruthy();
+  expect(screen.getByText("Rejected by employer")).toBeTruthy();
   expect(screen.queryByRole("button", { name: "Switch bank with one-time code" })).toBeNull();
 });
 
@@ -248,7 +248,7 @@ it("binds bulk exit upload to the establishment and preserves partial success re
   const content = `uan,account_link_id,date_of_exit,reason\n${uan},AL-1,2026-08-31,CESSATION\n${uan},AL-INVALID,2026-08-31,RETIREMENT`;
   fill(form, "CSV content", content); fireEvent.submit(form);
   expect(await screen.findByText("Member ID does not belong to this establishment.")).toBeTruthy();
-  expect(screen.getByText("ACCEPTED")).toBeTruthy(); expect(screen.getByText("ERROR")).toBeTruthy();
+  expect(screen.getByText("Accepted")).toBeTruthy(); expect(screen.getByText("Could not process")).toBeTruthy();
   expect(command).toHaveBeenCalledWith("POST", `${employerBase}/members/exit-bulk-uploads`, { content }, { stepUpToken: "step-up-token" });
   expect(ask).toHaveBeenCalledWith(expect.objectContaining({ action: "mark-exit-bulk", resourceId: "EST-1" }));
 });

@@ -1,3 +1,5 @@
+import { statusLabel } from "../statusLabel";
+import { useTranslation } from "react-i18next";
 import { useState, type FormEvent, type ReactNode } from "react";
 
 import { api, command, type Envelope } from "../../api/client";
@@ -11,9 +13,9 @@ interface PublicResult {
   note?: string; tier?: string; resolved_at?: string | null; resolution?: string | null;
   form_type?: string; next_step?: string; filed_on?: string; steps?: { at: string | null; state: string }[];
 }
-const label = (value: string) => value.replaceAll("_", " ").toLowerCase();
 
 function PublicForm({ id, title, path, children }: { id: string; title: string; path: string; children: ReactNode }) {
+  const { t } = useTranslation();
   const [challenge, setChallenge] = useState<Challenge | null>(null);
   const [answer, setAnswer] = useState("");
   const [busy, setBusy] = useState(false);
@@ -78,7 +80,7 @@ function PublicForm({ id, title, path, children }: { id: string; title: string; 
     {busy ? <p role="status">Please wait…</p> : null}
     <ProblemMessage error={error} />
     {result ? <div className="profile-card stack" role="status">
-      <p><strong>{result.registration_no ?? result.claim_id}</strong> · {label(result.state)}</p>
+      <p><strong>{result.registration_no ?? result.claim_id}</strong> · {statusLabel(result.state, t)}</p>
       <dl className="kv">
         {result.office_id ? <><dt>Office</dt><dd>{result.office_id}</dd></> : null}
         {result.tier ? <><dt>Handling tier</dt><dd>{result.tier}</dd></> : null}
@@ -90,7 +92,7 @@ function PublicForm({ id, title, path, children }: { id: string; title: string; 
       </dl>
       {result.note ? <p>{result.note}</p> : null}
       {result.next_step ? <p>{result.next_step}</p> : null}
-      {result.steps?.length ? <ol>{result.steps.map((step, index) => <li key={index}>{dateTime(step.at, "en")} · {label(step.state)}</li>)}</ol> : null}
+      {result.steps?.length ? <ol>{result.steps.map((step, index) => <li key={index}>{dateTime(step.at, "en")} · {statusLabel(step.state, t)}</li>)}</ol> : null}
     </div> : null}
   </section>;
 }
@@ -100,14 +102,15 @@ function MobileField() {
 }
 
 export function PublicGrievancesPage() {
+  const { t } = useTranslation();
   return <section className="stack" aria-labelledby="public-grievances-page-heading">
     <PageHeader id="public-grievances-page-heading" eyebrow="Public services · synthetic POC" title="Grievances without login"
       description="File a grievance or check its progress using your registration number and mobile number." current="Grievances" parent={{ label: "Public services", to: "/public" }} />
     <PublicForm id="public-grievance-heading" title="File a grievance" path="grievances">
       <label>Name<input name="name" required minLength={2} maxLength={120} autoComplete="name" /></label><MobileField />
       <div className="form-row">
-        <label>Complainant type<select name="complainant_type" required>{["PENSIONER", "EMPLOYER", "MEMBER", "OTHER"].map((value) => <option key={value} value={value}>{label(value)}</option>)}</select></label>
-        <label>Category<select name="category" required>{["CLAIM_DELAY", "CLAIM_REJECTION", "PASSBOOK", "KYC", "EMPLOYER", "OTHER"].map((value) => <option key={value} value={value}>{label(value)}</option>)}</select></label>
+        <label>Complainant type<select name="complainant_type" required>{["PENSIONER", "EMPLOYER", "MEMBER", "OTHER"].map((value) => <option key={value} value={value}>{statusLabel(value, t)}</option>)}</select></label>
+        <label>Category<select name="category" required>{["CLAIM_DELAY", "CLAIM_REJECTION", "PASSBOOK", "KYC", "EMPLOYER", "OTHER"].map((value) => <option key={value} value={value}>{statusLabel(value, t)}</option>)}</select></label>
       </div>
       <label>Subject<input name="subject" required minLength={5} maxLength={200} /></label>
       <label>Description<textarea name="description" required minLength={10} maxLength={4000} /></label>

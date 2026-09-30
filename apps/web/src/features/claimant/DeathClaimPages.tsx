@@ -1,3 +1,5 @@
+import { statusLabel } from "../statusLabel";
+import { useTranslation } from "react-i18next";
 import { useState, type FormEvent } from "react";
 
 import { api, command, rupees, type Envelope } from "../../api/client";
@@ -27,6 +29,7 @@ export function SharesTable({ rows }: { rows: Share[] }) {
 
 /** A nominee files the PF (Form 20) and EDLI (Form 5IF) claims on a member's death and follows them. */
 export function ClaimantPage() {
+  const { t } = useTranslation();
   const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
   const [claim, setClaim] = useState<DeathClaim | null>(null);
@@ -80,7 +83,7 @@ export function ClaimantPage() {
         <label>Claim ID<input name="claim" required placeholder="CLM-…" /></label><button type="submit">Track</button></form>
 
       {claim ? <section className="card stack" aria-labelledby="claim-status-heading">
-        <h2 id="claim-status-heading">{claim.claim_id} · Form {claim.form_type} <span className="state-pill">{claim.state.replaceAll("_", " ")}</span></h2>
+        <h2 id="claim-status-heading">{claim.claim_id} · Form {claim.form_type} <span className="state-pill">{statusLabel(claim.state, t)}</span></h2>
         <p>{claim.summary}</p>
         <p className="muted">{claim.next_step}{claim.decision_reason ? ` Reason: ${claim.decision_reason}` : ""}</p>
         <h3>Beneficiaries</h3>
@@ -92,7 +95,7 @@ export function ClaimantPage() {
           <div className="actions"><button type="submit">Add</button></div>
         </form>
         <h3>Timeline</h3>
-        <ol className="claim-timeline">{claim.timeline.map((t, i) => <li key={i} className={i === claim.timeline.length - 1 ? "current" : ""}><strong>{t.state.replaceAll("_", " ")}</strong> — {t.by}. {t.note}</li>)}</ol>
+        <ol className="claim-timeline">{claim.timeline.map((entry, i) => <li key={i} className={i === claim.timeline.length - 1 ? "current" : ""}><strong>{statusLabel(entry.state, t)}</strong> — {entry.by}. {entry.note}</li>)}</ol>
       </section> : null}
       <FamilyPensionSection />
       <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
@@ -106,6 +109,7 @@ interface FamilyClaim { claim_id: string; state: string; kind: string; pension_f
 
 /** Family pension: the widow / widower or a child of a member who died in service files Form 10D. */
 export function FamilyPensionSection() {
+  const { t } = useTranslation();
   const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
   const [filed, setFiled] = useState<FamilyClaim | null>(null);
@@ -135,7 +139,7 @@ export function FamilyPensionSection() {
         ({filed.estimate.working}; illustrative rules).</p> : null}
       <div className="actions"><button type="button" onClick={() => void load()}>Show my applications</button></div>
       {list ? list.length ? <ul className="plain-list">{list.map((c) => <li key={c.claim_id}><strong>{c.claim_id}</strong> ·{" "}
-        <span className="state-pill">{c.state.replaceAll("_", " ")}</span> — {c.family?.relation.toLowerCase()} of {c.family?.deceased_name}
+        <span className="state-pill">{statusLabel(c.state, t)}</span> — {c.family?.relation.toLowerCase()} of {c.family?.deceased_name}
         {c.worksheet ? `, ${rupees(c.worksheet.monthly_paise)} a month` : ""}{c.ppo_id ? `, PPO ${c.ppo_id}` : ""}.
         {c.next_step ? <span className="muted small"> Next: {c.next_step}.</span> : null}</li>)}</ul> : <p className="muted">No applications.</p> : null}
       <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
@@ -154,6 +158,7 @@ const PRO_FORMS: [string, string][] = [
 
 /** PRO counter: inward a paper claim or pensioner updation, then match the filer with the member's record. */
 export function ProCounterPage() {
+  const { t } = useTranslation();
   const [error, setError] = useState<unknown>(null);
   const [intake, setIntake] = useState<Json | null>(null);
   const [identity, setIdentity] = useState<Json | null>(null);
@@ -197,7 +202,7 @@ export function ProCounterPage() {
         <div className="actions"><button type="submit" className="primary">Inward</button></div>
       </form>
       {intake ? <section className="card stack" aria-labelledby="intake-heading">
-        <h2 id="intake-heading">{String(intake.intake_id)} <span className="state-pill">{String(intake.state)}</span></h2>
+        <h2 id="intake-heading">{String(intake.intake_id)} <span className="state-pill">{statusLabel(String(intake.state), t)}</span></h2>
         <p>{String(intake.next_step)}</p>
         {intake.state === "INWARDED" ? <form className="stack" aria-labelledby="identity-heading" onSubmit={validate}>
           <h3 id="identity-heading">Validate the filer's identity</h3>
@@ -208,7 +213,7 @@ export function ProCounterPage() {
           <div className="actions"><button type="submit">Validate</button></div>
         </form> : null}
         {identity ? <div role="status" className={identity.result === "MATCHED" ? "ok" : "pending-notice"}>
-          <strong>{String(identity.result)}</strong> — {Object.entries(checks).map(([k, v]) => `${k.replaceAll("_", " ")}: ${v ? "yes" : "no"}`).join(" · ")}.
+          <strong>{statusLabel(String(identity.result), t)}</strong> — {Object.entries(checks).map(([k, v]) => `${k.replaceAll("_", " ")}: ${v ? "yes" : "no"}`).join(" · ")}.
           <p>{String(identity.next_step)}</p></div> : null}
       </section> : null}
     </section>
@@ -217,6 +222,7 @@ export function ProCounterPage() {
 
 /** APFC: the beneficiaries' shares on a death claim; payment waits until they add up to 100 %. */
 export function SharesSection() {
+  const { t } = useTranslation();
   const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
   const [summary, setSummary] = useState<{ claim_id: string; state: string; shares_total_pct: number; payable: boolean; beneficiaries: Share[] } | null>(null);
@@ -245,7 +251,7 @@ export function SharesSection() {
       <form className="search-input-row" onSubmit={load}><label>Claim ID<input name="claim" required placeholder="CLM-…" /></label>
         <button type="submit">Show shares</button></form>
       {summary ? <>
-        <p>{summary.claim_id} · {summary.state.replaceAll("_", " ")} · shares total <strong>{summary.shares_total_pct}%</strong>
+        <p>{summary.claim_id} · {statusLabel(summary.state, t)} · shares total <strong>{summary.shares_total_pct}%</strong>
           {summary.payable ? " — payable." : " — payment is held until the shares add up to 100%."}</p>
         <SharesTable rows={summary.beneficiaries} />
         <form className="stack" aria-labelledby="amend-heading" onSubmit={amend}><h3 id="amend-heading">Amend a share</h3>

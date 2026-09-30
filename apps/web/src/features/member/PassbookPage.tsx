@@ -1,3 +1,4 @@
+import { statusLabel } from "../statusLabel";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
@@ -48,7 +49,7 @@ export function PassbookPage() {
         <h2 id="pending-heading">{t("passbook.pendingTitle")}</h2>
         <p>{t("passbook.pendingDescription")}</p>
         <ul>{pending.map((item, index) => <li key={`${item.account_link_id}-${item.wage_month}-${item.trrn ?? index}`}>
-          <strong>{item.wage_month}</strong> · {item.account_link_id} · {item.status}{item.trrn ? ` · ${item.trrn}` : ""}<br />{item.message}
+          <strong>{item.wage_month}</strong> · {item.account_link_id} · {statusLabel(item.status, t)}{item.trrn ? ` · ${item.trrn}` : ""}<br />{item.message}
         </li>)}</ul>
       </section> : null}
       {entries.length === 0 ? <div className="card empty-state"><h2>{t("passbook.empty")}</h2><p>{t("passbook.emptyDescription")}</p></div> : null}

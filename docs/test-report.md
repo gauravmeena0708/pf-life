@@ -108,6 +108,10 @@ changed, so the unit suites of P2.9a stand. Reviewing the first draft found a se
 duplicate *Home* menu item and a balance table that showed only its first column on a phone; all fixed.
 Then the Hindi translations: web 149 passed (a new test renders the member home in Hindi); `test_member_home.py` and
 `test_international_worker_member.py` pass unchanged, as the English text is the same.
+Then one shared status label table (`i18n/status.en.json` / `status.hi.json`, 152 codes; `statusLabel()`), used on the
+member, employer, claimant, pensioner and public screens: web 153 passed; end to end 70 passed, and
+`test_journey_b_claim.py` stopped only because member A's synthetic balance was used up by the day's repeated runs
+(the test asks for `make reset`); the claim UI tests, which check the status labels, 2 passed.
 
 ## Update — Phase 2, slice 9a: international workers are members (30 September 2026)
 

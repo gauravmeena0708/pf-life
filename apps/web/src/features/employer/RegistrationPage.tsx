@@ -1,3 +1,5 @@
+import { statusLabel } from "../statusLabel";
+import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 
@@ -18,6 +20,7 @@ const csv = (rows: ExportRow[]) => ["UAN,Member ID,Name,Date of birth,Gender,Dat
 /** Member › Register-Individual / Register-Bulk / Missing details / KYC BULK, Dashboards › Active Members,
  * and (signatory) Approve KYC pending for Digital Signature / seeded by member. */
 export function RegistrationPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
@@ -161,14 +164,14 @@ export function RegistrationPage() {
       </>}
 
       {result ? <section className="card stack" aria-labelledby="upload-result-heading"><h2 id="upload-result-heading">Upload result</h2>
-        <pre className="small">{JSON.stringify(result, null, 2)}</pre></section> : null}
+        <pre className="small">{JSON.stringify(result, (key, value: unknown) => (key === "state" || key === "status") && typeof value === "string" ? statusLabel(value, t) : value, 2)}</pre></section> : null}
 
       <section className="card stack" aria-labelledby="active-heading"><h2 id="active-heading">Active members</h2>
         <div className="actions"><button type="button" onClick={download} disabled={!rows.length}>Download CSV</button></div>
         <div className="table-scroll"><table>
           <thead><tr><th scope="col">UAN</th><th scope="col">Name</th><th scope="col">Joined</th><th scope="col">Aadhaar · PAN · bank</th><th scope="col">Form 11</th><th scope="col">Missing</th><th scope="col" /></tr></thead>
           <tbody>{rows.map((r) => <tr key={r.member_id}><td>{r.uan}<br /><span className="muted small">{r.member_id}</span></td><td>{r.name}</td><td>{r.date_of_joining}</td>
-            <td>{[r.aadhaar, r.pan, r.bank].map((x) => x.replaceAll("_", " ").toLowerCase()).join(" · ")}</td><td>{r.form11.toLowerCase()}</td>
+            <td>{[r.aadhaar, r.pan, r.bank].map((x) => statusLabel(x, t)).join(" · ")}</td><td>{statusLabel(r.form11, t)}</td>
             <td>{r.missing_details.join(", ").replaceAll("_", " ") || "—"}</td>
             <td><button type="button" onClick={() => showLedger(r.uan)}>Ledger</button></td></tr>)}</tbody>
         </table></div>

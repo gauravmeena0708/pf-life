@@ -1,3 +1,5 @@
+import { statusLabel } from "../statusLabel";
+import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 
@@ -33,6 +35,7 @@ function ExitFields() {
 /** Member › Member Profile (mark exit), Member › Approvals (the signatory approves exits) and
  * Online Services › Transfer Claims (attest a member's Form 13 transfer). */
 export function MemberActionsPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
@@ -174,7 +177,7 @@ export function MemberActionsPage() {
           {bulkResult ? <div className="stack"><p role="status">Lines: {bulkResult.lines} · Accepted: {bulkResult.accepted}</p>
             <div className="table-scroll"><table><thead><tr><th scope="col">Line</th><th scope="col">Status</th>
               <th scope="col">UAN</th><th scope="col">Case</th><th scope="col">Error</th></tr></thead>
-              <tbody>{bulkResult.results.map((item) => <tr key={item.line}><th scope="row">{item.line}</th><td>{item.status}</td>
+              <tbody>{bulkResult.results.map((item) => <tr key={item.line}><th scope="row">{item.line}</th><td>{statusLabel(item.status, t)}</td>
                 <td>{item.uan ?? "—"}</td><td>{item.case_id ?? "—"}</td><td>{item.error ?? "—"}</td></tr>)}</tbody>
             </table></div>
           </div> : null}

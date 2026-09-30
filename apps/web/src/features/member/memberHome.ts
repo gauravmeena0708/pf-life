@@ -1,4 +1,7 @@
 import { rupees } from "../../api/client";
+import type { TFunction } from "i18next";
+import i18n from "../../i18n";
+import { statusLabel } from "../statusLabel";
 
 export interface MemberHomeInput {
   profile?: { name: string; uan: string; kyc: { aadhaar: string; pan: string; bank: string }; international_worker?: boolean };
@@ -56,7 +59,7 @@ export function nudges(input: MemberHomeInput, today: Date): Nudge[] {
   return actions;
 }
 
-export function pendingItems(input: MemberHomeInput): PendingItem[] {
+export function pendingItems(input: MemberHomeInput, t: TFunction = i18n.t): PendingItem[] {
   const final = new Set(["SETTLED", "REJECTED_WITH_REASON", "REJECTED_BY_EMPLOYER", "CANCELLED"]);
   return [
     ...(input.claims ?? []).filter((claim) => !final.has(claim.state)).map((claim) => ({
@@ -64,6 +67,6 @@ export function pendingItems(input: MemberHomeInput): PendingItem[] {
         .find((type) => type.claim_type === claim.claim_type)?.label ?? `Form ${claim.form_type}`,
       next: claim.next_step, to: `/member/claims/${encodeURIComponent(claim.claim_id)}` })),
     ...(input.applications ?? []).filter((app) => app.pending).map((app) => ({ id: `application:${app.application_id}`,
-      title: app.title, next: app.state.replaceAll("_", " ").toLowerCase(), to: "/member/service#applications-heading" })),
+      title: app.title, next: statusLabel(app.state, t), to: "/member/service#applications-heading" })),
   ];
 }

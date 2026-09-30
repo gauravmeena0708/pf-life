@@ -494,4 +494,6 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 - **Hindi**: the member home, life events, nudges, the phone menu and the international-worker screens are translated
   (`i18n/member.en.json` / `member.hi.json`, merged into the resources); the 17 strings left marked `[TODO-translate]`
   since Phase 1 (banner, title, persona menu, interface page) are translated too.
-- **Not yet**: plain language in the office screens.
+- **Status labels**: one table of plain labels, English and Hindi, for every state and status code the member,
+  employer, claimant, pensioner and public screens receive (`statusLabel()`, which the older `stateLabel()` now uses).
+- **Not yet**: the office screens keep their codes where no label exists (officers work with them).

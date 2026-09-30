@@ -81,7 +81,7 @@ describe("pendingItems", () => {
       { application_id: "A2", title: "Processed", state: "APPROVED", pending: false, updated_at: "2026-09-01" },
     ] }))).toEqual([
       { id: "claim:C0", title: "Medical advance", next: "Employer attestation needed", to: "/member/claims/C0" },
-      { id: "application:A1", title: "Transfer request", next: "pending employer", to: "/member/service#applications-heading" },
+      { id: "application:A1", title: "Transfer request", next: "With employer for approval", to: "/member/service#applications-heading" },
     ]);
     expect(pendingItems(withInput({ eligibility: undefined, claims: [claims[0]] }))[0].title).toBe("Form 31");
   });

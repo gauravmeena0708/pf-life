@@ -1,7 +1,8 @@
 import type { TFunction } from "i18next";
+import { statusLabel } from "./statusLabel";
 
 export function stateLabel(value: string, t: TFunction): string {
-  return t(`journeyB.states.${value}`, { defaultValue: value.replaceAll("_", " ").toLowerCase() });
+  return statusLabel(value, t);
 }
 
 export function dateTime(value: string | null | undefined, language: string): string {

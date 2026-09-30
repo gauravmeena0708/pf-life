@@ -1,3 +1,5 @@
+import { statusLabel } from "../statusLabel";
+import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 
@@ -7,6 +9,7 @@ import { ProblemMessage } from "../../components/ProblemMessage";
 interface MemberLocation { branch_code: string; district: string; pincode: string }
 interface Member { uan: string; name: string; account_link_id: string; status: string; location: MemberLocation | null }
 export function MemberLocations({ canMap }: { canMap: boolean }) {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [busy, setBusy] = useState(false); const [error, setError] = useState<unknown>(null); const [notice, setNotice] = useState<string | null>(null);
   const members = useQuery({ queryKey: ["employer-members"], retry: false,
@@ -38,7 +41,7 @@ export function MemberLocations({ canMap }: { canMap: boolean }) {
     </form> : null}
     {members.isLoading ? <p role="status">Loading members…</p> : null}
     {members.data ? <div className="table-scroll"><table><thead><tr><th scope="col">UAN</th><th scope="col">Name</th><th scope="col">Member ID</th><th scope="col">Status</th><th scope="col">Location</th></tr></thead>
-      <tbody>{members.data.data.map((member) => <tr key={member.account_link_id}><th scope="row">{member.uan}</th><td>{member.name}</td><td>{member.account_link_id}</td><td>{member.status}</td>
+      <tbody>{members.data.data.map((member) => <tr key={member.account_link_id}><th scope="row">{member.uan}</th><td>{member.name}</td><td>{member.account_link_id}</td><td>{statusLabel(member.status, t)}</td>
         <td>{member.location ? `${member.location.branch_code} · ${member.location.district} · ${member.location.pincode}` : "Not mapped"}</td></tr>)}</tbody>
     </table></div> : null}
     {members.data && !members.data.data.length ? <p className="muted">No members at this establishment.</p> : null}

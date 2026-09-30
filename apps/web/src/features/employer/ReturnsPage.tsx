@@ -1,3 +1,5 @@
+import { statusLabel } from "../statusLabel";
+import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
@@ -24,10 +26,6 @@ interface Demand {
 interface Demands { items: Demand[]; open_paise: number; note: string }
 interface DirectChallan { trrn: string; total_paise: number }
 type ComplianceStatus = "FILED_AND_PAID_ON_TIME" | "PAID_LATE" | "FILED_NOT_PAID" | "NOT_FILED";
-const complianceLabels: Record<ComplianceStatus, string> = {
-  FILED_AND_PAID_ON_TIME: "Filed and paid on time", PAID_LATE: "Paid late",
-  FILED_NOT_PAID: "Filed but not paid", NOT_FILED: "Not filed",
-};
 interface ComplianceSummary {
   establishment_id: string; as_of: string; counts: Record<ComplianceStatus, number>;
   months: { wage_month: string; due_date: string; status: ComplianceStatus; paid_on: string | null;
@@ -44,7 +42,8 @@ interface VishwasData {
 }
 
 function ReturnDetails({ entry }: { entry: ReturnEntry }) {
-  return <span>{entry.type} · {entry.state.replaceAll("_", " ")}
+  const { t } = useTranslation();
+  return <span>{entry.type} · {statusLabel(entry.state, t)}
     {entry.trrn ? <> · TRRN <code>{entry.trrn}</code></> : null}
     {entry.challan ? <> · {entry.challan}</> : null}
     {entry.total_paise != null ? <> · {rupees(entry.total_paise)}</> : null}
@@ -56,6 +55,7 @@ function toPaise(value: string): number {
 }
 
 export function ReturnsPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
@@ -176,7 +176,7 @@ export function ReturnsPage() {
         <th scope="col">Wage month</th><th scope="col">Due date</th><th scope="col">Status</th>
         <th scope="col">Regular return</th><th scope="col">Additional returns</th><th scope="col">Paid</th>
       </tr></thead><tbody>{dashboard.data.data.map((month) => <tr key={month.wage_month}>
-        <th scope="row">{month.wage_month}</th><td>{month.due_date}</td><td>{month.status.replaceAll("_", " ")}
+        <th scope="row">{month.wage_month}</th><td>{month.due_date}</td><td>{statusLabel(month.status, t)}
           {month.paid_late ? " · paid late" : ""}</td>
         <td>{month.regular ? <ReturnDetails entry={month.regular} /> : "—"}</td>
         <td>{month.additional.length ? <ul>{month.additional.map((entry, index) => <li key={`${entry.trrn ?? entry.type}-${index}`}>
@@ -195,7 +195,7 @@ export function ReturnsPage() {
       </tr></thead><tbody>{demands.data.data.items.map((demand) => <tr key={demand.demand_id}>
         <th scope="row">{demand.demand_id}</th><td>{demand.kind === "DAMAGES_14B" ? "14B damages" : "7Q interest"}</td>
         <td><code>{demand.trrn}</code></td><td>{demand.wage_month}</td><td>{rupees(demand.amount_paise)}</td>
-        <td>{demand.days_late}</td><td>{demand.working}</td><td>{demand.state.replaceAll("_", " ")}
+        <td>{demand.days_late}</td><td>{demand.working}</td><td>{statusLabel(demand.state, t)}
           {demand.settled_by ? ` · ${demand.settled_by}` : ""}</td>
         {signatory ? <td>{demand.state === "OPEN" ? <button type="button"
           disabled={busy || !!stepUp.request || pendingPayments.includes(demand.demand_id)}
@@ -207,15 +207,15 @@ export function ReturnsPage() {
     <section className="card stack" aria-labelledby="compliance-summary-heading"><h2 id="compliance-summary-heading">Compliance summary</h2>
       {compliance.isLoading ? <p role="status">Loading compliance summary…</p> : null}
       {compliance.data ? <><p>{compliance.data.data.establishment_id} · As of {compliance.data.data.as_of}</p>
-        <dl>{(Object.keys(complianceLabels) as ComplianceStatus[]).map((status) => <div key={status}>
-          <dt>{complianceLabels[status]}</dt><dd>{compliance.data.data.counts[status] ?? 0}</dd></div>)}</dl>
+        <dl>{((["FILED_AND_PAID_ON_TIME", "PAID_LATE", "FILED_NOT_PAID", "NOT_FILED"] as ComplianceStatus[])).map((status) => <div key={status}>
+          <dt>{statusLabel(status, t)}</dt><dd>{compliance.data.data.counts[status] ?? 0}</dd></div>)}</dl>
         <p className="muted">Showing up to the 24 most recent wage months.</p>
         {compliance.data.data.months.length ? <div className="table-scroll"><table><thead><tr>
           <th scope="col">Wage month</th><th scope="col">Due date</th><th scope="col">Status</th>
           <th scope="col">Paid on</th><th scope="col">Days late</th><th scope="col">Total</th>
         </tr></thead><tbody>{[...compliance.data.data.months].sort((a, b) => b.wage_month.localeCompare(a.wage_month)).slice(0, 24).map((month) =>
           <tr key={month.wage_month}><th scope="row">{month.wage_month}</th><td>{month.due_date}</td>
-            <td>{complianceLabels[month.status]}</td><td>{month.paid_on ?? "—"}</td><td>{month.days_late}</td>
+            <td>{statusLabel(month.status, t)}</td><td>{month.paid_on ?? "—"}</td><td>{month.days_late}</td>
             <td>{rupees(month.total_paise)}</td></tr>)}</tbody></table></div> : <p className="muted">No compliance months recorded.</p>}
       </> : null}
     </section>
@@ -229,7 +229,7 @@ export function ReturnsPage() {
         <th scope="col">Revised amount</th><th scope="col">State</th><th scope="col">Decision note</th>
       </tr></thead><tbody>{vishwas.data.data.applications.map((item) => <tr key={item.application_id}>
         <th scope="row">{item.application_id}</th><td>{item.demand_ids.join(", ")}</td><td>{rupees(item.damages_paise)}</td>
-        <td>{rupees(item.revised_paise)}</td><td>{item.state}</td><td>{item.decision_note ?? "—"}</td>
+        <td>{rupees(item.revised_paise)}</td><td>{statusLabel(item.state, t)}</td><td>{item.decision_note ?? "—"}</td>
       </tr>)}</tbody></table></div> : vishwas.data ? <p className="muted">No VISHWAS applications recorded.</p> : null}
       {signatory && vishwas.data ? <form className="stack" onSubmit={(e) => void applyVishwas(e)}>
         <fieldset><legend>Open 14B demands</legend>

@@ -1,3 +1,5 @@
+import { statusLabel } from "../statusLabel";
+import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState, type FormEvent } from "react";
 
@@ -80,6 +82,7 @@ function reportOf(value: Filing["validation_report"]): ValidationReport | null {
 }
 
 export function EcrPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const stepUp = useStepUp();
   const retryKeys = useRef<Record<string, string>>({});
@@ -287,14 +290,14 @@ export function EcrPage() {
           {filings.data?.data.length ? (
             <label>Choose a return
               <select value={currentId ?? ""} onChange={(e) => setSelectedId(e.target.value)}>
-                {filings.data.data.map((item) => <option key={item.filing_id} value={item.filing_id}>{item.wage_month} · v{item.version} · {item.state}</option>)}
+                {filings.data.data.map((item) => <option key={item.filing_id} value={item.filing_id}>{item.wage_month} · v{item.version} · {statusLabel(item.state, t)}</option>)}
               </select>
             </label>
           ) : null}
           <ProblemMessage error={detail.error} />
           {filing ? (
             <div className="filing-detail">
-              <div className="detail-head"><strong>{filing.wage_month}</strong><span className="state-pill">{filing.state.replaceAll("_", " ")}</span></div>
+              <div className="detail-head"><strong>{filing.wage_month}</strong><span className="state-pill">{statusLabel(filing.state, t)}</span></div>
               <p className="muted small">Version {filing.version} · rule set {filing.rule_version} · {filing.filing_id}</p>
               {filing.trrn ? <p>TRRN <code>{filing.trrn}</code></p> : null}
               {signatory && filing.trrn && ["SUBMITTED", "PAYMENT_FAILED"].includes(filing.state) ?
@@ -342,7 +345,7 @@ export function EcrPage() {
           {challans.data?.data.length === 0 ? <p className="muted">No challans yet. Submit a return, then refresh.</p> : null}
           {challans.data?.data.map((challan) => (
             <div className="challan" key={challan.trrn}>
-              <div><strong>{challan.trrn}</strong><p className="muted small">{challan.status} · {rupees(challan.total_paise)}</p></div>
+              <div><strong>{challan.trrn}</strong><p className="muted small">{statusLabel(challan.status, t)} · {rupees(challan.total_paise)}</p></div>
               {["DUE", "FAILED"].includes(challan.status) ? <button type="button" className="primary" disabled={busy} onClick={() => void pay(challan)}>Pay with mock bank</button> : null}
             </div>
           ))}

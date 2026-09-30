@@ -26,11 +26,6 @@
     "loadingNext": "अगले कदम लोड हो रहे हैं…",
     "allSet": "आपके सभी कार्य पूरे हैं।",
     "eventsHeading": "आप क्या करना चाहते हैं?",
-    "status": {
-      "ACTIVE": "सक्रिय",
-      "EXITED": "निकास दर्ज",
-      "TRANSFERRED": "अंतरित"
-    },
     "nudges": {
       "transferTitle": "{{establishment}} से {{amount}} अपने वर्तमान खाते में अंतरित करें",
       "transferDetail": "सदस्य आईडी {{memberId}} में अभी भी शेष राशि है।",

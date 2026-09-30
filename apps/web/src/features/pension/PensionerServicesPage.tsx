@@ -1,3 +1,5 @@
+import { statusLabel } from "../statusLabel";
+import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 
@@ -16,6 +18,7 @@ const lastMonth = () => { const d = new Date(); d.setDate(0); return d.toISOStri
 
 /** Pensioner services: life certificate (mock Jeevan Pramaan), PPO, pension slip, bank change, declarations. */
 export function PensionerServicesPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
@@ -67,7 +70,7 @@ export function PensionerServicesPage() {
       {notice ? <p role="status" className="ok">{notice}</p> : null}
 
       <form className="card stack" aria-labelledby="lc-heading" onSubmit={submitDlc}><h2 id="lc-heading">Life certificate</h2>
-        {lc.data ? <p>Status: <span className="state-pill">{lc.data.data.state.toLowerCase()}</span> · valid till <strong>{lc.data.data.valid_till ?? "—"}</strong>
+        {lc.data ? <p>Status: <span className="state-pill">{statusLabel(lc.data.data.state, t)}</span> · valid till <strong>{lc.data.data.valid_till ?? "—"}</strong>
           {lc.data.data.reference ? <span className="muted small"> · {lc.data.data.source?.replaceAll("_", " ").toLowerCase()} {lc.data.data.reference}</span> : null}
           {lc.data.data.pension_status === "SUSPENDED" ? <span className="state-pill"> pension suspended</span> : null}</p> : null}
         <p className="muted small">A certificate keeps your pension in payment for a year. This demonstration simulates Jeevan Pramaan face authentication (no real check).</p>
@@ -80,7 +83,7 @@ export function PensionerServicesPage() {
           <dt>Pension from</dt><dd>{p.pension_start}</dd><dt>Pension at issue</dt><dd>{rupees(p.original_monthly_paise)} a month</dd>
           <dt>Pension now</dt><dd><strong>{rupees(p.current_monthly_paise)}</strong> a month <span className="muted small">— {p.working} ({p.rule_version})</span></dd>
           <dt>Issuing office</dt><dd>{p.issuing_office}</dd><dt>Paid into</dt><dd>account ending {p.disbursing_bank.account_last4} · IFSC {p.disbursing_bank.ifsc}</dd>
-          <dt>Status</dt><dd>{p.status.replaceAll("_", " ").toLowerCase()}</dd></dl>
+          <dt>Status</dt><dd>{statusLabel(p.status, t)}</dd></dl>
         <div className="actions"><button type="button" onClick={() => window.print()}>Print</button></div>
       </section> : null}
 

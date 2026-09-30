@@ -6,6 +6,7 @@ import { api, command, rupees, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { dateOnly, stateLabel } from "../journeyB";
+import { statusLabel } from "../statusLabel";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 
@@ -158,7 +159,7 @@ export function ServicePage() {
             <th scope="col">Date of exit</th><th scope="col">Amount</th><th scope="col">State</th><th scope="col">Confirmation</th>
           </tr></thead><tbody>{autoTransfers.data.data.eligible.map((item) => <tr key={item.transfer_id}>
             <th scope="row">{item.transfer_id}</th><td>{item.uan}</td><td>{item.from_account_link_id}</td><td>{item.to_account_link_id}</td>
-            <td>{item.date_of_exit}</td><td>{rupees(item.amount_paise)}</td><td>{item.state.replaceAll("_", " ")}</td>
+            <td>{item.date_of_exit}</td><td>{rupees(item.amount_paise)}</td><td>{statusLabel(item.state, t)}</td>
             <td><button type="button" className="primary" disabled={busy || !!stepUp.request}
               aria-label={`Confirm auto-transfer ${item.transfer_id}`} onClick={() => confirmAutoTransfer(item)}>Confirm transfer</button></td>
           </tr>)}</tbody></table></div> : <p className="muted">No eligible auto-transfers.</p>}
@@ -168,7 +169,7 @@ export function ServicePage() {
             <th scope="col">Amount</th><th scope="col">State</th><th scope="col">Confirmed</th><th scope="col">Posted</th>
           </tr></thead><tbody>{autoTransfers.data.data.history.map((item) => <tr key={item.transfer_id}>
             <th scope="row">{item.transfer_id}</th><td>{item.from_account_link_id}</td><td>{item.to_account_link_id}</td>
-            <td>{rupees(item.amount_paise)}</td><td>{item.state.replaceAll("_", " ")}</td>
+            <td>{rupees(item.amount_paise)}</td><td>{statusLabel(item.state, t)}</td>
             <td>{item.confirmed_at ?? "—"}</td><td>{item.posted_at ?? "—"}</td>
           </tr>)}</tbody></table></div> : <p className="muted">No auto-transfer history.</p>}
         </> : null}
@@ -179,7 +180,7 @@ export function ServicePage() {
           <thead><tr><th scope="col">Application</th><th scope="col">Reference</th><th scope="col">Status</th><th scope="col">Updated</th><th scope="col" /></tr></thead>
           <tbody>{apps.data.data.map((a) => (
             <tr key={a.application_id}><td>{a.title}{a.account_link_id ? <span className="muted small"> · {a.account_link_id}</span> : null}</td><td><code>{a.application_id}</code></td>
-              <td><span className="state-pill">{stateLabel(a.state, t) || a.state.replaceAll("_", " ").toLowerCase()}</span></td>
+              <td><span className="state-pill">{stateLabel(a.state, t)}</span></td>
               <td>{dateOnly(a.updated_at, i18n.language)}</td>
               <td>{a.process === "transfer_form13" && a.state === "APPROVED" ? <button type="button" disabled={busy || !!stepUp.request} onClick={() => showAnnexure(a.application_id)}>Annexure K</button> : null}</td></tr>
           ))}</tbody>

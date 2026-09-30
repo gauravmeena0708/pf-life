@@ -1,3 +1,5 @@
+import { statusLabel } from "../statusLabel";
+import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -37,6 +39,7 @@ const OPERATOR_GRANTS = ["ecr.prepare"];
 const SIGNATORY_GRANTS = ["ecr.approve", "ecr.submit", "payment.initiate"];
 
 export function EmployerHome() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
@@ -119,7 +122,7 @@ export function EmployerHome() {
   return (
     <section aria-labelledby="emp-heading" className="stack">
       <PageHeader id="emp-heading" eyebrow="Employer services · workspace" title={e.legal_name}
-        description={`${e.establishment_id} · ${e.registration_number} · office ${e.office_id} · status ${e.status}`}
+        description={`${e.establishment_id} · ${e.registration_number} · office ${e.office_id} · status ${statusLabel(e.status, t)}`}
         current="Employer workspace" />
       {e.frozen ? <p role="alert" className="pending-notice"><strong>This establishment is frozen</strong> under order {e.freeze?.order_ref ?? "—"}
         {e.freeze?.category ? ` (category ${e.freeze.category})` : ""}. ECR returns cannot be approved or submitted until the regional office de-freezes it.</p> : null}
@@ -160,7 +163,7 @@ export function EmployerHome() {
                   <tr key={g.grant_id}>
                     <td>{g.username}</td>
                     <td>{g.grants.join(", ")}</td>
-                    <td>{g.status}</td>
+                    <td>{statusLabel(g.status, t)}</td>
                     <td>{canManage && g.status === "ACTIVE" ? <button type="button" onClick={() => revoke(g)}>Revoke</button> : null}</td>
                   </tr>
                 ))}
