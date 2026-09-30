@@ -6,12 +6,12 @@
   "stakeholders_with_access": 96,
   "activities": 238,
   "endpoints": {
-   "W": 324,
+   "W": 329,
    "M": 21,
-   "P": 74,
+   "P": 70,
    "?": 5
   },
-  "personas": 50
+  "personas": 51
  },
  "interfaces": [
   {
@@ -293,9 +293,9 @@
    "coverage": "Working",
    "purpose": "The Central Anti-fraud Intelligence Unit: synthetic risk signals and their review.",
    "endpoints": {
-    "W": 3,
+    "W": 4,
     "M": 0,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
    "stakeholders": [
@@ -358,12 +358,12 @@
    "id": 18,
    "slug": "vigilance",
    "name": "Vigilance",
-   "coverage": "Planned",
-   "purpose": "Vigilance (planned): referrals and investigations.",
+   "coverage": "Working",
+   "purpose": "Vigilance: referrals, preliminary inquiries by the zones and the CVO's decisions (restricted).",
    "endpoints": {
-    "W": 0,
+    "W": 4,
     "M": 0,
-    "P": 3,
+    "P": 0,
     "?": 0
    },
    "stakeholders": [
@@ -1871,18 +1871,20 @@
    "name": "**Zonal Vigilance Directorate**",
    "group": "E. Zonal Office (ZO)",
    "endpoints": {
-    "W": 0,
+    "W": 3,
     "M": 0,
-    "P": 2,
+    "P": 0,
     "?": 0
    },
    "activities": [
     {
      "id": "F07.vig_zone",
-     "does": "Investigate vigilance case with restricted evidence access"
+     "does": "Inquire into vigilance cases assigned to the zone, with restricted evidence access; report findings"
     }
    ],
-   "personas": []
+   "personas": [
+    "zo-vigilance"
+   ]
   },
   "zo.fraud_committee": {
    "name": "Zonal / regional fraud-risk management committee (ZFRMC / RFRMC)",
@@ -2106,9 +2108,9 @@
    "name": "Central Analysis & Intelligence Unit",
    "group": "F. Head Office (HO) — leadership and divisions",
    "endpoints": {
-    "W": 3,
+    "W": 4,
     "M": 0,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
    "activities": [
@@ -2118,7 +2120,7 @@
     },
     {
      "id": "F07.vig_referral",
-     "does": "Refer a pattern to vigilance"
+     "does": "Refer a confirmed risk signal, a member's report or a complaint to vigilance"
     }
    ],
    "personas": [
@@ -2256,15 +2258,15 @@
    "name": "**Chief Vigilance Officer** and **Director (Vigilance)**",
    "group": "F. Head Office (HO) — leadership and divisions",
    "endpoints": {
-    "W": 0,
+    "W": 3,
     "M": 0,
-    "P": 2,
+    "P": 0,
     "?": 0
    },
    "activities": [
     {
      "id": "F07.vig_ho",
-     "does": "CVO / Director (Vigilance): oversee vigilance cases and decisions"
+     "does": "CVO / Director (Vigilance): assign preliminary inquiries and decide on the findings"
     }
    ],
    "personas": [

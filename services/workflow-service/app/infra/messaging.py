@@ -6,7 +6,7 @@ from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import grievance_case, last_decision, open_case
-from app.infra.tables import cases, claim_dockets, member_accounts, subject_offices
+from app.infra.tables import cases, claim_dockets, member_accounts, subject_offices, vigilance_signals
 from epfo_persistence.policy import after_defreeze_chain, approval_chain, on_policy_published, rules_by_version
 
 BINDINGS = [
@@ -27,6 +27,7 @@ BINDINGS = [
     "claim-service.CADGenerated.v1",
     "contribution-service.LedgerReversed.v1",
     "member-service.PrimaryMemberIdChanged.v1",
+    "intelligence-service.RiskSignalReviewed.v1",
 ]
 
 
@@ -174,7 +175,17 @@ async def on_primary_changed(session: AsyncSession, event: dict[str, Any]) -> No
         is_primary=member_accounts.c.account_link_id == p["primary_account_link_id"]))
 
 
+async def on_risk_signal_reviewed(session: AsyncSession, event: dict[str, Any]) -> None:
+    """P2.10a: keep the CAIU's review, so only a confirmed signal can be referred to vigilance."""
+    p = event["payload"]
+    if (await session.execute(select(vigilance_signals.c.signal_id).where(vigilance_signals.c.signal_id == p["signal_id"]))).first():
+        await session.execute(update(vigilance_signals).where(vigilance_signals.c.signal_id == p["signal_id"]).values(outcome=p["outcome"]))
+    else:
+        await session.execute(insert(vigilance_signals).values(signal_id=p["signal_id"], subject_ref=p.get("subject_ref"), outcome=p["outcome"]))
+
+
 HANDLERS = {
+    "RiskSignalReviewed.v1": on_risk_signal_reviewed,
     "PrimaryMemberIdChanged.v1": on_primary_changed,
     "LedgerReversed.v1": on_ledger_reversed,
     "CADGenerated.v1": on_cad_generated,

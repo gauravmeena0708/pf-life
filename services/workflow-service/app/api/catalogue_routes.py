@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /hrm/me', 'POST /hrm/postings', 'GET /office/stopped-cases', 'GET /office/work-queue', 'GET /public/offices', 'GET /employers/me/pending-approvals', 'GET /zo/fraud-risk/cases', 'POST /office/system/locks/{lockId}/release', 'GET /office/cases/{caseId}', 'POST /office/cases/{caseId}/assignments', 'POST /office/cases/{caseId}/decisions', 'POST /office/cases/{caseId}/recommendations', 'POST /office/cases/{caseId}/restarts', 'POST /office/cases/{caseId}/second-approvals', 'POST /office/cases/{caseId}/stops', 'POST /office/freeze-cases/{caseId}/verifications', 'GET /office/members/{uan}/locks', 'POST /office/cases/{caseId}/documents/{docId}/attestation-views']
+OPERATIONS = ['GET /hrm/me', 'POST /hrm/postings', 'GET /office/stopped-cases', 'GET /office/work-queue', 'GET /public/offices', 'GET /vigilance/cases', 'POST /vigilance/referrals', 'GET /employers/me/pending-approvals', 'GET /zo/fraud-risk/cases', 'POST /office/system/locks/{lockId}/release', 'GET /office/cases/{caseId}', 'GET /vigilance/cases/{caseId}', 'POST /office/cases/{caseId}/assignments', 'POST /office/cases/{caseId}/decisions', 'POST /office/cases/{caseId}/recommendations', 'POST /office/cases/{caseId}/restarts', 'POST /office/cases/{caseId}/second-approvals', 'POST /office/cases/{caseId}/stops', 'POST /office/freeze-cases/{caseId}/verifications', 'GET /office/members/{uan}/locks', 'POST /vigilance/cases/{caseId}/decisions', 'POST /vigilance/cases/{caseId}/findings', 'POST /office/cases/{caseId}/documents/{docId}/attestation-views']
 
 @router.api_route("/api/v1/hrm/me", methods=["GET"], include_in_schema=False)
 async def get_hrm_me(actor: Actor = Depends(require_actor)) -> None:
@@ -37,6 +37,16 @@ async def get_public_offices(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Office locator by state/district/pincode")
 
 
+@router.api_route("/api/v1/vigilance/cases", methods=["GET"], include_in_schema=False)
+async def get_vigilance_cases(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Vigilance case list (restricted: the CVO, or the zone the inquiry is assigned to)")
+
+
+@router.api_route("/api/v1/vigilance/referrals", methods=["POST"], include_in_schema=False)
+async def post_vigilance_referrals(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Refer a confirmed risk signal, a member report or a complaint to vigilance (interface 18)")
+
+
 @router.api_route("/api/v1/employers/me/pending-approvals", methods=["GET"], include_in_schema=False)
 async def get_employers_me_pending_approvals(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Items awaiting DSC/e-sign (KYC, transfers, claims, JD)")
@@ -55,6 +65,11 @@ async def post_office_system_locks_lockId_release(actor: Actor = Depends(require
 @router.api_route("/api/v1/office/cases/{caseId}", methods=["GET"], include_in_schema=False)
 async def get_office_cases_caseId(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Case detail")
+
+
+@router.api_route("/api/v1/vigilance/cases/{caseId}", methods=["GET"], include_in_schema=False)
+async def get_vigilance_cases_caseId(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "A vigilance case with its evidence and history (restricted; every read audited)")
 
 
 @router.api_route("/api/v1/office/cases/{caseId}/assignments", methods=["POST"], include_in_schema=False)
@@ -95,6 +110,16 @@ async def post_office_freeze_cases_caseId_verifications(actor: Actor = Depends(r
 @router.api_route("/api/v1/office/members/{uan}/locks", methods=["GET"], include_in_schema=False)
 async def get_office_members_uan_locks(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Active locks on a member ledger (annual accounts, claim adjudication, ECR posting) with owner and ex")
+
+
+@router.api_route("/api/v1/vigilance/cases/{caseId}/decisions", methods=["POST"], include_in_schema=False)
+async def post_vigilance_cases_caseId_decisions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "CVO / Director (Vigilance): assign an inquiry, or decide on the findings")
+
+
+@router.api_route("/api/v1/vigilance/cases/{caseId}/findings", methods=["POST"], include_in_schema=False)
+async def post_vigilance_cases_caseId_findings(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Zonal vigilance reports the preliminary inquiry's findings")
 
 
 @router.api_route("/api/v1/office/cases/{caseId}/documents/{docId}/attestation-views", methods=["POST"], include_in_schema=False)

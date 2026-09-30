@@ -845,8 +845,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /vigilance/cases` | P | restricted — vigilance roles only, case-by-case |  |
-| `POST /vigilance/cases/{caseId}/findings` | P | restricted — vigilance roles only, case-by-case | yes |
+| `GET /vigilance/cases` | W | restricted — vigilance roles only, case-by-case |  |
+| `GET /vigilance/cases/{caseId}` | W | restricted — vigilance roles only, case-by-case |  |
+| `POST /vigilance/cases/{caseId}/findings` | W | restricted — vigilance roles only, case-by-case | yes |
 
 **`zo.fraud_committee`** — Zonal / regional fraud-risk management committee (ZFRMC / RFRMC)
 
@@ -951,7 +952,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /ai/models` | W | caller's own permissions; advisory output only |  |
 | `GET /caiu/synthetic-risk-signals` | W | CAIU role |  |
 | `POST /caiu/synthetic-risk-signals/{signalId}/reviews` | W | CAIU role |  |
-| `POST /vigilance/referrals` | P | restricted — vigilance roles only, case-by-case |  |
+| `POST /vigilance/referrals` | W | restricted — vigilance roles only, case-by-case |  |
 
 **`ho.iwu`** — International Workers Unit
 
@@ -1002,8 +1003,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /vigilance/cases` | P | restricted — vigilance roles only, case-by-case |  |
-| `POST /vigilance/cases/{caseId}/decisions` | P | restricted — vigilance roles only, case-by-case | yes |
+| `GET /vigilance/cases` | W | restricted — vigilance roles only, case-by-case |  |
+| `GET /vigilance/cases/{caseId}` | W | restricted — vigilance roles only, case-by-case |  |
+| `POST /vigilance/cases/{caseId}/decisions` | W | restricted — vigilance roles only, case-by-case | yes |
 
 **`ho.security`** — Information security / SOC (cyber incidents, access reviews)
 

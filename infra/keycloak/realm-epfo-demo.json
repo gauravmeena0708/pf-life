@@ -189,6 +189,10 @@
       {
         "name": "do.incharge",
         "description": "District Office in charge — district dashboard"
+      },
+      {
+        "name": "zo.vigilance",
+        "description": "Zonal Vigilance Directorate — preliminary inquiries into vigilance cases assigned to the zone"
       }
     ]
   },
@@ -763,7 +767,7 @@
       "username": "vigilance-investigator",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Vigilance investigator",
+      "firstName": "Chief Vigilance Officer",
       "lastName": "Demo",
       "email": "vigilance-investigator@demo.invalid",
       "credentials": [
@@ -1211,6 +1215,25 @@
         "do.incharge"
       ],
       "id": "00000000-0000-4000-8000-000000000050"
+    },
+    {
+      "username": "zo-vigilance",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Zonal vigilance",
+      "lastName": "Demo",
+      "email": "zo-vigilance@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "zo.vigilance"
+      ],
+      "id": "00000000-0000-4000-8000-000000000051"
     }
   ]
 }

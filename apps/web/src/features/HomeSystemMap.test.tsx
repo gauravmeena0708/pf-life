@@ -64,7 +64,7 @@ it("filters system map by coverage and interface, role, activity and persona des
   expect(screen.getAllByRole("article")).toHaveLength(TOTALS.interfaces);
   for (const status of ["Working", "Mock", "Planned"]) {
     fireEvent.change(screen.getByLabelText("Coverage status"), { target: { value: status } });
-    expect(screen.getAllByRole("article")).toHaveLength(INTERFACES.filter((item) => item.coverage === status).length);
+    expect(screen.queryAllByRole("article")).toHaveLength(INTERFACES.filter((item) => item.coverage === status).length);   // none may be Planned
   }
   fireEvent.change(screen.getByLabelText("Coverage status"), { target: { value: "" } });
   const search = screen.getByLabelText("Search interfaces and roles");

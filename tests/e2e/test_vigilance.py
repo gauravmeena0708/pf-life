@@ -1,0 +1,60 @@
+"""Phase 2, slice 10a on the running stack: a staff complaint referred to vigilance by the CAIU; the CVO assigns a
+preliminary inquiry to the zone; zonal vigilance sees the case with the complainant masked and reports findings; the
+CVO orders minor penalty proceedings. A signal the CAIU found benign cannot be referred; other roles cannot read cases.
+Repeatable: every run opens a new case."""
+import secrets
+
+from tests.e2e.test_journey_a_ecr import call, step_up
+from tests.e2e.test_policy_admin import browser, persona  # noqa: F401  (fixtures)
+
+
+def test_vigilance_case_from_referral_to_decision(persona):
+    caiu = persona("caiu-investigator", "/caiu/signals")
+    tag = secrets.token_hex(3)
+    status, r = call(caiu, "POST", "/api/v1/vigilance/referrals", {
+        "source": "STAFF_COMPLAINT", "subject_type": "OFFICIAL", "subject_ref": "ro-da-accounts", "office_id": "RO-DEMO-01",
+        "allegation": f"Claims approved without the bank verification the manual requires (synthetic {tag}).",
+        "evidence": [{"kind": "OFFICE_CASE", "ref": f"CASE-{tag}"}], "complainant": {"name": "A Colleague", "contact": "desk 4"}})
+    assert status == 201 and r["data"]["vcn"].startswith("VIG/"), r
+    case_id = r["data"]["case_id"]
+    benign = [s for s in call(caiu, "GET", "/api/v1/caiu/synthetic-risk-signals")[1]["data"]["signals"] if s["status"] == "BENIGN"]
+    if benign:                                                                        # left by Journey D
+        status, r = call(caiu, "POST", "/api/v1/vigilance/referrals", {
+            "source": "CAIU_SIGNAL", "source_ref": benign[0]["signal_id"], "subject_type": "MEMBER", "subject_ref": benign[0]["subject_ref"],
+            "office_id": "RO-DEMO-01", "allegation": "A benign signal must not become a vigilance case (synthetic)."})
+        assert status == 409 and r["type"] == "/problems/signal-not-confirmed", r
+    assert call(caiu, "GET", f"/api/v1/vigilance/cases/{case_id}")[0] == 403
+
+    cvo = persona("vigilance-investigator", "/vigilance")
+    assert call(cvo, "GET", f"/api/v1/vigilance/cases/{case_id}")[1]["data"]["complainant"]["name"] == "A Colleague"
+
+    def decide(decision, note):
+        return call(cvo, "POST", f"/api/v1/vigilance/cases/{case_id}/decisions", {"decision": decision, "note": note},
+                    {"X-Step-Up-Token": step_up(cvo, "decide-vigilance-case", case_id)})
+    status, r = decide("ASSIGN_INQUIRY", "Preliminary inquiry by the zone")
+    assert status == 200 and r["data"]["state"] == "PI_ASSIGNED" and r["data"]["zone_id"] == "ZO-DEMO-01", r
+
+    zone = persona("zo-vigilance", "/vigilance")
+    assert any(c["case_id"] == case_id for c in call(zone, "GET", "/api/v1/vigilance/cases")[1]["data"]["cases"])
+    seen = call(zone, "GET", f"/api/v1/vigilance/cases/{case_id}")[1]["data"]
+    assert seen["complainant"] == {"masked": True} and seen["evidence"] == [{"kind": "OFFICE_CASE", "ref": f"CASE-{tag}"}]
+    status, r = call(zone, "POST", f"/api/v1/vigilance/cases/{case_id}/findings", {
+        "finding": "PARTLY_SUBSTANTIATED", "recommendation": "Minor penalty proceedings and a system check.",
+        "report": "The approvals were made without the bank verification; no gain to the official was found (synthetic).",
+        "evidence_examined": [f"CASE-{tag}"]}, {"X-Step-Up-Token": step_up(zone, "report-vigilance-findings", case_id)})
+    assert status == 200 and r["data"]["state"] == "PI_REPORTED" and r["data"]["late"] is False, r
+
+    status, r = decide("MINOR_PENALTY_PROCEEDINGS", "Accepting the zone's recommendation")
+    assert status == 200 and r["data"]["state"] == "ACTION_ORDERED", r
+    history = [h["action"] for h in call(cvo, "GET", f"/api/v1/vigilance/cases/{case_id}")[1]["data"]["history"]]
+    assert history == ["REFERRED", "ASSIGN_INQUIRY", "FINDINGS_REPORTED", "MINOR_PENALTY_PROCEEDINGS"]
+
+    cvo.goto(cvo.url.split("/vigilance")[0] + f"/vigilance?case={case_id}")
+    cvo.get_by_role("heading", name="Vigilance cases").wait_for()
+    cvo.get_by_text(r["data"]["vcn"]).first.wait_for()
+
+
+def test_other_roles_cannot_read_vigilance_cases(persona):
+    for name, landing in (("ro-oic", "/office/work-queue"), ("zo-fraud", "/zo/fraud-risk"), ("member-a", "/member")):
+        page = persona(name, landing)
+        assert call(page, "GET", "/api/v1/vigilance/cases")[0] == 403, name

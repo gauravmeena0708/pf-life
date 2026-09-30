@@ -1,0 +1,7 @@
+.vigilance-page .card { border-top: 3px solid #b48b32; }
+.vigilance-page .vigilance-case { border-top-color: #173b69; }
+.vigilance-page .vigilance-alert-pill { display: inline-block; margin-left: .35rem; padding: .12rem .45rem; border: 1px solid #a52828; border-radius: 1rem; color: #8b1e1e; background: #fff4f2; font-size: .78rem; font-weight: 700; white-space: nowrap; }
+.vigilance-page .vigilance-list { margin: .35rem 0 0; padding-left: 1.4rem; }
+.vigilance-page .vigilance-list li + li { margin-top: .35rem; }
+.vigilance-page .vigilance-prose { white-space: pre-wrap; overflow-wrap: anywhere; }
+.vigilance-page .kv dd { overflow-wrap: anywhere; }

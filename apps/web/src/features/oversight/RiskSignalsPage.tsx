@@ -22,6 +22,8 @@ export function RiskSignalsPage() {
   const qc = useQueryClient();
   const [error, setError] = useState<unknown>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [referring, setReferring] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const data = useQuery({ queryKey: ["risk-signals"], queryFn: () => api<Envelope<Signals>>("/api/v1/caiu/synthetic-risk-signals"),
     retry: false, refetchInterval: 5000 });
   const d = data.data?.data;
@@ -35,6 +37,25 @@ export function RiskSignalsPage() {
       setNotice(`Review recorded for ${id}. No automatic action was taken.`);
       await qc.invalidateQueries({ queryKey: ["risk-signals"] });
     } catch (cause) { setError(cause); }
+  }
+
+  async function refer(e: FormEvent<HTMLFormElement>, id: string) {
+    e.preventDefault(); if (busy) return;
+    const form = e.currentTarget;
+    const values = new FormData(form);
+    const read = (name: string) => String(values.get(name) ?? "").trim();
+    const complainant = read("complainant");
+    setBusy(true); setError(null); setNotice(null);
+    try {
+      const result = await command<Envelope<{ vcn: string }>>("POST", "/api/v1/vigilance/referrals", {
+        source: "CAIU_SIGNAL", source_ref: id, subject_type: read("subject_type"),
+        subject_ref: read("subject_ref"), office_id: read("office_id"), allegation: read("allegation"),
+        evidence: [{ kind: "RISK_SIGNAL", ref: id }], ...(complainant ? { complainant: { name: complainant } } : {}),
+      });
+      setNotice(`Referred to vigilance as ${result.data.vcn}.`);
+      setReferring(null); form.reset();
+      await qc.invalidateQueries({ queryKey: ["risk-signals"] });
+    } catch (cause) { setError(cause); } finally { setBusy(false); }
   }
 
   return (
@@ -78,12 +99,23 @@ export function RiskSignalsPage() {
         <details className="card filter-panel">
           <summary>Reviewed signals ({d.signals.filter((s) => !OPEN.includes(s.status)).length})</summary>
           <div className="table-scroll"><table>
-            <thead><tr><th scope="col">Signal</th><th scope="col">Rule</th><th scope="col">Outcome</th><th scope="col">Reviewed</th><th scope="col">Reasoning</th></tr></thead>
+            <thead><tr><th scope="col">Signal</th><th scope="col">Rule</th><th scope="col">Outcome</th><th scope="col">Reviewed</th><th scope="col">Reasoning</th><th scope="col">Action</th></tr></thead>
             <tbody>{d.signals.filter((s) => !OPEN.includes(s.status)).map((s) => (
               <tr key={s.signal_id}><td><code>{s.signal_id}</code></td><td>{s.detection_type}</td><td>{s.status.toLowerCase()}</td>
-                <td>{s.reviewed_at ? new Date(s.reviewed_at).toLocaleString("en-IN") : "—"}</td><td>{s.review_note}</td></tr>
+                <td>{s.reviewed_at ? new Date(s.reviewed_at).toLocaleString("en-IN") : "—"}</td><td>{s.review_note}</td>
+                <td>{s.status === "CONFIRMED" ? <button type="button" onClick={() => setReferring(referring === s.signal_id ? null : s.signal_id)}>Refer to vigilance</button> : "—"}</td></tr>
             ))}</tbody>
           </table></div>
+          {d.signals.filter((s) => s.status === "CONFIRMED" && referring === s.signal_id).map((s) => <form key={s.signal_id} className="stack" aria-label={`Refer signal ${s.signal_id} to vigilance`} onSubmit={(e) => void refer(e, s.signal_id)}>
+            <fieldset className="stack" disabled={busy}><legend>Vigilance referral · {s.signal_id}</legend>
+              <label>Subject type<select name="subject_type" required><option value="MEMBER">Member</option><option value="ESTABLISHMENT">Establishment</option><option value="OFFICIAL">Official</option></select></label>
+              <label>Subject reference<input name="subject_ref" defaultValue={s.subject_ref} required minLength={3} maxLength={80} /></label>
+              <label>Office ID<input name="office_id" defaultValue="RO-DEMO-01" required minLength={3} maxLength={40} /></label>
+              <label>Allegation<textarea name="allegation" required minLength={20} maxLength={4000} /></label>
+              <label>Complainant name (optional)<input name="complainant" minLength={2} maxLength={120} /></label>
+              <div className="actions"><button type="submit" className="primary">Submit referral</button></div>
+            </fieldset>
+          </form>)}
         </details>
       ) : null}
       {d?.shared_devices_not_signals.length ? (

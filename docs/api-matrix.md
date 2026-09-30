@@ -19,11 +19,11 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | 11 | NDC | **Working** | `tech.ndc`, `tech.adc`, `tech.cpps`, `tech.epfo3` | 6 | 0 | 2 | 0 |
 | 12 | Ministry | **Working** | `gov.mole`, `gov.parliament` | 3 | 0 | 0 | 0 |
 | 13 | B2B | **Mock** | `payroll_provider`, `ext.collecting_bank`, `ext.pension_bank`, `ext.mca`, `ext.shram_suvidha`, `ext.fund_manager` | 0 | 7 | 0 | 0 |
-| 14 | CAIU | **Working** | `ho.caiu` | 3 | 0 | 1 | 0 |
+| 14 | CAIU | **Working** | `ho.caiu` | 4 | 0 | 0 | 0 |
 | 15 | HRM | **Working** | `ho.hr` | 2 | 0 | 0 | 0 |
 | 16 | Reporting and monitoring | **Working** | `gov.cbt`, `gov.ec`, `gov.fiac`, `gov.peic` | 1 | 0 | 2 | 0 |
 | 17 | Security | **Working** | `ho.security`, `ho.data_protection` | 10 | 0 | 2 | 0 |
-| 18 | Vigilance | **Planned** | `ho.cvo`, `zo.vigilance` | 0 | 0 | 3 | 0 |
+| 18 | Vigilance | **Working** | `ho.cvo`, `zo.vigilance` | 4 | 0 | 0 | 0 |
 | 19 | Audit | **Working** | `ho.audit`, `zo.rpfc1_audit`, `zo.internal_audit`, `gov.cag`, `gov.statutory_auditor` | 8 | 0 | 4 | 0 |
 | 20 | UMANG | **Working** | `ext.umang` | 3 | 0 | 0 | 0 |
 | 21 | AI model / local LLM | **Working** | `tech.ai_service` | 5 | 0 | 0 | 0 |
@@ -544,7 +544,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /ai/models` | W | intelligence | ho.caiu |
 | `GET /caiu/synthetic-risk-signals` | W | intelligence | ho.caiu |
 | `POST /caiu/synthetic-risk-signals/{signalId}/reviews` | W | intelligence | ho.caiu |
-| `POST /vigilance/referrals` | P | workflow | ho.caiu |
+| `POST /vigilance/referrals` | W | workflow | ho.caiu |
 
 ### 15. HRM — Working
 
@@ -578,13 +578,14 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /privacy/requests` | P | audit | ho.data_protection |
 | `POST /privacy/requests/{requestId}/decisions` | P | audit | ho.data_protection |
 
-### 18. Vigilance — Planned
+### 18. Vigilance — Working
 
 | Endpoint | Status | Owner | Called by |
 |---|---|---|---|
-| `GET /vigilance/cases` | P | workflow | ho.cvo, zo.vigilance |
-| `POST /vigilance/cases/{caseId}/decisions` | P | workflow | ho.cvo |
-| `POST /vigilance/cases/{caseId}/findings` | P | workflow | zo.vigilance |
+| `GET /vigilance/cases` | W | workflow | ho.cvo, zo.vigilance |
+| `GET /vigilance/cases/{caseId}` | W | workflow | ho.cvo, zo.vigilance |
+| `POST /vigilance/cases/{caseId}/decisions` | W | workflow | ho.cvo |
+| `POST /vigilance/cases/{caseId}/findings` | W | workflow | zo.vigilance |
 
 ### 19. Audit — Working
 

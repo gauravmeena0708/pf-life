@@ -342,6 +342,12 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
         on = iw.get("final_settlement_on") or {}
         if not _whole(on.get("min_age"), 18, 80) or not isinstance(on.get("agreement_nationalities"), list):
             problems.append("international_workers.final_settlement_on needs min_age (18-80) and a list of agreement_nationalities")
+    if "vigilance" in document:
+        vg = document["vigilance"] or {}
+        if not _whole(vg.get("pi_days"), 7, 365):
+            problems.append("vigilance.pi_days must be a whole number of days between 7 and 365")
+        if not all(isinstance(vg.get(k), list) and vg[k] for k in ("sources", "outcomes")):
+            problems.append("vigilance.sources and vigilance.outcomes must be non-empty lists")
     if "late_payment" in document:
         lp = document["late_payment"] or {}
         if not _whole(lp.get("due_day"), 1, 28):

@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 import epfo_auth
-from app.api import catalogue_routes, hr_routes, locks_routes, routes
+from app.api import catalogue_routes, hr_routes, locks_routes, routes, vigilance_routes
 from app.engine.engine import build_router, definitions
 from app.config import settings
 from app.infra.db import database_ready, engine
@@ -37,6 +37,7 @@ def create_app() -> FastAPI:
     app.include_router(routes.router)
     app.include_router(locks_routes.router)
     app.include_router(hr_routes.router)
+    app.include_router(vigilance_routes.router)
     app.include_router(build_router())               # tier-2 processes from config/processes
     handled = {(m, r.path) for r in app.router.routes for m in getattr(r, "methods", set())}
     for route in catalogue_routes.router.routes:

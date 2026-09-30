@@ -69,6 +69,7 @@ import { IssueTrackerPage } from "./features/ndc/IssueTrackerPage";
 import { FraudRiskPage } from "./features/office/FraudRiskPage";
 import { DistrictDashboardPage } from "./features/office/DistrictDashboardPage";
 import { HrmPage } from "./features/hrm/HrmPage";
+import { VigilancePage } from "./features/vigilance/VigilancePage";
 
 /** Menu links point at sections (`/member/profile#correction-heading`); scroll there once the section has rendered. */
 function ScrollToHash() {
@@ -168,6 +169,7 @@ export function App() {
             <Route path="/zo/fraud-risk" element={<FraudRiskPage />} />
             <Route path="/do/dashboard" element={<DistrictDashboardPage />} />
             <Route path="/i/hrm" element={<HrmPage />} />
+            <Route path="/vigilance" element={<VigilancePage />} />
             <Route path="/member/grievances" element={<GrievancesPage />} />
             <Route path="/member/grievances/:grievanceId" element={<GrievanceDetailPage />} />
             <Route path="/member/security" element={<SecurityPage />} />

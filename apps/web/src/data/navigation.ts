@@ -145,6 +145,7 @@ function poc(role: string): NavGroup[] {
   if (role === "do.incharge") out.push({ label: "District dashboard", to: "/do/dashboard" });
   if (role === "ho.hr") out.push({ label: "HRM", to: "/i/hrm" }, { label: "Staff postings", to: "/i/hrm#postings-heading" });
   if (role === "ho.caiu") out.push({ labelKey: "navigation.riskSignals", to: "/caiu/signals" });
+  if (role === "ho.cvo" || role === "zo.vigilance") out.push({ label: "Vigilance cases", to: "/vigilance" });
   if (role === "ho.security" || role === "ho.audit") out.push({ labelKey: "navigation.audit", to: "/audit/log" });
   return out;
 }
@@ -169,6 +170,7 @@ export function homeFor(role: string | undefined): string {
   if (role === "ho.security") return "/security/activity";
   if (role === "ho.audit") return "/audit/log";
   if (role === "ho.caiu") return "/caiu/signals";
+  if (role === "ho.cvo" || role === "zo.vigilance") return "/vigilance";
   if (role === "ho.acc_hq") return "/policy";
   if (role === "ho.cpfc" || role === "gov.mole") return "/dashboards";
   if (role === "zo.acc" || role === "zo.rpfc1") return "/office/work-queue";

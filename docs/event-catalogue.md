@@ -42,12 +42,15 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `SecurityIncidentRecorded.v1` | audit | audit | security_incident | 1 |
 | `ConcurrentAuditAlertRaised.v1` | audit | audit | concurrent_alert | 1 |
 | `IssueTrackerExecuted.v1` | platform | member, audit | issue_tracker_request | 1 |
+| `VigilanceCaseOpened.v1` | workflow | audit | vigilance_case | 1 |
+| `VigilanceFindingsRecorded.v1` | workflow | audit | vigilance_case | 1 |
+| `VigilanceDecisionRecorded.v1` | workflow | audit | vigilance_case | 1 |
 | `StaffPostingChanged.v1` | workflow | member, claim, grievance, intelligence, compliance, international, pension, employer, reporting, audit | staff_posting | 1 |
 | `AutoTransferConfirmed.v1` | claim | contribution, audit | auto_transfer | 1 |
 | `TransferPosted.v1` | contribution | claim, member, workflow, audit | ledger_journal | 1 |
 | `PolicyPublished.v1` | platform | claim, contribution, workflow, grievance, intelligence, pension, audit | rule_set | 1 |
 | `ClaimStateChanged.v1` | claim | workflow, reporting, audit | claim | 1 |
-| `RiskSignalReviewed.v1` | intelligence | claim, reporting, audit | risk_signal | 1 |
+| `RiskSignalReviewed.v1` | intelligence | claim, workflow, reporting, audit | risk_signal | 1 |
 | `SecurityEventRecorded.v1` | audit | intelligence, member, gateway | security_event | 1 |
 | `NotificationRequested.v1` | claim, grievance, member, contribution | member | notification | 1 |
 | `DemandRaised.v1` | compliance | contribution, audit | vishwas_application | 1 |

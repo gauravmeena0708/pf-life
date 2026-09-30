@@ -3479,8 +3479,8 @@
     "method": "POST",
     "path_template": "/vigilance/cases/{caseId}/decisions",
     "regex": "^/vigilance/cases/[^/]+/decisions$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "workflow",
     "upstream": "http://workflow-service:8000",
     "money": false,
@@ -3488,7 +3488,7 @@
     "callers": [
       "ho.cvo"
     ],
-    "summary": "CVO / Director (Vigilance) decision",
+    "summary": "CVO / Director (Vigilance): assign an inquiry, or decide on the findings",
     "revocation": false
   },
   {
@@ -3755,8 +3755,8 @@
     "method": "POST",
     "path_template": "/vigilance/cases/{caseId}/findings",
     "regex": "^/vigilance/cases/[^/]+/findings$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "workflow",
     "upstream": "http://workflow-service:8000",
     "money": false,
@@ -3764,7 +3764,7 @@
     "callers": [
       "zo.vigilance"
     ],
-    "summary": "Zonal vigilance records findings",
+    "summary": "Zonal vigilance reports the preliminary inquiry's findings",
     "revocation": false
   },
   {
@@ -5736,6 +5736,23 @@
   },
   {
     "method": "GET",
+    "path_template": "/vigilance/cases/{caseId}",
+    "regex": "^/vigilance/cases/[^/]+$",
+    "status": "W",
+    "phase": 1,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.cvo",
+      "zo.vigilance"
+    ],
+    "summary": "A vigilance case with its evidence and history (restricted; every read audited)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/employers/me/branches",
     "regex": "^/employers/me/branches$",
     "status": "W",
@@ -6194,8 +6211,8 @@
     "method": "POST",
     "path_template": "/vigilance/referrals",
     "regex": "^/vigilance/referrals$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "workflow",
     "upstream": "http://workflow-service:8000",
     "money": false,
@@ -6203,7 +6220,7 @@
     "callers": [
       "ho.caiu"
     ],
-    "summary": "Vigilance referral contract (interface 18)",
+    "summary": "Refer a confirmed risk signal, a member report or a complaint to vigilance (interface 18)",
     "revocation": false
   },
   {
@@ -6658,8 +6675,8 @@
     "method": "GET",
     "path_template": "/vigilance/cases",
     "regex": "^/vigilance/cases$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "workflow",
     "upstream": "http://workflow-service:8000",
     "money": false,
@@ -6668,7 +6685,7 @@
       "ho.cvo",
       "zo.vigilance"
     ],
-    "summary": "Vigilance case list (restricted)",
+    "summary": "Vigilance case list (restricted: the CVO, or the zone the inquiry is assigned to)",
     "revocation": false
   },
   {

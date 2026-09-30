@@ -265,9 +265,9 @@ activities:
   - {id: F07.defreeze_est_maker, actor: fo.apfc, does: "Recommend de-freezing an establishment (maker); the OIC orders it (checker)", api: ["POST /office/establishments/{estId}/defreezes"], next: [F07.defreeze], src: FIA, ev: D}
   - {id: F07.defreeze, actor: fo.oic, does: "Recommend / order de-freezing; post-defreeze claims use the higher chain", api: ["POST /office/freeze-cases/{caseId}/verifications", "POST /office/members/{uan}/defreezes", "POST /office/establishments/{estId}/defreezes"], next: [F07.block], chain: claim_settlement_after_defreeze, src: FIA, ev: D}
   - {id: F07.committee, actor: zo.fraud_committee, does: "Review suspected fraud cases reported by OICs", api: ["GET /zo/fraud-risk/cases"], next: [F07.vig_referral], src: FIA, ev: D}
-  - {id: F07.vig_referral, actor: ho.caiu, does: "Refer a pattern to vigilance", api: ["POST /vigilance/referrals"], next: [F07.vig_zone], src: "EC, MAP", ev: U}
-  - {id: F07.vig_zone, actor: zo.vigilance, does: "Investigate vigilance case with restricted evidence access", api: ["GET /vigilance/cases", "POST /vigilance/cases/{caseId}/findings"], next: [F07.vig_ho], src: "MAP, EC", ev: D, fut: true}
-  - {id: F07.vig_ho, actor: ho.cvo, does: "CVO / Director (Vigilance): oversee vigilance cases and decisions", api: ["GET /vigilance/cases", "POST /vigilance/cases/{caseId}/decisions"], next: [], src: "MAP, EC", ev: D, fut: true}
+  - {id: F07.vig_referral, actor: ho.caiu, does: "Refer a confirmed risk signal, a member's report or a complaint to vigilance", api: ["POST /vigilance/referrals"], next: [F07.vig_ho], src: "EC, MAP", ev: U}
+  - {id: F07.vig_zone, actor: zo.vigilance, does: "Inquire into vigilance cases assigned to the zone, with restricted evidence access; report findings", api: ["GET /vigilance/cases", "GET /vigilance/cases/{caseId}", "POST /vigilance/cases/{caseId}/findings"], next: [F07.vig_ho], src: "MAP, EC", ev: D}
+  - {id: F07.vig_ho, actor: ho.cvo, does: "CVO / Director (Vigilance): assign preliminary inquiries and decide on the findings", api: ["GET /vigilance/cases", "GET /vigilance/cases/{caseId}", "POST /vigilance/cases/{caseId}/decisions"], next: [F07.vig_zone], src: "MAP, EC", ev: D}
   - {id: F07.member_report, actor: member, does: "Report suspicious activity; account recovery; view sessions", api: ["POST /members/me/security-reports", "POST /members/me/account-recovery-requests", "GET /members/me/sessions"], next: [F07.vig_referral], src: "init.md Journey D", ev: U}
 
 # ─────────────────────────── F08 Grievances ───────────────────────────

@@ -162,3 +162,9 @@ international_workers:
     agreement_nationalities: [Belgium, Germany, Switzerland, Luxembourg, France, Denmark, Korea, Netherlands, Hungary,
                               Finland, Sweden, Czech Republic, Norway, Austria, Canada, Australia, Japan, Portugal, Quebec,
                               Brazil]
+
+# P2.10a: vigilance cases (illustrative; after the CVC's pattern for complaints and preliminary inquiries)
+vigilance:
+  pi_days: 90                  # a preliminary inquiry is due this many days after it is assigned
+  sources: [CAIU_SIGNAL, MEMBER_REPORT, PUBLIC_COMPLAINT, STAFF_COMPLAINT, CVC, MINISTRY]
+  outcomes: [CLOSED_NO_SUBSTANCE, MINOR_PENALTY_PROCEEDINGS, MAJOR_PENALTY_PROCEEDINGS, REFERRED_TO_CBI, SYSTEM_IMPROVEMENT]

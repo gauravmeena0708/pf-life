@@ -2940,13 +2940,19 @@ stakeholders:
     - F12.internal
   zo.vigilance:
   - endpoint: GET /vigilance/cases
-    status: P
+    status: W
+    scope: restricted — vigilance roles only, case-by-case
+    step_up: false
+    via:
+    - F07.vig_zone
+  - endpoint: GET /vigilance/cases/{caseId}
+    status: W
     scope: restricted — vigilance roles only, case-by-case
     step_up: false
     via:
     - F07.vig_zone
   - endpoint: POST /vigilance/cases/{caseId}/findings
-    status: P
+    status: W
     scope: restricted — vigilance roles only, case-by-case
     step_up: true
     via:
@@ -3181,7 +3187,7 @@ stakeholders:
     via:
     - F06.detect
   - endpoint: POST /vigilance/referrals
-    status: P
+    status: W
     scope: restricted — vigilance roles only, case-by-case
     step_up: false
     via:
@@ -3255,13 +3261,19 @@ stakeholders:
     - F13.publicity
   ho.cvo:
   - endpoint: GET /vigilance/cases
-    status: P
+    status: W
+    scope: restricted — vigilance roles only, case-by-case
+    step_up: false
+    via:
+    - F07.vig_ho
+  - endpoint: GET /vigilance/cases/{caseId}
+    status: W
     scope: restricted — vigilance roles only, case-by-case
     step_up: false
     via:
     - F07.vig_ho
   - endpoint: POST /vigilance/cases/{caseId}/decisions
-    status: P
+    status: W
     scope: restricted — vigilance roles only, case-by-case
     step_up: true
     via:

@@ -219,6 +219,9 @@ OTHER_FAMILIES = [
          "tests/e2e/test_ledger_and_establishment.py"),
         ("LED-ISSUE-TRACKER", "Issue Tracker freeze and notice", "Order raised by the OIC; executed by the IS Division", "Account frozen and de-frozen by member-service; notice delivered",
          "tests/e2e/test_oversight_administration.py"),
+        ("OVS-VIGILANCE", "Vigilance case", "Staff complaint; benign signal; CVO, zone and other roles",
+         "Referred, inquiry assigned to the zone, findings with the complainant masked, penalty proceedings ordered; benign signal and other roles refused",
+         "tests/e2e/test_vigilance.py"),
     ]),
     ("Oversight and administration", "tests/e2e/test_oversight_administration.py", [
         ("OVS-INCIDENT", "Security incident and CERT-In report", "High severity within and past 6 hours; low severity", "Reportable ones reported (mock) with acknowledgement; late marked"),

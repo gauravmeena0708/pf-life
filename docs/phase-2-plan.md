@@ -28,6 +28,8 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.9a** | International workers are members: one member login and menu, with what does not apply to them disabled and explained, from rules in the rule set | **Done** (30 Sep 2026) |
 | P2.9b | Members of exempted establishments: PF held by the trust (passbook, claims and transfers say so and route correctly), pension and EDLI with EPFO; the trust's Annexure K | Planned — needs the Exemption Manual |
 | **P2.9c** | Member experience: a life-event home page, one consolidated view, plain-language status, nudges, a mobile pass | **Done** (30 Sep 2026; built before P2.9b, which waits for the Exemption Manual) |
+| **P2.10a** | Vigilance cases: a CAIU-confirmed risk signal (or a complaint) referred to vigilance; the CVO assigns a preliminary inquiry to a zone (90 days); zonal vigilance reports findings; the CVO decides; restricted, access-logged, the complainant masked | **Done** (30 Sep 2026) |
+| P2.10b | Preventive vigilance: sensitive posts and 3-year rotation alerts; vigilance clearance for HR postings, promotions and retirement against open cases and penalties | Planned |
 
 ## P2.9 — plan
 
@@ -89,6 +91,44 @@ withdrawal conditions should stay illustrative or be taken from a source you can
 
 Operations marked **?** (scope unconfirmed, e.g. *ECR Approval*, *VDR Member Beneficiary*) wait until their
 meaning is confirmed.
+
+## P2.10 — plan (vigilance)
+
+**Why.** Interface 18 (Vigilance) is the last one with nothing built: the catalogue has the referral, the case list,
+findings and decisions, and the activity map says how work flows (F07.vig_referral → F07.vig_zone → F07.vig_ho), but
+no source describes the procedure in detail. The outline below follows the CVC's pattern for complaints and preliminary
+inquiries as summarised in `../pf-ideas/divisions/12_vig.md` (Vigilance Complaint Number, 90-day inquiry, first-stage
+advice); every period and outcome is illustrative and lives in the rule set.
+
+### P2.10a — vigilance cases (workflow-service)
+- **Referral** (`ho.caiu`, `POST /vigilance/referrals`): from a risk signal the CAIU has reviewed as *confirmed*
+  (workflow-service keeps a copy from `RiskSignalReviewed.v1`; anything else is refused), from a member's security
+  report, or a complaint (source: public, staff, CVC, ministry). Subject: a member, an establishment or an official;
+  the office where it arose; the allegation; evidence references (the signal, claims, audit events, office cases); an
+  optional complainant, stored but masked for everyone except the CVO. The case gets a Vigilance Complaint Number.
+- **CVO** (`ho.cvo`, `POST /vigilance/cases/{id}/decisions`, step-up): *assign a preliminary inquiry* to the zone of
+  the office (due in the rule set's `vigilance.pi_days`, 90), *close — no substance*, and after the report: *close*,
+  *minor* or *major penalty proceedings*, *refer to the CBI*, *system improvement*, or *return for further inquiry*.
+- **Zonal vigilance** (`zo.vigilance`, `POST /vigilance/cases/{id}/findings`, step-up): sees only the cases assigned
+  to its zone; reports findings (substantiated / partly / not substantiated, the report, a recommendation, the evidence
+  examined); a report after the due date is marked late.
+- **Restricted**: only these two roles read cases (`GET /vigilance/cases`, new `GET /vigilance/cases/{id}`); every
+  read is written to the audit log; the events (`VigilanceCaseOpened.v1`, `VigilanceFindingsRecorded.v1`,
+  `VigilanceDecisionRecorded.v1`) carry identifiers only — no allegation or names — and go to audit only, so nothing
+  reaches reporting or the assistant.
+- **Persona**: `zo-vigilance` (Zonal Vigilance Directorate, ZO-DEMO-01).
+- **Web**: `/vigilance` for the CVO and the zone (list, case, decision and findings forms); *Refer to vigilance* on a
+  confirmed signal in the CAIU screen.
+- **Tests**: unit (referral only from a confirmed signal, zone restriction, masking, the state machine, late
+  findings, reads audited); must-deny (other roles, the other zone); end to end (signal → referral → assignment →
+  findings → decision).
+
+### P2.10b — preventive vigilance (after a)
+- Sensitive posts (compliance, recovery, cash, administration — in the rule set) and each officer's tenure from the
+  postings; alerts at 2½ and 3 years; the list for the annual general transfer.
+- Vigilance clearance: HR asks before a posting to a sensitive post, a promotion or retirement; clear unless an
+  open case names the officer or a penalty is current.
+- Not planned: the Agreed List and doubtful-integrity register (kept with the CBI; too sensitive even as a demo).
 
 ## P2.1 — how it is built
 
@@ -497,3 +537,27 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 - **Status labels**: one table of plain labels, English and Hindi, for every state and status code the member,
   employer, claimant, pensioner and public screens receive (`statusLabel()`, which the older `stateLabel()` now uses).
 - **Not yet**: the office screens keep their codes where no label exists (officers work with them).
+
+## P2.10a — how it is built
+
+- **workflow-service** (`vigilance_routes.py`, migration 0012): `vigilance_cases` (VCN `VIG/<year>/<n>`, source, subject,
+  office, zone, allegation, evidence references, complainant, state, PI due date, findings, outcome),
+  `vigilance_actions` (the history) and `vigilance_signals` (the CAIU's reviews, from `RiskSignalReviewed.v1`, which
+  workflow-service now consumes).
+- **States**: `REFERRED` → *assign inquiry* → `PI_ASSIGNED` (zone = the office's zone; due in `vigilance.pi_days`) →
+  findings → `PI_REPORTED` → an outcome from `vigilance.outcomes` (`ACTION_ORDERED`, or `CLOSED` when there is no
+  substance) or *return for further inquiry* (back to `PI_ASSIGNED` with a new due date). A referral can also be closed
+  at once. Decisions and findings need a step-up bound to the case.
+- **Referral rules**: the source must be one of `vigilance.sources`; a CAIU signal only when its review was
+  *confirmed* (409 otherwise), with the signal added to the evidence; the same signal or report cannot be referred twice.
+- **Restriction**: `ho.cvo` reads every case; `zo.vigilance` only its zone's cases once assigned (another zone's case
+  answers 404, not 403); every list and case read writes `vigilance.cases.list` / `vigilance.case.read` to the audit log;
+  the complainant is `{"masked": true}` for the zone. Events carry identifiers only and go to audit alone.
+- **Persona**: `zo-vigilance` (ZO-DEMO-01); `vigilance-investigator` is now labelled *Chief Vigilance Officer*.
+- **Web**: `/vigilance` (the list, a linkable case with `?case=`, the CVO's decisions limited to those open, the zone's
+  findings form, an *Overdue* mark); *Refer to vigilance* on a confirmed signal in the CAIU screen; the states in the
+  shared label table, English and Hindi. Interface 18 is now *Working*, so no interface is left *Planned*.
+- **Tests**: workflow-service `test_vigilance.py` (only a confirmed signal, once; the full cycle with a return for
+  further inquiry; the history; events without the allegation or names; reads audited; other roles 403, another zone
+  404; a late report); web `Vigilance.test.tsx`; end to end `test_vigilance.py` (a staff complaint through to penalty
+  proceedings, a benign signal refused, other roles refused).

@@ -886,12 +886,13 @@ Activities: **F12.internal** Internal audit of an RO; raise audit paras
 
 #### `zo.vigilance` — **Zonal Vigilance Directorate**
 
-Activities: **F07.vig_zone** Investigate vigilance case with restricted evidence access
+Activities: **F07.vig_zone** Inquire into vigilance cases assigned to the zone, with restricted evidence access; report findings
 
 | Endpoint | Status |
 |---|---|
-| `GET /vigilance/cases` | P |
-| `POST /vigilance/cases/{caseId}/findings` | P |
+| `GET /vigilance/cases` | W |
+| `GET /vigilance/cases/{caseId}` | W |
+| `POST /vigilance/cases/{caseId}/findings` | W |
 
 #### `zo.fraud_committee` — Zonal / regional fraud-risk management committee (ZFRMC / RFRMC)
 
@@ -1014,14 +1015,14 @@ Activities: **F12.ho** Audit Division: plan audits, IT audit, pre-audit, drop pa
 
 #### `ho.caiu` — Central Analysis & Intelligence Unit
 
-Activities: **F06.detect** Analyse data and allocate risk-based inspections / risk signals; **F07.vig_referral** Refer a pattern to vigilance
+Activities: **F06.detect** Analyse data and allocate risk-based inspections / risk signals; **F07.vig_referral** Refer a confirmed risk signal, a member's report or a complaint to vigilance
 
 | Endpoint | Status |
 |---|---|
 | `GET /ai/models` | W |
 | `GET /caiu/synthetic-risk-signals` | W |
 | `POST /caiu/synthetic-risk-signals/{signalId}/reviews` | W |
-| `POST /vigilance/referrals` | P |
+| `POST /vigilance/referrals` | W |
 
 #### `ho.iwu` — International Workers Unit
 
@@ -1084,12 +1085,13 @@ Activities: **F13.publicity** Publish circulars and awareness content
 
 #### `ho.cvo` — **Chief Vigilance Officer** and **Director (Vigilance)**
 
-Activities: **F07.vig_ho** CVO / Director (Vigilance): oversee vigilance cases and decisions
+Activities: **F07.vig_ho** CVO / Director (Vigilance): assign preliminary inquiries and decide on the findings
 
 | Endpoint | Status |
 |---|---|
-| `GET /vigilance/cases` | P |
-| `POST /vigilance/cases/{caseId}/decisions` | P |
+| `GET /vigilance/cases` | W |
+| `GET /vigilance/cases/{caseId}` | W |
+| `POST /vigilance/cases/{caseId}/decisions` | W |
 
 #### `ho.security` — Information security / SOC (cyber incidents, access reviews)
 
@@ -1756,11 +1758,9 @@ flowchart LR
   F07_defreeze_est_maker["fo.apfc<br/>Recommend de-freezing an establishment (maker); the OIC orde"]
   F07_defreeze["fo.oic<br/>Recommend / order de-freezing; post-defreeze claims use the "]
   F07_committee["zo.fraud_committee<br/>Review suspected fraud cases reported by OICs"]
-  F07_vig_referral["ho.caiu<br/>Refer a pattern to vigilance"]
-  F07_vig_zone["zo.vigilance<br/>Investigate vigilance case with restricted evidence access"]
-  style F07_vig_zone stroke-dasharray: 5 5
-  F07_vig_ho["ho.cvo<br/>CVO / Director (Vigilance): oversee vigilance cases and deci"]
-  style F07_vig_ho stroke-dasharray: 5 5
+  F07_vig_referral["ho.caiu<br/>Refer a confirmed risk signal, a member's report or a compla"]
+  F07_vig_zone["zo.vigilance<br/>Inquire into vigilance cases assigned to the zone, with rest"]
+  F07_vig_ho["ho.cvo<br/>CVO / Director (Vigilance): assign preliminary inquiries and"]
   F07_member_report["member<br/>Report suspicious activity; account recovery; view sessions"]
   F07_freeze_ho --> F07_block
   F07_freeze_zo --> F07_block
@@ -1779,8 +1779,9 @@ flowchart LR
   F07_defreeze_est_maker --> F07_defreeze
   F07_defreeze --> F07_block
   F07_committee --> F07_vig_referral
-  F07_vig_referral --> F07_vig_zone
+  F07_vig_referral --> F07_vig_ho
   F07_vig_zone --> F07_vig_ho
+  F07_vig_ho --> F07_vig_zone
   F07_member_report --> F07_vig_referral
 ```
 

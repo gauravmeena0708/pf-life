@@ -602,7 +602,7 @@ Monitoring (`/monitoring/**`), AI (`/ai/**`), audit (`/audit/**`) and NDC (`/ndc
 | `POST /security/step-up-challenges/{challengeId}/verifications` | Complete step-up | W | 1 | gateway |
 | `POST /internal/security-events` | Ingest IdP events (login, new device, credential change) from the Keycloak event listener into audit + outbox → `SecurityEventRecorded.v1` (Journey D1). Service-to-service only | W | 1 | audit |
 | `GET /hrm/me` | HRM staff profile and assignment metadata (interface 15) | W | 1 | workflow |
-| `POST /vigilance/referrals` | Vigilance referral contract (interface 18) | P | 3 | workflow |
+| `POST /vigilance/referrals` | Refer a confirmed risk signal, a member report or a complaint to vigilance (interface 18) | W | 1 | workflow |
 
 
 **Added from the stakeholder activity map** (`docs/stakeholder-activities.yaml`)
@@ -616,9 +616,10 @@ Monitoring (`/monitoring/**`), AI (`/ai/**`), audit (`/audit/**`) and NDC (`/ndc
 | `GET /security/incidents` | Security incidents on record and their CERT-In reporting (mock) | W | 1 | audit |
 | `GET /privacy/requests` | Data-principal requests queue (DPDP Act) | P | 3 | audit |
 | `POST /privacy/requests/{requestId}/decisions` 🔐 | Decide a data-principal request | P | 3 | audit |
-| `GET /vigilance/cases` | Vigilance case list (restricted) | P | 3 | workflow |
-| `POST /vigilance/cases/{caseId}/findings` 🔐 | Zonal vigilance records findings | P | 3 | workflow |
-| `POST /vigilance/cases/{caseId}/decisions` 🔐 | CVO / Director (Vigilance) decision | P | 3 | workflow |
+| `GET /vigilance/cases` | Vigilance case list (restricted: the CVO, or the zone the inquiry is assigned to) | W | 1 | workflow |
+| `GET /vigilance/cases/{caseId}` | A vigilance case with its evidence and history (restricted; every read audited) | W | 1 | workflow |
+| `POST /vigilance/cases/{caseId}/findings` 🔐 | Zonal vigilance reports the preliminary inquiry's findings | W | 1 | workflow |
+| `POST /vigilance/cases/{caseId}/decisions` 🔐 | CVO / Director (Vigilance): assign an inquiry, or decide on the findings | W | 1 | workflow |
 | `GET /zo/fraud-risk/cases` | Zonal / regional fraud-risk committee case list | W | 1 | workflow |
 | `POST /hrm/postings` 🔐 | Staff postings and role assignment to offices (drives jurisdiction) | W | 1 | workflow |
 | `GET /audit/concurrent/extracts` | Concurrent Audit Cell daily functionality extract (Audit Portal) | W | 1 | audit |

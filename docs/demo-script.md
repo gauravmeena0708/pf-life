@@ -397,6 +397,18 @@ contribution- and platform-service*
 4. **Death claims**: after the officers admit the Form 5IF claim, **`ro-edli` → EDLI claims** enters the verified
    average wages, works out the benefit and sanctions it (one-time code bound to the amount).
 
+## Vigilance
+*Tests: `tests/e2e/test_vigilance.py`, `services/workflow-service/tests/test_vigilance.py`*
+
+1. **`caiu-investigator` → Risk signals**: a signal reviewed as *confirmed* has *Refer to vigilance*; fill the subject,
+   the office and the allegation. A benign signal has no button (and the API refuses it). The referral gets a VCN.
+2. **`vigilance-investigator` (Chief Vigilance Officer) → Vigilance cases**: open the case — the complainant is shown —
+   and *Assign inquiry* (one-time code). The inquiry goes to the zone of the office, due in 90 days.
+3. **`zo-vigilance` → Vigilance cases**: only the zone's cases; the complainant reads *Masked — known to the CVO only*;
+   report the findings (partly substantiated, the report, a recommendation, the evidence examined).
+4. **CVO**: decide — e.g. *Minor penalty proceedings*, or *Return for further inquiry*. The history lists each step.
+5. Any other role (e.g. `ro-oic`) gets 403 on the vigilance API; every read is in the audit log (`vigilance.case.read`).
+
 ## The member's home page and the phone layout
 *Tests: `tests/e2e/test_member_home.py`, `apps/web/src/features/member/memberHome.test.ts`, `apps/web/src/features/MemberHome.test.tsx`*
 

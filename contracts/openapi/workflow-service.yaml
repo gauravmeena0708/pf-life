@@ -746,20 +746,61 @@ paths:
   /vigilance/cases:
     get:
       operationId: getVigilanceCases
-      summary: Vigilance case list (restricted)
+      summary: 'Vigilance case list (restricted: the CVO, or the zone the inquiry is assigned to)'
       tags:
       - Grievances, security, platform, audit and oversight
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: workflow
+      x-callers:
+      - ho.cvo
+      - zo.vigilance
+      x-scope: restricted — vigilance roles only, case-by-case
+      security:
+      - bffSession: []
+  /vigilance/cases/{caseId}:
+    get:
+      operationId: getVigilanceCasesCaseId
+      summary: A vigilance case with its evidence and history (restricted; every read audited)
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: workflow
       x-callers:
       - ho.cvo
@@ -770,7 +811,7 @@ paths:
   /vigilance/cases/{caseId}/decisions:
     post:
       operationId: postVigilanceCasesCaseIdDecisions
-      summary: CVO / Director (Vigilance) decision
+      summary: 'CVO / Director (Vigilance): assign an inquiry, or decide on the findings'
       tags:
       - Grievances, security, platform, audit and oversight
       parameters:
@@ -782,14 +823,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: workflow
       x-callers:
       - ho.cvo
@@ -806,7 +853,7 @@ paths:
   /vigilance/cases/{caseId}/findings:
     post:
       operationId: postVigilanceCasesCaseIdFindings
-      summary: Zonal vigilance records findings
+      summary: Zonal vigilance reports the preliminary inquiry's findings
       tags:
       - Grievances, security, platform, audit and oversight
       parameters:
@@ -818,14 +865,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: workflow
       x-callers:
       - zo.vigilance
@@ -842,20 +895,26 @@ paths:
   /vigilance/referrals:
     post:
       operationId: postVigilanceReferrals
-      summary: Vigilance referral contract (interface 18)
+      summary: Refer a confirmed risk signal, a member report or a complaint to vigilance (interface 18)
       tags:
       - Grievances, security, platform, audit and oversight
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: workflow
       x-callers:
       - ho.caiu

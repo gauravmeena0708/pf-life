@@ -98,6 +98,14 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 10a: vigilance cases (30 September 2026)
+
+workflow-service 44 passed (4 new in `test_vigilance.py`), common-persistence 25; web 160 passed (new `Vigilance.test.tsx`;
+the System map test now allows no *Planned* interface, since Vigilance was the last); end to end 72 passed (new
+`test_vigilance.py`: a staff complaint through the inquiry to penalty proceedings, a benign signal refused, other roles
+refused) — `test_journey_b_claim.py` again stopped only because member A's synthetic balance is used up (needs
+`make reset`); must-deny 18 passed; UI smoke 2 passed.
+
 ## Update — Phase 2, slice 9c: the member's home page and the phone layout (30 September 2026)
 
 Web 148 passed (new `memberHome.test.ts` for the savings, nudge and pending rules, `MemberHome.test.tsx` for the page,

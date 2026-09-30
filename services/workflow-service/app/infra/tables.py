@@ -141,3 +141,44 @@ claim_dockets = Table(
     Column("officer_role", String(60), nullable=False),
     Column("after_action", Integer, nullable=False),
 )
+
+# P2.10a: vigilance cases (restricted). The allegation, evidence and complainant stay here; events carry identifiers only.
+vigilance_cases = Table(
+    "vigilance_cases", metadata,
+    Column("case_id", String(40), primary_key=True),
+    Column("vcn", String(40), nullable=False, unique=True),          # Vigilance Complaint Number
+    Column("source", String(30), nullable=False),
+    Column("source_ref", String(80)),
+    Column("subject_type", String(20), nullable=False),              # MEMBER | ESTABLISHMENT | OFFICIAL
+    Column("subject_ref", String(80), nullable=False),
+    Column("office_id", String(40), nullable=False),                 # where the matter arose
+    Column("zone_id", String(40)),                                   # the zone the inquiry is assigned to
+    Column("allegation", Text, nullable=False),
+    Column("evidence", JSON, nullable=False),                        # [{kind, ref}]
+    Column("complainant", JSON),                                     # shown to the CVO only
+    Column("state", String(30), nullable=False),
+    Column("pi_due", Date),
+    Column("findings", JSON),
+    Column("outcome", String(40)),
+    Column("referred_by", String(80), nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now()),
+    Column("updated_at", DateTime(timezone=True), server_default=func.now()),
+)
+
+vigilance_actions = Table(
+    "vigilance_actions", metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("case_id", String(40), nullable=False, index=True),
+    Column("actor_stakeholder", String(60), nullable=False),
+    Column("action", String(40), nullable=False),
+    Column("note", Text),
+    Column("at", DateTime(timezone=True), server_default=func.now()),
+)
+
+# Risk signals the CAIU has reviewed (from RiskSignalReviewed.v1): only a confirmed one can be referred.
+vigilance_signals = Table(
+    "vigilance_signals", metadata,
+    Column("signal_id", String(40), primary_key=True),
+    Column("subject_ref", String(80)),
+    Column("outcome", String(30), nullable=False),
+)
