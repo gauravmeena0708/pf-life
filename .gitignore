@@ -32,4 +32,6 @@ Thumbs.db
 minio-data/
 postgres-data/
 tests/e2e/screenshots/
+artifacts/ui-manuals/
+ci-results/
 *.egg-info/

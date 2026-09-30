@@ -1,0 +1,21 @@
+:root { color: #142b42; background: #fff; font-family: "Trebuchet MS", "Segoe UI", sans-serif; }
+body { max-width: 1050px; margin: 0 auto; padding: 24px; line-height: 1.55; }
+header { background: #003366; color: white; padding: 28px; border-bottom: 4px solid #b8860b; }
+header p { margin: 0 0 8px; } h1, h2, h3 { font-family: Georgia, serif; }
+h1 { line-height: 1.2; font-size: 2rem; margin: 0 0 14px; } h2, h3 { color: #003366; }
+main { padding-block: 20px; } section, nav { margin-block: 30px; }
+.notice { border: 1px solid #b92125; border-left: 5px solid #b92125; padding: 12px; font-weight: bold; }
+table { border-collapse: collapse; width: 100%; } th, td { border: 1px solid #cbd4df; padding: 10px; text-align: left; vertical-align: top; }
+th { color: #003366; } .expected { border-left: 4px solid #b8860b; padding: 10px 14px; }
+figure { margin: 18px 0; } img { display: block; width: 100%; height: auto; border: 1px solid #cbd4df; }
+figcaption { margin-top: 8px; font-size: .85rem; color: #516273; }
+.evidence { font-size: .75rem; overflow-wrap: anywhere; color: #516273; }
+a { color: #004d99; } a:focus-visible { outline: 2px solid #b8860b; outline-offset: 3px; }
+footer { border-top: 3px solid #b8860b; padding-top: 14px; font-size: .85rem; }
+@media print {
+  body { padding: 0; max-width: none; font-size: 10pt; }
+  header { print-color-adjust: exact; } h1 { font-size: 24pt; }
+  .step { break-before: page; } figure { break-inside: avoid; }
+  .step img { max-height: 175mm; object-fit: contain; }
+  h2, h3 { break-after: avoid; } table, .notice { break-inside: avoid; }
+}

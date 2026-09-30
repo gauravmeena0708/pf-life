@@ -3,9 +3,14 @@
 A role manual explains one person's actions. A process manual follows the same claim across roles in
 execution order and records the asserted business outcome. The lifecycle case matrix relates those
 processes to stakeholder journeys and distinguishes specifications from verified observations.
+The existing [stakeholder atlas](stakeholder-atlas.html) supplies the wider stakeholder and handoff map;
+[stakeholder API sets](stakeholder-api-sets.md) retain the source activity references. The generated
+case report adds run-specific evidence to that map rather than treating all mapped activities as tested.
 
 The catalogue in `scripts/lifecycles/catalogue.py` is a finite baseline POC specification. It covers
-claims, enrollment, contributions, mobility, pension, death/EDLI, grievances, compliance and ledger work.
+claims, enrollment, contributions, mobility, pension, death/EDLI, grievances, compliance, ledger work and
+oversight (security incidents, concurrent audit, postings, dashboards). Each case names the test that exercises
+it — an end-to-end journey where one exists, otherwise the owning service's unit test.
 Its data partitions include missing/invalid inputs, inclusive amount boundaries, service and exit-date
 boundaries, active/exited employment, account ownership, multiple member IDs, KYC, office decisions,
 interruptions, document types/size, tax and policy versions, bank failure and financial reconciliation.
@@ -25,7 +30,9 @@ python3 scripts/ui_manuals.py --suite all --isolated
 The local demo must have been started once: isolation snapshots its running image IDs. The command creates
 a separate Compose project, private volumes/network, copies seed/rules/realm configuration and serves the
 fixture at `http://localhost:15173` (Keycloak 18080; gateway 18000). It migrates before starting consumers,
-seeds the dedicated data, runs the UI cases, generates manuals and stops only that isolated project.
+seeds the dedicated data and checks a real member sign-in before running the UI cases. Only transport
+failures during this readiness check receive bounded retries; lifecycle tests and business commands do
+not. It then generates manuals and stops only that isolated project.
 It does not reset/recreate the shared demo. Snapshots contain local configuration and remain in ignored
 `artifacts/ui-manuals/`; do not publish them as manual downloads. Its database volumes are retained.
 
@@ -39,7 +46,8 @@ python3 scripts/lifecycles/isolated_stack.py --existing artifacts/ui-manuals/<ep
 balances or once-only eligibility. Create a new fixture for a full run. Fixed alternate ports permit one
 local isolated fixture at a time; GitHub matrix jobs use separate runners.
 
-For a separately provisioned fresh stack, use `--suite all --base-url <fixture-url>` instead. `--suite claims`
+For a separately provisioned fresh stack, use `--suite all --base-url <fixture-url>` instead; the same
+sign-in readiness check runs before capture. `--suite claims`
 selects only the new claim cases. `--suite smoke` is the default and retains the original return/withdrawal
 and persona-switching journeys. Select a named executable data case with repeated `--case` options:
 

@@ -142,7 +142,7 @@ export function CasePage() {
       </section>
       <section className="card stack" aria-labelledby="case-history-heading"><h2 id="case-history-heading">{t("office.history")}</h2>
         {item.history.length === 0 ? <p className="muted">{t("office.noHistory")}</p> : <div className="table-scroll"><table><thead><tr><th scope="col">{t("office.when")}</th><th scope="col">{t("office.round")}</th><th scope="col">{t("office.officer")}</th><th scope="col">{t("office.action")}</th><th scope="col">{t("office.reasonChecks")}</th></tr></thead><tbody>{item.history.map((entry, index) => <tr key={`${entry.at}-${index}`}>
-          <td>{dateTime(entry.at, i18n.language)}</td><td>{entry.round}</td><td>{roleLabel(entry.officer_role, t)}<br /><span className="muted small">{entry.officer_subject}</span></td><td>{entry.action} {entry.approval_level ?? ""}</td><td>{entry.reason}{entry.reason && entry.checks.length ? "; " : ""}{entry.checks.join(", ")}</td>
+          <td>{dateTime(entry.at, i18n.language)}</td><td>{entry.round}</td><td>{roleLabel(entry.officer_role, t)}<br /><span className="muted small">{entry.officer_subject}</span></td><td>{entry.action} {entry.approval_level ?? ""}</td><td>{entry.reason}{entry.reason && entry.checks?.length ? "; " : ""}{(entry.checks ?? []).join(", ")}</td>
         </tr>)}</tbody></table></div>}
       </section>
       {item.claim_id && (reviewing || role === "fo.fa_accounts") ? <ClaimDocket claimId={item.claim_id} ready={!!item.docket_ready} canGenerate={reviewing}

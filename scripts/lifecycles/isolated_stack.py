@@ -10,10 +10,12 @@ import ipaddress
 import json
 import shutil
 import subprocess
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
 CORE = ["postgres", "redis", "rabbitmq", "keycloak", "gateway", "web", "employer-service", "member-service",
         "contribution-service", "claim-service", "workflow-service", "payment-simulator", "platform-service",
         "audit-service", "intelligence-service", "mock-integrations"]
@@ -107,6 +109,8 @@ def start(folder):
     for name in SEED:
         print(f"Seeding isolated {name}", flush=True)
         run(folder, "exec", "-T", name, "python", "-m", "app.seed")
+    from scripts.lifecycles.readiness import wait_for_sign_in
+    wait_for_sign_in("http://localhost:15173")
     print("Run UI tests with --base-url http://localhost:15173", flush=True)
 
 
