@@ -25,6 +25,67 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.8c** | Joint option for pension on higher wages (member opts, employer validates wages, dues from the rules); the EDLI section's decision on verified wages; Certificates of Coverage and the international worker's view (new international-service) | **Done** (30 Sep 2026) |
 | **P2.8d** | Grievances without a login and their status, reminders, feedback and office transfers; claim status without a login; circulars; the e-Report Card; the approved interest rate recorded by HO F&A (→ a draft rule set); a surrendered trust's past accumulations ingested | **Done** (30 Sep 2026) |
 | **P2.8e** | Security incidents with CERT-In reporting (mock); the Concurrent Audit Cell's daily extract, alerts and OIC replies; the NDC Issue Tracker (freeze / de-freeze / login notice); the zonal fraud-risk case list; HR postings that move jurisdiction everywhere; district and employer dashboards; member location mapping | **Done** (30 Sep 2026) |
+| P2.9a | International workers are members: one member login and menu, with what does not apply to them disabled and explained, from rules in the rule set | Planned |
+| P2.9b | Members of exempted establishments: PF held by the trust (passbook, claims and transfers say so and route correctly), pension and EDLI with EPFO; the trust's Annexure K | Planned — needs the Exemption Manual |
+| P2.9c | Member experience: a life-event home page, one consolidated view, plain-language status, nudges, a mobile pass | Planned |
+
+## P2.9 — plan
+
+**Why.** In P2.8c the international worker was modelled as a separate login with one permission, so
+`worker-expat` sees a single page. An international worker is a member — UAN, contributions, passbook, KYC,
+nomination, claims — with different rules. And members of exempted establishments have not been modelled at all:
+their PF is held by the establishment's trust, which the passbook and claim screens do not reflect.
+
+### P2.9a — international workers as members
+- **Identity**: `worker-expat` signs in as `member`; being an international worker is an attribute of the member
+  record, already captured on Form 11 (`international_worker`, `country_of_origin`) — plus nationality and whether
+  their home scheme issued a Certificate of Coverage (then exempt for the posting). member-service publishes it
+  (`MemberRegistered.v1` / a new `MemberInternationalStatusChanged.v1`); claim-service, contribution-service and
+  international-service keep a copy. The separate `intl_worker` stakeholder is retired (the activity map's F10.worker
+  moves to `member`).
+- **Rules, not code** — a new rule-set section `international_workers` (illustrative, validated like the others):
+  which claim types are open to an international worker and under what condition (e.g. final settlement only at the
+  age of retirement, on permanent incapacity, or on leaving for a country with an agreement that allows it; no
+  advances), whether contributions are on full wages (no wage ceiling), and per agreement country what changes.
+  Claim eligibility already explains refusals; it gains the reason "not available to international workers …".
+- **Contributions**: the ECR accepts wages above the ceiling for international workers (today it is an error for
+  EPS/EDLI wages); the validation report says why.
+- **Web**: the same member menu; items that do not apply are shown disabled with the reason, not hidden; the
+  coverage page stays as *View › International worker coverage*.
+- **Agreements**: align the synthetic catalogue with the 20 partner countries and years in `../pf-international`
+  (names and years only; terms stay illustrative until curated from the treaty texts).
+- **Tests**: claims refused and allowed by rule; ECR above the ceiling; the persona's full menu; must-deny for the
+  old one-permission role removed.
+
+### P2.9b — members of exempted establishments
+- **Source first**: the rules come from the EPFO *Exemption Manual 2023* (`Exemption_Manual_08122023.pdf`, cited in
+  `../pf-exempted`), read and summarised with page references as was done for the CITES and Pension manuals. It is
+  not on this machine yet.
+- **Model**: an establishment's exemption — which schemes (PF under 17(1)(a), pension, EDLI under 17(2)), from when,
+  and its status (active, surrendered, cancelled). Each member ID at an exempted establishment is marked *PF with
+  the trust* for that period.
+- **Member view**: the passbook shows the PF for those periods as held by the trust (with the trust's name), the
+  pension part with EPFO; the claim screen refuses PF claims on such member IDs with "file with your trust" and
+  keeps pension and EDLI claims with EPFO unless those are exempted too.
+- **ECR**: an exempted establishment remits to EPFO only what is not exempted (pension, and EDLI/admin charges as
+  applicable); PF lines go to the trust.
+- **Transfers**: Form 13 between an EPFO member ID and a trust uses Annexure K — the trust answers requests and
+  submits the amount (`/exempted/me/annexure-k-*`, now Phase 3, brought forward), the office reconciles.
+- **Trust portal**: a trust officer persona with the trust profile and Annexure K; returns, audits and surrender stay
+  Phase 3. Surrender then feeds the existing past-accumulation ingestion (P2.8d).
+- **Seed**: an exempted establishment (active exemption) with a member who also has an EPFO member ID elsewhere.
+
+### P2.9c — member experience (after a and b)
+- A life-event home page ("I changed jobs", "I'm leaving work", "someone has died", "I need money for …") that
+  leads into the existing forms; EPFO's menu stays for familiarity.
+- One consolidated view: the balance across the Aadhaar-verified set, the pension estimate, what is pending and the
+  next action.
+- Plain-language status everywhere (lead with the `next_step` the APIs already return; no internal state codes).
+- Nudges: an old member ID with a balance, missing KYC or nomination, an exit not marked.
+- A mobile layout pass, checked by the UI tests at phone width.
+
+**Open questions**: the Exemption Manual PDF (P2.9b cannot start without it); whether international workers'
+withdrawal conditions should stay illustrative or be taken from a source you can provide.
 
 Operations marked **?** (scope unconfirmed, e.g. *ECR Approval*, *VDR Member Beneficiary*) wait until their
 meaning is confirmed.
