@@ -22,6 +22,7 @@ members = Table(
     Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
     Column("aadhaar_ref", String(64), index=True),           # a stand-in for the verified Aadhaar (never the number): UANs sharing it form a set
     Column("primary_account_link_id", String(40)),           # the primary member ID of the member's set (P2.7d)
+    Column("international", JSON),                           # P2.9a: an international worker — {nationality, passport_masked}
 )
 
 employments = Table(

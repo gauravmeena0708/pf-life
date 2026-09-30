@@ -3,7 +3,7 @@
  "totals": {
   "interfaces": 21,
   "stakeholders": 114,
-  "stakeholders_with_access": 97,
+  "stakeholders_with_access": 96,
   "activities": 238,
   "endpoints": {
    "W": 324,
@@ -62,7 +62,7 @@
    "coverage": "Working",
    "purpose": "Members, pensioners and claimants: passbook, claims, transfers, nomination, pension and death claims.",
    "endpoints": {
-    "W": 80,
+    "W": 81,
     "M": 5,
     "P": 2,
     "?": 0
@@ -135,7 +135,7 @@
    "coverage": "Working",
    "purpose": "International workers and Certificates of Coverage under social-security agreements.",
    "endpoints": {
-    "W": 5,
+    "W": 4,
     "M": 0,
     "P": 2,
     "?": 0
@@ -446,7 +446,7 @@
    "name": "Member — active contributor (UAN holder)",
    "group": "A. Members, beneficiaries and the public",
    "endpoints": {
-    "W": 65,
+    "W": 66,
     "M": 2,
     "P": 1,
     "?": 0
@@ -521,6 +521,10 @@
      "does": "Register, track, reopen, remind and give feedback on grievances"
     },
     {
+     "id": "F10.worker",
+     "does": "An international worker is a member: views their coverage under the international-worker rules (P2.9a)"
+    },
+    {
      "id": "F14.step_up",
      "does": "Complete step-up confirmation for sensitive actions"
     }
@@ -533,7 +537,8 @@
     "member-e",
     "member-f",
     "member-g",
-    "member-h"
+    "member-h",
+    "worker-expat"
    ]
   },
   "member.exited": {
@@ -659,23 +664,16 @@
    "personas": []
   },
   "intl_worker": {
-   "name": "International worker (inbound or outbound, CoC holder)",
+   "name": "International worker (inbound or outbound, CoC holder) — since P2.9a a member attribute (`members.international`), signs in with the `member` role",
    "group": "A. Members, beneficiaries and the public",
    "endpoints": {
-    "W": 1,
+    "W": 0,
     "M": 0,
     "P": 0,
     "?": 0
    },
-   "activities": [
-    {
-     "id": "F10.worker",
-     "does": "View own international-worker status and CoC (no direct IWU login found; member-portal view is a future option)"
-    }
-   ],
-   "personas": [
-    "worker-expat"
-   ]
+   "activities": [],
+   "personas": []
   },
   "complainant": {
    "name": "Grievance complainant who is not logged in (member, pensioner, employer, other)",

@@ -24,7 +24,7 @@ export const PERSONAS: Persona[] = [
   { username: "member-f", label: "Member F (Aadhaar not verified)", role: "member", group: "Members and public", description: "Aadhaar not verified — claims wait for the employer's attestation." },
   { username: "member-g", label: "Member G (changed jobs, auto-transfer)", role: "member", group: "Members and public", description: "Changed jobs — auto-transfer of the old member ID." },
   { username: "member-h", label: "Member H (higher pension option)", role: "member", group: "Members and public", description: "In service since 2011 above the wage ceiling — joint option for higher pension." },
-  { username: "worker-expat", label: "International worker", role: "intl_worker", group: "Members and public", description: "Foreign national employed in India — international-worker coverage." },
+  { username: "worker-expat", label: "International worker", role: "member", group: "Members and public", description: "Foreign national employed in India — international-worker coverage." },
   { username: "pensioner-a", label: "Pensioner A", role: "pensioner", group: "Members and public", description: "Pension payments, life certificates, bank changes and declarations." },
   { username: "claimant-a", label: "Claimant (nominee of a deceased member)", role: "claimant", group: "Members and public", description: "Nominee of a deceased member — PF, family pension and EDLI claims." },
   { username: "emp-owner", label: "Employer owner", role: "employer.owner", group: "Employers", description: "Verify an establishment, manage operators and signatories, and register changes." },

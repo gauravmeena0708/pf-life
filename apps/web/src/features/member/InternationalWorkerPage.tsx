@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { api, getSession, type Envelope } from "../../api/client";
+import { ApiError, api, getSession, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import type { Agreement } from "../international/types";
@@ -13,16 +13,17 @@ interface InternationalWorker {
 
 export function InternationalWorkerPage() {
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
-  const allowed = session.data?.stakeholder === "intl_worker";
+  const allowed = session.data?.stakeholder === "member";
   const worker = useQuery({ queryKey: ["international-worker"], enabled: allowed, retry: false,
     queryFn: () => api<Envelope<InternationalWorker>>("/api/v1/members/me/international") });
   const data = worker.data?.data;
+  const notRecorded = worker.error instanceof ApiError && worker.error.problem.status === 404;
   return <section className="stack" aria-labelledby="intl-worker-heading">
     <PageHeader id="intl-worker-heading" eyebrow="Member services" title="International worker coverage"
       description="Review your employment and coverage under the demonstration scheme." current="International worker" />
-    <ProblemMessage error={session.error ?? worker.error} />
+    <ProblemMessage error={session.error ?? (notRecorded ? null : worker.error)} />
     {session.isLoading || worker.isLoading ? <p role="status">Loading coverage…</p> : null}
-    {session.data && !allowed ? <p className="pending-notice">This service is available to international workers.</p> : null}
+    {session.data && (!allowed || notRecorded) ? <p className="pending-notice">This service is available to members recorded as international workers.</p> : null}
     {allowed && data ? <><section className="card stack"><h2>Worker details</h2>
       <dl className="kv"><dt>Name</dt><dd>{data.name}</dd><dt>UAN</dt><dd>{data.uan}</dd>
         <dt>International worker</dt><dd>{data.international_worker ? "Yes" : "No"}</dd><dt>Nationality</dt><dd>{data.nationality ?? "—"}</dd>

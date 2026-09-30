@@ -312,7 +312,7 @@ paths:
       x-phase: 1
       x-owner-service: international
       x-callers:
-      - intl_worker
+      - member
       x-scope: self — caller's own member record only
       security:
       - bffSession: []

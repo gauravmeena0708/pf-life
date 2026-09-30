@@ -5155,7 +5155,7 @@
     "money": false,
     "step_up": false,
     "callers": [
-      "intl_worker"
+      "member"
     ],
     "summary": "International worker profile",
     "revocation": false

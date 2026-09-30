@@ -144,3 +144,19 @@ def test_pro_counter_matches_the_filer_with_the_member_record(api):
     assert api.post(url, json={**body, "date_of_birth": "1985-11-03"}, headers=pro).json()["data"]["result"] == "MISMATCH"
     assert api.post(url, json={**body, "uan": "999999999999"}, headers=pro).status_code == 404
     assert api.post(url, json=body, headers=hdr(S["member-a"], "member", establishment=None)).status_code == 403
+
+
+def test_form11_international_worker_declaration_changes_the_member_status(api):
+    """P2.9a: an international worker is a member; the employer's Form 11 declaration sets or clears the status."""
+    uan, url = "100000000001", "/api/v1/employers/me/members/100000000001/declarations"
+    f11 = {"previous_pf_member": True, "previous_eps_member": True, "international_worker": True, "declared_on": "2026-09-01"}
+    assert api.post(url, json=f11, headers=operator()).status_code == 422             # country of origin is required
+    assert api.post(url, json={**f11, "country_of_origin": "Germany"}, headers=operator()).status_code == 200
+    changed = [e for e in outbox("MemberInternationalStatusChanged.v1") if e["uan"] == uan]
+    assert changed[-1] == {"uan": uan, "international_worker": True, "nationality": "Germany"}
+    me = api.get("/api/v1/members/me", headers=hdr(S["member-a"], "member", establishment=None)).json()["data"]
+    assert me["international_worker"] is True and me["nationality"] == "Germany"
+    assert api.post(url, json={**f11, "country_of_origin": "Germany"}, headers=operator()).status_code == 200
+    assert len([e for e in outbox("MemberInternationalStatusChanged.v1") if e["uan"] == uan]) == len(changed)   # unchanged: no event
+    assert api.post(url, json={**f11, "international_worker": False}, headers=operator()).status_code == 200
+    assert [e for e in outbox("MemberInternationalStatusChanged.v1") if e["uan"] == uan][-1]["nationality"] is None

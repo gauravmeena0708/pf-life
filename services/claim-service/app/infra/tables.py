@@ -25,6 +25,9 @@ accounts = Table(
     Column("is_primary", Boolean, nullable=False, server_default=sa_false()),     # the member's primary member ID (P2.7d)
     Column("set_key", String(200)),                                               # the UANs of the member's Aadhaar-verified set
     Column("aadhaar_verified", Boolean, nullable=False, server_default=sa_true()),  # not verified: claims wait for the employer's attestation (P2.8b)
+    Column("international_worker", Boolean, nullable=False, server_default=sa_false()),   # P2.9a: the international-worker rules apply
+    Column("nationality", String(60)),
+    Column("date_of_birth", Date),                                                          # for age conditions (retirement)
 )
 
 # Office staff directory (synthetic seed): which office an officer acts for.

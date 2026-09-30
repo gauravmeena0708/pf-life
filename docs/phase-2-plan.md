@@ -25,7 +25,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.8c** | Joint option for pension on higher wages (member opts, employer validates wages, dues from the rules); the EDLI section's decision on verified wages; Certificates of Coverage and the international worker's view (new international-service) | **Done** (30 Sep 2026) |
 | **P2.8d** | Grievances without a login and their status, reminders, feedback and office transfers; claim status without a login; circulars; the e-Report Card; the approved interest rate recorded by HO F&A (→ a draft rule set); a surrendered trust's past accumulations ingested | **Done** (30 Sep 2026) |
 | **P2.8e** | Security incidents with CERT-In reporting (mock); the Concurrent Audit Cell's daily extract, alerts and OIC replies; the NDC Issue Tracker (freeze / de-freeze / login notice); the zonal fraud-risk case list; HR postings that move jurisdiction everywhere; district and employer dashboards; member location mapping | **Done** (30 Sep 2026) |
-| P2.9a | International workers are members: one member login and menu, with what does not apply to them disabled and explained, from rules in the rule set | Planned |
+| **P2.9a** | International workers are members: one member login and menu, with what does not apply to them disabled and explained, from rules in the rule set | **Done** (30 Sep 2026) |
 | P2.9b | Members of exempted establishments: PF held by the trust (passbook, claims and transfers say so and route correctly), pension and EDLI with EPFO; the trust's Annexure K | Planned — needs the Exemption Manual |
 | P2.9c | Member experience: a life-event home page, one consolidated view, plain-language status, nudges, a mobile pass | Planned |
 
@@ -445,3 +445,30 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 - Personas: `zo-audit`, `ndc-is`, `zo-fraud`, `do-oic` (HR postings use `hrm-employee`).
 - Not built: real CERT-In reporting, Issue Tracker requests for establishments and employer users, vigilance
   referral from the fraud-risk committee (Phase 3), branch lists checked against Form 2A.
+
+## P2.9a — how it is built
+
+- **One login**: `worker-expat` has the `member` role; the `intl_worker` stakeholder has no activities left (F10.worker
+  moved to `member`) and is kept in `stakeholders.md` only as a member attribute. member-service stores the status in
+  `members.international` (nationality, passport, country of origin), set from the seed and from the employer's Form 11
+  (`international_worker` + `country_of_origin`); a change publishes `MemberInternationalStatusChanged.v1`
+  {uan, international_worker, nationality}. `GET /members/me` returns `international_worker` and `nationality`.
+- **Copies**: claim-service keeps `international_worker`, `nationality` and `date_of_birth` on each account (a new
+  member ID under the same UAN inherits the status); contribution-service on `establishment_members`;
+  international-service on its worker record. `GET /members/me/international` is now a member endpoint and answers 404
+  for a member who is not an international worker.
+- **Rules, not code** — rule-set section `international_workers` (illustrative, validated): `no_wage_ceiling`,
+  `claim_types` open to them (final settlement only) and `final_settlement_on` (`min_age` 58, or a nationality in
+  `agreement_nationalities`). Claim eligibility adds the reason "Not available to international workers …" or the
+  age / agreement condition; filing an advance is refused with the same reason.
+- **Contributions**: an ECR row above the EPS/EDLI ceiling for an international worker gets the warning
+  `W-IW-FULL-WAGES` instead of the error `E-EPS-CEILING`.
+- **Agreements**: the synthetic catalogue now lists India's 20 partner countries (names and years; terms illustrative).
+- **Web**: the ordinary member menu; *View › International worker coverage* appears when `/members/me` says the member
+  is one; the profile shows the status and a one-line note on the rules; the claims page shows the refusals with
+  their reasons (disabled, not hidden).
+- **Tests**: claim-service `test_international_workers.py`, contribution-service `test_domain.py` (full wages),
+  member-service `test_onboarding.py` (Form 11 sets and clears the status, one event per change),
+  international-service `test_international.py` (404 for other members, status events), web `P28c.test.tsx`;
+  end to end `tests/e2e/test_international_worker_member.py` (the persona's menu, passbook, refusals, an advance
+  refused; a domestic member has no coverage page).

@@ -228,7 +228,7 @@ def test_extension_terms(ctx, country, months, status):
 
 def test_international_worker_sees_full_wage_coverage_without_agreement(ctx):
     client, _, _ = ctx
-    response = client.get("/api/v1/members/me/international", headers=hdr(S["worker-expat"], "intl_worker"))
+    response = client.get("/api/v1/members/me/international", headers=hdr(S["worker-expat"], "member"))
     assert response.status_code == 200, response.text
     data = response.json()["data"]
     assert data["nationality"] == "United States" and data["agreement"] is None
@@ -247,3 +247,12 @@ def test_registered_member_event_enables_an_application(ctx):
     assert q("SELECT uan, subject FROM members WHERE account_link_id='AL-NEW'") == [(body["uan"], "registered-worker")]
     application = apply(client, body)
     assert application["uan"] == body["uan"] and application["account_link_id"] == "AL-NEW"
+
+
+def test_a_member_who_is_not_an_international_worker_gets_404_and_status_follows_the_declaration(ctx):
+    client, q, deliver = ctx
+    url = "/api/v1/members/me/international"
+    assert client.get(url, headers=hdr(S["member-a"], "member")).status_code == 404
+    deliver("MemberInternationalStatusChanged.v1", {"uan": "100000000001", "international_worker": True, "nationality": "Japan"})
+    body = client.get(url, headers=hdr(S["member-a"], "member")).json()["data"]
+    assert body["nationality"] == "Japan" and body["agreement"]["country"] == "Japan"

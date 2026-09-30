@@ -16,7 +16,7 @@ from app.infra.db import sessions
 from app.infra.tables import employments, kyc_requests, kyc_uploads, members
 from epfo_auth import Actor, require_grant, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
-from epfo_persistence import audit
+from epfo_persistence import add_event, audit
 
 router = APIRouter()
 EMPLOYER = require_stakeholder("employer.owner", "employer.operator", "employer.signatory")
@@ -138,6 +138,14 @@ async def form11(uan: str, body: Form11, actor: Actor = Depends(EMPLOYER), sessi
                           "Register the joinee against the previous UAN instead.")
         await session.execute(update(employments).where(employments.c.account_link_id == emp["account_link_id"])
                               .values(form11={**body.model_dump(mode="json"), "recorded_by": actor.subject}))
+        was = bool(emp.get("international"))
+        if body.international_worker != was:                  # P2.9a: the international-worker rules follow the declaration
+            intl = {"nationality": body.country_of_origin} if body.international_worker else None
+            await session.execute(update(members).where(members.c.member_id == emp["member_id"]).values(international=intl))
+            await add_event(session, producer="member-service", event_type="MemberInternationalStatusChanged.v1",
+                            aggregate_type="member", aggregate_id=uan, correlation_id=actor.correlation_id, payload={
+                                "uan": uan, "international_worker": body.international_worker,
+                                "nationality": body.country_of_origin if body.international_worker else None})
     return envelope({"uan": uan, "account_link_id": emp["account_link_id"], "form11": body.model_dump(mode="json")})
 
 

@@ -1,7 +1,7 @@
 """Standard tables present in every service database (docs/architecture.md §2.2)."""
 from datetime import date, datetime
 
-from sqlalchemy import JSON, BigInteger, Date, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import JSON, BigInteger, Boolean, Date, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, false, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 IdType = BigInteger().with_variant(Integer, "sqlite")  # SQLite only autoincrements INTEGER keys (unit tests)
@@ -83,6 +83,7 @@ class EstablishmentMember(Base):
     date_of_joining: Mapped[date | None] = mapped_column(Date)
     date_of_exit: Mapped[date | None] = mapped_column(Date)
     status: Mapped[str] = mapped_column(String(20), default="ACTIVE")
+    international_worker: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())   # P2.9a: full wages, no ceiling
 
 
 class ECRFiling(Base):

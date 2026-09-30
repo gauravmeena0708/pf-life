@@ -14,6 +14,13 @@ from app.infra.tables import accounts, member_bank_accounts, nominations, office
 SEED_FILE = os.getenv("SEED_FILE", "/srv/seed/synthetic.json")
 
 
+def _identity(m: dict) -> dict:
+    """Date of birth and, for an international worker, the nationality (P2.9a)."""
+    intl = m.get("international") or {}
+    return {"date_of_birth": date.fromisoformat(m["date_of_birth"]), "international_worker": bool(intl),
+            "nationality": intl.get("nationality")}
+
+
 async def main() -> None:
     with open(SEED_FILE, encoding="utf-8") as f:
         seed = json.load(f)
@@ -30,7 +37,8 @@ async def main() -> None:
             if exists:   # balances move with events after the first load; only refresh identity fields
                 await session.execute(update(accounts).where(accounts.c.account_link_id == m["account_link_id"])
                                       .values(member_subject=m.get("subject"), office_id=office_id, uan=m["uan"],
-                                              pan_verified=m["kyc"]["pan"] == "VERIFIED", aadhaar_verified=m["kyc"]["aadhaar"] == "VERIFIED"))    # exits move with MemberExitMarked.v1
+                                              pan_verified=m["kyc"]["pan"] == "VERIFIED", aadhaar_verified=m["kyc"]["aadhaar"] == "VERIFIED",
+                                              **_identity(m)))    # exits move with MemberExitMarked.v1
                 continue
             await session.execute(insert(accounts).values(
                 account_link_id=m["account_link_id"], member_subject=m.get("subject"), uan=m["uan"],
@@ -39,7 +47,7 @@ async def main() -> None:
                 date_of_exit=date.fromisoformat(m["date_of_exit"]) if m.get("date_of_exit") else None,
                 employee_paise=balance.get("employee_paise", 0), employer_paise=balance.get("employer_paise", 0),
                 pan_verified=m["kyc"]["pan"] == "VERIFIED", aadhaar_verified=m["kyc"]["aadhaar"] == "VERIFIED",
-                deceased_on=date.fromisoformat(m["deceased_on"]) if m.get("deceased_on") else None))
+                deceased_on=date.fromisoformat(m["deceased_on"]) if m.get("deceased_on") else None, **_identity(m)))
         # P2.7d: the primary member ID of each member's Aadhaar-verified set (the same rule member-service applies)
         from epfo_persistence.member_ids import primary_member_id
         sets: dict[str, list[dict]] = {}

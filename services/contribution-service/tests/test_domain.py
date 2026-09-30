@@ -83,3 +83,13 @@ def test_state_machine_all_declared_edges_and_forbidden_jumps():
     for before, after in [("DRAFT", "POSTED"), ("APPROVED", "PAYMENT_CONFIRMED"), ("POSTED", "DRAFT")]:
         with pytest.raises(ValueError):
             transition(before, after)
+
+
+def test_an_international_worker_contributes_on_full_wages():
+    """P2.9a: no wage ceiling for an international worker — a warning, not an error (illustrative)."""
+    iw = [{**MEMBERS[0], "international_worker": True}]
+    content = "#~#".join(row(eps="100000", edli="100000"))
+    codes = {i["code"] for i in validate(content, "ECR_TXT", "2026-08", iw, RULES)["issues"]}
+    assert "W-IW-FULL-WAGES" in codes and "E-EPS-CEILING" not in codes
+    domestic = {i["code"] for i in validate(content, "ECR_TXT", "2026-08", MEMBERS, RULES)["issues"]}
+    assert "E-EPS-CEILING" in domestic and "W-IW-FULL-WAGES" not in domestic

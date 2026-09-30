@@ -66,6 +66,22 @@ def months_between(start: date, end: date) -> int:
     return (end.year - start.year) * 12 + end.month - start.month - (end.day < start.day)
 
 
+def international_worker_reasons(account: dict[str, Any], claim_type: str, rules: dict[str, Any], today: date) -> list[str]:
+    """Why an international worker may not make this claim (empty: they may)."""
+    iw = section(rules, "international_workers")
+    if claim_type not in iw["claim_types"]:
+        return ["Not available to international workers: their PF is paid only as a final settlement "
+                "(illustrative international-worker rules)."]
+    if claim_type != "FINAL_SETTLEMENT":
+        return []
+    on, born = iw["final_settlement_on"], account.get("date_of_birth")
+    age = today.year - born.year - ((today.month, today.day) < (born.month, born.day)) if born else 0
+    if age >= on["min_age"] or (account.get("nationality") or "") in on["agreement_nationalities"]:
+        return []
+    return [f"An international worker's final settlement is paid at the age of {on['min_age']}, or earlier only when "
+            f"their country has a social-security agreement with India that allows it (illustrative)."]
+
+
 def eligibility(account: dict[str, Any], claim_type: str, rules: dict[str, Any], today: date,
                 previous_claims: list[date] | None = None) -> dict[str, Any]:
     """Whether this account may claim this type today, the maximum amount, and why — using only the
@@ -89,6 +105,8 @@ def eligibility(account: dict[str, Any], claim_type: str, rules: dict[str, Any],
                        f"{'and ' + str(spec['min_service_months'] % 12) + ' months ' if spec['min_service_months'] % 12 else ''}of service.")
     if spec.get("once_every_months") and any(months_between(d, today) < spec["once_every_months"] for d in previous_claims or []):
         reasons.append(f"This claim can be made once every {spec['once_every_months']} months.")
+    if account.get("international_worker"):                    # P2.9a: the international-worker rules (illustrative)
+        reasons += international_worker_reasons(account, claim_type, rules, today)
     served = months_between(joined, exited or today) if joined else 0
     if spec.get("max_service_months") is not None and served > spec["max_service_months"]:
         reasons.append("With this much service a monthly pension or a scheme certificate applies instead (Form 10D / 10C).")

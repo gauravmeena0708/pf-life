@@ -397,6 +397,19 @@ contribution- and platform-service*
 4. **Death claims**: after the officers admit the Form 5IF claim, **`ro-edli` → EDLI claims** enters the verified
    average wages, works out the benefit and sanctions it (one-time code bound to the amount).
 
+## International workers are members
+*Tests: `tests/e2e/test_international_worker_member.py`, `services/claim-service/tests/test_international_workers.py`*
+
+1. **`worker-expat`** signs in as a member (UAN 100000000907, United States): the full member menu, passbook and
+   profile, which says *International worker: Yes* with a note on the rules. *View › International worker coverage*
+   shows the employment and that there is no agreement with their country.
+2. **Claims**: every advance is shown not available, "Not available to international workers …"; final settlement
+   waits for the age of 58 (or a nationality with an agreement in `international_workers.final_settlement_on`).
+3. **`emp-preparer` → ECR**: a row above the wage ceiling for this member is a warning (`W-IW-FULL-WAGES`), not an
+   error; for anyone else it is still `E-EPS-CEILING`.
+4. **Form 11**: the employer declaring a joinee an international worker (country of origin required) makes them one
+   everywhere; declaring otherwise clears it. `member-a` has no coverage page.
+
 ## Member services: e-Nomination, attestation, bank switch, auto-transfer, exits
 *Tests: `tests/e2e/test_member_mobility.py`, `services/{member,claim,workflow}-service/tests/test_*mobility*.py`,
 `services/member-service/tests/test_nominations.py`*

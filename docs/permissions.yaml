@@ -483,6 +483,12 @@ stakeholders:
     step_up: false
     via:
     - F08.member_file
+  - endpoint: GET /members/me/international
+    status: W
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F10.worker
   - endpoint: POST /security/step-up-challenges
     status: W
     scope: self — challenge bound to one action and resource version
@@ -657,13 +663,7 @@ stakeholders:
     step_up: false
     via:
     - F04.co_beneficiary
-  intl_worker:
-  - endpoint: GET /members/me/international
-    status: W
-    scope: self — caller's own member record only
-    step_up: false
-    via:
-    - F10.worker
+  intl_worker: []
   complainant:
   - endpoint: POST /public/grievances
     status: W

@@ -8,10 +8,10 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 |---|---|---|---|---|---|---|---|
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 14 | 2 | 0 | 0 |
 | 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 78 | 5 | 13 | 0 |
-| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 80 | 5 | 2 | 0 |
+| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 81 | 5 | 2 | 0 |
 | 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 84 | 0 | 28 | 4 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 12 | 1 | 1 | 0 |
-| 6 | International worker | **Working** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 5 | 0 | 2 | 0 |
+| 6 | International worker | **Working** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 4 | 0 | 2 | 0 |
 | 7 | District office | **Working** | `do.incharge`, `do.staff` | 3 | 0 | 0 | 0 |
 | 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 37 | 0 | 10 | 1 |
 | 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 12 | 0 | 1 | 0 |
@@ -175,6 +175,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /members/me/higher-pension-options` | W | pension | member |
 | `GET /members/me/higher-pension-options/{optionId}` | W | pension | member |
 | `GET /members/me/identity-assurance` | W | member | member |
+| `GET /members/me/international` | W | international | member |
 | `GET /members/me/kyc` | W | member | member |
 | `GET /members/me/nominations` | W | member | member |
 | `GET /members/me/notifications` | W | member | member |
@@ -390,7 +391,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 |---|---|---|---|
 | `GET /international/agreements` | W | international | ho.iwu |
 | `GET /international/coc-applications/{id}` | W | international | fo.iw |
-| `GET /members/me/international` | W | international | intl_worker |
 | `GET /office/international/coc-applications` | W | international | fo.iw |
 | `POST /office/international/coc-applications/{id}/decisions` | W | international | fo.iw |
 | `GET /partners/foreign-agencies/coc-certificates/{id}` | P | international | ext.foreign_ss |

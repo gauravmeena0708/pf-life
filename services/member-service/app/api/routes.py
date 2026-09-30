@@ -49,7 +49,9 @@ async def get_me(actor: Actor = Depends(require_stakeholder("member")), session:
                      "mobile_masked": member["mobile_masked"], "email_masked": member["email_masked"],
                      "bank": {"ifsc": member["bank_ifsc"], "account_last4": member["bank_account_last4"]},
                      "kyc": member["kyc"], "account_link_ids": links, "account_state": member["account_state"],
-                     "profile_extra": member["profile_extra"] or {}})
+                     "profile_extra": member["profile_extra"] or {},
+                     "international_worker": bool(member["international"]),
+                     "nationality": (member["international"] or {}).get("nationality")})
 
 
 @router.get("/api/v1/members/me/employment-history")

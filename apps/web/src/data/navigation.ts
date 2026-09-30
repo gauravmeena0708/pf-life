@@ -34,6 +34,11 @@ const MEMBER: NavGroup[] = [
   { labelKey: "navigation.help", items: [{ labelKey: "navigation.grievances", to: "/member/grievances" }, { labelKey: "navigation.assistant", to: "/member/assistant" }] },
 ];
 
+export function memberMenus(internationalWorker: boolean): NavGroup[] {
+  return internationalWorker ? MEMBER.map((group) => group.label === "View"
+    ? { ...group, items: [...group.items!, link("International worker coverage", "/international-worker")] } : group) : MEMBER;
+}
+
 const EMPLOYER: NavGroup[] = [
   { label: "Member", items: [
     link("Register-Individual", "/employer/registration#register-heading"), link("Register-Bulk", "/employer/registration#bulk-heading"), link("Member Profile (mark exit)", "/employer/members#exit-heading"), link("Approvals", "/employer/members#approvals-heading"),
@@ -153,7 +158,6 @@ export function menusFor(role: string | undefined): NavGroup[] {
   if (role === "fo.edli") return [{ label: "EDLI claims", to: "/office/edli-claims" }];
   if (role === "fo.iw") return [{ label: "Certificate of coverage queue", to: "/office/international#coc-queue-heading" }];
   if (role === "ho.iwu") return [{ label: "Social-security agreements", to: "/ho/agreements#agreements-heading" }];
-  if (role === "intl_worker") return [{ label: "International worker coverage", to: "/international-worker" }];
   if (["fo.apfc_pension", "fo.da_pension", "fo.ss_pension"].includes(role)) return PENSION_OFFICE;
   if (role === "tech.cpps") return [{ label: "CPPS disbursement", to: "/cpps" }];
   if (role.startsWith("fo.")) return fieldOffice(role);
@@ -180,7 +184,6 @@ export function homeFor(role: string | undefined): string {
   if (role === "fo.edli") return "/office/edli-claims";
   if (role === "fo.iw") return "/office/international";
   if (role === "ho.iwu") return "/ho/agreements";
-  if (role === "intl_worker") return "/international-worker";
   if (role === "ho.publicity") return "/ho/circulars";
   if (role === "fo.exemption") return "/office/exempted";
   if (role === "ho.fa_cao") return "/finance/interest";

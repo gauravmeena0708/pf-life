@@ -4,7 +4,8 @@ import type { ReactElement } from "react";
 import { MemoryRouter } from "react-router-dom";
 
 import { ApiError, api, command, getMyPermissions, getSession } from "../api/client";
-import { homeFor, menusFor } from "../data/navigation";
+import { RoleNav } from "../components/RoleNav";
+import { homeFor, memberMenus, menusFor } from "../data/navigation";
 import "../i18n";
 import { InternationalPage } from "./employer/InternationalPage";
 import { MemberActionsPage } from "./employer/MemberActionsPage";
@@ -257,16 +258,44 @@ it("shows agreements to the HO unit without loading the decision queue", async (
 });
 
 it("shows international worker employment, masked passport and service coverage", async () => {
-  renderPage(<InternationalWorkerPage />, "intl_worker");
+  renderPage(<InternationalWorkerPage />, "member");
   expect(await screen.findByText("*****1234")).toBeTruthy(); expect(screen.getByText("Illustrative coverage from the service.")).toBeTruthy();
   expect(screen.getByText("Demo establishment")).toBeTruthy(); expect(screen.getByText("In service")).toBeTruthy();
 });
 
+it("shows a notice when a member is not recorded as an international worker", async () => {
+  vi.mocked(api).mockRejectedValue(new ApiError({ type: "/problems/not-found", title: "Not found", status: 404,
+    detail: "You are not recorded as an international worker" }));
+  renderPage(<InternationalWorkerPage />, "member");
+  expect(await screen.findByText("This service is available to members recorded as international workers.")).toBeTruthy();
+  expect(api).toHaveBeenCalledWith(`${memberBase}/international`); expect(screen.queryByRole("alert")).toBeNull();
+});
+
+it("adds international worker coverage last in View only for international members", () => {
+  const link = { label: "International worker coverage", to: "/international-worker" };
+  const view = memberMenus(true).find((group) => group.label === "View")!;
+  expect(view.items?.at(-1)).toEqual(link);
+  expect(memberMenus(false).flatMap((group) => group.items ?? [])).not.toContainEqual(link);
+  expect(memberMenus(false)).toBe(menusFor("member"));
+});
+
+it("keeps the member menu available while loading and then adds international coverage", async () => {
+  let resolve!: (value: { data: { international_worker: boolean }; meta: Record<string, never> }) => void;
+  vi.mocked(api).mockReturnValue(new Promise((done) => { resolve = done; }));
+  renderPage(<RoleNav role="member" />);
+  fireEvent.click(screen.getByRole("button", { name: /View/ }));
+  expect(screen.getByRole("link", { name: "Profile" })).toBeTruthy();
+  expect(screen.queryByRole("link", { name: "International worker coverage" })).toBeNull();
+  resolve({ data: { international_worker: true }, meta: {} });
+  expect(await screen.findByRole("link", { name: "International worker coverage" })).toHaveProperty("pathname", "/international-worker");
+  expect(api).toHaveBeenCalledWith(memberBase);
+});
+
 it.each([
   ["fo.edli", "/office/edli-claims"], ["fo.iw", "/office/international"],
-  ["ho.iwu", "/ho/agreements"], ["intl_worker", "/international-worker"],
+  ["ho.iwu", "/ho/agreements"], ["member", "/member/passbook"],
 ])("provides the %s landing path and a working menu link", (role, path) => {
-  expect(homeFor(role)).toBe(path); expect(menusFor(role).some((item) => item.to?.startsWith(path))).toBe(true);
+  expect(homeFor(role)).toBe(path); expect(menusFor(role).some((group) => group.to?.startsWith(path) || group.items?.some((item) => item.to?.startsWith(path)))).toBe(true);
 });
 
 it.each([

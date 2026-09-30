@@ -28,7 +28,9 @@ async def main() -> None:
                           "gender": member["gender"], "mobile_masked": member["mobile_masked"],
                           "email_masked": member["email_masked"], "bank_ifsc": member["bank_ifsc"],
                           "bank_account_last4": member["bank_account_last4"], "kyc": member["kyc"],
-                          "aadhaar_ref": member.get("aadhaar_ref") or f"DEMO-AADHAAR-{member['uan']}"}
+                          "aadhaar_ref": member.get("aadhaar_ref") or f"DEMO-AADHAAR-{member['uan']}",
+                          "international": {k: v for k, v in member["international"].items() if not k.startswith("_")}
+                          if member.get("international") else None}
                 statement = insert(members).values(**values)
                 await session.execute(statement.on_conflict_do_update(
                     index_elements=[members.c.member_id],

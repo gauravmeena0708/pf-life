@@ -8,7 +8,7 @@ import { dateOnly, dateTime, stateLabel } from "../journeyB";
 import { CorrectionForm } from "./CorrectionForm";
 import { PensionEstimate } from "./PensionEstimate";
 
-interface Member { member_id: string; uan: string; name: string; date_of_birth: string; gender: string; mobile_masked: string; email_masked: string; bank: { ifsc: string; account_last4: string }; kyc: { aadhaar: string; pan: string; bank: string }; account_link_ids: string[] }
+interface Member { member_id: string; uan: string; name: string; date_of_birth: string; gender: string; mobile_masked: string; email_masked: string; bank: { ifsc: string; account_last4: string }; kyc: { aadhaar: string; pan: string; bank: string }; account_link_ids: string[]; international_worker?: boolean; nationality?: string | null }
 interface Assurance { kyc: Member["kyc"]; level: "FULL" | "PARTIAL"; next_step: string }
 interface Employment { account_link_id: string; establishment_name: string; date_of_joining: string; date_of_exit: string | null; status: string }
 interface Notice { id: string; template: string; reference_id: string; title: string; body: string; created_at: string; read_at: string | null }
@@ -28,7 +28,9 @@ export function ProfilePage() {
         <div><dt>{t("profile.dob")}</dt><dd>{dateOnly(member.date_of_birth, i18n.language)}</dd></div><div><dt>{t("profile.gender")}</dt><dd>{member.gender}</dd></div>
         <div><dt>{t("profile.mobile")}</dt><dd>{member.mobile_masked}</dd></div><div><dt>{t("profile.email")}</dt><dd>{member.email_masked}</dd></div>
         <div><dt>{t("profile.ifsc")}</dt><dd><code>{member.bank.ifsc}</code></dd></div><div><dt>{t("profile.bankEnding")}</dt><dd>•••• {member.bank.account_last4}</dd></div>
-      </dl> : null}</section>
+        {member.international_worker === true ? <div><dt>International worker</dt><dd>Yes{member.nationality ? ` (${member.nationality})` : ""}</dd></div> : null}
+      </dl> : null}
+      {member?.international_worker === true ? <p className="pending-notice">As an international worker your EPF is on full wages (no wage ceiling) and it is paid out as a final settlement on leaving service in India at 58, or earlier under a social-security agreement with your country.</p> : null}</section>
     <section className="card stack" aria-labelledby="assurance-heading"><div className="section-heading"><h2 id="assurance-heading">{t("profile.identity")}</h2>{assurance.data ? <span className="state-pill">{stateLabel(assurance.data.data.level, t)}</span> : null}</div>
       <ProblemMessage error={assurance.error} />{assurance.isLoading ? <p role="status">{t("profile.loadingIdentity")}</p> : null}
       {assurance.data ? <><dl className="kv"><dt>{t("profile.aadhaar")}</dt><dd>{assurance.data.data.kyc.aadhaar}</dd><dt>{t("profile.pan")}</dt><dd>{assurance.data.data.kyc.pan}</dd><dt>{t("profile.bankKyc")}</dt><dd>{assurance.data.data.kyc.bank}</dd></dl><p className="pending-notice">{assurance.data.data.next_step}</p></> : null}</section>

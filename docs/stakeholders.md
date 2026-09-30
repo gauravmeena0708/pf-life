@@ -30,7 +30,7 @@ All sources are official EPFO documents downloaded in September 2026 (list at th
 | `family_pensioner` | Widow(er), child, orphan, dependent-parent pensioner | Via FO, Jeevan Pramaan | Core | ➕ | PEN |
 | `claimant` | Nominee / legal heir / guardian claiming PF, EDLI or pension on death | Via FO (paper) + online death claims | Core | ➕ | PEN, EDLI |
 | `claimant.nominee` | Co-beneficiary on a multi-beneficiary death claim (PF / EDLI / pension) holding an allocated percentage share, including shares already settled in the legacy system | Via FO / online death claims | Core | ➕ | EDLI, PEN, SS |
-| `intl_worker` | International worker (inbound or outbound, CoC holder) | Login (IWU portal via employer) | Core | ➕ | MAP, EC |
+| `intl_worker` | International worker (inbound or outbound, CoC holder) — since P2.9a a member attribute (`members.international`), signs in with the `member` role | Login (IWU portal via employer) | Core | ➕ | MAP, EC |
 | `complainant` | Grievance complainant who is not logged in (member, pensioner, employer, other) | Login-free (EPFiGMS) | Core | ➕ | WEB |
 | `rti_applicant` | RTI applicant | Via RTI portal / paper | Read | — | PEN, EC |
 

@@ -302,11 +302,12 @@ async def decide(id: str, body: CocDecision, actor: Actor = Depends(IW_CELL), se
 # ── the international worker ───────────────────────────────────────────────────────────────────
 
 @router.get("/api/v1/members/me/international")
-async def my_international(actor: Actor = Depends(require_stakeholder("intl_worker")), session: AsyncSession = Depends(db)) -> dict:
+async def my_international(actor: Actor = Depends(require_stakeholder("member")), session: AsyncSession = Depends(db)) -> dict:
+    """P2.9a: an international worker is a member; other members get 404 (the portal then hides the page)."""
     rows = (await session.execute(select(members).where(members.c.subject == actor.subject)
                                   .order_by(members.c.date_of_joining.desc()))).mappings().all()
-    if not rows:
-        raise Problem(404, "/problems/not-found", "No international-worker record found")
+    if not rows or not any(r["international_worker"] for r in rows):
+        raise Problem(404, "/problems/not-found", "You are not recorded as an international worker")
     m = rows[0]
     a = (await session.execute(select(agreements).where(agreements.c.country == (m["nationality"] or "-")))).mappings().first()
     names = await _names(session)

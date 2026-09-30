@@ -12,12 +12,18 @@ from app.infra.tables import agreements, establishments, members, office_staff
 
 SEED_FILE = os.getenv("SEED_FILE", "/srv/seed/synthetic.json")
 NOTE = "Synthetic catalogue: the partner country is real, the terms shown are illustrative and not the agreement's text."
-AGREEMENTS = [  # country, code, in force from, max posting, max extension, totalisation
+AGREEMENTS = [  # India's 20 operational partners and the year each agreement came into force (../pf-international);
+    # posting limits are illustrative: country, code, in force from, max posting months, max extension months, totalisation
     ("Belgium", "BEL", "2009-09-01", 60, 0, True), ("Germany", "DEU", "2009-10-01", 48, 12, False),
-    ("Switzerland", "CHE", "2011-01-29", 72, 0, True), ("France", "FRA", "2011-07-01", 60, 0, True),
-    ("Netherlands", "NLD", "2011-12-01", 60, 0, True), ("Korea", "KOR", "2011-11-01", 60, 36, False),
-    ("Japan", "JPN", "2016-10-01", 60, 0, True), ("Australia", "AUS", "2016-01-01", 48, 12, True),
-    ("Canada", "CAN", "2015-08-01", 60, 0, True), ("Brazil", "BRA", "2022-07-01", 60, 0, True),
+    ("Switzerland", "CHE", "2011-01-29", 72, 0, True), ("Luxembourg", "LUX", "2011-06-01", 60, 0, True),
+    ("France", "FRA", "2011-07-01", 60, 0, True), ("Denmark", "DNK", "2011-05-01", 60, 0, True),
+    ("Korea", "KOR", "2011-11-01", 60, 36, False), ("Netherlands", "NLD", "2011-12-01", 60, 0, True),
+    ("Hungary", "HUN", "2013-04-01", 60, 0, True), ("Finland", "FIN", "2014-08-01", 60, 0, True),
+    ("Sweden", "SWE", "2014-08-01", 48, 12, True), ("Czech Republic", "CZE", "2014-09-01", 60, 0, True),
+    ("Norway", "NOR", "2015-01-01", 60, 0, True), ("Austria", "AUT", "2015-07-01", 60, 0, True),
+    ("Canada", "CAN", "2015-08-01", 60, 0, True), ("Australia", "AUS", "2016-01-01", 48, 12, True),
+    ("Japan", "JPN", "2016-10-01", 60, 0, True), ("Portugal", "PRT", "2017-05-08", 60, 0, True),
+    ("Quebec", "QUE", "2017-06-01", 60, 0, True), ("Brazil", "BRA", "2024-01-01", 60, 0, True),
 ]
 
 
@@ -35,7 +41,10 @@ async def main() -> None:
         for c, code, since, posting, extension, total in AGREEMENTS:
             await session.execute(insert(agreements).values(country=c, code=code, in_force_from=date.fromisoformat(since),
                                                             max_posting_months=posting, max_extension_months=extension,
-                                                            totalisation=total, note=NOTE).on_conflict_do_nothing())
+                                                            totalisation=total, note=NOTE).on_conflict_do_update(
+                index_elements=[agreements.c.country], set_={"code": code, "in_force_from": date.fromisoformat(since),
+                                                             "max_posting_months": posting, "max_extension_months": extension,
+                                                             "totalisation": total, "note": NOTE}))
         for m in seed["members"]:
             intl = m.get("international") or {}
             for job in [{**m, "establishment_id": est["establishment_id"]}, *m.get("previous_employments", [])]:

@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra.tables import members
 
-BINDINGS = ["member-service.MemberRegistered.v1", "member-service.MemberExitMarked.v1", "workflow-service.StaffPostingChanged.v1"]
+BINDINGS = ["member-service.MemberRegistered.v1", "member-service.MemberExitMarked.v1", "member-service.MemberInternationalStatusChanged.v1", "workflow-service.StaffPostingChanged.v1"]
 
 
 async def dispatch(session: AsyncSession, event: dict[str, Any]) -> None:
@@ -22,6 +22,9 @@ async def dispatch(session: AsyncSession, event: dict[str, Any]) -> None:
             await session.execute(insert(members).values(account_link_id=p["account_link_id"], uan=p["uan"], subject=p.get("member_subject"),
                                                          name=p["name"], establishment_id=p["establishment_id"],
                                                          date_of_joining=date.fromisoformat(p["date_of_joining"])))
+    elif event["event_type"] == "MemberInternationalStatusChanged.v1":        # P2.9a
+        await session.execute(update(members).where(members.c.uan == p["uan"]).values(
+            international_worker=bool(p["international_worker"]), nationality=p.get("nationality") or None))
     elif event["event_type"] == "MemberExitMarked.v1":
         await session.execute(update(members).where(members.c.account_link_id == p["account_link_id"])
                               .values(date_of_exit=date.fromisoformat(p["date_of_exit"])))

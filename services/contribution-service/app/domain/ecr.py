@@ -16,7 +16,7 @@ ACCOUNTS = ("AC01_EPF_EE", "AC01_EPF_ER", "AC10_EPS", "AC21_EDLI", "AC02_ADMIN",
 
 
 # The contribution split is shared with platform-service's policy preview, so both use the same arithmetic.
-from epfo_persistence.policy import round_rupee_half_up, split  # noqa: E402,F401
+from epfo_persistence.policy import round_rupee_half_up, section, split  # noqa: E402,F401
 
 
 def _masked_uan(uan: str) -> str:
@@ -117,7 +117,11 @@ def validate(content: str, fmt: str, wage_month: str, members: list[dict[str, An
             if epf > gross or eps > epf or edli > epf:
                 issue(i, row, "EPF Wages", "E-WAGE-ORDER", "error", "Wages must satisfy EPF ≤ gross and EPS/EDLI ≤ EPF.", fix="Correct the wage amounts using payroll records.")
             c = rules["contribution"]
-            if eps > c["eps_wage_ceiling_paise"] or edli > c["edli_wage_ceiling_paise"]:
+            above = eps > c["eps_wage_ceiling_paise"] or edli > c["edli_wage_ceiling_paise"]
+            if above and member and member.get("international_worker") and section(rules, "international_workers")["no_wage_ceiling"]:
+                issue(i, row, "EPS/EDLI Wages", "W-IW-FULL-WAGES", "warning", "An international worker contributes on the full wages; the wage ceiling does not apply (illustrative).",
+                      fix="No action needed.")
+            elif above:
                 issue(i, row, "EPS/EDLI Wages", "E-EPS-CEILING", "error", "EPS and EDLI wages cannot exceed the illustrative wage ceiling.", c["eps_wage_ceiling_paise"] // 100)
             born = date.fromisoformat(str(member["date_of_birth"])) if member and member.get("date_of_birth") else None
             age = int(wage_month[:4]) - born.year - ((int(wage_month[5:7]), day_count) < (born.month, born.day)) if born else 0

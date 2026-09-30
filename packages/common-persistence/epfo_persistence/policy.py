@@ -334,6 +334,14 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
         if not isinstance(ceilings, list) or not ceilings or any(not _whole(c.get("ceiling_paise"), 0, 10**9) for c in ceilings) \
                 or [c.get("from_month") for c in ceilings] != sorted(str(c.get("from_month")) for c in ceilings):
             problems.append("higher_pension.wage_ceilings must be a list of {from_month, ceiling_paise} in month order")
+    if "international_workers" in document:
+        iw = document["international_workers"] or {}
+        types = (document.get("claims") or {}).get("types") or {}
+        if not isinstance(iw.get("claim_types"), list) or any(t not in types for t in iw["claim_types"]):
+            problems.append("international_workers.claim_types must list claim types of the rule set")
+        on = iw.get("final_settlement_on") or {}
+        if not _whole(on.get("min_age"), 18, 80) or not isinstance(on.get("agreement_nationalities"), list):
+            problems.append("international_workers.final_settlement_on needs min_age (18-80) and a list of agreement_nationalities")
     if "late_payment" in document:
         lp = document["late_payment"] or {}
         if not _whole(lp.get("due_day"), 1, 28):

@@ -35,6 +35,7 @@ BINDINGS = [
     "member-service.MemberRegistered.v1",
     "member-service.MemberKycUpdated.v1",
     "member-service.NominationRegistered.v1",
+    "member-service.MemberInternationalStatusChanged.v1",
     "workflow-service.StaffPostingChanged.v1",
 ]
 
@@ -83,10 +84,13 @@ async def on_member_registered(session: AsyncSession, event: dict[str, Any]) -> 
         return
     office = (await session.execute(select(accounts.c.office_id).where(accounts.c.establishment_id == p["establishment_id"]).limit(1))).scalar_one_or_none()
     office = office or (await session.execute(select(accounts.c.office_id).limit(1))).scalar_one()
+    known = (await session.execute(select(accounts.c.international_worker, accounts.c.nationality).where(
+        accounts.c.uan == p["uan"]).limit(1))).first()          # a new member ID keeps the UAN's international status
     await session.execute(insert(accounts).values(
         account_link_id=p["account_link_id"], member_subject=p.get("member_subject"), uan=p["uan"], establishment_id=p["establishment_id"],
         office_id=office, date_of_joining=date.fromisoformat(p["date_of_joining"]), employee_paise=0, employer_paise=0,
-        pan_verified=bool(p.get("pan_verified"))))
+        pan_verified=bool(p.get("pan_verified")), date_of_birth=date.fromisoformat(p["date_of_birth"]) if p.get("date_of_birth") else None,
+        international_worker=bool(known and known[0]), nationality=known[1] if known else None))
 
 
 async def on_kyc_updated(session: AsyncSession, event: dict[str, Any]) -> None:
@@ -286,6 +290,13 @@ async def _posting(session: AsyncSession, event: dict[str, Any]) -> None:
     await apply_posting(session, event, office_staff)
 
 
+async def on_international_status(session: AsyncSession, event: dict[str, Any]) -> None:
+    """P2.9a: a member declared (or ceased to be) an international worker; the international-worker rules follow."""
+    p = event["payload"]
+    await session.execute(update(accounts).where(accounts.c.uan == p["uan"]).values(
+        international_worker=bool(p["international_worker"]), nationality=p.get("nationality") or None))
+
+
 HANDLERS = {
     "StaffPostingChanged.v1": _posting,
     "PrimaryMemberIdChanged.v1": on_primary_changed,
@@ -303,6 +314,7 @@ HANDLERS = {
     "MemberRegistered.v1": on_member_registered,
     "MemberKycUpdated.v1": on_kyc_updated,
     "NominationRegistered.v1": on_nomination,
+    "MemberInternationalStatusChanged.v1": on_international_status,
     "ClaimDebitPosted.v1": on_claim_debit_posted,
     "CaseDecisionSubmitted.v1": on_case_decision,
     "PaymentConfirmed.v1": on_payment_result,

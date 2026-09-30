@@ -35,7 +35,7 @@ def create_app() -> FastAPI:
                          ["platform-service.PolicyPublished.v1"], on_policy_published),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.members",
                          ["member-service.MemberChangeApproved.v1", "member-service.MemberExitMarked.v1",
-                          "member-service.MemberRegistered.v1"], _members_router),
+                          "member-service.MemberRegistered.v1", "member-service.MemberInternationalStatusChanged.v1"], _members_router),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.processes",
                          ["workflow-service.ProcessTransitioned.v1"], on_transfer_step),
             ]
@@ -96,6 +96,10 @@ async def _claims_router(session, event):
 async def _members_router(session, event):
     if event.get("event_type") == "MemberExitMarked.v1":
         await on_member_exit(session, event)
+    elif event.get("event_type") == "MemberInternationalStatusChanged.v1":      # P2.9a: full wages from the next return
+        from sqlalchemy import text
+        await session.execute(text("UPDATE establishment_members SET international_worker=:iw WHERE uan=:u"),
+                              {"iw": bool(event["payload"]["international_worker"]), "u": event["payload"]["uan"]})
     elif event.get("event_type") == "MemberRegistered.v1":
         await on_member_registered(session, event)
     else:

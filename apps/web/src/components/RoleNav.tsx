@@ -1,8 +1,10 @@
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, useLocation } from "react-router-dom";
 
-import { homeFor, menusFor, type NavGroup, type NavItem } from "../data/navigation";
+import { api, type Envelope } from "../api/client";
+import { homeFor, memberMenus, menusFor, type NavGroup, type NavItem } from "../data/navigation";
 
 /** A menu item is the current page when its path matches and, for a link to a section, its section too. */
 const current = (to: string, pathname: string, hash: string) => {
@@ -15,6 +17,9 @@ const current = (to: string, pathname: string, hash: string) => {
 export function RoleNav({ role }: { role: string | undefined }) {
   const { t } = useTranslation();
   const location = useLocation();
+  const profile = useQuery({ queryKey: ["member-profile"], enabled: role === "member", retry: false,
+    queryFn: () => api<Envelope<{ international_worker?: boolean }>>("/api/v1/members/me") });
+  const menus = role === "member" ? memberMenus(profile.data?.data.international_worker === true) : menusFor(role);
   const [open, setOpen] = useState<number | null>(null);
   const bar = useRef<HTMLDivElement>(null);
   const text = (x: NavItem | NavGroup) => (x.labelKey ? t(x.labelKey) : x.label) ?? "";
@@ -40,7 +45,7 @@ export function RoleNav({ role }: { role: string | undefined }) {
       <NavLink end to={homeFor(role)}>{t("navigation.home")}</NavLink>
       <NavLink to="/public">{t("navigation.public")}</NavLink>
       <NavLink to="/system-map">{t("navigation.systemMap")}</NavLink>
-      {menusFor(role).map((g, i) => {
+      {menus.map((g, i) => {
         if (!g.items) return g.to ? <NavLink key={i} to={g.to}>{text(g)}</NavLink> : unavailable(text(g), i);
         const active = g.items.some((it) => it.to && current(it.to, location.pathname, location.hash));
         const working = g.items.some((it) => it.to);

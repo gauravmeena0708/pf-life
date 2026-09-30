@@ -10,9 +10,9 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 |---|---|
 | Stakeholders | 114 |
 | Activities | 238 |
-| Stakeholders with at least one API | 97 |
+| Stakeholders with at least one API | 96 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
-| Stakeholders with no activity yet | 0 |
+| Stakeholders with no activity yet | 1 |
 | **NEW endpoints to add to the catalogue** | **0** |
 | Catalogue endpoints no stakeholder calls | 0 |
 
@@ -43,7 +43,7 @@ Activities: **F13.public** Browse schemes, offices, statistics, circulars; searc
 
 #### `member` — Member — active contributor (UAN holder)
 
-Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP; **F02.kyc_seed** Seed KYC (Aadhaar, bank, PAN); **F02.self_service** View profile, service history, UAN card; change contact details; e-nomination; self-marked exit; **F02.jd_submit** Submit Joint Declaration to correct one of 12 profile parameters; **F03.passbook** View passbook, annual statement and taxable-interest split; **F04.preflight** Pre-flight before filing: check account readiness (blockers), service history and eligibility for the chosen form; **F04.claim_file** Check eligibility and file a claim (Form 31 / 19 / 10C); confirm intent; upload documents; **F04.post_submission** After filing: follow the claim's audit trail, cancel it before a decision, or switch to another KYC-verified bank account before payment; **F04.redisburse_request** Submit corrected bank details after a payment return; **F04.track** Track claims and notifications; download Form 16A; **F04.transfer** Request Form 13 transfer; confirm auto-transfer; view Annexure K; **F05.apply** Apply for monthly pension (Form 10D) or scheme certificate; **F05.preview** Pre-check pension eligibility across all member IDs; see untransferred service to fix first (Form 13); **F05.sc_surrender** Surrender a Scheme Certificate for monthly pension or withdrawal benefit; **F05.higher_member** Apply for pension on higher wages (joint option); track status; **F07.member_report** Report suspicious activity; account recovery; view sessions; **F08.member_file** Register, track, reopen, remind and give feedback on grievances; **F14.step_up** Complete step-up confirmation for sensitive actions
+Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP; **F02.kyc_seed** Seed KYC (Aadhaar, bank, PAN); **F02.self_service** View profile, service history, UAN card; change contact details; e-nomination; self-marked exit; **F02.jd_submit** Submit Joint Declaration to correct one of 12 profile parameters; **F03.passbook** View passbook, annual statement and taxable-interest split; **F04.preflight** Pre-flight before filing: check account readiness (blockers), service history and eligibility for the chosen form; **F04.claim_file** Check eligibility and file a claim (Form 31 / 19 / 10C); confirm intent; upload documents; **F04.post_submission** After filing: follow the claim's audit trail, cancel it before a decision, or switch to another KYC-verified bank account before payment; **F04.redisburse_request** Submit corrected bank details after a payment return; **F04.track** Track claims and notifications; download Form 16A; **F04.transfer** Request Form 13 transfer; confirm auto-transfer; view Annexure K; **F05.apply** Apply for monthly pension (Form 10D) or scheme certificate; **F05.preview** Pre-check pension eligibility across all member IDs; see untransferred service to fix first (Form 13); **F05.sc_surrender** Surrender a Scheme Certificate for monthly pension or withdrawal benefit; **F05.higher_member** Apply for pension on higher wages (joint option); track status; **F07.member_report** Report suspicious activity; account recovery; view sessions; **F08.member_file** Register, track, reopen, remind and give feedback on grievances; **F10.worker** An international worker is a member: views their coverage under the international-worker rules (P2.9a); **F14.step_up** Complete step-up confirmation for sensitive actions
 
 | Endpoint | Status |
 |---|---|
@@ -64,6 +64,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/higher-pension-options` | W |
 | `GET /members/me/higher-pension-options/{optionId}` | W |
 | `GET /members/me/identity-assurance` | W |
+| `GET /members/me/international` | W |
 | `GET /members/me/kyc` | W |
 | `GET /members/me/nominations` | W |
 | `GET /members/me/notifications` | W |
@@ -188,13 +189,9 @@ Activities: **F04.co_beneficiary** Inward as an additional beneficiary on an ope
 | `GET /claimants/death-claims/{claimId}` | W |
 | `POST /claimants/death-claims/{claimId}/beneficiaries` | W |
 
-#### `intl_worker` — International worker (inbound or outbound, CoC holder)
+#### `intl_worker` — International worker (inbound or outbound, CoC holder) — since P2.9a a member attribute (`members.international`), signs in with the `member` role
 
-Activities: **F10.worker** View own international-worker status and CoC (no direct IWU login found; member-portal view is a future option)
-
-| Endpoint | Status |
-|---|---|
-| `GET /members/me/international` | W |
+*No activity mapped yet.*
 
 #### `complainant` — Grievance complainant who is not logged in (member, pensioner, employer, other)
 
@@ -1418,7 +1415,7 @@ Either an activity is missing from the map, or the endpoint is not needed.
 
 ### Stakeholders with no activity
 
-- none
+- `intl_worker` — International worker (inbound or outbound, CoC holder) — since P2.9a a member attribute (`members.international`), signs in with the `member` role
 
 ## Flow diagrams
 
@@ -1839,7 +1836,7 @@ flowchart LR
 ```mermaid
 flowchart LR
   F10_apply["employer.signatory<br/>Apply for / extend CoC for a posted worker (IWU portal EMPLO"]
-  F10_worker["intl_worker<br/>View own international-worker status and CoC (no direct IWU "]
+  F10_worker["member<br/>An international worker is a member: views their coverage un"]
   F10_decide["fo.iw<br/>Verify and issue Certificate of Coverage"]
   F10_foreign["ext.foreign_ss<br/>Foreign social-security agency verifies CoC (FOREIGN AGENCIE"]
   F10_ho["ho.iwu<br/>Maintain social-security agreements; route totalisation clai"]

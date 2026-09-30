@@ -136,6 +136,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/higher-pension-options` | W | self — caller's own member record only |  |
 | `GET /members/me/higher-pension-options/{optionId}` | W | self — caller's own member record only |  |
 | `GET /members/me/identity-assurance` | W | self — caller's own member record only |  |
+| `GET /members/me/international` | W | self — caller's own member record only |  |
 | `GET /members/me/kyc` | W | self — caller's own member record only |  |
 | `GET /members/me/nominations` | W | self — caller's own member record only |  |
 | `GET /members/me/notifications` | W | self — caller's own member record only |  |
@@ -243,12 +244,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /claimants/death-claims/{claimId}` | W | self — claimant's own claims only |  |
 | `POST /claimants/death-claims/{claimId}/beneficiaries` | W | self — claimant's own claims only |  |
-
-**`intl_worker`** — International worker (inbound or outbound, CoC holder)
-
-| Endpoint | Status | Scope | Step-up |
-|---|---|---|---|
-| `GET /members/me/international` | W | self — caller's own member record only |  |
+- `intl_worker` — International worker (inbound or outbound, CoC holder) — since P2.9a a member attribute (`members.international`), signs in with the `member` role: *no endpoints (acts through an adapter or through another role)*
 
 **`complainant`** — Grievance complainant who is not logged in (member, pensioner, employer, other)
 

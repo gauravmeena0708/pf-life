@@ -24,12 +24,13 @@ async def seed() -> None:
                 exited = date.fromisoformat(job["date_of_exit"]) if job.get("date_of_exit") else None
                 # Exits move with MemberExitMarked.v1 after the first load; a re-seed only refreshes identity fields.
                 await session.execute(text("""INSERT INTO establishment_members
-                  (uan,name,date_of_birth,account_link_id,member_subject,establishment_id,date_of_joining,date_of_exit,status)
-                  VALUES (:uan,:name,:dob,:account,:subject,:est,:joined,:exited,:status)
+                  (uan,name,date_of_birth,account_link_id,member_subject,establishment_id,date_of_joining,date_of_exit,status,international_worker)
+                  VALUES (:uan,:name,:dob,:account,:subject,:est,:joined,:exited,:status,:iw)
                   ON CONFLICT (account_link_id) DO UPDATE SET uan=excluded.uan,name=excluded.name,date_of_birth=excluded.date_of_birth,
-                  member_subject=excluded.member_subject,establishment_id=excluded.establishment_id,date_of_joining=excluded.date_of_joining"""),
+                  member_subject=excluded.member_subject,establishment_id=excluded.establishment_id,date_of_joining=excluded.date_of_joining,
+                  international_worker=excluded.international_worker"""),
                   {"uan":m["uan"],"name":m["name"],"dob":date.fromisoformat(m["date_of_birth"]),"account":job["account_link_id"],"subject":m.get("subject"),
-                   "est":job["establishment_id"],"joined":date.fromisoformat(job["date_of_joining"]),"exited":exited,"status":"EXITED" if exited else "ACTIVE"})
+                   "est":job["establishment_id"],"joined":date.fromisoformat(job["date_of_joining"]),"exited":exited,"status":"EXITED" if exited else "ACTIVE","iw":bool(m.get("international"))})
         demo = data["public_lookup_challan"]
         await session.execute(text("""INSERT INTO ecr_filings
           (id,establishment_id,wage_month,filing_type,format,content,version,state,preparer_subject,rule_version,trrn)

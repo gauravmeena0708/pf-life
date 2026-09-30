@@ -149,3 +149,16 @@ higher_pension:
     - {from_month: "1995-11", ceiling_paise: 500000}
     - {from_month: "2001-06", ceiling_paise: 650000}
     - {from_month: "2014-09", ceiling_paise: 1500000}
+international_workers:
+  # International workers (foreign nationals employed in India) are members with different rules — ILLUSTRATIVE,
+  # after EPF Scheme para 83, simplified; not the Scheme's text. Contributions are on the full wages (no wage
+  # ceiling). Only the claim types listed are open to them, and a final settlement only when one condition holds:
+  # the age of retirement, or a nationality whose social-security agreement with India lets the PF be paid on
+  # leaving. The agreement countries are India's partners (names only; the terms are not modelled here).
+  no_wage_ceiling: true
+  claim_types: [FINAL_SETTLEMENT]
+  final_settlement_on:
+    min_age: 58
+    agreement_nationalities: [Belgium, Germany, Switzerland, Luxembourg, France, Denmark, Korea, Netherlands, Hungary,
+                              Finland, Sweden, Czech Republic, Norway, Austria, Canada, Australia, Japan, Portugal, Quebec,
+                              Brazil]

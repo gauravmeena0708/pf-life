@@ -157,6 +157,9 @@ OTHER_FAMILIES = [
          "tests/e2e/test_member_mobility.py"),
         ("MOB-COC", "Certificate of Coverage", "Posting to an agreement country; limits; overlap; extension", "Issued by the IW cell; certificate; extension within the limit",
          "tests/e2e/test_higher_pension_international_edli.py"),
+        ("MOB-IW-MEMBER", "International worker as a member", "IW versus domestic member; advance versus final settlement; age 58 or an agreement country",
+         "Full member menu with the coverage page; advances refused with the IW reason; no coverage page for a domestic member",
+         "tests/e2e/test_international_worker_member.py"),
     ]),
     ("Pension", "tests/e2e/test_pension_settlement.py", [
         ("PEN-10D", "Form 10D to PPO", "Retired eligible member", "IDS, worksheet, approvals, signing and dispatch to pension in payment"),

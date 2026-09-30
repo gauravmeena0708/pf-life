@@ -30,6 +30,7 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `MemberExitMarked.v1` | member | contribution, claim, workflow, audit | member_account | 1 |
 | `NominationRegistered.v1` | member | claim, audit | member | 1 |
 | `MemberRegistered.v1` | member | contribution, claim, workflow, audit | member_account | 1 |
+| `MemberInternationalStatusChanged.v1` | member | contribution, claim, international, audit | member | 1 |
 | `MemberKycUpdated.v1` | member | claim, audit | member | 1 |
 | `HigherPensionOptionValidated.v1` | pension | audit | higher_pension_option | 1 |
 | `CertificateOfCoverageIssued.v1` | international | audit | coc_application | 1 |

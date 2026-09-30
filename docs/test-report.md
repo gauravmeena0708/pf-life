@@ -98,6 +98,16 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 9a: international workers are members (30 September 2026)
+
+Unit tests on the changed services all pass: claim-service 56 (new `test_international_workers.py`),
+contribution-service 63 (ECR full wages), member-service 52 (Form 11 sets and clears the status), international-service
+17, platform-service 21, common-persistence 25, gateway 23; web 139 passed; must-deny 18 passed; end to end 69 passed
+(including `test_international_worker_member.py`, later extended with an advance refused to the international worker
+and re-run); UI smoke 2 passed. The first stack run found two faults, both fixed: the claim-service seed passed the
+identity fields twice, and Keycloak refused the persona's first name with parentheses ("International worker
+(member)"), leaving the login on the *Update Account Information* page.
+
 ## Update — Phase 2, slice 8e: oversight and administration (30 September 2026)
 
 Unit tests 495 passed (new: audit-service `test_oversight.py`, platform-service `test_issue_tracker.py`,

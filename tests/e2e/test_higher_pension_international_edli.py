@@ -91,7 +91,7 @@ def test_certificate_of_coverage_issued_and_extended(persona):
     assert status == 201 and ext["data"]["kind"] == "EXTENSION" and ext["data"]["posting_from"] == (end + timedelta(days=1)).isoformat(), ext
 
     ho = persona("ho-iwu", "/ho/agreements")
-    assert len(call(ho, "GET", "/api/v1/international/agreements")[1]["data"]["agreements"]) >= 10
+    assert len(call(ho, "GET", "/api/v1/international/agreements")[1]["data"]["agreements"]) == 20          # India's 20 partner countries (illustrative terms)
     expat = persona("worker-expat", "/international-worker")
     me = call(expat, "GET", "/api/v1/members/me/international")[1]["data"]
     assert me["nationality"] == "United States" and me["agreement"] is None and "full wages" in me["coverage"]
