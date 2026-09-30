@@ -85,3 +85,33 @@ def test_readiness_timeout_fails_the_gate(monkeypatch):
     monkeypatch.setattr(checks.time, "monotonic", lambda: next(clock))
     with pytest.raises(RuntimeError, match="did not become ready: http://realm"):
         checks.wait_for_entry_points(timeout=1)
+
+
+@pytest.mark.parametrize("error", [ConnectionResetError(104, "Connection reset by peer"),
+                                   ConnectionRefusedError(111, "Connection refused"),
+                                   checks.http.client.RemoteDisconnected("closed")])
+def test_readiness_retries_a_server_that_is_still_starting(monkeypatch, error):
+    monkeypatch.setattr(checks, "ENTRY_POINTS", ("http://web",))
+    clock = iter((0, 0, 1))
+    monkeypatch.setattr(checks.time, "monotonic", lambda: next(clock))
+    monkeypatch.setattr(checks.time, "sleep", lambda _: None)
+    calls = []
+
+    class Ready:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+    def open_url(url, timeout):
+        calls.append(url)
+        if len(calls) == 1:
+            raise error                       # what a freshly started Vite or gateway answers at first
+        return Ready()
+
+    monkeypatch.setattr(checks.urllib.request, "urlopen", open_url)
+    checks.wait_for_entry_points(timeout=10)
+    assert calls == ["http://web", "http://web"]

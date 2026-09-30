@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Fresh-stack CI checks. Docker operations inherit the workflow's Compose project and files."""
 import argparse
+import http.client
 import json
 import subprocess
 import time
@@ -56,8 +57,8 @@ def wait_for_entry_points(timeout: float = 180) -> None:
                     if response.status == 200:
                         pending.remove(url)
                         print(f"Ready: {url}", flush=True)
-            except (urllib.error.URLError, TimeoutError):
-                pass
+            except (urllib.error.URLError, TimeoutError, ConnectionError, http.client.HTTPException):
+                pass                                   # still starting: refused, reset or closed early
         if pending:
             time.sleep(2)
     if pending:
