@@ -210,3 +210,21 @@ def test_direct_challans_become_payable_and_cancelled_ones_cannot_be_paid(ctx):
     _dispatch(routes, {"event_type": "ChallanStatusChanged.v1", "payload": {"trrn": TRRN, "status": "CANCELLED", "reason": "wrong month"}})
     r = pay(client, key="k3", step_up=STEP)
     assert r.status_code == 409 and r.json()["type"] == "/problems/challan-cancelled"
+
+
+def test_a_demand_is_paid_directly_once(ctx):
+    client, routes, q, _ = ctx
+    _dispatch(routes, {"event_type": "DemandStateChanged.v1", "payload": {"demand_id": "DEM-T1-14B", "establishment_id": EST, "kind": "DAMAGES_14B",
+                                                                          "trrn": "T1", "wage_month": "2026-08", "amount_paise": 12300, "days_late": 15,
+                                                                          "state": "OPEN", "working": "w"}})
+    url = "/api/v1/employers/me/demands/DEM-T1-14B/payment-intents"
+    step = {"action": "pay-demand", "resource_id": "DEM-T1-14B", "amount_paise": 12300}
+    assert client.post(url, json={}, headers=hdr(key="d1")).status_code == 428
+    r = client.post(url, json={}, headers=hdr(key="d1", step_up=step))
+    assert r.status_code == 202 and r.json()["data"]["amount_paise"] == 12300
+    assert client.post(url, json={}, headers=hdr(key="d2", step_up=step)).status_code == 409        # pending: no second payment
+    assert asyncio.run(routes.process_due_payments()) == 1
+    [(payload,)] = q("SELECT payload FROM outbox WHERE event_type='PaymentConfirmed.v1'")
+    p = json.loads(payload)["envelope"]["payload"]
+    assert (p["purpose"], p["reference_type"], p["reference_id"]) == ("DEMAND", "demand", "DEM-T1-14B")
+    assert q("SELECT status FROM demand_payables") == [("PAID",)]

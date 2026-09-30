@@ -281,6 +281,8 @@ async def approve_knock_off(knockOffId: str, body: KnockOffDecision, actor: Acto
             await session.execute(text("UPDATE demands SET state='KNOCKED_OFF', settled_by=:k WHERE demand_id IN :ids").bindparams(
                 bindparam("ids", expanding=True)), {"k": knockOffId, "ids": ids})
             await session.execute(text("UPDATE challans SET applied_paise = applied_paise + :a WHERE trrn=:t"), {"a": k["amount_paise"], "t": k["trrn"]})
+            from app.infra.demands import publish
+            await publish(session, ids, actor.correlation_id)
         await session.execute(text("UPDATE damages_knock_offs SET state=:s, decided_by=:d, note=:n WHERE knock_off_id=:k"),
                               {"s": state, "d": actor.subject, "n": body.note, "k": knockOffId})
         await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action=f"knock_off.{state.lower()}",

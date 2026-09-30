@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings
 from app.domain.bank import sign, verify
 from app.infra.db import sessions
-from app.infra.tables import bank_nonces, payables, payment_intents
+from app.infra.tables import bank_nonces, demand_payables, payables, payment_intents
 from epfo_auth import Actor, require_actor, require_grant, require_step_up, require_stakeholder
 from epfo_observability import Problem, envelope, get_logger
 from epfo_persistence import add_event, audit, find_response, request_hash, store_response
@@ -100,7 +100,10 @@ async def apply_bank_callback(session: AsyncSession, kind: str, body: bytes, tim
     if challan:
         await session.execute(update(payables).where(payables.c.trrn == intent["trrn"]).values(
             status="PAID" if target == "CONFIRMED" else "FAILED"))
-    reference = {"purpose": intent["purpose"], "reference_type": "trrn" if challan else "claim"}
+    if intent["purpose"] == "DEMAND":
+        await session.execute(update(demand_payables).where(demand_payables.c.demand_id == intent["reference_id"]).values(
+            status="PAID" if target == "CONFIRMED" else "DUE"))
+    reference = {"purpose": intent["purpose"], "reference_type": {"CHALLAN": "trrn", "DEMAND": "demand"}.get(intent["purpose"], "claim")}
     reference_id = intent["trrn"] if challan else intent["reference_id"]
     if target == "CONFIRMED":
         await add_event(session, producer=PRODUCER, event_type="PaymentConfirmed.v1", aggregate_type="payment",
@@ -201,8 +204,59 @@ async def on_challan_status(session: AsyncSession, event: dict) -> None:
         await session.execute(update(payables).where(payables.c.trrn == p["trrn"]).values(status="FAILED"))
 
 
+async def on_demand_state(session: AsyncSession, event: dict) -> None:
+    p = event["payload"]
+    status = "DUE" if p["state"] == "OPEN" else "CLOSED"
+    row = (await session.execute(select(demand_payables).where(demand_payables.c.demand_id == p["demand_id"]))).mappings().first()
+    if row is None:
+        await session.execute(insert(demand_payables).values(demand_id=p["demand_id"], establishment_id=p["establishment_id"], kind=p["kind"],
+                                                             amount_paise=p["amount_paise"], status=status))
+    elif row["status"] not in ("PENDING", "PAID") or status == "CLOSED":
+        await session.execute(update(demand_payables).where(demand_payables.c.demand_id == p["demand_id"]).values(
+            status="PAID" if row["status"] == "PAID" else status, amount_paise=p["amount_paise"]))
+
+
+class DemandPayment(BaseModel):
+    channel: str = "NET_BANKING"
+    demo_scenario: str = "SUCCESS"
+
+
+@router.post("/api/v1/employers/me/demands/{demandId}/payment-intents", status_code=202)
+async def pay_demand(demandId: str, body: DemandPayment, request: Request,
+                     idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+                     actor: Actor = Depends(require_stakeholder("employer.signatory")), session: AsyncSession = Depends(db)) -> Any:
+    """Pay a 14B / 7Q demand directly (mock bank), instead of a miscellaneous direct challan and a knock-off."""
+    if not idempotency_key:
+        raise Problem(400, "/problems/idempotency-key-required", "Idempotency-Key header is required")
+    if body.channel != "NET_BANKING" or body.demo_scenario not in ("SUCCESS", "RETURN"):
+        raise Problem(422, "/problems/validation", "Unsupported channel or scenario")
+    require_grant(actor, "payment.initiate")
+    operation, h = f"POST /employers/me/demands/{demandId}/payment-intents", request_hash(body.model_dump())
+    async with session.begin():
+        cached = await find_response(session, actor.subject, operation, idempotency_key, h)
+        if cached:
+            return envelope(cached.body)
+        d = (await session.execute(select(demand_payables).where(demand_payables.c.demand_id == demandId))).mappings().first()
+        if not d or d["establishment_id"] != actor.establishment_id:
+            raise Problem(404, "/problems/not-found", "Demand not found", "If it was raised just now, wait a few seconds and try again.")
+        require_step_up(actor, "pay-demand", demandId, None, d["amount_paise"])
+        if d["status"] != "DUE":
+            raise Problem(409, "/problems/not-payable", f"This demand is {d['status'].lower()}", "Nothing to pay.")
+        payment_id = f"PAY-{secrets.token_hex(6).upper()}"
+        await session.execute(insert(payment_intents).values(
+            payment_id=payment_id, trrn=None, purpose="DEMAND", reference_id=demandId, amount_paise=d["amount_paise"], channel=body.channel,
+            scenario=body.demo_scenario, status="PENDING", created_by=actor.subject))
+        await session.execute(update(demand_payables).where(demand_payables.c.demand_id == demandId).values(status="PENDING"))
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="payment.initiated",
+                    target_type="demand", target_id=demandId, detail=payment_id)
+        result = {"payment_id": payment_id, "demand_id": demandId, "amount_paise": d["amount_paise"], "status": "PENDING", "mock": True}
+        await store_response(session, actor.subject, operation, idempotency_key, h, 202, result)
+    return envelope(result)
+
+
 async def dispatch(session: AsyncSession, event: dict) -> None:
     handler = {"ECRSubmitted.v1": on_ecr_submitted, "PaymentInstructed.v1": on_payment_instructed,
-               "ChallanGenerated.v1": on_challan_generated, "ChallanStatusChanged.v1": on_challan_status}.get(event["event_type"])
+               "ChallanGenerated.v1": on_challan_generated, "ChallanStatusChanged.v1": on_challan_status,
+               "DemandStateChanged.v1": on_demand_state}.get(event["event_type"])
     if handler:
         await handler(session, event)

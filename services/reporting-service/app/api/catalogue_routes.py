@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /monitoring/claims', 'GET /monitoring/contributions', 'GET /monitoring/data-freshness', 'GET /monitoring/grievances', 'GET /public/schemes', 'GET /public/statistics', 'GET /zo/dashboards']
+OPERATIONS = ['GET /monitoring/claims', 'GET /monitoring/contributions', 'GET /monitoring/data-freshness', 'GET /monitoring/grievances', 'GET /public/schemes', 'GET /public/statistics', 'GET /zo/dashboards', 'GET /employers/me/compliance-summary', 'GET /office/compliance/defaulters']
 
 @router.api_route("/api/v1/monitoring/claims", methods=["GET"], include_in_schema=False)
 async def get_monitoring_claims(actor: Actor = Depends(require_actor)) -> None:
@@ -45,3 +45,13 @@ async def get_public_statistics(actor: Actor = Depends(require_actor)) -> None:
 @router.api_route("/api/v1/zo/dashboards", methods=["GET"], include_in_schema=False)
 async def get_zo_dashboards(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Zonal comparison dashboard (interface 9, aggregated, read-only)")
+
+
+@router.api_route("/api/v1/employers/me/compliance-summary", methods=["GET"], include_in_schema=False)
+async def get_employers_me_compliance_summary(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Month-wise filing / payment compliance for this establishment")
+
+
+@router.api_route("/api/v1/office/compliance/defaulters", methods=["GET"], include_in_schema=False)
+async def get_office_compliance_defaulters(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Non-filing / short-payment detection")

@@ -123,3 +123,23 @@ def test_admin_charges_challan_and_the_dashboard(ctx):
                        headers=signatory({"action": "raise-direct-challan", "resource_id": EST, "amount_paise": 50050})).status_code == 422
     month = next(m for m in client.get("/api/v1/employers/me/returns/dashboard", headers=signatory()).json()["data"] if m["wage_month"] == MONTH)
     assert month["wage_month"] == MONTH and month["status"] == "PAID" and month["due_date"] == "2026-09-15" and month["paid_late"] is True
+
+
+def test_demands_are_published_revised_under_vishwas_and_paid_directly(ctx):
+    client, q = ctx
+    regular_posted(client)
+    import json as _json
+    published = [_json.loads(p)["envelope"]["payload"] for (p,) in q("SELECT payload FROM outbox WHERE event_type='DemandStateChanged.v1'")]
+    assert {p["kind"] for p in published} == {"DAMAGES_14B", "INTEREST_7Q"} and {p["state"] for p in published} == {"OPEN"}
+    d14b = next(p for p in published if p["kind"] == "DAMAGES_14B")
+    from app.infra.demands import on_demand_paid, on_demand_raised
+    _deliver(on_demand_raised, {"demand_id": "DEM-VIS-1", "establishment_id": EST, "demand_type": "DAMAGES_14B_VISHWAS", "amount_paise": 100,
+                                "supersedes_demand_ids": [d14b["demand_id"]], "working": "VISHWAS: 30% (illustrative)", "rule_version": "r"},
+             "DemandRaised.v1")
+    states = dict(q("SELECT demand_id, state FROM demands"))
+    assert states[d14b["demand_id"]] == "WAIVED" and states["DEM-VIS-1"] == "OPEN"
+    _deliver(on_demand_paid, {"payment_id": "PAY-DEM-1", "purpose": "DEMAND", "reference_type": "demand", "reference_id": "DEM-VIS-1",
+                              "amount_paise": 100, "mock": True}, "PaymentConfirmed.v1")
+    assert dict(q("SELECT demand_id, state FROM demands"))["DEM-VIS-1"] == "PAID"
+    assert sorted(q("SELECT jl.account_code, jl.side FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id WHERE j.kind='DEMAND_PAYMENT'")) == [
+        ("BANK_COLLECTION", "debit"), ("DAMAGES_14B", "credit")]

@@ -51,7 +51,7 @@ stakeholders:
     via:
     - F13.public
   - endpoint: GET /public/defaulting-establishments
-    status: P
+    status: W
     scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
     step_up: false
     via:
@@ -853,6 +853,18 @@ stakeholders:
     step_up: false
     via:
     - F01.establishment_owner
+  - endpoint: GET /employers/me/compliance-summary
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.establishment_owner
+  - endpoint: GET /employers/me/vishwas-applications
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.establishment_owner
   employer.signatory:
   - endpoint: GET /employers/me/ownership-declaration
     status: W
@@ -1053,7 +1065,7 @@ stakeholders:
     via:
     - F03.direct_challan
   - endpoint: POST /employers/me/demands/{demandId}/payment-intents
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:
@@ -1100,8 +1112,14 @@ stakeholders:
     step_up: false
     via:
     - F06.employer_reply
+  - endpoint: GET /employers/me/vishwas-applications
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.vishwas_apply
   - endpoint: POST /employers/me/vishwas-applications
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
@@ -1288,7 +1306,7 @@ stakeholders:
     via:
     - F03.receipt
   - endpoint: GET /employers/me/compliance-summary
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
@@ -1683,25 +1701,25 @@ stakeholders:
     via:
     - F03.knock_off
   - endpoint: GET /office/compliance/defaulters
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F06.defaulters
   - endpoint: POST /office/compliance/cases
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F06.defaulters
   - endpoint: GET /office/compliance/cases
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F06.defaulters
   - endpoint: GET /office/compliance/cases/{caseId}
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -2028,8 +2046,14 @@ stakeholders:
     step_up: true
     via:
     - F06.order
+  - endpoint: GET /office/compliance/vishwas-applications
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.vishwas_decide
   - endpoint: POST /office/compliance/vishwas-applications/{applicationId}/decisions
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -2701,7 +2725,7 @@ stakeholders:
     via:
     - F06.district
   - endpoint: GET /office/compliance/cases
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:

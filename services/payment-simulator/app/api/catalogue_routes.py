@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['POST /integrations/mock-bank/payment-confirmations', 'POST /integrations/mock-bank/payment-returns', 'POST /employers/me/challans/{trrn}/payment-intents']
+OPERATIONS = ['POST /integrations/mock-bank/payment-confirmations', 'POST /integrations/mock-bank/payment-returns', 'POST /employers/me/challans/{trrn}/payment-intents', 'POST /employers/me/demands/{demandId}/payment-intents']
 
 @router.api_route("/api/v1/integrations/mock-bank/payment-confirmations", methods=["POST"], include_in_schema=False)
 async def post_integrations_mock_bank_payment_confirmations(actor: Actor = Depends(require_actor)) -> None:
@@ -25,3 +25,8 @@ async def post_integrations_mock_bank_payment_returns(actor: Actor = Depends(req
 @router.api_route("/api/v1/employers/me/challans/{trrn}/payment-intents", methods=["POST"], include_in_schema=False)
 async def post_employers_me_challans_trrn_payment_intents(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Pay challan via mock bank")
+
+
+@router.api_route("/api/v1/employers/me/demands/{demandId}/payment-intents", methods=["POST"], include_in_schema=False)
+async def post_employers_me_demands_demandId_payment_intents(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Pay a demand (14B / 7Q / admin charges)")

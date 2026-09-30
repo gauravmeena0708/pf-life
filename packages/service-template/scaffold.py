@@ -30,6 +30,7 @@ SERVICES = {
     "intelligence-service": "intelligence",
     "pension-service": "pension",
     "platform-service": "platform",
+    "compliance-service": "compliance",
     "mock-integrations": None,
 }
 PHASE_1_BUILT = {"W", "M"}  # status values that are in scope for this POC phase

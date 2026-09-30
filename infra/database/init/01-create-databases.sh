@@ -24,6 +24,7 @@ create pension_db pension_app "${PENSION_DB_PASSWORD}"
 create platform_db platform_app "${PLATFORM_DB_PASSWORD}"
 create mock_integrations_db mock_integrations_app "${MOCK_INTEGRATIONS_DB_PASSWORD}"
 create keycloak_db keycloak_app "${KEYCLOAK_DB_PASSWORD}"
+create compliance_db compliance_app "${COMPLIANCE_DB_PASSWORD}"
 # Read-only role for reporting projections.
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname reporting_db <<-SQL
   CREATE ROLE reporting_ro LOGIN PASSWORD '${REPORTING_RO_DB_PASSWORD}';

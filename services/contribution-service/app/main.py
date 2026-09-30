@@ -24,7 +24,8 @@ def create_app() -> FastAPI:
             relay = OutboxRelay(engine(), settings.rabbitmq_url)
             consumers = [
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.payments",
-                         ["payment-simulator.PaymentConfirmed.v1", "payment-simulator.PaymentReturned.v1"], _payment_router),
+                         ["payment-simulator.PaymentConfirmed.v1", "payment-simulator.PaymentReturned.v1",
+                          "compliance-service.DemandRaised.v1"], _payment_router),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.employers",
                          ["employer-service.EmployerVerified.v1"], handle_employer_verified),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.claims",
@@ -65,6 +66,12 @@ def create_app() -> FastAPI:
 async def _payment_router(session, event):
     if event.get("event_type") == "PaymentConfirmed.v1" and event["payload"].get("purpose") == "CLAIM_SETTLEMENT":
         await on_claim_paid(session, event)
+    elif event.get("event_type") == "PaymentConfirmed.v1" and event["payload"].get("purpose") == "DEMAND":
+        from app.infra.demands import on_demand_paid
+        await on_demand_paid(session, event)
+    elif event.get("event_type") == "DemandRaised.v1":
+        from app.infra.demands import on_demand_raised
+        await on_demand_raised(session, event)
     elif event.get("event_type") == "PaymentConfirmed.v1":
         await handle_payment_confirmed(session, event)
     elif event.get("event_type") == "PaymentReturned.v1":

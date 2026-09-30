@@ -133,3 +133,7 @@ late_payment:
     - {upto_months: 6, rate_bp_pa: 1500}
     - {upto_months: null, rate_bp_pa: 2500}
   interest_7q_rate_bp_pa: 1200
+vishwas:
+  # ILLUSTRATIVE settlement of disputed 14B damages: on approval the establishment pays this share of the damages it
+  # applied for and the rest is waived, as one revised demand. Not the terms of any actual EPFO scheme.
+  settlement_share_bp: 3000

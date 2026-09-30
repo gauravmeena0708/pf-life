@@ -41,7 +41,7 @@ Rules that apply to every row:
 | `GET /public/demo-challenges` | One-use arithmetic proof for synthetic public lookup demo | M | 1 | gateway |
 | `GET /public/establishments/{estId}/e-report-card` | Establishment **e-Report Card**: wage-month filing/payment history, counts and totals only | P | 2 | reporting |
 | `POST /public/trrn-status-lookups` | **TRRN / challan status** lookup with wage month, issue/payment times and next step; one-use synthetic demo proof (production CAPTCHA pending) | M | 1 | contribution |
-| `GET /public/defaulting-establishments` | Published defaulter list (synthetic) | P | 2 | compliance |
+| `GET /public/defaulting-establishments` | Published defaulter list (synthetic) | W | 1 | compliance |
 | `GET /public/circulars` | Circulars / notifications catalogue (synthetic, versioned documents) | P | 2 | intelligence |
 | `POST /public/pension/life-certificate-lookups` | **Jeevan Pramaan / life-certificate status** by PPO number or Jeevan Pramaan transaction ID (CAPTCHA, minimal disclosure) | M | 1 | pension |
 | `POST /public/pension/ppo-lookups` | **Know your PPO** (by bank account + DoB / member ID) | W | 1 | pension |
@@ -173,8 +173,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /employers/me/challans/{trrn}/payment-intents` 💰🔐 (`channel=NET_BANKING`) | Pay challan via mock bank | M | 1 | payment-simulator |
 | `POST /employers/me/challans/{trrn}/payment-intents` 💰🔐 (`channel=BANK_COUNTER`) | **Cash / bank-counter payment** channel — whether it is still permitted, and for what, is unconfirmed | ? | 3 | payment-simulator |
 | `GET /employers/me/demands` | Payable demands: 14B damages, 7Q interest, admin charges, higher-pension dues (created from compliance / pension events) | W | 1 | contribution |
-| `POST /employers/me/demands/{demandId}/payment-intents` 💰🔐 | Pay a demand (**14B / 7Q / admin charges**) | P | 2 | payment-simulator |
-| `GET /employers/me/compliance-summary` | Month-wise filing / payment compliance for this establishment | P | 2 | reporting |
+| `POST /employers/me/demands/{demandId}/payment-intents` 💰🔐 | Pay a demand (**14B / 7Q / admin charges**) | W | 1 | payment-simulator |
+| `GET /employers/me/compliance-summary` | Month-wise filing / payment compliance for this establishment | W | 1 | reporting |
 | `POST /integrations/mock-bank/payment-confirmations` 💰 | Signed bank confirmation callback | M | 1 | payment-simulator |
 | `POST /integrations/mock-bank/payment-returns` 💰 | Signed bank return / failure callback | M | 1 | payment-simulator |
 | `POST /partners/sandbox/payroll/ecr-filings` 💰 | B2B payroll API ECR upload | M | 1 | contribution |
@@ -470,10 +470,10 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 |---|---|---|---|---|
 | `GET /caiu/synthetic-risk-signals` | CAIU risk signals (Journey D2) | W | 1 | intelligence |
 | `POST /caiu/synthetic-risk-signals/{signalId}/reviews` | Investigator disposition (Journey D4) | W | 1 | intelligence |
-| `GET /office/compliance/defaulters` | Non-filing / short-payment detection | P | 2 | reporting |
-| `POST /office/compliance/cases` | Open proceeding / enforcement case | P | 2 | compliance |
-| `GET /office/compliance/cases?type=&status=` | Case search | P | 2 | compliance |
-| `GET /office/compliance/cases/{caseId}` | Case detail with full proceeding history | P | 2 | compliance |
+| `GET /office/compliance/defaulters` | Non-filing / short-payment detection | W | 1 | reporting |
+| `POST /office/compliance/cases` | Open proceeding / enforcement case | W | 1 | compliance |
+| `GET /office/compliance/cases?type=&status=` | Case search | W | 1 | compliance |
+| `GET /office/compliance/cases/{caseId}` | Case detail with full proceeding history | W | 1 | compliance |
 | `POST /office/compliance/cases/{caseId}/notices` 🔐 | Issue and serve notice / summons | P | 3 | compliance |
 | `POST /office/compliance/cases/{caseId}/hearings` | Schedule / record hearing | P | 3 | compliance |
 | `POST /employers/me/proceedings/{caseId}/submissions` | Employer reply / evidence submission | P | 3 | compliance |
@@ -513,8 +513,10 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `POST /employers/me/vishwas-applications` 💰 | Apply under **VISHWAS** (one-time settlement of 14B damages / penalty disputes at reduced rates for past defaults) | P | 2 | compliance |
-| `POST /office/compliance/vishwas-applications/{applicationId}/decisions` 🔐 | Recalculate damages under VISHWAS and decide the application → `DemandRaised.v1` for the revised amount | P | 2 | compliance |
+| `POST /employers/me/vishwas-applications` 💰 | Apply under **VISHWAS** (one-time settlement of 14B damages / penalty disputes at reduced rates for past defaults) | W | 1 | compliance |
+| `GET /employers/me/vishwas-applications` | The establishment's VISHWAS applications and its open 14B demands | W | 1 | compliance |
+| `GET /office/compliance/vishwas-applications` | VISHWAS applications of the office's establishments | W | 1 | compliance |
+| `POST /office/compliance/vishwas-applications/{applicationId}/decisions` 🔐 | Recalculate damages under VISHWAS and decide the application → `DemandRaised.v1` for the revised amount | W | 1 | compliance |
 
 ## 11. Exempted establishments (PF trusts)
 

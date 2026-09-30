@@ -28,7 +28,7 @@
       "const": 1
     },
     "aggregate_type": {
-      "const": "compliance_case"
+      "const": "vishwas_application"
     },
     "aggregate_id": {
       "type": "string"
@@ -57,7 +57,10 @@
         "demand_id",
         "establishment_id",
         "demand_type",
-        "amount_paise"
+        "amount_paise",
+        "supersedes_demand_ids",
+        "working",
+        "rule_version"
       ],
       "properties": {
         "demand_id": {
@@ -73,6 +76,18 @@
           "type": "integer",
           "minimum": 0,
           "description": "Money in paise (integer); never floating point"
+        },
+        "supersedes_demand_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "working": {
+          "type": "string"
+        },
+        "rule_version": {
+          "type": "string"
         }
       }
     }

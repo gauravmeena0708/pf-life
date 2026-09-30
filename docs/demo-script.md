@@ -343,6 +343,20 @@ simulation; point out that the dialog says exactly what is being authorised (act
    AL-0903 holds ₹50,000" — AL-0903 is on BHARAT's older UAN, linked by the same verified Aadhaar.
 3. **`do-caseworker` → Member 360** for UAN 100000000903: the Aadhaar-verified set and its primary member ID.
 
+## Compliance: defaulters, demands and VISHWAS
+*Tests: `tests/e2e/test_compliance.py`, `services/compliance-service/tests/test_compliance.py`,
+`services/reporting-service/tests/test_compliance_reads.py`*
+
+1. **`ro-da-compliance` → Establishments & compliance › Defaulters, cases and VISHWAS**: establishments with a month
+   unpaid past its due date or an open demand. *Open a compliance case* on one; `ro-apfc` sees it in the cases list.
+2. **`member-a` → Public lookups**: *Defaulting establishments* — name, office and months in default.
+3. **`emp-owner` → Dashboards › Compliance summary**: each wage month filed, paid, paid late or unpaid, with its demands.
+4. **`emp-signatory` → Payments › VISHWAS**: apply to settle the open 14B damages; the page says 30% will be payable
+   (illustrative). **`ro-apfc`** approves it (step-up bound to the revised amount): the old demands are waived and
+   one revised demand raised.
+5. **`emp-signatory` → Payments › Demands (14B / 7Q)**: *Pay now* on the revised demand; after the bank callback it
+   shows **PAID**.
+
 ## Policy changes that move money — interest, TDS and pensions
 *Tests: `tests/e2e/test_policy_money.py`, `services/contribution-service/tests/test_interest.py`,
 `services/claim-service/tests/test_tds.py`, `services/pension-service/tests/test_pensions.py`*

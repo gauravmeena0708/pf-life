@@ -28,6 +28,7 @@ services:
       PENSION_DB_PASSWORD: ${PENSION_DB_PASSWORD}
       PLATFORM_DB_PASSWORD: ${PLATFORM_DB_PASSWORD}
       MOCK_INTEGRATIONS_DB_PASSWORD: ${MOCK_INTEGRATIONS_DB_PASSWORD}
+      COMPLIANCE_DB_PASSWORD: ${COMPLIANCE_DB_PASSWORD}
       KEYCLOAK_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
       REPORTING_RO_DB_PASSWORD: ${REPORTING_RO_DB_PASSWORD}
     volumes:
@@ -57,6 +58,7 @@ services:
       data-pension-service: {}
       data-platform-service: {}
       data-mock-integrations: {}
+      data-compliance-service: {}
       data-keycloak: {}
   redis:
     image: redis:7.4-alpine
@@ -492,6 +494,33 @@ services:
     networks:
       services: {}
       data-pension-service: {}
+  compliance-service:
+    build:
+      context: .
+      dockerfile: services/compliance-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      SERVICE_NAME: compliance-service
+      DATABASE_URL: postgresql+asyncpg://compliance_app:${COMPLIANCE_DB_PASSWORD}@postgres:5432/compliance_db
+      RABBITMQ_URL: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+      GATEWAY_JWKS_URL: http://gateway:8000/internal/jwks
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}
+      DB_POOL_SIZE: ${DB_POOL_SIZE:-5}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3).status==200 else 1)"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks:
+      services: {}
+      data-compliance-service: {}
   platform-service:
     build:
       context: .
@@ -641,6 +670,10 @@ networks:
     ipam:
       config:
       - subnet: 172.30.14.0/24
+  data-compliance-service:
+    ipam:
+      config:
+      - subnet: 172.30.15.0/24
 volumes:
   postgres-data: {}
   ollama-data: {}

@@ -36,7 +36,8 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `RiskSignalReviewed.v1` | intelligence | claim, reporting, audit | risk_signal | 1 |
 | `SecurityEventRecorded.v1` | audit | intelligence, member, gateway | security_event | 1 |
 | `NotificationRequested.v1` | claim, grievance, member, contribution | member | notification | 1 |
-| `DemandRaised.v1` | compliance | contribution, audit | compliance_case | 2 (contract only) |
+| `DemandRaised.v1` | compliance | contribution, audit | vishwas_application | 1 |
+| `DemandStateChanged.v1` | contribution | compliance, payment-simulator, reporting, audit | demand | 1 |
 | `LedgerReversed.v1` | contribution | claim, member, workflow, reporting, audit | ledger_journal | 1 |
 | `LedgerAdjusted.v1` | contribution | claim, reporting, audit | ledger_journal | 1 |
 | `InterestCredited.v1` | contribution | claim, reporting, audit | interest_run | 1 |

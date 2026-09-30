@@ -323,6 +323,9 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
                 problems.append(f"interest: {fy} is not a financial year like 2025-26")
             if not _whole(rate, 0, 2000):
                 problems.append(f"interest rate for {fy} must be between 0 and 2000 basis points (20%)")
+    if "vishwas" in document:
+        if not _whole((document["vishwas"] or {}).get("settlement_share_bp"), 0, 10000):
+            problems.append("vishwas.settlement_share_bp must be between 0 and 10000 basis points")
     if "late_payment" in document:
         lp = document["late_payment"] or {}
         if not _whole(lp.get("due_day"), 1, 28):

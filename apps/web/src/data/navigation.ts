@@ -41,8 +41,8 @@ const EMPLOYER: NavGroup[] = [
     link("Authorized eSign List", "/employer/establishment#esign-heading")] },
   { label: "Payments", items: [
     link("ECR Upload", "/employer/ecr#ecr-prepare"), link("Return Filing", "/employer/ecr#ecr-returns"), link("Return monthly dashboard", "/employer/returns#returns-dashboard-heading"),
-    link("Direct Challan", "/employer/returns#direct-challan-heading"), link("Demands (14B / 7Q)", "/employer/returns#demands-heading"), link("Monthly Return for Exempted Establishment"), link("TRRN query / challan status", "/employer/ecr#ecr-challans")] },
-  { label: "Dashboards", items: [link("Active Members details", "/employer/registration#active-heading"), link("Missing details", "/employer/registration#active-heading")] },
+    link("Direct Challan", "/employer/returns#direct-challan-heading"), link("Demands (14B / 7Q)", "/employer/returns#demands-heading"), link("VISHWAS: settle damages", "/employer/returns#vishwas-heading"), link("Monthly Return for Exempted Establishment"), link("TRRN query / challan status", "/employer/ecr#ecr-challans")] },
+  { label: "Dashboards", items: [link("Compliance summary", "/employer/returns#compliance-summary-heading"), link("Active Members details", "/employer/registration#active-heading"), link("Missing details", "/employer/registration#active-heading")] },
   { label: "User", items: [link("Sub-users (payroll operators)", "/employer#people-operator")] },
   { label: "Admin" },
   { label: "Online Services", items: [link("Transfer Claims", "/employer/members#transfers-heading"), link("Claim attestation"), link("Higher-pension joint-option validation")] },
@@ -71,6 +71,7 @@ function fieldOffice(role: string): NavGroup[] {
       link("VDR Rejection", role === "fo.da_accounts" ? "/office/ledger#vdr-heading" : undefined),
       ...(["fo.cash", "fo.da_accounts"].includes(role) ? [link("Receipts outside the challan flow (VDR)", "/office/ledger#vdr-heading")] : []), ...["ANNEXURE K RECO", "ANNEXURE K VDR RECO"].map((l) => link(l, role === "fo.da_accounts" ? "/office/claim-tools#annexure-heading" : undefined))] },
     { label: "Establishments & compliance", items: [
+      ...(["fo.da_compliance", "fo.apfc", "fo.oic"].includes(role) ? [link("Defaulters, cases and VISHWAS", "/office/compliance")] : []),
       link("7Q & 14B", ["fo.da_compliance", "fo.ss"].includes(role) ? "/office/returns#knock-off-heading" : undefined),
       link("Establishment", ["fo.oic", "fo.apfc"].includes(role) ? "/office/work-queue" : undefined),
       link("OLRE", ["fo.da_compliance", "fo.apfc"].includes(role) ? "/office/olre" : undefined),

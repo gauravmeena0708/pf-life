@@ -26,6 +26,7 @@ Activities: **F13.public** Browse schemes, offices, statistics, circulars; searc
 
 | Endpoint | Status |
 |---|---|
+| `GET /public/defaulting-establishments` | W |
 | `GET /public/establishments` | W |
 | `GET /public/establishments/{estId}` | W |
 | `GET /public/offices` | W |
@@ -38,7 +39,6 @@ Activities: **F13.public** Browse schemes, offices, statistics, circulars; searc
 | `GET /public/demo-challenges` | M |
 | `POST /public/trrn-status-lookups` | M |
 | `GET /public/circulars` | P |
-| `GET /public/defaulting-establishments` | P |
 | `GET /public/establishments/{estId}/e-report-card` | P |
 
 #### `member` — Member — active contributor (UAN holder)
@@ -221,6 +221,7 @@ Activities: **F01.register** Register establishment online and submit verificati
 | `GET /employers/me/bank-accounts` | W |
 | `GET /employers/me/branches` | W |
 | `GET /employers/me/change-requests` | W |
+| `GET /employers/me/compliance-summary` | W |
 | `GET /employers/me/configuration` | W |
 | `GET /employers/me/contractors` | W |
 | `GET /employers/me/demands` | W |
@@ -231,6 +232,7 @@ Activities: **F01.register** Register establishment online and submit verificati
 | `GET /employers/me/returns/dashboard` | W |
 | `GET /employers/me/signatories` | W |
 | `GET /employers/me/signature-registrations` | W |
+| `GET /employers/me/vishwas-applications` | W |
 | `GET /employers/registration-requests/{reqId}` | W |
 | `PATCH /employers/me` | W |
 | `POST /employers/me/branches` | W |
@@ -272,10 +274,12 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `GET /employers/me/returns/dashboard` | W |
 | `GET /employers/me/signature-registrations` | W |
 | `GET /employers/me/transfer-requests` | W |
+| `GET /employers/me/vishwas-applications` | W |
 | `PATCH /employers/me` | W |
 | `POST /employers/me/approvals/{approvalId}/decisions` | W |
 | `POST /employers/me/branches` | W |
 | `POST /employers/me/configuration/change-requests` | W |
+| `POST /employers/me/demands/{demandId}/payment-intents` | W |
 | `POST /employers/me/direct-challans` | W |
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W |
 | `POST /employers/me/ecr-filings/{filingId}/cancellations` | W |
@@ -283,6 +287,7 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `POST /employers/me/joint-declarations/{jdId}/decisions` | W |
 | `POST /employers/me/kyc-approvals/{requestId}/decisions` | W |
 | `POST /employers/me/transfer-requests/{transferId}/decisions` | W |
+| `POST /employers/me/vishwas-applications` | W |
 | `PUT /employers/me/ownership-declaration` | W |
 | `GET /international/coc-applications/{id}` | M |
 | `POST /employers/me/challans/{trrn}/payment-intents` | M |
@@ -293,12 +298,10 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `GET /international/coc-applications/{id}/certificate` | P |
 | `POST /employers/me/claim-attestations/{claimId}/decisions` | P |
 | `POST /employers/me/closure-requests` | P |
-| `POST /employers/me/demands/{demandId}/payment-intents` | P |
 | `POST /employers/me/higher-pension-options/{optionId}/validations` | P |
 | `POST /employers/me/joint-declarations` | P |
 | `POST /employers/me/office-transfer-requests` | P |
 | `POST /employers/me/proceedings/{caseId}/submissions` | P |
-| `POST /employers/me/vishwas-applications` | P |
 | `POST /employers/voluntary-coverage-requests` | P |
 | `POST /international/coc-applications/{id}/extensions` | P |
 | `POST /international/coc-applications/{id}/signed-uploads` | P |
@@ -314,6 +317,7 @@ Activities: **F01.profile** View establishment profile, configuration, KYC and h
 | `GET /employers/me` | W |
 | `GET /employers/me/bank-accounts` | W |
 | `GET /employers/me/challans/{trrn}/receipt` | W |
+| `GET /employers/me/compliance-summary` | W |
 | `GET /employers/me/configuration` | W |
 | `GET /employers/me/ecr-filings` | W |
 | `GET /employers/me/ecr-filings/{filingId}` | W |
@@ -333,7 +337,6 @@ Activities: **F01.profile** View establishment profile, configuration, KYC and h
 | `POST /employers/me/members/bulk-registrations` | W |
 | `POST /employers/me/members/{uan}/declarations` | W |
 | `POST /employers/me/members/{uan}/exits` | W |
-| `GET /employers/me/compliance-summary` | P |
 | `GET /employers/me/dashboard` | P |
 | `POST /employers/me/members/exit-bulk-uploads` | P |
 | `POST /employers/me/members/{uan}/exit-corrections` | P |
@@ -466,16 +469,16 @@ Activities: **F01.olre_scrutiny** Scrutinise documents of a newly registered est
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/compliance/cases` | W |
+| `GET /office/compliance/cases/{caseId}` | W |
+| `GET /office/compliance/defaulters` | W |
 | `GET /office/damages-knock-offs` | W |
 | `GET /office/establishment-registrations` | W |
 | `GET /office/establishment-registrations/{reqId}/documents` | W |
+| `POST /office/compliance/cases` | W |
 | `POST /office/establishment-registrations/{reqId}/scrutiny-notes` | W |
 | `POST /office/establishments/{estId}/damages-knock-offs` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
-| `GET /office/compliance/cases` | P |
-| `GET /office/compliance/cases/{caseId}` | P |
-| `GET /office/compliance/defaulters` | P |
-| `POST /office/compliance/cases` | P |
 | `POST /office/compliance/inspections/{inspectionId}/processing-notes` | P |
 
 #### `fo.ss` — Section Supervisor (Accounts / Compliance)
@@ -531,6 +534,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 |---|---|
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/claims/{claimId}/cad` | W |
+| `GET /office/compliance/vishwas-applications` | W |
 | `GET /office/death-claims/{claimId}/shares-summary` | W |
 | `GET /office/ecr-filings` | W |
 | `GET /office/establishment-change-requests` | W |
@@ -542,6 +546,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/cases/{caseId}/second-approvals` | W |
 | `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/claims/{claimId}/re-disbursement-approvals` | W |
+| `POST /office/compliance/vishwas-applications/{applicationId}/decisions` | W |
 | `POST /office/establishment-registrations/{reqId}/coverage-decisions` | W |
 | `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | W |
 | `POST /office/establishments/{estId}/defreezes` | W |
@@ -560,7 +565,6 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/compliance/cases/{caseId}/reviews-7b` | P |
 | `POST /office/compliance/inspections` | P |
 | `POST /office/compliance/membership-disputes` | P |
-| `POST /office/compliance/vishwas-applications/{applicationId}/decisions` | P |
 | `POST /office/ecr-filings/{filingId}/approvals` | ? |
 
 #### `fo.rpfc1` — RPFC-I — regional head of wings
@@ -816,8 +820,8 @@ Activities: **F06.district** District-level compliance follow-up and facilitatio
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/compliance/cases` | W |
 | `GET /office/work-queue` | W |
-| `GET /office/compliance/cases` | P |
 
 ### E. Zonal Office (ZO)
 

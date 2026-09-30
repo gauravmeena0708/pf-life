@@ -33,3 +33,14 @@ bank_nonces = Table(  # replay protection for signed bank callbacks
     Column("nonce", String(64), primary_key=True),
     Column("seen_at", DateTime(timezone=True), server_default=func.now()),
 )
+
+
+# Demands (14B / 7Q) learnt from contribution-service.DemandStateChanged.v1, payable directly (P2.8a).
+demand_payables = Table(
+    "demand_payables", metadata,
+    Column("demand_id", String(60), primary_key=True),
+    Column("establishment_id", String(40), nullable=False),
+    Column("kind", String(20), nullable=False),
+    Column("amount_paise", Money, nullable=False),
+    Column("status", String(20), nullable=False),          # DUE | PENDING | PAID | CLOSED
+)

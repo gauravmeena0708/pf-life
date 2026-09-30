@@ -20,7 +20,11 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.7b** | Office ledger work: receipts outside the challan flow (VDR) allocated to TRRNs or rejected, reversal of a posted journal, recredit of a rejected transfer-in, Appendix E with the CITES manual's four types (DA proposes, APFC approves) | **Done** (30 Sep 2026) |
 | **P2.7c** | Member-facing ledger: annual statement, taxable interest split, Form 10C cash withdrawal (pension withdrawal benefit by Table D, paid from EPS) | **Done** (30 Sep 2026) |
 | **P2.7d** | Primary member ID: the latest member ID with contributions, over the member's Aadhaar-verified set; claims only against it, whole-balance claims (final settlement, Form 10C, death claims) only when the rest of the set is transferred; Form 13 only into it (checked when filed and when approved) | **Done** (30 Sep 2026) |
-| P2.8 | The rest: principal-employer tags (contractor), exempted establishments' past accumulations, compliance and VISHWAS, international workers, grievance extras, public lookups, audit, NDC, HRM, DO dashboards | |
+| **P2.8a** | Compliance: defaulting establishments (office and public lists), compliance cases, the employer's month-by-month compliance summary, 14B/7Q demands paid directly, VISHWAS settlement of damages (new compliance-service) | **Done** (30 Sep 2026) |
+| P2.8b | e-Nomination, UAN lookup, exit-date corrections, auto-transfer, claim attestation, bank switch | |
+| P2.8c | Higher pension, the EDLI decision, international workers | |
+| P2.8d | Public grievances, circulars, the e-Report Card, the interest-rate record, exempted trusts' ingestion | |
+| P2.8e | Concurrent audit, security incidents, the NDC issue tracker, HRM postings, DO and employer dashboards, location mapping | |
 
 Operations marked **?** (scope unconfirmed, e.g. *ECR Approval*, *VDR Member Beneficiary*) wait until their
 meaning is confirmed.
@@ -252,3 +256,23 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
   have moved; rejecting stays possible).
 - Web: "P" against the primary member ID in the service history and the claim screen; the transfer form offers only
   the primary as the target.
+
+## P2.8a — how it is built
+
+- **compliance-service** (new, its own database): the establishments and office postings it needs (seeded), compliance
+  cases, VISHWAS applications, and a projection of every 14B/7Q demand from `DemandStateChanged.v1`, which
+  contribution-service now publishes whenever a demand is raised, knocked off, waived or paid.
+- **Defaulters** (`/office/compliance/defaulters`, reporting-service): establishments with a return month unpaid past
+  its due date or an open demand, for the officer's office. `fo.da_compliance` opens a **compliance case** on one
+  (`/office/compliance/cases`); APFC and OIC see them. The public list (`/public/defaulting-establishments`) shows
+  only the name, office and months in default.
+- **Compliance summary** (`/employers/me/compliance-summary`): each wage month — filed, paid, paid late, unpaid —
+  with its due date and the demands on it.
+- **Paying a demand**: the signatory pays a 14B/7Q demand directly (`/employers/me/demands/{id}/payment-intents`,
+  step-up bound to the amount); the payment is journalled (`DEMAND_PAYMENT`) and the demand closed.
+- **VISHWAS**: the signatory applies to settle open 14B damages; the APFC approves or rejects (step-up bound to the
+  revised amount, which the office list shows). Approval raises one revised demand for
+  `vishwas.settlement_share_bp` of the damages (illustrative 30%, in whole rupees) — `DemandRaised.v1` — and
+  contribution-service waives the demands it replaces. The rule is in the rule set, so HO can change it.
+- Not built: principal-employer tags and contractor compliance (no contractor establishment has a workforce in the
+  seed), inspections and 7A proceedings, recovery (attachment, prosecution).

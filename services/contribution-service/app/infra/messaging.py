@@ -111,10 +111,14 @@ async def _raise_late_payment_demands(session, f, challan, rules):
     charges=late_payment_charges(int(challan["total_paise"]), due_date(f["wage_month"], rules), paid, rules)
     if not charges["late"]:
         return
+    raised=[]
     for kind,amount in (("DAMAGES_14B",charges["damages_14b_paise"]),("INTEREST_7Q",charges["interest_7q_paise"])):
         key=f"DEM-{challan['trrn']}-{kind[-3:]}"
+        raised.append(key)
         if amount and not (await session.execute(text("SELECT 1 FROM demands WHERE demand_id=:d"), {"d":key})).first():
             await session.execute(text("INSERT INTO demands (demand_id,establishment_id,kind,trrn,wage_month,amount_paise,days_late,working,rule_version,state,created_at) "
                                        "VALUES (:d,:e,:k,:t,:m,:a,:days,:w,:r,'OPEN',:at)"),
                                   {"d":key,"e":f["establishment_id"],"k":kind,"t":challan["trrn"],"m":f["wage_month"],"a":amount,
                                    "days":charges["days_late"],"w":charges["working"],"r":rules["rule_version"],"at":datetime.now(UTC)})
+    from app.infra.demands import publish
+    await publish(session, raised, None)                      # compliance-service and the mock bank see the demands

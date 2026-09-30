@@ -1,4 +1,5 @@
 import { FormEvent, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { api, command, Envelope } from "../api/client";
 import { PensionEnquiries } from "./PensionEnquiries";
@@ -20,6 +21,11 @@ type Challenge = { challenge_id: string; prompt: string; proof_type: string };
 type TrrnStatus = {
   trrn: string; status: string; wage_month: string | null; issued_at: string | null;
   paid_at: string | null; next_step: string; label: string;
+};
+type PublicDefaulters = {
+  establishments: { establishment_id: string; legal_name: string | null; office_id: string;
+    defaults: { kind: string; wage_months: string[] }[]; since: string }[];
+  label: string; note: string;
 };
 
 const SEARCH_MODES: { value: SearchMode; label: string; hint: string }[] = [
@@ -44,6 +50,8 @@ function label(value: string): string {
 }
 
 export function PublicLookups() {
+  const defaulters = useQuery({ queryKey: ["public-defaulting-establishments"], retry: false,
+    queryFn: () => api<Envelope<PublicDefaulters>>("/api/v1/public/defaulting-establishments") });
   const [mode, setMode] = useState<SearchMode>("name");
   const [query, setQuery] = useState("");
   const [match, setMatch] = useState<NameMatch>("contains");
@@ -196,6 +204,22 @@ export function PublicLookups() {
         <dl className="profile-grid"><div><dt>Wage month</dt><dd>{trrnResult.wage_month || "Not found"}</dd></div><div><dt>Issued</dt><dd>{dateTime(trrnResult.issued_at)}</dd></div>
           <div><dt>Payment recorded</dt><dd>{dateTime(trrnResult.paid_at)}</dd></div><div><dt>Next step</dt><dd>{trrnResult.next_step}</dd></div></dl>
       </div>}
+    </section>
+    <section className="card stack" aria-labelledby="defaulters-public-heading"><h2 id="defaulters-public-heading">Defaulting establishments (synthetic)</h2>
+      <ProblemMessage error={defaulters.error} />
+      {defaulters.isLoading ? <p role="status">Loading defaulting establishments…</p> : null}
+      {defaulters.data ? <><p className="muted">{label(defaulters.data.data.label)} · {defaulters.data.data.note}</p>
+        <p className="muted">Showing up to the 6 latest wage months per default.</p></> : null}
+      {defaulters.data?.data.establishments.length ? <ul>{defaulters.data.data.establishments.map((item) =>
+        <li key={item.establishment_id}><h3>{item.legal_name ?? item.establishment_id}</h3>
+          <p>{item.establishment_id} · Office {item.office_id} · Since {item.since}</p>
+          <ul>{item.defaults.map((entry, index) => <li key={`${entry.kind}-${index}`}>
+            {entry.kind === "NON_FILING" ? "Returns not filed" : entry.kind === "NON_PAYMENT" ? "Dues not paid" : label(entry.kind)}
+            {" · "}{entry.wage_months.length} months in total
+            {entry.wage_months.length ? <ul>{[...entry.wage_months].sort((a, b) => b.localeCompare(a)).slice(0, 6)
+              .map((month) => <li key={month}>{month}</li>)}</ul> : null}
+          </li>)}</ul>
+        </li>)}</ul> : defaulters.data ? <p className="muted">No defaulting establishments published.</p> : null}
     </section>
     <PensionEnquiries />
   </div>;
