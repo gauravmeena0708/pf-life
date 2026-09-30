@@ -75,7 +75,8 @@
             "OTHER",
             "INTEREST_ON_RETURNS",
             "EPS_DIVERSION",
-            "EXCESS_INTEREST_DEBIT"
+            "EXCESS_INTEREST_DEBIT",
+            "PAST_ACCUMULATION"
           ]
         },
         "postings": {

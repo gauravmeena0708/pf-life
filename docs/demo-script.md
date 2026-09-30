@@ -51,6 +51,7 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `member-h` | Member in service since 2011 on wages above the ceiling | Higher pension |
 | `worker-expat`, `iw-officer`, `ho-iwu` | International worker; International Workers cell; HO International Workers Unit | International workers |
 | `ro-edli` | EDLI section officer | EDLI decision |
+| `ho-publicity`, `ro-exemption` | HO Public Relations (circulars); exemption cell (surrendered trusts) | Public services, trusts |
 
 ---
 
@@ -347,6 +348,22 @@ simulation; point out that the dialog says exactly what is being authorised (act
 2. **`member-b` → Claim**: *Final settlement* lists "All services are not transferred to the primary member ID:
    AL-0903 holds ₹50,000" — AL-0903 is on BHARAT's older UAN, linked by the same verified Aadhaar.
 3. **`do-caseworker` → Member 360** for UAN 100000000903: the Aadhaar-verified set and its primary member ID.
+
+## Public services, grievances, circulars, the interest rate, surrendered trusts
+*Tests: `tests/e2e/test_public_services.py` and the unit tests of grievance-, intelligence-, claim-, reporting-,
+contribution- and platform-service*
+
+1. **Public page (no login)**: *Grievance without login* — name, mobile, the demo question and any six-digit code;
+   note the registration number. *Grievance status* with it and the mobile. *Claim status* with a claim number and
+   UAN. *Circulars*: filter by category; open one and its versions. *Establishments* → *e-Report Card*.
+2. **`member-a` → Grievances**: *Send a reminder* (once a day); after the office resolves it, *Feedback* (satisfied
+   closes it). **`ro-pro`** can *Transfer to another office* (RO-DEMO-02); it leaves the queue.
+3. **`ho-publicity` → Circulars**: publish one, then publish the same number again: version 2, version 1 superseded.
+4. **`ho-finance` → Record the interest rate** for 2026-27 (CBT date, Ministry concurrence; one-time code bound to
+   the rate). **`ho-policy` → Policy**: a draft rule set with that rate is waiting; submit it; **`ho-analyst`**
+   publishes it.
+5. **`ro-exemption` → Surrendered trusts**: EST-DEMO-0003, a transfer reference and the trust's member lines;
+   the total is confirmed with a one-time code; each line is posted to the member's ID at the trust.
 
 ## Higher pension, international workers, the EDLI decision
 *Tests: `tests/e2e/test_higher_pension_international_edli.py`, `services/pension-service/tests/test_higher_pension.py`,

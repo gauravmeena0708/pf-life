@@ -33,6 +33,11 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `MemberKycUpdated.v1` | member | claim, audit | member | 1 |
 | `HigherPensionOptionValidated.v1` | pension | audit | higher_pension_option | 1 |
 | `CertificateOfCoverageIssued.v1` | international | audit | coc_application | 1 |
+| `GrievanceTransferred.v1` | grievance | workflow, audit | grievance | 1 |
+| `GrievanceFeedbackGiven.v1` | grievance | audit | grievance | 1 |
+| `CircularPublished.v1` | intelligence | audit | circular | 1 |
+| `InterestRateDeclared.v1` | contribution | platform, audit | interest_rate | 1 |
+| `TrustAccumulationIngested.v1` | contribution | audit | past_accumulation_ingestion | 1 |
 | `AutoTransferConfirmed.v1` | claim | contribution, audit | auto_transfer | 1 |
 | `TransferPosted.v1` | contribution | claim, member, workflow, audit | ledger_journal | 1 |
 | `PolicyPublished.v1` | platform | claim, contribution, workflow, grievance, intelligence, pension, audit | rule_set | 1 |

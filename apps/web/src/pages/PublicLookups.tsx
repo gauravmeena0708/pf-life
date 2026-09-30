@@ -1,4 +1,6 @@
 import { FormEvent, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { PUBLIC_SERVICES } from "../data/navigation";
 import { useQuery } from "@tanstack/react-query";
 
 import { api, command, Envelope } from "../api/client";
@@ -50,6 +52,7 @@ function label(value: string): string {
 }
 
 export function PublicLookups() {
+  const navigate = useNavigate();
   const defaulters = useQuery({ queryKey: ["public-defaulting-establishments"], retry: false,
     queryFn: () => api<Envelope<PublicDefaulters>>("/api/v1/public/defaulting-establishments") });
   const [mode, setMode] = useState<SearchMode>("name");
@@ -145,6 +148,9 @@ export function PublicLookups() {
       description="Search by name, EPF code, registration number, pincode or industry. Open a result to see its public demo profile."
       current="Public services"><span className="state-pill">Seeded demo records</span></PageHeader>
 
+    <nav className="card actions" aria-label="Public services">
+      {PUBLIC_SERVICES.map((item) => <Link key={item.to} to={item.to!}>{item.label}</Link>)}
+    </nav>
     <section className="card stack" aria-labelledby="establishment-search">
       <div className="section-heading"><div><p className="eyebrow">01 / Directory</p><h2 id="establishment-search">Establishment search</h2></div><span className="muted small">20 per page · first 5 pages</span></div>
       <form className="stack" onSubmit={(event) => { event.preventDefault(); void search(1); }}>
@@ -174,7 +180,9 @@ export function PublicLookups() {
           <div><span className="eyebrow">{row.establishment_id}</span><h3><button type="button" className="lookup-link" onClick={() => void openProfile(row.establishment_id)}>{row.legal_name} ↗</button></h3>
             <p className="muted small">Registration {row.registration_number} · {row.city || "City unavailable"}, {row.district || "District unavailable"} · {row.pincode || "Pincode unavailable"}</p>
             <p className="muted small">{row.establishment_type ? label(row.establishment_type) : "Type unavailable"} · {row.industry_group ? label(row.industry_group) : "Industry unavailable"} · {row.office_id}</p></div>
-          <span className="state-pill">{label(row.status)}</span>
+          <div className="stack"><span className="state-pill">{label(row.status)}</span>
+            <button type="button" onClick={() => navigate(`/public/establishments/${encodeURIComponent(row.establishment_id)}/e-report-card`)}>e-Report Card</button>
+          </div>
         </li>)}</ul>
         <div className="actions"><button type="button" disabled={searchBusy || page <= 1} onClick={() => void search(page - 1)}>Previous</button><button type="button" disabled={searchBusy || results.length < 20 || page >= 5} onClick={() => void search(page + 1)}>Next</button></div>
       </div>}

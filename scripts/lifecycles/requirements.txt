@@ -1,0 +1,4 @@
+-r ../manuals/requirements.txt
+-e ../../packages/common-observability
+-e ../../packages/common-persistence
+-e ../../packages/common-auth-client

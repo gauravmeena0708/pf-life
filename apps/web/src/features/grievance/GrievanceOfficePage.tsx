@@ -23,15 +23,21 @@ export function GrievanceOfficePage() {
   const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [transferred, setTransferred] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
-  const detail = useQuery({ queryKey: ["office-grievance", grievanceId], enabled: !!grievanceId, retry: false,
+  const detail = useQuery({ queryKey: ["office-grievance", grievanceId], enabled: !!grievanceId && transferred !== grievanceId, retry: false,
     queryFn: () => api<Envelope<Grievance>>(`/api/v1/grievances/${grievanceId}`) });
   const g = detail.data?.data;
   const role = session.data?.stakeholder ?? "";
-  const handling = !!g && TIER_OF[role] === g.tier && !["RESOLVED", "CLOSED"].includes(g.state);
+  const handling = transferred !== grievanceId && !!g && TIER_OF[role] === g.tier && !["RESOLVED", "CLOSED"].includes(g.state);
+
+  const offices = useQuery({ queryKey: ["public-offices"], enabled: role === "fo.pro" && handling, retry: false,
+    queryFn: () => api<Envelope<{ office_id: string; name: string; zone_id: string }[]>>("/api/v1/public/offices") });
+  const choices = offices.data?.data.filter((office) => office.office_id !== g?.office_id) ?? [];
 
   async function run(work: () => Promise<unknown>, ok: string, form?: HTMLFormElement) {
+    if (busy) return;
     setBusy(true); setError(null); setNotice(null);
     try {
       await work();
@@ -80,6 +86,7 @@ export function GrievanceOfficePage() {
           </section>
           {role === "fo.pro" ? <TriageSuggestion text={`${g.subject}. ${g.description}`} current={g.category} /> : null}
           <GrievanceThread grievance={g} viewer="office" />
+          {transferred === grievanceId ? <p className="pending-notice">This grievance has been transferred; the receiving office now handles it.</p> : null}
           {handling ? (
             <div className="activity-columns">
               <form className="card stack" onSubmit={(e) => { e.preventDefault(); const f = e.currentTarget; void run(() => post("messages", { body: field(e, "body") }), "Reply sent to the member.", f); }}>
@@ -100,6 +107,23 @@ export function GrievanceOfficePage() {
                   <div className="actions"><button type="submit" disabled={busy}>Link evidence</button></div>
                 </form>
               ) : null}
+              {role === "fo.pro" ? <form className="card stack" aria-label="Transfer to another office" onSubmit={(e) => {
+                e.preventDefault(); const f = e.currentTarget;
+                const to_office_id = field(e, "to_office_id"); const reason = field(e, "reason");
+                if (reason.length < 10 || !choices.some((office) => office.office_id === to_office_id)) {
+                  setError(new Error("Choose another office and enter a reason of at least 10 characters.")); return;
+                }
+                void run(async () => {
+                  await post("office-transfers", { to_office_id, reason }); setTransferred(grievanceId ?? null);
+                }, "Grievance transferred to the selected office.", f);
+              }}>
+                <h2>Transfer to another office</h2><ProblemMessage error={offices.error} />
+                <label>Receiving office<select name="to_office_id" required disabled={busy || !choices.length} defaultValue="">
+                  <option value="">Choose another office</option>{choices.map((office) => <option key={office.office_id} value={office.office_id}>{office.name} · {office.office_id} · {office.zone_id}</option>)}
+                </select></label>
+                <label>Transfer reason<textarea name="reason" required minLength={10} maxLength={1000} /></label>
+                <div className="actions"><button type="submit" disabled={busy || !choices.length}>Transfer grievance</button></div>
+              </form> : null}
               {g.state === "IN_PROGRESS" ? (
                 <form className="card stack" onSubmit={(e) => void resolve(e)}>
                   <h2>Resolve</h2>

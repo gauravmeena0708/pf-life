@@ -6,6 +6,7 @@ import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
+import { InterestRateRecord } from "./InterestRateRecord";
 
 interface Share { due_paise: number; credited_paise: number; now_paise: number }
 interface InterestPlan {
@@ -41,7 +42,7 @@ export function InterestPage() {
   const revision = !!p?.history.length;
 
   async function post() {
-    if (!p || p.rate_bp === null) return;
+    if (!p || p.rate_bp === null || stepUp.request) return;
     setError(null); setNotice(null);
     const token = await stepUp.ask({ action: "post-interest", resourceId: p.financial_year, amountPaise: Math.abs(p.total_to_credit_paise),
       summary: `${revision ? "Post the revision of" : "Credit"} interest for ${p.financial_year} at ${p.rate_bp / 100}% (rule set ${p.rule_version}) to ${pending.length} accounts: ${signed(p.total_to_credit_paise)} in all.` });
@@ -87,7 +88,7 @@ export function InterestPage() {
                 <tfoot><tr><th scope="row" colSpan={3}>Total</th><td><strong>{signed(p.total_to_credit_paise)}</strong></td></tr></tfoot>
               </table></div>
               <div className="actions">
-                <button type="button" className="primary" disabled={!p.year_ended || pending.length === 0} onClick={() => void post()}>
+                <button type="button" className="primary" disabled={!p.year_ended || pending.length === 0 || !!stepUp.request} onClick={() => void post()}>
                   {revision ? "Post the revision" : "Credit interest"}</button>
                 {pending.length === 0 ? <span className="muted small">Every account is credited at this rate.</span> : null}
               </div>
@@ -106,6 +107,7 @@ export function InterestPage() {
           </section>
         </>
       ) : null}
+      <InterestRateRecord defaultYear={year} stepUp={stepUp} />
       <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
     </section>
   );

@@ -23,7 +23,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.8a** | Compliance: defaulting establishments (office and public lists), compliance cases, the employer's month-by-month compliance summary, 14B/7Q demands paid directly, VISHWAS settlement of damages (new compliance-service) | **Done** (30 Sep 2026) |
 | **P2.8b** | e-Nomination, Know your UAN, exit-date corrections and bulk exits, employer-initiated Joint Declaration, auto-transfer on a change of job, employer attestation of claims, switching a claim's bank account | **Done** (30 Sep 2026) |
 | **P2.8c** | Joint option for pension on higher wages (member opts, employer validates wages, dues from the rules); the EDLI section's decision on verified wages; Certificates of Coverage and the international worker's view (new international-service) | **Done** (30 Sep 2026) |
-| P2.8d | Public grievances, circulars, the e-Report Card, the interest-rate record, exempted trusts' ingestion | |
+| **P2.8d** | Grievances without a login and their status, reminders, feedback and office transfers; claim status without a login; circulars; the e-Report Card; the approved interest rate recorded by HO F&A (→ a draft rule set); a surrendered trust's past accumulations ingested | **Done** (30 Sep 2026) |
 | P2.8e | Concurrent audit, security incidents, the NDC issue tracker, HRM postings, DO and employer dashboards, location mapping | |
 
 Operations marked **?** (scope unconfirmed, e.g. *ECR Approval*, *VDR Member Beneficiary*) wait until their
@@ -329,3 +329,31 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
   nationals by their home scheme (the exemption itself), pensioners' higher-pension options.
 - Fixed on the way: the e-nomination notification (P2.8b) named a placeholder the renderer does not supply, so the
   notification failed; a test now renders every template.
+
+## P2.8d — how it is built
+
+- **Without a login** (the gateway's one-use demo question and a rate limit guard each form; the one-time code to
+  the mobile is a mock — any six digits except 000000):
+  - *Grievance* (`/public/grievances`): a pensioner, an employer or anyone files it; only a hash of the mobile and
+    its last four digits are kept; it is routed to the regional office like a member's grievance.
+  - *Grievance status* by registration number and mobile: the steps and the resolution, never the grievance text.
+  - *Claim status* by claim number and UAN (or the late member's UAN): the steps only — no amounts, names or bank.
+  - *Circulars* (intelligence-service): HO Public Relations publishes them; the same number again is a new version
+    and the last is kept as superseded. Three synthetic circulars are seeded.
+  - *e-Report Card* (reporting-service): the establishment's last 12 wage months due — filed and paid on time,
+    late, filed not paid, not filed — with counts and the total remitted; no member data.
+- **Grievances**: the member sends a reminder at most once a day while the grievance is open; gives feedback on a
+  resolved one (satisfied closes it, otherwise it stays open to a reopen); the regional office transfers a
+  grievance to another office (`GrievanceTransferred.v1` moves its work-queue case; a second synthetic office,
+  RO-DEMO-02, has no staff).
+- **Interest rate** (`PUT /ho/config/interest-rates/{fy}`): HO F&A records the CBT recommendation and the Ministry's
+  concurrence; `InterestRateDeclared.v1` makes platform-service prepare a draft rule set with the rate, which ACC
+  (HQ) submits and the CPFC publishes as any rule change — crediting still uses only the published rule set.
+- **Surrendered trust** (`POST /office/exempted/{estId}/past-accumulation-ingestions`): the exemption cell ingests
+  the trust's member ledgers for member IDs of an establishment whose exemption was surrendered or cancelled (the
+  seeded Demo Retail Cooperative; KAVITA DEMO and LALIT DEMO), one batch per transfer reference, all lines or none;
+  each line is a balanced journal against the trust's transfer (`LedgerAdjusted.v1`, `PAST_ACCUMULATION`), so the
+  balances reach the claims projection and can then be transferred.
+- Personas: `ho-publicity`, `ro-exemption`.
+- Not built: OTP delivery, the maker-checker on trust ingestion (one officer with a one-time code bound to the
+  total), trust returns and audits (Phase 3), circulars in the assistant's knowledge base.

@@ -26,9 +26,11 @@ Activities: **F13.public** Browse schemes, offices, statistics, circulars; searc
 
 | Endpoint | Status |
 |---|---|
+| `GET /public/circulars` | W |
 | `GET /public/defaulting-establishments` | W |
 | `GET /public/establishments` | W |
 | `GET /public/establishments/{estId}` | W |
+| `GET /public/establishments/{estId}/e-report-card` | W |
 | `GET /public/offices` | W |
 | `GET /public/policy/current` | W |
 | `GET /public/schemes` | W |
@@ -38,8 +40,6 @@ Activities: **F13.public** Browse schemes, offices, statistics, circulars; searc
 | `POST /public/demo-calculations/pension` | W |
 | `GET /public/demo-challenges` | M |
 | `POST /public/trrn-status-lookups` | M |
-| `GET /public/circulars` | P |
-| `GET /public/establishments/{estId}/e-report-card` | P |
 
 #### `member` — Member — active contributor (UAN holder)
 
@@ -83,7 +83,9 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /ai/knowledge/search` | W |
 | `POST /grievances/{grievanceId}/documents` | W |
 | `POST /grievances/{grievanceId}/escalations` | W |
+| `POST /grievances/{grievanceId}/feedback` | W |
 | `POST /grievances/{grievanceId}/messages` | W |
+| `POST /grievances/{grievanceId}/reminders` | W |
 | `POST /grievances/{grievanceId}/reopen-requests` | W |
 | `POST /members/me/account-recovery-requests` | W |
 | `POST /members/me/claims` | W |
@@ -106,15 +108,13 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/me/transfers` | W |
 | `POST /members/me/transfers/auto/{transferId}/confirmations` | W |
 | `POST /members/uan-lookups` | W |
+| `POST /public/claims/status-lookups` | W |
 | `POST /security/step-up-challenges` | W |
 | `POST /security/step-up-challenges/{challengeId}/verifications` | W |
 | `PUT /members/me/claims/{claimId}/bank-details` | W |
 | `POST /members/uan-activations` | M |
 | `POST /members/uan-allotments` | M |
 | `GET /members/me/tax/form-16a` | P |
-| `POST /grievances/{grievanceId}/feedback` | P |
-| `POST /grievances/{grievanceId}/reminders` | P |
-| `POST /public/claims/status-lookups` | P |
 
 Integration adapters: `uidai`
 
@@ -147,13 +147,13 @@ Activities: **F05.pensioner_view** View PPO, pension slips, payments; change ban
 | `GET /pensioners/me/ppo` | W |
 | `POST /pensioners/me/bank-change-requests` | W |
 | `POST /pensioners/me/declarations` | W |
+| `POST /public/grievances` | W |
 | `POST /public/pension/payment-enquiries` | W |
 | `POST /public/pension/ppo-lookups` | W |
 | `POST /public/pension/status-enquiries` | W |
 | `GET /pensioners/me/life-certificate` | M |
 | `POST /pensioners/me/life-certificate/submissions` | M |
 | `POST /public/pension/life-certificate-lookups` | M |
-| `POST /public/grievances` | P |
 
 Integration adapters: `jeevan_pramaan`
 
@@ -202,8 +202,8 @@ Activities: **F08.public_file** Register grievance without login (pensioner, emp
 
 | Endpoint | Status |
 |---|---|
-| `POST /public/grievances` | P |
-| `POST /public/grievances/status-lookups` | P |
+| `POST /public/grievances` | W |
+| `POST /public/grievances/status-lookups` | W |
 
 #### `rti_applicant` — RTI applicant
 
@@ -749,10 +749,10 @@ Activities: **F09.ingest** Bulk-ingest the surrendered trust's member ledgers an
 
 | Endpoint | Status |
 |---|---|
+| `POST /office/exempted/{estId}/past-accumulation-ingestions` | W |
 | `GET /office/exempted/{estId}/audits` | P |
 | `GET /office/exempted/{estId}/returns` | P |
 | `POST /office/exempted/past-accumulation-bulk-transfers` | P |
-| `POST /office/exempted/{estId}/past-accumulation-ingestions` | P |
 | `POST /office/exempted/{estId}/past-accumulation-transfers` | P |
 | `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` | P |
 
@@ -790,9 +790,9 @@ Activities: **F08.triage** Triage, assign, reply with evidence, lodge local grie
 | `POST /grievances/{grievanceId}/escalations` | W |
 | `POST /grievances/{grievanceId}/evidence-links` | W |
 | `POST /grievances/{grievanceId}/messages` | W |
+| `POST /grievances/{grievanceId}/office-transfers` | W |
 | `POST /grievances/{grievanceId}/resolution` | W |
 | `POST /office/cases/{caseId}/assignments` | W |
-| `POST /grievances/{grievanceId}/office-transfers` | P |
 | `POST /office/rti-requests/{requestId}/replies` | P |
 
 #### `fo.nan` — Nidhi Aapke Nikat outreach camp team
@@ -947,7 +947,7 @@ Activities: **F03.interest** Record the approved annual interest rate and run in
 | `POST /office/accounts/interest-postings` | W |
 | `POST /office/establishments/{estId}/freezes` | W |
 | `POST /office/members/{uan}/freezes` | W |
-| `PUT /ho/config/interest-rates/{financialYear}` | P |
+| `PUT /ho/config/interest-rates/{financialYear}` | W |
 
 #### `ho.compliance` — Compliance Division
 
@@ -1079,7 +1079,7 @@ Activities: **F13.publicity** Publish circulars and awareness content
 
 | Endpoint | Status |
 |---|---|
-| `POST /ho/circulars` | P |
+| `POST /ho/circulars` | W |
 
 #### `ho.cvo` — **Chief Vigilance Officer** and **Director (Vigilance)**
 

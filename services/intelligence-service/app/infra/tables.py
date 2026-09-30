@@ -1,5 +1,5 @@
 """Tables owned by intelligence-service (created by migration 0002)."""
-from sqlalchemy import JSON, BigInteger, Column, DateTime, MetaData, String, Table, Text, func
+from sqlalchemy import JSON, BigInteger, Column, Date, DateTime, Integer, MetaData, String, Table, Text, func
 
 from app.infra.models import IdType
 
@@ -84,4 +84,21 @@ ai_feedback = Table(
     Column("rating", String(20), nullable=False),
     Column("correction", Text),
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
+)
+
+# Circulars and notifications (P2.8d, synthetic): each number is versioned; a new version supersedes the last.
+circulars = Table(
+    "circulars", metadata,
+    Column("circular_id", String(40), primary_key=True),
+    Column("number", String(60), nullable=False, index=True),
+    Column("version", Integer, nullable=False),
+    Column("title", String(200), nullable=False),
+    Column("category", String(30), nullable=False),
+    Column("issued_on", Date, nullable=False),
+    Column("summary", Text, nullable=False),
+    Column("body", Text, nullable=False),
+    Column("state", String(20), nullable=False),                  # CURRENT | SUPERSEDED
+    Column("sha256", String(64), nullable=False),
+    Column("published_by", String(80), nullable=False),
+    Column("published_at", DateTime(timezone=True), server_default=func.now()),
 )

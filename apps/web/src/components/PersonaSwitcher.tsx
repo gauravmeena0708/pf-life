@@ -69,7 +69,7 @@ export function PersonaSwitcher() {
   function switchTo(username: string) {
     const role = PERSONAS.find((persona) => persona.username === username)?.role;
     const returnTo = role === "ho.security" ? "/security/activity" : role === "member" ? "/member/passbook"
-      : role && ["fo.edli", "fo.iw", "ho.iwu", "intl_worker"].includes(role) ? homeFor(role)
+      : role && ["fo.edli", "fo.iw", "ho.iwu", "intl_worker", "ho.publicity", "fo.exemption"].includes(role) ? homeFor(role)
       : role === "pensioner" ? "/pensioner" : role === "fo.apfc_pension" ? "/office/pension-revisions" : role === "fo.da_pension" || role === "fo.ss_pension" ? "/office/pension-claims" : role === "tech.cpps" ? "/cpps" : role === "ho.fa_cao" ? "/finance/interest"
       : role?.startsWith("fo.") || role === "zo.acc" || role === "zo.rpfc1" ? "/office/work-queue"
       : role === "ho.acc_hq" ? "/policy" : role === "ho.caiu" ? "/caiu/signals" : role === "ho.audit" ? "/audit/log" : role === "ho.cpfc" || role === "gov.mole" ? "/dashboards"

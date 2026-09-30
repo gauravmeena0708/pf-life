@@ -83,7 +83,6 @@ def test_eps_service_minimum_and_maximum(joined, eligible):
 def test_tds_threshold_pan_service_and_waiver(amount, service, pan, declaration, tax):
     result = tds_on(amount, "FINAL_SETTLEMENT", service, pan, declaration, RULES)
     assert result["tds_paise"] == tax
-    assert amount == result["tds_paise"] + (amount - result["tds_paise"])
 
 
 def test_medical_advance_is_not_final_settlement_tax_case():

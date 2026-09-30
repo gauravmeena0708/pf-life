@@ -165,6 +165,14 @@
       {
         "name": "fo.edli",
         "description": "EDLI section — verifies wages and decides the EDLI assurance benefit"
+      },
+      {
+        "name": "ho.publicity",
+        "description": "HO Public Relations — publishes circulars and awareness content"
+      },
+      {
+        "name": "fo.exemption",
+        "description": "Exemption cell — exempted trusts, surrender and past accumulations"
       }
     ]
   },
@@ -1073,6 +1081,44 @@
         "fo.edli"
       ],
       "id": "00000000-0000-4000-8000-000000000044"
+    },
+    {
+      "username": "ho-publicity",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "HO Public Relations",
+      "lastName": "Demo",
+      "email": "ho-publicity@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ho.publicity"
+      ],
+      "id": "00000000-0000-4000-8000-000000000045"
+    },
+    {
+      "username": "ro-exemption",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Exemption cell",
+      "lastName": "Demo",
+      "email": "ro-exemption@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.exemption"
+      ],
+      "id": "00000000-0000-4000-8000-000000000046"
     }
   ]
 }

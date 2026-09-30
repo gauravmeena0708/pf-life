@@ -18,6 +18,7 @@ BINDINGS = [
     "grievance-service.GrievanceRegistered.v1",
     "grievance-service.GrievanceEscalated.v1",
     "grievance-service.GrievanceResolved.v1",
+    "grievance-service.GrievanceTransferred.v1",
     "platform-service.PolicyPublished.v1",
     "claim-service.ClaimStateChanged.v1",
     "member-service.MemberExitMarked.v1",
@@ -114,6 +115,13 @@ async def on_grievance_resolved(session: AsyncSession, event: dict[str, Any]) ->
                           .values(state="CLOSED", current_role=None, version=cases.c.version + 1))
 
 
+async def on_grievance_transferred(session: AsyncSession, event: dict[str, Any]) -> None:
+    """P2.8d: the grievance moved to another office; its open case goes with it (and leaves the old queue)."""
+    p = event["payload"]
+    await session.execute(update(cases).where(cases.c.grievance_id == p["grievance_id"], cases.c.state != "CLOSED")
+                          .values(office_id=p["to_office_id"], assignee_subject=None, version=cases.c.version + 1))
+
+
 async def on_member_exit(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
     await session.execute(update(member_accounts).where(member_accounts.c.account_link_id == p["account_link_id"])
@@ -178,6 +186,7 @@ HANDLERS = {
     "GrievanceRegistered.v1": on_grievance_registered,
     "GrievanceEscalated.v1": on_grievance_escalated,
     "GrievanceResolved.v1": on_grievance_resolved,
+    "GrievanceTransferred.v1": on_grievance_transferred,
     "ClaimSubmitted.v1": on_claim_submitted,
     "ClaimDecisionRecorded.v1": on_claim_decision,
     "PaymentInstructed.v1": on_payment_instructed,

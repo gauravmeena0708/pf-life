@@ -10,6 +10,13 @@ export interface NavGroup { label?: string; labelKey?: string; to?: string; item
 
 const link = (label: string, to?: string): NavItem => ({ label, to });
 
+export const PUBLIC_SERVICES: NavItem[] = [
+  link("Grievance (without login)", "/public/grievances#public-grievance-heading"),
+  link("Grievance status", "/public/grievances#grievance-status-heading"),
+  link("Claim status", "/public/claims#claim-status-heading"),
+  link("Circulars", "/public/circulars#circulars-heading"),
+];
+
 const MEMBER: NavGroup[] = [
   { label: "View", items: [
     link("Profile", "/member/profile#member-profile-heading"), link("Service History", "/member/service#service-heading"),
@@ -78,7 +85,7 @@ function fieldOffice(role: string): NavGroup[] {
       link("7Q & 14B", ["fo.da_compliance", "fo.ss"].includes(role) ? "/office/returns#knock-off-heading" : undefined),
       link("Establishment", ["fo.oic", "fo.apfc"].includes(role) ? "/office/work-queue" : undefined),
       link("OLRE", ["fo.da_compliance", "fo.apfc"].includes(role) ? "/office/olre" : undefined),
-      ...(role === "fo.apfc" ? [link("Establishment change requests", "/office/olre#est-changes-heading"), link("DSC / e-sign approvals", "/office/olre#sig-heading")] : []), link("Exempted-Unexempted"), link("Past Accum. File Upload"),
+      ...(role === "fo.apfc" ? [link("Establishment change requests", "/office/olre#est-changes-heading"), link("DSC / e-sign approvals", "/office/olre#sig-heading")] : []), link("Exempted-Unexempted", role === "fo.exemption" ? "/office/exempted" : undefined), link("Past Accum. File Upload", role === "fo.exemption" ? "/office/exempted#past-accumulation-heading" : undefined),
       link("PAST ACCUM BULK TRANSFER"), link("PAST ACCUM VDR RECO")] },
     { label: "Pension", items: [link("Pension"), link("NPPS")] },
     { label: "Accounts", items: [link("Annual Accounting"),
@@ -123,7 +130,8 @@ function poc(role: string): NavGroup[] {
   if (role === "zo.acc" || role === "ho.cpfc") out.push({ labelKey: "navigation.grievanceMetrics", to: "/monitoring/grievances" });
   if (["zo.acc", "ho.cpfc", "gov.mole"].includes(role)) out.push({ labelKey: "navigation.dashboards", to: "/dashboards" });
   if (["ho.acc_hq", "ho.cpfc", "ho.pension", "ho.audit"].includes(role)) out.push({ labelKey: "navigation.policy", to: "/policy" });
-  if (role === "ho.fa_cao") out.push({ labelKey: "navigation.interest", to: "/finance/interest" });
+  if (role === "ho.fa_cao") out.push({ labelKey: "navigation.interest", to: "/finance/interest" }, { label: "Record the interest rate", to: "/finance/interest#interest-rate-record-heading" });
+  if (role === "ho.publicity") out.push({ label: "Publish circulars", to: "/ho/circulars#publish-circular-heading" });
   if (role === "ho.security") out.push({ labelKey: "navigation.security", to: "/security/activity" }, { labelKey: "navigation.sessions", to: "/security/sessions" });
   if (role === "ho.caiu") out.push({ labelKey: "navigation.riskSignals", to: "/caiu/signals" });
   if (role === "ho.security" || role === "ho.audit") out.push({ labelKey: "navigation.audit", to: "/audit/log" });
@@ -131,7 +139,7 @@ function poc(role: string): NavGroup[] {
 }
 
 export function menusFor(role: string | undefined): NavGroup[] {
-  if (!role) return [];
+  if (!role || role === "public") return [{ label: "Public services", items: PUBLIC_SERVICES }];
   if (role === "member") return MEMBER;
   if (role.startsWith("employer.")) return EMPLOYER;
   if (role === "pensioner") return PENSIONER;
@@ -156,6 +164,9 @@ export function homeFor(role: string | undefined): string {
   if (role === "fo.iw") return "/office/international";
   if (role === "ho.iwu") return "/ho/agreements";
   if (role === "intl_worker") return "/international-worker";
+  if (role === "ho.publicity") return "/ho/circulars";
+  if (role === "fo.exemption") return "/office/exempted";
+  if (role === "ho.fa_cao") return "/finance/interest";
   if (role === "fo.pro_intake") return "/office/pro-counter";
   if (role === "fo.apfc_pension") return "/office/pension-revisions";
   if (role === "fo.da_pension" || role === "fo.ss_pension") return "/office/pension-claims";

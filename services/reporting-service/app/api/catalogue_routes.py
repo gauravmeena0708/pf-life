@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /monitoring/claims', 'GET /monitoring/contributions', 'GET /monitoring/data-freshness', 'GET /monitoring/grievances', 'GET /public/schemes', 'GET /public/statistics', 'GET /zo/dashboards', 'GET /employers/me/compliance-summary', 'GET /office/compliance/defaulters']
+OPERATIONS = ['GET /monitoring/claims', 'GET /monitoring/contributions', 'GET /monitoring/data-freshness', 'GET /monitoring/grievances', 'GET /public/schemes', 'GET /public/statistics', 'GET /zo/dashboards', 'GET /employers/me/compliance-summary', 'GET /office/compliance/defaulters', 'GET /public/establishments/{estId}/e-report-card']
 
 @router.api_route("/api/v1/monitoring/claims", methods=["GET"], include_in_schema=False)
 async def get_monitoring_claims(actor: Actor = Depends(require_actor)) -> None:
@@ -55,3 +55,8 @@ async def get_employers_me_compliance_summary(actor: Actor = Depends(require_act
 @router.api_route("/api/v1/office/compliance/defaulters", methods=["GET"], include_in_schema=False)
 async def get_office_compliance_defaulters(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Non-filing / short-payment detection")
+
+
+@router.api_route("/api/v1/public/establishments/{estId}/e-report-card", methods=["GET"], include_in_schema=False)
+async def get_public_establishments_estId_e_report_card(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Establishment e-Report Card: wage-month filing/payment history, counts and totals only")

@@ -8,7 +8,8 @@ from .problems import problem
 from .request_activity import lookup_fingerprint, summarize_body
 
 PROTECTED = {"/public/establishments", "/public/establishments/{estId}",
-             "/public/demo-challenges", "/public/trrn-status-lookups"}
+             "/public/demo-challenges", "/public/trrn-status-lookups", "/public/grievances",
+             "/public/grievances/status-lookups", "/public/claims/status-lookups"}
 
 
 def _peer(request: Request) -> str:
@@ -28,7 +29,8 @@ async def limit_public(request: Request, route: dict):
     except Exception:
         request.state.rate_decision = "unavailable"
         return problem(request, 503, "public-access-unavailable", "Public lookup temporarily unavailable")
-    ceiling = 10 if route["path_template"] == "/public/trrn-status-lookups" else 30
+    ceiling = 10 if route["path_template"] in ("/public/trrn-status-lookups", "/public/grievances",
+                                               "/public/grievances/status-lookups", "/public/claims/status-lookups") else 30
     if count > ceiling:
         request.state.rate_decision = "limited"
         return problem(request, 429, "rate-limited", "Too many public lookups", "Try again in a minute.")
@@ -53,7 +55,8 @@ async def create_demo_challenge(request: Request):
 async def verify_demo_challenge(request: Request):
     body_bytes = await request.body()
     summarize_body(request, body_bytes)
-    if len(body_bytes) > 4096:
+    limit = 16384 if request.state.route_template == "/public/grievances" else 4096   # a grievance carries its text
+    if len(body_bytes) > limit:
         request.state.challenge_decision = "rejected"
         return problem(request, 413, "request-too-large", "Lookup request is too large")
     try:

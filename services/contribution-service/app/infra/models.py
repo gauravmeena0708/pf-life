@@ -68,6 +68,7 @@ class Establishment(Base):
     legal_name: Mapped[str] = mapped_column(Text)
     status: Mapped[str] = mapped_column(String(30))
     verification_ref: Mapped[str | None] = mapped_column(Text)
+    exemption_status: Mapped[str | None] = mapped_column(String(30))   # EXEMPT | SURRENDERED | CANCELLED (P2.8d; seeded)
 
 
 class EstablishmentMember(Base):
@@ -272,4 +273,31 @@ class LedgerAdjustment(Base):
     decided_by: Mapped[str | None] = mapped_column(String(80))
     decision_note: Mapped[str | None] = mapped_column(Text)
     journal_id: Mapped[str | None] = mapped_column(String(36))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class InterestRateDeclaration(Base):
+    """The approved annual interest rate as recorded by HO F&A (CBT recommendation, Ministry concurrence), P2.8d. It
+    reaches the rule set as a draft that HO's maker-checker publishes; crediting uses only the published rate."""
+    __tablename__ = "interest_rate_declarations"
+    declaration_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    financial_year: Mapped[str] = mapped_column(String(7), index=True)
+    rate_bp: Mapped[int] = mapped_column(Integer)
+    cbt_recommended_on: Mapped[date] = mapped_column(Date)
+    ministry_concurrence_ref: Mapped[str] = mapped_column(String(80))
+    ministry_concurrence_on: Mapped[date] = mapped_column(Date)
+    note: Mapped[str | None] = mapped_column(Text)
+    recorded_by: Mapped[str] = mapped_column(String(80))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PastAccumulationIngestion(Base):
+    """A surrendered PF trust's member ledgers taken over by EPFO (P2.8d): one batch per transfer reference."""
+    __tablename__ = "past_accumulation_ingestions"
+    batch_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    establishment_id: Mapped[str] = mapped_column(String(80), index=True)
+    transfer_reference: Mapped[str] = mapped_column(String(80), unique=True)
+    lines: Mapped[list] = mapped_column(JSON)
+    total_paise: Mapped[int] = mapped_column(BigInteger)
+    ingested_by: Mapped[str] = mapped_column(String(80))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

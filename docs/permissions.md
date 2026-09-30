@@ -100,9 +100,11 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /public/circulars` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/defaulting-establishments` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/establishments` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/establishments/{estId}` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
+| `GET /public/establishments/{estId}/e-report-card` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/offices` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/policy/current` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/schemes` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
@@ -112,8 +114,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /public/demo-calculations/pension` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/demo-challenges` | M | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `POST /public/trrn-status-lookups` | M | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
-| `GET /public/circulars` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
-| `GET /public/establishments/{estId}/e-report-card` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 
 **`member`** — Member — active contributor (UAN holder)
 
@@ -155,7 +155,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /ai/knowledge/search` | W | caller's own permissions; advisory output only |  |
 | `POST /grievances/{grievanceId}/documents` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/escalations` | W | complainant or the assigned office |  |
+| `POST /grievances/{grievanceId}/feedback` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/messages` | W | complainant or the assigned office |  |
+| `POST /grievances/{grievanceId}/reminders` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/reopen-requests` | W | complainant or the assigned office |  |
 | `POST /members/me/account-recovery-requests` | W | self — caller's own member record only | yes |
 | `POST /members/me/claims` | W | self — caller's own member record only |  |
@@ -178,15 +180,13 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /members/me/transfers` | W | self — caller's own member record only | yes |
 | `POST /members/me/transfers/auto/{transferId}/confirmations` | W | self — caller's own member record only | yes |
 | `POST /members/uan-lookups` | W | unauthenticated with OTP / face-auth proof |  |
+| `POST /public/claims/status-lookups` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `POST /security/step-up-challenges` | W | self — challenge bound to one action and resource version |  |
 | `POST /security/step-up-challenges/{challengeId}/verifications` | W | self — challenge bound to one action and resource version |  |
 | `PUT /members/me/claims/{claimId}/bank-details` | W | self — caller's own member record only | yes |
 | `POST /members/uan-activations` | M | unauthenticated with OTP / face-auth proof |  |
 | `POST /members/uan-allotments` | M | unauthenticated with OTP / face-auth proof |  |
 | `GET /members/me/tax/form-16a` | P | self — caller's own member record only |  |
-| `POST /grievances/{grievanceId}/feedback` | P | complainant or the assigned office |  |
-| `POST /grievances/{grievanceId}/reminders` | P | complainant or the assigned office |  |
-| `POST /public/claims/status-lookups` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 
 **`member.exited`** — Member — exited / inoperative account holder
 
@@ -211,13 +211,13 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /pensioners/me/ppo` | W | self — caller's own PPO only |  |
 | `POST /pensioners/me/bank-change-requests` | W | self — caller's own PPO only | yes |
 | `POST /pensioners/me/declarations` | W | self — caller's own PPO only |  |
+| `POST /public/grievances` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `POST /public/pension/payment-enquiries` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `POST /public/pension/ppo-lookups` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `POST /public/pension/status-enquiries` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /pensioners/me/life-certificate` | M | self — caller's own PPO only |  |
 | `POST /pensioners/me/life-certificate/submissions` | M | self — caller's own PPO only |  |
 | `POST /public/pension/life-certificate-lookups` | M | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
-| `POST /public/grievances` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 
 **`family_pensioner`** — Widow(er), child, orphan, dependent-parent pensioner
 
@@ -254,8 +254,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `POST /public/grievances` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
-| `POST /public/grievances/status-lookups` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
+| `POST /public/grievances` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
+| `POST /public/grievances/status-lookups` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 - `rti_applicant` — RTI applicant: *no endpoints (acts through an adapter or through another role)*
 
 ### B. Employers and intermediaries
@@ -727,10 +727,10 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `POST /office/exempted/{estId}/past-accumulation-ingestions` | W | office jurisdiction of the caller's posting | yes |
 | `GET /office/exempted/{estId}/audits` | P | office jurisdiction of the caller's posting |  |
 | `GET /office/exempted/{estId}/returns` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/exempted/past-accumulation-bulk-transfers` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/exempted/{estId}/past-accumulation-ingestions` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/{estId}/past-accumulation-transfers` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` | P | office jurisdiction of the caller's posting | yes |
 
@@ -762,9 +762,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /grievances/{grievanceId}/escalations` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/evidence-links` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/messages` | W | complainant or the assigned office |  |
+| `POST /grievances/{grievanceId}/office-transfers` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/resolution` | W | complainant or the assigned office | yes |
 | `POST /office/cases/{caseId}/assignments` | W | office jurisdiction of the caller's posting |  |
-| `POST /grievances/{grievanceId}/office-transfers` | P | complainant or the assigned office |  |
 | `POST /office/rti-requests/{requestId}/replies` | P | office jurisdiction of the caller's posting |  |
 
 **`fo.nan`** — Nidhi Aapke Nikat outreach camp team
@@ -894,7 +894,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/accounts/interest-postings` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/freezes` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/members/{uan}/freezes` | W | office jurisdiction of the caller's posting | yes |
-| `PUT /ho/config/interest-rates/{financialYear}` | P | national (Head Office role) | yes |
+| `PUT /ho/config/interest-rates/{financialYear}` | W | national (Head Office role) | yes |
 
 **`ho.compliance`** — Compliance Division
 
@@ -996,7 +996,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `POST /ho/circulars` | P | national (Head Office role) |  |
+| `POST /ho/circulars` | W | national (Head Office role) |  |
 
 **`ho.cvo`** — **Chief Vigilance Officer** and **Director (Vigilance)**
 

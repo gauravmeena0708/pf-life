@@ -10,7 +10,12 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /members/me/grievances', 'POST /members/me/grievances', 'GET /grievances/{grievanceId}', 'POST /grievances/{grievanceId}/documents', 'POST /grievances/{grievanceId}/escalations', 'POST /grievances/{grievanceId}/evidence-links', 'POST /grievances/{grievanceId}/messages', 'POST /grievances/{grievanceId}/reopen-requests', 'POST /grievances/{grievanceId}/resolution']
+OPERATIONS = ['POST /public/grievances', 'GET /members/me/grievances', 'POST /members/me/grievances', 'POST /public/grievances/status-lookups', 'GET /grievances/{grievanceId}', 'POST /grievances/{grievanceId}/documents', 'POST /grievances/{grievanceId}/escalations', 'POST /grievances/{grievanceId}/evidence-links', 'POST /grievances/{grievanceId}/feedback', 'POST /grievances/{grievanceId}/messages', 'POST /grievances/{grievanceId}/office-transfers', 'POST /grievances/{grievanceId}/reminders', 'POST /grievances/{grievanceId}/reopen-requests', 'POST /grievances/{grievanceId}/resolution']
+
+@router.api_route("/api/v1/public/grievances", methods=["POST"], include_in_schema=False)
+async def post_public_grievances(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Grievance intake from a non-logged-in person (OTP-verified contact)")
+
 
 @router.api_route("/api/v1/members/me/grievances", methods=["GET"], include_in_schema=False)
 async def get_members_me_grievances(actor: Actor = Depends(require_actor)) -> None:
@@ -20,6 +25,11 @@ async def get_members_me_grievances(actor: Actor = Depends(require_actor)) -> No
 @router.api_route("/api/v1/members/me/grievances", methods=["POST"], include_in_schema=False)
 async def post_members_me_grievances(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Member registers grievance linked to a claim (Journey C1)")
+
+
+@router.api_route("/api/v1/public/grievances/status-lookups", methods=["POST"], include_in_schema=False)
+async def post_public_grievances_status_lookups(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Grievance status by registration number (OTP proof)")
 
 
 @router.api_route("/api/v1/grievances/{grievanceId}", methods=["GET"], include_in_schema=False)
@@ -42,9 +52,24 @@ async def post_grievances_grievanceId_evidence_links(actor: Actor = Depends(requ
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Officer attaches case-linked evidence (Journey C3)")
 
 
+@router.api_route("/api/v1/grievances/{grievanceId}/feedback", methods=["POST"], include_in_schema=False)
+async def post_grievances_grievanceId_feedback(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Closure feedback / satisfaction")
+
+
 @router.api_route("/api/v1/grievances/{grievanceId}/messages", methods=["POST"], include_in_schema=False)
 async def post_grievances_grievanceId_messages(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Reply / message")
+
+
+@router.api_route("/api/v1/grievances/{grievanceId}/office-transfers", methods=["POST"], include_in_schema=False)
+async def post_grievances_grievanceId_office_transfers(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Transfer a grievance to another office")
+
+
+@router.api_route("/api/v1/grievances/{grievanceId}/reminders", methods=["POST"], include_in_schema=False)
+async def post_grievances_grievanceId_reminders(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Complainant reminder on an overdue grievance")
 
 
 @router.api_route("/api/v1/grievances/{grievanceId}/reopen-requests", methods=["POST"], include_in_schema=False)

@@ -16,8 +16,9 @@ async def seed() -> None:
         # status is owned by EmployerVerified.v1 after the first load; a re-seed must not undo a verification
         await session.execute(text("INSERT INTO establishments (id,legal_name,status) VALUES (:id,:name,:status) ON CONFLICT (id) DO UPDATE SET legal_name=excluded.legal_name"), {"id": establishment["establishment_id"], "name": establishment["legal_name"], "status": establishment["status"]})
         for e in data.get("public_establishments", []):   # earlier employers of members (other member IDs)
-            await session.execute(text("INSERT INTO establishments (id,legal_name,status) VALUES (:id,:name,'REGISTERED') ON CONFLICT (id) DO NOTHING"),
-                                  {"id": e["establishment_id"], "name": e["legal_name"]})
+            await session.execute(text("INSERT INTO establishments (id,legal_name,status,exemption_status) VALUES (:id,:name,'REGISTERED',:ex) "
+                                       "ON CONFLICT (id) DO UPDATE SET exemption_status=excluded.exemption_status"),
+                                  {"id": e["establishment_id"], "name": e["legal_name"], "ex": e.get("exemption_status")})
         for m in data["members"]:
             for job in [{**m, "establishment_id": establishment["establishment_id"]}, *m.get("previous_employments", [])]:
                 exited = date.fromisoformat(job["date_of_exit"]) if job.get("date_of_exit") else None

@@ -96,3 +96,20 @@ async def compliance_summary(actor: Actor = Depends(EMPLOYER), session: AsyncSes
     return envelope({"establishment_id": actor.establishment_id, "as_of": as_of.isoformat(),
                      "months": list(reversed(months)),
                      "counts": {status: sum(month["status"] == status for month in months) for status in STATUSES}})
+
+
+@router.get("/api/v1/public/establishments/{estId}/e-report-card")
+async def e_report_card(estId: str, actor: Actor = Depends(require_stakeholder("public")), session: AsyncSession = Depends(db)) -> dict:
+    """P2.8d: the establishment's e-Report Card — month by month whether the return was filed and paid on time,
+    for the last 12 wage months due, with counts and the total remitted. No member-level data."""
+    as_of = today()
+    rows = (await session.execute(select(contribution_facts).where(contribution_facts.c.establishment_id == estId))).mappings().all()
+    months, _ = _evaluate(rows, as_of)
+    if not months:
+        raise Problem(404, "/problems/not-found", "No filing history is available for this establishment")
+    recent = months[-12:]
+    return envelope({"establishment_id": estId, "as_of": as_of.isoformat(),
+                     "months": [{k: m[k] for k in ("wage_month", "due_date", "status", "paid_on", "days_late")} for m in reversed(recent)],
+                     "counts": {status: sum(m["status"] == status for m in recent) for status in STATUSES},
+                     "remitted_paise": sum(m["total_paise"] for m in recent if m["status"] in ("FILED_AND_PAID_ON_TIME", "PAID_LATE")),
+                     "note": "Synthetic data. The last 12 wage months due; filings and payments as recorded, counts and totals only."})

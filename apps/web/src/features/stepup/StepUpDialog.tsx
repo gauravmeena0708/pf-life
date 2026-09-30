@@ -75,7 +75,9 @@ export function StepUpDialog({ request, onConfirmed, onCancel }: Props) {
           <dl className="kv">
             <dt>You are authorising</dt>
             <dd><strong>{request.summary}</strong></dd>
-            {request.amountPaise !== undefined ? (<><dt>Amount</dt><dd>{rupees(request.amountPaise)}</dd></>) : null}
+            {request.amountPaise !== undefined ? request.action === "record-interest-rate"
+              ? <><dt>Rate</dt><dd>{(request.amountPaise / 100).toFixed(2)}%</dd></>
+              : <><dt>Amount</dt><dd>{rupees(request.amountPaise)}</dd></> : null}
             <dt>Reference</dt>
             <dd><code>{request.resourceId}</code>{request.resourceVersion !== undefined ? ` (version ${request.resourceVersion})` : ""}</dd>
           </dl>

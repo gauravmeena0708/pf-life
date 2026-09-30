@@ -98,6 +98,14 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 8d: public services, grievances, circulars, the interest-rate record, trusts (30 September 2026)
+
+Unit tests 416 passed (new: `test_public_grievances.py`, `test_circulars.py`, `test_public_claim_status.py`,
+`test_e_report_card.py`, `test_trust_and_interest.py`, `test_interest_declaration.py`); web 89 passed; end to end 63
+passed (including `test_public_services.py`); must-deny 18 passed. Found on the way: a `_comment` key in a seeded
+public establishment broke employer-service's seed (it inserts the record column for column) — removed; the gateway
+test that a planned public route answers 501 used circulars, now built — it uses the inoperative-account search.
+
 ## Update — Phase 2, slice 8c: higher pension, international workers, the EDLI decision (30 September 2026)
 
 Unit tests 404 passed (new: international-service `test_international.py`, pension-service `test_higher_pension.py`,

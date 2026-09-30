@@ -30,7 +30,7 @@ def test_literal_route_beats_template():
 @pytest.mark.asyncio
 async def test_planned_public_route_is_501_without_auth(client):
     http, _, _ = client
-    response = await http.get("/api/v1/public/circulars")
+    response = await http.post("/api/v1/public/inoperative-accounts/searches", json={})   # planned for Phase 3
     assert response.status_code == 501
     assert response.headers["content-type"].startswith("application/problem+json")
     assert response.json()["type"] == "/problems/planned"

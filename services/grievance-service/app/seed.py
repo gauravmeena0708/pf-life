@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
 from app.infra.db import sessions
-from app.infra.tables import complainants, office_staff
+from app.infra.tables import complainants, office_staff, offices
 
 SEED_FILE = os.getenv("SEED_FILE", "/srv/seed/synthetic.json")
 
@@ -22,6 +22,8 @@ async def main() -> None:
             if m.get("subject"):
                 await session.execute(insert(complainants).values(subject=m["subject"], office_id=office_id,
                                                                   zone_id=zone_id).on_conflict_do_nothing())
+        for o in [seed["office"], *seed.get("other_offices", [])]:
+            await session.execute(insert(offices).values(office_id=o["office_id"], name=o["name"], zone_id=o["zone_id"]).on_conflict_do_nothing())
         for s in seed.get("office_staff", []):
             await session.execute(insert(office_staff).values(subject=s["subject"], stakeholder=s["stakeholder"],
                                                               office_id=s["office_id"]).on_conflict_do_nothing())

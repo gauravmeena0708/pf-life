@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['POST /ai/feedback', 'GET /ai/models', 'GET /caiu/synthetic-risk-signals', 'POST /ai/claims/analyse', 'POST /ai/grievances/classify', 'POST /ai/knowledge/search', 'POST /caiu/synthetic-risk-signals/{signalId}/reviews']
+OPERATIONS = ['POST /ai/feedback', 'GET /ai/models', 'GET /caiu/synthetic-risk-signals', 'POST /ho/circulars', 'GET /public/circulars', 'POST /ai/claims/analyse', 'POST /ai/grievances/classify', 'POST /ai/knowledge/search', 'POST /caiu/synthetic-risk-signals/{signalId}/reviews']
 
 @router.api_route("/api/v1/ai/feedback", methods=["POST"], include_in_schema=False)
 async def post_ai_feedback(actor: Actor = Depends(require_actor)) -> None:
@@ -25,6 +25,16 @@ async def get_ai_models(actor: Actor = Depends(require_actor)) -> None:
 @router.api_route("/api/v1/caiu/synthetic-risk-signals", methods=["GET"], include_in_schema=False)
 async def get_caiu_synthetic_risk_signals(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "CAIU risk signals (Journey D2)")
+
+
+@router.api_route("/api/v1/ho/circulars", methods=["POST"], include_in_schema=False)
+async def post_ho_circulars(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Publish a circular to the public corpus")
+
+
+@router.api_route("/api/v1/public/circulars", methods=["GET"], include_in_schema=False)
+async def get_public_circulars(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Circulars / notifications catalogue (synthetic, versioned documents)")
 
 
 @router.api_route("/api/v1/ai/claims/analyse", methods=["POST"], include_in_schema=False)

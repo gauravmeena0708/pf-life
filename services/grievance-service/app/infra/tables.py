@@ -38,6 +38,15 @@ grievances = Table(
     Column("resolution", Text),
     Column("resolved_at", DateTime(timezone=True)),
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
+    # P2.8d: a grievance filed without a login keeps the contact only as a hash and the mobile's last four digits
+    Column("source", String(10), nullable=False, server_default="MEMBER"),        # MEMBER | PUBLIC
+    Column("complainant_type", String(30)),                                       # PENSIONER | EMPLOYER | MEMBER | OTHER (public)
+    Column("public_name", String(120)),
+    Column("mobile_hash", String(64)),
+    Column("mobile_last4", String(4)),
+    Column("reminders", Integer, nullable=False, server_default="0"),
+    Column("last_reminded_at", DateTime(timezone=True)),
+    Column("feedback", JSON),                                                     # {rating, satisfied, comment, at}
 )
 
 # The conversation, status changes and evidence links, in order. Append-only.
@@ -63,4 +72,12 @@ grievance_documents = Table(
     Column("sha256", String(64), nullable=False),
     Column("content", LargeBinary, nullable=False),
     Column("uploaded_at", DateTime(timezone=True), server_default=func.now()),
+)
+
+# The offices a grievance can be transferred between (synthetic seed).
+offices = Table(
+    "offices", metadata,
+    Column("office_id", String(40), primary_key=True),
+    Column("name", String(200), nullable=False),
+    Column("zone_id", String(40), nullable=False),
 )

@@ -89,7 +89,7 @@
       "coverage_date": "2025-02-01",
       "establishment_type": "COOPERATIVE",
       "industry_group": "RETAIL",
-      "exemption_status": "EXEMPT",
+      "exemption_status": "SURRENDERED",
       "status": "REGISTERED",
       "pan": "AAAAD0003A"
     }
@@ -459,6 +459,68 @@
         "_comment": "A foreign national employed in India (P2.8c); no social-security agreement in this synthetic catalogue, so fully covered."
       },
       "_comment": "International worker (P2.8c)."
+    },
+    {
+      "uan": "100000000908",
+      "name": "KAVITA DEMO",
+      "date_of_birth": "1985-08-08",
+      "subject": null,
+      "account_link_id": "AL-0909",
+      "member_id": "DEMO00001000000000908",
+      "date_of_joining": "2026-04-01",
+      "date_of_exit": null,
+      "gender": "FEMALE",
+      "mobile_masked": "******0908",
+      "email_masked": "k***@demo.invalid",
+      "bank_ifsc": "DEMO0000908",
+      "bank_account_last4": "0908",
+      "kyc": {
+        "aadhaar": "VERIFIED",
+        "pan": "NOT_SEEDED",
+        "bank": "VERIFIED"
+      },
+      "last_contribution_month": "2026-08",
+      "_comment": "Covered by the Demo Retail Cooperative's PF trust until it surrendered its exemption (P2.8d).",
+      "previous_employments": [
+        {
+          "account_link_id": "AL-0910",
+          "establishment_id": "EST-DEMO-0003",
+          "date_of_joining": "2019-07-01",
+          "date_of_exit": "2026-03-31",
+          "last_contribution_month": "2026-03"
+        }
+      ]
+    },
+    {
+      "uan": "100000000909",
+      "name": "LALIT DEMO",
+      "date_of_birth": "1983-01-21",
+      "subject": null,
+      "account_link_id": "AL-0911",
+      "member_id": "DEMO00001000000000909",
+      "date_of_joining": "2026-04-01",
+      "date_of_exit": null,
+      "gender": "MALE",
+      "mobile_masked": "******0909",
+      "email_masked": "l***@demo.invalid",
+      "bank_ifsc": "DEMO0000909",
+      "bank_account_last4": "0909",
+      "kyc": {
+        "aadhaar": "VERIFIED",
+        "pan": "NOT_SEEDED",
+        "bank": "VERIFIED"
+      },
+      "last_contribution_month": "2026-08",
+      "_comment": "Covered by the Demo Retail Cooperative's PF trust until it surrendered its exemption (P2.8d).",
+      "previous_employments": [
+        {
+          "account_link_id": "AL-0912",
+          "establishment_id": "EST-DEMO-0003",
+          "date_of_joining": "2020-01-01",
+          "date_of_exit": "2026-03-31",
+          "last_contribution_month": "2026-03"
+        }
+      ]
     }
   ],
   "demo_wage_month": "2026-08",
@@ -506,7 +568,9 @@
     "worker-expat": "00000000-0000-4000-8000-000000000041",
     "iw-officer": "00000000-0000-4000-8000-000000000042",
     "ho-iwu": "00000000-0000-4000-8000-000000000043",
-    "ro-edli": "00000000-0000-4000-8000-000000000044"
+    "ro-edli": "00000000-0000-4000-8000-000000000044",
+    "ho-publicity": "00000000-0000-4000-8000-000000000045",
+    "ro-exemption": "00000000-0000-4000-8000-000000000046"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -669,6 +733,12 @@
       "subject": "00000000-0000-4000-8000-000000000044",
       "stakeholder": "fo.edli",
       "office_id": "RO-DEMO-01"
+    },
+    {
+      "username": "ro-exemption",
+      "subject": "00000000-0000-4000-8000-000000000046",
+      "stakeholder": "fo.exemption",
+      "office_id": "RO-DEMO-01"
     }
   ],
   "pensioners": [
@@ -716,6 +786,14 @@
       "owner_ref": "BATCH-ANNUAL-2025-26",
       "acquired_at": "2026-04-02T01:00:00+05:30",
       "expires_at": "2026-04-02T06:00:00+05:30"
+    }
+  ],
+  "other_offices": [
+    {
+      "office_id": "RO-DEMO-02",
+      "name": "Demo Regional Office 2 (synthetic)",
+      "zone_id": "ZO-DEMO-01",
+      "_comment": "A second office so a grievance can be transferred between offices (P2.8d); no staff are posted there."
     }
   ]
 }

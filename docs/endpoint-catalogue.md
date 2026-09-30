@@ -39,18 +39,18 @@ Rules that apply to every row:
 | `GET /public/establishments?query=&mode=&match=&office_id=&city=&district=&establishment_type=&exemption_status=&status=&page=` | **Establishment search** by code, registration, pincode, name or industry; filter by location, type, exemption and coverage | W | 1 | employer |
 | `GET /public/establishments/{estId}` | Public profile: name, registration, office, location, type, industry, coverage, verification and exemption | W | 1 | employer |
 | `GET /public/demo-challenges` | One-use arithmetic proof for synthetic public lookup demo | M | 1 | gateway |
-| `GET /public/establishments/{estId}/e-report-card` | Establishment **e-Report Card**: wage-month filing/payment history, counts and totals only | P | 2 | reporting |
+| `GET /public/establishments/{estId}/e-report-card` | Establishment **e-Report Card**: wage-month filing/payment history, counts and totals only | W | 1 | reporting |
 | `POST /public/trrn-status-lookups` | **TRRN / challan status** lookup with wage month, issue/payment times and next step; one-use synthetic demo proof (production CAPTCHA pending) | M | 1 | contribution |
 | `GET /public/defaulting-establishments` | Published defaulter list (synthetic) | W | 1 | compliance |
-| `GET /public/circulars` | Circulars / notifications catalogue (synthetic, versioned documents) | P | 2 | intelligence |
+| `GET /public/circulars` | Circulars / notifications catalogue (synthetic, versioned documents) | W | 1 | intelligence |
 | `POST /public/pension/life-certificate-lookups` | **Jeevan Pramaan / life-certificate status** by PPO number or Jeevan Pramaan transaction ID (CAPTCHA, minimal disclosure) | M | 1 | pension |
 | `POST /public/pension/ppo-lookups` | **Know your PPO** (by bank account + DoB / member ID) | W | 1 | pension |
 | `POST /public/pension/payment-enquiries` | Pension payment enquiry (month-wise credited / not credited) | W | 1 | pension |
 | `POST /public/pension/status-enquiries` | Pension application / PPO status enquiry | W | 1 | pension |
-| `POST /public/claims/status-lookups` | Claim status by reference (OTP proof; no PII in response) | P | 2 | claim |
+| `POST /public/claims/status-lookups` | Claim status by reference (OTP proof; no PII in response) | W | 1 | claim |
 | `POST /public/inoperative-accounts/searches` | Inoperative-account helpdesk search (step-up before any balance is shown) | P | 3 | contribution |
-| `POST /public/grievances` | Grievance intake from a non-logged-in person (OTP-verified contact) | P | 2 | grievance |
-| `POST /public/grievances/status-lookups` | Grievance status by registration number (OTP proof) | P | 2 | grievance |
+| `POST /public/grievances` | Grievance intake from a non-logged-in person (OTP-verified contact) | W | 1 | grievance |
+| `POST /public/grievances/status-lookups` | Grievance status by registration number (OTP proof) | W | 1 | grievance |
 
 ## 2. Establishment registration and configuration
 
@@ -211,7 +211,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /office/damages-knock-offs` | Knock-offs, open demands and paid miscellaneous challans with a balance | W | 1 | contribution |
 | `POST /office/damages-knock-offs/{knockOffId}/approvals` 🔐 | SS approves the knock-off | W | 1 | contribution |
 | `POST /office/vdr-entries/{vdrId}/eo-certifications` 🔐 | Enforcement Officer certifies a revised ECR in the VDR-ECR correction process | ? | 3 | contribution |
-| `PUT /ho/config/interest-rates/{financialYear}` 🔐 | Record the approved annual interest rate (CBT recommendation, Ministry concurrence). In the POC the rate is a field of the rule set (`interest.rates_bp`), published through policy administration | P | 2 | contribution |
+| `PUT /ho/config/interest-rates/{financialYear}` 🔐 | Record the approved annual interest rate (CBT recommendation, Ministry concurrence). In the POC the rate is a field of the rule set (`interest.rates_bp`), published through policy administration | W | 1 | contribution |
 
 
 **Added from the Samadhan Setu integration spec** (`../samadhan-setu files/PF_LIFE_INTEGRATION_SPECIFICATION.md`, checked against the tracker issues)
@@ -552,7 +552,7 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `POST /office/exempted/{estId}/past-accumulation-ingestions` 💰🔐 | Bulk-ingest member ledgers and past accumulations of a surrendered PF trust | P | 2 | contribution |
+| `POST /office/exempted/{estId}/past-accumulation-ingestions` 💰🔐 | Bulk-ingest member ledgers and past accumulations of a surrendered PF trust | W | 1 | contribution |
 
 ## 12. International workers
 
@@ -592,8 +592,8 @@ Monitoring (`/monitoring/**`), AI (`/ai/**`), audit (`/audit/**`) and NDC (`/ndc
 | `POST /grievances/{grievanceId}/escalations` | Escalate to next supervisory tier (Journey C4) | W | 1 | grievance |
 | `POST /grievances/{grievanceId}/resolution` 🔐 | Resolve with reason (Journey C4) | W | 1 | grievance |
 | `POST /grievances/{grievanceId}/reopen-requests` | Complainant requests reopening | W | 1 | grievance |
-| `POST /grievances/{grievanceId}/reminders` | Complainant reminder on an overdue grievance | P | 2 | grievance |
-| `POST /grievances/{grievanceId}/feedback` | Closure feedback / satisfaction | P | 2 | grievance |
+| `POST /grievances/{grievanceId}/reminders` | Complainant reminder on an overdue grievance | W | 1 | grievance |
+| `POST /grievances/{grievanceId}/feedback` | Closure feedback / satisfaction | W | 1 | grievance |
 | `GET /security/me/permissions` | Permission inspection | W | 1 | gateway |
 | `GET /security/request-activity` | Security analyst view of recent API rates and redacted request activity (Redis POC, 24-hour retention) | W | 1 | gateway |
 | `GET /security/sessions` | Session inspection (security analyst, interface 17) | W | 1 | gateway |
@@ -609,7 +609,7 @@ Monitoring (`/monitoring/**`), AI (`/ai/**`), audit (`/audit/**`) and NDC (`/ndc
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `POST /grievances/{grievanceId}/office-transfers` | Transfer a grievance to another office | P | 2 | grievance |
+| `POST /grievances/{grievanceId}/office-transfers` | Transfer a grievance to another office | W | 1 | grievance |
 | `POST /integrations/cpgrams/grievances` | CPGRAMS grievance feed (signed) | M | 3 | grievance |
 | `POST /office/rti-requests/{requestId}/replies` | Record RTI replies | P | 3 | grievance |
 | `POST /security/incidents` 🔐 | Record a security incident; report to CERT-In | P | 2 | audit |
@@ -640,7 +640,7 @@ Monitoring (`/monitoring/**`), AI (`/ai/**`), audit (`/audit/**`) and NDC (`/ndc
 | `POST /ho/config/rule-sets/{versionId}/submissions` | Submit a draft that passes every check for approval | W | 1 | platform |
 | `POST /ho/config/rule-sets/{versionId}/decisions` 🔐 | Approve and publish (effective from its date), or return, a submitted rule set; approver ≠ drafter | W | 1 | platform |
 | `GET /public/policy/current` | The rule set in force today: ceilings, rates, claim types and limits (public figures only) | W | 1 | platform |
-| `POST /ho/circulars` | Publish a circular to the public corpus | P | 2 | intelligence |
+| `POST /ho/circulars` | Publish a circular to the public corpus | W | 1 | intelligence |
 | `GET /ndc/event-failures` | Failed events / DLQ view (interface 11) | W | 1 | platform |
 | `POST /ndc/event-failures/{eventId}/replays` 🔐 | Replay a dead-lettered event (idempotent consumers) | W | 1 | platform |
 | `POST /ndc/issue-tracker/requests` | Raise an Issue Tracker request (e.g. freeze / de-freeze), with the order attached | P | 2 | platform |

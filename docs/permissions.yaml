@@ -21,7 +21,7 @@ stakeholders:
     via:
     - F13.public
   - endpoint: GET /public/circulars
-    status: P
+    status: W
     scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
     step_up: false
     via:
@@ -45,7 +45,7 @@ stakeholders:
     via:
     - F13.public
   - endpoint: GET /public/establishments/{estId}/e-report-card
-    status: P
+    status: W
     scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
     step_up: false
     via:
@@ -322,7 +322,7 @@ stakeholders:
     via:
     - F04.track
   - endpoint: POST /public/claims/status-lookups
-    status: P
+    status: W
     scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
     step_up: false
     via:
@@ -472,13 +472,13 @@ stakeholders:
     via:
     - F08.member_file
   - endpoint: POST /grievances/{grievanceId}/reminders
-    status: P
+    status: W
     scope: complainant or the assigned office
     step_up: false
     via:
     - F08.member_file
   - endpoint: POST /grievances/{grievanceId}/feedback
-    status: P
+    status: W
     scope: complainant or the assigned office
     step_up: false
     via:
@@ -589,7 +589,7 @@ stakeholders:
     via:
     - F05.dlc
   - endpoint: POST /public/grievances
-    status: P
+    status: W
     scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
     step_up: false
     via:
@@ -666,13 +666,13 @@ stakeholders:
     - F10.worker
   complainant:
   - endpoint: POST /public/grievances
-    status: P
+    status: W
     scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
     step_up: false
     via:
     - F08.public_file
   - endpoint: POST /public/grievances/status-lookups
-    status: P
+    status: W
     scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
     step_up: false
     via:
@@ -2592,7 +2592,7 @@ stakeholders:
     - F06.legal
   fo.exemption:
   - endpoint: POST /office/exempted/{estId}/past-accumulation-ingestions
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -2721,7 +2721,7 @@ stakeholders:
     via:
     - F08.triage
   - endpoint: POST /grievances/{grievanceId}/office-transfers
-    status: P
+    status: W
     scope: complainant or the assigned office
     step_up: false
     via:
@@ -3023,7 +3023,7 @@ stakeholders:
     - F13.acc_hq
   ho.fa_cao:
   - endpoint: PUT /ho/config/interest-rates/{financialYear}
-    status: P
+    status: W
     scope: national (Head Office role)
     step_up: true
     via:
@@ -3224,7 +3224,7 @@ stakeholders:
     - F05.actuarial
   ho.publicity:
   - endpoint: POST /ho/circulars
-    status: P
+    status: W
     scope: national (Head Office role)
     step_up: false
     via:

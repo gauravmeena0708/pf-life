@@ -55,6 +55,11 @@ import { RiskSignalsPage } from "./features/oversight/RiskSignalsPage";
 import { SessionsRecoveryPage } from "./features/oversight/SessionsRecoveryPage";
 import { Home } from "./pages/Home";
 import { InterfacePage } from "./pages/InterfacePage";
+import { CircularsPage } from "./features/ho/CircularsPage";
+import { ExemptedPage } from "./features/office/ExemptedPage";
+import { PublicGrievancesPage, PublicClaimStatusPage } from "./features/public/PublicGrievancesPage";
+import { PublicCircularsPage } from "./features/public/CircularsList";
+import { EReportCardPage } from "./features/public/EReportCardPage";
 import { PublicLookups } from "./pages/PublicLookups";
 import { SecurityActivity } from "./pages/SecurityActivity";
 
@@ -142,6 +147,12 @@ export function App() {
             <Route path="/office/work-queue" element={<WorkQueuePage />} />
             <Route path="/office/cases/:caseId" element={<CasePage />} />
             <Route path="/public" element={<PublicLookups />} />
+            <Route path="/public/grievances" element={<PublicGrievancesPage />} />
+            <Route path="/public/claims" element={<PublicClaimStatusPage />} />
+            <Route path="/public/circulars" element={<PublicCircularsPage />} />
+            <Route path="/public/establishments/:estId/e-report-card" element={<EReportCardPage />} />
+            <Route path="/ho/circulars" element={<CircularsPage />} />
+            <Route path="/office/exempted" element={<ExemptedPage />} />
             <Route path="/security/activity" element={<SecurityActivity />} />
             <Route path="/member/grievances" element={<GrievancesPage />} />
             <Route path="/member/grievances/:grievanceId" element={<GrievanceDetailPage />} />

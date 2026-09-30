@@ -35,6 +35,8 @@ export const PERSONAS: Persona[] = [
   { username: "iw-officer", label: "International Workers cell (CoC)", role: "fo.iw" },
   { username: "ho-iwu", label: "HO International Workers Unit", role: "ho.iwu" },
   { username: "ro-edli", label: "EDLI section officer", role: "fo.edli" },
+  { username: "ho-publicity", label: "HO Public Relations (circulars)", role: "ho.publicity" },
+  { username: "ro-exemption", label: "Exemption cell (surrendered trusts)", role: "fo.exemption" },
   { username: "ro-pension", label: "APFC (Pension)", role: "fo.apfc_pension" },
   { username: "ro-da-pension", label: "Dealing assistant (Pension)", role: "fo.da_pension" },
   { username: "ro-ss-pension", label: "Section supervisor (Pension)", role: "fo.ss_pension" },
