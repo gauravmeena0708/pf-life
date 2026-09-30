@@ -24,6 +24,9 @@ def test_form_10c_withdrawal_benefit_is_paid(persona):
         publish_today(persona, lambda d: d["claims"]["types"].setdefault("PENSION_WITHDRAWAL", spec), "Form 10C pension withdrawal benefit")
         wait_for(lambda: "PENSION_WITHDRAWAL" in _types(member), timeout=30)
     w = _types(member)["PENSION_WITHDRAWAL"]
+    if not w["eligible"]:                                                         # taken on an earlier run: once per member ID
+        assert any("once every" in r for r in w["reasons"]), w
+        return
     status, r = call(member, "POST", "/api/v1/members/me/claims", {"account_link_id": "AL-0006", "claim_type": "PENSION_WITHDRAWAL",
                                                                    "amount_paise": w["max_amount_paise"]}, {"Idempotency-Key": str(uuid.uuid4())})
     if status == 409 and r.get("type") == "/problems/claim-already-open":        # left by an earlier run

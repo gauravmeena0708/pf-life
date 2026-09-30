@@ -333,6 +333,16 @@ simulation; point out that the dialog says exactly what is being authorised (act
 3. **`member-a` → View › Annual statement and taxable interest**: opening, the year's movements and the closing
    balance per member ID; the taxable part of the interest (none below ₹2,50,000 of own contributions a year).
 
+## Primary member ID
+*Tests: `tests/e2e/test_primary_member_id.py`, `services/*/tests/test_primary_member_id.py`*
+
+1. **`member-d` → View › Service History**: AL-0009 is marked **P** (the latest member ID with contributions);
+   AL-0008 is secondary. On the claim screen AL-0008's claims are refused: "Requested member ID does not match with
+   the primary member ID (AL-0009)". The transfer form offers only AL-0009 as the target.
+2. **`member-b` → Claim**: *Final settlement* lists "All services are not transferred to the primary member ID:
+   AL-0903 holds ₹50,000" — AL-0903 is on BHARAT's older UAN, linked by the same verified Aadhaar.
+3. **`do-caseworker` → Member 360** for UAN 100000000903: the Aadhaar-verified set and its primary member ID.
+
 ## Policy changes that move money — interest, TDS and pensions
 *Tests: `tests/e2e/test_policy_money.py`, `services/contribution-service/tests/test_interest.py`,
 `services/claim-service/tests/test_tds.py`, `services/pension-service/tests/test_pensions.py`*

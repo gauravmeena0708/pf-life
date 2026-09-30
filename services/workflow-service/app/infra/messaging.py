@@ -25,6 +25,7 @@ BINDINGS = [
     "member-service.MemberRegistered.v1",
     "claim-service.CADGenerated.v1",
     "contribution-service.LedgerReversed.v1",
+    "member-service.PrimaryMemberIdChanged.v1",
 ]
 
 
@@ -158,7 +159,15 @@ async def on_ledger_reversed(session: AsyncSession, event: dict[str, Any]) -> No
             await session.execute(update(member_accounts).where(member_accounts.c.account_link_id == frm).values(transferred_to=None))
 
 
+async def on_primary_changed(session: AsyncSession, event: dict[str, Any]) -> None:
+    """P2.7d: which member ID of the member's Aadhaar-verified set is primary (Form 13 transfers go to it)."""
+    p = event["payload"]
+    await session.execute(update(member_accounts).where(member_accounts.c.uan.in_(p["set_uans"])).values(
+        is_primary=member_accounts.c.account_link_id == p["primary_account_link_id"]))
+
+
 HANDLERS = {
+    "PrimaryMemberIdChanged.v1": on_primary_changed,
     "LedgerReversed.v1": on_ledger_reversed,
     "CADGenerated.v1": on_cad_generated,
     "MemberRegistered.v1": on_member_registered,

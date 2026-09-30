@@ -19,6 +19,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.7a** | Returns and payments: arrear and supplementary returns, cancelling an unpaid TRRN, the office rejecting a return before posting or a payment stuck at the bank, the returns dashboard, 14B / 7Q demands on late payment, direct challans (administrative charges; miscellaneous 14B / 7Q) and their knock-off (DA Compliance → SS) | **Done** (30 Sep 2026) |
 | **P2.7b** | Office ledger work: receipts outside the challan flow (VDR) allocated to TRRNs or rejected, reversal of a posted journal, recredit of a rejected transfer-in, Appendix E with the CITES manual's four types (DA proposes, APFC approves) | **Done** (30 Sep 2026) |
 | **P2.7c** | Member-facing ledger: annual statement, taxable interest split, Form 10C cash withdrawal (pension withdrawal benefit by Table D, paid from EPS) | **Done** (30 Sep 2026) |
+| **P2.7d** | Primary member ID: the latest member ID with contributions, over the member's Aadhaar-verified set; claims only against it, whole-balance claims (final settlement, Form 10C, death claims) only when the rest of the set is transferred; Form 13 only into it (checked when filed and when approved) | **Done** (30 Sep 2026) |
 | P2.8 | The rest: principal-employer tags (contractor), exempted establishments' past accumulations, compliance and VISHWAS, international workers, grievance extras, public lookups, audit, NDC, HRM, DO dashboards | |
 
 Operations marked **?** (scope unconfirmed, e.g. *ECR Approval*, *VDR Member Beneficiary*) wait until their
@@ -229,3 +230,25 @@ Source: the CITES user manuals (`../manuals`, reviewed in `docs/reviews/cites-ma
   (illustrative ₹2,50,000 a year) is taxable, at the year's rate on the excess; the rest is not. Shown with the
   working, marked illustrative.
 - Not built from the CITES review: "send back to DA for wage corrections" on Form 10C, NCP-day deductions.
+
+## P2.7d — how it is built
+
+Source: the Samadhan Setu tracker (7 of its 35 issue types are about the primary member ID: "Requested member id does
+not match with the primary member id", "all services are not transferred to primary member id", "Unable to inward
+form 5IF due to incorrect Primary Member ID marked", "Transfer-in Member ID must be primary MemberID") and the office
+screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified set").
+
+- Rule (`epfo_persistence.member_ids.primary_member_id`): among the member IDs not transferred out, the latest-joined
+  one that has received a contribution; if none has, the latest-joined. It is worked out over the member's
+  **Aadhaar-verified set**: every UAN with the same verified Aadhaar (member-service keeps a reference, never the
+  number). Seed: BHARAT DEMO's older UAN 100000000903 (AL-0903, ₹50,000 not transferred) is in his set.
+- member-service recomputes it when a contribution is posted (a new member ID becomes primary with its first
+  contribution), a member ID is registered, a transfer is posted or recredited, and publishes
+  `PrimaryMemberIdChanged.v1`; the service history, the member 360 view and the UAN set show it.
+- claim-service: a claim on a secondary member ID is refused ("Requested member ID does not match with the primary
+  member ID (AL-…)"); a final settlement or Form 10C, and a Form 20 / 5IF death claim, also need every other member ID
+  of the set emptied ("All services are not transferred to the primary member ID: AL-… holds ₹…").
+- workflow: Form 13's "to" member ID must be primary when filed, and again when the AO approves (the primary may
+  have moved; rejecting stays possible).
+- Web: "P" against the primary member ID in the service history and the claim screen; the transfer form offers only
+  the primary as the target.

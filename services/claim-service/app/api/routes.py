@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.claims import NEXT_STEP, OPEN_STATES, ROLE_LABELS, approval_chain, eligibility, months_between, route, summary
+from app.domain.claims import NEXT_STEP, OPEN_STATES, ROLE_LABELS, approval_chain, eligibility, months_between, route, rupees, summary
 from app.infra.db import sessions
 from app.infra.tables import accounts, cads, claim_beneficiaries, claim_timeline, claims, office_staff, risk_flags, tax_declarations
 from epfo_auth import Actor, require_stakeholder, require_step_up
@@ -125,6 +125,35 @@ async def staff_office(session: AsyncSession, actor: Actor) -> str:
     return office
 
 
+WHOLE_BALANCE_TYPES = {"FINAL_SETTLEMENT", "PENSION_WITHDRAWAL"}
+
+
+async def member_id_reasons(session: AsyncSession, account: dict[str, Any], claim_type: str) -> list[str]:
+    """P2.7d: claims go against the primary member ID; a claim for the whole balance needs every other member ID of
+    the member's Aadhaar-verified set transferred first (tracker: "all services are not transferred to primary member id")."""
+    siblings = [dict(r) for r in (await session.execute(select(accounts).where(
+        accounts.c.set_key == account["set_key"], accounts.c.account_link_id != account["account_link_id"]))).mappings().all()] \
+        if account.get("set_key") else []
+    reasons = []
+    if not account.get("is_primary"):
+        primary = next((x["account_link_id"] for x in siblings if x["is_primary"]), None)
+        reasons.append(f"Requested member ID does not match with the primary member ID{f' ({primary})' if primary else ''}. "
+                       "Claims are made against the primary member ID.")
+    elif claim_type in WHOLE_BALANCE_TYPES:
+        held = [x for x in siblings if x["employee_paise"] + x["employer_paise"] > 0]
+        if held:
+            reasons.append("All services are not transferred to the primary member ID: "
+                           + ", ".join(f"{x['account_link_id']} holds {rupees(x['employee_paise'] + x['employer_paise'])}" for x in held)
+                           + ". Transfer them first (Form 13).")
+    return reasons
+
+
+async def evaluate(session: AsyncSession, account: dict[str, Any], claim_type: str, rules: dict[str, Any], today: date) -> dict[str, Any]:
+    e = eligibility(account, claim_type, rules, today, await previous_claims(session, account["account_link_id"], claim_type))
+    extra = await member_id_reasons(session, account, claim_type)
+    return {**e, "eligible": False, "max_amount_paise": 0, "reasons": [*e["reasons"], *extra]} if extra else e
+
+
 # ── member routes ───────────────────────────────────────────────────────────────────────────────
 
 async def previous_claims(session: AsyncSession, account_link_id: str, claim_type: str) -> list[date]:
@@ -144,9 +173,9 @@ async def eligible_types(actor: Actor = Depends(MEMBER), session: AsyncSession =
         for t, spec in rules["claims"]["types"].items():
             if spec.get("retired"):
                 continue
-            e = eligibility(a, t, rules, today, await previous_claims(session, a["account_link_id"], t))
+            e = await evaluate(session, a, t, rules, today)
             types.append({k: v for k, v in e.items() if k != "trace"})
-        out.append({"account_link_id": a["account_link_id"],
+        out.append({"account_link_id": a["account_link_id"], "primary": bool(a.get("is_primary")),
                     "balance": {"employee_paise": a["employee_paise"], "employer_paise": a["employer_paise"],
                                 "total_paise": a["employee_paise"] + a["employer_paise"]}, "types": types})
     return envelope({"rule_version": rules["rule_version"], "illustrative_only": True,
@@ -172,8 +201,7 @@ async def create_claim(body: ClaimInput, request: Request, actor: Actor = Depend
         if account["frozen"]:
             raise Problem(403, "/problems/account-frozen", "This account is on hold",
                           "A new claim cannot be filed while the account is under verification. Contact your regional office.")
-        evaluation = eligibility(account, body.claim_type, rules, date.today(),
-                                 await previous_claims(session, account["account_link_id"], body.claim_type))
+        evaluation = await evaluate(session, account, body.claim_type, rules, date.today())
         if not evaluation["eligible"]:
             raise Problem(422, "/problems/not-eligible", "You are not eligible for this claim today",
                           " ".join(evaluation["reasons"]), reasons=evaluation["reasons"])

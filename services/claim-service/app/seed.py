@@ -40,6 +40,20 @@ async def main() -> None:
                 employee_paise=balance.get("employee_paise", 0), employer_paise=balance.get("employer_paise", 0),
                 pan_verified=m["kyc"]["pan"] == "VERIFIED",
                 deceased_on=date.fromisoformat(m["deceased_on"]) if m.get("deceased_on") else None))
+        # P2.7d: the primary member ID of each member's Aadhaar-verified set (the same rule member-service applies)
+        from epfo_persistence.member_ids import primary_member_id
+        sets: dict[str, list[dict]] = {}
+        for m in seed["members"]:
+            key = m.get("aadhaar_ref") if m["kyc"]["aadhaar"] == "VERIFIED" and m.get("aadhaar_ref") else m["uan"]
+            sets.setdefault(key, []).append(m)
+        for group in sets.values():
+            ids = [{"account_link_id": j["account_link_id"], "date_of_joining": j["date_of_joining"],
+                    "last_contribution_month": j.get("last_contribution_month"), "transferred_to": None}
+                   for m in group for j in [m, *m.get("previous_employments", [])]]
+            primary, key = primary_member_id(ids), ",".join(sorted(m["uan"] for m in group))
+            for i in ids:
+                await session.execute(update(accounts).where(accounts.c.account_link_id == i["account_link_id"],
+                                                             accounts.c.set_key.is_(None)).values(is_primary=i["account_link_id"] == primary, set_key=key))
         for m in seed["members"]:                                 # nominations on record (e-nomination is planned)
             for i, n in enumerate(m.get("nominations", []), start=1):
                 await session.execute(insert(nominations).values(

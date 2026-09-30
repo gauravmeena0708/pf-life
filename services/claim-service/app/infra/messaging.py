@@ -27,6 +27,7 @@ BINDINGS = [
     "platform-service.PolicyPublished.v1",
     "contribution-service.LedgerReversed.v1",
     "contribution-service.LedgerAdjusted.v1",
+    "member-service.PrimaryMemberIdChanged.v1",
     "contribution-service.InterestCredited.v1",
     "member-service.MemberExitMarked.v1",
     "contribution-service.TransferPosted.v1",
@@ -242,7 +243,16 @@ async def on_ledger_adjusted(session: AsyncSession, event: dict[str, Any]) -> No
     await on_ledger_reversed(session, {**event, "payload": {**event["payload"], "claim_id": ""}})
 
 
+async def on_primary_changed(session: AsyncSession, event: dict[str, Any]) -> None:
+    """P2.7d: the member's primary member ID (and Aadhaar-verified set) as member-service works it out."""
+    p = event["payload"]
+    key = ",".join(sorted(p["set_uans"]))
+    await session.execute(update(accounts).where(accounts.c.uan.in_(p["set_uans"])).values(
+        is_primary=accounts.c.account_link_id == p["primary_account_link_id"], set_key=key))
+
+
 HANDLERS = {
+    "PrimaryMemberIdChanged.v1": on_primary_changed,
     "LedgerReversed.v1": on_ledger_reversed,
     "LedgerAdjusted.v1": on_ledger_adjusted,
     "PolicyPublished.v1": on_policy_published,

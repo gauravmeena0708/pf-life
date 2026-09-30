@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.routes import claim_view, db, load_claim, staff_office, transition
+from app.api.routes import claim_view, db, load_claim, member_id_reasons, staff_office, transition
 from app.domain.claims import ROLE_LABELS, approval_chain, months_between, rupees
 from app.infra.tables import accounts, claim_beneficiaries, claim_timeline, claims, nominations, physical_intakes
 from epfo_auth import Actor, require_stakeholder, require_step_up
@@ -65,10 +65,14 @@ async def file_death_claim(body: DeathClaimInput, actor: Actor = Depends(CLAIMAN
             raise Problem(404, "/problems/not-found", "No nomination of yours for that UAN",
                           "A legal heir without a nomination files at the PRO counter with a succession certificate.")
         account = (await session.execute(select(accounts).where(accounts.c.uan == body.deceased_uan, accounts.c.deceased_on.is_not(None))
-                                         .order_by(accounts.c.date_of_joining.desc()))).mappings().first()
+                                         .order_by(accounts.c.is_primary.desc(), accounts.c.date_of_joining.desc()))).mappings().first()
         if not account:
             raise Problem(422, "/problems/death-not-recorded", "The member's death is not recorded",
                           "The employer marks the exit with the reason 'death while in service' first.")
+        not_moved = await member_id_reasons(session, {**dict(account), "is_primary": True}, "FINAL_SETTLEMENT")
+        if not_moved:                                  # the claim is inwarded against the primary member ID only
+            raise Problem(422, "/problems/services-not-transferred", "All services are not transferred to the primary member ID",
+                          " ".join(not_moved) + " The office transfers them before the claim is filed.")
         require_step_up(actor, "file-death-claim", body.deceased_uan)
         open_claim = (await session.execute(select(claims.c.claim_id).where(claims.c.death_of_uan == body.deceased_uan,
                                                                             claims.c.claim_type == claim_type,

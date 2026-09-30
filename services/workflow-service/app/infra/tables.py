@@ -1,5 +1,5 @@
 """Tables owned by workflow-service (created by migration 0002)."""
-from sqlalchemy import JSON, BigInteger, Column, Date, DateTime, Integer, MetaData, String, Table, Text, func
+from sqlalchemy import JSON, BigInteger, Boolean, Column, Date, DateTime, Integer, MetaData, String, Table, Text, false as sa_false, func
 
 from app.infra.models import IdType
 
@@ -87,6 +87,7 @@ member_accounts = Table(
     Column("date_of_joining", Date, nullable=False),
     Column("date_of_exit", Date),
     Column("transferred_to", String(40)),
+    Column("is_primary", Boolean, nullable=False, server_default=sa_false()),     # the member's primary member ID (P2.7d)
 )
 
 # Locks on a member's ledger (Phase 2, slice 5c): a claim or transfer case holds one while it is open; the annual

@@ -22,6 +22,8 @@ accounts = Table(
     Column("pan_verified", Boolean, nullable=False, server_default=sa_false()),   # decides the TDS rate
     Column("interest_paise", BigInteger, nullable=False, server_default="0"),     # interest credited (InterestCredited.v1), for the CAD
     Column("deceased_on", Date),                                                  # a death in service (exit reason) or seeded
+    Column("is_primary", Boolean, nullable=False, server_default=sa_false()),     # the member's primary member ID (P2.7d)
+    Column("set_key", String(200)),                                               # the UANs of the member's Aadhaar-verified set
 )
 
 # Office staff directory (synthetic seed): which office an officer acts for.

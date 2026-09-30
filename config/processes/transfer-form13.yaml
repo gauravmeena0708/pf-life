@@ -22,7 +22,7 @@ operations:
     to: SUBMITTED
     form:
       from_account_link_id: {account: {owner: self, exited: true, not_transferred: true}}
-      to_account_link_id: {account: {owner: self, exited: false}}
+      to_account_link_id: {account: {owner: self, exited: false, primary: true}}   # the primary member ID only (P2.7d)
       attesting_employer: {enum: [PRESENT]}
   - name: status
     operation: GET /members/me/transfers/{transferId}
@@ -70,6 +70,7 @@ operations:
     case_from: path:transferId
     roles: [fo.ao]
     step_up: {action: decide-transfer, bind: case}
+    recheck_primary: to_account_link_id      # refused if the member's primary member ID has moved meanwhile
     from: VERIFIED
     outcomes: {field: decision, map: {APPROVE: APPROVED, REJECT: REJECTED, RETURN: EMPLOYER_ATTESTED}}
     new_round_on: [EMPLOYER_ATTESTED]

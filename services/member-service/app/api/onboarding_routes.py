@@ -391,15 +391,19 @@ async def member_360(uan: str, purpose: str = Query(min_length=10, max_length=30
         await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="member.viewed_360",
                     target_type="member", target_id=uan, detail=purpose)
     kyc = m["kyc"] or {}
+    from app.domain.primary import aadhaar_set
+    set_uans = sorted(u["uan"] for u in await aadhaar_set(session, uan))
     return envelope({"uan": uan, "name": m["name"], "date_of_birth": m["date_of_birth"].isoformat(), "gender": m["gender"],
                      "account_state": m["account_state"], "mobile_masked": m["mobile_masked"], "email_masked": m["email_masked"],
                      "kyc": {"aadhaar": kyc.get("aadhaar"), "pan": kyc.get("pan"), "bank": kyc.get("bank"), "bank_account_last4": m["bank_account_last4"]},
                      "profile_extra": m["profile_extra"] or {},
-                     "member_ids": [{"account_link_id": j["account_link_id"], "establishment": j["establishment_name"], "office_id": j["office_id"],
+                     "member_ids": [{"account_link_id": j["account_link_id"], "primary": j["account_link_id"] == m["primary_account_link_id"],
+                                     "establishment": j["establishment_name"], "office_id": j["office_id"],
                                      "date_of_joining": j["date_of_joining"].isoformat(), "date_of_exit": j["date_of_exit"].isoformat() if j["date_of_exit"] else None,
                                      "transferred_to": j["transferred_to"]} for j in jobs],
                      "applications": [{"application_id": a["application_id"], "title": a["title"], "state": a["state"], "pending": not a["terminal"]} for a in apps],
                      "pending_kyc": [{"request_id": r["request_id"], "kyc_type": r["kyc_type"]} for r in pending_kyc],
+                     "primary_member_id": m["primary_account_link_id"], "aadhaar_set_uans": set_uans,
                      "viewed_for": purpose, "note": "This view is recorded in the audit log with its purpose."})
 
 

@@ -71,3 +71,14 @@ def test_rules_in_force_by_date_and_by_version(tmp_path):
     assert september["contribution"]["eps_wage_ceiling_paise"] == 1500000       # the old rule for old months
     assert october["contribution"]["eps_wage_ceiling_paise"] == 2500000
     assert exact["rule_version"] == "demo-rules-2026.1"
+
+
+def test_primary_member_id_is_the_latest_joined_with_contributions():
+    from epfo_persistence.member_ids import primary_member_id
+    ids = [{"account_link_id": "AL-1", "date_of_joining": "2019-04-01", "last_contribution_month": "2025-12", "transferred_to": None},
+           {"account_link_id": "AL-2", "date_of_joining": "2026-01-15", "last_contribution_month": "2026-08", "transferred_to": None},
+           {"account_link_id": "AL-3", "date_of_joining": "2026-09-01", "last_contribution_month": None, "transferred_to": None}]
+    assert primary_member_id(ids) == "AL-2"                         # AL-3 has no contribution yet
+    assert primary_member_id([{**ids[2]}]) == "AL-3"                 # nothing contributed anywhere: latest joined
+    assert primary_member_id([{**ids[1], "transferred_to": "AL-9"}, ids[0]]) == "AL-1"
+    assert primary_member_id([]) is None

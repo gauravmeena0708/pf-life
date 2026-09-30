@@ -3,6 +3,7 @@ import asyncio
 import json
 import os
 
+from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
@@ -43,6 +44,23 @@ async def main() -> None:
                 **{k: v for k, v in lock.items() if not k.startswith("_") and k not in ("acquired_at", "expires_at")},
                 office_id=est["office_id"], acquired_at=datetime.fromisoformat(lock["acquired_at"]),
                 expires_at=datetime.fromisoformat(lock["expires_at"])).on_conflict_do_nothing())
+        # P2.7d: the primary member ID of each member's Aadhaar-verified set (the same rule member-service applies)
+        from epfo_persistence.member_ids import primary_member_id
+        groups: dict[str, list[dict]] = {}
+        for m in seed["members"]:
+            key = m.get("aadhaar_ref") if m["kyc"]["aadhaar"] == "VERIFIED" and m.get("aadhaar_ref") else m["uan"]
+            groups.setdefault(key, []).append(m)
+        for group in groups.values():
+            ids = [{"account_link_id": j["account_link_id"], "date_of_joining": j["date_of_joining"],
+                    "last_contribution_month": j.get("last_contribution_month"), "transferred_to": None}
+                   for m in group for j in [m, *m.get("previous_employments", [])]]
+            primary = primary_member_id(ids)
+            has_primary = (await session.execute(select(member_accounts.c.account_link_id).where(
+                member_accounts.c.account_link_id.in_([i["account_link_id"] for i in ids]), member_accounts.c.is_primary))).first()
+            if not has_primary:                                     # later changes arrive by event; a re-seed keeps them
+                for i in ids:
+                    await session.execute(update(member_accounts).where(member_accounts.c.account_link_id == i["account_link_id"])
+                                          .values(is_primary=i["account_link_id"] == primary))
         for s in seed.get("office_staff", []):
             await session.execute(insert(office_staff).values(
                 subject=s["subject"], username=s["username"], stakeholder=s["stakeholder"],

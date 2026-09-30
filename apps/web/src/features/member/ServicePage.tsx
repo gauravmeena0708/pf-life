@@ -12,7 +12,7 @@ import { useStepUp } from "../stepup/useStepUp";
 interface MemberIdRow {
   account_link_id: string; establishment_name: string; date_of_joining: string; date_of_exit: string | null;
   exit_marked_by: string | null; last_contribution_month: string | null; transferred_to: string | null; status: string;
-  service_months: number; mark_exit_allowed: boolean; transfer_status: string;
+  service_months: number; mark_exit_allowed: boolean; transfer_status: string; primary?: boolean;
 }
 interface Application { application_id: string; process: string; title: string; state: string; pending: boolean; account_link_id: string | null; submitted_at: string; updated_at: string }
 interface AnnexureK {
@@ -33,13 +33,14 @@ export function ServicePage() {
   const [notice, setNotice] = useState<string | null>(null);
   const [annexure, setAnnexure] = useState<AnnexureK | null>(null);
   const history = useQuery({ queryKey: ["service-history"], retry: false,
-    queryFn: () => api<Envelope<{ uan: string; member_ids: MemberIdRow[]; total_service_months: number }>>("/api/v1/members/me/service-history") });
+    queryFn: () => api<Envelope<{ uan: string; member_ids: MemberIdRow[]; total_service_months: number; primary_member_id?: string | null;
+      aadhaar_set_uans?: string[]; note?: string }>>("/api/v1/members/me/service-history") });
   const apps = useQuery({ queryKey: ["applications"], retry: false, queryFn: () => api<Envelope<Application[]>>("/api/v1/members/me/applications") });
   const h = history.data?.data;
   const ids = h?.member_ids ?? [];
   const canExit = ids.filter((m) => m.mark_exit_allowed);
   const from = ids.filter((m) => m.date_of_exit && !m.transferred_to);
-  const to = ids.filter((m) => !m.date_of_exit);
+  const to = ids.filter((m) => !m.date_of_exit && (m.primary ?? true));   // a transfer goes to the primary member ID only
   const refresh = async () => { await qc.invalidateQueries({ queryKey: ["service-history"] }); await qc.invalidateQueries({ queryKey: ["applications"] }); };
 
   async function run(work: () => Promise<string | null>) {
@@ -82,11 +83,13 @@ export function ServicePage() {
       {notice ? <p role="status" className="ok">{notice}</p> : null}
 
       <section className="card stack" aria-labelledby="service-heading"><h2 id="service-heading">Service history</h2>
-        {h ? <p className="muted small">UAN {h.uan} · total service {years(h.total_service_months)}</p> : null}
+        {h ? <p className="muted small">UAN {h.uan} · total service {years(h.total_service_months)}
+          {h.aadhaar_set_uans?.length ? ` · also linked by your Aadhaar: UAN ${h.aadhaar_set_uans.join(", ")}` : ""}</p> : null}
+        {h?.note ? <p className="muted small">{h.note}</p> : null}
         <div className="table-scroll"><table>
           <thead><tr><th scope="col">Member ID</th><th scope="col">Establishment</th><th scope="col">Joined</th><th scope="col">Exit</th><th scope="col">Last contribution</th><th scope="col">Service</th><th scope="col">Transfer</th></tr></thead>
           <tbody>{ids.map((m) => (
-            <tr key={m.account_link_id}><td><code>{m.account_link_id}</code></td><td>{m.establishment_name}</td>
+            <tr key={m.account_link_id}><td><code>{m.account_link_id}</code>{m.primary ? <> <span className="state-pill" title="Primary member ID">P</span></> : null}</td><td>{m.establishment_name}</td>
               <td>{dateOnly(m.date_of_joining, i18n.language)}</td>
               <td>{m.date_of_exit ? <>{dateOnly(m.date_of_exit, i18n.language)} <span className="muted small">({(m.exit_marked_by ?? "").toLowerCase()})</span></> : "—"}</td>
               <td>{m.last_contribution_month ?? "—"}</td><td>{years(m.service_months)}</td><td>{m.transfer_status}</td></tr>
@@ -111,7 +114,7 @@ export function ServicePage() {
         {from.length === 0 || to.length === 0 ? <p className="muted">{from.length === 0 ? "No previous member ID with a date of exit is waiting to be transferred." : "You have no current member ID to transfer into."}</p> : <>
           <div className="form-row">
             <label>From (previous member ID)<select name="from" required>{from.map((m) => <option key={m.account_link_id} value={m.account_link_id}>{m.account_link_id} · {m.establishment_name}</option>)}</select></label>
-            <label>To (current member ID)<select name="to" required>{to.map((m) => <option key={m.account_link_id} value={m.account_link_id}>{m.account_link_id} · {m.establishment_name}</option>)}</select></label>
+            <label>To (your primary member ID)<select name="to" required>{to.map((m) => <option key={m.account_link_id} value={m.account_link_id}>{m.account_link_id} · {m.establishment_name}</option>)}</select></label>
           </div>
           <div className="actions"><button type="submit" className="primary">Request transfer</button></div>
         </>}

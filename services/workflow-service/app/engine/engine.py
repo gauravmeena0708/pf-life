@@ -125,6 +125,8 @@ async def check_accounts(session: AsyncSession, form: dict[str, Any], data: dict
             problems.append(f"{name}: the date of exit must be marked first" if want["exited"] else f"{name}: this account is already exited")
         if want.get("not_transferred") and row["transferred_to"]:
             problems.append(f"{name}: this account was already transferred to {row['transferred_to']}")
+        if want.get("primary") and not row["is_primary"]:
+            problems.append(f"{name}: transfer-in member ID must be the primary member ID")
     for name, rule in form.items():
         joined_of = (rule.get("date") or {}).get("after_joining_of")
         if joined_of and name in data and data.get(joined_of):
@@ -369,6 +371,12 @@ async def _step(session, definition, op, request, staff, data, actor) -> dict[st
                           "A different officer must take each step.")
     if definition["subject"] == "uan":
         await ensure_unlocked(session, case)
+    if op.get("recheck_primary") and data.get("decision", "APPROVE") == "APPROVE":   # the primary may have moved meanwhile (P2.7d)
+        field = op["recheck_primary"]
+        link = (case.get("data") or {}).get(field)
+        if link and not (await session.execute(select(member_accounts.c.is_primary).where(member_accounts.c.account_link_id == link))).scalar_one_or_none():
+            raise Problem(409, "/problems/not-primary-member-id", "The transfer-in member ID is no longer the primary member ID",
+                          f"{link} is not the member's primary member ID now; reject the request so the member files it again.")
     if op.get("requires_viewed"):              # e.g. the employer-signed Form 13 must be opened first
         await ensure_viewed(session, case, op["requires_viewed"], actor)
     bind_step_up(op, actor, case, case["subject_ref"])

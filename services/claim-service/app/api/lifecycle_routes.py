@@ -12,9 +12,9 @@ from pydantic import BaseModel, Field
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.routes import (MEMBER, _instruct, claim_view, db, ensure_not_frozen, load_claim, member_accounts, previous_claims,
-                            staff_office, transition, work_out_tax)
-from app.domain.claims import CANCELLABLE, eligibility
+from app.api.routes import (MEMBER, _instruct, claim_view, db, ensure_not_frozen, evaluate, load_claim, member_accounts, staff_office,
+                            transition, work_out_tax)
+from app.domain.claims import CANCELLABLE
 from app.infra.tables import accounts, cads, claim_documents, claims, payment_scrolls, tax_declarations
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
@@ -48,7 +48,7 @@ async def eligibility_preview(formType: str = Query(pattern="^(31|19|10C)$"), ac
     out = []
     for a in await member_accounts(session, actor.subject):
         blockers = (["ACCOUNT_FROZEN"] if a["frozen"] else []) + (["BALANCE_EMPTY"] if a["employee_paise"] + a["employer_paise"] <= 0 else [])
-        types = [{k: v for k, v in eligibility(a, t, rules, today, await previous_claims(session, a["account_link_id"], t)).items() if k != "trace"}
+        types = [{k: v for k, v in (await evaluate(session, a, t, rules, today)).items() if k != "trace"}
                  for t, spec in rules["claims"]["types"].items() if spec.get("form_type") == formType and not spec.get("retired")]
         out.append({"account_link_id": a["account_link_id"], "blockers": blockers, "types": types})
     return envelope({"form_type": formType, "rule_version": rules["rule_version"], "accounts": out,

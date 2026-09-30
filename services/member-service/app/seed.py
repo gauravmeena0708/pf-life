@@ -27,7 +27,8 @@ async def main() -> None:
                           "date_of_birth": date.fromisoformat(member["date_of_birth"]),
                           "gender": member["gender"], "mobile_masked": member["mobile_masked"],
                           "email_masked": member["email_masked"], "bank_ifsc": member["bank_ifsc"],
-                          "bank_account_last4": member["bank_account_last4"], "kyc": member["kyc"]}
+                          "bank_account_last4": member["bank_account_last4"], "kyc": member["kyc"],
+                          "aadhaar_ref": member.get("aadhaar_ref") or f"DEMO-AADHAAR-{member['uan']}"}
                 statement = insert(members).values(**values)
                 await session.execute(statement.on_conflict_do_update(
                     index_elements=[members.c.member_id],
@@ -54,6 +55,9 @@ async def main() -> None:
                     await session.execute(statement.on_conflict_do_update(
                         index_elements=[employments.c.account_link_id],
                         set_={key: statement.excluded[key] for key in ("member_id", "establishment_id", "establishment_name", "date_of_joining", "office_id")}))
+            from app.domain.primary import recompute
+            for member in seed["members"]:                  # the primary member ID of each set; other services learn it by event
+                await recompute(session, member["uan"], None)
             for st in seed.get("office_staff", []):
                 statement = insert(office_staff).values(subject=st["subject"], stakeholder=st["stakeholder"], office_id=st["office_id"])
                 await session.execute(statement.on_conflict_do_nothing())

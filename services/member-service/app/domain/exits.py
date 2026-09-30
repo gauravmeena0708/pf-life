@@ -81,12 +81,23 @@ async def on_contribution_posted(session: AsyncSession, event: dict[str, Any]) -
         if not job or p["wage_month"] > job:
             await session.execute(update(employments).where(employments.c.account_link_id == link)
                                   .values(last_contribution_month=p["wage_month"]))
+    await _recompute_for_links(session, {x["account_link_id"] for x in p.get("postings", []) if x.get("account_link_id")}, event)
+
+
+async def _recompute_for_links(session: AsyncSession, links: set[str], event: dict[str, Any]) -> None:
+    """A first contribution to a new member ID makes it primary (P2.7d)."""
+    from app.domain.primary import recompute
+    uans = set((await session.execute(select(members.c.uan).join(employments, employments.c.member_id == members.c.member_id)
+                                      .where(employments.c.account_link_id.in_(links)))).scalars()) if links else set()
+    for uan in sorted(uans):
+        await recompute(session, uan, event.get("correlation_id"))
 
 
 async def on_transfer_posted(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
     await session.execute(update(employments).where(employments.c.account_link_id == p["from_account_link_id"])
                           .values(transferred_to=p["to_account_link_id"]))
+    await _recompute_for_links(session, {p["from_account_link_id"], p["to_account_link_id"]}, event)
     member = (await session.execute(select(members).where(members.c.uan == p["uan"]))).mappings().first()
     if member and member["subject"]:
         await add_event(session, producer=PRODUCER, event_type="NotificationRequested.v1", aggregate_type="notification",
@@ -104,3 +115,4 @@ async def on_ledger_reversed(session: AsyncSession, event: dict[str, Any]) -> No
     frm = next((x["account_link_id"] for x in p["postings"] if x.get("account_link_id") and x["side"] == "credit"), None)
     if frm:
         await session.execute(update(employments).where(employments.c.account_link_id == frm).values(transferred_to=None))
+        await _recompute_for_links(session, {frm}, event)

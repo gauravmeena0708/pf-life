@@ -169,7 +169,8 @@
         "pan": "NOT_SEEDED",
         "bank": "VERIFIED"
       },
-      "last_contribution_month": "2026-08"
+      "last_contribution_month": "2026-08",
+      "aadhaar_ref": "DEMO-AADHAAR-BHARAT"
     },
     {
       "uan": "100000000003",
@@ -325,6 +326,29 @@
           "date_of_birth": "2010-06-06"
         }
       ]
+    },
+    {
+      "uan": "100000000903",
+      "name": "BHARAT DEMO",
+      "date_of_birth": "1985-11-02",
+      "subject": null,
+      "account_link_id": "AL-0903",
+      "member_id": "DEMO00001000000000903",
+      "date_of_joining": "2016-05-01",
+      "gender": "MALE",
+      "mobile_masked": "******0903",
+      "email_masked": "b***@demo.invalid",
+      "bank_ifsc": "DEMO0000002",
+      "bank_account_last4": "0002",
+      "kyc": {
+        "aadhaar": "VERIFIED",
+        "pan": "NOT_SEEDED",
+        "bank": "VERIFIED"
+      },
+      "last_contribution_month": "2020-03",
+      "aadhaar_ref": "DEMO-AADHAAR-BHARAT",
+      "_comment": "BHARAT DEMO's older UAN from before UANs were Aadhaar-linked; the same verified Aadhaar puts both UANs in one Aadhaar-verified set (P2.7d). Its balance is not transferred yet.",
+      "date_of_exit": "2020-03-31"
     }
   ],
   "demo_wage_month": "2026-08",
@@ -392,6 +416,11 @@
     "AL-0901": {
       "employee_paise": 24000000,
       "employer_paise": 16000000,
+      "as_of": "2025-03-31"
+    },
+    "AL-0903": {
+      "employee_paise": 3000000,
+      "employer_paise": 2000000,
       "as_of": "2025-03-31"
     }
   },

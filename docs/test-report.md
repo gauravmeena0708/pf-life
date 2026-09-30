@@ -98,6 +98,12 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 7d: primary member ID (30 September 2026)
+
+Unit tests 324 passed; must-deny 18 passed; end to end 48 of 49 in the full run (including
+`test_primary_member_id.py`). The one failure was the Form 10C test on a re-run: the member had already taken the
+benefit, which is once per member ID. The test now accepts that and passes.
+
 ## Update — Phase 2, slice 7c: Form 10C withdrawal benefit, annual statement, taxable interest (30 September 2026)
 
 Unit tests 316 passed; must-deny 18 passed; end to end 47 of 48 in the full run, including

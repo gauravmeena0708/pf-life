@@ -103,3 +103,28 @@ def test_a_registered_joinee_can_be_exited_by_the_employer(ctx):
                     json={"account_link_id": "AL-0010", "date_of_exit": "2026-09-15", "reason": "CESSATION"},
                     headers=hdr(OPERATOR, "employer.operator", {"action": "mark-exit-employer", "resource_id": "100000000008"}, establishment=EST))
     assert r.status_code == 200 and r.json()["data"]["state"] == "EXIT_MARKED", r.json()
+
+
+def test_transfer_in_member_id_must_be_primary_when_filed_and_when_approved(ctx):
+    client, q, _ = ctx
+    deliver("MemberExitMarked.v1", {"uan": UAN_D, "account_link_id": "AL-0008", "date_of_exit": "2025-12-31", "reason": "CESSATION", "marked_by": "MEMBER"})
+    primary = lambda link: deliver("PrimaryMemberIdChanged.v1", {"uan": UAN_D, "set_uans": [UAN_D], "primary_account_link_id": link,  # noqa: E731
+                                                                  "previous_account_link_id": "", "member_ids": ["AL-0008", "AL-0009"]})
+    primary("AL-0008")
+    refused = transfer(client)
+    assert refused.status_code == 422 and "must be the primary member ID" in refused.json()["detail"]
+    primary("AL-0009")
+    case = transfer(client).json()["data"]
+    case = step(client, f"/api/v1/employers/me/transfer-requests/{case['case_id']}/decisions", case, SIGNATORY, "employer.signatory",
+                {"decision": "ATTEST", "note": "Present employee"}, "attest-transfer", EST).json()["data"]
+    [doc] = client.get(f"/api/v1/office/cases/{case['case_id']}", headers=hdr(DA, "fo.da_accounts")).json()["data"]["documents"]
+    client.post(f"/api/v1/office/cases/{case['case_id']}/documents/{doc['doc_id']}/attestation-views", headers=hdr(DA, "fo.da_accounts"))
+    case = step(client, f"/api/v1/office/transfers/{case['case_id']}/verifications", case, DA, "fo.da_accounts",
+                {"service_checked": "YES", "note": "Service at both establishments checked"}).json()["data"]
+    primary("AL-0008")                                                      # the primary moves before the AO decides
+    moved = step(client, f"/api/v1/office/transfers/{case['case_id']}/decisions", case, AO, "fo.ao",
+                 {"decision": "APPROVE", "reason": "Service and balance verified"}, "decide-transfer")
+    assert moved.status_code == 409 and moved.json()["type"] == "/problems/not-primary-member-id"
+    rejected = step(client, f"/api/v1/office/transfers/{case['case_id']}/decisions", case, AO, "fo.ao",
+                    {"decision": "REJECT", "reason": "Primary member ID changed; member to file again"}, "decide-transfer")
+    assert rejected.status_code == 200 and rejected.json()["data"]["state"] == "REJECTED"

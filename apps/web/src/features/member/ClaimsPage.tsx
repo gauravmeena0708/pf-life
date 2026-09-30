@@ -12,7 +12,7 @@ import { TaxDeclaration } from "./TaxDeclaration";
 import { useStepUp } from "../stepup/useStepUp";
 
 interface ClaimType { claim_type: string; form_type: string; label: string; plain_rule: string; eligible: boolean; max_amount_paise: number; reasons: string[] }
-interface Account { account_link_id: string; balance: { employee_paise: number; employer_paise: number; total_paise: number }; types: ClaimType[] }
+interface Account { account_link_id: string; primary?: boolean; balance: { employee_paise: number; employer_paise: number; total_paise: number }; types: ClaimType[] }
 interface Eligibility { rule_version: string; illustrative_only: boolean; auto_settlement_limit_paise: number; accounts: Account[] }
 interface ClaimRow { claim_id: string; claim_type: string; form_type: string; amount_paise: number; state: string; next_step: string; created_at: string }
 interface CreatedClaim { claim_id: string; state: string; summary: string; version: number; amount_paise: number; next_step: string; rules_applied: { rule_version: string; plain_rule: string; max_amount_paise: number; route: "AUTO" | "REVIEW"; approval_chain: string[] }; confirmation: { action: string; resource_id: string; resource_version: number; amount_paise: number } }
@@ -82,7 +82,9 @@ export function ClaimsPage() {
       {eligibility.data?.data.accounts.length === 0 ? <p className="muted">{t("claims.noAccounts")}</p> : null}
       {!created ? <>
         {eligibility.data?.data.accounts.map((account) => <section className="claim-account stack" key={account.account_link_id} aria-labelledby={`account-${account.account_link_id}`}>
-          <h3 id={`account-${account.account_link_id}`}>{t("claims.account")} <code>{account.account_link_id}</code></h3>
+          <h3 id={`account-${account.account_link_id}`}>{t("claims.account")} <code>{account.account_link_id}</code>
+            {account.primary ? <> <span className="state-pill" title="Primary member ID: claims are made against it">P</span></>
+              : <span className="muted small"> (secondary: transfer it to your primary member ID)</span>}</h3>
           <div className="metrics passbook-metrics"><div><span>{t("claims.employeeBalance")}</span><strong>{rupees(account.balance.employee_paise)}</strong></div><div><span>{t("claims.employerBalance")}</span><strong>{rupees(account.balance.employer_paise)}</strong></div><div><span>{t("claims.totalBalance")}</span><strong>{rupees(account.balance.total_paise)}</strong></div></div>
           <div className="claim-type-grid">{account.types.map((type) => {
             const active = choice?.accountId === account.account_link_id && choice.claimType === type.claim_type;

@@ -8,6 +8,7 @@
   MemberKycUpdated.v1 goes out (a verified PAN, for example, changes the TDS rate on withdrawals).
 
 Every verifier here is a labelled mock: no real Aadhaar, PAN or bank account is ever checked."""
+import hashlib
 import re
 import secrets
 from datetime import UTC, date, datetime
@@ -89,7 +90,8 @@ async def register(session: AsyncSession, *, establishment_id: str, establishmen
         await session.execute(insert(members).values(
             member_id=member_id, uan=uan, subject=None, name=name.upper(), date_of_birth=date_of_birth, gender=gender,
             mobile_masked=mask(mobile), email_masked="-", bank_ifsc="-", bank_account_last4="-",
-            kyc={"aadhaar": "VERIFIED", "pan": "NOT_SEEDED", "bank": "NOT_SEEDED", "aadhaar_masked": mask(aadhaar)}))
+            kyc={"aadhaar": "VERIFIED", "pan": "NOT_SEEDED", "bank": "NOT_SEEDED", "aadhaar_masked": mask(aadhaar)},
+            aadhaar_ref=hashlib.sha256(f"demo-aadhaar:{aadhaar}".encode()).hexdigest()))   # links UANs of the same person
     office = (await session.execute(select(employments.c.office_id).where(employments.c.establishment_id == establishment_id,
                                                                           employments.c.office_id.is_not(None)).limit(1))).scalar_one_or_none()
     await session.execute(insert(employments).values(
@@ -102,6 +104,8 @@ async def register(session: AsyncSession, *, establishment_id: str, establishmen
                         "date_of_birth": member["date_of_birth"].isoformat(), "gender": member["gender"],
                         "establishment_id": establishment_id, "date_of_joining": date_of_joining.isoformat(), "new_uan": new_uan,
                         "pan_verified": (member["kyc"] or {}).get("pan") == "VERIFIED"})
+    from app.domain.primary import recompute
+    await recompute(session, uan, correlation_id)      # after MemberRegistered.v1, so other services have the member ID first
     return {"uan": uan, "account_link_id": link, "new_uan": new_uan, "name": member["name"],
             "aadhaar": check["verifier"] + ": verified"}
 

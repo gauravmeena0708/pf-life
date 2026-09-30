@@ -309,12 +309,18 @@ async def service_history(actor: Actor = Depends(MEMBER), session: AsyncSession 
     member = await _member(session, actor.subject)
     today = datetime.now(UTC).date()
     out = []
+    from app.domain.primary import aadhaar_set
+    linked = [u for u in await aadhaar_set(session, member["uan"]) if u["uan"] != member["uan"]]
     for j in await _own_jobs(session, member):
         end = j["date_of_exit"] or today
         out.append({**_employment(j), "service_months": _months(j["date_of_joining"], end),
+                    "primary": j["account_link_id"] == member["primary_account_link_id"],
                     "mark_exit_allowed": bool(not j["date_of_exit"] and j["last_contribution_month"]
                                               and today >= month_after(j["last_contribution_month"], 3)),
                     "transfer_status": ("Transferred to " + j["transferred_to"]) if j["transferred_to"] else
                                        ("Not transferred" if j["date_of_exit"] else "Current member ID")})
-    return envelope({"uan": member["uan"], "member_ids": out,
+    return envelope({"uan": member["uan"], "member_ids": out, "primary_member_id": member["primary_account_link_id"],
+                     "aadhaar_set_uans": sorted(u["uan"] for u in linked),
+                     "note": "Claims and transfers are made against the primary member ID (P): the latest member ID that has "
+                             "received contributions. Transfer the others to it (Form 13).",
                      "total_service_months": sum(x["service_months"] for x in out)})
