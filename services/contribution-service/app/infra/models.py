@@ -106,9 +106,11 @@ class ECRFiling(Base):
 class Challan(Base):
     __tablename__ = "challans"
     trrn: Mapped[str] = mapped_column(String(17), primary_key=True)
-    filing_id: Mapped[str] = mapped_column(ForeignKey("ecr_filings.id"), unique=True)
+    filing_id: Mapped[str | None] = mapped_column(ForeignKey("ecr_filings.id"), unique=True, nullable=True)   # none for a direct challan
     establishment_id: Mapped[str] = mapped_column(ForeignKey("establishments.id"))
     status: Mapped[str] = mapped_column(String(30))
+    kind: Mapped[str] = mapped_column(String(20), server_default="ECR")      # ECR | DIRECT_ADMIN | DIRECT_MISC
+    applied_paise: Mapped[int] = mapped_column(BigInteger, server_default="0")   # a misc challan knocked off against demands
     total_paise: Mapped[int] = mapped_column(BigInteger)
     breakdown: Mapped[dict] = mapped_column(JSON)
     payment_id: Mapped[str | None] = mapped_column(String(80), unique=True)
@@ -199,3 +201,35 @@ class AnnexureKVdrReco(Base):
     result: Mapped[str] = mapped_column(String(20))
     reconciled_by: Mapped[str] = mapped_column(String(80))
     reconciled_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Demand(Base):
+    """A payable demand raised when contributions are paid after the due date: 14B damages or 7Q interest."""
+    __tablename__ = "demands"
+    demand_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    establishment_id: Mapped[str] = mapped_column(String(80), index=True)
+    kind: Mapped[str] = mapped_column(String(20))                   # DAMAGES_14B | INTEREST_7Q
+    trrn: Mapped[str] = mapped_column(String(17))                   # the challan paid late
+    wage_month: Mapped[str] = mapped_column(String(7))
+    amount_paise: Mapped[int] = mapped_column(BigInteger)
+    days_late: Mapped[int] = mapped_column(Integer)
+    working: Mapped[str] = mapped_column(Text)
+    rule_version: Mapped[str] = mapped_column(String(80))
+    state: Mapped[str] = mapped_column(String(20))                  # OPEN | KNOCKED_OFF
+    settled_by: Mapped[str | None] = mapped_column(String(40))      # the knock-off
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class KnockOff(Base):
+    """14B / 7Q knock-off: the DA (Compliance) matches demands with a paid miscellaneous challan; the SS approves."""
+    __tablename__ = "damages_knock_offs"
+    knock_off_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    establishment_id: Mapped[str] = mapped_column(String(80), index=True)
+    trrn: Mapped[str] = mapped_column(String(17))
+    demand_ids: Mapped[list] = mapped_column(JSON)
+    amount_paise: Mapped[int] = mapped_column(BigInteger)
+    state: Mapped[str] = mapped_column(String(20))                  # PROPOSED | APPROVED | REJECTED
+    proposed_by: Mapped[str] = mapped_column(String(80))
+    decided_by: Mapped[str | None] = mapped_column(String(80))
+    note: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

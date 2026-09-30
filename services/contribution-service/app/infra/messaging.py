@@ -16,12 +16,16 @@ async def handle_employer_verified(session, event):
 async def handle_payment_confirmed(session, event):
     p=event["payload"]
     if p.get("purpose") != "CHALLAN": return
-    row=(await session.execute(text("SELECT * FROM challans WHERE trrn=:t FOR UPDATE"), {"t":p["reference_id"]})).mappings().first()
+    lock=" FOR UPDATE" if session.bind.dialect.name=="postgresql" else ""      # SQLite (unit tests) has no row locks
+    row=(await session.execute(text("SELECT * FROM challans WHERE trrn=:t"+lock), {"t":p["reference_id"]})).mappings().first()
     if not row or row["status"] == "PAID": return
     if int(p["amount_paise"]) != int(row["total_paise"]):
         raise ValueError("confirmed payment amount does not match challan total")
-    f=(await session.execute(text("SELECT * FROM ecr_filings WHERE id=:id FOR UPDATE"), {"id":row["filing_id"]})).mappings().first()
-    await session.execute(text("UPDATE challans SET status='PAID',payment_id=:p,paid_at=now() WHERE trrn=:t"), {"p":p["payment_id"],"t":row["trrn"]})
+    if row.get("kind", "ECR") != "ECR":                      # a direct challan: administrative charges, or 14B / 7Q
+        await _post_direct_challan(session, row, p, event)
+        return
+    f=(await session.execute(text("SELECT * FROM ecr_filings WHERE id=:id"+lock), {"id":row["filing_id"]})).mappings().first()
+    await session.execute(text("UPDATE challans SET status='PAID',payment_id=:p,paid_at=:at WHERE trrn=:t"), {"p":p["payment_id"],"t":row["trrn"],"at":datetime.now(UTC)})
     await session.execute(text("UPDATE ecr_filings SET state='PAYMENT_CONFIRMED' WHERE id=:id"), {"id":f["id"]})
     exists=(await session.execute(text("SELECT id FROM journals WHERE business_key=:k"), {"k":p["payment_id"]})).scalar_one_or_none()
     if exists: return
@@ -37,7 +41,7 @@ async def handle_payment_confirmed(session, event):
         gross,epf,eps,edli,ee,eps_share,er=rupees
         for amt,share in ((ee,"employee"),(er,"employer")):
             if amt: postings.append({"account_code":"AC01_EPF","side":"credit","amount_paise":amt*100,"account_link_id":m["account_link_id"],"share":share})
-        dob=m["date_of_birth"]
+        dob=m["date_of_birth"] if not isinstance(m["date_of_birth"],str) else datetime.fromisoformat(m["date_of_birth"]).date()
         import calendar
         last_day=calendar.monthrange(int(f["wage_month"][:4]),int(f["wage_month"][5:7]))[1]
         age=int(f["wage_month"][:4])-dob.year-((int(f["wage_month"][5:7]),last_day)<(dob.month,dob.day))
@@ -58,6 +62,7 @@ async def handle_payment_confirmed(session, event):
     for line in postings:
         await session.execute(text("INSERT INTO journal_lines (journal_id,account_code,side,amount_paise,account_link_id,share) VALUES (:j,:a,:s,:n,:l,:h)"), {"j":jid,"a":line["account_code"],"s":line["side"],"n":line["amount_paise"],"l":line.get("account_link_id"),"h":line.get("share")})
     await session.execute(text("UPDATE ecr_filings SET state='POSTED' WHERE id=:f"), {"f":f["id"]})
+    await _raise_late_payment_demands(session, f, row, rules)
     await add_event(session,producer="contribution-service",event_type="ContributionPosted.v1",aggregate_type="ledger_journal",aggregate_id=jid,
        payload={"journal_id":jid,"payment_id":p["payment_id"],"filing_id":f["id"],"establishment_id":f["establishment_id"],"wage_month":f["wage_month"],"postings":postings},correlation_id=event["correlation_id"])
 
@@ -78,3 +83,38 @@ async def handle_member_change(session, event):
         elif change["parameter"] == "DATE_OF_BIRTH":
             await session.execute(text("UPDATE establishment_members SET date_of_birth=:v WHERE uan=:u"),
                                   {"v": datetime.fromisoformat(change["value"]).date(), "u": p["uan"]})
+
+
+async def _post_direct_challan(session, row, p, event):
+    """A paid direct challan: the bank collection against administrative charges or 14B damages / 7Q interest."""
+    await session.execute(text("UPDATE challans SET status='PAID',payment_id=:p,paid_at=:at WHERE trrn=:t"),
+                          {"p":p["payment_id"],"t":row["trrn"],"at":datetime.now(UTC)})
+    if (await session.execute(text("SELECT id FROM journals WHERE business_key=:k"), {"k":p["payment_id"]})).first():
+        return
+    breakdown=row["breakdown"] if isinstance(row["breakdown"],dict) else json.loads(row["breakdown"])
+    lines=[{"account_code":"BANK_COLLECTION","side":"debit","amount_paise":int(p["amount_paise"])}]
+    lines+=[{"account_code":code,"side":"credit","amount_paise":amt} for code,amt in breakdown.items() if amt]
+    if sum(x["amount_paise"] for x in lines if x["side"]=="credit") != int(p["amount_paise"]):
+        raise ValueError("direct challan amount does not balance")
+    jid=str(uuid.uuid4())
+    await session.execute(text("INSERT INTO journals (id,business_key,kind,occurred_at) VALUES (:id,:k,'DIRECT_CHALLAN',:at)"),
+                          {"id":jid,"k":p["payment_id"],"at":datetime.now(UTC)})
+    for line in lines:
+        await session.execute(text("INSERT INTO journal_lines (journal_id,account_code,side,amount_paise) VALUES (:j,:a,:s,:n)"),
+                              {"j":jid,"a":line["account_code"],"s":line["side"],"n":line["amount_paise"]})
+
+
+async def _raise_late_payment_demands(session, f, challan, rules):
+    """Contributions paid after the due date raise 14B damages and 7Q interest demands (illustrative rates)."""
+    from epfo_persistence.policy import due_date, late_payment_charges
+    paid=datetime.now(UTC).date()
+    charges=late_payment_charges(int(challan["total_paise"]), due_date(f["wage_month"], rules), paid, rules)
+    if not charges["late"]:
+        return
+    for kind,amount in (("DAMAGES_14B",charges["damages_14b_paise"]),("INTEREST_7Q",charges["interest_7q_paise"])):
+        key=f"DEM-{challan['trrn']}-{kind[-3:]}"
+        if amount and not (await session.execute(text("SELECT 1 FROM demands WHERE demand_id=:d"), {"d":key})).first():
+            await session.execute(text("INSERT INTO demands (demand_id,establishment_id,kind,trrn,wage_month,amount_paise,days_late,working,rule_version,state,created_at) "
+                                       "VALUES (:d,:e,:k,:t,:m,:a,:days,:w,:r,'OPEN',:at)"),
+                                  {"d":key,"e":f["establishment_id"],"k":kind,"t":challan["trrn"],"m":f["wage_month"],"a":amount,
+                                   "days":charges["days_late"],"w":charges["working"],"r":rules["rule_version"],"at":datetime.now(UTC)})

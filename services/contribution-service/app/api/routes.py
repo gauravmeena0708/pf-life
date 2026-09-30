@@ -96,17 +96,22 @@ async def _create(body: FilingInput, actor: Actor):
     eid = _establishment(actor)
     if body.format not in ("ECR_TXT", "CSV"):
         raise Problem(400, "/problems/invalid-ecr-format", "Unsupported ECR format")
-    if body.type != "REGULAR":
-        raise Problem(400, "/problems/invalid-ecr-type", "Only REGULAR filings are supported")
+    if body.type not in ("REGULAR", "ARREAR", "SUPPLEMENTARY"):
+        raise Problem(400, "/problems/invalid-ecr-type", "The return type must be REGULAR, ARREAR or SUPPLEMENTARY")
     async with sessions()() as session, session.begin():
         est = (await session.execute(text("SELECT status FROM establishments WHERE id=:e"), {"e": eid})).scalar_one_or_none()
         if est != "VERIFIED":
             raise Problem(409, "/problems/establishment-not-verified", "Establishment is not verified")
         prior_rows = (await session.execute(text("SELECT * FROM ecr_filings WHERE establishment_id=:e AND wage_month=:m ORDER BY version DESC"), {"e": eid, "m": body.wage_month})).mappings().all()
-        if any(x["state"] not in ("DRAFT", "VALIDATION_FAILED", "VALIDATED", "SUPERSEDED") for x in prior_rows):
-            raise Problem(409, "/problems/wage-month-already-filed", "Wage month already filed", "Use a supplementary return.", fix="use a supplementary return")
-        for old in prior_rows:
-            if old["state"] in ("DRAFT", "VALIDATION_FAILED", "VALIDATED"):
+        regular = [x for x in prior_rows if x["filing_type"] == "REGULAR"]
+        if body.type == "REGULAR":
+            if any(x["state"] not in OPEN_DRAFT + ("SUPERSEDED", "CANCELLED", "REJECTED") for x in regular):
+                raise Problem(409, "/problems/wage-month-already-filed", "Wage month already filed", "Use a supplementary return.", fix="use a supplementary return")
+        elif not any(x["state"] == "POSTED" for x in regular):
+            raise Problem(409, "/problems/regular-return-not-posted", f"File and pay the regular return for {body.wage_month} first",
+                          f"An {body.type.lower()} return adds to a posted regular return of the same wage month.")
+        for old in prior_rows:                                   # an unsubmitted draft of the same type is replaced
+            if old["filing_type"] == body.type and old["state"] in OPEN_DRAFT:
                 await session.execute(text("UPDATE ecr_filings SET state='SUPERSEDED' WHERE id=:id"), {"id": old["id"]})
         ver = (max((x["version"] for x in prior_rows), default=0) + 1)
         fid = str(uuid.uuid4()); rv = (await rules_on(session, wage_month_start(body.wage_month)))["rule_version"]
@@ -114,6 +119,8 @@ async def _create(body: FilingInput, actor: Actor):
                               {"id": fid, "e": eid, "m": body.wage_month, "t": body.type, "f": body.format, "c": body.content, "v": ver, "p": actor.subject, "r": rv})
         filing = await _fetch_filing(session, fid, eid)
         report = await _validation(session, filing)
+        if body.type != "REGULAR":
+            report = await _check_additional_return(session, filing, report)
         state = report["state"]
         await session.execute(text("UPDATE ecr_filings SET state=:s, validation_report=:r, rule_version=:v WHERE id=:id"), {"s": state, "r": json.dumps(report, default=str), "v": report["rule_version"], "id": fid})
         if report["valid"]:
@@ -122,6 +129,33 @@ async def _create(body: FilingInput, actor: Actor):
         await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="ecr.create", target_type="ecr_filing", target_id=fid, detail=f"version={ver}; rule_version={rv}")
         filing["state"] = state
         return {"filing": _filing_json(filing), "validation_report": report}
+
+
+OPEN_DRAFT = ("DRAFT", "VALIDATION_FAILED", "VALIDATED")
+
+
+async def _check_additional_return(session, filing: dict[str, Any], report: dict[str, Any]) -> dict[str, Any]:
+    """A supplementary return adds members missed in the posted returns of the month; an arrear return pays
+    wage-revision arrears for members already in them. Warnings about the whole workforce do not apply."""
+    posted = (await session.execute(text("SELECT content, format FROM ecr_filings WHERE establishment_id=:e AND wage_month=:m AND state='POSTED'"),
+                                    {"e": filing["establishment_id"], "m": filing["wage_month"]})).mappings().all()
+    already = {row["UAN"] for f in posted for row in parse(f["content"], f["format"])[0]}
+    issues = [x for x in report["issues"] if x["code"] not in ("W-MISSING-MEMBER", "W-HEADCOUNT-CHANGE")]
+    for i, row in enumerate(parse(filing["content"], filing["format"])[0], 1):
+        uan = row.get("UAN", "")
+        if filing["filing_type"] == "SUPPLEMENTARY" and uan in already:
+            issues.append({"row": i, "uan_masked": "*" * 8 + uan[-4:], "field": "UAN", "code": "E-SUPP-ALREADY-FILED", "severity": "error",
+                           "message": "This member is already in a posted return for the wage month.", "expected": None, "actual": None,
+                           "fix": "Leave the member out, or file an arrear return for a wage revision.", "auto_fixable": False})
+        if filing["filing_type"] == "ARREAR" and uan not in already:
+            issues.append({"row": i, "uan_masked": "*" * 8 + uan[-4:], "field": "UAN", "code": "E-ARREAR-NOT-FILED", "severity": "error",
+                           "message": "Arrears are paid only for a member in a posted return of the wage month.", "expected": None, "actual": None,
+                           "fix": "File a supplementary return for a member who was missed.", "auto_fixable": False})
+    errors = sum(x["severity"] == "error" for x in issues)
+    report = {**report, "issues": issues, "valid": errors == 0, "state": "VALIDATED" if errors == 0 else "VALIDATION_FAILED"}
+    report["summary"] = {**report["summary"], "warnings": sum(x["severity"] == "warning" for x in issues),
+                         "rows_with_errors": len({x["row"] for x in issues if x["severity"] == "error"})}
+    return report
 
 
 def _filing_json(f):
@@ -146,6 +180,8 @@ async def validate_filing(filingId: str, actor: Actor = Depends(EMPLOYER)):
         if f["state"] not in ("DRAFT", "VALIDATION_FAILED", "VALIDATED"):
             raise Problem(409, "/problems/invalid-state", "This filing can no longer be validated")
         report = await _validation(session, f)
+        if f["filing_type"] != "REGULAR":
+            report = await _check_additional_return(session, f, report)
         await session.execute(text("UPDATE ecr_filings SET state=:s, validation_report=:r, rule_version=:v WHERE id=:id"), {"s": report["state"], "r": json.dumps(report, default=str), "v": report["rule_version"], "id": filingId})
         if report["valid"]:
             await add_event(session, producer="contribution-service", event_type="ECRValidated.v1", aggregate_type="ecr_filing", aggregate_id=filingId,

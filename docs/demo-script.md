@@ -298,6 +298,20 @@ simulation; point out that the dialog says exactly what is being authorised (act
    his formula pension. **`do-caseworker`** sees it under *Form 10D pension claims* and it runs desk by desk as in
    "Pension settlement"; the PPO is issued in the widow's name.
 
+## Arrear and supplementary returns, cancelling a TRRN, 14B / 7Q
+*Tests: `tests/e2e/test_returns_and_demands.py`, `services/contribution-service/tests/test_returns.py`*
+
+1. After Journey A, **`emp-preparer` → Payments › ECR Upload**: choose *Arrear* for the month just paid (a member of
+   that return, arrear wages) or *Supplementary* (a member left out). Before the regular return is paid both are
+   refused.
+2. **`emp-signatory`**: approve and submit it, then *Cancel TRRN* (one-time code) — the wage month is free again.
+3. **Payments › Return monthly dashboard**: each month, its returns, due date and whether it was paid late.
+   *Demands*: 14B damages and 7Q interest raised by the late payment. *Direct Challan*: fill from the open demands,
+   raise the challan, pay it on the ECR page.
+4. **`ro-da-compliance` → Returns office**: knock the demands off against the paid challan; **`ro-ss`** approves.
+5. **`ro-cashier`**: pay a challan with the scenario *Stuck at the bank*, then *Reject stuck payment* here; the
+   employer can pay again. **`do-caseworker`** can reject a submitted, unpaid return.
+
 ## Policy changes that move money — interest, TDS and pensions
 *Tests: `tests/e2e/test_policy_money.py`, `services/contribution-service/tests/test_interest.py`,
 `services/claim-service/tests/test_tds.py`, `services/pension-service/tests/test_pensions.py`*

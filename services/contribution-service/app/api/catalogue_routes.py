@@ -10,7 +10,17 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['POST /public/trrn-status-lookups', 'GET /employers/me/challans', 'GET /employers/me/ecr-filings', 'POST /employers/me/ecr-filings', 'GET /members/me/passbook', 'GET /office/accounts/inoperative', 'GET /office/accounts/interest-postings', 'POST /office/accounts/interest-postings', 'POST /public/demo-calculations/epf', 'POST /partners/sandbox/payroll/ecr-filings', 'GET /employers/me/challans/{trrn}', 'GET /employers/me/ecr-filings/{filingId}', 'GET /employers/me/challans/{trrn}/receipt', 'POST /employers/me/ecr-filings/{filingId}/approvals', 'POST /employers/me/ecr-filings/{filingId}/submissions', 'POST /employers/me/ecr-filings/{filingId}/validations', 'GET /employers/me/members/{uan}/contribution-ledger', 'GET /members/me/accounts/{accountLinkId}/passbook', 'GET /members/me/transfers/{transferId}/annexure-k', 'POST /office/annexure-k-files/{annexureId}/vdr-reconciliations']
+OPERATIONS = ['GET /office/damages-knock-offs', 'GET /office/ecr-filings', 'POST /public/trrn-status-lookups', 'GET /employers/me/challans', 'GET /employers/me/demands', 'POST /employers/me/direct-challans', 'GET /employers/me/ecr-filings', 'POST /employers/me/ecr-filings', 'GET /members/me/passbook', 'GET /office/accounts/inoperative', 'GET /office/accounts/interest-postings', 'POST /office/accounts/interest-postings', 'POST /public/demo-calculations/epf', 'GET /employers/me/returns/dashboard', 'POST /partners/sandbox/payroll/ecr-filings', 'GET /employers/me/challans/{trrn}', 'GET /employers/me/ecr-filings/{filingId}', 'GET /employers/me/challans/{trrn}/receipt', 'POST /employers/me/ecr-filings/{filingId}/approvals', 'POST /employers/me/ecr-filings/{filingId}/cancellations', 'POST /employers/me/ecr-filings/{filingId}/submissions', 'POST /employers/me/ecr-filings/{filingId}/validations', 'GET /employers/me/members/{uan}/contribution-ledger', 'GET /members/me/accounts/{accountLinkId}/passbook', 'GET /members/me/transfers/{transferId}/annexure-k', 'POST /office/annexure-k-files/{annexureId}/vdr-reconciliations', 'POST /office/damages-knock-offs/{knockOffId}/approvals', 'POST /office/ecr-filings/{filingId}/payment-rejections', 'POST /office/ecr-filings/{filingId}/rejections', 'POST /office/establishments/{estId}/damages-knock-offs']
+
+@router.api_route("/api/v1/office/damages-knock-offs", methods=["GET"], include_in_schema=False)
+async def get_office_damages_knock_offs(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Knock-offs, open demands and paid miscellaneous challans with a balance")
+
+
+@router.api_route("/api/v1/office/ecr-filings", methods=["GET"], include_in_schema=False)
+async def get_office_ecr_filings(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Returns submitted but not yet paid (to reject, or to reject a stuck payment)")
+
 
 @router.api_route("/api/v1/public/trrn-status-lookups", methods=["POST"], include_in_schema=False)
 async def post_public_trrn_status_lookups(actor: Actor = Depends(require_actor)) -> None:
@@ -20,6 +30,16 @@ async def post_public_trrn_status_lookups(actor: Actor = Depends(require_actor))
 @router.api_route("/api/v1/employers/me/challans", methods=["GET"], include_in_schema=False)
 async def get_employers_me_challans(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Challan list")
+
+
+@router.api_route("/api/v1/employers/me/demands", methods=["GET"], include_in_schema=False)
+async def get_employers_me_demands(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Payable demands: 14B damages, 7Q interest, admin charges, higher-pension dues (created from complian")
+
+
+@router.api_route("/api/v1/employers/me/direct-challans", methods=["POST"], include_in_schema=False)
+async def post_employers_me_direct_challans(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Direct Challan: administrative / inspection charges challan, or miscellaneous challan for 14B damage")
 
 
 @router.api_route("/api/v1/employers/me/ecr-filings", methods=["GET"], include_in_schema=False)
@@ -57,6 +77,11 @@ async def post_public_demo_calculations_epf(actor: Actor = Depends(require_actor
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Illustrative EPF contribution calculator")
 
 
+@router.api_route("/api/v1/employers/me/returns/dashboard", methods=["GET"], include_in_schema=False)
+async def get_employers_me_returns_dashboard(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Return monthly dashboard by wage month")
+
+
 @router.api_route("/api/v1/partners/sandbox/payroll/ecr-filings", methods=["POST"], include_in_schema=False)
 async def post_partners_sandbox_payroll_ecr_filings(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "B2B payroll API ECR upload")
@@ -80,6 +105,11 @@ async def get_employers_me_challans_trrn_receipt(actor: Actor = Depends(require_
 @router.api_route("/api/v1/employers/me/ecr-filings/{filingId}/approvals", methods=["POST"], include_in_schema=False)
 async def post_employers_me_ecr_filings_filingId_approvals(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Signatory approval")
+
+
+@router.api_route("/api/v1/employers/me/ecr-filings/{filingId}/cancellations", methods=["POST"], include_in_schema=False)
+async def post_employers_me_ecr_filings_filingId_cancellations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Cancel an unpaid TRRN and release the wage-month lock")
 
 
 @router.api_route("/api/v1/employers/me/ecr-filings/{filingId}/submissions", methods=["POST"], include_in_schema=False)
@@ -110,3 +140,23 @@ async def get_members_me_transfers_transferId_annexure_k(actor: Actor = Depends(
 @router.api_route("/api/v1/office/annexure-k-files/{annexureId}/vdr-reconciliations", methods=["POST"], include_in_schema=False)
 async def post_office_annexure_k_files_annexureId_vdr_reconciliations(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "ANNEXURE K VDR RECO — match the Annexure K amount with the VDR receipt")
+
+
+@router.api_route("/api/v1/office/damages-knock-offs/{knockOffId}/approvals", methods=["POST"], include_in_schema=False)
+async def post_office_damages_knock_offs_knockOffId_approvals(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "SS approves the knock-off")
+
+
+@router.api_route("/api/v1/office/ecr-filings/{filingId}/payment-rejections", methods=["POST"], include_in_schema=False)
+async def post_office_ecr_filings_filingId_payment_rejections(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Cash / Accounts rejects an unpaid or erroneous challan stuck in pending bank status (tracker: 'Unabl")
+
+
+@router.api_route("/api/v1/office/ecr-filings/{filingId}/rejections", methods=["POST"], include_in_schema=False)
+async def post_office_ecr_filings_filingId_rejections(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Reject an ECR before posting")
+
+
+@router.api_route("/api/v1/office/establishments/{estId}/damages-knock-offs", methods=["POST"], include_in_schema=False)
+async def post_office_establishments_estId_damages_knock_offs(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Knock off auto-calculated 14B / 7Q against a miscellaneous challan (FO INTERFACE >> 14B/7Q Knock Off")

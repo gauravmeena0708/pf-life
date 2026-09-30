@@ -159,12 +159,12 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
 | `POST /employers/me/ecr-filings` 💰 (`type=REGULAR`) | Create **regular** monthly ECR (upload / wizard) | W | 1 | contribution |
-| `POST /employers/me/ecr-filings` 💰 (`type=ARREAR`) | **Arrear ECR** (wage-revision arrears) | P | 2 | contribution |
-| `POST /employers/me/ecr-filings` 💰 (`type=SUPPLEMENTARY`) | **Supplementary / revised ECR** for missed members | P | 2 | contribution |
+| `POST /employers/me/ecr-filings` 💰 (`type=ARREAR`) | **Arrear ECR** (wage-revision arrears) | W | 1 | contribution |
+| `POST /employers/me/ecr-filings` 💰 (`type=SUPPLEMENTARY`) | **Supplementary / revised ECR** for missed members | W | 1 | contribution |
 | `POST /employers/me/ecr-filings/{filingId}/validations` | Schema + business validation | W | 1 | contribution |
 | `POST /employers/me/ecr-filings/{filingId}/approvals` 🔐 | Signatory approval | W | 1 | contribution |
 | `POST /employers/me/ecr-filings/{filingId}/submissions` 💰🔐 | Submit → generate TRRN | W | 1 | contribution |
-| `POST /employers/me/ecr-filings/{filingId}/cancellations` 💰🔐 | Cancel an **unpaid** TRRN and release the wage-month lock | P | 2 | contribution |
+| `POST /employers/me/ecr-filings/{filingId}/cancellations` 💰🔐 | Cancel an **unpaid** TRRN and release the wage-month lock | W | 1 | contribution |
 | `GET /employers/me/ecr-filings/{filingId}` | Filing detail and status | W | 1 | contribution |
 | `GET /employers/me/ecr-filings?wageMonth=&type=` | Return filing history | W | 1 | contribution |
 | `GET /employers/me/challans` | Challan list | W | 1 | contribution |
@@ -172,7 +172,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /employers/me/challans/{trrn}/receipt` | Payment receipt / CRN | W | 1 | contribution |
 | `POST /employers/me/challans/{trrn}/payment-intents` 💰🔐 (`channel=NET_BANKING`) | Pay challan via mock bank | M | 1 | payment-simulator |
 | `POST /employers/me/challans/{trrn}/payment-intents` 💰🔐 (`channel=BANK_COUNTER`) | **Cash / bank-counter payment** channel — whether it is still permitted, and for what, is unconfirmed | ? | 3 | payment-simulator |
-| `GET /employers/me/demands` | Payable demands: 14B damages, 7Q interest, admin charges, higher-pension dues (created from compliance / pension events) | P | 2 | contribution |
+| `GET /employers/me/demands` | Payable demands: 14B damages, 7Q interest, admin charges, higher-pension dues (created from compliance / pension events) | W | 1 | contribution |
 | `POST /employers/me/demands/{demandId}/payment-intents` 💰🔐 | Pay a demand (**14B / 7Q / admin charges**) | P | 2 | payment-simulator |
 | `GET /employers/me/compliance-summary` | Month-wise filing / payment compliance for this establishment | P | 2 | reporting |
 | `POST /integrations/mock-bank/payment-confirmations` 💰 | Signed bank confirmation callback | M | 1 | payment-simulator |
@@ -190,7 +190,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/vdr-entries/{vdrId}/special-credits` 💰🔐 | **VDR Special** — exceptional direct credit to a member account, with evidence and competent-authority approval. EPFO treats it as a high-risk process; semantics unconfirmed | ? | 3 | contribution |
 | `POST /office/ledger-adjustments` 💰🔐 (`type=APPENDIX_E`) | **Appendix E** — field-office adjustment of a member's opening balances (taxable / non-taxable / total), also used for PF→EPS diversion. Not an employer remittance | ? | 2 | contribution |
 | `POST /office/ledger-adjustments/{adjustmentId}/approvals` 🔐 | Second approval of a ledger adjustment | ? | 2 | contribution |
-| `POST /office/ecr-filings/{filingId}/rejections` 🔐 | Reject an ECR **before** posting | P | 2 | contribution |
+| `GET /office/ecr-filings` | Returns submitted but not yet paid (to reject, or to reject a stuck payment) | W | 1 | contribution |
+| `POST /office/ecr-filings/{filingId}/rejections` 🔐 | Reject an ECR **before** posting | W | 1 | contribution |
 | `GET /office/ecr-filings?state=PENDING_OFFICE_APPROVAL` | **ECR Approval** queue (top menu on the APFC login; exact scope not yet confirmed — see §16) | ? | 3 | contribution |
 | `POST /office/ecr-filings/{filingId}/approvals` 🔐 | Office approval of an ECR held for approval (*ECR Approval* menu; scope to be confirmed) | ? | 3 | contribution |
 | `POST /office/vdr-entries/{vdrId}/rejections` 🔐 | **VDR Rejection** — reject a VDR entry with a reason (top menu *VDR Rejection*) | P | 2 | contribution |
@@ -202,10 +203,11 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `GET /employers/me/returns/dashboard` | Return monthly dashboard by wage month | P | 2 | contribution |
-| `POST /employers/me/direct-challans` 💰🔐 | **Direct Challan**: administrative / inspection charges challan, or miscellaneous challan for 14B damages and 7Q interest (Payments > ECR/Return filing > Direct Challan > Challan Entry) | P | 2 | contribution |
-| `POST /office/establishments/{estId}/damages-knock-offs` 💰🔐 | Knock off auto-calculated 14B / 7Q against a miscellaneous challan (FO INTERFACE >> 14B/7Q Knock Off) | P | 2 | contribution |
-| `POST /office/damages-knock-offs/{knockOffId}/approvals` 🔐 | SS approves the knock-off | P | 2 | contribution |
+| `GET /employers/me/returns/dashboard` | Return monthly dashboard by wage month | W | 1 | contribution |
+| `POST /employers/me/direct-challans` 💰🔐 | **Direct Challan**: administrative / inspection charges challan, or miscellaneous challan for 14B damages and 7Q interest (Payments > ECR/Return filing > Direct Challan > Challan Entry) | W | 1 | contribution |
+| `POST /office/establishments/{estId}/damages-knock-offs` 💰🔐 | Knock off auto-calculated 14B / 7Q against a miscellaneous challan (FO INTERFACE >> 14B/7Q Knock Off) | W | 1 | contribution |
+| `GET /office/damages-knock-offs` | Knock-offs, open demands and paid miscellaneous challans with a balance | W | 1 | contribution |
+| `POST /office/damages-knock-offs/{knockOffId}/approvals` 🔐 | SS approves the knock-off | W | 1 | contribution |
 | `POST /office/vdr-entries/{vdrId}/eo-certifications` 🔐 | Enforcement Officer certifies a revised ECR in the VDR-ECR correction process | ? | 3 | contribution |
 | `PUT /ho/config/interest-rates/{financialYear}` 🔐 | Record the approved annual interest rate (CBT recommendation, Ministry concurrence). In the POC the rate is a field of the rule set (`interest.rates_bp`), published through policy administration | P | 2 | contribution |
 
@@ -214,7 +216,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `POST /office/ecr-filings/{filingId}/payment-rejections` 🔐 | Cash / Accounts rejects an unpaid or erroneous challan stuck in pending bank status (tracker: "Unable to reject ecr payment") | P | 2 | contribution |
+| `POST /office/ecr-filings/{filingId}/payment-rejections` 🔐 | Cash / Accounts rejects an unpaid or erroneous challan stuck in pending bank status (tracker: "Unable to reject ecr payment") | W | 1 | contribution |
 | `POST /office/transfers/{transferId}/recredits` 💰🔐 | Recredit a rejected transfer-in back to the member ledger (VDR recredit; tracker: "Recredit of transfer-in rejected cases") | P | 2 | contribution |
 
 ## 6. Member self-service

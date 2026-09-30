@@ -841,6 +841,18 @@ stakeholders:
     step_up: false
     via:
     - F01.establishment_owner
+  - endpoint: GET /employers/me/demands
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.establishment_owner
+  - endpoint: GET /employers/me/returns/dashboard
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.establishment_owner
   employer.signatory:
   - endpoint: GET /employers/me/ownership-declaration
     status: W
@@ -968,6 +980,12 @@ stakeholders:
     step_up: true
     via:
     - F02.jd_attest
+  - endpoint: GET /employers/me/returns/dashboard
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F03.ecr_approve
   - endpoint: GET /employers/me/ecr-filings
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
@@ -993,7 +1011,7 @@ stakeholders:
     via:
     - F03.ecr_approve
   - endpoint: POST /employers/me/ecr-filings/{filingId}/cancellations
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:
@@ -1023,13 +1041,13 @@ stakeholders:
     via:
     - F03.pay
   - endpoint: POST /employers/me/direct-challans
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:
     - F03.direct_challan
   - endpoint: GET /employers/me/demands
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
@@ -1258,7 +1276,7 @@ stakeholders:
     via:
     - F03.ecr_prepare
   - endpoint: GET /employers/me/returns/dashboard
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
@@ -1423,8 +1441,14 @@ stakeholders:
     step_up: true
     via:
     - F03.ledger_exception
+  - endpoint: GET /office/ecr-filings
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F03.ecr_reject
   - endpoint: POST /office/ecr-filings/{filingId}/rejections
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -1634,8 +1658,14 @@ stakeholders:
     step_up: false
     via:
     - F01.olre_scrutiny
+  - endpoint: GET /office/damages-knock-offs
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F03.knock_off
   - endpoint: POST /office/establishments/{estId}/damages-knock-offs
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -1683,8 +1713,14 @@ stakeholders:
     step_up: false
     via:
     - F02.jd_verify
+  - endpoint: GET /office/damages-knock-offs
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F03.knock_off_approve
   - endpoint: POST /office/damages-knock-offs/{knockOffId}/approvals
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -1873,7 +1909,7 @@ stakeholders:
     via:
     - F03.ledger_exception_approve
   - endpoint: GET /office/ecr-filings
-    status: '?'
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -2140,8 +2176,14 @@ stakeholders:
     step_up: true
     via:
     - F03.receipts
+  - endpoint: GET /office/ecr-filings
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F03.payment_reject
   - endpoint: POST /office/ecr-filings/{filingId}/payment-rejections
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:

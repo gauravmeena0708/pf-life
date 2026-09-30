@@ -237,6 +237,29 @@ def family_pension_on(salary_paise: int, service_months: int, relation: str, rul
     return {"eligible": True, "monthly_paise": monthly, "service_years": years, "relation": relation, "working": working}
 
 
+def due_date(wage_month: str, rules: dict[str, Any]) -> date:
+    """The day contributions for a wage month (YYYY-MM) are due: due_day of the following month."""
+    y, m = int(wage_month[:4]), int(wage_month[5:7])
+    y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+    return date(y, m, section(rules, "late_payment")["due_day"])
+
+
+def late_payment_charges(amount_paise: int, due: date, paid: date, rules: dict[str, Any]) -> dict[str, Any]:
+    """14B damages and 7Q interest on an amount paid after its due date (illustrative rates from the rules)."""
+    lp = section(rules, "late_payment")
+    days = (paid - due).days
+    if days <= 0 or amount_paise <= 0:
+        return {"late": False, "days_late": 0, "damages_14b_paise": 0, "interest_7q_paise": 0, "working": "Paid on time"}
+    months = (days + 29) // 30
+    band = next(b for b in lp["damages_14b_bands"] if b["upto_months"] is None or months <= b["upto_months"])
+    damages = round_rupee_half_up(amount_paise * band["rate_bp_pa"] * days // 365)
+    interest = round_rupee_half_up(amount_paise * lp["interest_7q_rate_bp_pa"] * days // 365)
+    return {"late": True, "days_late": days, "months_late": months, "damages_rate_bp_pa": band["rate_bp_pa"],
+            "interest_rate_bp_pa": lp["interest_7q_rate_bp_pa"], "damages_14b_paise": damages, "interest_7q_paise": interest,
+            "working": f"{days} days late on ₹{amount_paise // 100:,}: 14B at {band['rate_bp_pa'] / 100:g}% a year = ₹{damages // 100:,}; "
+                       f"7Q at {lp['interest_7q_rate_bp_pa'] / 100:g}% a year = ₹{interest // 100:,}"}
+
+
 def edli_benefit(average_wages_paise: int, average_balance_paise: int, service_months: int, rules: dict[str, Any]) -> dict[str, Any]:
     """EDLI assurance benefit on a member's death (illustrative formula from the rules)."""
     e = section(rules, "death_claims")["edli"]
@@ -300,6 +323,19 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
                 problems.append(f"interest: {fy} is not a financial year like 2025-26")
             if not _whole(rate, 0, 2000):
                 problems.append(f"interest rate for {fy} must be between 0 and 2000 basis points (20%)")
+    if "late_payment" in document:
+        lp = document["late_payment"] or {}
+        if not _whole(lp.get("due_day"), 1, 28):
+            problems.append("late_payment.due_day must be a day between 1 and 28")
+        bands = lp.get("damages_14b_bands")
+        if not isinstance(bands, list) or not bands or bands[-1].get("upto_months") is not None:
+            problems.append("late_payment.damages_14b_bands must be a list ending with a band for any longer delay (upto_months: null)")
+        else:
+            for b in bands:
+                if not _whole(b.get("rate_bp_pa"), 0, 10000):
+                    problems.append("late_payment.damages_14b_bands rates must be between 0 and 10000 basis points a year")
+        if not _whole(lp.get("interest_7q_rate_bp_pa"), 0, 10000):
+            problems.append("late_payment.interest_7q_rate_bp_pa must be between 0 and 10000 basis points a year")
     if "tds" in document:
         t = document["tds"] or {}
         if not isinstance(t.get("applies_to_claim_types"), list):

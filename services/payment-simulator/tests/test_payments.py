@@ -181,3 +181,32 @@ def test_claim_return_names_the_claim(ctx):
     [(payload,)] = q("SELECT payload FROM outbox")
     p = json.loads(payload)["envelope"]["payload"]
     assert routes_done == 1 and p["reference"] == "CLM-2" and p["purpose"] == "CLAIM_SETTLEMENT"
+
+
+def _dispatch(routes, event):
+    async def run():
+        import app.infra.db as db
+        async with db.sessions()() as s, s.begin():
+            await routes.dispatch(s, event)
+    asyncio.run(run())
+
+
+def test_a_stuck_payment_is_rejected_by_the_office_and_paid_again(ctx):
+    client, routes, q, _ = ctx
+    r = client.post(f"/api/v1/employers/me/challans/{TRRN}/payment-intents", json={"channel": "NET_BANKING", "demo_scenario": "STUCK"},
+                    headers=hdr(key="k1", step_up=STEP))
+    assert r.status_code == 202
+    assert asyncio.run(routes.process_due_payments()) == 0                       # the bank never answers
+    _dispatch(routes, {"event_type": "ChallanStatusChanged.v1", "payload": {"trrn": TRRN, "status": "PAYMENT_REJECTED", "reason": "stuck"}})
+    assert q("SELECT status FROM payment_intents") == [("REJECTED",)] and q("SELECT status FROM payables")[0][0] == "FAILED"
+    assert pay(client, key="k2", step_up=STEP).status_code == 202                   # paid again
+
+
+def test_direct_challans_become_payable_and_cancelled_ones_cannot_be_paid(ctx):
+    client, routes, q, _ = ctx
+    _dispatch(routes, {"event_type": "ChallanGenerated.v1", "payload": {"trrn": "TRRN0000000000099", "establishment_id": EST,
+                                                                         "kind": "DIRECT_ADMIN", "total_paise": 50000, "reference_id": "TRRN0000000000099"}})
+    assert q("SELECT total_paise, status FROM payables WHERE trrn='TRRN0000000000099'") == [(50000, "DUE")]
+    _dispatch(routes, {"event_type": "ChallanStatusChanged.v1", "payload": {"trrn": TRRN, "status": "CANCELLED", "reason": "wrong month"}})
+    r = pay(client, key="k3", step_up=STEP)
+    assert r.status_code == 409 and r.json()["type"] == "/problems/challan-cancelled"

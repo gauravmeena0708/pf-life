@@ -22,6 +22,8 @@ import { RegistrationPage } from "./features/employer/RegistrationPage";
 import { MemberActionsPage } from "./features/employer/MemberActionsPage";
 import { EstablishmentPage } from "./features/employer/EstablishmentPage";
 import { OlrePage } from "./features/office/OlrePage";
+import { ReturnsPage } from "./features/employer/ReturnsPage";
+import { ReturnsOfficePage } from "./features/office/ReturnsOfficePage";
 import { WorkQueuePage } from "./features/office/WorkQueuePage";
 import { CasePage } from "./features/office/CasePage";
 import { ClaimToolsPage } from "./features/office/ClaimToolsPage";
@@ -118,6 +120,8 @@ export function App() {
             <Route path="/employer/members" element={<MemberActionsPage />} />
             <Route path="/employer/establishment" element={<EstablishmentPage />} />
             <Route path="/office/olre" element={<OlrePage />} />
+            <Route path="/employer/returns" element={<ReturnsPage />} />
+            <Route path="/office/returns" element={<ReturnsOfficePage />} />
             <Route path="/office/work-queue" element={<WorkQueuePage />} />
             <Route path="/office/cases/:caseId" element={<CasePage />} />
             <Route path="/public" element={<PublicLookups />} />

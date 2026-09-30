@@ -16,7 +16,8 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.5d** | Claim scrutiny as the CITES manuals set it: the Claim Approval Docket at every level, recommend to approve / reject with the account status, rejection only at the final level (an intermediate "Recommend to Reject" returns to the initiator), Start-Stop Claim, one-time code on every officer action | **Done** (30 Sep 2026) |
 | **P2.6a** | Establishment record and changes: KYC through mock registries, bank accounts, exemption, branches (Form 2A), Form 5A, contractors of a principal employer; profile and configuration changes as requests the office decides; OLRE scrutiny (DA Compliance, e-file) and the APFC's coverage decision | **Done** (30 Sep 2026) |
 | **P2.6b** | Signatory request / revoke letters, DSC and e-sign registration with the office's approval (Authorized eSign List), the signatory's pending approvals; family pension (Form 10D by a widow / widower or child) | **Done** (30 Sep 2026) |
-| P2.7 | Returns, receipts and ledger: arrear / supplementary ECR, demands, direct challans, 14B/7Q knock-offs, VDR rejection, reversals, recredits | |
+| **P2.7a** | Returns and payments: arrear and supplementary returns, cancelling an unpaid TRRN, the office rejecting a return before posting or a payment stuck at the bank, the returns dashboard, 14B / 7Q demands on late payment, direct challans (administrative charges; miscellaneous 14B / 7Q) and their knock-off (DA Compliance → SS) | **Done** (30 Sep 2026) |
+| P2.7b | Ledger: unreconciled receipts and TRRN adjustment, VDR rejection, journal reversals, transfer-in recredits, Appendix E (with the CITES manual's four types), annual statement and taxable interest, Form 10C cash withdrawal, principal-employer tags, exempted past accumulations | Next |
 | P2.8 | The rest: compliance and VISHWAS, international workers, grievance extras, public lookups, audit, NDC, HRM, DO dashboards | |
 
 Operations marked **?** (scope unconfirmed, e.g. *ECR Approval*, *VDR Member Beneficiary*) wait until their
@@ -175,3 +176,20 @@ Source: the CITES user manuals (`../manuals`, reviewed in `docs/reviews/cites-ma
   a quarter of that for a child, with minimums; no minimum service). The PPO is issued in the claimant's name.
 - Web: the Authorized eSign List on *Establishment*, pending approvals on *Member actions*, the office's DSC /
   e-sign decisions on *OLRE* (drafted by codex, reviewed), and the family-pension section on the claimant page.
+
+## P2.7a — how it is built
+
+- contribution-service: `type=ARREAR | SUPPLEMENTARY` returns need the month's regular return posted; a
+  supplementary return may only carry members missing from the posted returns, an arrear return only members in
+  them (`E-SUPP-ALREADY-FILED`, `E-ARREAR-NOT-FILED`); warnings about the whole workforce do not apply to them.
+- An unpaid TRRN is cancelled by the signatory (one-time code bound to the amount) and the wage month is free
+  again; the DA (Accounts) rejects a submitted return before it is paid; Cash rejects a payment stuck at the bank
+  (the mock bank's new `STUCK` scenario never answers) and the challan can be paid again.
+  `ChallanStatusChanged.v1` tells the mock bank; `ChallanGenerated.v1` makes a direct challan payable.
+- Late payment: posting a return paid after the due date (`late_payment.due_day` of the next month) raises a 14B
+  damages demand (yearly rate by months of delay) and a 7Q interest demand (yearly rate by days) — new rule section
+  `late_payment`, validated and publishable. The employer pays them with a miscellaneous direct challan (posted to
+  `DAMAGES_14B` / `INTEREST_7Q`); the DA (Compliance) knocks the demands off against it and the SS approves.
+  Administrative charges go by a direct challan too (`AC02_ADMIN`).
+- The returns dashboard shows each wage month: the regular return, arrear and supplementary returns, due date,
+  paid late or not.

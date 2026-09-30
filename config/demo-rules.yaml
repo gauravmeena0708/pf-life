@@ -110,3 +110,15 @@ grievances:
   categories: [CLAIM_DELAY, CLAIM_REJECTION, PASSBOOK, KYC, EMPLOYER, OTHER]
   sla_days: {RO: 15, ZO: 10, HO: 7}
   reopen_window_days: 30
+late_payment:
+  # Contributions for a wage month are due by due_day of the next month (ILLUSTRATIVE). A later payment raises
+  # demands: 14B damages at the band's yearly rate for the months of delay, and 7Q interest at a yearly rate for
+  # the days of delay, both on the amount paid late. The employer pays them with a miscellaneous direct challan,
+  # which the office knocks off against the demands.
+  due_day: 15
+  damages_14b_bands:                      # up to N months late (null = beyond) -> yearly rate
+    - {upto_months: 2, rate_bp_pa: 500}
+    - {upto_months: 4, rate_bp_pa: 1000}
+    - {upto_months: 6, rate_bp_pa: 1500}
+    - {upto_months: null, rate_bp_pa: 2500}
+  interest_7q_rate_bp_pa: 1200

@@ -1,13 +1,13 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState, type FormEvent } from "react";
 
-import { api, getCurrentPolicy, type CurrentPolicy, command, newIdempotencyKey, rupees, type Envelope } from "../../api/client";
+import { api, getCurrentPolicy, getSession, type CurrentPolicy, command, newIdempotencyKey, rupees, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 
-type FilingState = "DRAFT" | "VALIDATION_FAILED" | "VALIDATED" | "APPROVED" | "SUBMITTED" | "PAYMENT_PENDING" | "PAYMENT_CONFIRMED" | "PAYMENT_FAILED" | "POSTED" | "SUPERSEDED";
+type FilingState = "DRAFT" | "VALIDATION_FAILED" | "VALIDATED" | "APPROVED" | "SUBMITTED" | "PAYMENT_PENDING" | "PAYMENT_CONFIRMED" | "PAYMENT_FAILED" | "POSTED" | "SUPERSEDED" | "CANCELLED" | "REJECTED";
 
 interface Establishment {
   legal_name: string;
@@ -86,11 +86,14 @@ export function EcrPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [wageMonth, setWageMonth] = useState("2026-08");
   const [format, setFormat] = useState<"CSV" | "ECR_TXT">("CSV");
+  const [returnType, setReturnType] = useState<"REGULAR" | "ARREAR" | "SUPPLEMENTARY">("REGULAR");
   const [content, setContent] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [paymentScenario, setPaymentScenario] = useState<"SUCCESS" | "RETURN">("SUCCESS");
+  const [paymentScenario, setPaymentScenario] = useState<"SUCCESS" | "RETURN" | "STUCK">("SUCCESS");
+  const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
+  const signatory = session.data?.stakeholder === "employer.signatory";
 
   const policy = useQuery({ queryKey: ["current-policy"], queryFn: getCurrentPolicy, retry: false });
   const establishment = useQuery({
@@ -126,6 +129,7 @@ export function EcrPage() {
   });
   const filing = detail.data?.data;
   const report = reportOf(filing?.validation_report);
+  const filingChallan = challans.data?.data.find((item) => item.trrn === filing?.trrn);
 
   function keyFor(action: string) {
     return (retryKeys.current[action] ??= newIdempotencyKey());
@@ -168,7 +172,7 @@ export function EcrPage() {
     }
     await run("create", async () => {
       const result = await command<Envelope<{ filing: Filing }>>("POST", "/api/v1/employers/me/ecr-filings", {
-        wage_month: wageMonth, type: "REGULAR", format, content,
+        wage_month: wageMonth, type: returnType, format, content,
       });
       setSelectedId(result.data.filing.filing_id);
     }, "Return created. Review the validation report before asking the signatory to approve it.");
@@ -219,6 +223,19 @@ export function EcrPage() {
     "Mock payment started. Refresh challans to see the bank result.");
   }
 
+  async function cancelTrRN(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!filing || !filingChallan) return;
+    const reason = String(new FormData(e.currentTarget).get("reason") ?? "").trim();
+    if (reason.length < 10) { setError(new Error("Enter a reason of at least 10 characters.")); return; }
+    const token = await stepUp.ask({ action: "cancel-trrn", resourceId: filing.filing_id,
+      amountPaise: filingChallan.total_paise, summary: `Cancel TRRN ${filing.trrn} for ${filing.wage_month}` });
+    if (!token) return;
+    await run(`cancel:${filing.filing_id}`, () => command("POST",
+      `/api/v1/employers/me/ecr-filings/${encodeURIComponent(filing.filing_id)}/cancellations`,
+      { reason }, { stepUpToken: token }), "TRRN cancelled. A new return can be prepared for this wage month.");
+  }
+
   if (establishment.isLoading || establishment.error) return <div className="stack">
     <PageHeader eyebrow="Monthly returns · Journey A" title="ECR workbench"
       description="Prepare and track synthetic monthly returns." current="Monthly returns (ECR)"
@@ -240,12 +257,16 @@ export function EcrPage() {
       {canPrepare ? (
         <form className="card stack" onSubmit={create}>
           <p className="eyebrow">01 · Payroll operator</p>
-          <h2 id="ecr-prepare">Prepare a regular return</h2>
+          <h2 id="ecr-prepare">Prepare a return</h2>
           <p className="muted">Upload an 11 field CSV or ECR TXT file. The service checks each member and explains any errors.</p>
           <div className="form-row">
             <label>Wage month <input type="month" value={wageMonth} onChange={(e) => setWageMonth(e.target.value)} required /></label>
             <label>File format <select value={format} onChange={(e) => setFormat(e.target.value as "CSV" | "ECR_TXT")}><option value="CSV">CSV</option><option value="ECR_TXT">ECR TXT</option></select></label>
+            <label>Return type <select value={returnType} onChange={(e) => setReturnType(e.target.value as typeof returnType)}>
+              <option value="REGULAR">Regular</option><option value="ARREAR">Arrear</option><option value="SUPPLEMENTARY">Supplementary</option>
+            </select></label>
           </div>
+          <p className="muted small">Arrear is for wage-revision arrears for members already in the posted return of the month. Supplementary is for members missed in it. Both need the month’s regular return posted.</p>
           <label>ECR file <input type="file" accept=".csv,.txt,text/csv,text/plain" onChange={(e) => void loadFile(e.target.files?.[0])} /></label>
           <label>Or paste file content <textarea rows={6} value={content} onChange={(e) => setContent(e.target.value)} spellCheck={false} /></label>
           <div className="actions">
@@ -276,6 +297,11 @@ export function EcrPage() {
               <div className="detail-head"><strong>{filing.wage_month}</strong><span className="state-pill">{filing.state.replaceAll("_", " ")}</span></div>
               <p className="muted small">Version {filing.version} · rule set {filing.rule_version} · {filing.filing_id}</p>
               {filing.trrn ? <p>TRRN <code>{filing.trrn}</code></p> : null}
+              {signatory && filing.trrn && ["SUBMITTED", "PAYMENT_FAILED"].includes(filing.state) ?
+                filingChallan ? <form className="stack" aria-label={`Cancel TRRN ${filing.trrn}`} onSubmit={(e) => void cancelTrRN(e)}>
+                  <label>Cancellation reason <input name="reason" required minLength={10} maxLength={500} /></label>
+                  <div className="actions"><button type="submit" disabled={busy}>Cancel TRRN</button></div>
+                </form> : <p className="muted small">Loading challan total before cancellation…</p> : null}
               {report ? (
                 <>
                   <div className="metrics">
@@ -307,9 +333,10 @@ export function EcrPage() {
           <p className="muted">A submitted return creates a challan. Payments here are simulated; no funds move.</p>
           <ProblemMessage error={challans.error} />
           <label>Demo bank outcome
-            <select value={paymentScenario} onChange={(e) => { setPaymentScenario(e.target.value as "SUCCESS" | "RETURN"); retryKeys.current = {}; }}>
+            <select value={paymentScenario} onChange={(e) => { setPaymentScenario(e.target.value as typeof paymentScenario); retryKeys.current = {}; }}>
               <option value="SUCCESS">Confirm payment</option>
               <option value="RETURN">Return payment</option>
+              <option value="STUCK">Stuck at the bank (never answered)</option>
             </select>
           </label>
           {challans.data?.data.length === 0 ? <p className="muted">No challans yet. Submit a return, then refresh.</p> : null}

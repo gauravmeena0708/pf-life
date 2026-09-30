@@ -30,7 +30,7 @@ async def db() -> AsyncSession:
 
 class PaymentIntent(BaseModel):
     channel: str = "NET_BANKING"
-    demo_scenario: str = "SUCCESS"  # SUCCESS | RETURN — demo switch, shown in the UI as such
+    demo_scenario: str = "SUCCESS"  # SUCCESS | RETURN | STUCK (never answered: the office rejects it) — a demo switch
 
 
 @router.post("/api/v1/employers/me/challans/{trrn}/payment-intents", status_code=202)
@@ -44,7 +44,7 @@ async def create_payment_intent(trrn: str, body: PaymentIntent, request: Request
     if body.channel == "BANK_COUNTER":
         raise Problem(501, "/problems/planned", "Bank-counter (cash) payment is not available",
                       "Whether cash / counter payment is still permitted is unconfirmed (docs/endpoint-catalogue.md, status ?).")
-    if body.channel != "NET_BANKING" or body.demo_scenario not in ("SUCCESS", "RETURN"):
+    if body.channel != "NET_BANKING" or body.demo_scenario not in ("SUCCESS", "RETURN", "STUCK"):
         raise Problem(422, "/problems/validation", "Unsupported channel or scenario")
     require_grant(actor, "payment.initiate")
     operation, h = f"POST /employers/me/challans/{trrn}/payment-intents", request_hash(body.model_dump())
@@ -57,6 +57,8 @@ async def create_payment_intent(trrn: str, body: PaymentIntent, request: Request
             raise Problem(404, "/problems/not-found", "Challan not found",
                           "If the return was submitted just now, wait a few seconds and try again.")
         require_step_up(actor, "pay-challan", trrn, None, payable["total_paise"])
+        if payable["status"] == "CANCELLED":
+            raise Problem(409, "/problems/challan-cancelled", "This challan is cancelled", "It can no longer be paid.")
         if payable["status"] in ("PENDING", "PAID"):
             raise Problem(409, "/problems/already-paid", f"This challan is already {payable['status'].lower()}",
                           "Check the challan status; a second payment is not needed.")
@@ -138,7 +140,7 @@ async def process_due_payments() -> int:
     cutoff = datetime.now(UTC) - timedelta(seconds=settings.mock_bank_delay_seconds)
     async with sessions()() as session:
         due = (await session.execute(select(payment_intents).where(and_(
-            payment_intents.c.status == "PENDING", payment_intents.c.created_at <= cutoff)).limit(20))).mappings().all()
+            payment_intents.c.status == "PENDING", payment_intents.c.scenario != "STUCK", payment_intents.c.created_at <= cutoff)).limit(20))).mappings().all()
     done = 0
     for intent in due:
         kind = "return" if intent["scenario"] == "RETURN" else "confirmation"
@@ -177,7 +179,28 @@ async def on_payment_instructed(session: AsyncSession, event: dict) -> None:
         status="PENDING", created_by="claim-service"))
 
 
+async def on_challan_generated(session: AsyncSession, event: dict) -> None:
+    """A direct challan (administrative charges, 14B / 7Q) becomes payable like a return's challan."""
+    p = event["payload"]
+    if not (await session.execute(select(payables.c.trrn).where(payables.c.trrn == p["trrn"]))).first():
+        await session.execute(insert(payables).values(trrn=p["trrn"], establishment_id=p["establishment_id"], filing_id=p["reference_id"],
+                                                      total_paise=p["total_paise"], status="DUE"))
+
+
+async def on_challan_status(session: AsyncSession, event: dict) -> None:
+    """Cancelled / rejected: the challan is no longer payable. Payment rejected by the office: a payment stuck at
+    the bank is dropped and the challan can be paid again."""
+    p = event["payload"]
+    if p["status"] in ("CANCELLED", "REJECTED"):
+        await session.execute(update(payables).where(payables.c.trrn == p["trrn"]).values(status="CANCELLED"))
+    elif p["status"] == "PAYMENT_REJECTED":
+        await session.execute(update(payment_intents).where(payment_intents.c.trrn == p["trrn"], payment_intents.c.status == "PENDING")
+                              .values(status="REJECTED"))
+        await session.execute(update(payables).where(payables.c.trrn == p["trrn"]).values(status="FAILED"))
+
+
 async def dispatch(session: AsyncSession, event: dict) -> None:
-    handler = {"ECRSubmitted.v1": on_ecr_submitted, "PaymentInstructed.v1": on_payment_instructed}.get(event["event_type"])
+    handler = {"ECRSubmitted.v1": on_ecr_submitted, "PaymentInstructed.v1": on_payment_instructed,
+               "ChallanGenerated.v1": on_challan_generated, "ChallanStatusChanged.v1": on_challan_status}.get(event["event_type"])
     if handler:
         await handler(session, event)

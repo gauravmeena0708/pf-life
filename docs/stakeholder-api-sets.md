@@ -223,10 +223,12 @@ Activities: **F01.register** Register establishment online and submit verificati
 | `GET /employers/me/change-requests` | W |
 | `GET /employers/me/configuration` | W |
 | `GET /employers/me/contractors` | W |
+| `GET /employers/me/demands` | W |
 | `GET /employers/me/exemption` | W |
 | `GET /employers/me/kyc` | W |
 | `GET /employers/me/operators` | W |
 | `GET /employers/me/ownership-declaration` | W |
+| `GET /employers/me/returns/dashboard` | W |
 | `GET /employers/me/signatories` | W |
 | `GET /employers/me/signature-registrations` | W |
 | `GET /employers/registration-requests/{reqId}` | W |
@@ -260,19 +262,23 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `GET /employers/me/challans/{trrn}` | W |
 | `GET /employers/me/challans/{trrn}/receipt` | W |
 | `GET /employers/me/change-requests` | W |
+| `GET /employers/me/demands` | W |
 | `GET /employers/me/ecr-filings` | W |
 | `GET /employers/me/ecr-filings/{filingId}` | W |
 | `GET /employers/me/joint-declarations` | W |
 | `GET /employers/me/kyc-approvals` | W |
 | `GET /employers/me/ownership-declaration` | W |
 | `GET /employers/me/pending-approvals` | W |
+| `GET /employers/me/returns/dashboard` | W |
 | `GET /employers/me/signature-registrations` | W |
 | `GET /employers/me/transfer-requests` | W |
 | `PATCH /employers/me` | W |
 | `POST /employers/me/approvals/{approvalId}/decisions` | W |
 | `POST /employers/me/branches` | W |
 | `POST /employers/me/configuration/change-requests` | W |
+| `POST /employers/me/direct-challans` | W |
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W |
+| `POST /employers/me/ecr-filings/{filingId}/cancellations` | W |
 | `POST /employers/me/ecr-filings/{filingId}/submissions` | W |
 | `POST /employers/me/joint-declarations/{jdId}/decisions` | W |
 | `POST /employers/me/kyc-approvals/{requestId}/decisions` | W |
@@ -283,14 +289,11 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `POST /employers/me/kyc/{kycType}` | M |
 | `POST /international/coc-applications` | M |
 | `GET /employers/me/claim-attestations` | P |
-| `GET /employers/me/demands` | P |
 | `GET /employers/me/higher-pension-options` | P |
 | `GET /international/coc-applications/{id}/certificate` | P |
 | `POST /employers/me/claim-attestations/{claimId}/decisions` | P |
 | `POST /employers/me/closure-requests` | P |
 | `POST /employers/me/demands/{demandId}/payment-intents` | P |
-| `POST /employers/me/direct-challans` | P |
-| `POST /employers/me/ecr-filings/{filingId}/cancellations` | P |
 | `POST /employers/me/higher-pension-options/{optionId}/validations` | P |
 | `POST /employers/me/joint-declarations` | P |
 | `POST /employers/me/office-transfer-requests` | P |
@@ -321,6 +324,7 @@ Activities: **F01.profile** View establishment profile, configuration, KYC and h
 | `GET /employers/me/members/active-export` | W |
 | `GET /employers/me/members/{uan}/contribution-ledger` | W |
 | `GET /employers/me/pending-approvals` | W |
+| `GET /employers/me/returns/dashboard` | W |
 | `PATCH /employers/me/members/{uan}/profile` | W |
 | `POST /employers/me/ecr-filings` | W |
 | `POST /employers/me/ecr-filings/{filingId}/validations` | W |
@@ -331,7 +335,6 @@ Activities: **F01.profile** View establishment profile, configuration, KYC and h
 | `POST /employers/me/members/{uan}/exits` | W |
 | `GET /employers/me/compliance-summary` | P |
 | `GET /employers/me/dashboard` | P |
-| `GET /employers/me/returns/dashboard` | P |
 | `POST /employers/me/members/exit-bulk-uploads` | P |
 | `POST /employers/me/members/{uan}/exit-corrections` | P |
 | `POST /employers/me/members/{uan}/location-mappings` | P |
@@ -417,6 +420,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `GET /office/claims/{claimId}/additional-forms` | W |
 | `GET /office/claims/{claimId}/audit-trail` | W |
 | `GET /office/claims/{claimId}/cad` | W |
+| `GET /office/ecr-filings` | W |
 | `GET /office/member-change-requests` | W |
 | `GET /office/members/{uan}` | W |
 | `GET /office/pension-claims` | W |
@@ -432,13 +436,13 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /office/cases/{caseId}/restarts` | W |
 | `POST /office/cases/{caseId}/stops` | W |
 | `POST /office/claims/{claimId}/cad` | W |
+| `POST /office/ecr-filings/{filingId}/rejections` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/member-change-requests/{requestId}/recommendations` | W |
 | `POST /office/pension-claims/{claimId}/input-data-sheets` | W |
 | `POST /office/physical-claims/{intakeId}/identity-validations` | W |
 | `POST /office/transfers/{transferId}/verifications` | W |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | P |
-| `POST /office/ecr-filings/{filingId}/rejections` | P |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P |
 | `POST /office/ledger-journals/{journalId}/reversals` | P |
 | `POST /office/pensions/higher-pension-options/{optionId}/ledger-transfers` | P |
@@ -460,16 +464,17 @@ Activities: **F01.olre_scrutiny** Scrutinise documents of a newly registered est
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/damages-knock-offs` | W |
 | `GET /office/establishment-registrations` | W |
 | `GET /office/establishment-registrations/{reqId}/documents` | W |
 | `POST /office/establishment-registrations/{reqId}/scrutiny-notes` | W |
+| `POST /office/establishments/{estId}/damages-knock-offs` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `GET /office/compliance/cases` | P |
 | `GET /office/compliance/cases/{caseId}` | P |
 | `GET /office/compliance/defaulters` | P |
 | `POST /office/compliance/cases` | P |
 | `POST /office/compliance/inspections/{inspectionId}/processing-notes` | P |
-| `POST /office/establishments/{estId}/damages-knock-offs` | P |
 
 #### `fo.ss` — Section Supervisor (Accounts / Compliance)
 
@@ -479,12 +484,13 @@ Activities: **F02.jd_verify** Verifier (SS route): cross-check and recommend; **
 |---|---|
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/claims/{claimId}/cad` | W |
+| `GET /office/damages-knock-offs` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/decisions` | W |
 | `POST /office/claims/{claimId}/cad` | W |
+| `POST /office/damages-knock-offs/{knockOffId}/approvals` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/member-change-requests/{requestId}/verifications` | W |
-| `POST /office/damages-knock-offs/{knockOffId}/approvals` | P |
 
 #### `fo.ao` — Accounts Officer
 
@@ -524,6 +530,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/death-claims/{claimId}/shares-summary` | W |
+| `GET /office/ecr-filings` | W |
 | `GET /office/establishment-change-requests` | W |
 | `GET /office/establishment-registrations` | W |
 | `GET /office/establishment-registrations/{reqId}/documents` | W |
@@ -550,7 +557,6 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/compliance/inspections` | P |
 | `POST /office/compliance/membership-disputes` | P |
 | `POST /office/compliance/vishwas-applications/{applicationId}/decisions` | P |
-| `GET /office/ecr-filings` | ? |
 | `POST /office/ecr-filings/{filingId}/approvals` | ? |
 | `POST /office/ledger-adjustments/{adjustmentId}/approvals` | ? |
 
@@ -594,14 +600,15 @@ Activities: **F03.receipts** Handle cheques / DDs and receipts outside the onlin
 | Endpoint | Status |
 |---|---|
 | `GET /office/cases/{caseId}` | W |
+| `GET /office/ecr-filings` | W |
 | `GET /office/payment-scrolls/ready` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/claims/{claimId}/payment-instructions` | W |
 | `POST /office/claims/{claimId}/reissues` | W |
+| `POST /office/ecr-filings/{filingId}/payment-rejections` | W |
 | `POST /office/payment-scrolls` | W |
 | `POST /office/payment-scrolls/{scrollId}/return-reconciliations` | W |
 | `GET /office/receipts/unreconciled` | P |
-| `POST /office/ecr-filings/{filingId}/payment-rejections` | P |
 | `POST /office/vdr-entries` | ? |
 
 Integration adapters: `collecting_bank`

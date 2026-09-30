@@ -98,6 +98,14 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 7a: returns, payments, 14B / 7Q (30 September 2026)
+
+Unit tests 306 passed; must-deny 18 passed. End to end: 44 of 45 passed, including `test_returns_and_demands.py`.
+The one failure was Journey B, because member A's synthetic balance was spent by the day's repeated runs (see
+Known limits; `make reset` restores it). On an earlier run of the same code Journey D timed out once waiting for
+an event and passed when run again.
+- Fixed a date-dependent pension test: the helper that pins "today" did not reach every module that imports it.
+
 ## Update — Phase 2, slice 6b: DSC / e-sign registration, pending approvals, family pension (30 September 2026)
 
 Unit tests 300 passed; end to end 44 passed (including `test_signatures_family_pension.py`); must-deny 18 passed.

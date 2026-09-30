@@ -11,10 +11,12 @@ DA_P = SUBJECTS["ro-da-pension"]
 
 def at(monkeypatch, day: date) -> None:
     """Move the service's clock: the pension is credited on the last day of each month."""
+    import app.api.family_routes as f
     import app.api.services_routes as r
+    import app.api.settlement_routes as w
     import app.domain.pension as p
     import app.domain.services as s
-    for module in (p, s, r):
+    for module in (p, s, r, w, f):
         monkeypatch.setattr(module, "today", lambda: day)
 
 
