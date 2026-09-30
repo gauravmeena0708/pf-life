@@ -53,6 +53,7 @@ import { DashboardsPage } from "./features/oversight/DashboardsPage";
 import { GrievanceMetricsPage } from "./features/oversight/GrievanceMetricsPage";
 import { RiskSignalsPage } from "./features/oversight/RiskSignalsPage";
 import { SessionsRecoveryPage } from "./features/oversight/SessionsRecoveryPage";
+import { SystemMapPage } from "./pages/SystemMapPage";
 import { Home } from "./pages/Home";
 import { InterfacePage } from "./pages/InterfacePage";
 import { CircularsPage } from "./features/ho/CircularsPage";
@@ -118,6 +119,7 @@ export function App() {
         <main id="main">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/system-map" element={<SystemMapPage />} />
             <Route path="/i/:slug" element={<InterfacePage />} />
             <Route path="/employer" element={<EmployerHome />} />
             <Route path="/employer/ecr" element={<EcrPage />} />

@@ -11,7 +11,9 @@
     "password": "Password for every persona (demo only): [TODO-translate]",
     "logout": "Log out [TODO-translate]",
     "account": "{{label}} · {{role}}",
-    "signIn": "साइन इन (डेमो)"
+    "signIn": "साइन इन (डेमो)",
+    "search": "Search demo personas",
+    "noMatches": "No personas match your search."
   },
   "home": {
     "heading": "भविष्य निधि सेवाओं का प्रदर्शन",
@@ -20,35 +22,66 @@
     "publicLookups": "सार्वजनिक खोज",
     "securityActivity": "सुरक्षा गतिविधि",
     "eyebrow": "सेवाएँ और कार्यक्षेत्र",
-    "heroEyebrow": "प्रदर्शन पोर्टल में आपका स्वागत है",
-    "heroTitle": "भविष्य निधि प्रक्रियाओं की स्पष्ट जानकारी",
-    "heroDescription": "डेमो डेटा से सार्वजनिक रिकॉर्ड खोजें, नियोक्ता की फाइलिंग देखें या सदस्य की पासबुक जाँचें। कार्यक्षेत्र देखने के लिए डेमो पहचान से साइन इन करें।",
     "signIn": "डेमो पहचान से साइन इन करें",
-    "servicesEyebrow": "पोर्टल देखें",
-    "servicesTitle": "आवश्यकता के अनुसार सेवाएँ",
-    "explore": "सेवा देखें",
-    "directoryTitle": "सभी 20+ इंटरफ़ेस और उनकी निर्माण स्थिति",
-    "directoryDescription": "स्थिति: कार्यरत, मॉक (अनुकरण किया गया एकीकरण), या नियोजित (केवल अनुबंध)।",
-    "services": {
-      "employer": {
-        "title": "नियोक्ता",
-        "description": "प्रतिष्ठान की पहुँच संभालें और मासिक रिटर्न तैयार करें।"
+    "built": "What's built",
+    "journeysTitle": "See it working",
+    "personasInvolved": "Personas involved",
+    "startAs": "Start as {{label}}",
+    "publicForm": "Public form",
+    "publicTitle": "Use a public service",
+    "exploreTitle": "Explore the system",
+    "workspace": "Open your workspace",
+    "exploreDescription": "See interface coverage, role activities and the demo accounts available to try.",
+    "totals": {
+      "interfaces": "{{count}} interfaces",
+      "roles": "{{access}} of {{all}} roles with access",
+      "working": "{{count}} working endpoints",
+      "simulated": "{{count}} simulated",
+      "planned": "{{count}} planned",
+      "personas": "{{count}} demo personas",
+      "pending": "{{count}} definitions pending"
+    },
+    "publicServices": {
+      "establishments": "Establishment search and e-Report Card",
+      "claims": "Claim status",
+      "grievance": "Grievance without login",
+      "grievanceStatus": "Grievance status",
+      "circulars": "Circulars",
+      "defaulters": "Defaulter list",
+      "pension": "Pension enquiries"
+    },
+    "journeys": {
+      "claim": {
+        "title": "A member's claim through the office",
+        "description": "File a claim, follow the officer's checks and approval, and see it paid."
       },
-      "member": {
-        "title": "सदस्य",
-        "description": "कृत्रिम सदस्य दावा शुरू करें और उसकी स्थिति देखें।"
+      "return": {
+        "title": "An employer's monthly return and payment",
+        "description": "Prepare and validate an ECR, then approve, submit and pay through the simulated bank."
       },
-      "public": {
-        "title": "सार्वजनिक खोज",
-        "description": "सार्वजनिक प्रतिष्ठान रजिस्टर खोजें और TRRN जाँचें।"
+      "pension": {
+        "title": "A pension from Form 10D to the PPO",
+        "description": "Follow a retired member's application through the pension desks to the signed PPO."
       },
-      "office": {
-        "title": "क्षेत्रीय कार्यालय",
-        "description": "दावों की समीक्षा करें और सौंपे गए कार्यालय कार्य पूरे करें।"
+      "death": {
+        "title": "A death claim and the EDLI benefit",
+        "description": "File as a nominee, review the death claim and record the EDLI benefit decision."
       },
-      "security": {
-        "title": "सुरक्षा",
-        "description": "सुरक्षा इंटरफ़ेस और गेटवे गतिविधि देखें।"
+      "transfer": {
+        "title": "Changing jobs: auto-transfer and the primary member ID",
+        "description": "Confirm an auto-transfer and explore why previous service must reach the primary member ID."
+      },
+      "compliance": {
+        "title": "Compliance: defaulters, demands and VISHWAS",
+        "description": "Review defaulting establishments, settle demands and follow the VISHWAS case."
+      },
+      "grievance": {
+        "title": "A grievance, with or without a login",
+        "description": "File and track a grievance, then follow the office's reply; a public form is also available."
+      },
+      "oversight": {
+        "title": "Oversight: concurrent audit and the Issue Tracker",
+        "description": "Raise an audit alert, reply from the regional office and execute an approved Issue Tracker request."
       }
     }
   },
@@ -95,7 +128,9 @@
     "pensionRevisions": "पेंशन संशोधन",
     "help": "शिकायत और सहायता",
     "notInPoc": "इस प्रदर्शन में उपलब्ध नहीं",
-    "notInPocShort": "उपलब्ध नहीं"
+    "notInPocShort": "उपलब्ध नहीं",
+    "systemMap": "System map",
+    "publicLookups": "Public lookups"
   },
   "passbook": {
     "eyebrow": "सदस्य सेवाएँ · अंशदान",

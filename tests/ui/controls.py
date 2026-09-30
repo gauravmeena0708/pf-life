@@ -14,13 +14,16 @@ def switch_persona(page, persona: str, landing: str, heading: str, record=None, 
         page.goto(BASE_URL)
     expect(page.locator(".demo-banner")).to_contain_text("NOT AN OFFICIAL EPFO SYSTEM")
     page.locator(".account-menu > summary").click()
-    expect(page.get_by_label("Switch to persona", exact=True)).to_be_visible()
+    search = page.get_by_label("Search demo personas", exact=True)
+    expect(search).to_be_visible()
+    search.fill(persona)
+    option = page.locator(f'.persona-option[data-persona="{persona}"]')
     if record:
         record.step(page, role, "Choose your demo persona",
-                    f"Open the account menu in the header and choose the {persona} demo persona.",
-                    "The account menu lists the available synthetic roles.",
-                    lambda: expect(page.get_by_label("Switch to persona", exact=True)).to_be_visible())
-    page.get_by_label("Switch to persona", exact=True).select_option(persona)
+                    f"Open the account menu in the header, search for {persona} and select that demo persona.",
+                    "The account menu lists the matching synthetic roles with what each demonstrates.",
+                    lambda: expect(option).to_be_visible())
+    option.click()
     # A real top-level logout/login must reach Keycloak; selecting a role alone is insufficient.
     page.wait_for_url(re.compile(r".*/realms/epfo-demo/.*"))
     expect(page.locator("#password")).to_be_visible()

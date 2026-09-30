@@ -118,4 +118,6 @@ def test_unauthenticated_api_call_is_401(page):
 def test_web_shell_renders_demo_banner_and_interfaces(page):
     page.goto(WEB)
     assert "NOT AN OFFICIAL EPFO SYSTEM" in page.inner_text("body")
-    assert page.locator(".interface-list li").count() == 21
+    page.goto(WEB + "/system-map")                       # the 21 interfaces, from the generated system map
+    page.locator(".system-map-grid > article").first.wait_for()
+    assert page.locator(".system-map-grid > article").count() == 21

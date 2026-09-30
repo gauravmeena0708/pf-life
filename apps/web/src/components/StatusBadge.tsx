@@ -2,8 +2,8 @@
 const STYLES: Record<string, { label: string; symbol: string; className: string }> = {
   W: { label: "Working", symbol: "●", className: "badge badge-working" },
   Working: { label: "Working", symbol: "●", className: "badge badge-working" },
-  M: { label: "Mock", symbol: "◆", className: "badge badge-mock" },
-  Mock: { label: "Mock", symbol: "◆", className: "badge badge-mock" },
+  M: { label: "Simulated", symbol: "◆", className: "badge badge-mock" },
+  Mock: { label: "Simulated", symbol: "◆", className: "badge badge-mock" },
   P: { label: "Planned", symbol: "○", className: "badge badge-planned" },
   Planned: { label: "Planned", symbol: "○", className: "badge badge-planned" },
   "?": { label: "Definition pending", symbol: "?", className: "badge badge-pending" },

@@ -145,7 +145,7 @@ function poc(role: string): NavGroup[] {
 }
 
 export function menusFor(role: string | undefined): NavGroup[] {
-  if (!role || role === "public") return [{ label: "Public services", items: PUBLIC_SERVICES }];
+  if (!role || role === "public") return [{ labelKey: "navigation.publicLookups", items: PUBLIC_SERVICES }];
   if (role === "member") return MEMBER;
   if (role.startsWith("employer.")) return EMPLOYER;
   if (role === "pensioner") return PENSIONER;
@@ -162,6 +162,12 @@ export function menusFor(role: string | undefined): NavGroup[] {
 
 /** Where "Home" goes for a role. */
 export function homeFor(role: string | undefined): string {
+  if (role === "ho.security") return "/security/activity";
+  if (role === "ho.audit") return "/audit/log";
+  if (role === "ho.caiu") return "/caiu/signals";
+  if (role === "ho.acc_hq") return "/policy";
+  if (role === "ho.cpfc" || role === "gov.mole") return "/dashboards";
+  if (role === "zo.acc" || role === "zo.rpfc1") return "/office/work-queue";
   if (role === "zo.rpfc1_audit") return "/audit/concurrent";
   if (role === "ho.is") return "/ndc/issue-tracker";
   if (role === "zo.fraud_committee") return "/zo/fraud-risk";

@@ -39,6 +39,7 @@ export function RoleNav({ role }: { role: string | undefined }) {
     <div className="primary-nav-inner shell-width" ref={bar}>
       <NavLink end to={homeFor(role)}>{t("navigation.home")}</NavLink>
       <NavLink to="/public">{t("navigation.public")}</NavLink>
+      <NavLink to="/system-map">{t("navigation.systemMap")}</NavLink>
       {menusFor(role).map((g, i) => {
         if (!g.items) return g.to ? <NavLink key={i} to={g.to}>{text(g)}</NavLink> : unavailable(text(g), i);
         const active = g.items.some((it) => it.to && current(it.to, location.pathname, location.hash));

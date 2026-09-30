@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
 import { getMyPermissions, getSession, type Grant } from "../api/client";
+import { EndpointCounts } from "../components/EndpointCounts";
+import { RoleList } from "../components/RoleList";
 import { PageHeader } from "../components/PageHeader";
 import { ProblemMessage } from "../components/ProblemMessage";
 import { StatusBadge } from "../components/StatusBadge";
@@ -27,11 +29,11 @@ export function InterfacePage() {
   return (
     <section aria-labelledby="interface-heading">
       <PageHeader id="interface-heading" eyebrow={t("interface.eyebrow", { number: def.id })}
-        title={def.name} description={t("interface.description")}
+        title={def.name} description={def.purpose}
         current={def.name}><StatusBadge status={def.coverage} /></PageHeader>
-      <p className="muted">
-        {t("interface.stakeholders")}: {def.stakeholders.map((s) => <code key={s}>{s} </code>)}
-      </p>
+      <EndpointCounts counts={def.endpoints} />
+      <h2>{t("interface.stakeholders")}</h2>
+      <RoleList ids={def.stakeholders} />
       {!session.data?.authenticated ? <p>{t("interface.login")}</p> : null}
       <ProblemMessage error={perms.error} />
       {session.data?.authenticated && perms.data ? (

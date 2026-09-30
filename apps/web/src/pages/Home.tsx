@@ -4,55 +4,62 @@ import { Link } from "react-router-dom";
 
 import { getSession } from "../api/client";
 import { PageHeader } from "../components/PageHeader";
-import { StatusBadge } from "../components/StatusBadge";
-import { INTERFACES } from "../data/interfaces";
+import { PersonaLink } from "../components/PersonaLink";
+import { SystemTotals } from "../components/SystemTotals";
+import { JOURNEYS } from "../data/journeys";
 import { homeFor } from "../data/navigation";
+import { PERSONAS } from "../data/personas";
+
+const publicServices = [
+  { key: "establishments", to: "/public#establishment-search" },
+  { key: "claims", to: "/public/claims#claim-status-heading" },
+  { key: "grievance", to: "/public/grievances#public-grievance-heading" },
+  { key: "grievanceStatus", to: "/public/grievances#grievance-status-heading" },
+  { key: "circulars", to: "/public/circulars#circulars-heading" },
+  { key: "defaulters", to: "/public#defaulters-public-heading" },
+  { key: "pension", to: "/public#pension-enquiries" },
+];
 
 export function Home() {
   const { t } = useTranslation();
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
-  const role = session.data?.stakeholder;
-  const workspace = role && ["fo.edli", "fo.iw", "ho.iwu", "intl_worker"].includes(role) ? { to: homeFor(role), label: "Open your services" }
-    : role?.startsWith("employer.") ? { to: "/employer", label: t("navigation.employer") }
-    : role === "member" ? { to: "/member/claims", label: t("navigation.claims") }
-      : role?.startsWith("fo.") ? { to: "/office/work-queue", label: t("navigation.workQueue") }
-      : role === "ho.security" ? { to: "/security/activity", label: t("navigation.security") } : null;
-  const services = [
-    { key: "employer", to: role?.startsWith("employer.") ? "/employer" : "/i/employer" },
-    { key: "member", to: "/member/claims" },
-    { key: "public", to: "/public" },
-    { key: "office", to: "/office/work-queue" },
-    { key: "security", to: role === "ho.security" ? "/security/activity" : "/i/security" },
-  ] as const;
-  return (
-    <div className="stack home-page">
-      <PageHeader eyebrow={t("home.eyebrow")} title={t("home.heading")} description={t("home.intro")} />
-      <section className="hero-card" aria-labelledby="hero-title">
-        <p className="eyebrow">{t("home.heroEyebrow")}</p>
-        <h2 id="hero-title">{t("home.heroTitle")}</h2>
-        <p>{t("home.heroDescription")}</p>
-        <div className="actions">
-          <Link to="/public" className="button primary">{t("navigation.public")}</Link>
-          {workspace ? <Link to={workspace.to} className="button secondary">{workspace.label}</Link>
-            : <button type="button" className="secondary" onClick={() => window.dispatchEvent(new Event("open-demo-account"))}>{t("home.signIn")}</button>}
-        </div>
-      </section>
-      <section className="stack" aria-labelledby="services-heading">
-        <div className="section-heading"><div><p className="eyebrow">{t("home.servicesEyebrow")}</p><h2 id="services-heading">{t("home.servicesTitle")}</h2></div></div>
-        <div className="service-grid">{services.map(({ key, to }, index) => <Link key={key} to={to} className="service-tile">
-          <span className="service-number">0{index + 1}</span>
-          <h3>{t(`home.services.${key}.title`)}</h3>
-          <p>{t(`home.services.${key}.description`)}</p>
-          <span className="service-link">{t("home.explore")} <span aria-hidden="true">→</span></span>
-        </Link>)}</div>
-      </section>
-      <details className="interface-directory card">
-        <summary>{t("home.directoryTitle")}</summary>
-        <p className="muted">{t("home.directoryDescription")}</p>
-        <ol className="interface-list">{INTERFACES.map((item) => <li key={item.slug}>
-          <Link to={`/i/${item.slug}`}>{item.id}. {item.name}</Link> <StatusBadge status={item.coverage} />
-        </li>)}</ol>
-      </details>
-    </div>
-  );
+  const authenticated = !!session.data?.authenticated;
+  return <div className="stack home-page">
+    <PageHeader eyebrow={t("home.eyebrow")} title={t("home.heading")} description={t("home.intro")} />
+    <section className="stack" aria-labelledby="built-heading">
+      <h2 id="built-heading">{t("home.built")}</h2>
+      <SystemTotals />
+    </section>
+    <section className="stack" aria-labelledby="journeys-heading">
+      <h2 id="journeys-heading">{t("home.journeysTitle")}</h2>
+      <div className="journey-grid">{JOURNEYS.map((journey, index) => {
+        const personas = journey.personas.flatMap((username) => {
+          const persona = PERSONAS.find((item) => item.username === username);
+          return persona ? [persona] : [];
+        });
+        return <article className="card journey-card stack" key={journey.id} aria-labelledby={`journey-${journey.id}`}>
+          <span className="service-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+          <h3 id={`journey-${journey.id}`}>{t(`home.journeys.${journey.id}.title`, { defaultValue: journey.title })}</h3>
+          <p className="muted">{t(`home.journeys.${journey.id}.description`, { defaultValue: journey.description })}</p>
+          <ol className="journey-personas" aria-label={t("home.personasInvolved")}>{personas.map((persona) => <li key={persona.username}>{persona.label}</li>)}</ol>
+          <div className="actions">{personas[0] ? <PersonaLink persona={personas[0]} authenticated={authenticated} className="button secondary">
+            {t("home.startAs", { label: personas[0].label })}
+          </PersonaLink> : null}
+          {journey.publicForm ? <Link to={journey.publicForm}>{t("home.publicForm")}</Link> : null}</div>
+        </article>;
+      })}</div>
+    </section>
+    <section className="card stack" aria-labelledby="public-services-heading">
+      <h2 id="public-services-heading">{t("home.publicTitle")}</h2>
+      <ul className="public-service-links">{publicServices.map(({ key, to }) => <li key={key}><Link to={to}>{t(`home.publicServices.${key}`)}</Link></li>)}</ul>
+    </section>
+    <section className="card stack" aria-labelledby="explore-heading">
+      <h2 id="explore-heading">{t("home.exploreTitle")}</h2>
+      <p className="muted">{t("home.exploreDescription")}</p>
+      <div className="actions"><Link to="/system-map" className="button primary">{t("navigation.systemMap")}</Link>
+        {authenticated ? <Link to={homeFor(session.data?.stakeholder)} className="button secondary">{t("home.workspace")}</Link>
+          : <button type="button" className="secondary" onClick={() => window.dispatchEvent(new Event("open-demo-account"))}>{t("home.signIn")}</button>}
+      </div>
+    </section>
+  </div>;
 }

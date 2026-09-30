@@ -165,5 +165,5 @@ def test_higher_minimum_pension_revises_pensions_in_payment_with_arrears(persona
     paid = call(pensioner, "GET", "/api/v1/pensioners/me/payments")[1]["data"]
     assert paid[0]["kind"] == "ARREARS" and paid[0]["amount_paise"] == r["arrears_paise"]
     pensioner.goto(f"{WEB}/pensioner")
-    pensioner.get_by_text("Arrears").first.wait_for()
+    pensioner.locator("main").get_by_text("Arrears").first.wait_for()   # not the persona picker's hidden descriptions
     pensioner.screenshot(path=str(SHOTS / "pensioner-revised.png"), full_page=True)

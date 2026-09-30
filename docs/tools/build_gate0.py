@@ -179,6 +179,37 @@ INTERFACES = [
     (21, "AI model / local LLM", ["tech.ai_service"]),
 ]
 
+# The web portal's addresses for the interfaces (/i/<slug>); stable, links elsewhere use them.
+INTERFACE_SLUG = {1: "public", 2: "employer", 3: "member", 4: "office", 5: "grievance", 6: "international", 7: "district-office",
+                  8: "regional-office", 9: "zonal-office", 10: "head-office", 11: "ndc", 12: "ministry", 13: "b2b", 14: "caiu",
+                  15: "hrm", 16: "reporting", 17: "security", 18: "vigilance", 19: "audit", 20: "umang", 21: "ai"}
+
+# One line per interface for the web portal's System map (apps/web/src/data/system-map.generated.json).
+INTERFACE_PURPOSE = {
+    1: "Anyone, without a login: establishment search, e-Report Card, circulars, claim and grievance status, lodging a grievance.",
+    2: "Employers: registration, members and KYC, monthly returns and challans, demands, attestations, exits.",
+    3: "Members, pensioners and claimants: passbook, claims, transfers, nomination, pension and death claims.",
+    4: "Field-office sections: claim scrutiny and payment, compliance, pension, EDLI, exemption, PRO counter.",
+    5: "Grievances: routing, replies, escalation to the zone and head office, office transfers.",
+    6: "International workers and Certificates of Coverage under social-security agreements.",
+    7: "District offices: the district dashboard and a jurisdiction-scoped queue.",
+    8: "Regional office officers: approvals above the dealing level, freezes, ledger decisions.",
+    9: "Zonal offices: grievances escalated to the zone, fraud-risk review, concurrent audit.",
+    10: "Head office: policy rules (maker-checker), interest, circulars, the IS Division.",
+    11: "National Data Centre: the pension disbursement run and technical operations.",
+    12: "The Ministry: aggregate reports and the published defaulter list.",
+    13: "Banks, payroll providers and other partners through simulated integrations.",
+    14: "The Central Anti-fraud Intelligence Unit: synthetic risk signals and their review.",
+    15: "Human resources: staff postings, which decide each officer's jurisdiction.",
+    16: "Governance bodies: statistics and monitoring.",
+    17: "Security: request activity, sessions, security events and incidents.",
+    18: "Vigilance (planned): referrals and investigations.",
+    19: "Audit: the hash-chained audit log, concurrent audit extracts and alerts.",
+    20: "UMANG: member services through the government app (simulated).",
+    21: "The local AI model: advisory answers, claim notes and grievance classification, never decisions.",
+}
+
+
 # ───────────────────────────── events ─────────────────────────────
 
 S, N, D, B, E = "string", "number", "date-time", "boolean", "enum"
@@ -525,6 +556,38 @@ def main():
         detail += [f"| `{e}` | {ops[e]['status']} | {ops[e]['owner']} | {', '.join(sorted(callers[e] & set(members)))} |" for e in eps]
         detail.append("")
     (DOCS / "api-matrix.md").write_text("\n".join(out + ["", "## Detail", ""] + detail) + "\n", encoding="utf-8")
+
+    # the web portal's System map: the same interfaces, coverage and stakeholders, so the home page cannot go stale
+    realm = json.loads((ROOT / "infra" / "keycloak" / "realm-epfo-demo.json").read_text(encoding="utf-8"))
+    personas = defaultdict(list)
+    humans = [u for u in realm.get("users", []) if not u["username"].startswith("service-account-")]   # machine clients are not personas
+    for u in humans:
+        for role in u.get("realmRoles", []):
+            personas[role].append(u["username"])
+    group_of = {s: g for g, members in groups.items() for s in members}
+    web_map = {"generated": GENERATED + " Source: docs/stakeholders.md, docs/stakeholder-activities.yaml, "
+                                       "docs/endpoint-catalogue.md, infra/keycloak/realm-epfo-demo.json.",
+               "totals": {"interfaces": len(INTERFACES), "stakeholders": len(names),
+                          "stakeholders_with_access": sum(1 for s in names if grants.get(s)),
+                          "activities": len(acts),
+                          "endpoints": {k: sum(o["status"] == k for o in ops.values()) for k in "WMP?"},
+                          "personas": len(humans)},
+               "interfaces": [], "stakeholders": {}}
+    for num, name, members in INTERFACES:
+        eps = {ep for s in members for ep in grants.get(s, {})}
+        cnt = {k: sum(ops[e]["status"] == k for e in eps) for k in "WMP?"}
+        web_map["interfaces"].append({"id": num, "slug": INTERFACE_SLUG[num], "name": name,
+                                      "coverage": "Working" if cnt["W"] else "Mock" if cnt["M"] else "Planned",
+                                      "purpose": INTERFACE_PURPOSE[num], "endpoints": cnt, "stakeholders": members})
+    for s, label in names.items():
+        eps = grants.get(s, {})
+        web_map["stakeholders"][s] = {
+            "name": label, "group": group_of.get(s, ""),
+            "endpoints": {k: sum(ops[e]["status"] == k for e in eps) for k in "WMP?"},
+            "activities": [{"id": a["id"], "does": a["does"]} for a in acts if a["actor"] == s],
+            "personas": sorted(personas.get(s, []))}
+    (ROOT / "apps" / "web" / "src" / "data" / "system-map.generated.json").write_text(
+        json.dumps(web_map, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 
     # OpenAPI per service + gateway
     by_owner = defaultdict(OrderedDict)

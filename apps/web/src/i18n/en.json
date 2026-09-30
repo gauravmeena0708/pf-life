@@ -11,7 +11,9 @@
     "password": "Password for every persona (demo only):",
     "logout": "Log out",
     "account": "{{label}} · {{role}}",
-    "signIn": "Sign in (demo)"
+    "signIn": "Sign in (demo)",
+    "search": "Search demo personas",
+    "noMatches": "No personas match your search."
   },
   "home": {
     "heading": "Provident fund services, demonstrated",
@@ -20,35 +22,66 @@
     "publicLookups": "Public lookups",
     "securityActivity": "Security activity",
     "eyebrow": "Services and workspaces",
-    "heroEyebrow": "Welcome to the demonstration portal",
-    "heroTitle": "A clear view of provident fund journeys",
-    "heroDescription": "Search public records, follow an employer filing, or review a member passbook using seeded demo data. Sign in with a demo persona to explore a role workspace.",
     "signIn": "Sign in with a demo persona",
-    "servicesEyebrow": "Explore the portal",
-    "servicesTitle": "Services by need",
-    "explore": "Explore service",
-    "directoryTitle": "All 20+ interfaces and their build status",
-    "directoryDescription": "Coverage indicates Working, Mock (simulated integration), or Planned (contract only).",
-    "services": {
-      "employer": {
-        "title": "Employer",
-        "description": "Manage establishment access and prepare monthly returns."
+    "built": "What's built",
+    "journeysTitle": "See it working",
+    "personasInvolved": "Personas involved",
+    "startAs": "Start as {{label}}",
+    "publicForm": "Public form",
+    "publicTitle": "Use a public service",
+    "exploreTitle": "Explore the system",
+    "workspace": "Open your workspace",
+    "exploreDescription": "See interface coverage, role activities and the demo accounts available to try.",
+    "totals": {
+      "interfaces": "{{count}} interfaces",
+      "roles": "{{access}} of {{all}} roles with access",
+      "working": "{{count}} working endpoints",
+      "simulated": "{{count}} simulated",
+      "planned": "{{count}} planned",
+      "personas": "{{count}} demo personas",
+      "pending": "{{count}} definitions pending"
+    },
+    "publicServices": {
+      "establishments": "Establishment search and e-Report Card",
+      "claims": "Claim status",
+      "grievance": "Grievance without login",
+      "grievanceStatus": "Grievance status",
+      "circulars": "Circulars",
+      "defaulters": "Defaulter list",
+      "pension": "Pension enquiries"
+    },
+    "journeys": {
+      "claim": {
+        "title": "A member's claim through the office",
+        "description": "File a claim, follow the officer's checks and approval, and see it paid."
       },
-      "member": {
-        "title": "Member",
-        "description": "Start and track a synthetic member claim."
+      "return": {
+        "title": "An employer's monthly return and payment",
+        "description": "Prepare and validate an ECR, then approve, submit and pay through the simulated bank."
       },
-      "public": {
-        "title": "Public lookups",
-        "description": "Search the public establishment register and check a TRRN."
+      "pension": {
+        "title": "A pension from Form 10D to the PPO",
+        "description": "Follow a retired member's application through the pension desks to the signed PPO."
       },
-      "office": {
-        "title": "Regional office",
-        "description": "Review claims and complete assigned office actions."
+      "death": {
+        "title": "A death claim and the EDLI benefit",
+        "description": "File as a nominee, review the death claim and record the EDLI benefit decision."
       },
-      "security": {
-        "title": "Security",
-        "description": "Inspect the security interface and gateway activity."
+      "transfer": {
+        "title": "Changing jobs: auto-transfer and the primary member ID",
+        "description": "Confirm an auto-transfer and explore why previous service must reach the primary member ID."
+      },
+      "compliance": {
+        "title": "Compliance: defaulters, demands and VISHWAS",
+        "description": "Review defaulting establishments, settle demands and follow the VISHWAS case."
+      },
+      "grievance": {
+        "title": "A grievance, with or without a login",
+        "description": "File and track a grievance, then follow the office's reply; a public form is also available."
+      },
+      "oversight": {
+        "title": "Oversight: concurrent audit and the Issue Tracker",
+        "description": "Raise an audit alert, reply from the regional office and execute an approved Issue Tracker request."
       }
     }
   },
@@ -95,7 +128,9 @@
     "pensionRevisions": "Pension revisions",
     "help": "Grievances & help",
     "notInPoc": "Not available in this demonstration",
-    "notInPocShort": "Not in POC"
+    "notInPocShort": "Not in POC",
+    "systemMap": "System map",
+    "publicLookups": "Public lookups"
   },
   "passbook": {
     "eyebrow": "Member services · contributions",

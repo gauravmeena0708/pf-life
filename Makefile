@@ -62,7 +62,7 @@ check-docs:
 	python3 docs/tools/build_stakeholder_views.py --check
 	python3 docs/tools/build_gate0.py
 	python3 docs/tools/build_stakeholder_views.py
-	git diff --exit-code -- docs contracts
+	git diff --exit-code -- docs contracts apps/web/src/data/system-map.generated.json
 
 scaffold:
 	python3 packages/service-template/scaffold.py

@@ -1,42 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation } from "react-router-dom";
 
 import { getSession } from "../api/client";
-import { DEMO_PASSWORD, PERSONAS } from "../data/personas";
-import { homeFor } from "../data/navigation";
-
-function csrfToken(): string | undefined {
-  return document.cookie.split("; ").find((cookie) => cookie.startsWith("epfo-csrf="))?.split("=")[1];
-}
-
-/** A top-level POST follows the Keycloak sign-out redirect; fetch cannot complete that browser flow. */
-function leaveSession(nextPersona?: string, returnTo = "/") {
-  const params = new URLSearchParams();
-  if (nextPersona) {
-    params.set("next_persona", nextPersona);
-    params.set("return_to", returnTo);
-  }
-  const form = document.createElement("form");
-  form.method = "POST";
-  form.action = `/auth/logout${params.size ? `?${params}` : ""}`;
-  const token = csrfToken();
-  if (token) {
-    const field = document.createElement("input");
-    field.type = "hidden";
-    field.name = "csrf_token";
-    field.value = token;
-    form.append(field);
-  }
-  document.body.append(form);
-  form.submit();
-}
+import { leaveSession, signInAs } from "../data/demoAuth";
+import { DEMO_PASSWORD, PERSONAS, PERSONA_GROUPS } from "../data/personas";
 
 /** Switching persona is a real logout + login through Keycloak — never impersonation. */
 export function PersonaSwitcher() {
   const { t } = useTranslation();
-  const location = useLocation();
+  const [search, setSearch] = useState("");
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
   const menuRef = useRef<HTMLDetailsElement>(null);
 
@@ -66,21 +39,8 @@ export function PersonaSwitcher() {
     };
   }, []);
 
-  function switchTo(username: string) {
-    const role = PERSONAS.find((persona) => persona.username === username)?.role;
-    const returnTo = role === "ho.security" ? "/security/activity" : role === "member" ? "/member/passbook"
-      : role && ["fo.edli", "fo.iw", "ho.iwu", "intl_worker", "ho.publicity", "fo.exemption", "zo.rpfc1_audit", "ho.is", "zo.fraud_committee", "do.incharge", "ho.hr"].includes(role) ? homeFor(role)
-      : role === "pensioner" ? "/pensioner" : role === "fo.apfc_pension" ? "/office/pension-revisions" : role === "fo.da_pension" || role === "fo.ss_pension" ? "/office/pension-claims" : role === "tech.cpps" ? "/cpps" : role === "ho.fa_cao" ? "/finance/interest"
-      : role?.startsWith("fo.") || role === "zo.acc" || role === "zo.rpfc1" ? "/office/work-queue"
-      : role === "ho.acc_hq" ? "/policy" : role === "ho.caiu" ? "/caiu/signals" : role === "ho.audit" ? "/audit/log" : role === "ho.cpfc" || role === "gov.mole" ? "/dashboards"
-      : role?.startsWith("employer.") ? (location.pathname.startsWith("/employer") ? location.pathname : "/employer")
-        : "/";
-    if (session.data?.authenticated) {
-      leaveSession(username, returnTo);
-    } else {
-      window.location.assign(`/auth/login?${new URLSearchParams({ persona: username, return_to: returnTo })}`);
-    }
-  }
+  const matching = PERSONAS.filter((persona) =>
+    [persona.label, persona.username, persona.role, persona.description, persona.group].join(" ").toLowerCase().includes(search.trim().toLowerCase()));
 
   return (
     <details className="account-menu" ref={menuRef}>
@@ -94,17 +54,24 @@ export function PersonaSwitcher() {
           ? t("persona.current", { label: session.data.persona_label ?? session.data.subject, role: session.data.stakeholder })
           : t("persona.none")}
       </p>
-      <label htmlFor="persona-select">{t("persona.choose")}</label>
-      <select id="persona-select" defaultValue="" onChange={(e) => e.target.value && switchTo(e.target.value)}>
-        <option value="" disabled>
-          —
-        </option>
-        {PERSONAS.map((p) => (
-          <option key={p.username} value={p.username}>
-            {p.label} ({p.role})
-          </option>
-        ))}
-      </select>
+      <label htmlFor="persona-search">{t("persona.search")}</label>
+      <input id="persona-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} />
+      <div className="persona-groups">
+        {PERSONA_GROUPS.map((group) => {
+          const items = matching.filter((persona) => persona.group === group);
+          return items.length ? <section key={group} aria-label={group}>
+            <h3>{group}</h3>
+            <ul className="persona-options">{items.map((persona) => <li key={persona.username}>
+              <button type="button" className="persona-option" data-persona={persona.username} onClick={() => signInAs(persona, !!session.data?.authenticated)}>
+                <strong>{persona.label}</strong>
+                <span>{persona.description}</span>
+                <code>{persona.role}</code>
+              </button>
+            </li>)}</ul>
+          </section> : null;
+        })}
+        {!matching.length ? <p role="status">{t("persona.noMatches")}</p> : null}
+      </div>
       <p className="muted">
         {t("persona.password")} <code>{DEMO_PASSWORD}</code>
       </p>
