@@ -107,6 +107,7 @@ because member A's synthetic balance is used up by earlier runs (₹2,43,794 lef
 the known limit below, cleared by `make reset`). Two claim tests failed in the same run because they picked up a
 member A claim another test had left mid-way; both pass when run again. The new international-service database was
 created on the running stack by hand (on a fresh stack the init script creates it).
+After `make reset` (a fresh stack: the init script created the new database), end to end 59 passed and must-deny 18 passed.
 
 ## Update — Phase 2, slice 8b: member services — e-Nomination, attestation, bank switch, auto-transfer, exits (30 September 2026)
 
