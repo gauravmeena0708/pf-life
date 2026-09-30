@@ -36,7 +36,8 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `SecurityEventRecorded.v1` | audit | intelligence, member, gateway | security_event | 1 |
 | `NotificationRequested.v1` | claim, grievance, member, contribution | member | notification | 1 |
 | `DemandRaised.v1` | compliance | contribution, audit | compliance_case | 2 (contract only) |
-| `LedgerReversed.v1` | contribution | claim, reporting, audit | ledger_journal | 1 |
+| `LedgerReversed.v1` | contribution | claim, member, workflow, reporting, audit | ledger_journal | 1 |
+| `LedgerAdjusted.v1` | contribution | claim, reporting, audit | ledger_journal | 1 |
 | `InterestCredited.v1` | contribution | claim, reporting, audit | interest_run | 1 |
 | `TaxDeducted.v1` | claim | contribution, reporting, audit | claim | 1 |
 | `PaymentScrollGenerated.v1` | claim | payment-simulator, audit | payment_scroll | 1 |

@@ -26,6 +26,7 @@ BINDINGS = [
     "member-service.AccountDefrozen.v1",
     "platform-service.PolicyPublished.v1",
     "contribution-service.LedgerReversed.v1",
+    "contribution-service.LedgerAdjusted.v1",
     "contribution-service.InterestCredited.v1",
     "member-service.MemberExitMarked.v1",
     "contribution-service.TransferPosted.v1",
@@ -227,14 +228,23 @@ async def on_freeze(session: AsyncSession, event: dict[str, Any]) -> None:
 
 
 async def on_ledger_reversed(session: AsyncSession, event: dict[str, Any]) -> None:
-    """A rejected claim's debit was reversed: the member's balance comes back."""
+    """A reversing journal (a rejected claim's debit, a contribution, a transfer recredit, an Appendix E): member
+    lines credited add to the balance, lines debited take from it."""
     p = event["payload"]
     await _member_lines(session, [x for x in p["postings"] if x["side"] == "credit"], +1)
-    await session.execute(update(claims).where(claims.c.claim_id == p["claim_id"]).values(debit_journal_id=None))
+    await _member_lines(session, [x for x in p["postings"] if x["side"] == "debit"], -1)
+    if p.get("claim_id"):
+        await session.execute(update(claims).where(claims.c.claim_id == p["claim_id"]).values(debit_journal_id=None))
+
+
+async def on_ledger_adjusted(session: AsyncSession, event: dict[str, Any]) -> None:
+    """Appendix E posted: the member ID's balances move by its lines."""
+    await on_ledger_reversed(session, {**event, "payload": {**event["payload"], "claim_id": ""}})
 
 
 HANDLERS = {
     "LedgerReversed.v1": on_ledger_reversed,
+    "LedgerAdjusted.v1": on_ledger_adjusted,
     "PolicyPublished.v1": on_policy_published,
     "AccountFrozen.v1": on_freeze,
     "AccountDefrozen.v1": on_freeze,

@@ -14,8 +14,11 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column("pension_claims", sa.Column("kind", sa.String(10), nullable=False, server_default="MEMBER"))
-    op.add_column("pension_claims", sa.Column("family", sa.JSON()))
+    existing = {c["name"] for c in sa.inspect(op.get_bind()).get_columns("pension_claims")}   # 0004 may have built it already
+    if "kind" not in existing:
+        op.add_column("pension_claims", sa.Column("kind", sa.String(10), nullable=False, server_default="MEMBER"))
+    if "family" not in existing:
+        op.add_column("pension_claims", sa.Column("family", sa.JSON()))
     family_members.create(bind=op.get_bind(), checkfirst=True)
 
 

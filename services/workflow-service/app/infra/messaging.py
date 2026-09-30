@@ -24,6 +24,7 @@ BINDINGS = [
     "contribution-service.TransferPosted.v1",
     "member-service.MemberRegistered.v1",
     "claim-service.CADGenerated.v1",
+    "contribution-service.LedgerReversed.v1",
 ]
 
 
@@ -148,7 +149,17 @@ async def on_cad_generated(session: AsyncSession, event: dict[str, Any]) -> None
                                                            after_action=await last_decision(session, case)))
 
 
+async def on_ledger_reversed(session: AsyncSession, event: dict[str, Any]) -> None:
+    """A recredited transfer: the previous member ID is no longer transferred and may be transferred again."""
+    p = event["payload"]
+    if p.get("reversed_kind") == "TRANSFER":
+        frm = next((x["account_link_id"] for x in p["postings"] if x.get("account_link_id") and x["side"] == "credit"), None)
+        if frm:
+            await session.execute(update(member_accounts).where(member_accounts.c.account_link_id == frm).values(transferred_to=None))
+
+
 HANDLERS = {
+    "LedgerReversed.v1": on_ledger_reversed,
     "CADGenerated.v1": on_cad_generated,
     "MemberRegistered.v1": on_member_registered,
     "MemberExitMarked.v1": on_member_exit,

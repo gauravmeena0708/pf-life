@@ -1404,6 +1404,12 @@ stakeholders:
     step_up: false
     via:
     - F02.jd_initiate
+  - endpoint: GET /office/receipts/unreconciled
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F03.vdr_reconcile
   - endpoint: POST /office/vdr-entries/{vdrId}/ecr-reconciliations
     status: '?'
     scope: office jurisdiction of the caller's posting
@@ -1411,13 +1417,13 @@ stakeholders:
     via:
     - F03.vdr_reconcile
   - endpoint: POST /office/receipts/{receiptId}/trrn-adjustments
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F03.vdr_reconcile
   - endpoint: POST /office/vdr-entries/{vdrId}/rejections
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -1428,8 +1434,14 @@ stakeholders:
     step_up: true
     via:
     - F03.vdr_reconcile
+  - endpoint: GET /office/ledger-adjustments
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F03.ledger_exception
   - endpoint: POST /office/ledger-adjustments
-    status: '?'
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -1454,7 +1466,7 @@ stakeholders:
     via:
     - F03.ecr_reject
   - endpoint: POST /office/ledger-journals/{journalId}/reversals
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -1562,7 +1574,7 @@ stakeholders:
     via:
     - F04.transfer_process
   - endpoint: POST /office/transfers/{transferId}/recredits
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -1580,7 +1592,7 @@ stakeholders:
     via:
     - F05.ids
   - endpoint: POST /office/vdr-entries
-    status: '?'
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -1902,8 +1914,14 @@ stakeholders:
     step_up: true
     via:
     - F02.jd_approve
+  - endpoint: GET /office/ledger-adjustments
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F03.ledger_exception_approve
   - endpoint: POST /office/ledger-adjustments/{adjustmentId}/approvals
-    status: '?'
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -2165,13 +2183,13 @@ stakeholders:
     - F13.oic
   fo.cash:
   - endpoint: GET /office/receipts/unreconciled
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F03.receipts
   - endpoint: POST /office/vdr-entries
-    status: '?'
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:

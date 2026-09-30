@@ -12,9 +12,14 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.drop_constraint("cads_claim_id_key", "cads", type_="unique")
-    op.create_index("ix_cads_claim_id", "cads", ["claim_id"])
-    op.add_column("cads", sa.Column("officer_role", sa.String(60)))
+    # 0008 builds cads from the current table definition on a fresh database: then there is nothing to change
+    inspector = sa.inspect(op.get_bind())
+    if "cads_claim_id_key" in {c["name"] for c in inspector.get_unique_constraints("cads")}:
+        op.drop_constraint("cads_claim_id_key", "cads", type_="unique")
+    if "ix_cads_claim_id" not in {i["name"] for i in inspector.get_indexes("cads")}:
+        op.create_index("ix_cads_claim_id", "cads", ["claim_id"])
+    if "officer_role" not in {c["name"] for c in inspector.get_columns("cads")}:
+        op.add_column("cads", sa.Column("officer_role", sa.String(60)))
 
 
 def downgrade() -> None:

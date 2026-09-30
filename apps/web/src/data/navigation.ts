@@ -68,7 +68,8 @@ function fieldOffice(role: string): NavGroup[] {
       ...(role === "fo.oic" ? [link("Ledger locks", "/office/claim-tools#locks-heading")] : [])] },
     { label: "Receipts & reconciliation", items: [
       role === "fo.apfc" ? link("ECR Approval") : link("VDR Vs ECR filing"), link("Reco - ECR Vs VDR"), link("VDR Member Beneficiary"),
-      link("VDR Rejection"), ...["ANNEXURE K RECO", "ANNEXURE K VDR RECO"].map((l) => link(l, role === "fo.da_accounts" ? "/office/claim-tools#annexure-heading" : undefined))] },
+      link("VDR Rejection", role === "fo.da_accounts" ? "/office/ledger#vdr-heading" : undefined),
+      ...(["fo.cash", "fo.da_accounts"].includes(role) ? [link("Receipts outside the challan flow (VDR)", "/office/ledger#vdr-heading")] : []), ...["ANNEXURE K RECO", "ANNEXURE K VDR RECO"].map((l) => link(l, role === "fo.da_accounts" ? "/office/claim-tools#annexure-heading" : undefined))] },
     { label: "Establishments & compliance", items: [
       link("7Q & 14B", ["fo.da_compliance", "fo.ss"].includes(role) ? "/office/returns#knock-off-heading" : undefined),
       link("Establishment", ["fo.oic", "fo.apfc"].includes(role) ? "/office/work-queue" : undefined),
@@ -76,7 +77,9 @@ function fieldOffice(role: string): NavGroup[] {
       ...(role === "fo.apfc" ? [link("Establishment change requests", "/office/olre#est-changes-heading"), link("DSC / e-sign approvals", "/office/olre#sig-heading")] : []), link("Exempted-Unexempted"), link("Past Accum. File Upload"),
       link("PAST ACCUM BULK TRANSFER"), link("PAST ACCUM VDR RECO")] },
     { label: "Pension", items: [link("Pension"), link("NPPS")] },
-    { label: "Accounts", items: [link("Annual Accounting")] },
+    { label: "Accounts", items: [link("Annual Accounting"),
+      ...(["fo.da_accounts", "fo.apfc"].includes(role) ? [link("Appendix E", "/office/ledger#appendix-e-heading")] : []),
+      ...(role === "fo.da_accounts" ? [link("Reverse a journal / recredit a transfer", "/office/ledger#reversal-heading")] : [])] },
     { label: "Office", items: [link("Dashboard", role === "fo.oic" ? "/dashboards" : undefined), link("Admin"), link("Services")] },
   ];
 }

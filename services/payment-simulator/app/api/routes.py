@@ -193,6 +193,8 @@ async def on_challan_status(session: AsyncSession, event: dict) -> None:
     p = event["payload"]
     if p["status"] in ("CANCELLED", "REJECTED"):
         await session.execute(update(payables).where(payables.c.trrn == p["trrn"]).values(status="CANCELLED"))
+    elif p["status"] == "SETTLED_OFFLINE":                          # paid by cheque / DD, allocated by the office
+        await session.execute(update(payables).where(payables.c.trrn == p["trrn"]).values(status="PAID"))
     elif p["status"] == "PAYMENT_REJECTED":
         await session.execute(update(payment_intents).where(payment_intents.c.trrn == p["trrn"], payment_intents.c.status == "PENDING")
                               .values(status="REJECTED"))

@@ -183,20 +183,21 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `GET /office/receipts/unreconciled` | Unreconciled / suspense receipts | P | 2 | contribution |
-| `POST /office/receipts/{receiptId}/trrn-adjustments` 💰🔐 | **TRRN adjustment**: allocate an excess / unallocated amount against a future TRRN | P | 2 | contribution |
-| `POST /office/vdr-entries` 💰🔐 | **VDR entry** — record a receipt that arrived outside the online ECR/TRRN flow (e.g. cheque/DD, transfer-in, Annexure K, LIC). EPFO material reportedly expands VDR as *Valuable Document Register* (unconfirmed); the exact categories are unconfirmed | ? | 3 | contribution |
+| `GET /office/receipts/unreconciled` | Unreconciled / suspense receipts | W | 1 | contribution |
+| `POST /office/receipts/{receiptId}/trrn-adjustments` 💰🔐 | **TRRN adjustment**: allocate an excess / unallocated amount against a future TRRN | W | 1 | contribution |
+| `POST /office/vdr-entries` 💰🔐 | **VDR entry** — record a receipt that arrived outside the online ECR/TRRN flow (e.g. cheque/DD, transfer-in, Annexure K, LIC). EPFO material reportedly expands VDR as *Valuable Document Register* (unconfirmed); the exact categories are unconfirmed | W | 1 | contribution |
 | `POST /office/vdr-entries/{vdrId}/ecr-reconciliations` 🔐 | Reconcile a VDR entry with the corresponding ECR, and flag late payment for 14B / 7Q | ? | 3 | contribution |
 | `POST /office/vdr-entries/{vdrId}/special-credits` 💰🔐 | **VDR Special** — exceptional direct credit to a member account, with evidence and competent-authority approval. EPFO treats it as a high-risk process; semantics unconfirmed | ? | 3 | contribution |
-| `POST /office/ledger-adjustments` 💰🔐 (`type=APPENDIX_E`) | **Appendix E** — field-office adjustment of a member's opening balances (taxable / non-taxable / total), also used for PF→EPS diversion. Not an employer remittance | ? | 2 | contribution |
-| `POST /office/ledger-adjustments/{adjustmentId}/approvals` 🔐 | Second approval of a ledger adjustment | ? | 2 | contribution |
+| `POST /office/ledger-adjustments` 💰🔐 (`type=APPENDIX_E`) | **Appendix E** — field-office adjustment of a member's opening balances (taxable / non-taxable / total), also used for PF→EPS diversion. Not an employer remittance | W | 1 | contribution |
+| `GET /office/ledger-adjustments` | Appendix E adjustments proposed, approved and rejected | W | 1 | contribution |
+| `POST /office/ledger-adjustments/{adjustmentId}/approvals` 🔐 | Second approval of a ledger adjustment | W | 1 | contribution |
 | `GET /office/ecr-filings` | Returns submitted but not yet paid (to reject, or to reject a stuck payment) | W | 1 | contribution |
 | `POST /office/ecr-filings/{filingId}/rejections` 🔐 | Reject an ECR **before** posting | W | 1 | contribution |
 | `GET /office/ecr-filings?state=PENDING_OFFICE_APPROVAL` | **ECR Approval** queue (top menu on the APFC login; exact scope not yet confirmed — see §16) | ? | 3 | contribution |
 | `POST /office/ecr-filings/{filingId}/approvals` 🔐 | Office approval of an ECR held for approval (*ECR Approval* menu; scope to be confirmed) | ? | 3 | contribution |
-| `POST /office/vdr-entries/{vdrId}/rejections` 🔐 | **VDR Rejection** — reject a VDR entry with a reason (top menu *VDR Rejection*) | P | 2 | contribution |
+| `POST /office/vdr-entries/{vdrId}/rejections` 🔐 | **VDR Rejection** — reject a VDR entry with a reason (top menu *VDR Rejection*) | W | 1 | contribution |
 | `POST /office/vdr-entries/{vdrId}/member-beneficiaries` 🔐 | **VDR Member Beneficiary** — attach the member / beneficiary to whom a VDR receipt is credited (top menu; exact meaning to be confirmed) | ? | 3 | contribution |
-| `POST /office/ledger-journals/{journalId}/reversals` 💰🔐 | Reverse an **already posted** journal (new reversing entries; never edit in place) → `LedgerReversed.v1` | P | 2 | contribution |
+| `POST /office/ledger-journals/{journalId}/reversals` 💰🔐 | Reverse an **already posted** journal (new reversing entries; never edit in place) → `LedgerReversed.v1` | W | 1 | contribution |
 
 
 **Added from the stakeholder activity map** (`docs/stakeholder-activities.yaml`)
@@ -217,7 +218,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
 | `POST /office/ecr-filings/{filingId}/payment-rejections` 🔐 | Cash / Accounts rejects an unpaid or erroneous challan stuck in pending bank status (tracker: "Unable to reject ecr payment") | W | 1 | contribution |
-| `POST /office/transfers/{transferId}/recredits` 💰🔐 | Recredit a rejected transfer-in back to the member ledger (VDR recredit; tracker: "Recredit of transfer-in rejected cases") | P | 2 | contribution |
+| `POST /office/transfers/{transferId}/recredits` 💰🔐 | Recredit a rejected transfer-in back to the member ledger (VDR recredit; tracker: "Recredit of transfer-in rejected cases") | W | 1 | contribution |
 
 ## 6. Member self-service
 

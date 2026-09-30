@@ -10506,6 +10506,35 @@ paths:
               type: object
               description: Defined when implemented
   /office/ledger-adjustments:
+    get:
+      operationId: getOfficeLedgerAdjustments
+      summary: Appendix E adjustments proposed, approved and rejected
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - fo.apfc
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
     post:
       operationId: postOfficeLedgerAdjustments
       summary: Appendix E — field-office adjustment of a member's opening balances (taxable / non-taxable / total), also used
@@ -10518,14 +10547,20 @@ paths:
       - $ref: '#/components/parameters/IfMatch'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: definition-pending
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: contribution
       x-callers:
       - fo.da_accounts
@@ -10536,11 +10571,11 @@ paths:
         also used for PF→EPS diversion. Not an employer remittance
 
 
-        Variants by `type`: `APPENDIX_E` (?, phase 2)'
+        Variants by `type`: `APPENDIX_E` (W, phase 1)'
       x-variants:
       - type: APPENDIX_E
-        status: '?'
-        phase: 2
+        status: W
+        phase: 1
       requestBody:
         required: false
         content:
@@ -10563,14 +10598,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: definition-pending
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: contribution
       x-callers:
       - fo.apfc
@@ -10601,14 +10642,20 @@ paths:
       - $ref: '#/components/parameters/IfMatch'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: contribution
       x-callers:
       - fo.da_accounts
@@ -12322,17 +12369,24 @@ paths:
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: contribution
       x-callers:
       - fo.cash
+      - fo.da_accounts
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -12353,14 +12407,20 @@ paths:
       - $ref: '#/components/parameters/IfMatch'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: contribution
       x-callers:
       - fo.da_accounts
@@ -12833,14 +12893,20 @@ paths:
       - $ref: '#/components/parameters/IfMatch'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: contribution
       x-callers:
       - fo.da_accounts
@@ -12910,14 +12976,20 @@ paths:
       - $ref: '#/components/parameters/IfMatch'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: definition-pending
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: contribution
       x-callers:
       - fo.cash
@@ -13061,14 +13133,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: contribution
       x-callers:
       - fo.da_accounts

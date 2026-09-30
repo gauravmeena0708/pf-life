@@ -16,8 +16,11 @@ depends_on = None
 
 def upgrade() -> None:
     op.alter_column("challans", "filing_id", nullable=True)
-    op.add_column("challans", sa.Column("kind", sa.String(20), nullable=False, server_default="ECR"))
-    op.add_column("challans", sa.Column("applied_paise", sa.BigInteger(), nullable=False, server_default="0"))
+    existing = {c["name"] for c in sa.inspect(op.get_bind()).get_columns("challans")}
+    if "kind" not in existing:
+        op.add_column("challans", sa.Column("kind", sa.String(20), nullable=False, server_default="ECR"))
+    if "applied_paise" not in existing:
+        op.add_column("challans", sa.Column("applied_paise", sa.BigInteger(), nullable=False, server_default="0"))
     Demand.__table__.create(bind=op.get_bind(), checkfirst=True)
     KnockOff.__table__.create(bind=op.get_bind(), checkfirst=True)
 

@@ -421,9 +421,11 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `GET /office/claims/{claimId}/audit-trail` | W |
 | `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/ecr-filings` | W |
+| `GET /office/ledger-adjustments` | W |
 | `GET /office/member-change-requests` | W |
 | `GET /office/members/{uan}` | W |
 | `GET /office/pension-claims` | W |
+| `GET /office/receipts/unreconciled` | W |
 | `GET /office/stopped-cases` | W |
 | `GET /office/transfers` | W |
 | `GET /office/work-queue` | W |
@@ -438,20 +440,20 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/ecr-filings/{filingId}/rejections` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
+| `POST /office/ledger-adjustments` | W |
+| `POST /office/ledger-journals/{journalId}/reversals` | W |
 | `POST /office/member-change-requests/{requestId}/recommendations` | W |
 | `POST /office/pension-claims/{claimId}/input-data-sheets` | W |
 | `POST /office/physical-claims/{intakeId}/identity-validations` | W |
+| `POST /office/receipts/{receiptId}/trrn-adjustments` | W |
+| `POST /office/transfers/{transferId}/recredits` | W |
 | `POST /office/transfers/{transferId}/verifications` | W |
+| `POST /office/vdr-entries` | W |
+| `POST /office/vdr-entries/{vdrId}/rejections` | W |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | P |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P |
-| `POST /office/ledger-journals/{journalId}/reversals` | P |
 | `POST /office/pensions/higher-pension-options/{optionId}/ledger-transfers` | P |
-| `POST /office/receipts/{receiptId}/trrn-adjustments` | P |
 | `POST /office/tds/computations` | P |
-| `POST /office/transfers/{transferId}/recredits` | P |
-| `POST /office/vdr-entries/{vdrId}/rejections` | P |
-| `POST /office/ledger-adjustments` | ? |
-| `POST /office/vdr-entries` | ? |
 | `POST /office/vdr-entries/{vdrId}/ecr-reconciliations` | ? |
 | `POST /office/vdr-entries/{vdrId}/member-beneficiaries` | ? |
 | `POST /office/vdr-entries/{vdrId}/special-credits` | ? |
@@ -534,6 +536,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `GET /office/establishment-change-requests` | W |
 | `GET /office/establishment-registrations` | W |
 | `GET /office/establishment-registrations/{reqId}/documents` | W |
+| `GET /office/ledger-adjustments` | W |
 | `GET /office/signature-registrations` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
@@ -544,6 +547,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/establishments/{estId}/defreezes` | W |
 | `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
+| `POST /office/ledger-adjustments/{adjustmentId}/approvals` | W |
 | `POST /office/member-change-requests/{requestId}/decisions` | W |
 | `POST /office/members/{uan}/freezes` | W |
 | `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | W |
@@ -558,7 +562,6 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/compliance/membership-disputes` | P |
 | `POST /office/compliance/vishwas-applications/{applicationId}/decisions` | P |
 | `POST /office/ecr-filings/{filingId}/approvals` | ? |
-| `POST /office/ledger-adjustments/{adjustmentId}/approvals` | ? |
 
 #### `fo.rpfc1` — RPFC-I — regional head of wings
 
@@ -602,14 +605,14 @@ Activities: **F03.receipts** Handle cheques / DDs and receipts outside the onlin
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/ecr-filings` | W |
 | `GET /office/payment-scrolls/ready` | W |
+| `GET /office/receipts/unreconciled` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/claims/{claimId}/payment-instructions` | W |
 | `POST /office/claims/{claimId}/reissues` | W |
 | `POST /office/ecr-filings/{filingId}/payment-rejections` | W |
 | `POST /office/payment-scrolls` | W |
 | `POST /office/payment-scrolls/{scrollId}/return-reconciliations` | W |
-| `GET /office/receipts/unreconciled` | P |
-| `POST /office/vdr-entries` | ? |
+| `POST /office/vdr-entries` | W |
 
 Integration adapters: `collecting_bank`
 

@@ -94,3 +94,13 @@ async def on_transfer_posted(session: AsyncSession, event: dict[str, Any]) -> No
                             "recipient_subject": member["subject"], "template": "TRANSFER_POSTED", "reference_id": p["transfer_id"],
                             "params": {"amount_paise": int(p["employee_paise"]) + int(p["employer_paise"]),
                                        "from": p["from_account_link_id"], "to": p["to_account_link_id"]}})
+
+
+async def on_ledger_reversed(session: AsyncSession, event: dict[str, Any]) -> None:
+    """A recredited transfer (P2.7b): the previous member ID holds its balance again and is no longer transferred."""
+    p = event["payload"]
+    if p.get("reversed_kind") != "TRANSFER":
+        return
+    frm = next((x["account_link_id"] for x in p["postings"] if x.get("account_link_id") and x["side"] == "credit"), None)
+    if frm:
+        await session.execute(update(employments).where(employments.c.account_link_id == frm).values(transferred_to=None))

@@ -102,7 +102,7 @@ async def reverse_claim_debit(session: AsyncSession, event: dict[str, Any]) -> N
         await add_event(session, producer=PRODUCER, event_type="LedgerReversed.v1", aggregate_type="ledger_journal",
                         aggregate_id=journal_id, correlation_id=event["correlation_id"], payload={
                             "journal_id": journal_id, "reverses_journal_id": debit[0], "reason": "Claim rejected after its account was debited",
-                            "claim_id": claim_id, "postings": lines})
+                            "claim_id": claim_id, "postings": lines, "reversed_kind": "CLAIM_DEBIT", "reference_id": claim_id})
 
 
 async def on_tax_deducted(session: AsyncSession, event: dict[str, Any]) -> None:

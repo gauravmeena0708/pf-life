@@ -312,6 +312,16 @@ simulation; point out that the dialog says exactly what is being authorised (act
 5. **`ro-cashier`**: pay a challan with the scenario *Stuck at the bank*, then *Reject stuck payment* here; the
    employer can pay again. **`do-caseworker`** can reject a submitted, unpaid return.
 
+## Receipts, reversals, recredits and Appendix E
+*Tests: `tests/e2e/test_ledger_office.py`, `services/contribution-service/tests/test_ledger_work.py`*
+
+1. Submit a return without paying it. **`ro-cashier` → Receipts and ledger**: record a cheque for its amount.
+2. **`do-caseworker`**: allocate the receipt to the TRRN — the return posts; the employer can no longer pay it
+   online. A receipt with nothing allocated can be rejected (dishonoured cheque).
+3. **Reverse a posted journal / recredit a transfer**: reverse a contribution, or recredit a Form 13 transfer.
+4. **Appendix E**: the DA proposes *Transfer of 1.16% from employer share to EPS* for member A with the notesheet;
+   **`ro-apfc`** approves; member A's passbook shows the adjustment.
+
 ## Policy changes that move money — interest, TDS and pensions
 *Tests: `tests/e2e/test_policy_money.py`, `services/contribution-service/tests/test_interest.py`,
 `services/claim-service/tests/test_tds.py`, `services/pension-service/tests/test_pensions.py`*

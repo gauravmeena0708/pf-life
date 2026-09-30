@@ -180,6 +180,7 @@ class TransferPosting(Base):
     journal_id: Mapped[str | None] = mapped_column(ForeignKey("journals.id"))
     approved_by: Mapped[str] = mapped_column(String(80))
     posted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    recredit_journal_id: Mapped[str | None] = mapped_column(String(36))    # the transfer was recredited (reversed)
 
 
 class EstablishmentFreeze(Base):
@@ -232,4 +233,43 @@ class KnockOff(Base):
     proposed_by: Mapped[str] = mapped_column(String(80))
     decided_by: Mapped[str | None] = mapped_column(String(80))
     note: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class VdrEntry(Base):
+    """A receipt that arrived outside the online challan flow (cheque, DD, an unmatched credit), recorded by Cash;
+    the DA (Accounts) allocates it to TRRNs (TRRN adjustment) or rejects it (e.g. a dishonoured cheque)."""
+    __tablename__ = "vdr_entries"
+    vdr_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    establishment_id: Mapped[str] = mapped_column(String(80), index=True)
+    instrument: Mapped[str] = mapped_column(String(20))              # CHEQUE | DD | NEFT_UNMATCHED
+    instrument_ref: Mapped[str] = mapped_column(String(60))
+    amount_paise: Mapped[int] = mapped_column(BigInteger)
+    allocated_paise: Mapped[int] = mapped_column(BigInteger, server_default="0")
+    received_on: Mapped[date] = mapped_column(Date)
+    state: Mapped[str] = mapped_column(String(20))                   # UNRECONCILED | PARTIAL | RECONCILED | REJECTED
+    allocations: Mapped[list] = mapped_column(JSON)
+    remarks: Mapped[str | None] = mapped_column(Text)
+    recorded_by: Mapped[str] = mapped_column(String(80))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class LedgerAdjustment(Base):
+    """Appendix E (CITES manual): a field-office adjustment of a member ID's balances, with the notesheet; the DA
+    proposes, the APFC approves and only then is it posted."""
+    __tablename__ = "ledger_adjustments"
+    adjustment_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    account_link_id: Mapped[str] = mapped_column(String(80), index=True)
+    uan: Mapped[str] = mapped_column(String(32))
+    appendix_type: Mapped[str] = mapped_column(String(30))           # OTHER | INTEREST_ON_RETURNS | EPS_DIVERSION | EXCESS_INTEREST_DEBIT
+    lines: Mapped[list] = mapped_column(JSON)
+    notesheet_no: Mapped[str] = mapped_column(String(60))
+    notesheet_date: Mapped[date] = mapped_column(Date)
+    remarks: Mapped[str] = mapped_column(Text)
+    attachment: Mapped[dict | None] = mapped_column(JSON)
+    state: Mapped[str] = mapped_column(String(20))                   # PROPOSED | APPROVED | REJECTED
+    proposed_by: Mapped[str] = mapped_column(String(80))
+    decided_by: Mapped[str | None] = mapped_column(String(80))
+    decision_note: Mapped[str | None] = mapped_column(Text)
+    journal_id: Mapped[str | None] = mapped_column(String(36))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

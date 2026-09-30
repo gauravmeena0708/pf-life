@@ -361,7 +361,9 @@ async def _passbook(subject: str, account_link_id: str | None):
             for ln in lines:
                 kind = {"CONTRIBUTION": "CONTRIBUTION", "OPENING_BALANCE": "OPENING_BALANCE", "CLAIM_DEBIT": "WITHDRAWAL",
                         "CLAIM_REVERSAL": "WITHDRAWAL_REVERSED", "INTEREST": "INTEREST", "INTEREST_REVISION": "INTEREST",
-                        "TRANSFER": "TRANSFER_OUT" if ln["side"] == "debit" else "TRANSFER_IN"}.get(ln["kind"], ln["kind"])
+                        "TRANSFER": "TRANSFER_OUT" if ln["side"] == "debit" else "TRANSFER_IN",
+                        "TRANSFER_RECREDIT": "TRANSFER_RECREDITED" if ln["side"] == "credit" else "TRANSFER_RECREDIT_OUT",
+                        "REVERSAL": "REVERSAL", "APPENDIX_E": "ADJUSTMENT"}.get(ln["kind"], ln["kind"])
                 rate = f"{ln['rate_bp'] / 100:g}%" if ln["rate_bp"] is not None else ""
                 ent = grouped.setdefault(ln["journal_id"], {
                     "kind": kind, "wage_month": ln["wage_month"] or _month(ln["occurred_at"]),
@@ -370,6 +372,10 @@ async def _passbook(subject: str, account_link_id: str | None):
                                     "WITHDRAWAL_REVERSED": f"Claim {ln['claim_id']} not paid: amount returned",
                                     "TRANSFER_OUT": f"Transferred to another member ID (Form 13, {ln['business_key'][9:]})",
                                     "TRANSFER_IN": f"Transferred in from a previous member ID (Form 13, {ln['business_key'][9:]})",
+                                    "ADJUSTMENT": "Adjusted by the PF office (Appendix E)",
+                                    "REVERSAL": "Entry reversed by the PF office",
+                                    "TRANSFER_RECREDITED": "Transfer rejected by the receiving office: balance recredited",
+                                    "TRANSFER_RECREDIT_OUT": "Transfer rejected by the receiving office: taken back",
                                     "INTEREST": (f"Interest for {ln['financial_year']} at {rate}" if ln["kind"] == "INTEREST"
                                                  else f"Interest for {ln['financial_year']} revised to {rate}: difference")
                                                 + (f" (earned on {ln['interest_account']}, transferred)" if ln["interest_account"] and ln["interest_account"] != a["account_link_id"] else "")}.get(kind, kind),

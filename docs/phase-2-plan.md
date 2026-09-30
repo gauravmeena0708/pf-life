@@ -17,8 +17,9 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.6a** | Establishment record and changes: KYC through mock registries, bank accounts, exemption, branches (Form 2A), Form 5A, contractors of a principal employer; profile and configuration changes as requests the office decides; OLRE scrutiny (DA Compliance, e-file) and the APFC's coverage decision | **Done** (30 Sep 2026) |
 | **P2.6b** | Signatory request / revoke letters, DSC and e-sign registration with the office's approval (Authorized eSign List), the signatory's pending approvals; family pension (Form 10D by a widow / widower or child) | **Done** (30 Sep 2026) |
 | **P2.7a** | Returns and payments: arrear and supplementary returns, cancelling an unpaid TRRN, the office rejecting a return before posting or a payment stuck at the bank, the returns dashboard, 14B / 7Q demands on late payment, direct challans (administrative charges; miscellaneous 14B / 7Q) and their knock-off (DA Compliance → SS) | **Done** (30 Sep 2026) |
-| P2.7b | Ledger: unreconciled receipts and TRRN adjustment, VDR rejection, journal reversals, transfer-in recredits, Appendix E (with the CITES manual's four types), annual statement and taxable interest, Form 10C cash withdrawal, principal-employer tags, exempted past accumulations | Next |
-| P2.8 | The rest: compliance and VISHWAS, international workers, grievance extras, public lookups, audit, NDC, HRM, DO dashboards | |
+| **P2.7b** | Office ledger work: receipts outside the challan flow (VDR) allocated to TRRNs or rejected, reversal of a posted journal, recredit of a rejected transfer-in, Appendix E with the CITES manual's four types (DA proposes, APFC approves) | **Done** (30 Sep 2026) |
+| P2.7c | Member-facing ledger: annual statement, taxable interest, Form 10C cash withdrawal (pension withdrawal benefit) | Next |
+| P2.8 | The rest: principal-employer tags (contractor), exempted establishments' past accumulations, compliance and VISHWAS, international workers, grievance extras, public lookups, audit, NDC, HRM, DO dashboards | |
 
 Operations marked **?** (scope unconfirmed, e.g. *ECR Approval*, *VDR Member Beneficiary*) wait until their
 meaning is confirmed.
@@ -193,3 +194,21 @@ Source: the CITES user manuals (`../manuals`, reviewed in `docs/reviews/cites-ma
   Administrative charges go by a direct challan too (`AC02_ADMIN`).
 - The returns dashboard shows each wage month: the regular return, arrear and supplementary returns, due date,
   paid late or not.
+
+## P2.7b — how it is built
+
+- contribution-service (`app/api/ledger_routes.py`). **Receipts (VDR)**: Cash records a cheque / DD / unmatched
+  credit with a one-time code; the DA (Accounts) allocates it to an unpaid TRRN of the same establishment — the
+  challan is paid and the return posted by the same code path as an online payment (late-payment demands included)
+  and `ChallanStatusChanged.v1` (`SETTLED_OFFLINE`) stops the mock bank from taking an online payment for it — or
+  rejects it (a dishonoured cheque). What a VDR entry covers in EPFO is not fully confirmed; this is the reading used.
+- **Reversal**: a posted contribution, direct challan or Appendix E journal is reversed by a new reversing
+  journal (never edited); a member ID is never taken below zero. **Recredit**: a transfer-in the receiving office
+  rejected goes back to the member ID it came from. `LedgerReversed.v1` now carries what was reversed; claim-service
+  applies any reversal to balances, workflow and member-service clear "transferred" on a recredit.
+- **Appendix E** (CITES manual): *Other* (employee, employer and EPS up or down, balanced by an office adjustment
+  account), *interest on returns* (employee and employer only), *1.16% to EPS* (from the employer share, never more
+  than it holds), *excess interest debit*; each with the notesheet number, date, remarks and optional PDF. The DA
+  proposes, the APFC approves (balances are checked again), then it is posted (`LedgerAdjusted.v1`) and shown in the
+  passbook.
+- Moved to P2.8: principal-employer tags and exempted past accumulations (their actors have no persona yet).

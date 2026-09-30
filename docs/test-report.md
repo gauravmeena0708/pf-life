@@ -98,6 +98,14 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 7b: receipts, reversals, recredits, Appendix E (30 September 2026)
+
+Run on a stack rebuilt from empty (`make reset`): unit tests 311 passed; end to end 46 passed (including
+`test_ledger_office.py`; Journey B passes again with the balances restored); must-deny 18 passed.
+- Found on the empty database: four Phase 2 migrations altered tables that an earlier migration already builds
+  from the current definitions (claim 0011, pension 0005, contribution 0008 and 0009). They failed on a fresh
+  database and had only passed on the long-lived stack. They now check before adding or dropping.
+
 ## Update — Phase 2, slice 7a: returns, payments, 14B / 7Q (30 September 2026)
 
 Unit tests 306 passed; must-deny 18 passed. End to end: 44 of 45 passed, including `test_returns_and_demands.py`.
