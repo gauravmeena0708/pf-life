@@ -208,13 +208,13 @@ stakeholders:
     via:
     - F03.passbook
   - endpoint: GET /members/me/annual-statements/{financialYear}
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
     - F03.passbook
   - endpoint: GET /members/me/tax/taxable-interest
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:

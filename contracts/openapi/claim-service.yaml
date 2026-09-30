@@ -421,9 +421,9 @@ paths:
         status: W
         phase: 1
       - formType: FORM_10C
-        status: P
-        phase: 2
-      description: 'Variants by `formType`: `FORM_31` (W, phase 1); `FORM_19` (W, phase 1); `FORM_10C` (P, phase 2)'
+        status: W
+        phase: 1
+      description: 'Variants by `formType`: `FORM_31` (W, phase 1); `FORM_19` (W, phase 1); `FORM_10C` (W, phase 1)'
       requestBody:
         required: false
         content:

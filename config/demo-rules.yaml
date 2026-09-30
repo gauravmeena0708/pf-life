@@ -42,6 +42,16 @@ claims:
       requires_exit_months: 2
       max_from: total_balance
       auto_settle_up_to_paise: 10000000
+    PENSION_WITHDRAWAL:
+      form_type: "10C"
+      label: Pension withdrawal benefit (Form 10C)
+      plain_rule: With less than 9½ years of pension (EPS) service, two months after leaving you can take the EPS money as a lump sum, by Table D.
+      requires_exit_months: 2
+      max_service_months: 113                  # 9 years 5 months; from 9½ years a monthly pension (or scheme certificate) applies
+      once_every_months: 1200                  # once per member ID
+      max_from: eps_table_d                    # factor for the completed years of service x wages at the EPS ceiling (ILLUSTRATIVE)
+      table_d_factor_x100: [102, 205, 310, 418, 528, 640, 754, 870, 988]
+      auto_settle_up_to_paise: null            # always scrutinised (CITES: initiator, then verifier / approver)
   # Default approval chain by amount (docs/stakeholder-activities.yaml → claim_settlement). Chain shape:
   # fo.da_accounts, then fo.ss or fo.ao, then optionally fo.apfc and/or fo.oic.
   approval_bands:
@@ -71,6 +81,7 @@ tds:
   rate_without_pan_bp: 2000               # 20% without a verified PAN
   exempt_after_service_months: 60         # no TDS after 5 years of continuous service
   form_15g_15h_waiver: true               # a Form 15G / 15H for the year waives TDS
+  taxable_interest_threshold_paise: 25000000   # interest on the employee's own contributions above ₹2,50,000 a year is taxable
 pension:
   # EPS monthly pension (ILLUSTRATIVE): pensionable salary x pensionable service / divisor.
   divisor: 70

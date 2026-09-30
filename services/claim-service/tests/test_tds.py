@@ -69,3 +69,23 @@ def test_advances_are_not_taxed_at_source(ctx):
     claim_id = confirm(client, create(client, amount=AMOUNT).json()["data"]).json()["data"]["claim_id"]
     assert pay(client, deliver, claim_id, "k1")["tds_paise"] == 0
     assert events(q, "TaxDeducted.v1") == []
+
+
+def test_form_10c_pension_withdrawal_by_table_d_paid_from_eps(ctx):
+    from tests.test_claims_api import _approved_claim  # noqa: F401
+    client, q, deliver = ctx
+    types = {t["claim_type"]: t for a in client.get("/api/v1/members/me/claims/eligible-types", headers=member(MEMBER_C)).json()["data"]["accounts"]
+             for t in a["types"] if a["account_link_id"] == "AL-0006"}
+    w = types["PENSION_WITHDRAWAL"]
+    # FARAH DEMO left on 30 June 2026 after 3 years 5 months: factor 3.10 x ₹15,000 = ₹46,500
+    assert w["eligible"] and w["form_type"] == "10C" and w["max_amount_paise"] == 4650000, w
+    active = {t["claim_type"]: t for t in client.get("/api/v1/members/me/claims/eligible-types", headers=member()).json()["data"]["accounts"][0]["types"]}
+    assert not active["PENSION_WITHDRAWAL"]["eligible"]
+    c = create(client, amount=4650000, account="AL-0006", subject=MEMBER_C, claim_type="PENSION_WITHDRAWAL").json()["data"]
+    done = confirm(client, c, subject=MEMBER_C).json()["data"]
+    assert done["state"] == "UNDER_REVIEW"                                  # never settled automatically
+    base = {"case_id": "CASE-10C", "claim_id": c["claim_id"], "officer_subject": "x", "reason": None, "next_role": None, "recommendation": "APPROVE"}
+    deliver("CaseDecisionSubmitted.v1", {**base, "decision": "RECOMMEND", "officer_role": "fo.da_accounts", "approval_level": 0, "final": False}, "workflow-service")
+    deliver("CaseDecisionSubmitted.v1", {**base, "decision": "APPROVE", "officer_role": "fo.ss", "approval_level": 1, "final": True}, "workflow-service")
+    [decision] = [e for e in events(q, "ClaimDecisionRecorded.v1") if e["claim_id"] == c["claim_id"]]
+    assert decision["fund"] == "EPS"

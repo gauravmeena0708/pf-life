@@ -123,6 +123,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me` | W | self — caller's own member record only |  |
 | `GET /members/me/account-status` | W | self — caller's own member record only |  |
 | `GET /members/me/accounts/{accountLinkId}/passbook` | W | self — caller's own member record only |  |
+| `GET /members/me/annual-statements/{financialYear}` | W | self — caller's own member record only |  |
 | `GET /members/me/applications` | W | self — caller's own member record only |  |
 | `GET /members/me/claims` | W | self — caller's own member record only |  |
 | `GET /members/me/claims/eligibility-preview` | W | self — caller's own member record only |  |
@@ -140,6 +141,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/pension-scheme-certificate` | W | self — caller's own member record only |  |
 | `GET /members/me/service-history` | W | self — caller's own member record only |  |
 | `GET /members/me/sessions` | W | self — caller's own member record only |  |
+| `GET /members/me/tax/taxable-interest` | W | self — caller's own member record only |  |
 | `GET /members/me/transfers/{transferId}` | W | self — caller's own member record only |  |
 | `GET /members/me/transfers/{transferId}/annexure-k` | W | self — caller's own member record only |  |
 | `GET /members/me/uan-card` | W | self — caller's own member record only |  |
@@ -171,11 +173,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /security/step-up-challenges/{challengeId}/verifications` | W | self — challenge bound to one action and resource version |  |
 | `POST /members/uan-activations` | M | unauthenticated with OTP / face-auth proof |  |
 | `POST /members/uan-allotments` | M | unauthenticated with OTP / face-auth proof |  |
-| `GET /members/me/annual-statements/{financialYear}` | P | self — caller's own member record only |  |
 | `GET /members/me/higher-pension-options/{optionId}` | P | self — caller's own member record only |  |
 | `GET /members/me/nominations` | P | self — caller's own member record only |  |
 | `GET /members/me/tax/form-16a` | P | self — caller's own member record only |  |
-| `GET /members/me/tax/taxable-interest` | P | self — caller's own member record only |  |
 | `GET /members/me/transfers/auto` | P | self — caller's own member record only |  |
 | `POST /grievances/{grievanceId}/feedback` | P | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/reminders` | P | complainant or the assigned office |  |

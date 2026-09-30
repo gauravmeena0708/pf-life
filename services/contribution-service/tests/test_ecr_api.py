@@ -299,3 +299,12 @@ def test_edli_claim_is_paid_from_the_edli_fund_not_the_member_account(ctx):
     postings = json.loads(payload)["envelope"]["payload"]["postings"]
     assert [(p["account_code"], p["side"]) for p in postings] == [("AC21_EDLI", "debit"), ("CLAIMS_PAYABLE", "credit")]
     assert not q(f"SELECT 1 FROM journal_lines WHERE account_link_id='{account}' AND account_code='AC01_EPF' AND side='debit'")
+
+
+def test_pension_withdrawal_is_paid_from_the_eps_fund(ctx):
+    client, q = ctx
+    from app.infra.claims_ledger import on_claim_decision
+    _deliver(on_claim_decision, {"claim_id": "CLM-10C", "decision": "APPROVED", "reason_code": "x", "rule_version": "r", "fund": "EPS",
+                                 "amount_paise": 4650000, "account_link_id": "AL-0006"}, "ClaimDecisionRecorded.v1")
+    lines = q("SELECT jl.account_code, jl.side FROM journal_lines jl JOIN journals j ON j.id = jl.journal_id WHERE j.kind='EPS_CLAIM_DEBIT'")
+    assert sorted(lines) == [("AC10_EPS", "debit"), ("CLAIMS_PAYABLE", "credit")]

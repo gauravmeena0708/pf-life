@@ -138,6 +138,8 @@ async def generate_cad(claim_id: str, actor: Actor = Depends(REVIEWERS), session
         tax = await work_out_tax(session, claim, date.today())
         balance = account["employee_paise"] + account["employer_paise"] + (claim["amount_paise"] if claim["debit_journal_id"] else 0)
         interest = claim["amount_paise"] * account["interest_paise"] // balance if balance else 0
+        if claim["claim_type"] in ("PENSION_WITHDRAWAL", "DEATH_EDLI"):          # paid from the EPS / EDLI fund, not the PF balance
+            interest = 0
         row = {"cad_id": f"CAD-{secrets.token_hex(4).upper()}", "claim_id": claim_id, "officer_role": actor.stakeholder,
                "gross_paise": claim["amount_paise"], "interest_paise": interest, "tds_paise": tax["tds_paise"], "net_paise": tax["net_paise"],
                "tax": tax, "rule_version": tax["rule_version"], "static_data_version": STATIC_DATA_VERSION, "created_by": actor.subject}

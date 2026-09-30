@@ -8,7 +8,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 |---|---|---|---|---|---|---|---|
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 9 | 2 | 5 | 0 |
 | 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 57 | 7 | 28 | 0 |
-| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 64 | 5 | 16 | 0 |
+| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 66 | 5 | 14 | 0 |
 | 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 75 | 0 | 35 | 4 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 11 | 1 | 2 | 0 |
 | 6 | International worker | **Mock** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 0 | 1 | 4 | 0 |
@@ -158,6 +158,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /members/me` | W | member | member |
 | `GET /members/me/account-status` | W | member | member |
 | `GET /members/me/accounts/{accountLinkId}/passbook` | W | contribution | member |
+| `GET /members/me/annual-statements/{financialYear}` | W | contribution | member |
 | `GET /members/me/applications` | W | member | member |
 | `GET /members/me/claims` | W | claim | member |
 | `GET /members/me/claims/eligibility-preview` | W | claim | member |
@@ -175,6 +176,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /members/me/pension-scheme-certificate` | W | pension | member |
 | `GET /members/me/service-history` | W | member | member |
 | `GET /members/me/sessions` | W | gateway | member |
+| `GET /members/me/tax/taxable-interest` | W | contribution | member |
 | `GET /members/me/transfers/{transferId}` | W | claim | member |
 | `GET /members/me/transfers/{transferId}/annexure-k` | W | contribution | member |
 | `GET /members/me/uan-card` | W | member | member |
@@ -221,11 +223,9 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /members/uan-allotments` | M | member | csc_operator, member |
 | `POST /pensioners/me/life-certificate/submissions` | M | pension | csc_operator, pensioner |
 | `POST /public/pension/life-certificate-lookups` | M | pension | pensioner |
-| `GET /members/me/annual-statements/{financialYear}` | P | contribution | member |
 | `GET /members/me/higher-pension-options/{optionId}` | P | pension | member |
 | `GET /members/me/nominations` | P | member | member |
 | `GET /members/me/tax/form-16a` | P | claim | member |
-| `GET /members/me/tax/taxable-interest` | P | contribution | member |
 | `GET /members/me/transfers/auto` | P | claim | member |
 | `POST /grievances/{grievanceId}/feedback` | P | grievance | member |
 | `POST /grievances/{grievanceId}/reminders` | P | grievance | member |

@@ -51,6 +51,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me` | W |
 | `GET /members/me/account-status` | W |
 | `GET /members/me/accounts/{accountLinkId}/passbook` | W |
+| `GET /members/me/annual-statements/{financialYear}` | W |
 | `GET /members/me/applications` | W |
 | `GET /members/me/claims` | W |
 | `GET /members/me/claims/eligibility-preview` | W |
@@ -68,6 +69,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/pension-scheme-certificate` | W |
 | `GET /members/me/service-history` | W |
 | `GET /members/me/sessions` | W |
+| `GET /members/me/tax/taxable-interest` | W |
 | `GET /members/me/transfers/{transferId}` | W |
 | `GET /members/me/transfers/{transferId}/annexure-k` | W |
 | `GET /members/me/uan-card` | W |
@@ -99,11 +101,9 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /security/step-up-challenges/{challengeId}/verifications` | W |
 | `POST /members/uan-activations` | M |
 | `POST /members/uan-allotments` | M |
-| `GET /members/me/annual-statements/{financialYear}` | P |
 | `GET /members/me/higher-pension-options/{optionId}` | P |
 | `GET /members/me/nominations` | P |
 | `GET /members/me/tax/form-16a` | P |
-| `GET /members/me/tax/taxable-interest` | P |
 | `GET /members/me/transfers/auto` | P |
 | `POST /grievances/{grievanceId}/feedback` | P |
 | `POST /grievances/{grievanceId}/reminders` | P |

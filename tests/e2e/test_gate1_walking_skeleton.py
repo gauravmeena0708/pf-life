@@ -84,7 +84,7 @@ def test_member_cannot_call_office_endpoint(page):
 
 def test_planned_endpoint_answers_501_planned(page):
     login(page, "member-a")
-    status, body = api(page, "GET", "/api/v1/members/me/annual-statements/2025-26")
+    status, body = api(page, "GET", "/api/v1/members/me/tax/form-16a?financialYear=2025-26")
     assert status == 501 and body["type"] == "/problems/planned"
 
 

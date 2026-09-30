@@ -90,7 +90,8 @@
         "fund": {
           "enum": [
             "MEMBER_ACCOUNT",
-            "EDLI"
+            "EDLI",
+            "EPS"
           ]
         }
       }

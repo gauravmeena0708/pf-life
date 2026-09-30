@@ -53,10 +53,10 @@ async def on_claim_decision(session: AsyncSession, event: dict[str, Any]) -> Non
     if p["decision"] not in ("APPROVED", "AUTO_APPROVED"):
         return
     amount, account = int(p["amount_paise"]), p["account_link_id"]
-    if p.get("fund") == "EDLI":        # the EDLI assurance benefit is paid from the EDLI fund, not the member's account
-        lines = [{"account_code": "AC21_EDLI", "side": "debit", "amount_paise": amount},
+    if p.get("fund") in ("EDLI", "EPS"):   # EDLI assurance / EPS withdrawal benefit: paid from the fund, not the member's PF
+        lines = [{"account_code": "AC21_EDLI" if p["fund"] == "EDLI" else "AC10_EPS", "side": "debit", "amount_paise": amount},
                  {"account_code": "CLAIMS_PAYABLE", "side": "credit", "amount_paise": amount}]
-        journal_id = await _post(session, f"CLAIM-DEBIT-{p['claim_id']}", "EDLI_CLAIM_DEBIT", p["claim_id"], lines)
+        journal_id = await _post(session, f"CLAIM-DEBIT-{p['claim_id']}", f"{p['fund']}_CLAIM_DEBIT", p["claim_id"], lines)
         if journal_id:
             await add_event(session, producer=PRODUCER, event_type="ClaimDebitPosted.v1", aggregate_type="ledger_journal",
                             aggregate_id=journal_id, correlation_id=event["correlation_id"],

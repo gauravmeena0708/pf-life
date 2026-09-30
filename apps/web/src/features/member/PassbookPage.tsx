@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { api, rupees, type Envelope } from "../../api/client";
+import { AnnualStatement } from "./AnnualStatement";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 
@@ -59,7 +60,8 @@ export function PassbookPage() {
             <td>{entry.wage_month}</td><td>{entry.establishment_name}</td><td className="numeric">{rupees(entry.employee_share_paise)}</td><td className="numeric">{rupees(entry.employer_share_paise)}</td><td className="numeric"><strong>{rupees(entry.running_balance_paise)}</strong></td><td><code>{entry.trrn}</code></td>
           </tr>)}</tbody>
         </table></div>
-      </section>)}
+    </section>)}
+    <AnnualStatement />
     </> : null}
   </div>;
 }

@@ -75,7 +75,7 @@ async def record_decision(session: AsyncSession, claim: dict[str, Any], decision
                         "claim_id": claim["claim_id"], "decision": decision, "reason_code": reason_code,
                         "rule_version": claim["rule_version"], "amount_paise": claim["amount_paise"],
                         "account_link_id": claim["account_link_id"],
-                        "fund": "EDLI" if claim["claim_type"] == "DEATH_EDLI" else "MEMBER_ACCOUNT"})   # EDLI is paid from the EDLI fund
+                        "fund": {"DEATH_EDLI": "EDLI", "PENSION_WITHDRAWAL": "EPS"}.get(claim["claim_type"], "MEMBER_ACCOUNT")})   # EDLI is paid from the EDLI fund
 
 
 async def load_claim(session: AsyncSession, claim_id: str, *, member: str | None = None, office: str | None = None,

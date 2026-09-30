@@ -18,7 +18,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.6b** | Signatory request / revoke letters, DSC and e-sign registration with the office's approval (Authorized eSign List), the signatory's pending approvals; family pension (Form 10D by a widow / widower or child) | **Done** (30 Sep 2026) |
 | **P2.7a** | Returns and payments: arrear and supplementary returns, cancelling an unpaid TRRN, the office rejecting a return before posting or a payment stuck at the bank, the returns dashboard, 14B / 7Q demands on late payment, direct challans (administrative charges; miscellaneous 14B / 7Q) and their knock-off (DA Compliance → SS) | **Done** (30 Sep 2026) |
 | **P2.7b** | Office ledger work: receipts outside the challan flow (VDR) allocated to TRRNs or rejected, reversal of a posted journal, recredit of a rejected transfer-in, Appendix E with the CITES manual's four types (DA proposes, APFC approves) | **Done** (30 Sep 2026) |
-| P2.7c | Member-facing ledger: annual statement, taxable interest, Form 10C cash withdrawal (pension withdrawal benefit) | Next |
+| **P2.7c** | Member-facing ledger: annual statement, taxable interest split, Form 10C cash withdrawal (pension withdrawal benefit by Table D, paid from EPS) | **Done** (30 Sep 2026) |
 | P2.8 | The rest: principal-employer tags (contractor), exempted establishments' past accumulations, compliance and VISHWAS, international workers, grievance extras, public lookups, audit, NDC, HRM, DO dashboards | |
 
 Operations marked **?** (scope unconfirmed, e.g. *ECR Approval*, *VDR Member Beneficiary*) wait until their
@@ -212,3 +212,20 @@ Source: the CITES user manuals (`../manuals`, reviewed in `docs/reviews/cites-ma
   proposes, the APFC approves (balances are checked again), then it is posted (`LedgerAdjusted.v1`) and shown in the
   passbook.
 - Moved to P2.8: principal-employer tags and exempted past accumulations (their actors have no persona yet).
+
+## P2.7c — how it is built
+
+- **Form 10C cash**: a new claim type `PENSION_WITHDRAWAL` in the rules (form 10C) — two months after leaving,
+  under 9½ years of service, once per member ID, never settled automatically. The limit is new rule kind
+  `max_from: eps_table_d`: the illustrative Table D factor for the completed years of service × wages at the EPS
+  ceiling (`table_d_factor_x100`, validated; the policy editor offers it). It runs through the officer chain with the
+  Claim Approval Docket, and `ClaimDecisionRecorded.v1` `fund: EPS` debits the EPS pool (`AC10_EPS`), not the member's
+  PF. On a running stack the type reaches members only when a rule set containing it is published (the e2e test
+  publishes it through the HO maker-checker flow if needed) — adding a claim type needs no code.
+- **Annual statement** (`/members/me/annual-statements/{fy}`): per member ID, the opening balance (with the balance
+  brought forward), the year's contributions, withdrawals, transfers, interest and adjustments, and the closing
+  balance, employee and employer shares. Interest counts in the year it is earned for.
+- **Taxable interest**: interest on the employee's own contributions above `tds.taxable_interest_threshold_paise`
+  (illustrative ₹2,50,000 a year) is taxable, at the year's rate on the excess; the rest is not. Shown with the
+  working, marked illustrative.
+- Not built from the CITES review: "send back to DA for wage corrections" on Form 10C, NCP-day deductions.

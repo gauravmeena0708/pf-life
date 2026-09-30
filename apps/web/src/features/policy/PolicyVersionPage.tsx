@@ -67,7 +67,8 @@ function ClaimTypeEditor({ code, t, onChange, disabled, defaults }: { code: stri
         <label>Rule in plain words (shown to members)<textarea value={t.plain_rule} disabled={disabled} onChange={(e) => set({ plain_rule: e.target.value })} /></label>
         <div className="form-row">
           <label>Limit is based on<select value={t.max_from} disabled={disabled} onChange={(e) => set({ max_from: e.target.value as ClaimType["max_from"] })}>
-            <option value="employee_share">Member's own (employee) share</option><option value="total_balance">Total balance</option></select></label>
+            <option value="employee_share">Member's own (employee) share</option><option value="total_balance">Total balance</option>
+            <option value="eps_table_d">Pension withdrawal (Table D)</option></select></label>
           <Num label="Share of that base" suffix="% — 100 = all of it" value={(t.max_pct_bp ?? 10000) / 100} disabled={disabled}
             onChange={(n) => set({ max_pct_bp: n === null ? undefined : Math.round(n * 100) })} />
           <Money label="Cap per claim (₹, blank = none)" value={t.cap_paise} disabled={disabled} onChange={(p) => set({ cap_paise: p ?? undefined })} />

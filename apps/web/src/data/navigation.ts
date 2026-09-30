@@ -13,7 +13,7 @@ const link = (label: string, to?: string): NavItem => ({ label, to });
 const MEMBER: NavGroup[] = [
   { label: "View", items: [
     link("Profile", "/member/profile#member-profile-heading"), link("Service History", "/member/service#service-heading"),
-    link("UAN Card", "/member/uan-card"), link("Passbook", "/member/passbook"), link("Pension estimate", "/member/profile#pension-estimate-heading")] },
+    link("UAN Card", "/member/uan-card"), link("Passbook", "/member/passbook"), link("Annual statement and taxable interest", "/member/passbook#annual-statement-heading"), link("Pension estimate", "/member/profile#pension-estimate-heading")] },
   { label: "Manage", items: [
     link("Basic Details (Joint Declaration)", "/member/profile#correction-heading"), link("Contact Details", "/member/security#contact-heading"),
     link("KYC", "/member/kyc"), link("E-Nomination"), link("Mark Exit", "/member/service#exit-heading")] },

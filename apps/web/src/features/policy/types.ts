@@ -4,7 +4,9 @@ export interface ClaimType {
   form_type: string;
   label: string;
   plain_rule: string;
-  max_from: "employee_share" | "total_balance";
+  max_from: "employee_share" | "total_balance" | "eps_table_d";
+  max_service_months?: number | null;
+  table_d_factor_x100?: number[];
   max_pct_bp?: number;
   cap_paise?: number | null;
   requires_active_employment?: boolean;

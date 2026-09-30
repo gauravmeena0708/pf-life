@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /office/damages-knock-offs', 'GET /office/ecr-filings', 'GET /office/ledger-adjustments', 'POST /office/ledger-adjustments', 'POST /office/vdr-entries', 'POST /public/trrn-status-lookups', 'GET /employers/me/challans', 'GET /employers/me/demands', 'POST /employers/me/direct-challans', 'GET /employers/me/ecr-filings', 'POST /employers/me/ecr-filings', 'GET /members/me/passbook', 'GET /office/accounts/inoperative', 'GET /office/accounts/interest-postings', 'POST /office/accounts/interest-postings', 'GET /office/receipts/unreconciled', 'POST /public/demo-calculations/epf', 'GET /employers/me/returns/dashboard', 'POST /partners/sandbox/payroll/ecr-filings', 'GET /employers/me/challans/{trrn}', 'GET /employers/me/ecr-filings/{filingId}', 'GET /employers/me/challans/{trrn}/receipt', 'POST /employers/me/ecr-filings/{filingId}/approvals', 'POST /employers/me/ecr-filings/{filingId}/cancellations', 'POST /employers/me/ecr-filings/{filingId}/submissions', 'POST /employers/me/ecr-filings/{filingId}/validations', 'GET /employers/me/members/{uan}/contribution-ledger', 'GET /members/me/accounts/{accountLinkId}/passbook', 'GET /members/me/transfers/{transferId}/annexure-k', 'POST /office/annexure-k-files/{annexureId}/vdr-reconciliations', 'POST /office/damages-knock-offs/{knockOffId}/approvals', 'POST /office/ecr-filings/{filingId}/payment-rejections', 'POST /office/ecr-filings/{filingId}/rejections', 'POST /office/establishments/{estId}/damages-knock-offs', 'POST /office/ledger-adjustments/{adjustmentId}/approvals', 'POST /office/ledger-journals/{journalId}/reversals', 'POST /office/receipts/{receiptId}/trrn-adjustments', 'POST /office/transfers/{transferId}/recredits', 'POST /office/vdr-entries/{vdrId}/rejections']
+OPERATIONS = ['GET /office/damages-knock-offs', 'GET /office/ecr-filings', 'GET /office/ledger-adjustments', 'POST /office/ledger-adjustments', 'POST /office/vdr-entries', 'POST /public/trrn-status-lookups', 'GET /employers/me/challans', 'GET /employers/me/demands', 'POST /employers/me/direct-challans', 'GET /employers/me/ecr-filings', 'POST /employers/me/ecr-filings', 'GET /members/me/passbook', 'GET /office/accounts/inoperative', 'GET /office/accounts/interest-postings', 'POST /office/accounts/interest-postings', 'GET /office/receipts/unreconciled', 'POST /public/demo-calculations/epf', 'GET /employers/me/returns/dashboard', 'GET /members/me/tax/taxable-interest', 'POST /partners/sandbox/payroll/ecr-filings', 'GET /employers/me/challans/{trrn}', 'GET /employers/me/ecr-filings/{filingId}', 'GET /members/me/annual-statements/{financialYear}', 'GET /employers/me/challans/{trrn}/receipt', 'POST /employers/me/ecr-filings/{filingId}/approvals', 'POST /employers/me/ecr-filings/{filingId}/cancellations', 'POST /employers/me/ecr-filings/{filingId}/submissions', 'POST /employers/me/ecr-filings/{filingId}/validations', 'GET /employers/me/members/{uan}/contribution-ledger', 'GET /members/me/accounts/{accountLinkId}/passbook', 'GET /members/me/transfers/{transferId}/annexure-k', 'POST /office/annexure-k-files/{annexureId}/vdr-reconciliations', 'POST /office/damages-knock-offs/{knockOffId}/approvals', 'POST /office/ecr-filings/{filingId}/payment-rejections', 'POST /office/ecr-filings/{filingId}/rejections', 'POST /office/establishments/{estId}/damages-knock-offs', 'POST /office/ledger-adjustments/{adjustmentId}/approvals', 'POST /office/ledger-journals/{journalId}/reversals', 'POST /office/receipts/{receiptId}/trrn-adjustments', 'POST /office/transfers/{transferId}/recredits', 'POST /office/vdr-entries/{vdrId}/rejections']
 
 @router.api_route("/api/v1/office/damages-knock-offs", methods=["GET"], include_in_schema=False)
 async def get_office_damages_knock_offs(actor: Actor = Depends(require_actor)) -> None:
@@ -102,6 +102,11 @@ async def get_employers_me_returns_dashboard(actor: Actor = Depends(require_acto
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Return monthly dashboard by wage month")
 
 
+@router.api_route("/api/v1/members/me/tax/taxable-interest", methods=["GET"], include_in_schema=False)
+async def get_members_me_tax_taxable_interest(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Taxable vs non-taxable interest split")
+
+
 @router.api_route("/api/v1/partners/sandbox/payroll/ecr-filings", methods=["POST"], include_in_schema=False)
 async def post_partners_sandbox_payroll_ecr_filings(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "B2B payroll API ECR upload")
@@ -115,6 +120,11 @@ async def get_employers_me_challans_trrn(actor: Actor = Depends(require_actor)) 
 @router.api_route("/api/v1/employers/me/ecr-filings/{filingId}", methods=["GET"], include_in_schema=False)
 async def get_employers_me_ecr_filings_filingId(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Filing detail and status")
+
+
+@router.api_route("/api/v1/members/me/annual-statements/{financialYear}", methods=["GET"], include_in_schema=False)
+async def get_members_me_annual_statements_financialYear(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Annual account slip")
 
 
 @router.api_route("/api/v1/employers/me/challans/{trrn}/receipt", methods=["GET"], include_in_schema=False)

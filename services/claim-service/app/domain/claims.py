@@ -83,7 +83,18 @@ def eligibility(account: dict[str, Any], claim_type: str, rules: dict[str, Any],
                        f"{'and ' + str(spec['min_service_months'] % 12) + ' months ' if spec['min_service_months'] % 12 else ''}of service.")
     if spec.get("once_every_months") and any(months_between(d, today) < spec["once_every_months"] for d in previous_claims or []):
         reasons.append(f"This claim can be made once every {spec['once_every_months']} months.")
-    base = employee if spec["max_from"] == "employee_share" else employee + employer
+    served = months_between(joined, exited or today) if joined else 0
+    if spec.get("max_service_months") is not None and served > spec["max_service_months"]:
+        reasons.append("With this much service a monthly pension or a scheme certificate applies instead (Form 10D / 10C).")
+    if spec["max_from"] == "eps_table_d":             # pension withdrawal benefit: Table D factor x wages (illustrative)
+        years = served // 12 + (1 if served % 12 >= 6 else 0)
+        table = spec["table_d_factor_x100"]
+        if years < 1:
+            reasons.append("At least six months of pension (EPS) service are needed.")
+        wages = rules["contribution"]["eps_wage_ceiling_paise"]
+        base = wages * table[min(years, len(table)) - 1] // 100 if years >= 1 else 0
+    else:
+        base = employee if spec["max_from"] == "employee_share" else employee + employer
     maximum = base * spec.get("max_pct_bp", 10000) // 10000
     if spec.get("cap_paise"):
         maximum = min(maximum, spec["cap_paise"])

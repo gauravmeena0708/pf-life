@@ -34,7 +34,7 @@ CHAIN_FIRST = {"fo.da_accounts"}
 CHAIN_SECOND = {"fo.ss", "fo.ao"}
 CHAIN_LATER = {"fo.apfc", "fo.oic"}
 CLAIM_CONDITIONS = {"requires_active_employment", "requires_exit_months", "min_service_months", "once_every_months",
-                    "max_from", "max_pct_bp", "cap_paise"}
+                    "max_from", "max_pct_bp", "cap_paise", "max_service_months", "table_d_factor_x100"}
 CLAIM_FIELDS = CLAIM_CONDITIONS | {"form_type", "label", "plain_rule", "auto_settle_up_to_paise", "approval_bands", "retired"}
 
 
@@ -423,11 +423,15 @@ def validate(document: dict[str, Any]) -> list[str]:
         for field in ("form_type", "label", "plain_rule"):
             if not str(t.get(field) or "").strip():
                 problems.append(f"{where}: {field} is required")
-        if t.get("max_from") not in ("employee_share", "total_balance"):
-            problems.append(f"{where}: max_from must be employee_share or total_balance")
+        if t.get("max_from") not in ("employee_share", "total_balance", "eps_table_d"):
+            problems.append(f"{where}: max_from must be employee_share, total_balance or eps_table_d")
+        if t.get("max_from") == "eps_table_d":
+            table = t.get("table_d_factor_x100")
+            if not isinstance(table, list) or not table or any(not isinstance(x, int) or x <= 0 for x in table) or table != sorted(table):
+                problems.append(f"{where}: table_d_factor_x100 must list rising whole-number factors (x100) for 1, 2, … years of service")
         if "max_pct_bp" in t and not (isinstance(t["max_pct_bp"], int) and 1 <= t["max_pct_bp"] <= 10000):
             problems.append(f"{where}: max_pct_bp must be between 1 and 10000")
-        for field in ("cap_paise", "requires_exit_months", "min_service_months", "once_every_months"):
+        for field in ("cap_paise", "requires_exit_months", "min_service_months", "once_every_months", "max_service_months"):
             if field in t and t[field] is not None and (not isinstance(t[field], int) or t[field] < 0):
                 problems.append(f"{where}: {field} must be a non-negative whole number")
         if t.get("requires_active_employment") and t.get("requires_exit_months") is not None:

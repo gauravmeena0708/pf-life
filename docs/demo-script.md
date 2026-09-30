@@ -322,6 +322,17 @@ simulation; point out that the dialog says exactly what is being authorised (act
 4. **Appendix E**: the DA proposes *Transfer of 1.16% from employer share to EPS* for member A with the notesheet;
    **`ro-apfc`** approves; member A's passbook shows the adjustment.
 
+## Form 10C withdrawal benefit; annual statement
+*Tests: `tests/e2e/test_pension_withdrawal_statement.py`, `services/claim-service/tests/test_tds.py`,
+`services/contribution-service/tests/test_statements.py`*
+
+1. **`member-c` (FARAH DEMO, left on 30 June 2026 after 3 years 5 months) → Online Services › Claim**: *Pension
+   withdrawal benefit (Form 10C)* shows ₹46,500 (Table D factor 3.10 × ₹15,000, illustrative). File and confirm.
+2. **`do-caseworker`** recommends, **`ro-ss`** approves (each generates the Claim Approval Docket), **`ro-cashier`**
+   pays: the money comes from the EPS fund, not her PF balance.
+3. **`member-a` → View › Annual statement and taxable interest**: opening, the year's movements and the closing
+   balance per member ID; the taxable part of the interest (none below ₹2,50,000 of own contributions a year).
+
 ## Policy changes that move money — interest, TDS and pensions
 *Tests: `tests/e2e/test_policy_money.py`, `services/contribution-service/tests/test_interest.py`,
 `services/claim-service/tests/test_tds.py`, `services/pension-service/tests/test_pensions.py`*

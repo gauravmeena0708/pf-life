@@ -239,8 +239,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /members/me/applications?status=` | *Recent Pending Applications* / *Recent Processed Applications* (Service History page); also the "process already ongoing" list that blocks a new Mark Exit | W | 1 | member |
 | `GET /members/me/passbook` | Passbook across all accounts linked to the caller (no member ID parameter) | W | 1 | contribution |
 | `GET /members/me/accounts/{accountLinkId}/passbook` | Passbook for one linked account; `accountLinkId` is an opaque ID validated against the caller | W | 1 | contribution |
-| `GET /members/me/annual-statements/{financialYear}` | Annual account slip | P | 2 | contribution |
-| `GET /members/me/tax/taxable-interest?financialYear=` | Taxable vs non-taxable interest split | P | 2 | contribution |
+| `GET /members/me/annual-statements/{financialYear}` | Annual account slip | W | 1 | contribution |
+| `GET /members/me/tax/taxable-interest?financialYear=` | Taxable vs non-taxable interest split | W | 1 | contribution |
 | `GET /members/me/tax/form-16a?financialYear=` | TDS certificate (Form 16A) | P | 3 | claim |
 | `POST /members/me/tax/form-15g-15h` | Upload Form 15G / 15H | W | 1 | claim |
 | `GET /members/me/nominations` | e-Nomination (Form 2) — view | P | 2 | member |
@@ -276,7 +276,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /members/me/claims/eligible-types` | Available claim types with rule version and reasons (Journey B3) | W | 1 | claim |
 | `POST /members/me/claims` 💰 (`formType=FORM_31`) | **Advance / partial withdrawal** (purpose as sub-type) | W | 1 | claim |
 | `POST /members/me/claims` 💰 (`formType=FORM_19`) | **Final PF settlement** | W | 1 | claim |
-| `POST /members/me/claims` 💰 (`formType=FORM_10C`) | **Pension withdrawal benefit** (cash benefit) | P | 2 | claim |
+| `POST /members/me/claims` 💰 (`formType=FORM_10C`) | **Pension withdrawal benefit** (cash benefit) | W | 1 | claim |
 | `POST /members/me/pension-scheme-certificates` 🔐 | **Scheme certificate** request (Form 10C option) | W | 1 | pension |
 | `POST /members/me/pension-applications` 💰 (`formType=FORM_10D`) | **Monthly pension** application | W | 1 | pension |
 | `GET /members/me/pension-applications` | The member's pension application: its desk-by-desk progress, the PPO number once issued | W | 1 | pension |

@@ -98,6 +98,14 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 7c: Form 10C withdrawal benefit, annual statement, taxable interest (30 September 2026)
+
+Unit tests 316 passed; must-deny 18 passed; end to end 47 of 48 in the full run, including
+`test_pension_withdrawal_statement.py`. The one failure was the gate-1 check that a planned endpoint answers 501:
+it used the annual statement, which is now built. It now uses Form 16A and passes (9 of 9 in that file).
+- The Form 10C type reached the running stack by publishing a rule set through the HO maker-checker flow
+  (rule sets published earlier today did not contain it).
+
 ## Update — Phase 2, slice 7b: receipts, reversals, recredits, Appendix E (30 September 2026)
 
 Run on a stack rebuilt from empty (`make reset`): unit tests 311 passed; end to end 46 passed (including
