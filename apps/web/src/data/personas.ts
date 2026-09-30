@@ -13,6 +13,8 @@ export const PERSONAS: Persona[] = [
   { username: "member-c", label: "Member C (left employment)", role: "member" },
   { username: "member-d", label: "Member D (two member IDs)", role: "member" },
   { username: "member-e", label: "Member E (retired, pension)", role: "member" },
+  { username: "member-f", label: "Member F (Aadhaar not verified)", role: "member" },
+  { username: "member-g", label: "Member G (changed jobs, auto-transfer)", role: "member" },
   { username: "pensioner-a", label: "Pensioner A", role: "pensioner" },
   { username: "claimant-a", label: "Claimant (nominee of a deceased member)", role: "claimant" },
   { username: "emp-owner", label: "Employer owner", role: "employer.owner" },

@@ -8,6 +8,9 @@ Each operation in a definition becomes a route. The engine enforces, generically
 * when            `from` states; the result is `to`, or `outcomes` chosen by a form field;
 * how             `form` rules, `step_up` bound to the subject or to the case version, one action per officer
                   per round (maker ≠ checker), `requires_last_finding`;
+* bulk            `bulk: <start operation>` takes CSV lines and starts one case per valid line, reporting each line;
+* subject         a starting operation takes its subject from the path, the actor (`subject_from: actor`) or a
+                  form field (`subject_from: form:uan`, e.g. an employer-initiated Joint Declaration);
 * lists           GET operations with `lists` return the open cases in given states within the caller's scope;
                   GET operations with `reads` return one case the caller may see (e.g. a member's own transfer);
 * documents       `produces_document` (a signed document kept on the case) and `requires_viewed` (the officer
@@ -52,7 +55,7 @@ def definitions() -> tuple[dict[str, Any], ...]:
             where = f"{d['process']}.{op['name']}"
             if not (op.get("roles") or op.get("chain") or op.get("roles_by")):
                 raise ValueError(f"{where}: no roles, chain or roles_by")
-            if op.get("lists"):
+            if op.get("lists") or op.get("bulk"):
                 continue
             if op.get("reads"):
                 if not op.get("case_from"):
@@ -230,7 +233,8 @@ def build_router() -> APIRouter:
     for definition in definitions():
         for op in definition["operations"]:
             method, path = op["operation"].split(" ", 1)
-            handler = _lister(definition, op) if op.get("lists") else _reader(definition, op) if op.get("reads") else _handler(definition, op)
+            handler = (_lister(definition, op) if op.get("lists") else _reader(definition, op) if op.get("reads")
+                       else _bulk(definition, op) if op.get("bulk") else _handler(definition, op))
             router.add_api_route("/api/v1" + path, handler,
                                  methods=[method], name=f"{definition['process']}.{op['name']}")
     return router
@@ -298,6 +302,44 @@ def _reader(definition: dict[str, Any], op: dict[str, Any]):
     return handle
 
 
+def _bulk(definition: dict[str, Any], op: dict[str, Any]):
+    """CSV lines, each the form of the starting operation `op["bulk"]` plus the subject (e.g. uan). Each valid line
+    starts its own case (so each still needs its approval); the others are reported with the reason."""
+    start = next(o for o in definition["operations"] if o["name"] == op["bulk"])
+    columns = [definition["subject"], *start.get("form", {}).keys()]
+
+    async def handle(body: dict[str, Any] = Body(default_factory=dict), actor: Actor = Depends(require_actor)) -> dict:
+        _check_role(op, actor, None)
+        lines = [ln for ln in str(body.get("content", "")).strip().splitlines() if ln.strip()]
+        if lines and lines[0].lower().startswith(columns[0]):
+            lines = lines[1:]                                                  # a header line
+        if not lines or len(lines) > op.get("max_lines", 100):
+            raise Problem(422, "/problems/validation", "Nothing to upload" if not lines else "Too many lines",
+                          f"Upload 1 to {op.get('max_lines', 100)} lines: {', '.join(columns)}.")
+        bind_step_up(op, actor, None, actor.establishment_id or "")
+        results = []
+        for n, line in enumerate(lines, start=1):
+            values = [v.strip() for v in line.split(",")]
+            row = dict(zip(columns, values))
+            try:
+                data = validate_form(start.get("form", {}), row)
+                async with sessions()() as session, session.begin():
+                    staff = await posting(session, actor)
+                    view = await _start(session, definition, {**start, "step_up": None}, _PathOnly({definition["subject"]: row.get(definition["subject"], "")}),
+                                        staff, data, actor)
+                results.append({"line": n, "status": "ACCEPTED", "case_id": view["case_id"], definition["subject"]: view["subject_ref"]})
+            except Problem as p:
+                results.append({"line": n, "status": "ERROR", "error": p.detail or p.title})
+        return envelope({"lines": len(results), "accepted": sum(r["status"] == "ACCEPTED" for r in results), "results": results})
+    return handle
+
+
+class _PathOnly:
+    """Stands in for the request when a bulk line starts a case: the subject comes from the line."""
+    def __init__(self, path_params: dict[str, str]):
+        self.path_params = path_params
+
+
 async def _open_case(session: AsyncSession, definition: dict[str, Any], subject_ref: str) -> dict[str, Any] | None:
     row = (await session.execute(select(cases).where(
         cases.c.process == definition["process"], cases.c.subject_ref == subject_ref,
@@ -317,6 +359,8 @@ async def _start(session, definition, op, request, staff, data, actor) -> dict[s
     if op.get("subject_from") == "actor":
         row = (await session.execute(select(subject_offices).where(subject_offices.c.member_subject == actor.subject))).mappings().first()
         subject_ref = row["subject_ref"] if row else None
+    elif str(op.get("subject_from", "")).startswith("form:"):
+        subject_ref = str(data.get(op["subject_from"].split(":", 1)[1]) or "") or None
     else:
         subject_ref = request.path_params[definition["subject"]]
     subject = await subject_row(session, subject_ref) if subject_ref else None

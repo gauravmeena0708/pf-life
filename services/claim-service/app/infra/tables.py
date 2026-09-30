@@ -1,5 +1,5 @@
 """Tables owned by claim-service (created by migration 0002)."""
-from sqlalchemy import JSON, BigInteger, Boolean, Column, Date, DateTime, Integer, LargeBinary, MetaData, String, Table, Text, false as sa_false, func
+from sqlalchemy import JSON, BigInteger, Boolean, Column, Date, DateTime, Integer, LargeBinary, MetaData, String, Table, Text, false as sa_false, true as sa_true, func
 
 from app.infra.models import IdType
 
@@ -24,6 +24,7 @@ accounts = Table(
     Column("deceased_on", Date),                                                  # a death in service (exit reason) or seeded
     Column("is_primary", Boolean, nullable=False, server_default=sa_false()),     # the member's primary member ID (P2.7d)
     Column("set_key", String(200)),                                               # the UANs of the member's Aadhaar-verified set
+    Column("aadhaar_verified", Boolean, nullable=False, server_default=sa_true()),  # not verified: claims wait for the employer's attestation (P2.8b)
 )
 
 # Office staff directory (synthetic seed): which office an officer acts for.
@@ -196,4 +197,29 @@ annexure_k_files = Table(
     Column("reco_status", String(20), nullable=False),            # PENDING | MATCHED | MISMATCH
     Column("reco", JSON),
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
+)
+
+# The member's KYC-verified bank accounts (seeded, then MemberKycUpdated.v1): a claim not yet in payment can be
+# switched to any of them (P2.8b).
+member_bank_accounts = Table(
+    "member_bank_accounts", metadata,
+    Column("uan", String(12), primary_key=True),
+    Column("bank_ifsc", String(20), primary_key=True),
+    Column("bank_account_last4", String(4), primary_key=True),
+    Column("verified_at", DateTime(timezone=True), server_default=func.now()),
+)
+
+# Auto-transfers on a change of job (P2.8b): an exited member ID of the member's Aadhaar-verified set with a balance
+# is offered for transfer into the primary member ID; the member confirms, contribution-service posts it.
+auto_transfers = Table(
+    "auto_transfers", metadata,
+    Column("transfer_id", String(80), primary_key=True),
+    Column("member_subject", String(80), nullable=False, index=True),
+    Column("uan", String(12), nullable=False),
+    Column("from_account_link_id", String(40), nullable=False),
+    Column("to_account_link_id", String(40), nullable=False),
+    Column("amount_paise", BigInteger, nullable=False),
+    Column("state", String(20), nullable=False),            # CONFIRMED | POSTED
+    Column("confirmed_at", DateTime(timezone=True), server_default=func.now()),
+    Column("posted_at", DateTime(timezone=True)),
 )

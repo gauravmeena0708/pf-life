@@ -215,9 +215,11 @@ EVENTS = [
     ("RiskSignalRaised", "intelligence", ["claim", "workflow", "reporting", "audit"], "risk_signal", 1, {"signal_id": S, "detection_type": S, "rule_version": S, "evidence_refs": "array", "subject_ref": S, "explanation": S}),
     ("ProcessTransitioned", "workflow", ["member", "contribution", "employer", "audit"], "process_instance", 1, {"process": S, "instance_id": S, "subject_ref": S, "from_state": {"type": ["string", "null"]}, "to_state": S, "operation": S, "title": S, "terminal": B, "visible_to_member": B, "actor_subject": S, "actor_role": S, "data": {"type": "object"}}),
     ("PrimaryMemberIdChanged", "member", ["claim", "workflow", "audit"], "member", 1, {"uan": S, "set_uans": "array", "primary_account_link_id": S, "previous_account_link_id": S, "member_ids": "array"}),
-    ("MemberExitMarked", "member", ["contribution", "claim", "workflow", "audit"], "member_account", 1, {"uan": S, "account_link_id": S, "date_of_exit": S, "reason": S, "marked_by": {"enum": ["MEMBER", "EMPLOYER"]}}),
+    ("MemberExitMarked", "member", ["contribution", "claim", "workflow", "audit"], "member_account", 1, {"uan": S, "account_link_id": S, "date_of_exit": S, "reason": S, "marked_by": {"enum": ["MEMBER", "EMPLOYER"]}, "corrects": {"type": "string", "optional": True, "description": "The date of exit this corrects (P2.8b)"}}),
+    ("NominationRegistered", "member", ["claim", "audit"], "member", 1, {"nomination_id": S, "uan": S, "nominees": {"type": "array", "items": {"type": "object"}, "description": "name, relation, share_bp, minor, guardian_name; no identity numbers"}, "signed_with": S}),
     ("MemberRegistered", "member", ["contribution", "claim", "workflow", "audit"], "member_account", 1, {"uan": S, "account_link_id": S, "member_subject": {"type": ["string", "null"]}, "name": S, "date_of_birth": S, "gender": S, "establishment_id": S, "date_of_joining": S, "new_uan": B, "pan_verified": B}),
     ("MemberKycUpdated", "member", ["claim", "audit"], "member", 1, {"uan": S, "kyc_type": {"enum": ["PAN", "BANK", "AADHAAR"]}, "status": S, "pan_verified": B, "bank_ifsc": S, "bank_account_last4": S}),
+    ("AutoTransferConfirmed", "claim", ["contribution", "audit"], "auto_transfer", 1, {"transfer_id": S, "uan": S, "from_account_link_id": S, "to_account_link_id": S}),
     ("TransferPosted", "contribution", ["claim", "member", "workflow", "audit"], "ledger_journal", 1, {"transfer_id": S, "uan": S, "from_account_link_id": S, "to_account_link_id": S, "employee_paise": N, "employer_paise": N, "journal_id": S, "postings": POSTINGS}),
     ("PolicyPublished", "platform", ["claim", "contribution", "workflow", "grievance", "intelligence", "pension", "audit"], "rule_set", 1, {"version_id": S, "rule_version": S, "effective_from": S, "document_sha256": S, "approved_by_role": S, "document": {"type": "object"}}),
     ("ClaimStateChanged", "claim", ["workflow", "reporting", "audit"], "claim", 1, {"claim_id": S, "from_state": S, "to_state": S, "reason": S, "claim_type": S, "amount_paise": N, "rule_version": S, "office_id": S, "account_link_id": S}),
@@ -246,10 +248,12 @@ EVENTS = [
 
 
 def event_schema(name, producer, aggregate, payload):
-    props = {}
+    props, optional = {}, set()
     for field, typ in payload.items():
         if isinstance(typ, dict):
-            props[field] = typ
+            props[field] = {k: v for k, v in typ.items() if k != "optional"}
+            if typ.get("optional"):
+                optional.add(field)
         else:
             props[field] = {"type": "array", "items": {"type": "string"}} if typ == "array" else {"type": typ}
         if field.endswith("_paise"):
@@ -274,7 +278,8 @@ def event_schema(name, producer, aggregate, payload):
             "occurred_at": {"type": "string", "format": "date-time", "description": "UTC"},
             "correlation_id": {"type": "string", "format": "uuid"},
             "causation_id": {"type": "string", "format": "uuid", "description": "Optional: the event that caused this one, when there is one"},
-            "payload": {"type": "object", "additionalProperties": False, "required": list(payload), "properties": props},
+            "payload": {"type": "object", "additionalProperties": False, "required": [f for f in payload if f not in optional],
+                        "properties": props},
         },
     }
 

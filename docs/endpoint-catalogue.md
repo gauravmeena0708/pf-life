@@ -125,16 +125,16 @@ Rules that apply to every row:
 | `POST /employers/me/members/{uan}/declarations` | **Form 11** new-joinee declaration | W | 1 | member |
 | `GET /employers/me/members/{uan}/contribution-ledger` | Wage and contribution ledger for own employee | W | 1 | contribution |
 | `POST /employers/me/members/{uan}/exits` 🔐 | Mark exit with date and reason | W | 1 | member |
-| `POST /employers/me/members/{uan}/exit-corrections` 🔐 | Date-of-exit correction | P | 2 | member |
+| `POST /employers/me/members/{uan}/exit-corrections` 🔐 | Date-of-exit correction | W | 1 | member |
 | `GET /employers/me/kyc-approvals` | Member KYC requests awaiting employer approval | W | 1 | member |
 | `POST /employers/me/kyc-approvals/{requestId}/decisions` 🔐 | Approve / reject member KYC (bank, PAN, Aadhaar seeding) | W | 1 | member |
 | `GET /employers/me/joint-declarations` | Joint Declarations awaiting attestation (tier-2 process `joint_declaration`) | W | 1 | member |
 | `POST /employers/me/joint-declarations/{jdId}/decisions` 🔐 | Attest / reject Joint Declaration (tier-2 process `joint_declaration`) | W | 1 | member |
-| `POST /employers/me/joint-declarations` 🔐 | Employer-initiated Joint Declaration | P | 2 | member |
+| `POST /employers/me/joint-declarations` 🔐 | Employer-initiated Joint Declaration | W | 1 | member |
 | `GET /employers/me/transfer-requests` | Form 13 transfer requests awaiting attestation | W | 1 | claim |
 | `POST /employers/me/transfer-requests/{transferId}/decisions` 🔐 | Attest / reject transfer | W | 1 | claim |
-| `GET /employers/me/claim-attestations` | Claims awaiting employer attestation | P | 2 | claim |
-| `POST /employers/me/claim-attestations/{claimId}/decisions` 🔐 | Attest / reject claim | P | 2 | claim |
+| `GET /employers/me/claim-attestations` | Claims awaiting employer attestation | W | 1 | claim |
+| `POST /employers/me/claim-attestations/{claimId}/decisions` 🔐 | Attest / reject claim | W | 1 | claim |
 | `GET /employers/me/higher-pension-options` | Member joint options for higher pension awaiting validation | P | 2 | pension |
 | `POST /employers/me/higher-pension-options/{optionId}/validations` 🔐 | Validate option and upload wage details | P | 2 | pension |
 
@@ -147,7 +147,7 @@ Rules that apply to every row:
 | `POST /employers/me/approvals/{approvalId}/decisions` 🔐 | Approve / reject a queued member change | W | 1 | member |
 | `POST /employers/me/kyc-bulk-uploads` | Member > KYC BULK upload | W | 1 | member |
 | `GET /employers/me/kyc-bulk-uploads/{uploadId}/errors` | Bulk KYC error list | W | 1 | member |
-| `POST /employers/me/members/exit-bulk-uploads` 🔐 | Member > Exit-Bulk upload | P | 2 | member |
+| `POST /employers/me/members/exit-bulk-uploads` 🔐 | Member > Exit-Bulk upload | W | 1 | member |
 | `PATCH /employers/me/members/{uan}/profile` 🔐 | Fill missing member details (only details the record lacks; a recorded detail changes through a Joint Declaration) | W | 1 | member |
 | `POST /employers/me/members/{uan}/location-mappings` | Member Location Mapping to branches | P | 2 | member |
 | `GET /employers/me/members/active-export` | Download active members with UAN and KYC (Dashboards > Active Members) | W | 1 | member |
@@ -226,7 +226,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 |---|---|---|---|---|
 | `POST /members/uan-activations` | UAN activation (mock OTP / mock face authentication) | M | 2 | member |
 | `POST /members/uan-allotments` | Self UAN allotment via mock Aadhaar face auth (UMANG-style) | M | 2 | member |
-| `POST /members/uan-lookups` | **Know your UAN** (OTP-verified) | P | 2 | member |
+| `POST /members/uan-lookups` | **Know your UAN** (OTP-verified) | W | 1 | member |
 | `GET /members/me` | Profile | W | 1 | member |
 | `GET /members/me/identity-assurance` | Assurance level | W | 1 | member |
 | `PATCH /members/me/contact-details` 🔐 | Change mobile / email (Journey D1) | W | 1 | member |
@@ -243,8 +243,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /members/me/tax/taxable-interest?financialYear=` | Taxable vs non-taxable interest split | W | 1 | contribution |
 | `GET /members/me/tax/form-16a?financialYear=` | TDS certificate (Form 16A) | P | 3 | claim |
 | `POST /members/me/tax/form-15g-15h` | Upload Form 15G / 15H | W | 1 | claim |
-| `GET /members/me/nominations` | e-Nomination (Form 2) — view | P | 2 | member |
-| `POST /members/me/nominations` 🔐 | e-Nomination — submit with mock e-sign | P | 2 | member |
+| `GET /members/me/nominations` | e-Nomination (Form 2) — view | W | 1 | member |
+| `POST /members/me/nominations` 🔐 | e-Nomination — submit with mock e-sign | W | 1 | member |
 | `GET /members/me/sessions` | Session history | W | 1 | gateway |
 | `POST /members/me/security-reports` | Report suspicious activity | W | 1 | member |
 | `POST /members/me/account-recovery-requests` 🔐 | Controlled, reviewed account recovery (Journey D5) | W | 1 | member |
@@ -252,8 +252,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /security/account-recovery-requests/{requestId}/decisions` 🔐 | Approve or reject an account-recovery request; approval restores the verified contact details (Journey D5) | W | 1 | member |
 | `GET /members/me/notifications` | Notifications (projection fed by claim / payment / grievance events — see §14) | W | 1 | member |
 | `GET /members/me/uan-card` | UAN card | W | 1 | member |
-| `GET /members/me/transfers/auto` | Auto-transfer status on job change | P | 2 | claim |
-| `POST /members/me/transfers/auto/{transferId}/confirmations` 🔐 | Confirm auto-transfer | P | 2 | claim |
+| `GET /members/me/transfers/auto` | Auto-transfer status on job change | W | 1 | claim |
+| `POST /members/me/transfers/auto/{transferId}/confirmations` 🔐 | Confirm auto-transfer | W | 1 | claim |
 | `GET /members/me/transfers/{transferId}/annexure-k` | **Annexure K** transfer statement | W | 1 | contribution |
 | `GET /members/me/pension-scheme-certificate` | Scheme certificate status | W | 1 | pension |
 | `POST /members/me/higher-pension-options` 🔐 | Submit joint option for higher pension | P | 2 | pension |
@@ -324,7 +324,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 |---|---|---|---|---|
 | `GET /members/me/claims/eligibility-preview?formType=` | **Pre-flight:** evaluate one form type before filing — eligible or not, blockers from account status, maximum amount, required documents, rule version | W | 1 | claim |
 | `GET /members/me/claims/{claimId}/audit-trail` | **Post-submission:** member's view of every state change on own claim (time, state, role, reason; officer names withheld) | W | 1 | claim |
-| `PUT /members/me/claims/{claimId}/bank-details` 🔐 | **Post-submission:** switch a claim not yet in payment to another **KYC-verified** bank account of the member (after a return, use `…/re-disbursement-requests`) | P | 2 | claim |
+| `PUT /members/me/claims/{claimId}/bank-details` 🔐 | **Post-submission:** switch a claim not yet in payment to another **KYC-verified** bank account of the member (after a return, use `…/re-disbursement-requests`) | W | 1 | claim |
+| `GET /members/me/claims/{claimId}/bank-details` | The member's KYC-verified bank accounts a claim can be switched to, and whether it still can be | W | 1 | claim |
 
 ## 8. Office claim processing and member accounts
 

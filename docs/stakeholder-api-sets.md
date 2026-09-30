@@ -58,10 +58,12 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/claims/eligible-types` | W |
 | `GET /members/me/claims/{claimId}` | W |
 | `GET /members/me/claims/{claimId}/audit-trail` | W |
+| `GET /members/me/claims/{claimId}/bank-details` | W |
 | `GET /members/me/employment-history` | W |
 | `GET /members/me/grievances` | W |
 | `GET /members/me/identity-assurance` | W |
 | `GET /members/me/kyc` | W |
+| `GET /members/me/nominations` | W |
 | `GET /members/me/notifications` | W |
 | `GET /members/me/passbook` | W |
 | `GET /members/me/pension-applications` | W |
@@ -70,6 +72,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/service-history` | W |
 | `GET /members/me/sessions` | W |
 | `GET /members/me/tax/taxable-interest` | W |
+| `GET /members/me/transfers/auto` | W |
 | `GET /members/me/transfers/{transferId}` | W |
 | `GET /members/me/transfers/{transferId}/annexure-k` | W |
 | `GET /members/me/uan-card` | W |
@@ -91,28 +94,26 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/me/joint-declarations` | W |
 | `POST /members/me/kyc/bank-accounts` | W |
 | `POST /members/me/kyc/{kycType}` | W |
+| `POST /members/me/nominations` | W |
 | `POST /members/me/pension-applications` | W |
 | `POST /members/me/pension-scheme-certificates` | W |
 | `POST /members/me/pension-scheme-certificates/{certId}/surrenders` | W |
 | `POST /members/me/security-reports` | W |
 | `POST /members/me/tax/form-15g-15h` | W |
 | `POST /members/me/transfers` | W |
+| `POST /members/me/transfers/auto/{transferId}/confirmations` | W |
+| `POST /members/uan-lookups` | W |
 | `POST /security/step-up-challenges` | W |
 | `POST /security/step-up-challenges/{challengeId}/verifications` | W |
+| `PUT /members/me/claims/{claimId}/bank-details` | W |
 | `POST /members/uan-activations` | M |
 | `POST /members/uan-allotments` | M |
 | `GET /members/me/higher-pension-options/{optionId}` | P |
-| `GET /members/me/nominations` | P |
 | `GET /members/me/tax/form-16a` | P |
-| `GET /members/me/transfers/auto` | P |
 | `POST /grievances/{grievanceId}/feedback` | P |
 | `POST /grievances/{grievanceId}/reminders` | P |
 | `POST /members/me/higher-pension-options` | P |
-| `POST /members/me/nominations` | P |
-| `POST /members/me/transfers/auto/{transferId}/confirmations` | P |
-| `POST /members/uan-lookups` | P |
 | `POST /public/claims/status-lookups` | P |
-| `PUT /members/me/claims/{claimId}/bank-details` | P |
 
 Integration adapters: `uidai`
 
@@ -264,6 +265,7 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `GET /employers/me/challans/{trrn}` | W |
 | `GET /employers/me/challans/{trrn}/receipt` | W |
 | `GET /employers/me/change-requests` | W |
+| `GET /employers/me/claim-attestations` | W |
 | `GET /employers/me/demands` | W |
 | `GET /employers/me/ecr-filings` | W |
 | `GET /employers/me/ecr-filings/{filingId}` | W |
@@ -278,12 +280,14 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `PATCH /employers/me` | W |
 | `POST /employers/me/approvals/{approvalId}/decisions` | W |
 | `POST /employers/me/branches` | W |
+| `POST /employers/me/claim-attestations/{claimId}/decisions` | W |
 | `POST /employers/me/configuration/change-requests` | W |
 | `POST /employers/me/demands/{demandId}/payment-intents` | W |
 | `POST /employers/me/direct-challans` | W |
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W |
 | `POST /employers/me/ecr-filings/{filingId}/cancellations` | W |
 | `POST /employers/me/ecr-filings/{filingId}/submissions` | W |
+| `POST /employers/me/joint-declarations` | W |
 | `POST /employers/me/joint-declarations/{jdId}/decisions` | W |
 | `POST /employers/me/kyc-approvals/{requestId}/decisions` | W |
 | `POST /employers/me/transfer-requests/{transferId}/decisions` | W |
@@ -293,13 +297,10 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `POST /employers/me/challans/{trrn}/payment-intents` | M |
 | `POST /employers/me/kyc/{kycType}` | M |
 | `POST /international/coc-applications` | M |
-| `GET /employers/me/claim-attestations` | P |
 | `GET /employers/me/higher-pension-options` | P |
 | `GET /international/coc-applications/{id}/certificate` | P |
-| `POST /employers/me/claim-attestations/{claimId}/decisions` | P |
 | `POST /employers/me/closure-requests` | P |
 | `POST /employers/me/higher-pension-options/{optionId}/validations` | P |
-| `POST /employers/me/joint-declarations` | P |
 | `POST /employers/me/office-transfer-requests` | P |
 | `POST /employers/me/proceedings/{caseId}/submissions` | P |
 | `POST /employers/voluntary-coverage-requests` | P |
@@ -335,11 +336,11 @@ Activities: **F01.profile** View establishment profile, configuration, KYC and h
 | `POST /employers/me/kyc-bulk-uploads` | W |
 | `POST /employers/me/members` | W |
 | `POST /employers/me/members/bulk-registrations` | W |
+| `POST /employers/me/members/exit-bulk-uploads` | W |
 | `POST /employers/me/members/{uan}/declarations` | W |
+| `POST /employers/me/members/{uan}/exit-corrections` | W |
 | `POST /employers/me/members/{uan}/exits` | W |
 | `GET /employers/me/dashboard` | P |
-| `POST /employers/me/members/exit-bulk-uploads` | P |
-| `POST /employers/me/members/{uan}/exit-corrections` | P |
 | `POST /employers/me/members/{uan}/location-mappings` | P |
 
 #### `principal_employer` — Principal employer monitoring contractors

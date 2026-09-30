@@ -28,8 +28,10 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `ProcessTransitioned.v1` | workflow | member, contribution, employer, audit | process_instance | 1 |
 | `PrimaryMemberIdChanged.v1` | member | claim, workflow, audit | member | 1 |
 | `MemberExitMarked.v1` | member | contribution, claim, workflow, audit | member_account | 1 |
+| `NominationRegistered.v1` | member | claim, audit | member | 1 |
 | `MemberRegistered.v1` | member | contribution, claim, workflow, audit | member_account | 1 |
 | `MemberKycUpdated.v1` | member | claim, audit | member | 1 |
+| `AutoTransferConfirmed.v1` | claim | contribution, audit | auto_transfer | 1 |
 | `TransferPosted.v1` | contribution | claim, member, workflow, audit | ledger_journal | 1 |
 | `PolicyPublished.v1` | platform | claim, contribution, workflow, grievance, intelligence, pension, audit | rule_set | 1 |
 | `ClaimStateChanged.v1` | claim | workflow, reporting, audit | claim | 1 |

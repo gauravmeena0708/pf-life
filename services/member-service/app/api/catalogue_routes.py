@@ -10,11 +10,16 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /members/me', 'GET /office/member-change-requests', 'GET /security/account-recovery-requests', 'GET /employers/me/approvals', 'GET /employers/me/joint-declarations', 'GET /employers/me/kyc-approvals', 'POST /employers/me/kyc-bulk-uploads', 'GET /employers/me/members', 'POST /employers/me/members', 'POST /members/me/account-recovery-requests', 'GET /members/me/account-status', 'GET /members/me/applications', 'PATCH /members/me/contact-details', 'GET /members/me/employment-history', 'POST /members/me/exits', 'GET /members/me/identity-assurance', 'POST /members/me/joint-declarations', 'GET /members/me/kyc', 'GET /members/me/notifications', 'POST /members/me/security-reports', 'GET /members/me/service-history', 'GET /members/me/uan-card', 'GET /office/member-change-requests/pendency', 'GET /employers/me/members/active-export', 'POST /employers/me/members/bulk-registrations', 'POST /members/me/kyc/bank-accounts', 'POST /members/me/kyc/{kycType}', 'POST /employers/me/approvals/{approvalId}/decisions', 'POST /employers/me/joint-declarations/{jdId}/decisions', 'POST /employers/me/kyc-approvals/{requestId}/decisions', 'GET /employers/me/kyc-bulk-uploads/{uploadId}/errors', 'POST /employers/me/members/{uan}/declarations', 'POST /employers/me/members/{uan}/exits', 'PATCH /employers/me/members/{uan}/profile', 'GET /office/members/{uan}', 'POST /office/member-change-requests/{requestId}/decisions', 'POST /office/member-change-requests/{requestId}/recommendations', 'POST /office/member-change-requests/{requestId}/verifications', 'POST /office/members/{uan}/defreezes', 'POST /office/members/{uan}/freezes', 'POST /office/physical-claims/{intakeId}/identity-validations', 'POST /security/account-recovery-requests/{requestId}/decisions']
+OPERATIONS = ['GET /members/me', 'POST /members/uan-lookups', 'GET /office/member-change-requests', 'GET /security/account-recovery-requests', 'GET /employers/me/approvals', 'GET /employers/me/joint-declarations', 'POST /employers/me/joint-declarations', 'GET /employers/me/kyc-approvals', 'POST /employers/me/kyc-bulk-uploads', 'GET /employers/me/members', 'POST /employers/me/members', 'POST /members/me/account-recovery-requests', 'GET /members/me/account-status', 'GET /members/me/applications', 'PATCH /members/me/contact-details', 'GET /members/me/employment-history', 'POST /members/me/exits', 'GET /members/me/identity-assurance', 'POST /members/me/joint-declarations', 'GET /members/me/kyc', 'GET /members/me/nominations', 'POST /members/me/nominations', 'GET /members/me/notifications', 'POST /members/me/security-reports', 'GET /members/me/service-history', 'GET /members/me/uan-card', 'GET /office/member-change-requests/pendency', 'GET /employers/me/members/active-export', 'POST /employers/me/members/bulk-registrations', 'POST /employers/me/members/exit-bulk-uploads', 'POST /members/me/kyc/bank-accounts', 'POST /members/me/kyc/{kycType}', 'POST /employers/me/approvals/{approvalId}/decisions', 'POST /employers/me/joint-declarations/{jdId}/decisions', 'POST /employers/me/kyc-approvals/{requestId}/decisions', 'GET /employers/me/kyc-bulk-uploads/{uploadId}/errors', 'POST /employers/me/members/{uan}/declarations', 'POST /employers/me/members/{uan}/exit-corrections', 'POST /employers/me/members/{uan}/exits', 'PATCH /employers/me/members/{uan}/profile', 'GET /office/members/{uan}', 'POST /office/member-change-requests/{requestId}/decisions', 'POST /office/member-change-requests/{requestId}/recommendations', 'POST /office/member-change-requests/{requestId}/verifications', 'POST /office/members/{uan}/defreezes', 'POST /office/members/{uan}/freezes', 'POST /office/physical-claims/{intakeId}/identity-validations', 'POST /security/account-recovery-requests/{requestId}/decisions']
 
 @router.api_route("/api/v1/members/me", methods=["GET"], include_in_schema=False)
 async def get_members_me(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Profile")
+
+
+@router.api_route("/api/v1/members/uan-lookups", methods=["POST"], include_in_schema=False)
+async def post_members_uan_lookups(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Know your UAN (OTP-verified)")
 
 
 @router.api_route("/api/v1/office/member-change-requests", methods=["GET"], include_in_schema=False)
@@ -35,6 +40,11 @@ async def get_employers_me_approvals(actor: Actor = Depends(require_actor)) -> N
 @router.api_route("/api/v1/employers/me/joint-declarations", methods=["GET"], include_in_schema=False)
 async def get_employers_me_joint_declarations(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Joint Declarations awaiting attestation (tier-2 process joint_declaration)")
+
+
+@router.api_route("/api/v1/employers/me/joint-declarations", methods=["POST"], include_in_schema=False)
+async def post_employers_me_joint_declarations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Employer-initiated Joint Declaration")
 
 
 @router.api_route("/api/v1/employers/me/kyc-approvals", methods=["GET"], include_in_schema=False)
@@ -102,6 +112,16 @@ async def get_members_me_kyc(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "KYC status (Aadhaar, PAN, bank)")
 
 
+@router.api_route("/api/v1/members/me/nominations", methods=["GET"], include_in_schema=False)
+async def get_members_me_nominations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "e-Nomination (Form 2) — view")
+
+
+@router.api_route("/api/v1/members/me/nominations", methods=["POST"], include_in_schema=False)
+async def post_members_me_nominations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "e-Nomination — submit with mock e-sign")
+
+
 @router.api_route("/api/v1/members/me/notifications", methods=["GET"], include_in_schema=False)
 async def get_members_me_notifications(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Notifications (projection fed by claim / payment / grievance events — see §14)")
@@ -137,6 +157,11 @@ async def post_employers_me_members_bulk_registrations(actor: Actor = Depends(re
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Bulk registration file")
 
 
+@router.api_route("/api/v1/employers/me/members/exit-bulk-uploads", methods=["POST"], include_in_schema=False)
+async def post_employers_me_members_exit_bulk_uploads(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Member > Exit-Bulk upload")
+
+
 @router.api_route("/api/v1/members/me/kyc/bank-accounts", methods=["POST"], include_in_schema=False)
 async def post_members_me_kyc_bank_accounts(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Seed / change bank account (mock penny-drop, employer approval)")
@@ -170,6 +195,11 @@ async def get_employers_me_kyc_bulk_uploads_uploadId_errors(actor: Actor = Depen
 @router.api_route("/api/v1/employers/me/members/{uan}/declarations", methods=["POST"], include_in_schema=False)
 async def post_employers_me_members_uan_declarations(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Form 11 new-joinee declaration")
+
+
+@router.api_route("/api/v1/employers/me/members/{uan}/exit-corrections", methods=["POST"], include_in_schema=False)
+async def post_employers_me_members_uan_exit_corrections(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Date-of-exit correction")
 
 
 @router.api_route("/api/v1/employers/me/members/{uan}/exits", methods=["POST"], include_in_schema=False)

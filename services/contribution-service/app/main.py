@@ -29,7 +29,8 @@ def create_app() -> FastAPI:
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.employers",
                          ["employer-service.EmployerVerified.v1"], handle_employer_verified),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.claims",
-                         ["claim-service.ClaimDecisionRecorded.v1", "claim-service.TaxDeducted.v1"], _claims_router),
+                         ["claim-service.ClaimDecisionRecorded.v1", "claim-service.TaxDeducted.v1",
+                          "claim-service.AutoTransferConfirmed.v1"], _claims_router),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.policy",
                          ["platform-service.PolicyPublished.v1"], on_policy_published),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.members",
@@ -84,6 +85,9 @@ app = create_app()
 async def _claims_router(session, event):
     if event.get("event_type") == "TaxDeducted.v1":
         await on_tax_deducted(session, event)
+    elif event.get("event_type") == "AutoTransferConfirmed.v1":
+        from app.infra.transfers import on_auto_transfer
+        await on_auto_transfer(session, event)
     else:
         await on_claim_decision(session, event)
 

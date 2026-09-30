@@ -149,7 +149,14 @@
         "pan": "VERIFIED",
         "bank": "VERIFIED"
       },
-      "last_contribution_month": "2026-08"
+      "last_contribution_month": "2026-08",
+      "other_bank_accounts": [
+        {
+          "bank_ifsc": "DEMO0000101",
+          "bank_account_last4": "4321",
+          "_comment": "A second KYC-verified account (P2.8b: a claim can be switched to it before payment)."
+        }
+      ]
     },
     {
       "uan": "100000000002",
@@ -349,6 +356,59 @@
       "aadhaar_ref": "DEMO-AADHAAR-BHARAT",
       "_comment": "BHARAT DEMO's older UAN from before UANs were Aadhaar-linked; the same verified Aadhaar puts both UANs in one Aadhaar-verified set (P2.7d). Its balance is not transferred yet.",
       "date_of_exit": "2020-03-31"
+    },
+    {
+      "uan": "100000000904",
+      "name": "FATIMA DEMO",
+      "date_of_birth": "1992-03-14",
+      "subject": "00000000-0000-4000-8000-000000000038",
+      "account_link_id": "AL-0904",
+      "member_id": "DEMO00001000000000904",
+      "date_of_joining": "2021-04-01",
+      "date_of_exit": null,
+      "gender": "FEMALE",
+      "mobile_masked": "******0904",
+      "email_masked": "f***@demo.invalid",
+      "bank_ifsc": "DEMO0000904",
+      "bank_account_last4": "0904",
+      "kyc": {
+        "aadhaar": "PENDING",
+        "pan": "NOT_SEEDED",
+        "bank": "VERIFIED"
+      },
+      "last_contribution_month": "2026-08",
+      "_comment": "Aadhaar not yet verified (P2.8b): her claims wait for the employer's attestation; e-nomination needs a verified Aadhaar."
+    },
+    {
+      "uan": "100000000905",
+      "name": "GIRISH DEMO",
+      "date_of_birth": "1990-10-10",
+      "subject": "00000000-0000-4000-8000-000000000039",
+      "account_link_id": "AL-0906",
+      "member_id": "DEMO00001000000000905",
+      "date_of_joining": "2026-02-01",
+      "date_of_exit": null,
+      "gender": "MALE",
+      "mobile_masked": "******0905",
+      "email_masked": "g***@demo.invalid",
+      "bank_ifsc": "DEMO0000905",
+      "bank_account_last4": "0905",
+      "kyc": {
+        "aadhaar": "VERIFIED",
+        "pan": "VERIFIED",
+        "bank": "VERIFIED"
+      },
+      "last_contribution_month": "2026-08",
+      "_comment": "Changed jobs (P2.8b): the new member ID is primary; the previous one, exited, still holds its balance, so an auto-transfer waits for his confirmation.",
+      "previous_employments": [
+        {
+          "account_link_id": "AL-0905",
+          "establishment_id": "EST-DEMO-0003",
+          "date_of_joining": "2018-06-01",
+          "date_of_exit": "2026-01-20",
+          "last_contribution_month": "2025-12"
+        }
+      ]
     }
   ],
   "demo_wage_month": "2026-08",
@@ -389,7 +449,9 @@
     "ro-fa-accounts": "00000000-0000-4000-8000-000000000034",
     "claimant-a": "00000000-0000-4000-8000-000000000035",
     "ro-pro-counter": "00000000-0000-4000-8000-000000000036",
-    "ro-da-compliance": "00000000-0000-4000-8000-000000000037"
+    "ro-da-compliance": "00000000-0000-4000-8000-000000000037",
+    "member-f": "00000000-0000-4000-8000-000000000038",
+    "member-g": "00000000-0000-4000-8000-000000000039"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -421,6 +483,16 @@
     "AL-0903": {
       "employee_paise": 3000000,
       "employer_paise": 2000000,
+      "as_of": "2025-03-31"
+    },
+    "AL-0904": {
+      "employee_paise": 7200000,
+      "employer_paise": 4800000,
+      "as_of": "2025-03-31"
+    },
+    "AL-0905": {
+      "employee_paise": 4800000,
+      "employer_paise": 3200000,
       "as_of": "2025-03-31"
     }
   },

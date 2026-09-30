@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-import { api, command, type Envelope } from "../../api/client";
+import { api, command, getSession, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
@@ -40,6 +40,7 @@ export function EmployerHome() {
   const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
   const est = useQuery({ queryKey: ["employer-me"], queryFn: () => api<Envelope<Establishment>>("/api/v1/employers/me"), retry: false });
   const perms = est.data?.data.your_permissions ?? [];
   const canManageOperators = perms.includes("operators.manage");
@@ -172,7 +173,7 @@ export function EmployerHome() {
           </div>
         );
       })}
-      {perms.includes("ecr.approve") ? <JointDeclarations /> : null}
+      {session.data?.stakeholder === "employer.signatory" || perms.includes("ecr.approve") ? <JointDeclarations /> : null}
       <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
     </section>
   );

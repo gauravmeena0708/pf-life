@@ -924,6 +924,44 @@
         "fo.da_compliance"
       ],
       "id": "00000000-0000-4000-8000-000000000037"
+    },
+    {
+      "username": "member-f",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Member F Aadhaar pending",
+      "lastName": "Demo",
+      "email": "member-f@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "member"
+      ],
+      "id": "00000000-0000-4000-8000-000000000038"
+    },
+    {
+      "username": "member-g",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Member G changed jobs",
+      "lastName": "Demo",
+      "email": "member-g@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "member"
+      ],
+      "id": "00000000-0000-4000-8000-000000000039"
     }
   ]
 }

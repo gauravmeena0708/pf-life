@@ -100,7 +100,7 @@ stakeholders:
     via:
     - F02.uan_self
   - endpoint: POST /members/uan-lookups
-    status: P
+    status: W
     scope: unauthenticated with OTP / face-auth proof
     step_up: false
     via:
@@ -154,13 +154,13 @@ stakeholders:
     via:
     - F02.self_service
   - endpoint: GET /members/me/nominations
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
     - F02.self_service
   - endpoint: POST /members/me/nominations
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: true
     via:
@@ -279,8 +279,14 @@ stakeholders:
     step_up: true
     via:
     - F04.post_submission
+  - endpoint: GET /members/me/claims/{claimId}/bank-details
+    status: W
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F04.post_submission
   - endpoint: PUT /members/me/claims/{claimId}/bank-details
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: true
     via:
@@ -334,13 +340,13 @@ stakeholders:
     via:
     - F04.transfer
   - endpoint: GET /members/me/transfers/auto
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
     - F04.transfer
   - endpoint: POST /members/me/transfers/auto/{transferId}/confirmations
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: true
     via:
@@ -987,7 +993,7 @@ stakeholders:
     via:
     - F02.jd_attest
   - endpoint: POST /employers/me/joint-declarations
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:
@@ -1071,13 +1077,13 @@ stakeholders:
     via:
     - F03.direct_challan
   - endpoint: GET /employers/me/claim-attestations
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
     - F04.attest
   - endpoint: POST /employers/me/claim-attestations/{claimId}/decisions
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:
@@ -1258,13 +1264,13 @@ stakeholders:
     via:
     - F02.exit
   - endpoint: POST /employers/me/members/{uan}/exit-corrections
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:
     - F02.exit
   - endpoint: POST /employers/me/members/exit-bulk-uploads
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:

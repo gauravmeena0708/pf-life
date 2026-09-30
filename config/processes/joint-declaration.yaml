@@ -1,5 +1,5 @@
 # Tier-2 process (ADR-0005): Joint Declaration — correcting a member's profile (JD SOP 2024, illustrative).
-# member submits → employer attests → DA initiates → SS or AO verifies → APFC (major) or AO (minor) decides.
+# member submits → employer attests (or the employer initiates it: P2.8b) → DA initiates → SS or AO verifies → APFC (major) or AO (minor) decides.
 # member-service owns the contract: on APPROVED it applies the correction and publishes MemberChangeApproved.v1.
 process: joint_declaration
 owner: member
@@ -29,6 +29,22 @@ operations:
       corrected_value: {min_length: 1, max_length: 120}
       reason: {min_length: 10, max_length: 1000}
       document_ref: {optional: true, max_length: 80}
+  - name: employer_submit            # employer-initiated JD: the signatory files it, already attested
+    operation: POST /employers/me/joint-declarations
+    starts: true
+    subject_from: form:uan
+    roles: [employer.signatory]
+    scope: establishment
+    step_up: submit-joint-declaration-employer     # bound to the member's UAN
+    to: EMPLOYER_ATTESTED
+    form:
+      uan: {min_length: 12, max_length: 12}
+      parameter: {enum: [NAME, DATE_OF_BIRTH, GENDER, FATHER_NAME, MOTHER_NAME, MARITAL_STATUS, NATIONALITY, DATE_OF_JOINING]}
+      current_value: {min_length: 1, max_length: 120}
+      corrected_value: {min_length: 1, max_length: 120}
+      reason: {min_length: 10, max_length: 1000}
+      document_ref: {optional: true, max_length: 80}
+      member_consent: {enum: ["MOCK_AADHAAR_OTP"]}   # the member's consent (illustrative: a mock Aadhaar OTP)
   - name: employer_queue
     operation: GET /employers/me/joint-declarations
     roles: [employer.signatory]

@@ -30,6 +30,8 @@ TEMPLATES = {
     "INTEREST_CREDITED": ("Interest credited", "Interest{amount} for {financial_year} at {rate} was credited to your PF account {reference_id}."),
     "INTEREST_REVISED": ("Interest revised", "The interest rate for {financial_year} was revised to {rate}; the difference{amount} was adjusted in your PF account {reference_id}."),
     "EXIT_RECORDED": ("Date of exit recorded", "The date of exit {date_of_exit} was recorded for your member ID {reference_id} (marked by the {marked_by})."),
+    "NOMINATION_REGISTERED": ("e-Nomination registered", "Your e-nomination ({reference_id}, {count} nominee(s)) was signed and registered; it replaces any earlier nomination."),
+    "EXIT_CORRECTED": ("Date of exit corrected", "Your employer corrected the date of exit of your member ID {reference_id} to {date_of_exit}."),
     "TRANSFER_POSTED": ("Transfer completed", "Your PF balance{amount} was transferred from member ID {from_id} to {to_id} ({reference_id}). You can download Annexure K."),
     "KYC_APPROVED": ("KYC approved", "Your employer approved your {parameter} KYC ({reference_id}). It now shows as verified."),
     "KYC_REJECTED": ("KYC not approved", "Your employer did not approve your {parameter} KYC ({reference_id}): {reason}"),

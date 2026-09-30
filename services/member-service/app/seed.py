@@ -9,7 +9,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
 from app.infra.db import sessions
-from app.infra.tables import office_staff, contact_history, employments, members
+from app.infra.tables import office_staff, contact_history, employments, members, nominations
 
 SEED_FILE = os.environ.get("SEED_FILE", "/srv/seed/synthetic.json")
 
@@ -55,6 +55,14 @@ async def main() -> None:
                     await session.execute(statement.on_conflict_do_update(
                         index_elements=[employments.c.account_link_id],
                         set_={key: statement.excluded[key] for key in ("member_id", "establishment_id", "establishment_name", "date_of_joining", "office_id")}))
+            for member in seed["members"]:                  # nominations on record before e-nomination (P2.8b)
+                if member.get("nominations") and not (await session.execute(select(nominations.c.nomination_id).where(
+                        nominations.c.member_id == member["member_id"]))).first():
+                    await session.execute(nominations.insert().values(
+                        nomination_id=f"NOM-SEED-{member['uan'][-4:]}", member_id=member["member_id"], uan=member["uan"],
+                        has_family=True, state="CURRENT", signed_with="SEED",
+                        nominees=[{"name": n["name"], "relation": n["relation"], "date_of_birth": n["date_of_birth"],
+                                   "share_bp": n["share_bp"], "guardian_name": n.get("guardian_name")} for n in member["nominations"]]))
             from app.domain.primary import recompute
             for member in seed["members"]:                  # the primary member ID of each set; other services learn it by event
                 await recompute(session, member["uan"], None)

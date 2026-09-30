@@ -16,10 +16,10 @@ const MEMBER: NavGroup[] = [
     link("UAN Card", "/member/uan-card"), link("Passbook", "/member/passbook"), link("Annual statement and taxable interest", "/member/passbook#annual-statement-heading"), link("Pension estimate", "/member/profile#pension-estimate-heading")] },
   { label: "Manage", items: [
     link("Basic Details (Joint Declaration)", "/member/profile#correction-heading"), link("Contact Details", "/member/security#contact-heading"),
-    link("KYC", "/member/kyc"), link("E-Nomination"), link("Mark Exit", "/member/service#exit-heading")] },
+    link("KYC", "/member/kyc"), link("e-Nomination", "/member/nomination#nomination-heading"), link("Know your UAN", "/member/nomination#uan-lookup-heading"), link("Mark Exit", "/member/service#exit-heading")] },
   { label: "Account", items: [link("Change Password"), { labelKey: "navigation.accountSecurity", to: "/member/security" }] },
   { label: "Online Services", items: [
-    link("Claim (Form-31, 19, 10C & 10D)", "/member/claims"), link("One Member – One EPF Account (Transfer Request)", "/member/service#transfer-heading"),
+    link("Claim (Form-31, 19, 10C & 10D)", "/member/claims"), link("One Member – One EPF Account (Transfer Request)", "/member/service#transfer-heading"), link("Auto-transfer", "/member/service#auto-transfer-heading"),
     link("Track Claim Status", "/member/claims"), link("Download Annexure K", "/member/service#applications-heading"), link("Joint Declaration", "/member/profile#correction-heading"),
     link("Form 15G / 15H", "/member/claims#tax-declaration-heading"), link("Pension (Form 10D) / scheme certificate", "/member/pension")] },
   { label: "PMVBRY" },
@@ -30,9 +30,10 @@ const EMPLOYER: NavGroup[] = [
   { label: "Member", items: [
     link("Register-Individual", "/employer/registration#register-heading"), link("Register-Bulk", "/employer/registration#bulk-heading"), link("Member Profile (mark exit)", "/employer/members#exit-heading"), link("Approvals", "/employer/members#approvals-heading"),
     link("Approve KYC pending for Digital Signature", "/employer/registration#kyc-approvals-heading"),
-    link("Approve KYC seeded by member", "/employer/registration#kyc-approvals-heading"), link("KYC Bulk", "/employer/registration#kyc-bulk-heading"), link("Exit-Bulk"),
+    link("Approve KYC seeded by member", "/employer/registration#kyc-approvals-heading"), link("KYC Bulk", "/employer/registration#kyc-bulk-heading"),
+    link("Exit correction", "/employer/members#exit-correction-heading"), link("Exit bulk upload", "/employer/members#exit-bulk-heading"),
     link("Missing details", "/employer/registration#missing-heading"), link("Member Location Mapping"), link("KYC Verification / PAN Verification", "/employer/registration#kyc-approvals-heading"),
-    link("Joint Declaration requests", "/employer#jd-heading")] },
+    link("Joint Declaration requests", "/employer#jd-heading"), link("Employer-initiated JD", "/employer#employer-jd-heading")] },
   { label: "Establishment", items: [
     link("Establishment Profile", "/employer/establishment#est-config-heading"), link("Form 5A", "/employer/establishment#est-form5a-heading"),
     link("Branches (Form 2A)", "/employer/establishment#est-branches-heading"), link("Establishment KYC and bank accounts", "/employer/establishment#est-kyc-heading"),
@@ -45,7 +46,7 @@ const EMPLOYER: NavGroup[] = [
   { label: "Dashboards", items: [link("Compliance summary", "/employer/returns#compliance-summary-heading"), link("Active Members details", "/employer/registration#active-heading"), link("Missing details", "/employer/registration#active-heading")] },
   { label: "User", items: [link("Sub-users (payroll operators)", "/employer#people-operator")] },
   { label: "Admin" },
-  { label: "Online Services", items: [link("Transfer Claims", "/employer/members#transfers-heading"), link("Claim attestation"), link("Higher-pension joint-option validation")] },
+  { label: "Online Services", items: [link("Transfer Claims", "/employer/members#transfers-heading"), link("Claim attestations", "/employer/members#claim-attestations-heading"), link("Higher-pension joint-option validation")] },
   { label: "PMVBRY" },
   { label: "EEC-2026/VISHWAS" },
 ];

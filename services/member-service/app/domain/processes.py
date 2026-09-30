@@ -4,7 +4,7 @@ processes (ADR-0005). On each ProcessTransitioned.v1 this service does what the 
 * member_freeze       records the account state and publishes AccountFrozen.v1 / AccountDefrozen.v1;
 * joint_declaration   tells the member at each step, and on APPROVED applies the correction, keeps the history
                       and publishes MemberChangeApproved.v1 (so, for example, ECR name checks use the new name);
-* employer_exit       on APPROVED records the exit and publishes MemberExitMarked.v1;
+* employer_exit       on APPROVED records the exit, or its correction, and publishes MemberExitMarked.v1;
 * every process marked visible_to_member is kept as one of the member's applications."""
 from datetime import date
 from typing import Any
@@ -33,9 +33,12 @@ async def on_process_transitioned(session: AsyncSession, event: dict[str, Any]) 
         await _joint_declaration(session, event)
     elif p["process"] == "employer_exit" and p["to_state"] == "APPROVED":
         job = (await session.execute(select(employments).where(employments.c.account_link_id == data["account_link_id"]))).mappings().first()
+        day = date.fromisoformat(data["date_of_exit"])
         if job and not job["date_of_exit"]:
-            await record_exit(session, dict(job), date.fromisoformat(data["date_of_exit"]), data["reason"], "EMPLOYER",
-                              event["correlation_id"])
+            await record_exit(session, dict(job), day, data["reason"], "EMPLOYER", event["correlation_id"])
+        elif job and data.get("correction_note") and (job["date_of_exit"], job["exit_reason"]) != (day, data["reason"]):
+            await record_exit(session, dict(job), day, data["reason"], "EMPLOYER", event["correlation_id"],
+                              corrects=job["date_of_exit"].isoformat())       # a corrected date of exit (P2.8b)
 
 
 async def _freeze(session: AsyncSession, event: dict[str, Any]) -> None:

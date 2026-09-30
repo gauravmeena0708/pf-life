@@ -21,7 +21,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.7c** | Member-facing ledger: annual statement, taxable interest split, Form 10C cash withdrawal (pension withdrawal benefit by Table D, paid from EPS) | **Done** (30 Sep 2026) |
 | **P2.7d** | Primary member ID: the latest member ID with contributions, over the member's Aadhaar-verified set; claims only against it, whole-balance claims (final settlement, Form 10C, death claims) only when the rest of the set is transferred; Form 13 only into it (checked when filed and when approved) | **Done** (30 Sep 2026) |
 | **P2.8a** | Compliance: defaulting establishments (office and public lists), compliance cases, the employer's month-by-month compliance summary, 14B/7Q demands paid directly, VISHWAS settlement of damages (new compliance-service) | **Done** (30 Sep 2026) |
-| P2.8b | e-Nomination, UAN lookup, exit-date corrections, auto-transfer, claim attestation, bank switch | |
+| **P2.8b** | e-Nomination, Know your UAN, exit-date corrections and bulk exits, employer-initiated Joint Declaration, auto-transfer on a change of job, employer attestation of claims, switching a claim's bank account | **Done** (30 Sep 2026) |
 | P2.8c | Higher pension, the EDLI decision, international workers | |
 | P2.8d | Public grievances, circulars, the e-Report Card, the interest-rate record, exempted trusts' ingestion | |
 | P2.8e | Concurrent audit, security incidents, the NDC issue tracker, HRM postings, DO and employer dashboards, location mapping | |
@@ -276,3 +276,31 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
   contribution-service waives the demands it replaces. The rule is in the rule set, so HO can change it.
 - Not built: principal-employer tags and contractor compliance (no contractor establishment has a workforce in the
   seed), inspections and 7A proceedings, recovery (attachment, prosecution).
+
+## P2.8b — how it is built
+
+- **e-Nomination** (member-service, `/members/me/nominations`): needs a verified Aadhaar; signed with a mock Aadhaar
+  e-sign (the step-up) and replaces the previous nomination, which is kept. Shares add up to 100%; a member with a
+  family nominates only family members (EPF Scheme para 61, simplified; a married member has a family); a minor
+  needs a guardian. `NominationRegistered.v1` replaces the nominees claim-service's death claims pay (a nominee's
+  login and bank details are kept for the same name).
+- **Know your UAN** (`/members/uan-lookups`): name, date of birth and the mobile's last four digits, with a mock OTP.
+- **Exits** (process engine, `employer_exit`): the operator corrects a marked date of exit (`exit-corrections`) or
+  uploads exits in bulk (`exit-bulk-uploads`: one case per valid line, the others reported); the signatory approves
+  each in *Member › Approvals*. On approval member-service republishes `MemberExitMarked.v1` with `corrects`. The
+  engine gained `bulk:` operations and `subject_from: form:<field>`.
+- **Employer-initiated Joint Declaration**: the signatory files it for a member of the establishment with the
+  member's consent (mock OTP); it starts at *employer attested* and follows the usual office chain.
+- **Employer attestation of claims** (claim-service): a claim on a UAN without a verified Aadhaar waits in
+  `PENDING_EMPLOYER_ATTESTATION` for the signatory (`/employers/me/claim-attestations`); attested, it goes on as any
+  claim (`ClaimSubmitted.v1` only then); rejected, it ends `REJECTED_BY_EMPLOYER` with the reason.
+- **Bank switch** (`PUT /members/me/claims/{id}/bank-details`): until the payment goes to the bank, to another of
+  the member's KYC-verified accounts (seeded, then `MemberKycUpdated.v1`). After a return, the re-disbursement
+  request still applies.
+- **Auto-transfer** (`/members/me/transfers/auto`): an exited member ID of the member's Aadhaar-verified set with a
+  balance is offered for transfer into the primary member ID; the member confirms (`AutoTransferConfirmed.v1`) and
+  contribution-service posts it as it posts an approved Form 13 (`TransferPosted.v1`). Needs a verified Aadhaar;
+  not offered while a claim on that member ID is open.
+- Personas: `member-f` (Aadhaar pending) and `member-g` (changed jobs), both synthetic.
+- Not built: EPS nomination (Form 2 part II), nominee photographs, a date-of-exit correction after a claim is
+  settled (refused in the portal; not checked here), OTP delivery for Know your UAN.

@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 import epfo_auth
-from app.api import catalogue_routes, onboarding_routes, routes
+from app.api import catalogue_routes, nomination_routes, onboarding_routes, routes
 from app.config import settings
 from app.domain.notifications import handle_notification_requested
 from app.domain.exits import on_contribution_posted, on_ledger_reversed, on_transfer_posted
@@ -45,6 +45,7 @@ def create_app() -> FastAPI:
     app.include_router(health_router(database_ready))
     app.include_router(routes.router)
     app.include_router(onboarding_routes.router)
+    app.include_router(nomination_routes.router)
     handled = {(m, r.path) for r in app.router.routes for m in getattr(r, "methods", set())}
     for route in catalogue_routes.router.routes:
         if not any((m, route.path) in handled for m in route.methods):

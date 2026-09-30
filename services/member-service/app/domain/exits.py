@@ -57,18 +57,19 @@ async def track(session: AsyncSession, application_id: str, uan: str, process: s
 
 
 async def record_exit(session: AsyncSession, job: dict[str, Any], day: date, reason: str, marked_by: str,
-                      correlation_id: str | None) -> None:
+                      correlation_id: str | None, corrects: str | None = None) -> None:
     member = (await session.execute(select(members).where(members.c.member_id == job["member_id"]))).mappings().one()
     await session.execute(update(employments).where(employments.c.account_link_id == job["account_link_id"])
                           .values(date_of_exit=day, exit_reason=reason, exit_marked_by=marked_by))
     await add_event(session, producer=PRODUCER, event_type="MemberExitMarked.v1", aggregate_type="member_account",
                     aggregate_id=job["account_link_id"], correlation_id=correlation_id, payload={
                         "uan": member["uan"], "account_link_id": job["account_link_id"], "date_of_exit": day.isoformat(),
-                        "reason": reason, "marked_by": marked_by})
+                        "reason": reason, "marked_by": marked_by, **({"corrects": corrects} if corrects else {})})
     if member["subject"]:
         await add_event(session, producer=PRODUCER, event_type="NotificationRequested.v1", aggregate_type="notification",
                         aggregate_id=job["account_link_id"], correlation_id=correlation_id, payload={
-                            "recipient_subject": member["subject"], "template": "EXIT_RECORDED", "reference_id": job["account_link_id"],
+                            "recipient_subject": member["subject"], "template": "EXIT_CORRECTED" if corrects else "EXIT_RECORDED",
+                            "reference_id": job["account_link_id"],
                             "params": {"date_of_exit": day.isoformat(), "marked_by": marked_by.lower()}})
 
 

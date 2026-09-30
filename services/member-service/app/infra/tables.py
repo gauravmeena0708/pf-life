@@ -158,3 +158,17 @@ member_changes = Table(
     Column("approved_by", String(80), nullable=False),
     Column("applied_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
 )
+
+# e-Nomination (Form 2, P2.8b): each signed nomination replaces the previous one, which is kept as SUPERSEDED.
+# Nominees are kept by name, relation and share only; no identity numbers.
+nominations = Table(
+    "nominations", metadata,
+    Column("nomination_id", String(40), primary_key=True),
+    Column("member_id", String(40), ForeignKey("members.member_id"), nullable=False, index=True),
+    Column("uan", String(12), nullable=False, index=True),
+    Column("has_family", Boolean, nullable=False),
+    Column("nominees", JSON, nullable=False),                 # [{name, relation, date_of_birth, share_bp, guardian_name}]
+    Column("state", String(20), nullable=False),              # CURRENT | SUPERSEDED
+    Column("signed_with", String(40), nullable=False),        # MOCK_AADHAAR_ESIGN | SEED
+    Column("signed_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+)

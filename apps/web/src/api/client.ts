@@ -4,6 +4,7 @@ export interface Problem {
   title: string;
   status: number;
   detail?: string;
+  errors?: (string | { field?: string; message?: string; msg?: string; loc?: (string | number)[] })[];
   correlation_id?: string;
 }
 

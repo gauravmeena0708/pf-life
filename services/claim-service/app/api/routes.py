@@ -241,6 +241,36 @@ async def create_claim(body: ClaimInput, request: Request, actor: Actor = Depend
     return envelope(result)
 
 
+async def send_on(session: AsyncSession, claim: dict[str, Any], rules: dict[str, Any],
+                  correlation_id: str | None) -> tuple[dict[str, Any], str]:
+    """A submitted claim goes on: ClaimSubmitted.v1, then settled automatically or sent to the office."""
+    claim_id = claim["claim_id"]
+    signal = (await session.execute(select(risk_flags.c.signal_id).where(
+        risk_flags.c.subject == claim["member_subject"], risk_flags.c.status != "BENIGN"))).scalars().first()
+    path = "REVIEW" if signal else route(claim["amount_paise"], rules, claim["claim_type"])
+    await add_event(session, producer=PRODUCER, event_type="ClaimSubmitted.v1", aggregate_type="claim",
+                    aggregate_id=claim_id, correlation_id=correlation_id, payload={
+                        "claim_id": claim_id, "form_type": claim["form_type"], "amount_paise": claim["amount_paise"],
+                        "rule_version": claim["rule_version"], "office_id": claim["office_id"],
+                        "account_link_id": claim["account_link_id"], "route": path, "claim_type": claim["claim_type"],
+                        "advisory_signal_id": signal})
+    await notify(session, claim, "CLAIM_SUBMITTED", correlation_id)
+    if path == "AUTO":
+        claim = await transition(session, claim, "AUTO_APPROVED", "system",
+                                 "Within the automatic settlement limit; approved without an officer.")
+        await record_decision(session, claim, "AUTO_APPROVED", "WITHIN_AUTO_LIMIT", correlation_id)
+        await notify(session, claim, "CLAIM_APPROVED", correlation_id)
+    else:
+        chain = approval_chain(claim["amount_paise"], rules, claim["claim_type"])
+        why = (" A routine security check on recent account activity asks an officer to look at this claim; "
+               "this is not an accusation and does not change what you are entitled to.") if signal else ""
+        claim = await transition(session, claim, "UNDER_REVIEW", "system",
+                                 "Sent to your regional office for review: "
+                                 + " → ".join(ROLE_LABELS[r] for r in chain) + "." + why)
+        await notify(session, claim, "CLAIM_UNDER_REVIEW", correlation_id)
+    return claim, path
+
+
 @router.post("/api/v1/members/me/claims/{claim_id}/confirmations")
 async def confirm_claim(claim_id: str, actor: Actor = Depends(MEMBER), session: AsyncSession = Depends(db)) -> dict:
     async with session.begin():
@@ -252,29 +282,15 @@ async def confirm_claim(claim_id: str, actor: Actor = Depends(MEMBER), session: 
             raise Problem(409, "/problems/invalid-state", "This claim is already confirmed",
                           f"Current status: {claim['state']}.")
         claim = await transition(session, claim, "SUBMITTED", "member", "You confirmed the claim.")
-        signal = (await session.execute(select(risk_flags.c.signal_id).where(
-            risk_flags.c.subject == actor.subject, risk_flags.c.status != "BENIGN"))).scalars().first()
-        path = "REVIEW" if signal else route(claim["amount_paise"], rules, claim["claim_type"])
-        await add_event(session, producer=PRODUCER, event_type="ClaimSubmitted.v1", aggregate_type="claim",
-                        aggregate_id=claim_id, correlation_id=actor.correlation_id, payload={
-                            "claim_id": claim_id, "form_type": claim["form_type"], "amount_paise": claim["amount_paise"],
-                            "rule_version": claim["rule_version"], "office_id": claim["office_id"],
-                            "account_link_id": claim["account_link_id"], "route": path, "claim_type": claim["claim_type"],
-                            "advisory_signal_id": signal})
-        await notify(session, claim, "CLAIM_SUBMITTED", actor.correlation_id)
-        if path == "AUTO":
-            claim = await transition(session, claim, "AUTO_APPROVED", "system",
-                                     "Within the automatic settlement limit; approved without an officer.")
-            await record_decision(session, claim, "AUTO_APPROVED", "WITHIN_AUTO_LIMIT", actor.correlation_id)
-            await notify(session, claim, "CLAIM_APPROVED", actor.correlation_id)
+        aadhaar_ok = (await session.execute(select(accounts.c.aadhaar_verified).where(
+            accounts.c.account_link_id == claim["account_link_id"]))).scalar_one_or_none()
+        if aadhaar_ok is False:                    # P2.8b: the employer attests it before it goes to the office
+            claim = await transition(session, claim, "PENDING_EMPLOYER_ATTESTATION", "system",
+                                     "Your Aadhaar is not verified, so the claim goes to your employer for attestation first.")
+            await notify(session, claim, "CLAIM_AWAITING_EMPLOYER", actor.correlation_id)
+            path = "EMPLOYER"
         else:
-            chain = approval_chain(claim["amount_paise"], rules, claim["claim_type"])
-            why = (" A routine security check on recent account activity asks an officer to look at this claim; "
-                   "this is not an accusation and does not change what you are entitled to.") if signal else ""
-            claim = await transition(session, claim, "UNDER_REVIEW", "system",
-                                     "Sent to your regional office for review: "
-                                     + " → ".join(ROLE_LABELS[r] for r in chain) + "." + why)
-            await notify(session, claim, "CLAIM_UNDER_REVIEW", actor.correlation_id)
+            claim, path = await send_on(session, claim, rules, actor.correlation_id)
         await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="claim.confirm",
                     target_type="claim", target_id=claim_id, detail=path)
         view = await claim_view(session, claim)

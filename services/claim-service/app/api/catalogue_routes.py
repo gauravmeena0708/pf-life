@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['POST /claimants/death-claims', 'GET /office/annexure-k-files', 'POST /office/payment-scrolls', 'POST /office/physical-claims', 'GET /office/transfers', 'GET /employers/me/transfer-requests', 'GET /members/me/claims', 'POST /members/me/claims', 'POST /members/me/transfers', 'GET /office/payment-scrolls/ready', 'GET /office/system/cad-static-data', 'GET /members/me/claims/eligibility-preview', 'GET /members/me/claims/eligible-types', 'POST /members/me/tax/form-15g-15h', 'GET /members/me/claims/{claimId}', 'GET /members/me/transfers/{transferId}', 'POST /employers/me/transfer-requests/{transferId}/decisions', 'GET /members/me/claims/{claimId}/audit-trail', 'POST /members/me/claims/{claimId}/cancellations', 'POST /members/me/claims/{claimId}/confirmations', 'POST /members/me/claims/{claimId}/documents', 'POST /members/me/claims/{claimId}/re-disbursement-requests', 'GET /claimants/death-claims/{claimId}', 'POST /claimants/death-claims/{claimId}/beneficiaries', 'POST /office/annexure-k-files/{annexureId}/reconciliations', 'GET /office/claims/{claimId}/additional-forms', 'GET /office/claims/{claimId}/audit-trail', 'GET /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/payment-instructions', 'POST /office/claims/{claimId}/re-disbursement-approvals', 'POST /office/claims/{claimId}/reissues', 'GET /office/death-claims/{claimId}/shares-summary', 'POST /office/payment-scrolls/{scrollId}/return-reconciliations', 'POST /office/transfers/{transferId}/decisions', 'POST /office/transfers/{transferId}/verifications', 'PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares']
+OPERATIONS = ['POST /claimants/death-claims', 'GET /office/annexure-k-files', 'POST /office/payment-scrolls', 'POST /office/physical-claims', 'GET /office/transfers', 'GET /employers/me/claim-attestations', 'GET /employers/me/transfer-requests', 'GET /members/me/claims', 'POST /members/me/claims', 'POST /members/me/transfers', 'GET /office/payment-scrolls/ready', 'GET /office/system/cad-static-data', 'GET /members/me/claims/eligibility-preview', 'GET /members/me/claims/eligible-types', 'POST /members/me/tax/form-15g-15h', 'GET /members/me/transfers/auto', 'POST /members/me/transfers/auto/{transferId}/confirmations', 'GET /members/me/claims/{claimId}', 'GET /members/me/transfers/{transferId}', 'POST /employers/me/claim-attestations/{claimId}/decisions', 'POST /employers/me/transfer-requests/{transferId}/decisions', 'GET /members/me/claims/{claimId}/audit-trail', 'GET /members/me/claims/{claimId}/bank-details', 'PUT /members/me/claims/{claimId}/bank-details', 'POST /members/me/claims/{claimId}/cancellations', 'POST /members/me/claims/{claimId}/confirmations', 'POST /members/me/claims/{claimId}/documents', 'POST /members/me/claims/{claimId}/re-disbursement-requests', 'GET /claimants/death-claims/{claimId}', 'POST /claimants/death-claims/{claimId}/beneficiaries', 'POST /office/annexure-k-files/{annexureId}/reconciliations', 'GET /office/claims/{claimId}/additional-forms', 'GET /office/claims/{claimId}/audit-trail', 'GET /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/payment-instructions', 'POST /office/claims/{claimId}/re-disbursement-approvals', 'POST /office/claims/{claimId}/reissues', 'GET /office/death-claims/{claimId}/shares-summary', 'POST /office/payment-scrolls/{scrollId}/return-reconciliations', 'POST /office/transfers/{transferId}/decisions', 'POST /office/transfers/{transferId}/verifications', 'PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares']
 
 @router.api_route("/api/v1/claimants/death-claims", methods=["POST"], include_in_schema=False)
 async def post_claimants_death_claims(actor: Actor = Depends(require_actor)) -> None:
@@ -35,6 +35,11 @@ async def post_office_physical_claims(actor: Actor = Depends(require_actor)) -> 
 @router.api_route("/api/v1/office/transfers", methods=["GET"], include_in_schema=False)
 async def get_office_transfers(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Form 13 transfers awaiting the DA's verification or the AO's decision")
+
+
+@router.api_route("/api/v1/employers/me/claim-attestations", methods=["GET"], include_in_schema=False)
+async def get_employers_me_claim_attestations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Claims awaiting employer attestation")
 
 
 @router.api_route("/api/v1/employers/me/transfer-requests", methods=["GET"], include_in_schema=False)
@@ -82,6 +87,16 @@ async def post_members_me_tax_form_15g_15h(actor: Actor = Depends(require_actor)
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Upload Form 15G / 15H")
 
 
+@router.api_route("/api/v1/members/me/transfers/auto", methods=["GET"], include_in_schema=False)
+async def get_members_me_transfers_auto(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Auto-transfer status on job change")
+
+
+@router.api_route("/api/v1/members/me/transfers/auto/{transferId}/confirmations", methods=["POST"], include_in_schema=False)
+async def post_members_me_transfers_auto_transferId_confirmations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Confirm auto-transfer")
+
+
 @router.api_route("/api/v1/members/me/claims/{claimId}", methods=["GET"], include_in_schema=False)
 async def get_members_me_claims_claimId(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Claim detail + timeline (Journey B7)")
@@ -92,6 +107,11 @@ async def get_members_me_transfers_transferId(actor: Actor = Depends(require_act
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Transfer status")
 
 
+@router.api_route("/api/v1/employers/me/claim-attestations/{claimId}/decisions", methods=["POST"], include_in_schema=False)
+async def post_employers_me_claim_attestations_claimId_decisions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Attest / reject claim")
+
+
 @router.api_route("/api/v1/employers/me/transfer-requests/{transferId}/decisions", methods=["POST"], include_in_schema=False)
 async def post_employers_me_transfer_requests_transferId_decisions(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Attest / reject transfer")
@@ -100,6 +120,16 @@ async def post_employers_me_transfer_requests_transferId_decisions(actor: Actor 
 @router.api_route("/api/v1/members/me/claims/{claimId}/audit-trail", methods=["GET"], include_in_schema=False)
 async def get_members_me_claims_claimId_audit_trail(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Post-submission: member's view of every state change on own claim (time, state, role, reason; office")
+
+
+@router.api_route("/api/v1/members/me/claims/{claimId}/bank-details", methods=["GET"], include_in_schema=False)
+async def get_members_me_claims_claimId_bank_details(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The member's KYC-verified bank accounts a claim can be switched to, and whether it still can be")
+
+
+@router.api_route("/api/v1/members/me/claims/{claimId}/bank-details", methods=["PUT"], include_in_schema=False)
+async def put_members_me_claims_claimId_bank_details(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Post-submission: switch a claim not yet in payment to another KYC-verified bank account of the membe")
 
 
 @router.api_route("/api/v1/members/me/claims/{claimId}/cancellations", methods=["POST"], include_in_schema=False)

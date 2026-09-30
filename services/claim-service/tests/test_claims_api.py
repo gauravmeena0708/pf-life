@@ -68,10 +68,12 @@ def ctx(tmp_path, monkeypatch):
     db._engine = None
 
 
-def hdr(subject, stakeholder, step_up=None, **extra):
+def hdr(subject, stakeholder, step_up=None, establishment_id=None, **extra):
     now = int(time.time())
     claims = {"iss": "epfo-gateway", "aud": "claim-service", "sub": subject, "stakeholder": stakeholder,
               "iat": now, "exp": now + 60, "jti": str(uuid.uuid4()), "correlation_id": str(uuid.uuid4())}
+    if establishment_id:
+        claims["establishment_id"] = establishment_id
     if step_up:
         claims["step_up"] = step_up
     return {"Authorization": "Bearer " + jwt.encode(claims, KEY, algorithm="EdDSA", headers={"kid": KID}), **extra}

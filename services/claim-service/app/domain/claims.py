@@ -7,25 +7,30 @@ from typing import Any
 
 from epfo_persistence.policy import approval_chain as chain_for, auto_settle_limit, section
 
-OPEN_STATES = {"AWAITING_CONFIRMATION", "SUBMITTED", "UNDER_REVIEW", "RECOMMENDED", "AWAITING_NEXT_APPROVAL",
+OPEN_STATES = {"AWAITING_CONFIRMATION", "SUBMITTED", "PENDING_EMPLOYER_ATTESTATION", "UNDER_REVIEW", "RECOMMENDED", "AWAITING_NEXT_APPROVAL",
                "APPROVED", "AUTO_APPROVED", "PAYMENT_PENDING", "PAYMENT_RETURNED", "CORRECTION_PENDING",
                "REISSUE_APPROVED", "ON_HOLD_FROZEN"}
 # Held while the account is frozen: any state before the payment has gone to the bank (init.md §7).
-HOLDABLE = {"SUBMITTED", "UNDER_REVIEW", "RECOMMENDED", "AWAITING_NEXT_APPROVAL", "APPROVED", "AUTO_APPROVED",
+HOLDABLE = {"SUBMITTED", "PENDING_EMPLOYER_ATTESTATION", "UNDER_REVIEW", "RECOMMENDED", "AWAITING_NEXT_APPROVAL", "APPROVED", "AUTO_APPROVED",
             "PAYMENT_RETURNED", "CORRECTION_PENDING", "REISSUE_APPROVED"}
 
 ROLE_LABELS = {
     "member": "You", "system": "EPFO system (automatic)", "fo.da_accounts": "Dealing assistant (accounts)",
     "fo.ss": "Section supervisor", "fo.ao": "Accounts officer", "fo.apfc": "Assistant PF commissioner",
     "fo.oic": "Officer in charge", "fo.cash": "Cash section", "bank": "Bank (mock)",
-    "fo.fa_accounts": "Accounts wing (F&A)", "claimant": "Claimant (nominee)",
+    "fo.fa_accounts": "Accounts wing (F&A)", "employer.signatory": "Your employer (authorised signatory)", "claimant": "Claimant (nominee)",
 }
+# Before payment the member may switch the claim to another of their KYC-verified bank accounts (P2.8b).
+BANK_SWITCHABLE = {"PENDING_EMPLOYER_ATTESTATION", "SUBMITTED", "UNDER_REVIEW", "RECOMMENDED", "AWAITING_NEXT_APPROVAL",
+                   "APPROVED", "AUTO_APPROVED"}
 # A member may withdraw a claim only before an approving officer has decided on it.
-CANCELLABLE = {"AWAITING_CONFIRMATION", "SUBMITTED", "UNDER_REVIEW", "RECOMMENDED"}
+CANCELLABLE = {"AWAITING_CONFIRMATION", "SUBMITTED", "PENDING_EMPLOYER_ATTESTATION", "UNDER_REVIEW", "RECOMMENDED"}
 
 NEXT_STEP = {
     "AWAITING_CONFIRMATION": "Check the summary and confirm the claim with the one-time code.",
     "SUBMITTED": "Your claim is being checked.",
+    "PENDING_EMPLOYER_ATTESTATION": "Your Aadhaar is not verified yet, so your employer must attest the claim before it goes to the office.",
+    "REJECTED_BY_EMPLOYER": "Your employer did not attest the claim. The reason is shown above; you can file a new claim.",
     "UNDER_REVIEW": "A dealing assistant in your regional office will review your claim.",
     "RECOMMENDED": "Your claim has been recommended and is waiting for an approving officer.",
     "AWAITING_NEXT_APPROVAL": "One approval is recorded; the next approving officer will now decide.",

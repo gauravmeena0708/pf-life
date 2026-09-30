@@ -34,10 +34,25 @@ async def on_process_transitioned(session: AsyncSession, event: dict[str, Any]) 
         return
     if p["process"] != "transfer_form13" or p["to_state"] != "APPROVED":
         return
-    transfer_id, data = p["instance_id"], p.get("data") or {}
+    data = p.get("data") or {}
+    await post_transfer(session, p["instance_id"], p["subject_ref"], data["from_account_link_id"], data["to_account_link_id"],
+                        p.get("actor_subject", ""), event["correlation_id"])
+
+
+async def on_auto_transfer(session: AsyncSession, event: dict[str, Any]) -> None:
+    """P2.8b: the member confirmed an auto-transfer on a change of job; post it as Form 13 would be once approved."""
+    p = event["payload"]
+    if (await session.execute(text("SELECT 1 FROM transfer_postings WHERE from_account_link_id=:f"), {"f": p["from_account_link_id"]})).first():
+        return                                                   # already transferred (e.g. by a Form 13 meanwhile)
+    await post_transfer(session, p["transfer_id"], p["uan"], p["from_account_link_id"], p["to_account_link_id"],
+                        "AUTO_TRANSFER", event["correlation_id"])
+
+
+async def post_transfer(session: AsyncSession, transfer_id: str, uan: str, frm: str, to: str, approved_by: str,
+                        correlation_id: str | None) -> None:
+    """Move the member ID's whole balance (a balanced journal) and publish TransferPosted.v1."""
     if (await session.execute(text("SELECT 1 FROM transfer_postings WHERE transfer_id=:t"), {"t": transfer_id})).first():
         return
-    frm, to = data["from_account_link_id"], data["to_account_link_id"]
     shares = await member_shares(session, frm)
     lines = []
     for share in ("employee", "employer"):
@@ -50,11 +65,11 @@ async def on_process_transitioned(session: AsyncSession, event: dict[str, Any]) 
     await session.execute(text(
         "INSERT INTO transfer_postings (transfer_id, uan, member_subject, from_account_link_id, to_account_link_id, employee_paise, "
         "employer_paise, journal_id, approved_by, posted_at) VALUES (:t, :u, :s, :f, :to, :ee, :er, :j, :by, CURRENT_TIMESTAMP)"),
-        {"t": transfer_id, "u": p["subject_ref"], "s": subject, "f": frm, "to": to, "ee": max(shares["employee"], 0),
-         "er": max(shares["employer"], 0), "j": journal_id, "by": p.get("actor_subject", "")})
+        {"t": transfer_id, "u": uan, "s": subject, "f": frm, "to": to, "ee": max(shares["employee"], 0),
+         "er": max(shares["employer"], 0), "j": journal_id, "by": approved_by})
     await add_event(session, producer=PRODUCER, event_type="TransferPosted.v1", aggregate_type="ledger_journal",
-                    aggregate_id=transfer_id, correlation_id=event["correlation_id"], payload={
-                        "transfer_id": transfer_id, "uan": p["subject_ref"], "from_account_link_id": frm, "to_account_link_id": to,
+                    aggregate_id=transfer_id, correlation_id=correlation_id, payload={
+                        "transfer_id": transfer_id, "uan": uan, "from_account_link_id": frm, "to_account_link_id": to,
                         "employee_paise": max(shares["employee"], 0), "employer_paise": max(shares["employer"], 0),
                         "journal_id": journal_id or "", "postings": lines})
 

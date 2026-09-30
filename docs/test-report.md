@@ -98,6 +98,13 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 8b: member services — e-Nomination, attestation, bank switch, auto-transfer, exits (30 September 2026)
+
+Unit tests 369 passed (new: member-service `test_nominations.py`, claim-service and workflow-service
+`test_member_mobility.py`); web 22 passed; end to end 56 passed (including `test_member_mobility.py`, also run twice
+on the same stack to check it repeats); must-deny 18 passed. Two synthetic personas were added (`member-f`,
+`member-g`); the Keycloak realm was re-imported.
+
 ## Update — Phase 2, slice 8a: compliance, defaulters and VISHWAS (30 September 2026)
 
 Unit tests 345 passed (compliance-service 5, new); end to end 51 passed (including `test_compliance.py`); must-deny

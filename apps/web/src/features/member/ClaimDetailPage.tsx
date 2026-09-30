@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
@@ -12,6 +12,10 @@ import { useStepUp } from "../stepup/useStepUp";
 
 interface ClaimDetail { claim_id: string; account_link_id: string; claim_type: string; form_type: string; amount_paise: number; state: string; version: number; rule_version: string; summary: string; decision_reason: string | null; payment_id: string | null; next_step: string;
   tax: { gross_paise: number; tds_paise: number; net_paise: number; rate_bp: number; basis: string; rule_version: string; financial_year: string; declaration: string | null } | null; timeline: { at: string; state: string; by: string; note: string }[] }
+interface BankDetails {
+  claim_id: string; switchable: boolean; current_account_last4: string | null;
+  verified_accounts: { bank_ifsc: string; bank_account_last4: string }[];
+}
 
 export function ClaimDetailPage() {
   const { t, i18n } = useTranslation();
@@ -21,8 +25,11 @@ export function ClaimDetailPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const claim = useQuery({ queryKey: ["member-claim", claimId], queryFn: () => api<Envelope<ClaimDetail>>(`/api/v1/members/me/claims/${claimId}`), enabled: !!claimId, retry: false,
-    refetchInterval: (query) => query.state.data && !["SETTLED", "REJECTED_WITH_REASON", "CANCELLED"].includes(query.state.data.data.state) ? 3000 : false });
+    refetchInterval: (query) => query.state.data && !["SETTLED", "REJECTED_WITH_REASON", "REJECTED_BY_EMPLOYER", "CANCELLED"].includes(query.state.data.data.state) ? 3000 : false });
   const item = claim.data?.data;
+  const bankDetails = useQuery({ queryKey: ["member-claim-bank", claimId, item?.version], enabled: !!item, retry: false,
+    queryFn: () => api<Envelope<BankDetails>>(`/api/v1/members/me/claims/${encodeURIComponent(claimId!)}/bank-details`) });
+  const [bankNotice, setBankNotice] = useState<string | null>(null);
   const [docNotice, setDocNotice] = useState<string | null>(null);
   async function withdraw() {
     if (!item) return;
@@ -58,6 +65,23 @@ export function ClaimDetailPage() {
     } catch (cause) { setError(cause); }
     finally { setBusy(false); }
   }
+  async function switchBank(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!item || !bankDetails.data?.data.switchable) return;
+    const selected = Number(new FormData(e.currentTarget).get("bank"));
+    const account = bankDetails.data.data.verified_accounts[selected];
+    setBusy(true); setError(null); setBankNotice(null);
+    try {
+      if (!account) throw new Error("Choose a verified bank account.");
+      const token = await stepUp.ask({ action: "switch-claim-bank", resourceId: item.claim_id, resourceVersion: item.version,
+        summary: `Switch claim ${item.claim_id} to verified bank account ending ${account.bank_account_last4} (${account.bank_ifsc}).` });
+      if (!token) return;
+      await command("PUT", `/api/v1/members/me/claims/${encodeURIComponent(item.claim_id)}/bank-details`, account, { stepUpToken: token });
+      setBankNotice(`Claim bank account changed to the verified account ending ${account.bank_account_last4}.`);
+      await Promise.all([qc.invalidateQueries({ queryKey: ["member-claim-bank", item.claim_id] }),
+        qc.invalidateQueries({ queryKey: ["member-claim", item.claim_id] }), qc.invalidateQueries({ queryKey: ["member-claims"] })]);
+    } catch (cause) { setError(cause); } finally { setBusy(false); }
+  }
   return <section className="stack" aria-labelledby="claim-detail-heading">
     <PageHeader id="claim-detail-heading" eyebrow={t("claimDetail.eyebrow")} title={t("claimDetail.title")} description={item ? `${rupees(item.amount_paise)} · ${item.form_type}` : t("claimDetail.description")}
       current={t("claimDetail.title")} parent={{ label: t("navigation.claims"), to: "/member/claims" }}>
@@ -67,7 +91,7 @@ export function ClaimDetailPage() {
     <ProblemMessage error={error} />
     {claim.isLoading ? <p role="status">{t("claimDetail.loading")}</p> : null}
     {item ? <>
-      {!["SETTLED", "REJECTED_WITH_REASON", "CANCELLED"].includes(item.state) ? <section className="card stack" aria-labelledby="claim-actions-heading">
+      {!["SETTLED", "REJECTED_WITH_REASON", "REJECTED_BY_EMPLOYER", "CANCELLED"].includes(item.state) ? <section className="card stack" aria-labelledby="claim-actions-heading">
         <h2 id="claim-actions-heading">Documents and withdrawal</h2>
         {docNotice ? <p role="status" className="ok">{docNotice}</p> : null}
         <label>Upload a supporting document (PDF, JPEG or PNG, up to 1 MB)<input type="file" accept="application/pdf,image/jpeg,image/png" onChange={(e) => void upload(e.target.files?.[0])} /></label>
@@ -77,6 +101,22 @@ export function ClaimDetailPage() {
       </section> : null}
       <aside className="pending-notice" aria-label={t("claims.nextStep")}><h2>{t("claims.nextStep")}</h2><p>{item.next_step}</p>
         {item.state === "AWAITING_CONFIRMATION" ? <button type="button" className="primary" disabled={busy} onClick={() => void confirm()}>{t("claims.confirmOtp")}</button> : null}</aside>
+      <section className="card stack" aria-labelledby="bank-switch-heading"><h2 id="bank-switch-heading">Switch claim bank account</h2>
+        <ProblemMessage error={bankDetails.error} />
+        {bankNotice ? <p role="status" className="ok">{bankNotice}</p> : null}
+        {bankDetails.isLoading ? <p role="status">Loading claim bank details…</p> : null}
+        {bankDetails.data ? <>
+          <p>Current account: {bankDetails.data.data.current_account_last4 ? `ending ${bankDetails.data.data.current_account_last4}` : "Not recorded"}.</p>
+          {!bankDetails.data.data.switchable ? <p className="muted">The bank account cannot be switched at this claim stage.</p>
+            : bankDetails.data.data.verified_accounts.length ? <form className="stack" onSubmit={(e) => void switchBank(e)}>
+              <label>Verified bank account<select name="bank" required disabled={busy || !!stepUp.request}>
+                {bankDetails.data.data.verified_accounts.map((account, index) => <option key={`${account.bank_ifsc}-${account.bank_account_last4}`} value={index}>
+                  {account.bank_ifsc} · account ending {account.bank_account_last4}</option>)}
+              </select></label>
+              <div className="actions"><button type="submit" className="primary" disabled={busy || !!stepUp.request}>Switch bank with one-time code</button></div>
+            </form> : <p className="muted">No verified bank accounts are available for switching.</p>}
+        </> : null}
+      </section>
       {item.state === "PAYMENT_RETURNED" ? <form className="card stack" onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget);
         void (async () => { setBusy(true); setError(null); try {
           await command("POST", `/api/v1/members/me/claims/${item.claim_id}/re-disbursement-requests`,
@@ -98,7 +138,7 @@ export function ClaimDetailPage() {
           {item.tax ? <><dt>{t("claimDetail.gross")}</dt><dd>{rupees(item.tax.gross_paise)}</dd>
             <dt>{t("claimDetail.tds")}</dt><dd>{item.tax.tds_paise ? rupees(item.tax.tds_paise) : t("claimDetail.noTds")} <span className="muted small">— {item.tax.basis} ({item.tax.rule_version})</span></dd>
             <dt>{t("claimDetail.net")}</dt><dd><strong>{rupees(item.tax.net_paise)}</strong></dd></> : null}</dl>
-        {item.decision_reason ? <p className={item.state === "REJECTED_WITH_REASON" ? "ineligible-reasons" : "muted"}><strong>{t("claimDetail.decisionReason")}:</strong> {item.decision_reason}</p> : null}
+        {item.decision_reason ? <p className={["REJECTED_WITH_REASON", "REJECTED_BY_EMPLOYER"].includes(item.state) ? "ineligible-reasons" : "muted"}><strong>{t("claimDetail.decisionReason")}:</strong> {item.decision_reason}</p> : null}
       </section>
       <section className="card stack" aria-labelledby="claim-timeline-heading"><h2 id="claim-timeline-heading">{t("claimDetail.timeline")}</h2>
         <ol className="claim-timeline">{item.timeline.map((event, index) => <li key={`${event.at}-${event.state}-${index}`} className={index === item.timeline.length - 1 ? "current" : ""}>

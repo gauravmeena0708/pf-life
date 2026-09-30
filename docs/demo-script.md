@@ -46,6 +46,8 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `ro-fa-accounts` | Accounts wing (F&A) — views the Claim Approval Dockets | Claim tools |
 | `claimant-a`, `ro-pro-counter` | Nominee of a deceased member; PRO counter (physical claims) | Death and EDLI claims |
 | `ro-da-compliance` | Dealing assistant (Compliance) — OLRE scrutiny | The establishment record, changes and OLRE |
+| `member-f` | Member whose Aadhaar is not verified yet | Member services (claim attestation) |
+| `member-g` | Member who changed jobs (previous member ID still holds a balance) | Member services (auto-transfer) |
 
 ---
 
@@ -342,6 +344,25 @@ simulation; point out that the dialog says exactly what is being authorised (act
 2. **`member-b` → Claim**: *Final settlement* lists "All services are not transferred to the primary member ID:
    AL-0903 holds ₹50,000" — AL-0903 is on BHARAT's older UAN, linked by the same verified Aadhaar.
 3. **`do-caseworker` → Member 360** for UAN 100000000903: the Aadhaar-verified set and its primary member ID.
+
+## Member services: e-Nomination, attestation, bank switch, auto-transfer, exits
+*Tests: `tests/e2e/test_member_mobility.py`, `services/{member,claim,workflow}-service/tests/test_*mobility*.py`,
+`services/member-service/tests/test_nominations.py`*
+
+1. **`member-a` → e-Nomination**: add the spouse (60%) and a minor son (40%, with a guardian); sign with the mock
+   Aadhaar e-sign. A non-family nominee is refused while "I have a family" is ticked. **`member-f`** is refused:
+   her Aadhaar is not verified. *Know your UAN*: name, date of birth, the mobile's last four digits and any
+   six-digit code (mock) find the UAN.
+2. **`member-f` → Claim**: an advance for ₹5,000 goes to *Pending employer attestation*, not to the office.
+   **`emp-signatory` → Claim attestations**: attest it (it is then approved automatically) or reject it with a reason.
+3. **`member-a` → Claims**: on a claim still with the office, *Switch bank account* offers her two KYC-verified
+   accounts (…0001 and …4321).
+4. **`member-g` → Service › Auto-transfer**: AL-0905 (exited, ₹80,000) can move into the primary member ID AL-0906.
+   Confirm with the one-time code; the ledger posts it without a Form 13, an employer or an officer.
+5. **`emp-preparer` → Exit bulk upload**: lines `uan,account_link_id,date_of_exit,reason`; each valid line becomes an
+   exit waiting for the signatory, the rest are reported. *Exit correction* corrects a marked date; **`emp-signatory`
+   → Member › Approvals** approves both kinds. *Employer-initiated JD*: the signatory files a Joint Declaration
+   with the member's consent (mock OTP); it goes straight to the DA.
 
 ## Compliance: defaulters, demands and VISHWAS
 *Tests: `tests/e2e/test_compliance.py`, `services/compliance-service/tests/test_compliance.py`,

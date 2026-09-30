@@ -9,7 +9,7 @@ from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.infra.db import sessions
-from app.infra.tables import accounts, nominations, office_staff
+from app.infra.tables import accounts, member_bank_accounts, nominations, office_staff
 
 SEED_FILE = os.getenv("SEED_FILE", "/srv/seed/synthetic.json")
 
@@ -30,7 +30,7 @@ async def main() -> None:
             if exists:   # balances move with events after the first load; only refresh identity fields
                 await session.execute(update(accounts).where(accounts.c.account_link_id == m["account_link_id"])
                                       .values(member_subject=m.get("subject"), office_id=office_id, uan=m["uan"],
-                                              pan_verified=m["kyc"]["pan"] == "VERIFIED"))    # exits move with MemberExitMarked.v1
+                                              pan_verified=m["kyc"]["pan"] == "VERIFIED", aadhaar_verified=m["kyc"]["aadhaar"] == "VERIFIED"))    # exits move with MemberExitMarked.v1
                 continue
             await session.execute(insert(accounts).values(
                 account_link_id=m["account_link_id"], member_subject=m.get("subject"), uan=m["uan"],
@@ -38,7 +38,7 @@ async def main() -> None:
                 date_of_joining=date.fromisoformat(m["date_of_joining"]),
                 date_of_exit=date.fromisoformat(m["date_of_exit"]) if m.get("date_of_exit") else None,
                 employee_paise=balance.get("employee_paise", 0), employer_paise=balance.get("employer_paise", 0),
-                pan_verified=m["kyc"]["pan"] == "VERIFIED",
+                pan_verified=m["kyc"]["pan"] == "VERIFIED", aadhaar_verified=m["kyc"]["aadhaar"] == "VERIFIED",
                 deceased_on=date.fromisoformat(m["deceased_on"]) if m.get("deceased_on") else None))
         # P2.7d: the primary member ID of each member's Aadhaar-verified set (the same rule member-service applies)
         from epfo_persistence.member_ids import primary_member_id
@@ -59,6 +59,11 @@ async def main() -> None:
                 await session.execute(insert(nominations).values(
                     nomination_id=f"NOM-{m['uan']}-{i}", uan=m["uan"], name=n["name"], relation=n["relation"], share_bp=n["share_bp"],
                     subject=n.get("subject"), bank_ifsc=n.get("bank_ifsc"), bank_account_last4=n.get("bank_account_last4")).on_conflict_do_nothing())
+        for m in seed["members"]:                                 # KYC-verified bank accounts (P2.8b)
+            banks = [{"bank_ifsc": m["bank_ifsc"], "bank_account_last4": m["bank_account_last4"]}] if m["kyc"]["bank"] == "VERIFIED" else []
+            for b in banks + m.get("other_bank_accounts", []):
+                await session.execute(insert(member_bank_accounts).values(uan=m["uan"], bank_ifsc=b["bank_ifsc"],
+                                                                          bank_account_last4=b["bank_account_last4"]).on_conflict_do_nothing())
         for s in seed.get("office_staff", []):
             await session.execute(insert(office_staff).values(subject=s["subject"], stakeholder=s["stakeholder"],
                                                               office_id=s["office_id"]).on_conflict_do_nothing())

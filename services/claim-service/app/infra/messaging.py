@@ -1,6 +1,6 @@
 """Events claim-service consumes. Each handler runs inside the inbox transaction (apply_once), so a
 redelivered event is applied once; state guards make an out-of-order event a logged no-op."""
-from datetime import date
+from datetime import UTC, date, datetime
 from typing import Any
 
 from sqlalchemy import insert, select, update
@@ -8,7 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import load_claim, notify, record_decision, transition
 from app.domain.claims import HOLDABLE, route
-from app.infra.tables import accounts, annexure_k_files, claim_beneficiaries, claims, risk_flags
+from app.infra.tables import (accounts, annexure_k_files, auto_transfers, claim_beneficiaries, claims, member_bank_accounts,
+                              nominations, risk_flags)
 from epfo_observability import Problem, get_logger
 from epfo_persistence.policy import on_policy_published, rules_by_version
 
@@ -33,6 +34,7 @@ BINDINGS = [
     "contribution-service.TransferPosted.v1",
     "member-service.MemberRegistered.v1",
     "member-service.MemberKycUpdated.v1",
+    "member-service.NominationRegistered.v1",
 ]
 
 
@@ -89,6 +91,26 @@ async def on_member_registered(session: AsyncSession, event: dict[str, Any]) -> 
 async def on_kyc_updated(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
     await session.execute(update(accounts).where(accounts.c.uan == p["uan"]).values(pan_verified=bool(p["pan_verified"])))
+    if p.get("kyc_type") == "AADHAAR" and p.get("status") == "VERIFIED":
+        await session.execute(update(accounts).where(accounts.c.uan == p["uan"]).values(aadhaar_verified=True))
+    if p.get("kyc_type") == "BANK" and p.get("bank_ifsc") and p.get("bank_account_last4") and not (await session.execute(
+            select(member_bank_accounts.c.uan).where(member_bank_accounts.c.uan == p["uan"], member_bank_accounts.c.bank_ifsc == p["bank_ifsc"],
+                                                     member_bank_accounts.c.bank_account_last4 == p["bank_account_last4"]))).first():
+        await session.execute(insert(member_bank_accounts).values(uan=p["uan"], bank_ifsc=p["bank_ifsc"],
+                                                                  bank_account_last4=p["bank_account_last4"]))
+
+
+async def on_nomination(session: AsyncSession, event: dict[str, Any]) -> None:
+    """e-Nomination (P2.8b): the signed nomination replaces the nominees on record; a nominee's login and bank
+    details, when known, are kept for the same name."""
+    p = event["payload"]
+    old = {r["name"]: dict(r) for r in (await session.execute(select(nominations).where(nominations.c.uan == p["uan"]))).mappings().all()}
+    await session.execute(nominations.delete().where(nominations.c.uan == p["uan"]))
+    for i, n in enumerate(p["nominees"], start=1):
+        was = old.get(n["name"], {})
+        await session.execute(insert(nominations).values(nomination_id=f"{p['nomination_id']}-{i}", uan=p["uan"], name=n["name"],
+                                                         relation=n["relation"], share_bp=n["share_bp"], subject=was.get("subject"),
+                                                         bank_ifsc=was.get("bank_ifsc"), bank_account_last4=was.get("bank_account_last4")))
 
 
 async def on_transfer_posted(session: AsyncSession, event: dict[str, Any]) -> None:
@@ -105,6 +127,8 @@ async def on_transfer_posted(session: AsyncSession, event: dict[str, Any]) -> No
         await session.execute(update(accounts).where(accounts.c.account_link_id == link).values(
             employee_paise=accounts.c.employee_paise + sign * int(p["employee_paise"]),
             employer_paise=accounts.c.employer_paise + sign * int(p["employer_paise"])))
+    await session.execute(update(auto_transfers).where(auto_transfers.c.transfer_id == p["transfer_id"]).values(   # P2.8b
+        state="POSTED", posted_at=datetime.now(UTC)))
 
 
 async def on_claim_debit_posted(session: AsyncSession, event: dict[str, Any]) -> None:
@@ -266,6 +290,7 @@ HANDLERS = {
     "TransferPosted.v1": on_transfer_posted,
     "MemberRegistered.v1": on_member_registered,
     "MemberKycUpdated.v1": on_kyc_updated,
+    "NominationRegistered.v1": on_nomination,
     "ClaimDebitPosted.v1": on_claim_debit_posted,
     "CaseDecisionSubmitted.v1": on_case_decision,
     "PaymentConfirmed.v1": on_payment_result,

@@ -1,6 +1,8 @@
 # Tier-2 process (ADR-0005): an employer marks a member's date of exit; the authorised signatory approves it
 # (Member > Approvals on the employer portal). member-service owns the contract: on APPROVED it records the exit
 # and publishes MemberExitMarked.v1. A member can also mark the exit themselves (POST /members/me/exits).
+# P2.8b: the employer can also correct a marked date of exit (approved the same way; member-service republishes
+# MemberExitMarked.v1 with the corrected date) and upload exits in bulk (one case per line, each approved).
 process: employer_exit
 owner: member
 title: Date of exit (employer)
@@ -21,18 +23,37 @@ operations:
       account_link_id: {account: {owner: subject, establishment: actor, exited: false}}
       date_of_exit: {date: {not_future: true, after_joining_of: account_link_id}}
       reason: {enum: [CESSATION, SUPERANNUATION, RETIREMENT, DEATH_IN_SERVICE, PERMANENT_DISABLEMENT]}
+  - name: mark_bulk
+    operation: POST /employers/me/members/exit-bulk-uploads
+    bulk: mark                        # lines: uan,account_link_id,date_of_exit,reason
+    max_lines: 100
+    roles: [employer.operator, employer.owner]
+    scope: establishment
+    step_up: mark-exit-bulk           # bound to the establishment
+  - name: correct
+    operation: POST /employers/me/members/{uan}/exit-corrections
+    starts: true
+    roles: [employer.operator, employer.owner]
+    scope: establishment
+    step_up: correct-exit-employer
+    to: CORRECTION_MARKED
+    form:
+      account_link_id: {account: {owner: subject, establishment: actor, exited: true, not_transferred: true}}
+      date_of_exit: {date: {not_future: true, after_joining_of: account_link_id}}
+      reason: {enum: [CESSATION, SUPERANNUATION, RETIREMENT, DEATH_IN_SERVICE, PERMANENT_DISABLEMENT]}
+      correction_note: {min_length: 10, max_length: 1000}
   - name: approvals
     operation: GET /employers/me/approvals
     roles: [employer.signatory]
     scope: establishment
-    lists: {states: [EXIT_MARKED]}
+    lists: {states: [EXIT_MARKED, CORRECTION_MARKED]}
   - name: approve
     operation: POST /employers/me/approvals/{approvalId}/decisions
     case_from: path:approvalId
     roles: [employer.signatory]
     scope: establishment
     step_up: {action: approve-exit, bind: case}
-    from: EXIT_MARKED
+    from: [EXIT_MARKED, CORRECTION_MARKED]
     outcomes: {field: decision, map: {APPROVE: APPROVED, REJECT: REJECTED}}
     form:
       decision: {enum: [APPROVE, REJECT]}
