@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
     if os.environ.get("DISABLE_MESSAGING") != "1":
         workers = [OutboxRelay(engine(), settings.rabbitmq_url),
                    Consumer(engine(), settings.rabbitmq_url, "grievance-service.policy",
-                            ["platform-service.PolicyPublished.v1"], on_policy_published)]
+                            ["platform-service.PolicyPublished.v1", "workflow-service.StaffPostingChanged.v1"], _dispatch)]
         for w in workers:
             w.start()
     yield
@@ -43,3 +43,12 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
+
+
+async def _dispatch(session, event):
+    if event["event_type"] == "StaffPostingChanged.v1":                 # HR re-posted an officer (P2.8e)
+        from app.infra.tables import office_staff
+        from epfo_persistence.postings import apply_posting
+        await apply_posting(session, event, office_staff)
+    else:
+        await on_policy_published(session, event)

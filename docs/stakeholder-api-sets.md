@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 237 |
+| Activities | 238 |
 | Stakeholders with at least one API | 97 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 0 |
@@ -324,6 +324,7 @@ Activities: **F01.profile** View establishment profile, configuration, KYC and h
 | `GET /employers/me/challans/{trrn}/receipt` | W |
 | `GET /employers/me/compliance-summary` | W |
 | `GET /employers/me/configuration` | W |
+| `GET /employers/me/dashboard` | W |
 | `GET /employers/me/ecr-filings` | W |
 | `GET /employers/me/ecr-filings/{filingId}` | W |
 | `GET /employers/me/exemption` | W |
@@ -344,8 +345,7 @@ Activities: **F01.profile** View establishment profile, configuration, KYC and h
 | `POST /employers/me/members/{uan}/declarations` | W |
 | `POST /employers/me/members/{uan}/exit-corrections` | W |
 | `POST /employers/me/members/{uan}/exits` | W |
-| `GET /employers/me/dashboard` | P |
-| `POST /employers/me/members/{uan}/location-mappings` | P |
+| `POST /employers/me/members/{uan}/location-mappings` | W |
 
 #### `principal_employer` — Principal employer monitoring contractors
 
@@ -585,16 +585,20 @@ Activities: **F02.jd_monitor** Monitor JD pendency across the RO; **F13.ro** RO-
 
 #### `fo.oic` — Officer-in-Charge of the office
 
-Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lock_admin** Inspect member-ledger locks and release an orphaned one with a recorded reason; **F07.freeze_ro_est** Order freezing of an establishment (Category B); report to fraud committee; **F07.defreeze** Recommend / order de-freezing; post-defreeze claims use the higher chain; **F11.oic_monitor** Trigger verification of suspicious inoperative-account requests and monitor unblocking daily; **F12.reply** Reply to concurrent-audit alerts within 3 days; **F12.para_reply** Comply with audit paras; request dropping; **F13.oic** Office-level pendency and daily unblocking monitoring
+Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lock_admin** Inspect member-ledger locks and release an orphaned one with a recorded reason; **F07.freeze_ro_est** Order freezing of an establishment (Category B); report to fraud committee; **F07.issue_raise** Raise an Issue Tracker request (freeze / de-freeze a member account, or a login notice) with the order; **F07.defreeze** Recommend / order de-freezing; post-defreeze claims use the higher chain; **F11.oic_monitor** Trigger verification of suspicious inoperative-account requests and monitor unblocking daily; **F12.reply** Reply to concurrent-audit alerts within 3 days; **F12.para_reply** Comply with audit paras; request dropping; **F13.oic** Office-level pendency and daily unblocking monitoring
 
 | Endpoint | Status |
 |---|---|
+| `GET /audit/concurrent/alerts` | W |
 | `GET /monitoring/claims` | W |
+| `GET /ndc/issue-tracker/requests` | W |
 | `GET /office/accounts/inoperative` | W |
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/members/{uan}/locks` | W |
 | `GET /office/work-queue` | W |
+| `POST /audit/concurrent/alerts/{alertId}/replies` | W |
+| `POST /ndc/issue-tracker/requests` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
 | `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/establishments/{estId}/defreezes` | W |
@@ -602,7 +606,6 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/members/{uan}/defreezes` | W |
 | `POST /office/system/locks/{lockId}/release` | W |
-| `POST /audit/concurrent/alerts/{alertId}/replies` | P |
 | `POST /audit/internal/paras/{paraId}/replies` | P |
 
 #### `fo.cash` — Cashier / Cash branch
@@ -810,7 +813,7 @@ Activities: **F13.admin** Office administration: staff postings and role assignm
 | Endpoint | Status |
 |---|---|
 | `GET /hrm/me` | W |
-| `POST /hrm/postings` | P |
+| `POST /hrm/postings` | W |
 
 ### D. District Office (DO)
 
@@ -820,8 +823,8 @@ Activities: **F13.do** District dashboard and jurisdiction-scoped queue
 
 | Endpoint | Status |
 |---|---|
+| `GET /do/dashboards` | W |
 | `GET /office/work-queue` | W |
-| `GET /do/dashboards` | P |
 
 #### `do.staff` — District Office facilitation and compliance staff
 
@@ -867,11 +870,12 @@ Activities: **F12.concurrent** Download daily functionality data from the Audit 
 
 | Endpoint | Status |
 |---|---|
+| `GET /audit/concurrent/alerts` | W |
+| `GET /audit/concurrent/extracts` | W |
 | `GET /audit/correlations/{correlationId}` | W |
 | `GET /audit/events` | W |
 | `GET /office/claims/{claimId}/audit-trail` | W |
-| `GET /audit/concurrent/extracts` | P |
-| `POST /audit/concurrent/alerts` | P |
+| `POST /audit/concurrent/alerts` | W |
 
 #### `zo.internal_audit` — Internal audit parties auditing ROs
 
@@ -898,7 +902,7 @@ Activities: **F07.committee** Review suspected fraud cases reported by OICs
 
 | Endpoint | Status |
 |---|---|
-| `GET /zo/fraud-risk/cases` | P |
+| `GET /zo/fraud-risk/cases` | W |
 
 #### `zo.zti` — Zonal Training Institute
 
@@ -1037,8 +1041,8 @@ Activities: **F07.block** Execute block / unblock raised through the Issue Track
 
 | Endpoint | Status |
 |---|---|
-| `POST /ndc/issue-tracker/requests` | P |
-| `POST /ndc/issue-tracker/requests/{requestId}/executions` | P |
+| `GET /ndc/issue-tracker/requests` | W |
+| `POST /ndc/issue-tracker/requests/{requestId}/executions` | W |
 
 #### `ho.customer_service` — Customer Service / Public Grievances cell
 
@@ -1055,7 +1059,7 @@ Activities: **F13.hr** Staff profiles, postings and delegation of roles to offic
 | Endpoint | Status |
 |---|---|
 | `GET /hrm/me` | W |
-| `POST /hrm/postings` | P |
+| `POST /hrm/postings` | W |
 
 #### `ho.investment` — Investment / IMC division
 
@@ -1098,13 +1102,14 @@ Activities: **F14.security** Inspect recent request rates and redacted activity;
 |---|---|
 | `GET /audit/events` | W |
 | `GET /security/account-recovery-requests` | W |
+| `GET /security/incidents` | W |
 | `GET /security/me/permissions` | W |
 | `GET /security/request-activity` | W |
 | `GET /security/sessions` | W |
 | `POST /internal/security-events` | W |
 | `POST /security/account-recovery-requests/{requestId}/decisions` | W |
+| `POST /security/incidents` | W |
 | `POST /security/sessions/{sessionId}/revocations` | W |
-| `POST /security/incidents` | P |
 
 Integration adapters: `cert_in`
 
@@ -1744,6 +1749,7 @@ flowchart LR
   style F07_freeze_zo stroke-dasharray: 5 5
   F07_freeze_ro_member["fo.apfc<br/>Order freezing of MID / UAN (Categories B / C)"]
   F07_freeze_ro_est["fo.oic<br/>Order freezing of an establishment (Category B); report to f"]
+  F07_issue_raise["fo.oic<br/>Raise an Issue Tracker request (freeze / de-freeze a member "]
   F07_block["ho.is<br/>Execute block / unblock raised through the Issue Tracker; sh"]
   F07_verify_member["fo.da_accounts<br/>Open e-file and verify the frozen MID / UAN (member ledger, "]
   F07_verify_est["fo.da_compliance<br/>Verify the frozen establishment"]
@@ -1753,7 +1759,6 @@ flowchart LR
   F07_defreeze_est_maker["fo.apfc<br/>Recommend de-freezing an establishment (maker); the OIC orde"]
   F07_defreeze["fo.oic<br/>Recommend / order de-freezing; post-defreeze claims use the "]
   F07_committee["zo.fraud_committee<br/>Review suspected fraud cases reported by OICs"]
-  style F07_committee stroke-dasharray: 5 5
   F07_vig_referral["ho.caiu<br/>Refer a pattern to vigilance"]
   F07_vig_zone["zo.vigilance<br/>Investigate vigilance case with restricted evidence access"]
   style F07_vig_zone stroke-dasharray: 5 5
@@ -1765,6 +1770,7 @@ flowchart LR
   F07_freeze_ro_member --> F07_block
   F07_freeze_ro_est --> F07_block
   F07_freeze_ro_est --> F07_committee
+  F07_issue_raise --> F07_block
   F07_block --> F07_verify_member
   F07_block --> F07_verify_est
   F07_verify_member --> F07_verify_ss
@@ -1886,7 +1892,6 @@ flowchart LR
 flowchart LR
   F13_public["public<br/>Browse schemes, offices, statistics, circulars; search estab"]
   F13_do["do.incharge<br/>District dashboard and jurisdiction-scoped queue"]
-  style F13_do stroke-dasharray: 5 5
   F13_ro["fo.rpfc1<br/>RO-level monitoring (claims, grievances, compliance)"]
   F13_oic["fo.oic<br/>Office-level pendency and daily unblocking monitoring"]
   F13_zo["zo.acc<br/>Zone dashboards; approvals above RO limits"]

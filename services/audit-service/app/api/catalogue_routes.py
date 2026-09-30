@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /audit/events', 'POST /internal/security-events', 'GET /audit/correlations/{correlationId}']
+OPERATIONS = ['GET /audit/events', 'POST /internal/security-events', 'GET /security/incidents', 'POST /security/incidents', 'GET /audit/concurrent/alerts', 'POST /audit/concurrent/alerts', 'GET /audit/concurrent/extracts', 'POST /audit/concurrent/alerts/{alertId}/replies', 'GET /audit/correlations/{correlationId}']
 
 @router.api_route("/api/v1/audit/events", methods=["GET"], include_in_schema=False)
 async def get_audit_events(actor: Actor = Depends(require_actor)) -> None:
@@ -20,6 +20,36 @@ async def get_audit_events(actor: Actor = Depends(require_actor)) -> None:
 @router.api_route("/api/v1/internal/security-events", methods=["POST"], include_in_schema=False)
 async def post_internal_security_events(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Ingest IdP events (login, new device, credential change) from the Keycloak event listener into audit")
+
+
+@router.api_route("/api/v1/security/incidents", methods=["GET"], include_in_schema=False)
+async def get_security_incidents(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Security incidents on record and their CERT-In reporting (mock)")
+
+
+@router.api_route("/api/v1/security/incidents", methods=["POST"], include_in_schema=False)
+async def post_security_incidents(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Record a security incident; report to CERT-In")
+
+
+@router.api_route("/api/v1/audit/concurrent/alerts", methods=["GET"], include_in_schema=False)
+async def get_audit_concurrent_alerts(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Concurrent-audit alerts: the zone's (Audit Cell) or the office's (OIC), with overdue replies")
+
+
+@router.api_route("/api/v1/audit/concurrent/alerts", methods=["POST"], include_in_schema=False)
+async def post_audit_concurrent_alerts(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Concurrent audit alert to an RO")
+
+
+@router.api_route("/api/v1/audit/concurrent/extracts", methods=["GET"], include_in_schema=False)
+async def get_audit_concurrent_extracts(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Concurrent Audit Cell daily functionality extract (Audit Portal)")
+
+
+@router.api_route("/api/v1/audit/concurrent/alerts/{alertId}/replies", methods=["POST"], include_in_schema=False)
+async def post_audit_concurrent_alerts_alertId_replies(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "OIC replies to a concurrent-audit alert")
 
 
 @router.api_route("/api/v1/audit/correlations/{correlationId}", methods=["GET"], include_in_schema=False)

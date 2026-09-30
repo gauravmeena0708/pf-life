@@ -52,6 +52,7 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `worker-expat`, `iw-officer`, `ho-iwu` | International worker; International Workers cell; HO International Workers Unit | International workers |
 | `ro-edli` | EDLI section officer | EDLI decision |
 | `ho-publicity`, `ro-exemption` | HO Public Relations (circulars); exemption cell (surrendered trusts) | Public services, trusts |
+| `zo-audit`, `ndc-is`, `zo-fraud`, `do-oic` | Concurrent Audit Cell; NDC IS Division; zonal fraud-risk committee; District Office in charge | Oversight and administration |
 
 ---
 
@@ -348,6 +349,22 @@ simulation; point out that the dialog says exactly what is being authorised (act
 2. **`member-b` → Claim**: *Final settlement* lists "All services are not transferred to the primary member ID:
    AL-0903 holds ₹50,000" — AL-0903 is on BHARAT's older UAN, linked by the same verified Aadhaar.
 3. **`do-caseworker` → Member 360** for UAN 100000000903: the Aadhaar-verified set and its primary member ID.
+
+## Oversight and administration
+*Tests: `tests/e2e/test_oversight_administration.py` and the unit tests of audit-, platform-, workflow-, member- and
+reporting-service*
+
+1. **`security-analyst` → Security › Incidents**: record a HIGH unauthorised-access incident detected an hour ago;
+   it is reported to CERT-In (mock) within the 6-hour window, with an acknowledgement number.
+2. **`zo-audit` → Concurrent audit**: today's extract lists the day's settlements, adjustments and transfers with red
+   flags; *Raise alert* to RO-DEMO-01. **`ro-oic`** replies (within 3 days, else marked late).
+3. **`ro-oic` → Issue Tracker**: raise a freeze for UAN 100000000909 with the order; **`ndc-is`** executes it (one-time
+   code); the member 360 view shows the account frozen; de-freeze the same way. A *login notice* for member A reaches
+   her notifications.
+4. **`zo-fraud` → Fraud-risk cases**: the zone's claims with risk signals and account freezes.
+5. **`hrm-employee` → Postings**: post `ro-pro-counter` to RO-DEMO-02 and back; each service follows.
+6. **`do-oic` → District dashboard**; **`emp-owner` → Home**: the establishment dashboard with alerts;
+   **`emp-preparer` → Member › Location mapping**: map member A to branch BR-01.
 
 ## Public services, grievances, circulars, the interest rate, surrendered trusts
 *Tests: `tests/e2e/test_public_services.py` and the unit tests of grievance-, intelligence-, claim-, reporting-,

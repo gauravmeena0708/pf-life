@@ -10,11 +10,16 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /hrm/me', 'GET /office/stopped-cases', 'GET /office/work-queue', 'GET /public/offices', 'GET /employers/me/pending-approvals', 'POST /office/system/locks/{lockId}/release', 'GET /office/cases/{caseId}', 'POST /office/cases/{caseId}/assignments', 'POST /office/cases/{caseId}/decisions', 'POST /office/cases/{caseId}/recommendations', 'POST /office/cases/{caseId}/restarts', 'POST /office/cases/{caseId}/second-approvals', 'POST /office/cases/{caseId}/stops', 'POST /office/freeze-cases/{caseId}/verifications', 'GET /office/members/{uan}/locks', 'POST /office/cases/{caseId}/documents/{docId}/attestation-views']
+OPERATIONS = ['GET /hrm/me', 'POST /hrm/postings', 'GET /office/stopped-cases', 'GET /office/work-queue', 'GET /public/offices', 'GET /employers/me/pending-approvals', 'GET /zo/fraud-risk/cases', 'POST /office/system/locks/{lockId}/release', 'GET /office/cases/{caseId}', 'POST /office/cases/{caseId}/assignments', 'POST /office/cases/{caseId}/decisions', 'POST /office/cases/{caseId}/recommendations', 'POST /office/cases/{caseId}/restarts', 'POST /office/cases/{caseId}/second-approvals', 'POST /office/cases/{caseId}/stops', 'POST /office/freeze-cases/{caseId}/verifications', 'GET /office/members/{uan}/locks', 'POST /office/cases/{caseId}/documents/{docId}/attestation-views']
 
 @router.api_route("/api/v1/hrm/me", methods=["GET"], include_in_schema=False)
 async def get_hrm_me(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "HRM staff profile and assignment metadata (interface 15)")
+
+
+@router.api_route("/api/v1/hrm/postings", methods=["POST"], include_in_schema=False)
+async def post_hrm_postings(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Staff postings and role assignment to offices (drives jurisdiction)")
 
 
 @router.api_route("/api/v1/office/stopped-cases", methods=["GET"], include_in_schema=False)
@@ -35,6 +40,11 @@ async def get_public_offices(actor: Actor = Depends(require_actor)) -> None:
 @router.api_route("/api/v1/employers/me/pending-approvals", methods=["GET"], include_in_schema=False)
 async def get_employers_me_pending_approvals(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Items awaiting DSC/e-sign (KYC, transfers, claims, JD)")
+
+
+@router.api_route("/api/v1/zo/fraud-risk/cases", methods=["GET"], include_in_schema=False)
+async def get_zo_fraud_risk_cases(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Zonal / regional fraud-risk committee case list")
 
 
 @router.api_route("/api/v1/office/system/locks/{lockId}/release", methods=["POST"], include_in_schema=False)

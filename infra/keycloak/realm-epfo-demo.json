@@ -173,6 +173,22 @@
       {
         "name": "fo.exemption",
         "description": "Exemption cell — exempted trusts, surrender and past accumulations"
+      },
+      {
+        "name": "zo.rpfc1_audit",
+        "description": "RPFC-I (Concurrent Audit Cell) — daily functionality extracts and alerts"
+      },
+      {
+        "name": "ho.is",
+        "description": "NDC IS Division — executes Issue Tracker requests (block / unblock)"
+      },
+      {
+        "name": "zo.fraud_committee",
+        "description": "Zonal fraud-risk committee — reviews suspected fraud cases"
+      },
+      {
+        "name": "do.incharge",
+        "description": "District Office in charge — district dashboard"
       }
     ]
   },
@@ -1119,6 +1135,82 @@
         "fo.exemption"
       ],
       "id": "00000000-0000-4000-8000-000000000046"
+    },
+    {
+      "username": "zo-audit",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Zonal Concurrent Audit Cell",
+      "lastName": "Demo",
+      "email": "zo-audit@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "zo.rpfc1_audit"
+      ],
+      "id": "00000000-0000-4000-8000-000000000047"
+    },
+    {
+      "username": "ndc-is",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "NDC IS Division",
+      "lastName": "Demo",
+      "email": "ndc-is@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ho.is"
+      ],
+      "id": "00000000-0000-4000-8000-000000000048"
+    },
+    {
+      "username": "zo-fraud",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Zonal fraud-risk committee",
+      "lastName": "Demo",
+      "email": "zo-fraud@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "zo.fraud_committee"
+      ],
+      "id": "00000000-0000-4000-8000-000000000049"
+    },
+    {
+      "username": "do-oic",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "District Office in charge",
+      "lastName": "Demo",
+      "email": "do-oic@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "do.incharge"
+      ],
+      "id": "00000000-0000-4000-8000-000000000050"
     }
   ]
 }

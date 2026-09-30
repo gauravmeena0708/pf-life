@@ -98,6 +98,15 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 8e: oversight and administration (30 September 2026)
+
+Unit tests 495 passed (new: audit-service `test_oversight.py`, platform-service `test_issue_tracker.py`,
+member-service `test_issue_tracker_and_location.py`, workflow-service `test_hr_postings.py`, reporting-service
+`test_dashboards_reads.py`, common-persistence `test_postings.py`); web 124 passed; must-deny 18 passed; end to end
+67 passed (including `test_oversight_administration.py`). In the first full run three tests failed only while saving
+screenshots: the Windows drive holding the repository was full; they passed once space was freed. The unit tests
+found that location mapping answered 404 instead of 409 for a member who had left; fixed.
+
 ## Update — Phase 2, slice 8d: public services, grievances, circulars, the interest-rate record, trusts (30 September 2026)
 
 Unit tests 416 passed (new: `test_public_grievances.py`, `test_circulars.py`, `test_public_claim_status.py`,

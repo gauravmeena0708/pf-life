@@ -302,6 +302,36 @@ async def fill_missing(uan: str, body: MissingDetails, actor: Actor = Depends(EM
     return envelope({"uan": uan, "filled": sorted(given), "profile_extra": extra})
 
 
+
+class LocationMapping(BaseModel):
+    account_link_id: str = Field(min_length=3, max_length=40)
+    branch_code: str = Field(pattern=r"^[A-Z0-9-]{2,20}$")
+    district: str = Field(min_length=2, max_length=80)
+    pincode: str = Field(pattern=r"^[1-9][0-9]{5}$")
+
+
+@router.post("/api/v1/employers/me/members/{uan}/location-mappings")
+async def map_location(uan: str, body: LocationMapping, actor: Actor = Depends(EMPLOYER), session: AsyncSession = Depends(db)) -> dict:
+    """Member › Location mapping (P2.8e): which branch of the establishment the member works at, for the branch-wise
+    returns and dashboards. Only the establishment's own, active member IDs."""
+    est = _establishment(actor, "ecr.prepare", "members.manage")
+    async with session.begin():
+        m = await _employee(session, est, uan, active=False)    # an exited member ID is refused below, with the reason
+        job = (await session.execute(select(employments).where(employments.c.account_link_id == body.account_link_id,
+                                                               employments.c.member_id == m["member_id"],
+                                                               employments.c.establishment_id == est))).mappings().first()
+        if not job:
+            raise Problem(404, "/problems/not-found", "No such member ID of this member in your establishment")
+        if job["date_of_exit"]:
+            raise Problem(409, "/problems/member-exited", "The member has left; a location is mapped for serving members only")
+        location = {"branch_code": body.branch_code, "district": body.district.strip().upper(), "pincode": body.pincode}
+        await session.execute(update(employments).where(employments.c.account_link_id == body.account_link_id).values(location=location))
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="member.location_mapping",
+                    target_type="member_account", target_id=body.account_link_id, detail=body.branch_code)
+    return envelope({"uan": uan, "account_link_id": body.account_link_id, "location": location,
+                     "previous": job["location"]})
+
+
 REQUIRED_DETAILS = ("father_name", "marital_status", "nationality")
 
 

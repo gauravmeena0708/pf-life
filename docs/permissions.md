@@ -364,6 +364,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /employers/me/challans/{trrn}/receipt` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/compliance-summary` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/configuration` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/dashboard` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ecr-filings` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ecr-filings/{filingId}` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/exemption` | W | own establishment (X-Establishment-Id validated against grants) |  |
@@ -384,8 +385,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /employers/me/members/{uan}/declarations` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/members/{uan}/exit-corrections` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/members/{uan}/exits` | W | own establishment (X-Establishment-Id validated against grants) | yes |
-| `GET /employers/me/dashboard` | P | own establishment (X-Establishment-Id validated against grants) |  |
-| `POST /employers/me/members/{uan}/location-mappings` | P | own establishment (X-Establishment-Id validated against grants) |  |
+| `POST /employers/me/members/{uan}/location-mappings` | W | own establishment (X-Establishment-Id validated against grants) |  |
 
 **`principal_employer`** — Principal employer monitoring contractors
 
@@ -595,12 +595,16 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /audit/concurrent/alerts` | W | read-only for auditors; audit writes by audit roles only |  |
 | `GET /monitoring/claims` | W | role jurisdiction; aggregates with small-group suppression |  |
+| `GET /ndc/issue-tracker/requests` | W | NDC / IS operations role |  |
 | `GET /office/accounts/inoperative` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/members/{uan}/locks` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
+| `POST /audit/concurrent/alerts/{alertId}/replies` | W | read-only for auditors; audit writes by audit roles only |  |
+| `POST /ndc/issue-tracker/requests` | W | NDC / IS operations role |  |
 | `POST /office/cases/{caseId}/second-approvals` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/establishments/{estId}/defreezes` | W | office jurisdiction of the caller's posting | yes |
@@ -608,7 +612,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/members/{uan}/defreezes` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/system/locks/{lockId}/release` | W | office jurisdiction of the caller's posting | yes |
-| `POST /audit/concurrent/alerts/{alertId}/replies` | P | read-only for auditors; audit writes by audit roles only |  |
 | `POST /audit/internal/paras/{paraId}/replies` | P | read-only for auditors; audit writes by audit roles only |  |
 
 **`fo.cash`** — Cashier / Cash branch
@@ -778,7 +781,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /hrm/me` | W | self (read) / HR role (write) |  |
-| `POST /hrm/postings` | P | self (read) / HR role (write) | yes |
+| `POST /hrm/postings` | W | self (read) / HR role (write) | yes |
 
 ### D. District Office (DO)
 
@@ -787,8 +790,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /do/dashboards` | W | district jurisdiction |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
-| `GET /do/dashboards` | P | district jurisdiction |  |
 
 **`do.staff`** — District Office facilitation and compliance staff
 
@@ -827,11 +830,12 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /audit/concurrent/alerts` | W | read-only for auditors; audit writes by audit roles only |  |
+| `GET /audit/concurrent/extracts` | W | read-only for auditors; audit writes by audit roles only |  |
 | `GET /audit/correlations/{correlationId}` | W | read-only for auditors; audit writes by audit roles only |  |
 | `GET /audit/events` | W | read-only for auditors; audit writes by audit roles only |  |
 | `GET /office/claims/{claimId}/audit-trail` | W | office jurisdiction of the caller's posting |  |
-| `GET /audit/concurrent/extracts` | P | read-only for auditors; audit writes by audit roles only |  |
-| `POST /audit/concurrent/alerts` | P | read-only for auditors; audit writes by audit roles only |  |
+| `POST /audit/concurrent/alerts` | W | read-only for auditors; audit writes by audit roles only |  |
 
 **`zo.internal_audit`** — Internal audit parties auditing ROs
 
@@ -852,7 +856,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /zo/fraud-risk/cases` | P | zone jurisdiction |  |
+| `GET /zo/fraud-risk/cases` | W | zone jurisdiction |  |
 
 **`zo.zti`** — Zonal Training Institute
 
@@ -964,8 +968,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `POST /ndc/issue-tracker/requests` | P | NDC / IS operations role |  |
-| `POST /ndc/issue-tracker/requests/{requestId}/executions` | P | NDC / IS operations role | yes |
+| `GET /ndc/issue-tracker/requests` | W | NDC / IS operations role |  |
+| `POST /ndc/issue-tracker/requests/{requestId}/executions` | W | NDC / IS operations role | yes |
 
 **`ho.customer_service`** — Customer Service / Public Grievances cell
 
@@ -978,7 +982,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /hrm/me` | W | self (read) / HR role (write) |  |
-| `POST /hrm/postings` | P | self (read) / HR role (write) | yes |
+| `POST /hrm/postings` | W | self (read) / HR role (write) | yes |
 
 **`ho.investment`** — Investment / IMC division
 
@@ -1011,13 +1015,14 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /audit/events` | W | read-only for auditors; audit writes by audit roles only |  |
 | `GET /security/account-recovery-requests` | W | security analyst |  |
+| `GET /security/incidents` | W | security analyst |  |
 | `GET /security/me/permissions` | W | self — open to every authenticated caller (own data only) |  |
 | `GET /security/request-activity` | W | security analyst |  |
 | `GET /security/sessions` | W | security analyst |  |
 | `POST /internal/security-events` | W | service-to-service only (client credentials) |  |
 | `POST /security/account-recovery-requests/{requestId}/decisions` | W | security analyst | yes |
+| `POST /security/incidents` | W | security analyst | yes |
 | `POST /security/sessions/{sessionId}/revocations` | W | security analyst | yes |
-| `POST /security/incidents` | P | security analyst | yes |
 
 **`ho.data_protection`** — Data-protection / privacy officer (DPDP Act obligations)
 

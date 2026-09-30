@@ -62,6 +62,11 @@ import { PublicCircularsPage } from "./features/public/CircularsList";
 import { EReportCardPage } from "./features/public/EReportCardPage";
 import { PublicLookups } from "./pages/PublicLookups";
 import { SecurityActivity } from "./pages/SecurityActivity";
+import { ConcurrentAuditPage } from "./features/audit/ConcurrentAuditPage";
+import { IssueTrackerPage } from "./features/ndc/IssueTrackerPage";
+import { FraudRiskPage } from "./features/office/FraudRiskPage";
+import { DistrictDashboardPage } from "./features/office/DistrictDashboardPage";
+import { HrmPage } from "./features/hrm/HrmPage";
 
 /** Menu links point at sections (`/member/profile#correction-heading`); scroll there once the section has rendered. */
 function ScrollToHash() {
@@ -154,6 +159,11 @@ export function App() {
             <Route path="/ho/circulars" element={<CircularsPage />} />
             <Route path="/office/exempted" element={<ExemptedPage />} />
             <Route path="/security/activity" element={<SecurityActivity />} />
+            <Route path="/audit/concurrent" element={<ConcurrentAuditPage />} />
+            <Route path="/ndc/issue-tracker" element={<IssueTrackerPage />} />
+            <Route path="/zo/fraud-risk" element={<FraudRiskPage />} />
+            <Route path="/do/dashboard" element={<DistrictDashboardPage />} />
+            <Route path="/i/hrm" element={<HrmPage />} />
             <Route path="/member/grievances" element={<GrievancesPage />} />
             <Route path="/member/grievances/:grievanceId" element={<GrievanceDetailPage />} />
             <Route path="/member/security" element={<SecurityPage />} />

@@ -7,24 +7,24 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | # | Interface | Coverage | Stakeholders | W | M | P | ? |
 |---|---|---|---|---|---|---|---|
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 14 | 2 | 0 | 0 |
-| 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 76 | 5 | 15 | 0 |
+| 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 78 | 5 | 13 | 0 |
 | 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 80 | 5 | 2 | 0 |
-| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 83 | 0 | 29 | 4 |
+| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 84 | 0 | 28 | 4 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 12 | 1 | 1 | 0 |
 | 6 | International worker | **Working** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 5 | 0 | 2 | 0 |
-| 7 | District office | **Working** | `do.incharge`, `do.staff` | 2 | 0 | 1 | 0 |
-| 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 33 | 0 | 11 | 1 |
-| 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 11 | 0 | 2 | 0 |
-| 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 16 | 0 | 8 | 0 |
+| 7 | District office | **Working** | `do.incharge`, `do.staff` | 3 | 0 | 0 | 0 |
+| 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 37 | 0 | 10 | 1 |
+| 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 12 | 0 | 1 | 0 |
+| 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 18 | 0 | 6 | 0 |
 | 11 | NDC | **Working** | `tech.ndc`, `tech.adc`, `tech.cpps`, `tech.epfo3` | 6 | 0 | 2 | 0 |
 | 12 | Ministry | **Working** | `gov.mole`, `gov.parliament` | 3 | 0 | 0 | 0 |
 | 13 | B2B | **Mock** | `payroll_provider`, `ext.collecting_bank`, `ext.pension_bank`, `ext.mca`, `ext.shram_suvidha`, `ext.fund_manager` | 0 | 7 | 0 | 0 |
 | 14 | CAIU | **Working** | `ho.caiu` | 3 | 0 | 1 | 0 |
-| 15 | HRM | **Working** | `ho.hr` | 1 | 0 | 1 | 0 |
+| 15 | HRM | **Working** | `ho.hr` | 2 | 0 | 0 | 0 |
 | 16 | Reporting and monitoring | **Working** | `gov.cbt`, `gov.ec`, `gov.fiac`, `gov.peic` | 1 | 0 | 2 | 0 |
-| 17 | Security | **Working** | `ho.security`, `ho.data_protection` | 8 | 0 | 3 | 0 |
+| 17 | Security | **Working** | `ho.security`, `ho.data_protection` | 10 | 0 | 2 | 0 |
 | 18 | Vigilance | **Planned** | `ho.cvo`, `zo.vigilance` | 0 | 0 | 3 | 0 |
-| 19 | Audit | **Working** | `ho.audit`, `zo.rpfc1_audit`, `zo.internal_audit`, `gov.cag`, `gov.statutory_auditor` | 5 | 0 | 6 | 0 |
+| 19 | Audit | **Working** | `ho.audit`, `zo.rpfc1_audit`, `zo.internal_audit`, `gov.cag`, `gov.statutory_auditor` | 8 | 0 | 4 | 0 |
 | 20 | UMANG | **Working** | `ext.umang` | 3 | 0 | 0 | 0 |
 | 21 | AI model / local LLM | **Working** | `tech.ai_service` | 5 | 0 | 0 | 0 |
 
@@ -67,6 +67,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /employers/me/compliance-summary` | W | reporting | employer.operator, employer.owner |
 | `GET /employers/me/configuration` | W | employer | employer.operator, employer.owner |
 | `GET /employers/me/contractors` | W | employer | employer.owner, principal_employer |
+| `GET /employers/me/dashboard` | W | reporting | employer.operator |
 | `GET /employers/me/demands` | W | contribution | employer.owner, employer.signatory |
 | `GET /employers/me/ecr-filings` | W | contribution | employer.operator, employer.signatory |
 | `GET /employers/me/ecr-filings/{filingId}` | W | contribution | employer.operator, employer.signatory |
@@ -118,6 +119,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /employers/me/members/{uan}/declarations` | W | member | employer.operator |
 | `POST /employers/me/members/{uan}/exit-corrections` | W | member | employer.operator |
 | `POST /employers/me/members/{uan}/exits` | W | member | employer.operator |
+| `POST /employers/me/members/{uan}/location-mappings` | W | member | employer.operator |
 | `POST /employers/me/operators/invitations` | W | employer | employer.owner |
 | `POST /employers/me/operators/{operatorId}/revocations` | W | employer | employer.owner |
 | `POST /employers/me/signatories/authorisations` | W | employer | employer.owner |
@@ -137,13 +139,11 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /employers/me/signatories/{signatoryId}/esign-registrations` | M | employer | employer.owner |
 | `POST /employers/registration-requests/{reqId}/verification-evidence` | M | employer | employer.owner |
 | `GET /employers/me/contractors/{contractorId}/compliance` | P | reporting | principal_employer |
-| `GET /employers/me/dashboard` | P | reporting | employer.operator |
 | `GET /exempted/me/annexure-k-requests` | P | claim | exempted.trust |
 | `GET /exempted/me/profile` | P | employer | exempted.trust |
 | `GET /partners/liquidators/claims/{claimId}` | P | compliance | liquidator |
 | `POST /employers/me/closure-requests` | P | employer | employer.signatory |
 | `POST /employers/me/ecr-filings/{filingId}/principal-employer-tags` | P | contribution | contractor |
-| `POST /employers/me/members/{uan}/location-mappings` | P | member | employer.operator |
 | `POST /employers/me/office-transfer-requests` | P | employer | employer.signatory |
 | `POST /employers/me/proceedings/{caseId}/submissions` | P | compliance | employer.signatory |
 | `POST /employers/voluntary-coverage-requests` | P | employer | employer.signatory |
@@ -279,6 +279,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /office/work-queue` | W | workflow | fo.ao, fo.cash, fo.da_accounts, fo.ss |
 | `POST /ai/claims/analyse` | W | intelligence | fo.da_accounts |
 | `POST /ai/feedback` | W | intelligence | fo.da_accounts |
+| `POST /hrm/postings` | W | workflow | fo.admin |
 | `POST /office/annexure-k-files/{annexureId}/reconciliations` | W | claim | fo.da_accounts |
 | `POST /office/annexure-k-files/{annexureId}/vdr-reconciliations` | W | contribution | fo.da_accounts |
 | `POST /office/cases/{caseId}/decisions` | W | workflow | fo.ao, fo.ss |
@@ -335,7 +336,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /office/exempted/{estId}/returns` | P | contribution | fo.exemption |
 | `GET /office/legal/cases` | P | compliance | fo.legal |
 | `GET /office/pensions/disbursement-lists` | P | pension | fo.pension_disbursement |
-| `POST /hrm/postings` | P | workflow | fo.admin |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | P | member | fo.da_accounts |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P | contribution | fo.ao |
 | `POST /office/compliance/cases/{caseId}/appeals` | P | compliance | fo.legal |
@@ -400,17 +400,19 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 
 | Endpoint | Status | Owner | Called by |
 |---|---|---|---|
+| `GET /do/dashboards` | W | reporting | do.incharge |
 | `GET /office/compliance/cases` | W | compliance | do.staff |
 | `GET /office/work-queue` | W | workflow | do.incharge, do.staff |
-| `GET /do/dashboards` | P | reporting | do.incharge |
 
 ### 8. Regional office — Working
 
 | Endpoint | Status | Owner | Called by |
 |---|---|---|---|
+| `GET /audit/concurrent/alerts` | W | audit | fo.oic |
 | `GET /monitoring/claims` | W | reporting | fo.oic, fo.rpfc1 |
 | `GET /monitoring/contributions` | W | reporting | fo.rpfc1 |
 | `GET /monitoring/grievances` | W | reporting | fo.rpfc1 |
+| `GET /ndc/issue-tracker/requests` | W | platform | fo.oic |
 | `GET /office/accounts/inoperative` | W | contribution | fo.oic |
 | `GET /office/cases/{caseId}` | W | workflow | fo.apfc, fo.oic |
 | `GET /office/claims/{claimId}/cad` | W | claim | fo.apfc, fo.oic |
@@ -425,6 +427,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /office/members/{uan}/locks` | W | workflow | fo.oic |
 | `GET /office/signature-registrations` | W | employer | fo.apfc |
 | `GET /office/work-queue` | W | workflow | fo.apfc, fo.oic |
+| `POST /audit/concurrent/alerts/{alertId}/replies` | W | audit | fo.oic |
+| `POST /ndc/issue-tracker/requests` | W | platform | fo.oic |
 | `POST /office/cases/{caseId}/second-approvals` | W | workflow | fo.apfc, fo.oic |
 | `POST /office/claims/{claimId}/cad` | W | claim | fo.apfc, fo.oic |
 | `POST /office/claims/{claimId}/re-disbursement-approvals` | W | claim | fo.apfc |
@@ -441,7 +445,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/members/{uan}/freezes` | W | member | fo.apfc |
 | `POST /office/system/locks/{lockId}/release` | W | workflow | fo.oic |
 | `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | W | claim | fo.apfc |
-| `POST /audit/concurrent/alerts/{alertId}/replies` | P | audit | fo.oic |
 | `POST /audit/internal/paras/{paraId}/replies` | P | audit | fo.oic |
 | `POST /office/accounts/{accountLinkId}/reactivations` | P | contribution | fo.apfc |
 | `POST /office/compliance/cases/{caseId}/escaped-assessments-7c` | P | compliance | fo.apfc |
@@ -464,12 +467,12 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /office/cases/{caseId}` | W | workflow | zo.acc, zo.rpfc1 |
 | `GET /office/work-queue` | W | workflow | zo.acc, zo.rpfc1 |
 | `GET /zo/dashboards` | W | reporting | zo.acc |
+| `GET /zo/fraud-risk/cases` | W | workflow | zo.fraud_committee |
 | `POST /grievances/{grievanceId}/escalations` | W | grievance | zo.acc |
 | `POST /grievances/{grievanceId}/messages` | W | grievance | zo.acc |
 | `POST /grievances/{grievanceId}/resolution` | W | grievance | zo.acc |
 | `POST /office/establishments/{estId}/freezes` | W | employer | zo.rpfc1 |
 | `POST /office/members/{uan}/freezes` | W | member | zo.rpfc1 |
-| `GET /zo/fraud-risk/cases` | P | workflow | zo.fraud_committee |
 | `POST /training/sandboxes` | P | platform | zo.zti |
 
 ### 10. Head office — Working
@@ -482,11 +485,13 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /monitoring/contributions` | W | reporting | ho.cpfc |
 | `GET /monitoring/data-freshness` | W | reporting | ho.cpfc |
 | `GET /monitoring/grievances` | W | reporting | ho.cpfc |
+| `GET /ndc/issue-tracker/requests` | W | platform | ho.is |
 | `GET /office/accounts/interest-postings` | W | contribution | ho.fa_cao |
 | `POST /ho/circulars` | W | intelligence | ho.publicity |
 | `POST /ho/config/rule-sets` | W | platform | ho.acc_hq |
 | `POST /ho/config/rule-sets/{versionId}/decisions` | W | platform | ho.cpfc |
 | `POST /ho/config/rule-sets/{versionId}/submissions` | W | platform | ho.acc_hq |
+| `POST /ndc/issue-tracker/requests/{requestId}/executions` | W | platform | ho.is |
 | `POST /office/accounts/interest-postings` | W | contribution | ho.fa_cao |
 | `POST /office/establishments/{estId}/freezes` | W | employer | ho.fa_cao |
 | `POST /office/members/{uan}/freezes` | W | member | ho.fa_cao |
@@ -498,8 +503,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /ho/reports/recovery` | P | reporting | ho.recovery |
 | `GET /office/legal/cases` | P | compliance | ho.legal |
 | `POST /ho/exemptions/{estId}/decisions` | P | employer | ho.exemption |
-| `POST /ndc/issue-tracker/requests` | P | platform | ho.is |
-| `POST /ndc/issue-tracker/requests/{requestId}/executions` | P | platform | ho.is |
 
 ### 11. NDC — Working
 
@@ -548,7 +551,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | Endpoint | Status | Owner | Called by |
 |---|---|---|---|
 | `GET /hrm/me` | W | workflow | ho.hr |
-| `POST /hrm/postings` | P | workflow | ho.hr |
+| `POST /hrm/postings` | W | workflow | ho.hr |
 
 ### 16. Reporting and monitoring — Working
 
@@ -564,15 +567,16 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 |---|---|---|---|
 | `GET /audit/events` | W | audit | ho.security |
 | `GET /security/account-recovery-requests` | W | member | ho.security |
+| `GET /security/incidents` | W | audit | ho.security |
 | `GET /security/me/permissions` | W | gateway | ho.security |
 | `GET /security/request-activity` | W | gateway | ho.security |
 | `GET /security/sessions` | W | gateway | ho.security |
 | `POST /internal/security-events` | W | audit | ho.security |
 | `POST /security/account-recovery-requests/{requestId}/decisions` | W | member | ho.security |
+| `POST /security/incidents` | W | audit | ho.security |
 | `POST /security/sessions/{sessionId}/revocations` | W | gateway | ho.security |
 | `GET /privacy/requests` | P | audit | ho.data_protection |
 | `POST /privacy/requests/{requestId}/decisions` | P | audit | ho.data_protection |
-| `POST /security/incidents` | P | audit | ho.security |
 
 ### 18. Vigilance — Planned
 
@@ -586,14 +590,15 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 
 | Endpoint | Status | Owner | Called by |
 |---|---|---|---|
+| `GET /audit/concurrent/alerts` | W | audit | zo.rpfc1_audit |
+| `GET /audit/concurrent/extracts` | W | audit | zo.rpfc1_audit |
 | `GET /audit/correlations/{correlationId}` | W | audit | gov.cag, ho.audit, zo.internal_audit, zo.rpfc1_audit |
 | `GET /audit/events` | W | audit | gov.cag, gov.statutory_auditor, ho.audit, zo.rpfc1_audit |
 | `GET /ho/config/rule-sets` | W | platform | ho.audit |
 | `GET /ho/config/rule-sets/{versionId}` | W | platform | ho.audit |
 | `GET /office/claims/{claimId}/audit-trail` | W | claim | zo.rpfc1_audit |
-| `GET /audit/concurrent/extracts` | P | audit | zo.rpfc1_audit |
+| `POST /audit/concurrent/alerts` | W | audit | zo.rpfc1_audit |
 | `GET /ho/finance/balance-sheet` | P | reporting | gov.statutory_auditor |
-| `POST /audit/concurrent/alerts` | P | audit | zo.rpfc1_audit |
 | `POST /audit/internal/paras/{paraId}/decisions` | P | audit | ho.audit |
 | `POST /audit/internal/reports` | P | audit | zo.internal_audit |
 | `POST /audit/internal/reports/{reportId}/paras` | P | audit | zo.internal_audit |

@@ -6,10 +6,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra.tables import demands
 
-BINDINGS = ["contribution-service.DemandStateChanged.v1"]
+BINDINGS = ["contribution-service.DemandStateChanged.v1", "workflow-service.StaffPostingChanged.v1"]
 
 
 async def dispatch(session: AsyncSession, event: dict[str, Any]) -> None:
+    if event["event_type"] == "StaffPostingChanged.v1":           # HR re-posted an officer (P2.8e)
+        from app.infra.tables import office_staff
+        from epfo_persistence.postings import apply_posting
+        await apply_posting(session, event, office_staff)
+        return
     if event["event_type"] != "DemandStateChanged.v1":
         return
     p = event["payload"]

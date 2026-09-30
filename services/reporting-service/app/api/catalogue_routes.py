@@ -10,7 +10,12 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /monitoring/claims', 'GET /monitoring/contributions', 'GET /monitoring/data-freshness', 'GET /monitoring/grievances', 'GET /public/schemes', 'GET /public/statistics', 'GET /zo/dashboards', 'GET /employers/me/compliance-summary', 'GET /office/compliance/defaulters', 'GET /public/establishments/{estId}/e-report-card']
+OPERATIONS = ['GET /do/dashboards', 'GET /monitoring/claims', 'GET /monitoring/contributions', 'GET /monitoring/data-freshness', 'GET /monitoring/grievances', 'GET /public/schemes', 'GET /public/statistics', 'GET /zo/dashboards', 'GET /employers/me/compliance-summary', 'GET /employers/me/dashboard', 'GET /office/compliance/defaulters', 'GET /public/establishments/{estId}/e-report-card']
+
+@router.api_route("/api/v1/do/dashboards", methods=["GET"], include_in_schema=False)
+async def get_do_dashboards(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "District dashboard (interface 7)")
+
 
 @router.api_route("/api/v1/monitoring/claims", methods=["GET"], include_in_schema=False)
 async def get_monitoring_claims(actor: Actor = Depends(require_actor)) -> None:
@@ -50,6 +55,11 @@ async def get_zo_dashboards(actor: Actor = Depends(require_actor)) -> None:
 @router.api_route("/api/v1/employers/me/compliance-summary", methods=["GET"], include_in_schema=False)
 async def get_employers_me_compliance_summary(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Month-wise filing / payment compliance for this establishment")
+
+
+@router.api_route("/api/v1/employers/me/dashboard", methods=["GET"], include_in_schema=False)
+async def get_employers_me_dashboard(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Employer home alerts and Dashboards (pending KYC, member-detail approvals, missing details)")
 
 
 @router.api_route("/api/v1/office/compliance/defaulters", methods=["GET"], include_in_schema=False)

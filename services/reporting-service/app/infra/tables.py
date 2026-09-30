@@ -3,6 +3,13 @@ from sqlalchemy import BigInteger, Boolean, Column, DateTime, Integer, MetaData,
 
 metadata = MetaData()
 
+office_staff = Table(
+    "office_staff", metadata,
+    Column("subject", String(80), primary_key=True),
+    Column("stakeholder", String(60), nullable=False),
+    Column("office_id", String(40), nullable=False),
+)
+
 grievance_facts = Table(
     "grievance_facts", metadata,
     Column("grievance_id", String(40), primary_key=True),

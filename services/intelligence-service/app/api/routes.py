@@ -77,6 +77,11 @@ async def on_security_event(session: AsyncSession, event: dict[str, Any]) -> Non
 
 
 async def dispatch(session: AsyncSession, event: dict[str, Any]) -> None:
+    if event["event_type"] == "StaffPostingChanged.v1":           # HR re-posted an officer (P2.8e)
+        from app.infra.tables import office_staff
+        from epfo_persistence.postings import apply_posting
+        await apply_posting(session, event, office_staff)
+        return
     if event["event_type"] == "SecurityEventRecorded.v1":
         await on_security_event(session, event)
     elif event["event_type"] == "PolicyPublished.v1":
@@ -87,7 +92,7 @@ async def dispatch(session: AsyncSession, event: dict[str, Any]) -> None:
 
 BINDINGS = ["audit-service.SecurityEventRecorded.v1", "claim-service.ClaimSubmitted.v1",
             "workflow-service.CaseDecisionSubmitted.v1", "grievance-service.GrievanceRegistered.v1",
-            "platform-service.PolicyPublished.v1"]
+            "platform-service.PolicyPublished.v1", "workflow-service.StaffPostingChanged.v1"]
 
 
 def _signal(r: Any) -> dict[str, Any]:

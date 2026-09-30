@@ -40,7 +40,7 @@ const EMPLOYER: NavGroup[] = [
     link("Approve KYC pending for Digital Signature", "/employer/registration#kyc-approvals-heading"),
     link("Approve KYC seeded by member", "/employer/registration#kyc-approvals-heading"), link("KYC Bulk", "/employer/registration#kyc-bulk-heading"),
     link("Exit correction", "/employer/members#exit-correction-heading"), link("Exit bulk upload", "/employer/members#exit-bulk-heading"),
-    link("Missing details", "/employer/registration#missing-heading"), link("Member Location Mapping"), link("KYC Verification / PAN Verification", "/employer/registration#kyc-approvals-heading"),
+    link("Missing details", "/employer/registration#missing-heading"), link("Member Location Mapping", "/employer/members#location-heading"), link("KYC Verification / PAN Verification", "/employer/registration#kyc-approvals-heading"),
     link("Joint Declaration requests", "/employer#jd-heading"), link("Employer-initiated JD", "/employer#employer-jd-heading")] },
   { label: "Establishment", items: [
     link("Establishment Profile", "/employer/establishment#est-config-heading"), link("Form 5A", "/employer/establishment#est-form5a-heading"),
@@ -51,7 +51,7 @@ const EMPLOYER: NavGroup[] = [
   { label: "Payments", items: [
     link("ECR Upload", "/employer/ecr#ecr-prepare"), link("Return Filing", "/employer/ecr#ecr-returns"), link("Return monthly dashboard", "/employer/returns#returns-dashboard-heading"),
     link("Direct Challan", "/employer/returns#direct-challan-heading"), link("Demands (14B / 7Q)", "/employer/returns#demands-heading"), link("VISHWAS: settle damages", "/employer/returns#vishwas-heading"), link("Monthly Return for Exempted Establishment"), link("TRRN query / challan status", "/employer/ecr#ecr-challans")] },
-  { label: "Dashboards", items: [link("Compliance summary", "/employer/returns#compliance-summary-heading"), link("Active Members details", "/employer/registration#active-heading"), link("Missing details", "/employer/registration#active-heading")] },
+  { label: "Dashboards", items: [link("Employer dashboard", "/employer#employer-dashboard-heading"), link("Compliance summary", "/employer/returns#compliance-summary-heading"), link("Active Members details", "/employer/registration#active-heading"), link("Missing details", "/employer/registration#active-heading")] },
   { label: "User", items: [link("Sub-users (payroll operators)", "/employer#people-operator")] },
   { label: "Admin" },
   { label: "Online Services", items: [link("Transfer Claims", "/employer/members#transfers-heading"), link("Claim attestations", "/employer/members#claim-attestations-heading"),
@@ -91,7 +91,7 @@ function fieldOffice(role: string): NavGroup[] {
     { label: "Accounts", items: [link("Annual Accounting"),
       ...(["fo.da_accounts", "fo.apfc"].includes(role) ? [link("Appendix E", "/office/ledger#appendix-e-heading")] : []),
       ...(role === "fo.da_accounts" ? [link("Reverse a journal / recredit a transfer", "/office/ledger#reversal-heading")] : [])] },
-    { label: "Office", items: [link("Dashboard", role === "fo.oic" ? "/dashboards" : undefined), link("Admin"), link("Services")] },
+    { label: "Office", items: [...(role === "fo.oic" ? [link("Audit alerts", "/audit/concurrent#audit-alerts-heading"), link("Issue Tracker requests", "/audit/concurrent#issue-tracker-raise-heading")] : []), link("Dashboard", role === "fo.oic" ? "/dashboards" : undefined), link("Admin"), link("Services")] },
   ];
 }
 
@@ -133,6 +133,12 @@ function poc(role: string): NavGroup[] {
   if (role === "ho.fa_cao") out.push({ labelKey: "navigation.interest", to: "/finance/interest" }, { label: "Record the interest rate", to: "/finance/interest#interest-rate-record-heading" });
   if (role === "ho.publicity") out.push({ label: "Publish circulars", to: "/ho/circulars#publish-circular-heading" });
   if (role === "ho.security") out.push({ labelKey: "navigation.security", to: "/security/activity" }, { labelKey: "navigation.sessions", to: "/security/sessions" });
+  if (role === "ho.security") out.push({ label: "Security incidents", to: "/security/activity#incidents-heading" });
+  if (role === "zo.rpfc1_audit") out.push({ label: "Concurrent audit", to: "/audit/concurrent" });
+  if (role === "ho.is") out.push({ label: "Issue Tracker", to: "/ndc/issue-tracker" });
+  if (role === "zo.fraud_committee") out.push({ label: "Fraud-risk cases", to: "/zo/fraud-risk" });
+  if (role === "do.incharge") out.push({ label: "District dashboard", to: "/do/dashboard" });
+  if (role === "ho.hr") out.push({ label: "HRM", to: "/i/hrm" }, { label: "Staff postings", to: "/i/hrm#postings-heading" });
   if (role === "ho.caiu") out.push({ labelKey: "navigation.riskSignals", to: "/caiu/signals" });
   if (role === "ho.security" || role === "ho.audit") out.push({ labelKey: "navigation.audit", to: "/audit/log" });
   return out;
@@ -156,6 +162,11 @@ export function menusFor(role: string | undefined): NavGroup[] {
 
 /** Where "Home" goes for a role. */
 export function homeFor(role: string | undefined): string {
+  if (role === "zo.rpfc1_audit") return "/audit/concurrent";
+  if (role === "ho.is") return "/ndc/issue-tracker";
+  if (role === "zo.fraud_committee") return "/zo/fraud-risk";
+  if (role === "do.incharge") return "/do/dashboard";
+  if (role === "ho.hr") return "/i/hrm";
   if (role === "member") return "/member/passbook";
   if (role?.startsWith("employer.")) return "/employer";
   if (role === "pensioner") return "/pensioner";

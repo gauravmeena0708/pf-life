@@ -7,6 +7,7 @@ import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 import { PendingApprovals } from "./SignaturePanels";
+import { MemberLocations } from "./MemberLocations";
 import { HigherPensionValidations } from "./HigherPensionValidations";
 
 interface CaseItem { case_id: string; subject_ref: string; state: string; version: number; data: Record<string, string> }
@@ -148,6 +149,7 @@ export function MemberActionsPage() {
       {notice ? <p role="status" className="ok">{notice}</p> : null}
       {session.isLoading ? <p role="status">Loading employer role…</p> : null}
 
+      {role === "employer.operator" || role === "employer.owner" ? <MemberLocations canMap={role === "employer.operator"} /> : null}
       {signatory || canExit ? <PendingApprovals /> : null}
       {canExit ? <>
         <form className="card stack" aria-labelledby="exit-heading" onSubmit={(e) => markExit(e)}><h2 id="exit-heading">Mark date of exit</h2>

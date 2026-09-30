@@ -39,6 +39,7 @@ employments = Table(
     Column("form11", JSON),                                 # the new joinee's declaration (previous PF / EPS, international worker)
     Column("registered_by", String(80)),                    # the employer user who registered the joinee (none for seeded rows)
     Column("office_id", String(40)),                        # the field office of the establishment (jurisdiction)
+    Column("location", JSON),                               # Member › Location mapping (P2.8e): {branch_code, district, pincode}
 )
 
 # Office postings (synthetic seed): an officer sees members of their own office only (member 360 view).

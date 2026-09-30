@@ -93,3 +93,30 @@ async def _joint_declaration(session: AsyncSession, event: dict[str, Any]) -> No
                     aggregate_id=p["instance_id"], correlation_id=event["correlation_id"], payload={
                         "request_id": p["instance_id"], "uan": p["subject_ref"],
                         "parameters": [{"parameter": parameter, "value": str(new)}], "approver_subject": p.get("actor_subject", "")})
+
+
+async def on_issue_tracker(session: AsyncSession, event: dict[str, Any]) -> None:
+    """P2.8e: an Issue Tracker request the IS Division executed — freeze or de-freeze the account (as the freeze process
+    does, publishing AccountFrozen.v1 / AccountDefrozen.v1), or show the member a notice at the next login."""
+    p = event["payload"]
+    member = (await session.execute(select(members).where(members.c.uan == p["target_uan"]))).mappings().first()
+    if not member:
+        return
+    if p["kind"] in ("FREEZE_MEMBER", "DEFREEZE_MEMBER"):
+        to = "FROZEN" if p["kind"] == "FREEZE_MEMBER" else "ACTIVE"
+        if member["account_state"] == to:
+            return
+        await session.execute(update(members).where(members.c.uan == p["target_uan"]).values(account_state=to))
+        if to == "FROZEN":
+            await add_event(session, producer="member-service", event_type="AccountFrozen.v1", aggregate_type="account",
+                            aggregate_id=p["target_uan"], correlation_id=event["correlation_id"], payload={
+                                "target_type": "member", "target_id": p["target_uan"], "category": "ISSUE_TRACKER", "order_ref": p["order_ref"]})
+        else:
+            await add_event(session, producer="member-service", event_type="AccountDefrozen.v1", aggregate_type="account",
+                            aggregate_id=p["target_uan"], correlation_id=event["correlation_id"], payload={
+                                "target_type": "member", "target_id": p["target_uan"], "order_ref": p["order_ref"]})
+    elif member["subject"]:
+        await add_event(session, producer="member-service", event_type="NotificationRequested.v1", aggregate_type="notification",
+                        aggregate_id=p["request_id"], correlation_id=event["correlation_id"], payload={
+                            "recipient_subject": member["subject"], "template": "OFFICE_NOTICE", "reference_id": p["request_id"],
+                            "params": {"reason": p.get("notice") or ""}})

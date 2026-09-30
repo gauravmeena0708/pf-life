@@ -35,6 +35,7 @@ BINDINGS = [
     "member-service.MemberRegistered.v1",
     "member-service.MemberKycUpdated.v1",
     "member-service.NominationRegistered.v1",
+    "workflow-service.StaffPostingChanged.v1",
 ]
 
 
@@ -278,7 +279,15 @@ async def on_primary_changed(session: AsyncSession, event: dict[str, Any]) -> No
         is_primary=accounts.c.account_link_id == p["primary_account_link_id"], set_key=key))
 
 
+
+async def _posting(session: AsyncSession, event: dict[str, Any]) -> None:
+    from app.infra.tables import office_staff
+    from epfo_persistence.postings import apply_posting
+    await apply_posting(session, event, office_staff)
+
+
 HANDLERS = {
+    "StaffPostingChanged.v1": _posting,
     "PrimaryMemberIdChanged.v1": on_primary_changed,
     "LedgerReversed.v1": on_ledger_reversed,
     "LedgerAdjusted.v1": on_ledger_adjusted,

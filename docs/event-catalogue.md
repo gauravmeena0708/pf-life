@@ -38,6 +38,10 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `CircularPublished.v1` | intelligence | audit | circular | 1 |
 | `InterestRateDeclared.v1` | contribution | platform, audit | interest_rate | 1 |
 | `TrustAccumulationIngested.v1` | contribution | audit | past_accumulation_ingestion | 1 |
+| `SecurityIncidentRecorded.v1` | audit | audit | security_incident | 1 |
+| `ConcurrentAuditAlertRaised.v1` | audit | audit | concurrent_alert | 1 |
+| `IssueTrackerExecuted.v1` | platform | member, audit | issue_tracker_request | 1 |
+| `StaffPostingChanged.v1` | workflow | member, claim, grievance, intelligence, compliance, international, pension, employer, reporting, audit | staff_posting | 1 |
 | `AutoTransferConfirmed.v1` | claim | contribution, audit | auto_transfer | 1 |
 | `TransferPosted.v1` | contribution | claim, member, workflow, audit | ledger_journal | 1 |
 | `PolicyPublished.v1` | platform | claim, contribution, workflow, grievance, intelligence, pension, audit | rule_set | 1 |

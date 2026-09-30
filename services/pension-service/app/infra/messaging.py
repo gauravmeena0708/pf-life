@@ -10,7 +10,7 @@ from app.domain.pension import propose_revisions
 from app.infra.tables import pensioners, updation_activities
 from epfo_persistence.policy import on_policy_published
 
-BINDINGS = ["platform-service.PolicyPublished.v1", "claim-service.PhysicalClaimInwarded.v1"]
+BINDINGS = ["platform-service.PolicyPublished.v1", "claim-service.PhysicalClaimInwarded.v1", "workflow-service.StaffPostingChanged.v1"]
 # PRO counter request → updation activity. PPO amendments are basic-details updations the DA (Pension) takes up.
 INTAKE_ACTIVITIES = {"PHYSICAL_LC_UPDATION": "PHYSICAL_LC", "DEATH_UPDATION": "DEATH", "SPOUSE_REMARRIAGE_UPDATION": "SPOUSE_REMARRIAGE",
                      "PPO_AMENDMENT_BENEFICIARY": "BASIC_DETAILS", "PPO_AMENDMENT_SERVICE": "BASIC_DETAILS", "PPO_AMENDMENT_POHW": "BASIC_DETAILS"}
@@ -32,6 +32,11 @@ async def on_physical_intake(session: AsyncSession, event: dict[str, Any]) -> No
 
 
 async def dispatch(session: AsyncSession, event: dict[str, Any]) -> None:
+    if event["event_type"] == "StaffPostingChanged.v1":           # HR re-posted an officer (P2.8e)
+        from app.infra.tables import office_staff
+        from epfo_persistence.postings import apply_posting
+        await apply_posting(session, event, office_staff)
+        return
     if event["event_type"] == "PhysicalClaimInwarded.v1":
         await on_physical_intake(session, event)
     if event["event_type"] == "PolicyPublished.v1":

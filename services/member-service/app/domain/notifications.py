@@ -33,6 +33,7 @@ TEMPLATES = {
     "NOMINATION_REGISTERED": ("e-Nomination registered", "Your e-nomination {reference_id} was signed and registered; it replaces any earlier nomination."),
     "HIGHER_PENSION_VALIDATED": ("Higher pension option validated", "Your employer validated your option {reference_id}; dues were worked out{amount}. The office decides next."),
     "HIGHER_PENSION_REJECTED_BY_EMPLOYER": ("Higher pension option not validated", "Your employer did not validate your option {reference_id}: {reason}"),
+    "OFFICE_NOTICE": ("Notice from EPFO", "{reason} (reference {reference_id})"),
     "EXIT_CORRECTED": ("Date of exit corrected", "Your employer corrected the date of exit of your member ID {reference_id} to {date_of_exit}."),
     "TRANSFER_POSTED": ("Transfer completed", "Your PF balance{amount} was transferred from member ID {from_id} to {to_id} ({reference_id}). You can download Annexure K."),
     "KYC_APPROVED": ("KYC approved", "Your employer approved your {parameter} KYC ({reference_id}). It now shows as verified."),

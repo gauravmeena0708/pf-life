@@ -7,10 +7,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra.tables import members
 
-BINDINGS = ["member-service.MemberRegistered.v1", "member-service.MemberExitMarked.v1"]
+BINDINGS = ["member-service.MemberRegistered.v1", "member-service.MemberExitMarked.v1", "workflow-service.StaffPostingChanged.v1"]
 
 
 async def dispatch(session: AsyncSession, event: dict[str, Any]) -> None:
+    if event["event_type"] == "StaffPostingChanged.v1":           # HR re-posted an officer (P2.8e)
+        from app.infra.tables import office_staff
+        from epfo_persistence.postings import apply_posting
+        await apply_posting(session, event, office_staff)
+        return
     p = event["payload"]
     if event["event_type"] == "MemberRegistered.v1":
         if not (await session.execute(select(members.c.account_link_id).where(members.c.account_link_id == p["account_link_id"]))).first():

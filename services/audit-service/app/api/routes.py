@@ -49,6 +49,10 @@ async def record(session: AsyncSession, event: dict[str, Any]) -> None:
               "correlation_id": event.get("correlation_id") or "-", "occurred_at": event.get("occurred_at") or "",
               "payload": event.get("payload") or {}}
     await session.execute(insert(audit_log).values(**values, prev_hash=prev, hash=chain_hash(prev, values)))
+    if event["event_type"] == "StaffPostingChanged.v1":                  # who may reply to concurrent-audit alerts (P2.8e)
+        from app.infra.oversight_tables import office_staff
+        from epfo_persistence.postings import apply_posting
+        await apply_posting(session, event, office_staff)
 
 
 def _row(r: Any) -> dict[str, Any]:

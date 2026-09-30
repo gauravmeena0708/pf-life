@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /ndc/event-failures', 'GET /ndc/health', 'GET /ho/config/rule-sets', 'POST /ho/config/rule-sets', 'GET /public/policy/current', 'GET /ho/config/rule-sets/{versionId}', 'PUT /ho/config/rule-sets/{versionId}', 'POST /ho/config/rule-sets/{versionId}/decisions', 'POST /ho/config/rule-sets/{versionId}/submissions', 'POST /ndc/event-failures/{eventId}/replays']
+OPERATIONS = ['GET /ndc/event-failures', 'GET /ndc/health', 'GET /ho/config/rule-sets', 'POST /ho/config/rule-sets', 'GET /ndc/issue-tracker/requests', 'POST /ndc/issue-tracker/requests', 'GET /public/policy/current', 'GET /ho/config/rule-sets/{versionId}', 'PUT /ho/config/rule-sets/{versionId}', 'POST /ho/config/rule-sets/{versionId}/decisions', 'POST /ho/config/rule-sets/{versionId}/submissions', 'POST /ndc/issue-tracker/requests/{requestId}/executions', 'POST /ndc/event-failures/{eventId}/replays']
 
 @router.api_route("/api/v1/ndc/event-failures", methods=["GET"], include_in_schema=False)
 async def get_ndc_event_failures(actor: Actor = Depends(require_actor)) -> None:
@@ -30,6 +30,16 @@ async def get_ho_config_rule_sets(actor: Actor = Depends(require_actor)) -> None
 @router.api_route("/api/v1/ho/config/rule-sets", methods=["POST"], include_in_schema=False)
 async def post_ho_config_rule_sets(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Draft a new rule-set version (wage ceilings, rates, claim types, approval matrix, auto-settlement, g")
+
+
+@router.api_route("/api/v1/ndc/issue-tracker/requests", methods=["GET"], include_in_schema=False)
+async def get_ndc_issue_tracker_requests(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Issue Tracker requests: all (IS Division) or the officer's own")
+
+
+@router.api_route("/api/v1/ndc/issue-tracker/requests", methods=["POST"], include_in_schema=False)
+async def post_ndc_issue_tracker_requests(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Raise an Issue Tracker request (e.g. freeze / de-freeze), with the order attached")
 
 
 @router.api_route("/api/v1/public/policy/current", methods=["GET"], include_in_schema=False)
@@ -55,6 +65,11 @@ async def post_ho_config_rule_sets_versionId_decisions(actor: Actor = Depends(re
 @router.api_route("/api/v1/ho/config/rule-sets/{versionId}/submissions", methods=["POST"], include_in_schema=False)
 async def post_ho_config_rule_sets_versionId_submissions(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Submit a draft that passes every check for approval")
+
+
+@router.api_route("/api/v1/ndc/issue-tracker/requests/{requestId}/executions", methods=["POST"], include_in_schema=False)
+async def post_ndc_issue_tracker_requests_requestId_executions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "IS Division executes the block / unblock")
 
 
 @router.api_route("/api/v1/ndc/event-failures/{eventId}/replays", methods=["POST"], include_in_schema=False)

@@ -9,7 +9,7 @@ from app.api import catalogue_routes, nomination_routes, onboarding_routes, rout
 from app.config import settings
 from app.domain.notifications import handle_notification_requested
 from app.domain.exits import on_contribution_posted, on_ledger_reversed, on_transfer_posted
-from app.domain.processes import on_process_transitioned
+from app.domain.processes import on_issue_tracker, on_process_transitioned
 from app.infra.db import database_ready, engine
 from epfo_observability import health_router, install
 from epfo_persistence import Consumer, OutboxRelay
@@ -25,7 +25,8 @@ async def lifespan(app: FastAPI):
                             ["*.NotificationRequested.v1"], handle_notification_requested)
         processes = Consumer(engine(), settings.rabbitmq_url, "member-service.processes",
                              ["workflow-service.ProcessTransitioned.v1", "contribution-service.ContributionPosted.v1",
-                              "contribution-service.TransferPosted.v1", "contribution-service.LedgerReversed.v1"], _route)
+                              "contribution-service.TransferPosted.v1", "contribution-service.LedgerReversed.v1",
+                              "platform-service.IssueTrackerExecuted.v1", "workflow-service.StaffPostingChanged.v1"], _route)
         relay.start()
         consumer.start()
         processes.start()
@@ -58,6 +59,13 @@ app = create_app()
 
 async def _route(session, event):
     handler = {"ProcessTransitioned.v1": on_process_transitioned, "ContributionPosted.v1": on_contribution_posted,
-               "TransferPosted.v1": on_transfer_posted, "LedgerReversed.v1": on_ledger_reversed}.get(event["event_type"])
+               "TransferPosted.v1": on_transfer_posted, "LedgerReversed.v1": on_ledger_reversed,
+               "IssueTrackerExecuted.v1": on_issue_tracker, "StaffPostingChanged.v1": _posting}.get(event["event_type"])
     if handler:
         await handler(session, event)
+
+
+async def _posting(session, event):
+    from app.infra.tables import office_staff
+    from epfo_persistence.postings import apply_posting
+    await apply_posting(session, event, office_staff)

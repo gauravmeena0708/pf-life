@@ -94,7 +94,7 @@ Rules that apply to every row:
 | `POST /integrations/mca/registrations` | MCA SPICe+ / AGILE-PRO auto-registration feed (signed) | M | 2 | employer |
 | `POST /integrations/shram-suvidha/registrations` | Shram Suvidha common-registration feed (signed) | M | 3 | employer |
 | `GET /partners/liquidators/claims/{claimId}` | Liquidator / resolution professional views EPFO dues claim | P | 3 | compliance |
-| `GET /employers/me/dashboard` | Employer home alerts and Dashboards (pending KYC, member-detail approvals, missing details) | P | 2 | reporting |
+| `GET /employers/me/dashboard` | Employer home alerts and Dashboards (pending KYC, member-detail approvals, missing details) | W | 1 | reporting |
 
 ## 3. Employer operators, signatories, DSC and e-sign
 
@@ -150,7 +150,7 @@ Rules that apply to every row:
 | `GET /employers/me/kyc-bulk-uploads/{uploadId}/errors` | Bulk KYC error list | W | 1 | member |
 | `POST /employers/me/members/exit-bulk-uploads` 🔐 | Member > Exit-Bulk upload | W | 1 | member |
 | `PATCH /employers/me/members/{uan}/profile` 🔐 | Fill missing member details (only details the record lacks; a recorded detail changes through a Joint Declaration) | W | 1 | member |
-| `POST /employers/me/members/{uan}/location-mappings` | Member Location Mapping to branches | P | 2 | member |
+| `POST /employers/me/members/{uan}/location-mappings` | Member Location Mapping to branches | W | 1 | member |
 | `GET /employers/me/members/active-export` | Download active members with UAN and KYC (Dashboards > Active Members) | W | 1 | member |
 
 ## 5. Returns, challans and payments
@@ -612,17 +612,19 @@ Monitoring (`/monitoring/**`), AI (`/ai/**`), audit (`/audit/**`) and NDC (`/ndc
 | `POST /grievances/{grievanceId}/office-transfers` | Transfer a grievance to another office | W | 1 | grievance |
 | `POST /integrations/cpgrams/grievances` | CPGRAMS grievance feed (signed) | M | 3 | grievance |
 | `POST /office/rti-requests/{requestId}/replies` | Record RTI replies | P | 3 | grievance |
-| `POST /security/incidents` 🔐 | Record a security incident; report to CERT-In | P | 2 | audit |
+| `POST /security/incidents` 🔐 | Record a security incident; report to CERT-In | W | 1 | audit |
+| `GET /security/incidents` | Security incidents on record and their CERT-In reporting (mock) | W | 1 | audit |
 | `GET /privacy/requests` | Data-principal requests queue (DPDP Act) | P | 3 | audit |
 | `POST /privacy/requests/{requestId}/decisions` 🔐 | Decide a data-principal request | P | 3 | audit |
 | `GET /vigilance/cases` | Vigilance case list (restricted) | P | 3 | workflow |
 | `POST /vigilance/cases/{caseId}/findings` 🔐 | Zonal vigilance records findings | P | 3 | workflow |
 | `POST /vigilance/cases/{caseId}/decisions` 🔐 | CVO / Director (Vigilance) decision | P | 3 | workflow |
-| `GET /zo/fraud-risk/cases` | Zonal / regional fraud-risk committee case list | P | 2 | workflow |
-| `POST /hrm/postings` 🔐 | Staff postings and role assignment to offices (drives jurisdiction) | P | 2 | workflow |
-| `GET /audit/concurrent/extracts` | Concurrent Audit Cell daily functionality extract (Audit Portal) | P | 2 | audit |
-| `POST /audit/concurrent/alerts` | Concurrent audit alert to an RO | P | 2 | audit |
-| `POST /audit/concurrent/alerts/{alertId}/replies` | OIC replies to a concurrent-audit alert | P | 2 | audit |
+| `GET /zo/fraud-risk/cases` | Zonal / regional fraud-risk committee case list | W | 1 | workflow |
+| `POST /hrm/postings` 🔐 | Staff postings and role assignment to offices (drives jurisdiction) | W | 1 | workflow |
+| `GET /audit/concurrent/extracts` | Concurrent Audit Cell daily functionality extract (Audit Portal) | W | 1 | audit |
+| `POST /audit/concurrent/alerts` | Concurrent audit alert to an RO | W | 1 | audit |
+| `POST /audit/concurrent/alerts/{alertId}/replies` | OIC replies to a concurrent-audit alert | W | 1 | audit |
+| `GET /audit/concurrent/alerts` | Concurrent-audit alerts: the zone's (Audit Cell) or the office's (OIC), with overdue replies | W | 1 | audit |
 | `POST /audit/internal/reports` | Internal audit report for an office | P | 3 | audit |
 | `POST /audit/internal/reports/{reportId}/paras` | Raise an audit para | P | 3 | audit |
 | `POST /audit/internal/paras/{paraId}/replies` | Office compliance reply to a para | P | 3 | audit |
@@ -632,7 +634,7 @@ Monitoring (`/monitoring/**`), AI (`/ai/**`), audit (`/audit/**`) and NDC (`/ndc
 | `POST /integrations/fund-managers/positions` | Fund manager / custodian position feed (signed) | M | 3 | reporting |
 | `GET /governance/board-packs` | CBT / EC / FIAC board packs (aggregates only) | P | 3 | reporting |
 | `GET /zo/dashboards` | Zonal comparison dashboard (interface 9, aggregated, read-only) | W | 1 | reporting |
-| `GET /do/dashboards` | District dashboard (interface 7) | P | 2 | reporting |
+| `GET /do/dashboards` | District dashboard (interface 7) | W | 1 | reporting |
 | `GET /ho/config/rule-sets` | Policy administration: rule-set versions in force, scheduled, drafts and history | W | 1 | platform |
 | `GET /ho/config/rule-sets/{versionId}` | One rule set: its checks, what changed from its base, and worked examples of the effect | W | 1 | platform |
 | `POST /ho/config/rule-sets` | Draft a new rule-set version (wage ceilings, rates, claim types, approval matrix, auto-settlement, grievance settings) from an existing one, with an effective date | W | 1 | platform |
@@ -643,8 +645,9 @@ Monitoring (`/monitoring/**`), AI (`/ai/**`), audit (`/audit/**`) and NDC (`/ndc
 | `POST /ho/circulars` | Publish a circular to the public corpus | W | 1 | intelligence |
 | `GET /ndc/event-failures` | Failed events / DLQ view (interface 11) | W | 1 | platform |
 | `POST /ndc/event-failures/{eventId}/replays` 🔐 | Replay a dead-lettered event (idempotent consumers) | W | 1 | platform |
-| `POST /ndc/issue-tracker/requests` | Raise an Issue Tracker request (e.g. freeze / de-freeze), with the order attached | P | 2 | platform |
-| `POST /ndc/issue-tracker/requests/{requestId}/executions` 🔐 | IS Division executes the block / unblock | P | 2 | platform |
+| `POST /ndc/issue-tracker/requests` | Raise an Issue Tracker request (e.g. freeze / de-freeze), with the order attached | W | 1 | platform |
+| `POST /ndc/issue-tracker/requests/{requestId}/executions` 🔐 | IS Division executes the block / unblock | W | 1 | platform |
+| `GET /ndc/issue-tracker/requests` | Issue Tracker requests: all (IS Division) or the officer's own | W | 1 | platform |
 | `GET /ndc/dr/replication-status` | ADC (DR site) replication status | P | 3 | platform |
 | `POST /ndc/dr/failover-drills` 🔐 | Run a DR failover drill | P | 3 | platform |
 | `POST /training/sandboxes` | Create a synthetic-data training sandbox (PDNASA / ZTI) | P | 3 | platform |

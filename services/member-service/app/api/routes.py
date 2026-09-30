@@ -99,7 +99,7 @@ async def employer_members(actor: Actor = Depends(require_stakeholder(
     return envelope([{"uan": row["uan"], "name": row["name"], "account_link_id": row["account_link_id"],
                       "date_of_joining": row["date_of_joining"].isoformat(),
                       "date_of_exit": row["date_of_exit"].isoformat() if row["date_of_exit"] else None,
-                      "status": "EXITED" if row["date_of_exit"] else "ACTIVE"} for row in rows])
+                      "status": "EXITED" if row["date_of_exit"] else "ACTIVE", "location": row["location"]} for row in rows])
 
 
 # ── security self-service and reviewed account recovery (Journey D) ─────────────────────────────

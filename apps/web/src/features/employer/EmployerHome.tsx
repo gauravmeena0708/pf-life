@@ -6,6 +6,7 @@ import { api, command, getSession, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
+import { EmployerDashboard } from "./EmployerDashboard";
 import { JointDeclarations } from "./JointDeclarations";
 import { useStepUp } from "../stepup/useStepUp";
 
@@ -125,6 +126,7 @@ export function EmployerHome() {
       <p>Your permissions: {perms.length ? perms.map((p) => <code key={p}>{p} </code>) : "none"}</p>
       {notice ? <p role="status" className="ok">{notice}</p> : null}
       <ProblemMessage error={error} />
+      {["employer.owner", "employer.operator", "employer.signatory"].includes(session.data?.stakeholder ?? "") ? <EmployerDashboard /> : null}
 
       {e.status !== "VERIFIED" && perms.includes("establishment.manage") ? (
         <form onSubmit={verify} className="card">

@@ -1,14 +1,20 @@
 """audit-service: append-only hash chain, correlation trail and security-event intake."""
 import asyncio
 import importlib
+import json
 import time
 import uuid
+from datetime import UTC, datetime
+from pathlib import Path
 
 import jwt
 import pytest
 from sqlalchemy import text
 
 from tests.conftest import JWKS, KEY, KID
+
+SEED_FILE = Path(__file__).resolve().parents[3] / "scripts" / "seed" / "synthetic.json"
+SEED = json.loads(SEED_FILE.read_text(encoding="utf-8"))
 
 
 @pytest.fixture
@@ -21,12 +27,17 @@ def ctx(tmp_path, monkeypatch):
     db._engine = None
     from app.infra.models import Base
     from app.infra.tables import install_append_only, metadata
+    from app.infra.oversight_tables import oversight_metadata
 
     async def setup():
         async with db.engine().begin() as c:
             await c.run_sync(Base.metadata.create_all)
             await c.run_sync(metadata.create_all)
+            await c.run_sync(oversight_metadata.create_all)
             await c.run_sync(install_append_only)
+        from app import seed
+        monkeypatch.setattr(seed, "SEED_FILE", str(SEED_FILE))
+        await seed.main()
     asyncio.run(setup())
     import epfo_auth
     from fastapi.testclient import TestClient
@@ -39,7 +50,7 @@ def ctx(tmp_path, monkeypatch):
         from app.api.routes import record
         from epfo_persistence.consumer import apply_once
         event = {"event_id": str(uuid.uuid4()), "event_type": event_type, "producer": "claim-service",
-                 "aggregate_type": "claim", "aggregate_id": "CLM-1", "occurred_at": "2026-09-27T10:00:00Z",
+                 "aggregate_type": "claim", "aggregate_id": "CLM-1", "occurred_at": datetime.now(UTC).isoformat(),
                  "correlation_id": correlation_id, "payload": payload}
         return asyncio.run(apply_once(db.sessions(), event, record)), event
 
@@ -55,10 +66,12 @@ def ctx(tmp_path, monkeypatch):
     db._engine = None
 
 
-def hdr(stakeholder, subject="x"):
+def hdr(stakeholder, subject="x", step_up=None):
     now = int(time.time())
     claims = {"iss": "epfo-gateway", "aud": "audit-service", "sub": subject, "stakeholder": stakeholder,
               "iat": now, "exp": now + 60, "jti": str(uuid.uuid4()), "correlation_id": str(uuid.uuid4())}
+    if step_up:
+        claims["step_up"] = step_up
     return {"Authorization": "Bearer " + jwt.encode(claims, KEY, algorithm="EdDSA", headers={"kid": KID})}
 
 

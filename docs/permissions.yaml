@@ -1222,7 +1222,7 @@ stakeholders:
     via:
     - F01.profile
   - endpoint: GET /employers/me/dashboard
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
@@ -1270,7 +1270,7 @@ stakeholders:
     via:
     - F02.missing_details
   - endpoint: POST /employers/me/members/{uan}/location-mappings
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
@@ -2193,6 +2193,18 @@ stakeholders:
     step_up: true
     via:
     - F07.freeze_ro_est
+  - endpoint: POST /ndc/issue-tracker/requests
+    status: W
+    scope: NDC / IS operations role
+    step_up: false
+    via:
+    - F07.issue_raise
+  - endpoint: GET /ndc/issue-tracker/requests
+    status: W
+    scope: NDC / IS operations role
+    step_up: false
+    via:
+    - F07.issue_raise
   - endpoint: POST /office/freeze-cases/{caseId}/verifications
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2217,8 +2229,14 @@ stakeholders:
     step_up: false
     via:
     - F11.oic_monitor
+  - endpoint: GET /audit/concurrent/alerts
+    status: W
+    scope: read-only for auditors; audit writes by audit roles only
+    step_up: false
+    via:
+    - F12.reply
   - endpoint: POST /audit/concurrent/alerts/{alertId}/replies
-    status: P
+    status: W
     scope: read-only for auditors; audit writes by audit roles only
     step_up: false
     via:
@@ -2753,7 +2771,7 @@ stakeholders:
     via:
     - F13.admin
   - endpoint: POST /hrm/postings
-    status: P
+    status: W
     scope: self (read) / HR role (write)
     step_up: true
     via:
@@ -2766,7 +2784,7 @@ stakeholders:
     via:
     - F13.do
   - endpoint: GET /do/dashboards
-    status: P
+    status: W
     scope: district jurisdiction
     step_up: false
     via:
@@ -2872,13 +2890,19 @@ stakeholders:
     via:
     - F12.concurrent
   - endpoint: GET /audit/concurrent/extracts
-    status: P
+    status: W
     scope: read-only for auditors; audit writes by audit roles only
     step_up: false
     via:
     - F12.concurrent
   - endpoint: POST /audit/concurrent/alerts
-    status: P
+    status: W
+    scope: read-only for auditors; audit writes by audit roles only
+    step_up: false
+    via:
+    - F12.concurrent
+  - endpoint: GET /audit/concurrent/alerts
+    status: W
     scope: read-only for auditors; audit writes by audit roles only
     step_up: false
     via:
@@ -2929,7 +2953,7 @@ stakeholders:
     - F07.vig_zone
   zo.fraud_committee:
   - endpoint: GET /zo/fraud-risk/cases
-    status: P
+    status: W
     scope: zone jurisdiction
     step_up: false
     via:
@@ -3176,14 +3200,14 @@ stakeholders:
     via:
     - F10.ho
   ho.is:
-  - endpoint: POST /ndc/issue-tracker/requests
-    status: P
+  - endpoint: GET /ndc/issue-tracker/requests
+    status: W
     scope: NDC / IS operations role
     step_up: false
     via:
     - F07.block
   - endpoint: POST /ndc/issue-tracker/requests/{requestId}/executions
-    status: P
+    status: W
     scope: NDC / IS operations role
     step_up: true
     via:
@@ -3203,7 +3227,7 @@ stakeholders:
     via:
     - F13.hr
   - endpoint: POST /hrm/postings
-    status: P
+    status: W
     scope: self (read) / HR role (write)
     step_up: true
     via:
@@ -3243,6 +3267,12 @@ stakeholders:
     via:
     - F07.vig_ho
   ho.security:
+  - endpoint: GET /security/incidents
+    status: W
+    scope: security analyst
+    step_up: false
+    via:
+    - F14.security
   - endpoint: GET /security/request-activity
     status: W
     scope: security analyst
@@ -3292,7 +3322,7 @@ stakeholders:
     via:
     - F14.security
   - endpoint: POST /security/incidents
-    status: P
+    status: W
     scope: security analyst
     step_up: true
     via:

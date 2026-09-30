@@ -24,7 +24,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.8b** | e-Nomination, Know your UAN, exit-date corrections and bulk exits, employer-initiated Joint Declaration, auto-transfer on a change of job, employer attestation of claims, switching a claim's bank account | **Done** (30 Sep 2026) |
 | **P2.8c** | Joint option for pension on higher wages (member opts, employer validates wages, dues from the rules); the EDLI section's decision on verified wages; Certificates of Coverage and the international worker's view (new international-service) | **Done** (30 Sep 2026) |
 | **P2.8d** | Grievances without a login and their status, reminders, feedback and office transfers; claim status without a login; circulars; the e-Report Card; the approved interest rate recorded by HO F&A (→ a draft rule set); a surrendered trust's past accumulations ingested | **Done** (30 Sep 2026) |
-| P2.8e | Concurrent audit, security incidents, the NDC issue tracker, HRM postings, DO and employer dashboards, location mapping | |
+| **P2.8e** | Security incidents with CERT-In reporting (mock); the Concurrent Audit Cell's daily extract, alerts and OIC replies; the NDC Issue Tracker (freeze / de-freeze / login notice); the zonal fraud-risk case list; HR postings that move jurisdiction everywhere; district and employer dashboards; member location mapping | **Done** (30 Sep 2026) |
 
 Operations marked **?** (scope unconfirmed, e.g. *ECR Approval*, *VDR Member Beneficiary*) wait until their
 meaning is confirmed.
@@ -357,3 +357,30 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 - Personas: `ho-publicity`, `ro-exemption`.
 - Not built: OTP delivery, the maker-checker on trust ingestion (one officer with a one-time code bound to the
   total), trust returns and audits (Phase 3), circulars in the assistant's knowledge base.
+
+## P2.8e — how it is built
+
+- **Security incidents** (audit-service, `ho.security`): recorded with category, severity and detection time; high and
+  critical ones, and unauthorised access, data breaches and identity theft whatever their severity, are reportable to
+  CERT-In within 6 hours of detection (after CERT-In's directions of 2022, simplified); the report is a mock with an
+  acknowledgement number, flagged late when past the window.
+- **Concurrent audit** (audit-service): the zone's Concurrent Audit Cell (`zo.rpfc1_audit`) downloads a day's
+  functionality extract from the hash-chained audit log — the day's settlements, ledger adjustments and reversals,
+  transfers, identity changes, de-freezes and waived demands, each with red flags (high value, bank changed after a
+  return, auto-transfer, past-accumulation credit …); raises an alert to a regional office of its zone; the OIC replies
+  within 3 days (late replies are marked).
+- **NDC Issue Tracker** (platform-service): the OIC raises a freeze, de-freeze or login notice for a UAN with the order
+  (PDF, hashed); the IS Division (`ho.is`) executes or rejects it; `IssueTrackerExecuted.v1` is carried out by
+  member-service, which owns the account state (`AccountFrozen.v1` / `AccountDefrozen.v1`, or a notice to the member).
+- **Fraud-risk committee** (workflow-service, `zo.fraud_committee`): the zone's cases that point to possible fraud —
+  claims with an advisory risk signal, member and establishment freezes.
+- **Postings** (workflow-service, `ho.hr` anywhere, `fo.admin` within its office): a posting changes the officer's
+  office and role; `StaffPostingChanged.v1` updates the copy every service keeps (a shared helper in
+  common-persistence), so work queues, the member 360 view, grievances, compliance and the rest follow at once;
+  cases assigned to the officer in the old office go back to that office's queue.
+- **Dashboards** (reporting-service): the district office's (claims pending and over the service level, payment
+  returns, grievances, defaulting establishments) and the employer's (the last three returns, alerts with links).
+- **Location mapping** (member-service): the employer maps a serving member to a branch (code, district, pincode).
+- Personas: `zo-audit`, `ndc-is`, `zo-fraud`, `do-oic` (HR postings use `hrm-employee`).
+- Not built: real CERT-In reporting, Issue Tracker requests for establishments and employer users, vigilance
+  referral from the fraud-risk committee (Phase 3), branch lists checked against Form 2A.

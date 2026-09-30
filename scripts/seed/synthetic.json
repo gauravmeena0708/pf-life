@@ -570,7 +570,11 @@
     "ho-iwu": "00000000-0000-4000-8000-000000000043",
     "ro-edli": "00000000-0000-4000-8000-000000000044",
     "ho-publicity": "00000000-0000-4000-8000-000000000045",
-    "ro-exemption": "00000000-0000-4000-8000-000000000046"
+    "ro-exemption": "00000000-0000-4000-8000-000000000046",
+    "zo-audit": "00000000-0000-4000-8000-000000000047",
+    "ndc-is": "00000000-0000-4000-8000-000000000048",
+    "zo-fraud": "00000000-0000-4000-8000-000000000049",
+    "do-oic": "00000000-0000-4000-8000-000000000050"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -738,6 +742,24 @@
       "username": "ro-exemption",
       "subject": "00000000-0000-4000-8000-000000000046",
       "stakeholder": "fo.exemption",
+      "office_id": "RO-DEMO-01"
+    },
+    {
+      "username": "zo-audit",
+      "subject": "00000000-0000-4000-8000-000000000047",
+      "stakeholder": "zo.rpfc1_audit",
+      "office_id": "ZO-DEMO-01"
+    },
+    {
+      "username": "zo-fraud",
+      "subject": "00000000-0000-4000-8000-000000000049",
+      "stakeholder": "zo.fraud_committee",
+      "office_id": "ZO-DEMO-01"
+    },
+    {
+      "username": "do-oic",
+      "subject": "00000000-0000-4000-8000-000000000050",
+      "stakeholder": "do.incharge",
       "office_id": "RO-DEMO-01"
     }
   ],

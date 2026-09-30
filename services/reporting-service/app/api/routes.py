@@ -151,6 +151,13 @@ async def update_freshness(session: AsyncSession, event: dict[str, Any]) -> None
         await session.execute(update(event_freshness).where(event_freshness.c.source == source).values(**values))
 
 
+async def on_staff_posting(session: AsyncSession, event: dict[str, Any]) -> None:
+    """HR re-posted an officer (P2.8e): the district dashboard follows the officer's office."""
+    from app.infra.tables import office_staff
+    from epfo_persistence.postings import apply_posting
+    await apply_posting(session, event, office_staff)
+
+
 HANDLERS = {
     "GrievanceRegistered.v1": on_grievance_registered,
     "GrievanceEscalated.v1": on_grievance_escalated,
@@ -164,6 +171,7 @@ HANDLERS = {
     "ContributionPosted.v1": on_contribution_posted,
     "CaseDecisionSubmitted.v1": on_observed,
     "RiskSignalRaised.v1": on_observed,
+    "StaffPostingChanged.v1": on_staff_posting,
 }
 EVENT_PRODUCERS = {
     **{name: "grievance-service" for name in GRIEVANCE_SOURCE},
@@ -172,6 +180,7 @@ EVENT_PRODUCERS = {
     **{name: "contribution-service" for name in ("ECRValidated.v1", "ECRSubmitted.v1", "ContributionPosted.v1")},
     "CaseDecisionSubmitted.v1": "workflow-service",
     "RiskSignalRaised.v1": "intelligence-service",
+    "StaffPostingChanged.v1": "workflow-service",
 }
 BINDINGS = [f"{EVENT_PRODUCERS[name]}.{name}" for name in HANDLERS]
 

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api, Envelope, getSession } from "../api/client";
 import { PageHeader } from "../components/PageHeader";
 import { ProblemMessage } from "../components/ProblemMessage";
+import { SecurityIncidents } from "../features/oversight/SecurityIncidents";
 
 type ActivityEvent = {
   at: string; method: string; route: string; status: number; duration_ms: number;
@@ -47,10 +48,12 @@ export function SecurityActivity() {
       current="Security activity">
       {authorised && <button type="button" onClick={() => void activity.refetch()} disabled={activity.isFetching}>Refresh now</button>}
     </PageHeader>
+    <ProblemMessage error={session.error} />
     {session.isLoading && <p>Checking access…</p>}
     {!session.isLoading && !authorised && <div className="card"><h2>Security role required</h2><p>Switch to the security analyst demo persona to view gateway activity.</p></div>}
     {authorised && <>
       <ProblemMessage error={activity.error} />
+      <SecurityIncidents />
       {!data && !activity.error && <p>Loading recent activity…</p>}
       {data && <>
         <section className="metrics" aria-label="Five minute activity summary">
