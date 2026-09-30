@@ -409,6 +409,56 @@
           "last_contribution_month": "2025-12"
         }
       ]
+    },
+    {
+      "uan": "100000000906",
+      "name": "HARI DEMO",
+      "date_of_birth": "1972-04-20",
+      "subject": "00000000-0000-4000-8000-000000000040",
+      "account_link_id": "AL-0907",
+      "member_id": "DEMO00001000000000906",
+      "date_of_joining": "2011-07-01",
+      "date_of_exit": null,
+      "gender": "MALE",
+      "mobile_masked": "******0906",
+      "email_masked": "h***@demo.invalid",
+      "bank_ifsc": "DEMO0000906",
+      "bank_account_last4": "0906",
+      "kyc": {
+        "aadhaar": "VERIFIED",
+        "pan": "VERIFIED",
+        "bank": "VERIFIED"
+      },
+      "last_contribution_month": "2026-08",
+      "_comment": "In service since 2011 on wages above the ceiling (P2.8c): may exercise the joint option for higher pension."
+    },
+    {
+      "uan": "100000000907",
+      "name": "ELENA DEMO",
+      "date_of_birth": "1988-12-01",
+      "subject": "00000000-0000-4000-8000-000000000041",
+      "account_link_id": "AL-0908",
+      "member_id": "DEMO00001000000000907",
+      "date_of_joining": "2025-04-01",
+      "date_of_exit": null,
+      "gender": "FEMALE",
+      "mobile_masked": "******0907",
+      "email_masked": "e***@demo.invalid",
+      "bank_ifsc": "DEMO0000907",
+      "bank_account_last4": "0907",
+      "kyc": {
+        "aadhaar": "NOT_SEEDED",
+        "pan": "VERIFIED",
+        "bank": "VERIFIED"
+      },
+      "last_contribution_month": "2026-08",
+      "international": {
+        "nationality": "United States",
+        "passport_masked": "*****4521",
+        "country_of_origin": "United States",
+        "_comment": "A foreign national employed in India (P2.8c); no social-security agreement in this synthetic catalogue, so fully covered."
+      },
+      "_comment": "International worker (P2.8c)."
     }
   ],
   "demo_wage_month": "2026-08",
@@ -451,7 +501,12 @@
     "ro-pro-counter": "00000000-0000-4000-8000-000000000036",
     "ro-da-compliance": "00000000-0000-4000-8000-000000000037",
     "member-f": "00000000-0000-4000-8000-000000000038",
-    "member-g": "00000000-0000-4000-8000-000000000039"
+    "member-g": "00000000-0000-4000-8000-000000000039",
+    "member-h": "00000000-0000-4000-8000-000000000040",
+    "worker-expat": "00000000-0000-4000-8000-000000000041",
+    "iw-officer": "00000000-0000-4000-8000-000000000042",
+    "ho-iwu": "00000000-0000-4000-8000-000000000043",
+    "ro-edli": "00000000-0000-4000-8000-000000000044"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -493,6 +548,16 @@
     "AL-0905": {
       "employee_paise": 4800000,
       "employer_paise": 3200000,
+      "as_of": "2025-03-31"
+    },
+    "AL-0907": {
+      "employee_paise": 180000000,
+      "employer_paise": 60000000,
+      "as_of": "2025-03-31"
+    },
+    "AL-0908": {
+      "employee_paise": 2400000,
+      "employer_paise": 800000,
       "as_of": "2025-03-31"
     }
   },
@@ -591,6 +656,18 @@
       "username": "ro-da-compliance",
       "subject": "00000000-0000-4000-8000-000000000037",
       "stakeholder": "fo.da_compliance",
+      "office_id": "RO-DEMO-01"
+    },
+    {
+      "username": "iw-officer",
+      "subject": "00000000-0000-4000-8000-000000000042",
+      "stakeholder": "fo.iw",
+      "office_id": "RO-DEMO-01"
+    },
+    {
+      "username": "ro-edli",
+      "subject": "00000000-0000-4000-8000-000000000044",
+      "stakeholder": "fo.edli",
       "office_id": "RO-DEMO-01"
     }
   ],

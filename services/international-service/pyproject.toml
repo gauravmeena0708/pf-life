@@ -1,0 +1,26 @@
+[project]
+name = "international-service"
+version = "0.1.0"
+description = "EPFO POC international-service (synthetic demonstration, not an official EPFO system)"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi==0.115.4",
+  "uvicorn[standard]==0.32.0",
+  "pydantic-settings==2.6.1",
+  "sqlalchemy[asyncio]==2.0.36",
+  "asyncpg==0.30.0",
+  "alembic==1.14.0",
+  "epfo-observability",
+  "epfo-auth-client",
+  "epfo-persistence",
+]
+
+[project.optional-dependencies]
+test = ["pytest==8.3.3", "httpx==0.27.2"]
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*"]

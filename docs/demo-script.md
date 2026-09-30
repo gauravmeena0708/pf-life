@@ -48,6 +48,9 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `ro-da-compliance` | Dealing assistant (Compliance) — OLRE scrutiny | The establishment record, changes and OLRE |
 | `member-f` | Member whose Aadhaar is not verified yet | Member services (claim attestation) |
 | `member-g` | Member who changed jobs (previous member ID still holds a balance) | Member services (auto-transfer) |
+| `member-h` | Member in service since 2011 on wages above the ceiling | Higher pension |
+| `worker-expat`, `iw-officer`, `ho-iwu` | International worker; International Workers cell; HO International Workers Unit | International workers |
+| `ro-edli` | EDLI section officer | EDLI decision |
 
 ---
 
@@ -344,6 +347,21 @@ simulation; point out that the dialog says exactly what is being authorised (act
 2. **`member-b` → Claim**: *Final settlement* lists "All services are not transferred to the primary member ID:
    AL-0903 holds ₹50,000" — AL-0903 is on BHARAT's older UAN, linked by the same verified Aadhaar.
 3. **`do-caseworker` → Member 360** for UAN 100000000903: the Aadhaar-verified set and its primary member ID.
+
+## Higher pension, international workers, the EDLI decision
+*Tests: `tests/e2e/test_higher_pension_international_edli.py`, `services/pension-service/tests/test_higher_pension.py`,
+`services/international-service/tests/test_international.py`, `services/claim-service/tests/test_edli_decision.py`*
+
+1. **`member-h` → Pension on higher wages**: opt from September 2014 with the declaration and consent (one-time code).
+   `member-a` is refused: not in service on 1 September 2014.
+2. **`emp-signatory` → Higher-pension joint-option validation**: paste the wages (`2015-01,40000` per line), *Preview
+   dues* (8.33% of the wages above ₹15,000), then *Validate*. `member-h` sees the dues and the month-by-month working.
+3. **`emp-signatory` → International workers (CoC)**: apply for a worker posted to Germany (from the agreement
+   catalogue), upload the signed PDF; **`iw-officer`** issues it; the employer downloads the certificate and extends
+   it by six months. **`ho-iwu`** reads the agreements; **`worker-expat`** sees their coverage (no agreement with
+   their country: full wages, no ceiling).
+4. **Death claims**: after the officers admit the Form 5IF claim, **`ro-edli` → EDLI claims** enters the verified
+   average wages, works out the benefit and sanctions it (one-time code bound to the amount).
 
 ## Member services: e-Nomination, attestation, bank switch, auto-transfer, exits
 *Tests: `tests/e2e/test_member_mobility.py`, `services/{member,claim,workflow}-service/tests/test_*mobility*.py`,

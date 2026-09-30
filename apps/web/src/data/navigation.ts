@@ -21,7 +21,8 @@ const MEMBER: NavGroup[] = [
   { label: "Online Services", items: [
     link("Claim (Form-31, 19, 10C & 10D)", "/member/claims"), link("One Member – One EPF Account (Transfer Request)", "/member/service#transfer-heading"), link("Auto-transfer", "/member/service#auto-transfer-heading"),
     link("Track Claim Status", "/member/claims"), link("Download Annexure K", "/member/service#applications-heading"), link("Joint Declaration", "/member/profile#correction-heading"),
-    link("Form 15G / 15H", "/member/claims#tax-declaration-heading"), link("Pension (Form 10D) / scheme certificate", "/member/pension")] },
+    link("Form 15G / 15H", "/member/claims#tax-declaration-heading"), link("Pension (Form 10D) / scheme certificate", "/member/pension"),
+    link("Pension on higher wages", "/member/higher-pension#higher-pension-heading")] },
   { label: "PMVBRY" },
   { labelKey: "navigation.help", items: [{ labelKey: "navigation.grievances", to: "/member/grievances" }, { labelKey: "navigation.assistant", to: "/member/assistant" }] },
 ];
@@ -46,7 +47,8 @@ const EMPLOYER: NavGroup[] = [
   { label: "Dashboards", items: [link("Compliance summary", "/employer/returns#compliance-summary-heading"), link("Active Members details", "/employer/registration#active-heading"), link("Missing details", "/employer/registration#active-heading")] },
   { label: "User", items: [link("Sub-users (payroll operators)", "/employer#people-operator")] },
   { label: "Admin" },
-  { label: "Online Services", items: [link("Transfer Claims", "/employer/members#transfers-heading"), link("Claim attestations", "/employer/members#claim-attestations-heading"), link("Higher-pension joint-option validation")] },
+  { label: "Online Services", items: [link("Transfer Claims", "/employer/members#transfers-heading"), link("Claim attestations", "/employer/members#claim-attestations-heading"),
+    link("Higher-pension joint-option validation", "/employer/members#higher-pension-validations-heading"), link("International workers (CoC)", "/employer/international")] },
   { label: "PMVBRY" },
   { label: "EEC-2026/VISHWAS" },
 ];
@@ -134,6 +136,10 @@ export function menusFor(role: string | undefined): NavGroup[] {
   if (role.startsWith("employer.")) return EMPLOYER;
   if (role === "pensioner") return PENSIONER;
   if (role === "claimant") return CLAIMANT;
+  if (role === "fo.edli") return [{ label: "EDLI claims", to: "/office/edli-claims" }];
+  if (role === "fo.iw") return [{ label: "Certificate of coverage queue", to: "/office/international#coc-queue-heading" }];
+  if (role === "ho.iwu") return [{ label: "Social-security agreements", to: "/ho/agreements#agreements-heading" }];
+  if (role === "intl_worker") return [{ label: "International worker coverage", to: "/international-worker" }];
   if (["fo.apfc_pension", "fo.da_pension", "fo.ss_pension"].includes(role)) return PENSION_OFFICE;
   if (role === "tech.cpps") return [{ label: "CPPS disbursement", to: "/cpps" }];
   if (role.startsWith("fo.")) return fieldOffice(role);
@@ -146,6 +152,10 @@ export function homeFor(role: string | undefined): string {
   if (role?.startsWith("employer.")) return "/employer";
   if (role === "pensioner") return "/pensioner";
   if (role === "claimant") return "/claimant";
+  if (role === "fo.edli") return "/office/edli-claims";
+  if (role === "fo.iw") return "/office/international";
+  if (role === "ho.iwu") return "/ho/agreements";
+  if (role === "intl_worker") return "/international-worker";
   if (role === "fo.pro_intake") return "/office/pro-counter";
   if (role === "fo.apfc_pension") return "/office/pension-revisions";
   if (role === "fo.da_pension" || role === "fo.ss_pension") return "/office/pension-claims";

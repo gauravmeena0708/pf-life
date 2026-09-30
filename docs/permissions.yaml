@@ -394,13 +394,19 @@ stakeholders:
     via:
     - F05.sc_surrender
   - endpoint: POST /members/me/higher-pension-options
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: true
     via:
     - F05.higher_member
+  - endpoint: GET /members/me/higher-pension-options
+    status: W
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F05.higher_member
   - endpoint: GET /members/me/higher-pension-options/{optionId}
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
@@ -653,7 +659,7 @@ stakeholders:
     - F04.co_beneficiary
   intl_worker:
   - endpoint: GET /members/me/international
-    status: P
+    status: W
     scope: self — caller's own member record only
     step_up: false
     via:
@@ -1101,13 +1107,19 @@ stakeholders:
     via:
     - F04.transfer_attest
   - endpoint: GET /employers/me/higher-pension-options
-    status: P
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F05.higher_employer
+  - endpoint: POST /employers/me/higher-pension-options/{optionId}/dues-previews
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
     - F05.higher_employer
   - endpoint: POST /employers/me/higher-pension-options/{optionId}/validations
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:
@@ -1130,32 +1142,44 @@ stakeholders:
     step_up: false
     via:
     - F06.vishwas_apply
+  - endpoint: GET /international/agreements
+    status: W
+    scope: own application (employer) or IWU role
+    step_up: false
+    via:
+    - F10.apply
+  - endpoint: GET /international/coc-applications
+    status: W
+    scope: own application (employer) or IWU role
+    step_up: false
+    via:
+    - F10.apply
   - endpoint: POST /international/coc-applications
-    status: M
+    status: W
     scope: own application (employer) or IWU role
     step_up: false
     via:
     - F10.apply
   - endpoint: GET /international/coc-applications/{id}
-    status: M
+    status: W
     scope: own application (employer) or IWU role
     step_up: false
     via:
     - F10.apply
   - endpoint: POST /international/coc-applications/{id}/extensions
-    status: P
+    status: W
     scope: own application (employer) or IWU role
     step_up: false
     via:
     - F10.apply
   - endpoint: POST /international/coc-applications/{id}/signed-uploads
-    status: P
+    status: W
     scope: own application (employer) or IWU role
     step_up: false
     via:
     - F10.apply
   - endpoint: GET /international/coc-applications/{id}/certificate
-    status: P
+    status: W
     scope: own application (employer) or IWU role
     step_up: false
     via:
@@ -2604,15 +2628,39 @@ stakeholders:
     via:
     - F09.supervise
   fo.edli:
+  - endpoint: GET /office/edli-claims
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.edli
+  - endpoint: POST /office/edli-claims/{claimId}/benefit-previews
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.edli
   - endpoint: POST /office/edli-claims/{claimId}/decisions
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F04.edli
   fo.iw:
+  - endpoint: GET /office/international/coc-applications
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F10.decide
+  - endpoint: GET /international/coc-applications/{id}
+    status: W
+    scope: own application (employer) or IWU role
+    step_up: false
+    via:
+    - F10.decide
   - endpoint: POST /office/international/coc-applications/{id}/decisions
-    status: M
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -3116,7 +3164,7 @@ stakeholders:
     - F07.vig_referral
   ho.iwu:
   - endpoint: GET /international/agreements
-    status: P
+    status: W
     scope: own application (employer) or IWU role
     step_up: false
     via:

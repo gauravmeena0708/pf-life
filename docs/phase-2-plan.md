@@ -22,7 +22,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.7d** | Primary member ID: the latest member ID with contributions, over the member's Aadhaar-verified set; claims only against it, whole-balance claims (final settlement, Form 10C, death claims) only when the rest of the set is transferred; Form 13 only into it (checked when filed and when approved) | **Done** (30 Sep 2026) |
 | **P2.8a** | Compliance: defaulting establishments (office and public lists), compliance cases, the employer's month-by-month compliance summary, 14B/7Q demands paid directly, VISHWAS settlement of damages (new compliance-service) | **Done** (30 Sep 2026) |
 | **P2.8b** | e-Nomination, Know your UAN, exit-date corrections and bulk exits, employer-initiated Joint Declaration, auto-transfer on a change of job, employer attestation of claims, switching a claim's bank account | **Done** (30 Sep 2026) |
-| P2.8c | Higher pension, the EDLI decision, international workers | |
+| **P2.8c** | Joint option for pension on higher wages (member opts, employer validates wages, dues from the rules); the EDLI section's decision on verified wages; Certificates of Coverage and the international worker's view (new international-service) | **Done** (30 Sep 2026) |
 | P2.8d | Public grievances, circulars, the e-Report Card, the interest-rate record, exempted trusts' ingestion | |
 | P2.8e | Concurrent audit, security incidents, the NDC issue tracker, HRM postings, DO and employer dashboards, location mapping | |
 
@@ -304,3 +304,28 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 - Personas: `member-f` (Aadhaar pending) and `member-g` (changed jobs), both synthetic.
 - Not built: EPS nomination (Form 2 part II), nominee photographs, a date-of-exit correction after a claim is
   settled (refused in the portal; not checked here), OTP delivery for Know your UAN.
+
+## P2.8c — how it is built
+
+- **Pension on higher wages** (pension-service; rule set section `higher_pension`, illustrative, after the Supreme
+  Court's judgment of 4 November 2022): a member in service on 1 September 2014 files the joint option with a
+  declaration and consent to move the dues; the employer's signatory uploads the wages month by month, previews the
+  dues (the pension share, 8.33%, of the wages above the ceiling in force for each month: ₹5,000 / ₹6,500 / ₹15,000)
+  and validates it, the confirmation bound to that amount — or rejects it with a reason.
+  `HigherPensionOptionValidated.v1` records the outcome; the office decision, interest on the dues and the PF →
+  pension fund transfer stay Phase 3.
+- **EDLI decision** (claim-service): once the officer chain admits a Form 5IF claim, it waits in
+  `PENDING_EDLI_DECISION`; the EDLI section (`fo.edli`) enters the verified average monthly wages, the benefit is
+  worked out again from the rules the claim was filed under, and the approval is bound to that amount (paid from the
+  EDLI fund as before). The section can also reject with a reason.
+- **international-service** (new, its own database): the agreement catalogue (India's partner countries, illustrative
+  terms), Certificates of Coverage for workers posted abroad — the employer applies (country with an agreement, posting
+  within its limit, no overlap), uploads the signed PDF, the International Workers cell (`fo.iw`) issues or rejects it,
+  the employer downloads the certificate and can extend it within the agreement's extension limit —
+  `CertificateOfCoverageIssued.v1`; and the international worker's own view of their coverage.
+- Personas: `member-h` (in service since 2011), `worker-expat` (a foreign national employed in India), `iw-officer`,
+  `ho-iwu`, `ro-edli`.
+- Not built: totalisation claims and the foreign agency's certificate check (Phase 3), CoCs issued to foreign
+  nationals by their home scheme (the exemption itself), pensioners' higher-pension options.
+- Fixed on the way: the e-nomination notification (P2.8b) named a placeholder the renderer does not supply, so the
+  notification failed; a test now renders every template.

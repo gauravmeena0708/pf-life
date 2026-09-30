@@ -21,21 +21,56 @@ paths:
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: international
       x-callers:
+      - employer.signatory
       - ho.iwu
       x-scope: own application (employer) or IWU role
       security:
       - bffSession: []
   /international/coc-applications:
+    get:
+      operationId: getInternationalCocApplications
+      summary: The establishment's Certificate of Coverage applications
+      tags:
+      - International workers
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: international
+      x-callers:
+      - employer.signatory
+      x-scope: own application (employer) or IWU role
+      security:
+      - bffSession: []
     post:
       operationId: postInternationalCocApplications
       summary: Certificate of Coverage application (mock)
@@ -56,8 +91,8 @@ paths:
           $ref: '#/components/responses/Problem'
         '409':
           $ref: '#/components/responses/Problem'
-      x-status: mock
-      x-phase: 2
+      x-status: working
+      x-phase: 1
       x-owner-service: international
       x-callers:
       - employer.signatory
@@ -97,11 +132,12 @@ paths:
           $ref: '#/components/responses/Problem'
         '409':
           $ref: '#/components/responses/Problem'
-      x-status: mock
-      x-phase: 2
+      x-status: working
+      x-phase: 1
       x-owner-service: international
       x-callers:
       - employer.signatory
+      - fo.iw
       x-scope: own application (employer) or IWU role
       security:
       - bffSession: []
@@ -119,14 +155,20 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: international
       x-callers:
       - employer.signatory
@@ -147,14 +189,20 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: international
       x-callers:
       - employer.signatory
@@ -182,14 +230,20 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: international
       x-callers:
       - employer.signatory
@@ -242,18 +296,53 @@ paths:
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 2
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: international
       x-callers:
       - intl_worker
       x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+  /office/international/coc-applications:
+    get:
+      operationId: getOfficeInternationalCocApplications
+      summary: Certificate of Coverage applications of the office's establishments
+      tags:
+      - International workers
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: international
+      x-callers:
+      - fo.iw
+      x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
   /office/international/coc-applications/{id}/decisions:
@@ -283,8 +372,8 @@ paths:
           $ref: '#/components/responses/Problem'
         '409':
           $ref: '#/components/responses/Problem'
-      x-status: mock
-      x-phase: 2
+      x-status: working
+      x-phase: 1
       x-owner-service: international
       x-callers:
       - fo.iw

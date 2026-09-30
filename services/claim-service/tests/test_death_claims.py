@@ -55,7 +55,17 @@ def test_edli_is_worked_out_and_paid_from_the_edli_fund(ctx):
     client, q, deliver = ctx
     c = file(client, "FORM_5IF").json()["data"]
     assert c["claim_type"] == "DEATH_EDLI" and c["amount_paise"] >= 25000000           # at least the assured minimum
-    approve(deliver, c["claim_id"])
+    approve(deliver, c["claim_id"])                                                      # admitted: the EDLI section decides (P2.8c)
+    assert q(f"SELECT state FROM claims WHERE claim_id='{c['claim_id']}'")[0][0] == "PENDING_EDLI_DECISION"
+    assert events(q, "ClaimDecisionRecorded.v1") == []
+    edli = hdr(SUBJECTS["ro-edli"], "fo.edli")
+    amount = client.post(f"/api/v1/office/edli-claims/{c['claim_id']}/benefit-previews", json={"average_monthly_wages_paise": 1500000},
+                         headers=edli).json()["data"]
+    step = {"action": "decide-edli", "resource_id": c["claim_id"], "resource_version": amount["version"], "amount_paise": amount["amount_paise"]}
+    r = client.post(f"/api/v1/office/edli-claims/{c['claim_id']}/decisions",
+                    json={"decision": "APPROVE", "average_monthly_wages_paise": 1500000, "reason": "Wages verified on Form 5IF"},
+                    headers=hdr(SUBJECTS["ro-edli"], "fo.edli", step))
+    assert r.status_code == 200 and r.json()["data"]["state"] == "APPROVED", r.json()
     assert events(q, "ClaimDecisionRecorded.v1")[0]["fund"] == "EDLI"
 
 

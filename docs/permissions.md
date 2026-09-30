@@ -133,6 +133,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/claims/{claimId}/bank-details` | W | self — caller's own member record only |  |
 | `GET /members/me/employment-history` | W | self — caller's own member record only |  |
 | `GET /members/me/grievances` | W | self — caller's own member record only |  |
+| `GET /members/me/higher-pension-options` | W | self — caller's own member record only |  |
+| `GET /members/me/higher-pension-options/{optionId}` | W | self — caller's own member record only |  |
 | `GET /members/me/identity-assurance` | W | self — caller's own member record only |  |
 | `GET /members/me/kyc` | W | self — caller's own member record only |  |
 | `GET /members/me/nominations` | W | self — caller's own member record only |  |
@@ -163,6 +165,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /members/me/claims/{claimId}/re-disbursement-requests` | W | self — caller's own member record only |  |
 | `POST /members/me/exits` | W | self — caller's own member record only | yes |
 | `POST /members/me/grievances` | W | self — caller's own member record only |  |
+| `POST /members/me/higher-pension-options` | W | self — caller's own member record only | yes |
 | `POST /members/me/joint-declarations` | W | self — caller's own member record only | yes |
 | `POST /members/me/kyc/bank-accounts` | W | self — caller's own member record only | yes |
 | `POST /members/me/kyc/{kycType}` | W | self — caller's own member record only | yes |
@@ -180,11 +183,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `PUT /members/me/claims/{claimId}/bank-details` | W | self — caller's own member record only | yes |
 | `POST /members/uan-activations` | M | unauthenticated with OTP / face-auth proof |  |
 | `POST /members/uan-allotments` | M | unauthenticated with OTP / face-auth proof |  |
-| `GET /members/me/higher-pension-options/{optionId}` | P | self — caller's own member record only |  |
 | `GET /members/me/tax/form-16a` | P | self — caller's own member record only |  |
 | `POST /grievances/{grievanceId}/feedback` | P | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/reminders` | P | complainant or the assigned office |  |
-| `POST /members/me/higher-pension-options` | P | self — caller's own member record only | yes |
 | `POST /public/claims/status-lookups` | P | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 
 **`member.exited`** — Member — exited / inoperative account holder
@@ -247,7 +248,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /members/me/international` | P | self — caller's own member record only |  |
+| `GET /members/me/international` | W | self — caller's own member record only |  |
 
 **`complainant`** — Grievance complainant who is not logged in (member, pensioner, employer, other)
 
@@ -313,6 +314,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /employers/me/demands` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ecr-filings` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ecr-filings/{filingId}` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/higher-pension-options` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/joint-declarations` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/kyc-approvals` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ownership-declaration` | W | own establishment (X-Establishment-Id validated against grants) |  |
@@ -321,6 +323,10 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /employers/me/signature-registrations` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/transfer-requests` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/vishwas-applications` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /international/agreements` | W | own application (employer) or IWU role |  |
+| `GET /international/coc-applications` | W | own application (employer) or IWU role |  |
+| `GET /international/coc-applications/{id}` | W | own application (employer) or IWU role |  |
+| `GET /international/coc-applications/{id}/certificate` | W | own application (employer) or IWU role |  |
 | `PATCH /employers/me` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/approvals/{approvalId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/branches` | W | own establishment (X-Establishment-Id validated against grants) |  |
@@ -331,25 +337,23 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/ecr-filings/{filingId}/cancellations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/ecr-filings/{filingId}/submissions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
+| `POST /employers/me/higher-pension-options/{optionId}/dues-previews` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `POST /employers/me/higher-pension-options/{optionId}/validations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/joint-declarations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/joint-declarations/{jdId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/kyc-approvals/{requestId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/transfer-requests/{transferId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/vishwas-applications` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `POST /international/coc-applications` | W | own application (employer) or IWU role |  |
+| `POST /international/coc-applications/{id}/extensions` | W | own application (employer) or IWU role |  |
+| `POST /international/coc-applications/{id}/signed-uploads` | W | own application (employer) or IWU role |  |
 | `PUT /employers/me/ownership-declaration` | W | own establishment (X-Establishment-Id validated against grants) | yes |
-| `GET /international/coc-applications/{id}` | M | own application (employer) or IWU role |  |
 | `POST /employers/me/challans/{trrn}/payment-intents` | M | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/kyc/{kycType}` | M | own establishment (X-Establishment-Id validated against grants) | yes |
-| `POST /international/coc-applications` | M | own application (employer) or IWU role |  |
-| `GET /employers/me/higher-pension-options` | P | own establishment (X-Establishment-Id validated against grants) |  |
-| `GET /international/coc-applications/{id}/certificate` | P | own application (employer) or IWU role |  |
 | `POST /employers/me/closure-requests` | P | own establishment (X-Establishment-Id validated against grants) | yes |
-| `POST /employers/me/higher-pension-options/{optionId}/validations` | P | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/office-transfer-requests` | P | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/proceedings/{caseId}/submissions` | P | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/voluntary-coverage-requests` | P | own registration request |  |
-| `POST /international/coc-applications/{id}/extensions` | P | own application (employer) or IWU role |  |
-| `POST /international/coc-applications/{id}/signed-uploads` | P | own application (employer) or IWU role |  |
 
 **`employer.operator`** — Employer sub-user / payroll preparer
 
@@ -734,13 +738,17 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `POST /office/edli-claims/{claimId}/decisions` | P | office jurisdiction of the caller's posting | yes |
+| `GET /office/edli-claims` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/edli-claims/{claimId}/benefit-previews` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/edli-claims/{claimId}/decisions` | W | office jurisdiction of the caller's posting | yes |
 
 **`fo.iw`** — International-worker (IWU) processing at the RO
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `POST /office/international/coc-applications/{id}/decisions` | M | office jurisdiction of the caller's posting | yes |
+| `GET /international/coc-applications/{id}` | W | own application (employer) or IWU role |  |
+| `GET /office/international/coc-applications` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/international/coc-applications/{id}/decisions` | W | office jurisdiction of the caller's posting | yes |
 
 **`fo.pro`** — PRO / Facilitation centre / grievance cell
 
@@ -949,7 +957,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /international/agreements` | P | own application (employer) or IWU role |  |
+| `GET /international/agreements` | W | own application (employer) or IWU role |  |
 | `POST /international/totalisation-claims` | P | own application (employer) or IWU role |  |
 
 **`ho.is`** — IS Division (application ownership, Issue Tracker, block / unblock)

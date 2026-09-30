@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 import epfo_auth
-from app.api import catalogue_routes, family_routes, routes, services_routes, settlement_routes
+from app.api import catalogue_routes, family_routes, higher_pension_routes, routes, services_routes, settlement_routes
 from app.config import settings
 from app.infra.db import database_ready, engine
 from app.infra.messaging import BINDINGS, dispatch
@@ -35,6 +35,7 @@ def create_app() -> FastAPI:
     app.include_router(routes.router)
     app.include_router(services_routes.router)
     app.include_router(settlement_routes.router)
+    app.include_router(higher_pension_routes.router)
     app.include_router(family_routes.router)
     handled = {(m, r.path) for r in app.router.routes for m in getattr(r, "methods", set())}
     for route in catalogue_routes.router.routes:

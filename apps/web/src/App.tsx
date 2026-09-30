@@ -21,6 +21,11 @@ import { PensionClaimsPage } from "./features/pension/PensionClaimsPage";
 import { CppsPage } from "./features/pension/CppsPage";
 import { RegistrationPage } from "./features/employer/RegistrationPage";
 import { MemberActionsPage } from "./features/employer/MemberActionsPage";
+import { InternationalPage } from "./features/employer/InternationalPage";
+import { HigherPensionPage } from "./features/member/HigherPensionPage";
+import { InternationalWorkerPage } from "./features/member/InternationalWorkerPage";
+import { EdliPage } from "./features/office/EdliPage";
+import { InternationalOfficePage } from "./features/office/InternationalOfficePage";
 import { EstablishmentPage } from "./features/employer/EstablishmentPage";
 import { OlrePage } from "./features/office/OlrePage";
 import { ReturnsPage } from "./features/employer/ReturnsPage";
@@ -114,6 +119,12 @@ export function App() {
             <Route path="/member/nomination" element={<NominationPage />} />
             <Route path="/member/kyc" element={<KycPage />} />
             <Route path="/member/pension" element={<PensionApplicationPage />} />
+            <Route path="/member/higher-pension" element={<HigherPensionPage />} />
+            <Route path="/international-worker" element={<InternationalWorkerPage />} />
+            <Route path="/employer/international" element={<InternationalPage />} />
+            <Route path="/office/edli-claims" element={<EdliPage />} />
+            <Route path="/office/international" element={<InternationalOfficePage />} />
+            <Route path="/ho/agreements" element={<InternationalOfficePage />} />
             <Route path="/office/pension-claims" element={<PensionClaimsPage />} />
             <Route path="/office/claim-tools" element={<ClaimToolsPage />} />
             <Route path="/claimant" element={<ClaimantPage />} />

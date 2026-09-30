@@ -137,3 +137,15 @@ vishwas:
   # ILLUSTRATIVE settlement of disputed 14B damages: on approval the establishment pays this share of the damages it
   # applied for and the rest is waived, as one revised demand. Not the terms of any actual EPFO scheme.
   settlement_share_bp: 3000
+higher_pension:
+  # Joint option for pension on higher wages (ILLUSTRATIVE, after the Supreme Court's judgment of 4 November 2022):
+  # a member of the pension scheme in service on in_service_on, whose wages were above the wage ceiling, may opt
+  # jointly with the employer. The employer validates the wages; the dues are the employer's pension share
+  # (eps_share_bp) of the wages above the ceiling for each month, moved from the PF account to the pension fund.
+  # Interest on the dues is not worked out here.
+  in_service_on: "2014-09-01"
+  eps_share_bp: 833
+  wage_ceilings:                          # the ceiling from a wage month onwards
+    - {from_month: "1995-11", ceiling_paise: 500000}
+    - {from_month: "2001-06", ceiling_paise: 650000}
+    - {from_month: "2014-09", ceiling_paise: 1500000}

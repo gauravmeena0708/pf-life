@@ -209,6 +209,22 @@
   },
   {
     "method": "POST",
+    "path_template": "/employers/me/higher-pension-options/{optionId}/dues-previews",
+    "regex": "^/employers/me/higher\\-pension\\-options/[^/]+/dues\\-previews$",
+    "status": "W",
+    "phase": 1,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "Dues the uploaded wages give, before the signatory confirms",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/employers/me/ecr-filings/{filingId}/principal-employer-tags",
     "regex": "^/employers/me/ecr\\-filings/[^/]+/principal\\-employer\\-tags$",
     "status": "P",
@@ -243,8 +259,8 @@
     "method": "POST",
     "path_template": "/employers/me/higher-pension-options/{optionId}/validations",
     "regex": "^/employers/me/higher\\-pension\\-options/[^/]+/validations$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "pension",
     "upstream": "http://pension-service:8000",
     "money": false,
@@ -679,8 +695,8 @@
     "method": "POST",
     "path_template": "/office/international/coc-applications/{id}/decisions",
     "regex": "^/office/international/coc\\-applications/[^/]+/decisions$",
-    "status": "M",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "international",
     "upstream": "http://international-service:8000",
     "money": false,
@@ -776,8 +792,8 @@
     "method": "POST",
     "path_template": "/international/coc-applications/{id}/signed-uploads",
     "regex": "^/international/coc\\-applications/[^/]+/signed\\-uploads$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "international",
     "upstream": "http://international-service:8000",
     "money": false,
@@ -1096,8 +1112,8 @@
     "method": "GET",
     "path_template": "/international/coc-applications/{id}/certificate",
     "regex": "^/international/coc\\-applications/[^/]+/certificate$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "international",
     "upstream": "http://international-service:8000",
     "money": false,
@@ -1209,8 +1225,8 @@
     "method": "POST",
     "path_template": "/international/coc-applications/{id}/extensions",
     "regex": "^/international/coc\\-applications/[^/]+/extensions$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "international",
     "upstream": "http://international-service:8000",
     "money": false,
@@ -1336,6 +1352,22 @@
   },
   {
     "method": "POST",
+    "path_template": "/office/edli-claims/{claimId}/benefit-previews",
+    "regex": "^/office/edli\\-claims/[^/]+/benefit\\-previews$",
+    "status": "W",
+    "phase": 1,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.edli"
+    ],
+    "summary": "The EDLI benefit from the verified average wages, before deciding",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/employers/me/challans/{trrn}/payment-intents",
     "regex": "^/employers/me/challans/[^/]+/payment\\-intents$",
     "status": "M",
@@ -1419,8 +1451,8 @@
     "method": "GET",
     "path_template": "/members/me/higher-pension-options/{optionId}",
     "regex": "^/members/me/higher\\-pension\\-options/[^/]+$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "pension",
     "upstream": "http://pension-service:8000",
     "money": false,
@@ -2418,6 +2450,22 @@
     "revocation": false
   },
   {
+    "method": "GET",
+    "path_template": "/office/international/coc-applications",
+    "regex": "^/office/international/coc\\-applications$",
+    "status": "W",
+    "phase": 1,
+    "owner": "international",
+    "upstream": "http://international-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.iw"
+    ],
+    "summary": "Certificate of Coverage applications of the office's establishments",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/office/pensions/ppos/{ppoId}/dispatches",
     "regex": "^/office/pensions/ppos/[^/]+/dispatches$",
@@ -2551,8 +2599,8 @@
     "method": "POST",
     "path_template": "/office/edli-claims/{claimId}/decisions",
     "regex": "^/office/edli\\-claims/[^/]+/decisions$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "claim",
     "upstream": "http://claim-service:8000",
     "money": true,
@@ -2663,8 +2711,8 @@
     "method": "GET",
     "path_template": "/employers/me/higher-pension-options",
     "regex": "^/employers/me/higher\\-pension\\-options$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "pension",
     "upstream": "http://pension-service:8000",
     "money": false,
@@ -3090,14 +3138,15 @@
     "method": "GET",
     "path_template": "/international/coc-applications/{id}",
     "regex": "^/international/coc\\-applications/[^/]+$",
-    "status": "M",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "international",
     "upstream": "http://international-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
-      "employer.signatory"
+      "employer.signatory",
+      "fo.iw"
     ],
     "summary": "CoC status",
     "revocation": false
@@ -3119,11 +3168,27 @@
     "revocation": false
   },
   {
+    "method": "GET",
+    "path_template": "/members/me/higher-pension-options",
+    "regex": "^/members/me/higher\\-pension\\-options$",
+    "status": "W",
+    "phase": 1,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "The member's higher-pension options and the eligibility date (illustrative)",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/members/me/higher-pension-options",
     "regex": "^/members/me/higher\\-pension\\-options$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "pension",
     "upstream": "http://pension-service:8000",
     "money": false,
@@ -3819,11 +3884,27 @@
     "revocation": false
   },
   {
+    "method": "GET",
+    "path_template": "/international/coc-applications",
+    "regex": "^/international/coc\\-applications$",
+    "status": "W",
+    "phase": 1,
+    "owner": "international",
+    "upstream": "http://international-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.signatory"
+    ],
+    "summary": "The establishment's Certificate of Coverage applications",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/international/coc-applications",
     "regex": "^/international/coc\\-applications$",
-    "status": "M",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "international",
     "upstream": "http://international-service:8000",
     "money": false,
@@ -5033,13 +5114,14 @@
     "method": "GET",
     "path_template": "/international/agreements",
     "regex": "^/international/agreements$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "international",
     "upstream": "http://international-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
+      "employer.signatory",
       "ho.iwu"
     ],
     "summary": "Social-security agreement catalogue (synthetic, labelled)",
@@ -5049,8 +5131,8 @@
     "method": "GET",
     "path_template": "/members/me/international",
     "regex": "^/members/me/international$",
-    "status": "P",
-    "phase": 2,
+    "status": "W",
+    "phase": 1,
     "owner": "international",
     "upstream": "http://international-service:8000",
     "money": false,
@@ -6154,6 +6236,22 @@
       "fo.da_accounts"
     ],
     "summary": "Returns submitted but not yet paid (to reject, or to reject a stuck payment)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/edli-claims",
+    "regex": "^/office/edli\\-claims$",
+    "status": "W",
+    "phase": 1,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.edli"
+    ],
+    "summary": "EDLI claims admitted by the office, waiting for the EDLI section",
     "revocation": false
   },
   {

@@ -61,6 +61,8 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/claims/{claimId}/bank-details` | W |
 | `GET /members/me/employment-history` | W |
 | `GET /members/me/grievances` | W |
+| `GET /members/me/higher-pension-options` | W |
+| `GET /members/me/higher-pension-options/{optionId}` | W |
 | `GET /members/me/identity-assurance` | W |
 | `GET /members/me/kyc` | W |
 | `GET /members/me/nominations` | W |
@@ -91,6 +93,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/me/claims/{claimId}/re-disbursement-requests` | W |
 | `POST /members/me/exits` | W |
 | `POST /members/me/grievances` | W |
+| `POST /members/me/higher-pension-options` | W |
 | `POST /members/me/joint-declarations` | W |
 | `POST /members/me/kyc/bank-accounts` | W |
 | `POST /members/me/kyc/{kycType}` | W |
@@ -108,11 +111,9 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `PUT /members/me/claims/{claimId}/bank-details` | W |
 | `POST /members/uan-activations` | M |
 | `POST /members/uan-allotments` | M |
-| `GET /members/me/higher-pension-options/{optionId}` | P |
 | `GET /members/me/tax/form-16a` | P |
 | `POST /grievances/{grievanceId}/feedback` | P |
 | `POST /grievances/{grievanceId}/reminders` | P |
-| `POST /members/me/higher-pension-options` | P |
 | `POST /public/claims/status-lookups` | P |
 
 Integration adapters: `uidai`
@@ -193,7 +194,7 @@ Activities: **F10.worker** View own international-worker status and CoC (no dire
 
 | Endpoint | Status |
 |---|---|
-| `GET /members/me/international` | P |
+| `GET /members/me/international` | W |
 
 #### `complainant` — Grievance complainant who is not logged in (member, pensioner, employer, other)
 
@@ -269,6 +270,7 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `GET /employers/me/demands` | W |
 | `GET /employers/me/ecr-filings` | W |
 | `GET /employers/me/ecr-filings/{filingId}` | W |
+| `GET /employers/me/higher-pension-options` | W |
 | `GET /employers/me/joint-declarations` | W |
 | `GET /employers/me/kyc-approvals` | W |
 | `GET /employers/me/ownership-declaration` | W |
@@ -277,6 +279,10 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `GET /employers/me/signature-registrations` | W |
 | `GET /employers/me/transfer-requests` | W |
 | `GET /employers/me/vishwas-applications` | W |
+| `GET /international/agreements` | W |
+| `GET /international/coc-applications` | W |
+| `GET /international/coc-applications/{id}` | W |
+| `GET /international/coc-applications/{id}/certificate` | W |
 | `PATCH /employers/me` | W |
 | `POST /employers/me/approvals/{approvalId}/decisions` | W |
 | `POST /employers/me/branches` | W |
@@ -287,25 +293,23 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W |
 | `POST /employers/me/ecr-filings/{filingId}/cancellations` | W |
 | `POST /employers/me/ecr-filings/{filingId}/submissions` | W |
+| `POST /employers/me/higher-pension-options/{optionId}/dues-previews` | W |
+| `POST /employers/me/higher-pension-options/{optionId}/validations` | W |
 | `POST /employers/me/joint-declarations` | W |
 | `POST /employers/me/joint-declarations/{jdId}/decisions` | W |
 | `POST /employers/me/kyc-approvals/{requestId}/decisions` | W |
 | `POST /employers/me/transfer-requests/{transferId}/decisions` | W |
 | `POST /employers/me/vishwas-applications` | W |
+| `POST /international/coc-applications` | W |
+| `POST /international/coc-applications/{id}/extensions` | W |
+| `POST /international/coc-applications/{id}/signed-uploads` | W |
 | `PUT /employers/me/ownership-declaration` | W |
-| `GET /international/coc-applications/{id}` | M |
 | `POST /employers/me/challans/{trrn}/payment-intents` | M |
 | `POST /employers/me/kyc/{kycType}` | M |
-| `POST /international/coc-applications` | M |
-| `GET /employers/me/higher-pension-options` | P |
-| `GET /international/coc-applications/{id}/certificate` | P |
 | `POST /employers/me/closure-requests` | P |
-| `POST /employers/me/higher-pension-options/{optionId}/validations` | P |
 | `POST /employers/me/office-transfer-requests` | P |
 | `POST /employers/me/proceedings/{caseId}/submissions` | P |
 | `POST /employers/voluntary-coverage-requests` | P |
-| `POST /international/coc-applications/{id}/extensions` | P |
-| `POST /international/coc-applications/{id}/signed-uploads` | P |
 
 Integration adapters: `collecting_bank`, `npci`
 
@@ -758,7 +762,9 @@ Activities: **F04.edli** Process EDLI assurance benefit
 
 | Endpoint | Status |
 |---|---|
-| `POST /office/edli-claims/{claimId}/decisions` | P |
+| `GET /office/edli-claims` | W |
+| `POST /office/edli-claims/{claimId}/benefit-previews` | W |
+| `POST /office/edli-claims/{claimId}/decisions` | W |
 
 #### `fo.iw` — International-worker (IWU) processing at the RO
 
@@ -766,7 +772,9 @@ Activities: **F10.decide** Verify and issue Certificate of Coverage
 
 | Endpoint | Status |
 |---|---|
-| `POST /office/international/coc-applications/{id}/decisions` | M |
+| `GET /international/coc-applications/{id}` | W |
+| `GET /office/international/coc-applications` | W |
+| `POST /office/international/coc-applications/{id}/decisions` | W |
 
 #### `fo.pro` — PRO / Facilitation centre / grievance cell
 
@@ -1020,7 +1028,7 @@ Activities: **F10.ho** Maintain social-security agreements; route totalisation c
 
 | Endpoint | Status |
 |---|---|
-| `GET /international/agreements` | P |
+| `GET /international/agreements` | W |
 | `POST /international/totalisation-claims` | P |
 
 #### `ho.is` — IS Division (application ownership, Issue Tracker, block / unblock)
@@ -1826,7 +1834,6 @@ flowchart LR
 flowchart LR
   F10_apply["employer.signatory<br/>Apply for / extend CoC for a posted worker (IWU portal EMPLO"]
   F10_worker["intl_worker<br/>View own international-worker status and CoC (no direct IWU "]
-  style F10_worker stroke-dasharray: 5 5
   F10_decide["fo.iw<br/>Verify and issue Certificate of Coverage"]
   F10_foreign["ext.foreign_ss<br/>Foreign social-security agency verifies CoC (FOREIGN AGENCIE"]
   F10_ho["ho.iwu<br/>Maintain social-security agreements; route totalisation clai"]

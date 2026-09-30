@@ -2,7 +2,7 @@
 COMPOSE := docker compose
 export PYTHONPATH := $(CURDIR)/packages/common-auth-client:$(CURDIR)/packages/common-observability:$(CURDIR)/packages/common-persistence
 SERVICES := employer-service member-service contribution-service claim-service payment-simulator workflow-service \
-            grievance-service audit-service reporting-service intelligence-service pension-service platform-service compliance-service mock-integrations
+            grievance-service audit-service reporting-service intelligence-service pension-service platform-service compliance-service international-service mock-integrations
 
 .PHONY: help env up up-lite up-direct down reset ps logs migrate seed test test-packages test-services e2e security resilience check-docs scaffold demo
 

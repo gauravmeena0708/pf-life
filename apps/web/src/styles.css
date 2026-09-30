@@ -259,3 +259,11 @@ code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9em; }
 
 .state-pill { white-space: nowrap; }
 .plain-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+/* Preserve certificate line breaks and print the selected certificate on its own. */
+.certificate-text { white-space: pre-wrap; }
+@media print {
+  body:has(.coc-certificate) * { visibility: hidden; }
+  body .coc-certificate, body .coc-certificate * { visibility: visible; }
+  .coc-certificate { position: absolute; inset: 0 auto auto 0; width: 100%; box-shadow: none; }
+  .coc-certificate .no-print { display: none; }
+}

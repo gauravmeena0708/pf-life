@@ -149,6 +149,22 @@
       {
         "name": "fo.da_compliance",
         "description": "Dealing assistant (Compliance) — OLRE scrutiny of new registrations"
+      },
+      {
+        "name": "intl_worker",
+        "description": "International worker (foreign national employed in India)"
+      },
+      {
+        "name": "fo.iw",
+        "description": "International Workers cell — verifies and issues Certificates of Coverage"
+      },
+      {
+        "name": "ho.iwu",
+        "description": "HO International Workers Unit — social-security agreements"
+      },
+      {
+        "name": "fo.edli",
+        "description": "EDLI section — verifies wages and decides the EDLI assurance benefit"
       }
     ]
   },
@@ -962,6 +978,101 @@
         "member"
       ],
       "id": "00000000-0000-4000-8000-000000000039"
+    },
+    {
+      "username": "member-h",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Member H higher pension",
+      "lastName": "Demo",
+      "email": "member-h@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "member"
+      ],
+      "id": "00000000-0000-4000-8000-000000000040"
+    },
+    {
+      "username": "worker-expat",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "International worker",
+      "lastName": "Demo",
+      "email": "worker-expat@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "intl_worker"
+      ],
+      "id": "00000000-0000-4000-8000-000000000041"
+    },
+    {
+      "username": "iw-officer",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "International Workers cell officer",
+      "lastName": "Demo",
+      "email": "iw-officer@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.iw"
+      ],
+      "id": "00000000-0000-4000-8000-000000000042"
+    },
+    {
+      "username": "ho-iwu",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "HO International Workers Unit",
+      "lastName": "Demo",
+      "email": "ho-iwu@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ho.iwu"
+      ],
+      "id": "00000000-0000-4000-8000-000000000043"
+    },
+    {
+      "username": "ro-edli",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "EDLI dealing officer",
+      "lastName": "Demo",
+      "email": "ro-edli@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.edli"
+      ],
+      "id": "00000000-0000-4000-8000-000000000044"
     }
   ]
 }

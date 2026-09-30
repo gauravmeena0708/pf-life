@@ -161,6 +161,9 @@ async def on_case_decision(session: AsyncSession, event: dict[str, Any]) -> None
         claim = await transition(session, claim, "REJECTED_WITH_REASON", role, f"Rejected: {reason}", decision_reason=reason)
         await record_decision(session, claim, "REJECTED", "OFFICER_REJECTED", cid)
         await notify(session, claim, "CLAIM_REJECTED", cid, reason=reason)
+    elif p["final"] and claim["claim_type"] == "DEATH_EDLI":   # P2.8c: the EDLI section decides the benefit
+        await transition(session, claim, "PENDING_EDLI_DECISION", role,
+                         "Admitted; sent to the EDLI section to verify the wages and decide the benefit.", decision_reason=reason)
     elif p["final"]:
         claim = await transition(session, claim, "APPROVED", role, "Approved.", decision_reason=reason)
         await record_decision(session, claim, "APPROVED", "OFFICER_APPROVED", cid)

@@ -98,6 +98,16 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 8c: higher pension, international workers, the EDLI decision (30 September 2026)
+
+Unit tests 404 passed (new: international-service `test_international.py`, pension-service `test_higher_pension.py`,
+claim-service `test_edli_decision.py`, member-service `test_notification_templates.py`); web 55 passed; must-deny 18
+passed; end to end 56 of 59 in the full run, including `test_higher_pension_international_edli.py`. Journey B failed
+because member A's synthetic balance is used up by earlier runs (₹2,43,794 left; the journey needs ₹6,00,000 —
+the known limit below, cleared by `make reset`). Two claim tests failed in the same run because they picked up a
+member A claim another test had left mid-way; both pass when run again. The new international-service database was
+created on the running stack by hand (on a fresh stack the init script creates it).
+
 ## Update — Phase 2, slice 8b: member services — e-Nomination, attestation, bank switch, auto-transfer, exits (30 September 2026)
 
 Unit tests 369 passed (new: member-service `test_nominations.py`, claim-service and workflow-service

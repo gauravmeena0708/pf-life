@@ -7,6 +7,7 @@ import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 import { PendingApprovals } from "./SignaturePanels";
+import { HigherPensionValidations } from "./HigherPensionValidations";
 
 interface CaseItem { case_id: string; subject_ref: string; state: string; version: number; data: Record<string, string> }
 interface ClaimAttestation {
@@ -197,6 +198,7 @@ export function MemberActionsPage() {
       </section> : null}
 
       {signatory ? <>
+        <HigherPensionValidations />
         <section className="card stack" aria-labelledby="approvals-heading"><h2 id="approvals-heading">Approvals — dates of exit</h2>
           <ProblemMessage error={approvals.error} />
           {approvals.isLoading ? <p role="status">Loading exit approvals…</p> : null}

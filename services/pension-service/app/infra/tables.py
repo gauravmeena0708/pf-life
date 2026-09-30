@@ -96,6 +96,7 @@ member_service = Table(
     Column("office_id", String(40)),
     Column("uan", String(12)),
     Column("account_link_id", String(40)),
+    Column("establishment_id", String(40)),                  # the present employer, who validates a higher-pension option
 )
 
 office_staff = Table(
@@ -182,4 +183,27 @@ brs_statements = Table(
     Column("difference_paise", BigInteger, nullable=False),
     Column("prepared_by", String(80), nullable=False),
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
+)
+
+# Joint options for pension on higher wages (P2.8c): the member opts, the employer validates the wages, and the dues
+# (the pension share of the wages above the ceiling) are worked out from the rule set. The office decision and the
+# PF → pension fund transfer are Phase 3.
+higher_pension_options = Table(
+    "higher_pension_options", metadata,
+    Column("option_id", String(40), primary_key=True),
+    Column("subject", String(80), nullable=False, index=True),
+    Column("uan", String(12), nullable=False),
+    Column("account_link_id", String(40), nullable=False),
+    Column("establishment_id", String(40), nullable=False, index=True),
+    Column("office_id", String(40)),
+    Column("higher_wages_from", String(7), nullable=False),       # the member's declaration: wages above the ceiling from
+    Column("state", String(30), nullable=False),                  # SUBMITTED | VALIDATED | REJECTED_BY_EMPLOYER
+    Column("wages", JSON),                                        # [{month, wage_paise, ceiling_paise, excess_paise, dues_paise}]
+    Column("dues_paise", BigInteger),
+    Column("working", Text),
+    Column("rule_version", String(60)),
+    Column("employer_note", Text),
+    Column("validated_by", String(80)),
+    Column("submitted_at", DateTime(timezone=True), server_default=func.now()),
+    Column("validated_at", DateTime(timezone=True)),
 )

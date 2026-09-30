@@ -326,6 +326,14 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
     if "vishwas" in document:
         if not _whole((document["vishwas"] or {}).get("settlement_share_bp"), 0, 10000):
             problems.append("vishwas.settlement_share_bp must be between 0 and 10000 basis points")
+    if "higher_pension" in document:
+        hp = document["higher_pension"] or {}
+        if not _whole(hp.get("eps_share_bp"), 0, 10000):
+            problems.append("higher_pension.eps_share_bp must be between 0 and 10000 basis points")
+        ceilings = hp.get("wage_ceilings")
+        if not isinstance(ceilings, list) or not ceilings or any(not _whole(c.get("ceiling_paise"), 0, 10**9) for c in ceilings) \
+                or [c.get("from_month") for c in ceilings] != sorted(str(c.get("from_month")) for c in ceilings):
+            problems.append("higher_pension.wage_ceilings must be a list of {from_month, ceiling_paise} in month order")
     if "late_payment" in document:
         lp = document["late_payment"] or {}
         if not _whole(lp.get("due_day"), 1, 28):

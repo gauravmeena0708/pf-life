@@ -135,8 +135,9 @@ Rules that apply to every row:
 | `POST /employers/me/transfer-requests/{transferId}/decisions` 🔐 | Attest / reject transfer | W | 1 | claim |
 | `GET /employers/me/claim-attestations` | Claims awaiting employer attestation | W | 1 | claim |
 | `POST /employers/me/claim-attestations/{claimId}/decisions` 🔐 | Attest / reject claim | W | 1 | claim |
-| `GET /employers/me/higher-pension-options` | Member joint options for higher pension awaiting validation | P | 2 | pension |
-| `POST /employers/me/higher-pension-options/{optionId}/validations` 🔐 | Validate option and upload wage details | P | 2 | pension |
+| `GET /employers/me/higher-pension-options` | Member joint options for higher pension awaiting validation | W | 1 | pension |
+| `POST /employers/me/higher-pension-options/{optionId}/validations` 🔐 | Validate option and upload wage details | W | 1 | pension |
+| `POST /employers/me/higher-pension-options/{optionId}/dues-previews` | Dues the uploaded wages give, before the signatory confirms | W | 1 | pension |
 
 
 **Added from the stakeholder activity map** (`docs/stakeholder-activities.yaml`)
@@ -256,8 +257,9 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /members/me/transfers/auto/{transferId}/confirmations` 🔐 | Confirm auto-transfer | W | 1 | claim |
 | `GET /members/me/transfers/{transferId}/annexure-k` | **Annexure K** transfer statement | W | 1 | contribution |
 | `GET /members/me/pension-scheme-certificate` | Scheme certificate status | W | 1 | pension |
-| `POST /members/me/higher-pension-options` 🔐 | Submit joint option for higher pension | P | 2 | pension |
-| `GET /members/me/higher-pension-options/{optionId}` | Higher-pension application status | P | 2 | pension |
+| `POST /members/me/higher-pension-options` 🔐 | Submit joint option for higher pension | W | 1 | pension |
+| `GET /members/me/higher-pension-options/{optionId}` | Higher-pension application status | W | 1 | pension |
+| `GET /members/me/higher-pension-options` | The member's higher-pension options and the eligibility date (illustrative) | W | 1 | pension |
 
 
 **Designed from the Samadhan Setu analysis** (not in the spec files; see `docs/samadhan-setu-mapping.md`)
@@ -307,7 +309,9 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /office/transfers` | Form 13 transfers awaiting the DA's verification or the AO's decision | W | 1 | claim |
 | `POST /office/transfers/{transferId}/verifications` | DA verifies service at both establishments before the AO decides | W | 1 | claim |
 | `POST /office/transfers/{transferId}/decisions` 🔐 | Process a Form 13 transfer between member IDs / offices | W | 1 | claim |
-| `POST /office/edli-claims/{claimId}/decisions` 💰🔐 | Decide EDLI assurance-benefit claim | P | 2 | claim |
+| `POST /office/edli-claims/{claimId}/decisions` 💰🔐 | Decide EDLI assurance-benefit claim | W | 1 | claim |
+| `GET /office/edli-claims` | EDLI claims admitted by the office, waiting for the EDLI section | W | 1 | claim |
+| `POST /office/edli-claims/{claimId}/benefit-previews` | The EDLI benefit from the verified average wages, before deciding | W | 1 | claim |
 
 
 **Added from the Samadhan Setu integration spec** (`../samadhan-setu files/PF_LIFE_INTEGRATION_SPECIFICATION.md`, checked against the tracker issues)
@@ -554,12 +558,14 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `GET /members/me/international` | International worker profile | P | 2 | international |
-| `POST /international/coc-applications` | Certificate of Coverage application (mock) | M | 2 | international |
-| `GET /international/coc-applications/{id}` | CoC status | M | 2 | international |
-| `POST /international/coc-applications/{id}/extensions` | CoC extension / renewal | P | 2 | international |
-| `POST /office/international/coc-applications/{id}/decisions` 🔐 | IW cell verification and CoC issuance (mock) | M | 2 | international |
-| `GET /international/agreements` | Social-security agreement catalogue (synthetic, labelled) | P | 2 | international |
+| `GET /members/me/international` | International worker profile | W | 1 | international |
+| `POST /international/coc-applications` | Certificate of Coverage application (mock) | W | 1 | international |
+| `GET /international/coc-applications/{id}` | CoC status | W | 1 | international |
+| `GET /international/coc-applications` | The establishment's Certificate of Coverage applications | W | 1 | international |
+| `GET /office/international/coc-applications` | Certificate of Coverage applications of the office's establishments | W | 1 | international |
+| `POST /international/coc-applications/{id}/extensions` | CoC extension / renewal | W | 1 | international |
+| `POST /office/international/coc-applications/{id}/decisions` 🔐 | IW cell verification and CoC issuance (mock) | W | 1 | international |
+| `GET /international/agreements` | Social-security agreement catalogue (synthetic, labelled) | W | 1 | international |
 | `POST /international/totalisation-claims` | Route a benefit claim under a social-security agreement | P | 3 | international |
 
 
@@ -567,8 +573,8 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `POST /international/coc-applications/{id}/signed-uploads` | Employer uploads signed CoC application | P | 2 | international |
-| `GET /international/coc-applications/{id}/certificate` | Download issued Certificate of Coverage | P | 2 | international |
+| `POST /international/coc-applications/{id}/signed-uploads` | Employer uploads signed CoC application | W | 1 | international |
+| `GET /international/coc-applications/{id}/certificate` | Download issued Certificate of Coverage | W | 1 | international |
 | `GET /partners/foreign-agencies/coc-certificates/{id}` | Foreign agency verifies a CoC (FOREIGN AGENCIES login) | P | 3 | international |
 
 ## 13. Grievances, security, platform, audit and oversight
