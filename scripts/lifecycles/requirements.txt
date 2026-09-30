@@ -1,4 +1,5 @@
+# Install from the repository root: pip resolves -e paths from the working directory.
 -r ../manuals/requirements.txt
--e ../../packages/common-observability
--e ../../packages/common-persistence
--e ../../packages/common-auth-client
+-e ./packages/common-observability
+-e ./packages/common-persistence
+-e ./packages/common-auth-client
