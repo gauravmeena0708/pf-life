@@ -4997,6 +4997,23 @@
   },
   {
     "method": "GET",
+    "path_template": "/vigilance/sensitive-posts",
+    "regex": "^/vigilance/sensitive\\-posts$",
+    "status": "W",
+    "phase": 1,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.cvo",
+      "ho.hr"
+    ],
+    "summary": "Officers on sensitive posts, their tenure and who is due for rotation (P2.10b)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/employers/me/contractors",
     "regex": "^/employers/me/contractors$",
     "status": "W",
@@ -6015,6 +6032,39 @@
       "fo.da_accounts"
     ],
     "summary": "Stopped claims of the office",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/vigilance/clearances",
+    "regex": "^/vigilance/clearances$",
+    "status": "W",
+    "phase": 1,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.cvo",
+      "ho.hr"
+    ],
+    "summary": "Vigilance clearances issued (the CVO also sees what withheld them)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/vigilance/clearances",
+    "regex": "^/vigilance/clearances$",
+    "status": "W",
+    "phase": 1,
+    "owner": "workflow",
+    "upstream": "http://workflow-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.hr"
+    ],
+    "summary": "Ask for vigilance clearance for an officer (posting to a sensitive post, promotion, retirement, deputation, passport NOC)",
     "revocation": false
   },
   {

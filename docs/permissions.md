@@ -979,7 +979,10 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /hrm/me` | W | self (read) / HR role (write) |  |
+| `GET /vigilance/clearances` | W | restricted — vigilance roles only, case-by-case |  |
+| `GET /vigilance/sensitive-posts` | W | restricted — vigilance roles only, case-by-case |  |
 | `POST /hrm/postings` | W | self (read) / HR role (write) | yes |
+| `POST /vigilance/clearances` | W | restricted — vigilance roles only, case-by-case |  |
 
 **`ho.investment`** — Investment / IMC division
 
@@ -1005,6 +1008,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /vigilance/cases` | W | restricted — vigilance roles only, case-by-case |  |
 | `GET /vigilance/cases/{caseId}` | W | restricted — vigilance roles only, case-by-case |  |
+| `GET /vigilance/clearances` | W | restricted — vigilance roles only, case-by-case |  |
+| `GET /vigilance/sensitive-posts` | W | restricted — vigilance roles only, case-by-case |  |
 | `POST /vigilance/cases/{caseId}/decisions` | W | restricted — vigilance roles only, case-by-case | yes |
 
 **`ho.security`** — Information security / SOC (cyber incidents, access reviews)

@@ -5,3 +5,5 @@
 .vigilance-page .vigilance-list li + li { margin-top: .35rem; }
 .vigilance-page .vigilance-prose { white-space: pre-wrap; overflow-wrap: anywhere; }
 .vigilance-page .kv dd { overflow-wrap: anywhere; }
+.vigilance-panel { border-top: 3px solid #b48b32; }
+.vigilance-panel .vigilance-alert-pill { display: inline-block; padding: .12rem .45rem; border: 1px solid #a52828; border-radius: 1rem; color: #8b1e1e; background: #fff4f2; font-size: .78rem; font-weight: 700; white-space: nowrap; }

@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 238 |
+| Activities | 240 |
 | Stakeholders with at least one API | 96 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 1 |
@@ -1052,12 +1052,15 @@ Activities: **F08.ho** Monitor grievance pendency and root causes
 
 #### `ho.hr` — HR / HRM Wing
 
-Activities: **F13.hr** Staff profiles, postings and delegation of roles to offices
+Activities: **F07.vig_clearance** Ask for vigilance clearance before a posting to a sensitive post, a promotion, retirement, a deputation or a passport NOC; plan the rotation of sensitive posts; **F13.hr** Staff profiles, postings and delegation of roles to offices
 
 | Endpoint | Status |
 |---|---|
 | `GET /hrm/me` | W |
+| `GET /vigilance/clearances` | W |
+| `GET /vigilance/sensitive-posts` | W |
 | `POST /hrm/postings` | W |
+| `POST /vigilance/clearances` | W |
 
 #### `ho.investment` — Investment / IMC division
 
@@ -1085,12 +1088,14 @@ Activities: **F13.publicity** Publish circulars and awareness content
 
 #### `ho.cvo` — **Chief Vigilance Officer** and **Director (Vigilance)**
 
-Activities: **F07.vig_ho** CVO / Director (Vigilance): assign preliminary inquiries and decide on the findings
+Activities: **F07.vig_ho** CVO / Director (Vigilance): assign preliminary inquiries and decide on the findings; **F07.vig_preventive** Preventive vigilance: officers on sensitive posts and their rotation; clearances issued and what withheld them
 
 | Endpoint | Status |
 |---|---|
 | `GET /vigilance/cases` | W |
 | `GET /vigilance/cases/{caseId}` | W |
+| `GET /vigilance/clearances` | W |
+| `GET /vigilance/sensitive-posts` | W |
 | `POST /vigilance/cases/{caseId}/decisions` | W |
 
 #### `ho.security` — Information security / SOC (cyber incidents, access reviews)
@@ -1761,6 +1766,8 @@ flowchart LR
   F07_vig_referral["ho.caiu<br/>Refer a confirmed risk signal, a member's report or a compla"]
   F07_vig_zone["zo.vigilance<br/>Inquire into vigilance cases assigned to the zone, with rest"]
   F07_vig_ho["ho.cvo<br/>CVO / Director (Vigilance): assign preliminary inquiries and"]
+  F07_vig_preventive["ho.cvo<br/>Preventive vigilance: officers on sensitive posts and their "]
+  F07_vig_clearance["ho.hr<br/>Ask for vigilance clearance before a posting to a sensitive "]
   F07_member_report["member<br/>Report suspicious activity; account recovery; view sessions"]
   F07_freeze_ho --> F07_block
   F07_freeze_zo --> F07_block

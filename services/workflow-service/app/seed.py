@@ -66,6 +66,8 @@ async def main() -> None:
             await session.execute(insert(office_staff).values(
                 subject=s["subject"], username=s["username"], stakeholder=s["stakeholder"],
                 office_id=s["office_id"]).on_conflict_do_nothing())
+            await session.execute(update(office_staff).where(office_staff.c.subject == s["subject"], office_staff.c.posted_since.is_(None))
+                                  .values(posted_since=date.fromisoformat(s.get("posted_since", "2025-04-01"))))   # P2.10b: tenure
     print(f"workflow-service seeded: office {office['office_id']}, {len(seed.get('office_staff', []))} postings")
 
 

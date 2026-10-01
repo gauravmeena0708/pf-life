@@ -116,3 +116,59 @@ def test_a_late_report_is_marked(ctx):
     assert client.get("/api/v1/vigilance/cases", headers=zone()).json()["data"]["cases"][0]["overdue"] is True
     r = client.post(f"/api/v1/vigilance/cases/{case_id}/findings", json=FINDINGS, headers=zone(case_id))
     assert r.json()["data"]["late"] is True and events(q, "VigilanceFindingsRecorded.v1")[0]["late"] is True
+
+
+# ── P2.10b: preventive vigilance ─────────────────────────────────────────────────────────────────
+HR = S["hrm-employee"]
+
+
+def hr(step_for=None):
+    return hdr(HR, "ho.hr", {"action": "post-staff", "resource_id": step_for} if step_for else None)
+
+
+def test_sensitive_posts_and_rotation(ctx):
+    client, q, _ = ctx
+    data = client.get("/api/v1/vigilance/sensitive-posts", headers=hr()).json()["data"]
+    by = {o["username"]: o for o in data["officers"]}
+    assert set(by) == {"ro-cashier", "ro-da-compliance"}                          # the seeded officers on sensitive posts
+    assert by["ro-cashier"]["posted_since"] == "2023-06-01" and by["ro-cashier"]["rotation"] in ("ROTATION_DUE", "ROTATION_OVERDUE")
+    assert data["transfer_list"] and all(by[u]["rotation"] in ("ROTATION_DUE", "ROTATION_OVERDUE") for u in data["transfer_list"])
+    assert client.get("/api/v1/vigilance/sensitive-posts", headers=cvo()).status_code == 200
+    assert client.get("/api/v1/vigilance/sensitive-posts", headers=hdr(S["ro-oic"], "fo.oic")).status_code == 403
+
+
+def test_clearance_withheld_while_a_case_names_the_officer(ctx):
+    client, q, deliver = ctx
+    body = {"username": "do-caseworker", "purpose": "PROMOTION"}
+    r = client.post("/api/v1/vigilance/clearances", json=body, headers=hr())
+    assert r.status_code == 201 and r.json()["data"]["cleared"] is True, r.text
+    case_id = refer(client, deliver, subject_ref="do-caseworker").json()["data"]["case_id"]
+    withheld = client.post("/api/v1/vigilance/clearances", json=body, headers=hr()).json()["data"]
+    assert withheld["cleared"] is False and "case_ids" not in withheld and "Chief Vigilance Officer" in withheld["reason"]
+    assert [c["case_ids"] for c in client.get("/api/v1/vigilance/clearances", headers=cvo()).json()["data"]["clearances"]][0] == [case_id]
+    assert "case_ids" not in client.get("/api/v1/vigilance/clearances", headers=hr()).json()["data"]["clearances"][0]
+    client.post(f"/api/v1/vigilance/cases/{case_id}/decisions", json={"decision": "CLOSED_NO_SUBSTANCE", "note": "Nothing in the allegation"},
+                headers=cvo(case_id))
+    assert client.post("/api/v1/vigilance/clearances", json=body, headers=hr()).json()["data"]["cleared"] is True
+    assert client.post("/api/v1/vigilance/clearances", json={**body, "purpose": "HOLIDAY"}, headers=hr()).status_code == 422
+    assert client.post("/api/v1/vigilance/clearances", json={**body, "username": "nobody-here"}, headers=hr()).status_code == 404
+    assert client.post("/api/v1/vigilance/clearances", json=body, headers=cvo()).status_code == 403
+    assert [e["cleared"] for e in events(q, "VigilanceClearanceIssued.v1")] == [True, False, True]
+
+
+def test_posting_to_a_sensitive_post_needs_a_current_clearance(ctx):
+    client, q, deliver = ctx
+    posting = {"username": "ro-pro", "stakeholder": "fo.cash", "office_id": "RO-DEMO-01", "reason": "Rotation of the cash section (synthetic)"}
+    r = client.post("/api/v1/hrm/postings", json=posting, headers=hr("ro-pro"))
+    assert r.status_code == 409 and r.json()["type"] == "/problems/vigilance-clearance-needed", r.text
+    refer(client, deliver, subject_ref="ro-pro")
+    client.post("/api/v1/vigilance/clearances", json={"username": "ro-pro", "purpose": "POSTING_SENSITIVE"}, headers=hr())
+    assert client.post("/api/v1/hrm/postings", json=posting, headers=hr("ro-pro")).json()["type"] == "/problems/vigilance-clearance-withheld"
+    case_id = q("SELECT case_id FROM vigilance_cases")[0][0]
+    client.post(f"/api/v1/vigilance/cases/{case_id}/decisions", json={"decision": "CLOSED_NO_SUBSTANCE", "note": "Nothing in the allegation"},
+                headers=cvo(case_id))
+    client.post("/api/v1/vigilance/clearances", json={"username": "ro-pro", "purpose": "POSTING_SENSITIVE"}, headers=hr())
+    r = client.post("/api/v1/hrm/postings", json=posting, headers=hr("ro-pro"))
+    assert r.status_code == 200, r.text
+    tenure = {o["username"]: o for o in client.get("/api/v1/vigilance/sensitive-posts", headers=hr()).json()["data"]["officers"]}["ro-pro"]
+    assert tenure["tenure_months"] == 0 and tenure["rotation"] == "WITHIN_TENURE"                     # the posting date is today

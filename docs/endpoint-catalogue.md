@@ -620,6 +620,9 @@ Monitoring (`/monitoring/**`), AI (`/ai/**`), audit (`/audit/**`) and NDC (`/ndc
 | `GET /vigilance/cases/{caseId}` | A vigilance case with its evidence and history (restricted; every read audited) | W | 1 | workflow |
 | `POST /vigilance/cases/{caseId}/findings` 🔐 | Zonal vigilance reports the preliminary inquiry's findings | W | 1 | workflow |
 | `POST /vigilance/cases/{caseId}/decisions` 🔐 | CVO / Director (Vigilance): assign an inquiry, or decide on the findings | W | 1 | workflow |
+| `GET /vigilance/sensitive-posts` | Officers on sensitive posts, their tenure and who is due for rotation (P2.10b) | W | 1 | workflow |
+| `POST /vigilance/clearances` | Ask for vigilance clearance for an officer (posting to a sensitive post, promotion, retirement, deputation, passport NOC) | W | 1 | workflow |
+| `GET /vigilance/clearances` | Vigilance clearances issued (the CVO also sees what withheld them) | W | 1 | workflow |
 | `GET /zo/fraud-risk/cases` | Zonal / regional fraud-risk committee case list | W | 1 | workflow |
 | `POST /hrm/postings` 🔐 | Staff postings and role assignment to offices (drives jurisdiction) | W | 1 | workflow |
 | `GET /audit/concurrent/extracts` | Concurrent Audit Cell daily functionality extract (Audit Portal) | W | 1 | audit |

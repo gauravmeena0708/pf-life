@@ -58,3 +58,57 @@ def test_other_roles_cannot_read_vigilance_cases(persona):
     for name, landing in (("ro-oic", "/office/work-queue"), ("zo-fraud", "/zo/fraud-risk"), ("member-a", "/member")):
         page = persona(name, landing)
         assert call(page, "GET", "/api/v1/vigilance/cases")[0] == 403, name
+
+
+def test_sensitive_posts_clearance_and_posting(persona):
+    """P2.10b: rotation of sensitive posts; clearance withheld while a case names the officer and given once it is
+    closed; a posting to a sensitive post only with a current clearance. Repeatable: the case is closed and the
+    officer posted back."""
+    hr = persona("hrm-employee", "/i/hrm")
+    posts = call(hr, "GET", "/api/v1/vigilance/sensitive-posts")[1]["data"]
+    cashier = next(o for o in posts["officers"] if o["username"] == "ro-cashier")
+    assert cashier["rotation"] in ("ROTATION_DUE", "ROTATION_OVERDUE") and "ro-cashier" in posts["transfer_list"]
+
+    cvo = persona("vigilance-investigator", "/vigilance")
+    close_leftovers(persona, cvo, "ro-fa-accounts")
+    caiu = persona("caiu-investigator", "/caiu/signals")
+    status, r = call(caiu, "POST", "/api/v1/vigilance/referrals", {
+        "source": "STAFF_COMPLAINT", "subject_type": "OFFICIAL", "subject_ref": "ro-fa-accounts", "office_id": "RO-DEMO-01",
+        "allegation": f"Ledger postings made without the second check (synthetic {secrets.token_hex(3)})."})
+    case_id = r["data"]["case_id"]
+    status, r = call(hr, "POST", "/api/v1/vigilance/clearances", {"username": "ro-fa-accounts", "purpose": "PROMOTION"})
+    assert status == 201 and r["data"]["cleared"] is False and "case_ids" not in r["data"], r
+    assert case_id in next(c for c in call(cvo, "GET", "/api/v1/vigilance/clearances")[1]["data"]["clearances"]
+                           if c["clearance_id"] == r["data"]["clearance_id"])["case_ids"]
+    call(cvo, "POST", f"/api/v1/vigilance/cases/{case_id}/decisions", {"decision": "CLOSED_NO_SUBSTANCE", "note": "No substance in it"},
+         {"X-Step-Up-Token": step_up(cvo, "decide-vigilance-case", case_id)})
+    assert call(hr, "POST", "/api/v1/vigilance/clearances", {"username": "ro-fa-accounts", "purpose": "PROMOTION"})[1]["data"]["cleared"] is True
+
+    def post(stakeholder):
+        return call(hr, "POST", "/api/v1/hrm/postings", {"username": "ro-pro-counter", "stakeholder": stakeholder, "office_id": "RO-DEMO-01",
+                                                         "reason": "Rotation of the cash section (synthetic)"},
+                    {"X-Step-Up-Token": step_up(hr, "post-staff", "ro-pro-counter")})
+    call(hr, "POST", "/api/v1/vigilance/clearances", {"username": "ro-pro-counter", "purpose": "POSTING_SENSITIVE"})
+    status, r = post("fo.cash")
+    assert status == 200, r
+    status, r = post("fo.pro_intake")                                                 # back, so other tests find the officer
+    assert status == 200, r
+
+
+def close_leftovers(persona, cvo, username):
+    """An interrupted earlier run can leave a case naming the officer open (it would withhold clearance); finish it
+    through the normal steps: findings by the zone if the inquiry is open, then the CVO closes it."""
+    def decide(case_id, decision):
+        call(cvo, "POST", f"/api/v1/vigilance/cases/{case_id}/decisions", {"decision": decision, "note": "Closed by the next e2e run"},
+             {"X-Step-Up-Token": step_up(cvo, "decide-vigilance-case", case_id)})
+    for c in call(cvo, "GET", "/api/v1/vigilance/cases")[1]["data"]["cases"]:
+        if c["subject_ref"] != username or c["state"] in ("CLOSED", "ACTION_ORDERED"):
+            continue
+        if c["state"] == "PI_ASSIGNED":
+            zone = persona("zo-vigilance", "/vigilance")
+            call(zone, "POST", f"/api/v1/vigilance/cases/{c['case_id']}/findings", {
+                "finding": "NOT_SUBSTANTIATED", "recommendation": "Close the case (left by an earlier run).",
+                "report": "Left open by an interrupted test run; nothing was examined and nothing was found (synthetic).",
+                "evidence_examined": []}, {"X-Step-Up-Token": step_up(zone, "report-vigilance-findings", c["case_id"])})
+        decide(c["case_id"], "CLOSED_NO_SUBSTANCE")
+

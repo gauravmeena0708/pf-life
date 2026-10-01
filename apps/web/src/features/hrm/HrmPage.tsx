@@ -1,17 +1,22 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 
 import { api, command, getSession, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
+import { statusLabel } from "../statusLabel";
+import { ClearancesTable, SensitivePostsPanel, type Clearance } from "../vigilance/PreventiveVigilance";
 
 interface Office { office_id: string; name?: string; zone_id?: string }
 interface Posting { username: string; stakeholder: string; office_id: string; previous: { stakeholder: string; office_id: string }; note: string }
 export function HrmPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient(); const stepUp = useStepUp();
   const [busy, setBusy] = useState(false); const [error, setError] = useState<unknown>(null); const [result, setResult] = useState<Posting | null>(null);
+  const [clearanceBusy, setClearanceBusy] = useState(false); const [clearanceError, setClearanceError] = useState<unknown>(null); const [clearanceResult, setClearanceResult] = useState<Clearance | null>(null);
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
   const hr = session.data?.stakeholder === "ho.hr";
   const me = useQuery({ queryKey: ["hrm-me"], enabled: hr, retry: false,
@@ -33,6 +38,16 @@ export function HrmPage() {
       setResult((await command<Envelope<Posting>>("POST", "/api/v1/hrm/postings", { username, stakeholder, office_id, reason }, { stepUpToken: token })).data);
       form.reset(); await qc.invalidateQueries({ queryKey: ["hrm-me"] });
     } catch (cause) { setError(cause); } finally { setBusy(false); }
+  }
+  async function clear(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault(); if (!hr || clearanceBusy) return;
+    const form = e.currentTarget; const f = new FormData(form);
+    const username = String(f.get("username") ?? "").trim(); const purpose = String(f.get("purpose") ?? ""); const note = String(f.get("note") ?? "").trim();
+    setClearanceBusy(true); setClearanceError(null); setClearanceResult(null);
+    try {
+      const issued = await command<Envelope<Clearance>>("POST", "/api/v1/vigilance/clearances", { username, purpose, ...(note ? { note } : {}) });
+      setClearanceResult(issued.data); form.reset(); await qc.invalidateQueries({ queryKey: ["vigilance-clearances"] });
+    } catch (cause) { setClearanceError(cause); } finally { setClearanceBusy(false); }
   }
   return <section className="stack" aria-labelledby="hrm-heading">
     <PageHeader id="hrm-heading" eyebrow="Human resources" title="HRM" description="Review your posting and record staff postings for the demonstration." current="HRM" />
@@ -58,6 +73,18 @@ export function HrmPage() {
           <p>New posting: {result.stakeholder} · {result.office_id}</p><p>Previous posting: {result.previous.stakeholder} · {result.previous.office_id}</p><p>{result.note}</p>
         </section> : null}
       </section>
+      <section className="card stack vigilance-panel" aria-labelledby="hr-clearance-heading"><h2 id="hr-clearance-heading">Vigilance clearance</h2>
+        <form className="stack" aria-label="Issue vigilance clearance" onSubmit={(e) => void clear(e)}><fieldset className="stack" disabled={clearanceBusy}><legend>Check an officer</legend>
+          <label>Officer user name<input name="username" required minLength={3} maxLength={80} /></label>
+          <label>Purpose<select name="purpose" required defaultValue=""><option value="">Choose purpose</option>{["POSTING_SENSITIVE", "PROMOTION", "RETIREMENT", "DEPUTATION", "PASSPORT_NOC"].map((purpose) => <option key={purpose} value={purpose}>{statusLabel(purpose, t)}</option>)}</select></label>
+          <label>Note (optional)<textarea name="note" maxLength={1000} /></label>
+          <div className="actions"><button type="submit" className="primary">Request clearance</button></div>
+        </fieldset></form>
+        <ProblemMessage error={clearanceError} />
+        {clearanceResult ? <p role="status"><span className="state-pill">{clearanceResult.cleared ? `Cleared until ${clearanceResult.valid_until}` : `Withheld — ${clearanceResult.reason}`}</span></p> : null}
+        <ClearancesTable />
+      </section>
+      <SensitivePostsPanel />
     </> : null}
     <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
   </section>;

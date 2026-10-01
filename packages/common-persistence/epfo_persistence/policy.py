@@ -129,8 +129,9 @@ def split(epf_wages_paise: int, eps_wages_paise: int, age_years: int, rules: dic
 # ── interest, TDS and pension (used by contribution-, claim- and pension-service and by the preview) ──
 
 def section(rules: dict[str, Any], name: str) -> dict[str, Any]:
-    """A section of the rules; a version published before the section existed takes the baseline's."""
-    return rules.get(name) or baseline()[name]
+    """A section of the rules. A version published before the section (or a key of it) existed takes the baseline's
+    for what it lacks; what the version does set wins."""
+    return {**baseline()[name], **(rules.get(name) or {})}
 
 
 FY = re.compile(r"^(\d{4})-(\d{2})$")
@@ -348,6 +349,14 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
             problems.append("vigilance.pi_days must be a whole number of days between 7 and 365")
         if not all(isinstance(vg.get(k), list) and vg[k] for k in ("sources", "outcomes")):
             problems.append("vigilance.sources and vigilance.outcomes must be non-empty lists")
+        if "sensitive_posts" in vg:
+            if not (isinstance(vg["sensitive_posts"], list) and _whole(vg.get("rotation_alert_months"), 1, 120)
+                    and _whole(vg.get("rotation_limit_months"), 1, 120) and vg["rotation_alert_months"] <= vg["rotation_limit_months"]):
+                problems.append("vigilance.sensitive_posts needs a list and rotation_alert_months <= rotation_limit_months (1-120)")
+            if not _whole(vg.get("clearance_valid_days"), 1, 365) or not vg.get("clearance_purposes"):
+                problems.append("vigilance.clearance_valid_days (1-365) and clearance_purposes are required with sensitive_posts")
+            if any(o not in vg["outcomes"] for o in vg.get("withholding_outcomes") or []):
+                problems.append("vigilance.withholding_outcomes must be among vigilance.outcomes")
     if "late_payment" in document:
         lp = document["late_payment"] or {}
         if not _whole(lp.get("due_day"), 1, 28):

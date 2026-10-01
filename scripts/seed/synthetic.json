@@ -665,7 +665,8 @@
       "username": "ro-cashier",
       "subject": "00000000-0000-4000-8000-000000000011",
       "stakeholder": "fo.cash",
-      "office_id": "RO-DEMO-01"
+      "office_id": "RO-DEMO-01",
+      "posted_since": "2023-06-01"
     },
     {
       "username": "ro-pro",
@@ -725,7 +726,8 @@
       "username": "ro-da-compliance",
       "subject": "00000000-0000-4000-8000-000000000037",
       "stakeholder": "fo.da_compliance",
-      "office_id": "RO-DEMO-01"
+      "office_id": "RO-DEMO-01",
+      "posted_since": "2024-02-01"
     },
     {
       "username": "iw-officer",

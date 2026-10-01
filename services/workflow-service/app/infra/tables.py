@@ -21,6 +21,7 @@ office_staff = Table(
     Column("username", String(80), nullable=False),
     Column("stakeholder", String(60), nullable=False),
     Column("office_id", String(40), nullable=False),
+    Column("posted_since", Date),                            # P2.10b: tenure on the post (rotation of sensitive posts)
 )
 
 # One case per claim. `chain` is the approval chain for the claim's amount band; `step` points at the
@@ -181,4 +182,18 @@ vigilance_signals = Table(
     Column("signal_id", String(40), primary_key=True),
     Column("subject_ref", String(80)),
     Column("outcome", String(30), nullable=False),
+)
+
+# P2.10b: vigilance clearances asked for by HR; HR sees only cleared / withheld, never the case.
+vigilance_clearances = Table(
+    "vigilance_clearances", metadata,
+    Column("clearance_id", String(40), primary_key=True),
+    Column("username", String(80), nullable=False, index=True),
+    Column("purpose", String(30), nullable=False),
+    Column("cleared", Boolean, nullable=False),
+    Column("case_ids", JSON, nullable=False),                         # the matters that withheld it (for the CVO)
+    Column("requested_by", String(80), nullable=False),
+    Column("note", Text),
+    Column("issued_at", DateTime(timezone=True), server_default=func.now()),
+    Column("valid_until", Date, nullable=False),
 )

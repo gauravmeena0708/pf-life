@@ -408,6 +408,10 @@ contribution- and platform-service*
    report the findings (partly substantiated, the report, a recommendation, the evidence examined).
 4. **CVO**: decide — e.g. *Minor penalty proceedings*, or *Return for further inquiry*. The history lists each step.
 5. Any other role (e.g. `ro-oic`) gets 403 on the vigilance API; every read is in the audit log (`vigilance.case.read`).
+6. **`hrm-employee` → HRM › Sensitive posts**: `ro-cashier` is overdue for rotation (posted June 2023). *Vigilance
+   clearance* for an officer named in an open case is *withheld* (HR is not told why); once the CVO closes the case, a
+   new request is *cleared*. Posting an officer to the cash section needs a current clearance for that purpose.
+7. **CVO → Vigilance cases**: the rotation list and every clearance, with the case that withheld it.
 
 ## The member's home page and the phone layout
 *Tests: `tests/e2e/test_member_home.py`, `apps/web/src/features/member/memberHome.test.ts`, `apps/web/src/features/MemberHome.test.tsx`*

@@ -892,6 +892,74 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /vigilance/clearances:
+    get:
+      operationId: getVigilanceClearances
+      summary: Vigilance clearances issued (the CVO also sees what withheld them)
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: workflow
+      x-callers:
+      - ho.cvo
+      - ho.hr
+      x-scope: restricted — vigilance roles only, case-by-case
+      security:
+      - bffSession: []
+    post:
+      operationId: postVigilanceClearances
+      summary: Ask for vigilance clearance for an officer (posting to a sensitive post, promotion, retirement, deputation,
+        passport NOC
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: workflow
+      x-callers:
+      - ho.hr
+      x-scope: restricted — vigilance roles only, case-by-case
+      security:
+      - bffSession: []
+      description: Ask for vigilance clearance for an officer (posting to a sensitive post, promotion, retirement, deputation,
+        passport NOC)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /vigilance/referrals:
     post:
       operationId: postVigilanceReferrals
@@ -928,6 +996,36 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /vigilance/sensitive-posts:
+    get:
+      operationId: getVigilanceSensitivePosts
+      summary: Officers on sensitive posts, their tenure and who is due for rotation (P2.10b)
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: workflow
+      x-callers:
+      - ho.cvo
+      - ho.hr
+      x-scope: restricted — vigilance roles only, case-by-case
+      security:
+      - bffSession: []
   /zo/fraud-risk/cases:
     get:
       operationId: getZoFraudRiskCases

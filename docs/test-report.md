@@ -98,6 +98,22 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 10b: sensitive posts and vigilance clearance (1 October 2026)
+
+After `make reset` (member A's balance restored; Journey B passes again) the suites were run on a freshly built stack:
+workflow-service 47 passed (3 new), claim 56, contribution 63, compliance 5, pension 29, international 17, platform 21,
+common-persistence 25; web 163 passed; end to end 74 passed (new `test_sensitive_posts_clearance_and_posting`);
+must-deny 18 passed; UI smoke 2 passed. Found on the way, all fixed:
+- the rule set in force had been published before the new `vigilance` keys existed, so the rotation list failed with a
+  missing key: `section()` now takes the baseline's value for any key a published version lacks (it did so only for a
+  whole missing section);
+- the rotation states first reused `DUE`, already a payment status, which would have relabelled "Payment due"
+  everywhere; they now have their own codes (`ROTATION_DUE`, `ROTATION_OVERDUE`, `WITHIN_TENURE`);
+- a pension-service test depended on the real date: its fixture credits pensions up to the last completed month, so on
+  1 October September was already paid; the test now seeds as of 28 September;
+- an e2e run could find an earlier, unfinished vigilance case naming the officer; the test now closes such leftovers
+  first.
+
 ## Update — Phase 2, slice 10a: vigilance cases (30 September 2026)
 
 workflow-service 44 passed (4 new in `test_vigilance.py`), common-persistence 25; web 160 passed (new `Vigilance.test.tsx`;

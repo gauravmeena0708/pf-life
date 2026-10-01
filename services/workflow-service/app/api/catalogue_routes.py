@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /hrm/me', 'POST /hrm/postings', 'GET /office/stopped-cases', 'GET /office/work-queue', 'GET /public/offices', 'GET /vigilance/cases', 'POST /vigilance/referrals', 'GET /employers/me/pending-approvals', 'GET /zo/fraud-risk/cases', 'POST /office/system/locks/{lockId}/release', 'GET /office/cases/{caseId}', 'GET /vigilance/cases/{caseId}', 'POST /office/cases/{caseId}/assignments', 'POST /office/cases/{caseId}/decisions', 'POST /office/cases/{caseId}/recommendations', 'POST /office/cases/{caseId}/restarts', 'POST /office/cases/{caseId}/second-approvals', 'POST /office/cases/{caseId}/stops', 'POST /office/freeze-cases/{caseId}/verifications', 'GET /office/members/{uan}/locks', 'POST /vigilance/cases/{caseId}/decisions', 'POST /vigilance/cases/{caseId}/findings', 'POST /office/cases/{caseId}/documents/{docId}/attestation-views']
+OPERATIONS = ['GET /hrm/me', 'POST /hrm/postings', 'GET /office/stopped-cases', 'GET /office/work-queue', 'GET /public/offices', 'GET /vigilance/cases', 'GET /vigilance/clearances', 'POST /vigilance/clearances', 'POST /vigilance/referrals', 'GET /vigilance/sensitive-posts', 'GET /employers/me/pending-approvals', 'GET /zo/fraud-risk/cases', 'POST /office/system/locks/{lockId}/release', 'GET /office/cases/{caseId}', 'GET /vigilance/cases/{caseId}', 'POST /office/cases/{caseId}/assignments', 'POST /office/cases/{caseId}/decisions', 'POST /office/cases/{caseId}/recommendations', 'POST /office/cases/{caseId}/restarts', 'POST /office/cases/{caseId}/second-approvals', 'POST /office/cases/{caseId}/stops', 'POST /office/freeze-cases/{caseId}/verifications', 'GET /office/members/{uan}/locks', 'POST /vigilance/cases/{caseId}/decisions', 'POST /vigilance/cases/{caseId}/findings', 'POST /office/cases/{caseId}/documents/{docId}/attestation-views']
 
 @router.api_route("/api/v1/hrm/me", methods=["GET"], include_in_schema=False)
 async def get_hrm_me(actor: Actor = Depends(require_actor)) -> None:
@@ -42,9 +42,24 @@ async def get_vigilance_cases(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Vigilance case list (restricted: the CVO, or the zone the inquiry is assigned to)")
 
 
+@router.api_route("/api/v1/vigilance/clearances", methods=["GET"], include_in_schema=False)
+async def get_vigilance_clearances(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Vigilance clearances issued (the CVO also sees what withheld them)")
+
+
+@router.api_route("/api/v1/vigilance/clearances", methods=["POST"], include_in_schema=False)
+async def post_vigilance_clearances(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Ask for vigilance clearance for an officer (posting to a sensitive post, promotion, retirement, depu")
+
+
 @router.api_route("/api/v1/vigilance/referrals", methods=["POST"], include_in_schema=False)
 async def post_vigilance_referrals(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Refer a confirmed risk signal, a member report or a complaint to vigilance (interface 18)")
+
+
+@router.api_route("/api/v1/vigilance/sensitive-posts", methods=["GET"], include_in_schema=False)
+async def get_vigilance_sensitive_posts(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Officers on sensitive posts, their tenure and who is due for rotation (P2.10b)")
 
 
 @router.api_route("/api/v1/employers/me/pending-approvals", methods=["GET"], include_in_schema=False)

@@ -7,7 +7,15 @@
 * Zonal vigilance (zo.vigilance) sees only the cases assigned to its zone and reports the findings; a report after the
   due date is marked late. The CVO then decides (an outcome from the rule set) or returns the case for more inquiry.
 * Restricted: only the CVO and the assigned zone read a case; every read is written to the audit log; the complainant
-  is masked for everyone but the CVO; events carry identifiers only, so nothing reaches reporting or the assistant."""
+  is masked for everyone but the CVO; events carry identifiers only, so nothing reaches reporting or the assistant.
+
+Phase 2, slice 10b — preventive vigilance:
+* Sensitive posts (the rule set's `vigilance.sensitive_posts`) and each officer's tenure from the posting date: due for
+  rotation at `rotation_alert_months`, overdue at `rotation_limit_months`; the list for the annual general transfer.
+* Vigilance clearance, asked for by HR (ho.hr) before a posting to a sensitive post, a promotion, retirement, a
+  deputation or a passport NOC: withheld while a case names the officer (open, or ordered with an outcome in
+  `withholding_outcomes`). HR sees cleared / withheld only; the CVO sees which cases withheld it. A posting to a
+  sensitive post needs a current clearance (hr_routes.py)."""
 import secrets
 from datetime import UTC, date, datetime, timedelta
 from typing import Any, Literal
@@ -18,7 +26,7 @@ from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import db, posting
-from app.infra.tables import offices, vigilance_actions, vigilance_cases, vigilance_signals
+from app.infra.tables import office_staff, offices, vigilance_actions, vigilance_cases, vigilance_clearances, vigilance_signals
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit
@@ -215,3 +223,91 @@ async def findings(case_id: str, body: FindingsInput, actor: Actor = Depends(req
                     target_type="vigilance_case", target_id=case_id, detail=f"{c['vcn']}: {body.finding}")
     return envelope({"case_id": case_id, "vcn": c["vcn"], "state": "PI_REPORTED", "late": late,
                      "next_step": "The Chief Vigilance Officer decides on the findings."})
+
+
+# ── P2.10b: preventive vigilance ─────────────────────────────────────────────────────────────────
+
+def months_between(start: date, end: date) -> int:
+    return (end.year - start.year) * 12 + end.month - start.month - (end.day < start.day)
+
+
+@router.get("/api/v1/vigilance/sensitive-posts")
+async def sensitive_posts(actor: Actor = Depends(require_stakeholder("ho.cvo", "ho.hr")), session: AsyncSession = Depends(db)) -> dict:
+    today = date.today()
+    async with session.begin():
+        rules = section(await rules_on(session, today), "vigilance")
+        rows = (await session.execute(select(office_staff).where(office_staff.c.stakeholder.in_(rules["sensitive_posts"]))
+                                      .order_by(office_staff.c.posted_since))).mappings().all()
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="vigilance.sensitive_posts",
+                    target_type="office_staff", target_id="SENSITIVE", detail=f"{len(rows)} officers")
+    officers = []
+    for r in rows:
+        tenure = months_between(r["posted_since"], today) if r["posted_since"] else None
+        rotation = ("TENURE_UNKNOWN" if tenure is None else "ROTATION_OVERDUE" if tenure >= rules["rotation_limit_months"]
+                    else "ROTATION_DUE" if tenure >= rules["rotation_alert_months"] else "WITHIN_TENURE")
+        officers.append({"username": r["username"], "stakeholder": r["stakeholder"], "office_id": r["office_id"],
+                         "posted_since": r["posted_since"].isoformat() if r["posted_since"] else None,
+                         "tenure_months": tenure, "rotation": rotation})
+    return envelope({"as_of": today.isoformat(), "sensitive_posts": rules["sensitive_posts"],
+                     "alert_months": rules["rotation_alert_months"], "limit_months": rules["rotation_limit_months"],
+                     "officers": officers, "transfer_list": [o["username"] for o in officers if o["rotation"] in ("ROTATION_DUE", "ROTATION_OVERDUE")],
+                     "note": "Illustrative rotation periods from the rule set; the annual general transfer takes the officers due or overdue."})
+
+
+class ClearanceInput(BaseModel):
+    username: str = Field(min_length=3, max_length=80)
+    purpose: str = Field(max_length=30)
+    note: str | None = Field(default=None, max_length=1000)
+
+
+async def pending_matters(session: AsyncSession, username: str, rules: dict[str, Any]) -> list[str]:
+    """Vigilance cases that withhold clearance for this officer: open, or ordered with a withholding outcome."""
+    rows = (await session.execute(select(vigilance_cases.c.case_id, vigilance_cases.c.state, vigilance_cases.c.outcome).where(
+        vigilance_cases.c.subject_type == "OFFICIAL", vigilance_cases.c.subject_ref == username))).all()
+    return [c for c, state, outcome in rows if state not in FINAL or (state == "ACTION_ORDERED" and outcome in rules["withholding_outcomes"])]
+
+
+def _clearance(c: dict[str, Any], actor: Actor) -> dict[str, Any]:
+    out = {"clearance_id": c["clearance_id"], "username": c["username"], "purpose": c["purpose"], "cleared": c["cleared"],
+           "valid_until": c["valid_until"].isoformat(), "issued_at": c["issued_at"].isoformat() if c["issued_at"] else None,
+           "reason": "No vigilance matter concerning the officer is pending." if c["cleared"] else
+                     "Withheld: a vigilance matter concerning the officer is pending. The Chief Vigilance Officer can say more."}
+    if actor.stakeholder == "ho.cvo":
+        out["case_ids"] = c["case_ids"]
+    return out
+
+
+@router.post("/api/v1/vigilance/clearances", status_code=201)
+async def clearance(body: ClearanceInput, actor: Actor = Depends(require_stakeholder("ho.hr")), session: AsyncSession = Depends(db)) -> dict:
+    async with session.begin():
+        rules = section(await rules_on(session, date.today()), "vigilance")
+        if body.purpose not in rules["clearance_purposes"]:
+            raise Problem(422, "/problems/validation", "Unknown purpose", f"One of: {', '.join(rules['clearance_purposes'])}.")
+        if not (await session.execute(select(office_staff.c.subject).where(office_staff.c.username == body.username))).first():
+            raise Problem(404, "/problems/not-found", "No officer with this user name is on the rolls")
+        matters = await pending_matters(session, body.username, rules)
+        row = {"clearance_id": f"VCL-{secrets.token_hex(4).upper()}", "username": body.username, "purpose": body.purpose,
+               "cleared": not matters, "case_ids": matters, "requested_by": actor.subject, "note": body.note,
+               "valid_until": date.today() + timedelta(days=int(rules["clearance_valid_days"])), "issued_at": datetime.now(UTC)}
+        await session.execute(insert(vigilance_clearances).values(**row))
+        await add_event(session, producer=PRODUCER, event_type="VigilanceClearanceIssued.v1", aggregate_type="vigilance_clearance",
+                        aggregate_id=row["clearance_id"], correlation_id=actor.correlation_id, payload={
+                            "clearance_id": row["clearance_id"], "username": body.username, "purpose": body.purpose, "cleared": row["cleared"]})
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="vigilance.clearance",
+                    target_type="officer", target_id=body.username, detail=f"{body.purpose}: {'cleared' if row['cleared'] else 'withheld'}")
+    return envelope(_clearance(row, actor))
+
+
+@router.get("/api/v1/vigilance/clearances")
+async def clearances(actor: Actor = Depends(require_stakeholder("ho.cvo", "ho.hr")), session: AsyncSession = Depends(db)) -> dict:
+    async with session.begin():
+        rows = (await session.execute(select(vigilance_clearances).order_by(vigilance_clearances.c.issued_at.desc()).limit(200))).mappings().all()
+    return envelope({"clearances": [_clearance(dict(r), actor) for r in rows]})
+
+
+async def current_clearance(session: AsyncSession, username: str, purpose: str) -> dict[str, Any] | None:
+    """The latest clearance for this officer and purpose that is still valid (used by HR postings)."""
+    row = (await session.execute(select(vigilance_clearances).where(
+        vigilance_clearances.c.username == username, vigilance_clearances.c.purpose == purpose,
+        vigilance_clearances.c.valid_until >= date.today()).order_by(vigilance_clearances.c.issued_at.desc()).limit(1))).mappings().first()
+    return dict(row) if row else None

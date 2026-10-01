@@ -222,6 +222,9 @@ OTHER_FAMILIES = [
         ("OVS-VIGILANCE", "Vigilance case", "Staff complaint; benign signal; CVO, zone and other roles",
          "Referred, inquiry assigned to the zone, findings with the complainant masked, penalty proceedings ordered; benign signal and other roles refused",
          "tests/e2e/test_vigilance.py"),
+        ("OVS-PREVENTIVE", "Sensitive posts and vigilance clearance", "Officer overdue for rotation; officer named in a case; posting to the cash section",
+         "Rotation list; clearance withheld then given after the case is closed; sensitive posting only with a clearance",
+         "tests/e2e/test_vigilance.py"),
     ]),
     ("Oversight and administration", "tests/e2e/test_oversight_administration.py", [
         ("OVS-INCIDENT", "Security incident and CERT-In report", "High severity within and past 6 hours; low severity", "Reportable ones reported (mock) with acknowledgement; late marked"),

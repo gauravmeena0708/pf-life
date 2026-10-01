@@ -4,9 +4,9 @@
   "interfaces": 21,
   "stakeholders": 114,
   "stakeholders_with_access": 96,
-  "activities": 238,
+  "activities": 240,
   "endpoints": {
-   "W": 329,
+   "W": 332,
    "M": 21,
    "P": 70,
    "?": 5
@@ -309,7 +309,7 @@
    "coverage": "Working",
    "purpose": "Human resources: staff postings, which decide each officer's jurisdiction.",
    "endpoints": {
-    "W": 2,
+    "W": 5,
     "M": 0,
     "P": 0,
     "?": 0
@@ -361,7 +361,7 @@
    "coverage": "Working",
    "purpose": "Vigilance: referrals, preliminary inquiries by the zones and the CVO's decisions (restricted).",
    "endpoints": {
-    "W": 4,
+    "W": 6,
     "M": 0,
     "P": 0,
     "?": 0
@@ -2186,12 +2186,16 @@
    "name": "HR / HRM Wing",
    "group": "F. Head Office (HO) — leadership and divisions",
    "endpoints": {
-    "W": 2,
+    "W": 5,
     "M": 0,
     "P": 0,
     "?": 0
    },
    "activities": [
+    {
+     "id": "F07.vig_clearance",
+     "does": "Ask for vigilance clearance before a posting to a sensitive post, a promotion, retirement, a deputation or a passport NOC; plan the rotation of sensitive posts"
+    },
     {
      "id": "F13.hr",
      "does": "Staff profiles, postings and delegation of roles to offices"
@@ -2258,7 +2262,7 @@
    "name": "**Chief Vigilance Officer** and **Director (Vigilance)**",
    "group": "F. Head Office (HO) — leadership and divisions",
    "endpoints": {
-    "W": 3,
+    "W": 5,
     "M": 0,
     "P": 0,
     "?": 0
@@ -2267,6 +2271,10 @@
     {
      "id": "F07.vig_ho",
      "does": "CVO / Director (Vigilance): assign preliminary inquiries and decide on the findings"
+    },
+    {
+     "id": "F07.vig_preventive",
+     "does": "Preventive vigilance: officers on sensitive posts and their rotation; clearances issued and what withheld them"
     }
    ],
    "personas": [

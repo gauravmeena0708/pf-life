@@ -6,6 +6,7 @@ import { MemoryRouter } from "react-router-dom";
 import { ApiError, api, command, getSession } from "../api/client";
 import { homeFor, menusFor } from "../data/navigation";
 import "../i18n";
+import { HrmPage } from "./hrm/HrmPage";
 import { RiskSignalsPage } from "./oversight/RiskSignalsPage";
 import { VigilancePage } from "./vigilance/VigilancePage";
 
@@ -33,6 +34,10 @@ beforeEach(() => {
   responses = {
     "/api/v1/vigilance/cases": { zone_id: null, cases: [summary], restricted: true, note: "Restricted" },
     "/api/v1/vigilance/cases/VC-1": detail,
+    "/api/v1/vigilance/sensitive-posts": { officers: [{ username: "officer.one", stakeholder: "fo.oic", office_id: "RO-DEMO-01", posted_since: "2023-01-01", tenure_months: 44, rotation: "ROTATION_OVERDUE" }], transfer_list: ["officer.one"] },
+    "/api/v1/vigilance/clearances": { clearances: [{ clearance_id: "VCL-1", username: "officer.one", purpose: "POSTING_SENSITIVE", cleared: false, valid_until: "2026-12-01", issued_at: "2026-10-01", reason: "A vigilance matter is pending.", case_ids: ["VC-1"] }] },
+    "/api/v1/hrm/me": { username: "hr.one", role: "ho.hr", office: { office_id: "HO", name: "Head office" } },
+    "/api/v1/public/offices": [{ office_id: "RO-DEMO-01", name: "Demo office" }],
     "/api/v1/caiu/synthetic-risk-signals": { rule_version: "v1", signals: [signal], shared_devices_not_signals: [] },
   };
   vi.mocked(api).mockImplementation(async (path) => {
@@ -55,7 +60,7 @@ it("shows the CVO list, complainant, and only the referral decisions", async () 
   renderPage(<VigilancePage />, "ho.cvo");
   expect(await screen.findByRole("heading", { name: "VIG/2026/0001" })).toBeTruthy();
   expect(screen.getByText("Asha Rao · asha@example.org")).toBeTruthy();
-  const table = screen.getByRole("table");
+  const table = within(screen.getByRole("region", { name: "Cases" })).getByRole("table");
   expect(within(table).getByText("Referred")).toBeTruthy();
   const decision = screen.getByLabelText("Decision") as HTMLSelectElement;
   expect([...decision.options].map((option) => option.value)).toEqual(["", "ASSIGN_INQUIRY", "CLOSED_NO_SUBSTANCE"]);
@@ -85,6 +90,46 @@ it("masks the zone complainant and reports findings for an assigned inquiry", as
     { finding: "SUBSTANTIATED", report: "The inquiry reviewed the audit trail and confirmed the payment diversion.",
       recommendation: "Begin proceedings.", evidence_examined: ["SIG-1"] }, { stepUpToken: "step-up-token" }));
   expect(ask).toHaveBeenCalledWith(expect.objectContaining({ action: "report-vigilance-findings", resourceId: "VC-1" }));
+  expect(api).not.toHaveBeenCalledWith("/api/v1/vigilance/sensitive-posts");
+  expect(api).not.toHaveBeenCalledWith("/api/v1/vigilance/clearances");
+});
+
+it("shows CVO rotation and withholding cases", async () => {
+  renderPage(<VigilancePage />, "ho.cvo");
+  const posts = await screen.findByRole("region", { name: "Sensitive posts and rotation" });
+  expect(within(posts).getByText("Overdue for rotation").className).toContain("vigilance-alert-pill");
+  expect(within(posts).getByText("Due or overdue for the annual general transfer: officer.one")).toBeTruthy();
+  const clearances = screen.getByRole("region", { name: "Vigilance clearances" });
+  expect((await within(clearances).findByRole("link", { name: "VC-1" })).getAttribute("href")).toBe("/vigilance?case=VC-1");
+});
+
+it("lets HR request a clearance and shows a withheld result", async () => {
+  vi.mocked(command).mockResolvedValueOnce({ data: { clearance_id: "VCL-2", username: "officer.one", purpose: "POSTING_SENSITIVE", cleared: false, valid_until: "2026-12-01", issued_at: "2026-10-01", reason: "A vigilance matter is pending." }, meta: {} });
+  renderPage(<HrmPage />, "ho.hr", "/hrm");
+  const clearance = await screen.findByRole("region", { name: "Vigilance clearance" });
+  const form = within(clearance).getByRole("form", { name: "Issue vigilance clearance" });
+  fireEvent.change(within(form).getByLabelText("Officer user name"), { target: { value: "officer.one" } });
+  fireEvent.change(within(form).getByLabelText("Purpose"), { target: { value: "POSTING_SENSITIVE" } });
+  fireEvent.change(within(form).getByLabelText("Note (optional)"), { target: { value: "Check for transfer." } });
+  fireEvent.submit(form);
+  await waitFor(() => expect(command).toHaveBeenCalledWith("POST", "/api/v1/vigilance/clearances", { username: "officer.one", purpose: "POSTING_SENSITIVE", note: "Check for transfer." }));
+  expect(await within(clearance).findByText("Withheld — A vigilance matter is pending.")).toBeTruthy();
+  expect(within(clearance).queryByRole("link", { name: "VC-1" })).toBeNull();
+  const posts = screen.getByRole("region", { name: "Sensitive posts" });
+  expect(within(posts).getByText("Overdue for rotation").className).toContain("vigilance-alert-pill");
+});
+
+it("shows the clearance needed problem on a sensitive posting", async () => {
+  vi.mocked(command).mockRejectedValueOnce(new ApiError({ type: "/problems/vigilance-clearance-needed", title: "Vigilance clearance needed", status: 409, detail: "Request a current clearance before posting this officer." }));
+  renderPage(<HrmPage />, "ho.hr", "/hrm");
+  const form = await screen.findByRole("form", { name: "Post staff" });
+  fireEvent.change(within(form).getByLabelText("Username"), { target: { value: "officer.one" } });
+  fireEvent.change(within(form).getByLabelText("Stakeholder role"), { target: { value: "fo.oic" } });
+  fireEvent.change(within(form).getByLabelText("Office"), { target: { value: "RO-DEMO-01" } });
+  fireEvent.change(within(form).getByLabelText("Posting reason"), { target: { value: "Annual general transfer." } });
+  fireEvent.submit(form);
+  expect(await screen.findByText("Vigilance clearance needed")).toBeTruthy();
+  expect(screen.getByText("Request a current clearance before posting this officer.")).toBeTruthy();
 });
 
 it("does not request case data for another role", async () => {

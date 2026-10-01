@@ -168,3 +168,10 @@ vigilance:
   pi_days: 90                  # a preliminary inquiry is due this many days after it is assigned
   sources: [CAIU_SIGNAL, MEMBER_REPORT, PUBLIC_COMPLAINT, STAFF_COMPLAINT, CVC, MINISTRY]
   outcomes: [CLOSED_NO_SUBSTANCE, MINOR_PENALTY_PROCEEDINGS, MAJOR_PENALTY_PROCEEDINGS, REFERRED_TO_CBI, SYSTEM_IMPROVEMENT]
+  # P2.10b: preventive vigilance (illustrative, after the CVC's rotation guidance)
+  sensitive_posts: [fo.da_compliance, fo.eo, fo.icf, fo.recovery_officer, fo.cash, fo.admin]
+  rotation_alert_months: 30    # an officer on a sensitive post is flagged for rotation at this tenure …
+  rotation_limit_months: 36    # … and is overdue for rotation at this one
+  clearance_valid_days: 90     # a vigilance clearance is valid this long
+  clearance_purposes: [POSTING_SENSITIVE, PROMOTION, RETIREMENT, DEPUTATION, PASSPORT_NOC]
+  withholding_outcomes: [MINOR_PENALTY_PROCEEDINGS, MAJOR_PENALTY_PROCEEDINGS, REFERRED_TO_CBI]   # an ordered outcome that withholds clearance

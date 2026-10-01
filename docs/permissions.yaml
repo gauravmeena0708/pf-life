@@ -3226,6 +3226,24 @@ stakeholders:
     via:
     - F08.ho
   ho.hr:
+  - endpoint: POST /vigilance/clearances
+    status: W
+    scope: restricted — vigilance roles only, case-by-case
+    step_up: false
+    via:
+    - F07.vig_clearance
+  - endpoint: GET /vigilance/clearances
+    status: W
+    scope: restricted — vigilance roles only, case-by-case
+    step_up: false
+    via:
+    - F07.vig_clearance
+  - endpoint: GET /vigilance/sensitive-posts
+    status: W
+    scope: restricted — vigilance roles only, case-by-case
+    step_up: false
+    via:
+    - F07.vig_clearance
   - endpoint: GET /hrm/me
     status: W
     scope: self (read) / HR role (write)
@@ -3278,6 +3296,18 @@ stakeholders:
     step_up: true
     via:
     - F07.vig_ho
+  - endpoint: GET /vigilance/sensitive-posts
+    status: W
+    scope: restricted — vigilance roles only, case-by-case
+    step_up: false
+    via:
+    - F07.vig_preventive
+  - endpoint: GET /vigilance/clearances
+    status: W
+    scope: restricted — vigilance roles only, case-by-case
+    step_up: false
+    via:
+    - F07.vig_preventive
   ho.security:
   - endpoint: GET /security/incidents
     status: W

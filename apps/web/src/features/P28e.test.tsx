@@ -44,6 +44,8 @@ beforeEach(() => {
     "/api/v1/ndc/issue-tracker/requests": [request],
     "/api/v1/hrm/me": { username: "hrm-employee", role: "ho.hr", office: { office_id: "HO-1", name: "Head office" } },
     "/api/v1/public/offices": [{ office_id: "RO-1", name: "Current office" }, { office_id: "RO-2", name: "Receiving office" }],
+    "/api/v1/vigilance/sensitive-posts": { officers: [], transfer_list: [] },
+    "/api/v1/vigilance/clearances": { clearances: [] },
     "/api/v1/audit/concurrent/alerts": [alert],
     "/api/v1/employers/me/members": [{ uan, name: "Demo Member", account_link_id: "AL-1", status: "ACTIVE", location: { branch_code: "BR-1", district: "DELHI", pincode: "110001" } }],
   };

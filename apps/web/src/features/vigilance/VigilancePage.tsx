@@ -7,6 +7,7 @@ import { api, command, getSession, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { statusLabel } from "../statusLabel";
+import { ClearancesTable, SensitivePostsPanel } from "./PreventiveVigilance";
 
 const ROLE: Record<string, string> = { "ho.caiu": "CAIU", "ho.cvo": "Chief Vigilance Officer", "zo.vigilance": "Zonal vigilance" };
 import { StepUpDialog } from "../stepup/StepUpDialog";
@@ -162,6 +163,7 @@ function VigilanceWorkspace({ role }: { role: "ho.cvo" | "zo.vigilance" }) {
       </form> : null}
       {role === "ho.cvo" && !openDecisions.length ? <p className="muted">No decision is open for this state. Awaiting the zonal inquiry where applicable.</p> : null}
     </article> : null}
+    {role === "ho.cvo" ? <><SensitivePostsPanel cvo /><section className="card stack vigilance-panel" aria-labelledby="vigilance-clearances-heading"><h2 id="vigilance-clearances-heading">Vigilance clearances</h2><ClearancesTable cvo /></section></> : null}
     <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
   </>;
 }

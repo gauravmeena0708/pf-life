@@ -29,7 +29,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | P2.9b | Members of exempted establishments: PF held by the trust (passbook, claims and transfers say so and route correctly), pension and EDLI with EPFO; the trust's Annexure K | Planned — needs the Exemption Manual |
 | **P2.9c** | Member experience: a life-event home page, one consolidated view, plain-language status, nudges, a mobile pass | **Done** (30 Sep 2026; built before P2.9b, which waits for the Exemption Manual) |
 | **P2.10a** | Vigilance cases: a CAIU-confirmed risk signal (or a complaint) referred to vigilance; the CVO assigns a preliminary inquiry to a zone (90 days); zonal vigilance reports findings; the CVO decides; restricted, access-logged, the complainant masked | **Done** (30 Sep 2026) |
-| P2.10b | Preventive vigilance: sensitive posts and 3-year rotation alerts; vigilance clearance for HR postings, promotions and retirement against open cases and penalties | Planned |
+| **P2.10b** | Preventive vigilance: sensitive posts and 3-year rotation alerts; vigilance clearance for HR postings, promotions and retirement against open cases and penalties | **Done** (1 Oct 2026) |
 
 ## P2.9 — plan
 
@@ -561,3 +561,27 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
   further inquiry; the history; events without the allegation or names; reads audited; other roles 403, another zone
   404; a late report); web `Vigilance.test.tsx`; end to end `test_vigilance.py` (a staff complaint through to penalty
   proceedings, a benign signal refused, other roles refused).
+
+## P2.10b — how it is built
+
+- **Rule set** (`vigilance`, illustrative): `sensitive_posts` (`fo.da_compliance`, `fo.eo`, `fo.icf`,
+  `fo.recovery_officer`, `fo.cash`, `fo.admin` — compliance, recovery, cash and administration),
+  `rotation_alert_months` 30, `rotation_limit_months` 36, `clearance_valid_days` 90, `clearance_purposes`, and
+  `withholding_outcomes` (penalty proceedings or a CBI reference); validated like the other sections.
+- **Tenure**: `office_staff.posted_since` (migration 0013), from the seed (`ro-cashier` since June 2023,
+  `ro-da-compliance` since February 2024; others April 2025) and set to the day of every HR posting.
+  `GET /vigilance/sensitive-posts` (CVO, HR) lists the officers on sensitive posts with their tenure and
+  `WITHIN_TENURE` / `ROTATION_DUE` / `ROTATION_OVERDUE`, and the list for the annual general transfer.
+- **Clearance**: HR asks (`POST /vigilance/clearances`: posting to a sensitive post, promotion, retirement, deputation,
+  passport NOC). It is withheld while a vigilance case names the officer — open, or ordered with a withholding
+  outcome; a case closed with no substance, or one that ended in a system improvement, does not withhold it. HR sees
+  cleared / withheld and a neutral reason; only the CVO sees which cases withheld it (`GET /vigilance/clearances`).
+  `VigilanceClearanceIssued.v1` goes to audit only.
+- **Postings**: `POST /hrm/postings` to a sensitive post needs a current clearance for that purpose (409
+  `/problems/vigilance-clearance-needed` or `/problems/vigilance-clearance-withheld`).
+- **Web**: the HRM page gains *Vigilance clearance* (form and list) and *Sensitive posts*; the CVO's vigilance page
+  gains the rotation list and the clearances with links to the cases; zonal vigilance sees neither.
+- **Not built**: the Agreed List and the register of officers of doubtful integrity (kept with the CBI; too sensitive
+  even as a demo).
+- **Tests**: workflow-service `test_vigilance.py` (rotation, clearance withheld and restored, the posting check and the
+  new posting date); web `Vigilance.test.tsx`; end to end `test_vigilance.py::test_sensitive_posts_clearance_and_posting`.

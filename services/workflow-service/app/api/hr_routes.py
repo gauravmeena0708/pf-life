@@ -12,11 +12,15 @@ from pydantic import BaseModel, Field
 from sqlalchemy import or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from datetime import date
+
 from app.api.routes import db, posting
+from app.api.vigilance_routes import current_clearance
 from app.infra.tables import cases, office_staff, offices
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit
+from epfo_persistence.policy import rules_on, section
 
 router = APIRouter()
 PRODUCER = "workflow-service"
@@ -48,9 +52,17 @@ async def post_staff(body: PostingInput, actor: Actor = Depends(require_stakehol
                 raise Problem(403, "/problems/outside-your-office", "Office administration posts staff within its own office only")
         if (target["stakeholder"], target["office_id"]) == (body.stakeholder, body.office_id):
             raise Problem(409, "/problems/unchanged", "The officer already holds this posting")
+        if body.stakeholder in section(await rules_on(session, date.today()), "vigilance")["sensitive_posts"]:   # P2.10b
+            cleared = await current_clearance(session, body.username, "POSTING_SENSITIVE")
+            if not cleared:
+                raise Problem(409, "/problems/vigilance-clearance-needed", "A posting to a sensitive post needs a current vigilance clearance",
+                              "Ask for vigilance clearance (purpose: posting to a sensitive post) first.")
+            if not cleared["cleared"]:
+                raise Problem(409, "/problems/vigilance-clearance-withheld", "Vigilance clearance for this officer is withheld",
+                              "The Chief Vigilance Officer can say more.")
         require_step_up(actor, "post-staff", body.username)
         await session.execute(update(office_staff).where(office_staff.c.subject == target["subject"]).values(
-            stakeholder=body.stakeholder, office_id=body.office_id))
+            stakeholder=body.stakeholder, office_id=body.office_id, posted_since=date.today()))
         await session.execute(update(cases).where(cases.c.assignee_subject == target["subject"], cases.c.state != "CLOSED",
                                                   cases.c.office_id != body.office_id).values(assignee_subject=None))
         await add_event(session, producer=PRODUCER, event_type="StaffPostingChanged.v1", aggregate_type="staff_posting",

@@ -264,6 +264,7 @@ EVENTS = [
     ("VigilanceCaseOpened", "workflow", ["audit"], "vigilance_case", 1, {"case_id": S, "vcn": S, "source": S, "subject_type": {"enum": ["MEMBER", "ESTABLISHMENT", "OFFICIAL"]}, "office_id": S}),
     ("VigilanceFindingsRecorded", "workflow", ["audit"], "vigilance_case", 1, {"case_id": S, "vcn": S, "zone_id": S, "finding": {"enum": ["SUBSTANTIATED", "PARTLY_SUBSTANTIATED", "NOT_SUBSTANTIATED"]}, "late": B}),
     ("VigilanceDecisionRecorded", "workflow", ["audit"], "vigilance_case", 1, {"case_id": S, "vcn": S, "decision": S, "state": S, "zone_id": {"type": ["string", "null"]}}),
+    ("VigilanceClearanceIssued", "workflow", ["audit"], "vigilance_clearance", 1, {"clearance_id": S, "username": S, "purpose": S, "cleared": B}),
     ("StaffPostingChanged", "workflow", ["member", "claim", "grievance", "intelligence", "compliance", "international", "pension", "employer", "reporting", "audit"], "staff_posting", 1, {"subject": S, "username": S, "stakeholder": S, "office_id": S, "previous_stakeholder": S, "previous_office_id": S}),
     ("AutoTransferConfirmed", "claim", ["contribution", "audit"], "auto_transfer", 1, {"transfer_id": S, "uan": S, "from_account_link_id": S, "to_account_link_id": S}),
     ("TransferPosted", "contribution", ["claim", "member", "workflow", "audit"], "ledger_journal", 1, {"transfer_id": S, "uan": S, "from_account_link_id": S, "to_account_link_id": S, "employee_paise": N, "employer_paise": N, "journal_id": S, "postings": POSTINGS}),

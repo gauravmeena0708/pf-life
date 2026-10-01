@@ -20,10 +20,10 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | 12 | Ministry | **Working** | `gov.mole`, `gov.parliament` | 3 | 0 | 0 | 0 |
 | 13 | B2B | **Mock** | `payroll_provider`, `ext.collecting_bank`, `ext.pension_bank`, `ext.mca`, `ext.shram_suvidha`, `ext.fund_manager` | 0 | 7 | 0 | 0 |
 | 14 | CAIU | **Working** | `ho.caiu` | 4 | 0 | 0 | 0 |
-| 15 | HRM | **Working** | `ho.hr` | 2 | 0 | 0 | 0 |
+| 15 | HRM | **Working** | `ho.hr` | 5 | 0 | 0 | 0 |
 | 16 | Reporting and monitoring | **Working** | `gov.cbt`, `gov.ec`, `gov.fiac`, `gov.peic` | 1 | 0 | 2 | 0 |
 | 17 | Security | **Working** | `ho.security`, `ho.data_protection` | 10 | 0 | 2 | 0 |
-| 18 | Vigilance | **Working** | `ho.cvo`, `zo.vigilance` | 4 | 0 | 0 | 0 |
+| 18 | Vigilance | **Working** | `ho.cvo`, `zo.vigilance` | 6 | 0 | 0 | 0 |
 | 19 | Audit | **Working** | `ho.audit`, `zo.rpfc1_audit`, `zo.internal_audit`, `gov.cag`, `gov.statutory_auditor` | 8 | 0 | 4 | 0 |
 | 20 | UMANG | **Working** | `ext.umang` | 3 | 0 | 0 | 0 |
 | 21 | AI model / local LLM | **Working** | `tech.ai_service` | 5 | 0 | 0 | 0 |
@@ -551,7 +551,10 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | Endpoint | Status | Owner | Called by |
 |---|---|---|---|
 | `GET /hrm/me` | W | workflow | ho.hr |
+| `GET /vigilance/clearances` | W | workflow | ho.hr |
+| `GET /vigilance/sensitive-posts` | W | workflow | ho.hr |
 | `POST /hrm/postings` | W | workflow | ho.hr |
+| `POST /vigilance/clearances` | W | workflow | ho.hr |
 
 ### 16. Reporting and monitoring — Working
 
@@ -584,6 +587,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 |---|---|---|---|
 | `GET /vigilance/cases` | W | workflow | ho.cvo, zo.vigilance |
 | `GET /vigilance/cases/{caseId}` | W | workflow | ho.cvo, zo.vigilance |
+| `GET /vigilance/clearances` | W | workflow | ho.cvo |
+| `GET /vigilance/sensitive-posts` | W | workflow | ho.cvo |
 | `POST /vigilance/cases/{caseId}/decisions` | W | workflow | ho.cvo |
 | `POST /vigilance/cases/{caseId}/findings` | W | workflow | zo.vigilance |
 

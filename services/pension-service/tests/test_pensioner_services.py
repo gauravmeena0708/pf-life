@@ -4,6 +4,8 @@ import hashlib
 import hmac
 from datetime import date
 
+import pytest
+
 from tests.test_pensions import APFC_P, PENSIONER, SUBJECTS, ctx, hdr  # noqa: F401  (ctx is a fixture)
 
 DA_P = SUBJECTS["ro-da-pension"]
@@ -20,7 +22,15 @@ def at(monkeypatch, day: date) -> None:
         monkeypatch.setattr(module, "today", lambda: day)
 
 
-def test_lapsed_certificate_suspends_and_a_physical_one_resumes_with_held_months(ctx, monkeypatch):
+@pytest.fixture
+def seeded_on_28_september(monkeypatch):
+    """The seed credits every month up to the last completed one; seed as of 28 September 2026 (before ctx), so the
+    test does not depend on the real date."""
+    import app.domain.pension as p
+    monkeypatch.setattr(p, "today", lambda: date(2026, 9, 28))
+
+
+def test_lapsed_certificate_suspends_and_a_physical_one_resumes_with_held_months(seeded_on_28_september, ctx, monkeypatch):
     client, _, _ = ctx
     at(monkeypatch, date(2026, 9, 28))
     overdue = client.get("/api/v1/office/pensions/life-certificates/overdue", headers=hdr(APFC_P, "fo.apfc_pension")).json()["data"]
