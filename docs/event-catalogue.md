@@ -65,9 +65,12 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `TrainingSandboxCreated.v1` | platform | audit | training_sandbox | 1 |
 | `CampRequestTaken.v1` | workflow | audit | camp_request | 1 |
 | `TotalisationClaimRouted.v1` | international | audit | totalisation_claim | 1 |
+| `TrustTransferRequested.v1` | contribution | claim, audit | transfer | 1 |
+| `TrustAnnexureKReconciled.v1` | claim | contribution, audit | annexure_k | 1 |
+| `EpsServiceTransferred.v1` | pension | contribution, audit | transfer | 1 |
 | `StaffPostingChanged.v1` | workflow | member, claim, grievance, intelligence, compliance, international, pension, employer, reporting, audit | staff_posting | 1 |
 | `AutoTransferConfirmed.v1` | claim | contribution, audit | auto_transfer | 1 |
-| `TransferPosted.v1` | contribution | claim, member, workflow, audit | ledger_journal | 1 |
+| `TransferPosted.v1` | contribution | claim, member, workflow, pension, audit | ledger_journal | 1 |
 | `PolicyPublished.v1` | platform | claim, contribution, workflow, grievance, intelligence, pension, audit | rule_set | 1 |
 | `ClaimStateChanged.v1` | claim | workflow, reporting, audit | claim | 1 |
 | `RiskSignalReviewed.v1` | intelligence | claim, workflow, reporting, audit | risk_signal | 1 |

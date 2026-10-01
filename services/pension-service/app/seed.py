@@ -13,7 +13,7 @@ from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
 from app.domain.pension import catch_up_payments
 from app.infra.db import sessions
-from app.infra.tables import eps_accounts, family_members, member_service, office_staff, pensioners
+from app.infra.tables import eps_accounts, exempted_establishments, family_members, member_service, office_staff, pensioners
 from epfo_persistence.policy import baseline, pension_on
 
 SEED_FILE = os.getenv("SEED_FILE", "/srv/seed/synthetic.json")
@@ -54,7 +54,7 @@ async def main() -> None:
                       "date_of_joining": date.fromisoformat(m["date_of_joining"]),
                       "date_of_exit": date.fromisoformat(m["date_of_exit"]) if m.get("date_of_exit") else None,
                       "eps_wages_paise": SYNTHETIC_EPS_WAGES, "office_id": seed["establishment"]["office_id"], "uan": m["uan"],
-                      "account_link_id": m["account_link_id"], "establishment_id": seed["establishment"]["establishment_id"]}
+                      "account_link_id": m["account_link_id"], "establishment_id": m.get("establishment_id", seed["establishment"]["establishment_id"])}
             if (await session.execute(select(member_service.c.subject).where(member_service.c.subject == values["subject"]))).first():
                 await session.execute(update(member_service).where(member_service.c.subject == values["subject"]).values(**values))
             else:
@@ -75,6 +75,15 @@ async def main() -> None:
                     establishment_id=job.get("establishment_id", seed["establishment"]["establishment_id"]),
                     date_of_joining=date.fromisoformat(job["date_of_joining"]),
                     date_of_exit=date.fromisoformat(job["date_of_exit"]) if job.get("date_of_exit") else None))
+        exemption = seed.get("exempted_establishment")
+        if exemption:
+            await session.execute(insert(exempted_establishments).values(
+                establishment_id=exemption["establishment_id"], trust_name=exemption["trust_name"],
+                pf_exempt=int(exemption["pf_exempt"]), status=exemption["status"],
+                effective_from=date.fromisoformat(exemption["effective_from"]))
+                                  .on_conflict_do_update(index_elements=["establishment_id"], set_={
+                                      "trust_name": exemption["trust_name"], "pf_exempt": int(exemption["pf_exempt"]),
+                                      "status": exemption["status"], "effective_from": date.fromisoformat(exemption["effective_from"])}))
         for s in seed.get("office_staff", []):
             await session.execute(insert(office_staff).values(subject=s["subject"], stakeholder=s["stakeholder"],
                                                               office_id=s["office_id"]).on_conflict_do_nothing())

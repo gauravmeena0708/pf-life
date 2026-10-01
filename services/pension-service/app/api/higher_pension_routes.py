@@ -304,7 +304,7 @@ async def request_dues_transfer(optionId: str, idempotency_key: str | None = Hea
         require_step_up(actor, "transfer-higher-pension-dues", optionId, None, row["dues_paise"])
         cached = await find_response(session, actor.subject, operation, idempotency_key, h)
         if cached:
-            return cached.body                                          # the stored response, exactly as first sent
+            return envelope(cached.body)
         if row["state"] != "APPROVED":
             raise Problem(409, "/problems/invalid-state", "Only an approved option can request a dues transfer")
         await session.execute(update(higher_pension_options).where(higher_pension_options.c.option_id == optionId).values(
@@ -315,6 +315,6 @@ async def request_dues_transfer(optionId: str, idempotency_key: str | None = Hea
                                  "amount_paise": row["dues_paise"]})
         await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder,
                     action="pension.higher_dues_transfer_requested", target_type="higher_pension_option", target_id=optionId)
-        result = envelope(_view({**row, "state": "TRANSFER_REQUESTED"}))
+        result = _view({**row, "state": "TRANSFER_REQUESTED"})
         await store_response(session, actor.subject, operation, idempotency_key, h, 200, result)
-    return result
+    return envelope(result)

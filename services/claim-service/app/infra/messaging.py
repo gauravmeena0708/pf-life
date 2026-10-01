@@ -1,5 +1,6 @@
 """Events claim-service consumes. Each handler runs inside the inbox transaction (apply_once), so a
 redelivered event is applied once; state guards make an out-of-order event a logged no-op."""
+import secrets
 from datetime import UTC, date, datetime
 from typing import Any
 
@@ -8,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import load_claim, notify, record_decision, transition
 from app.domain.claims import HOLDABLE, route
-from app.infra.tables import (accounts, annexure_k_files, auto_transfers, claim_beneficiaries, claims, member_bank_accounts,
+from app.infra.tables import (accounts, annexure_k_files, annexure_k_requests, auto_transfers, claim_beneficiaries, claims, member_bank_accounts,
                               nominations, risk_flags)
 from epfo_observability import Problem, get_logger
 from epfo_persistence.policy import on_policy_published, rules_by_version
@@ -32,6 +33,7 @@ BINDINGS = [
     "contribution-service.InterestCredited.v1",
     "member-service.MemberExitMarked.v1",
     "contribution-service.TransferPosted.v1",
+    "contribution-service.TrustTransferRequested.v1",
     "member-service.MemberRegistered.v1",
     "member-service.MemberKycUpdated.v1",
     "member-service.NominationRegistered.v1",
@@ -124,17 +126,32 @@ async def on_transfer_posted(session: AsyncSession, event: dict[str, Any]) -> No
     p = event["payload"]
     offices = dict((await session.execute(select(accounts.c.account_link_id, accounts.c.office_id).where(
         accounts.c.account_link_id.in_((p["from_account_link_id"], p["to_account_link_id"]))))).all())
-    if not (await session.execute(select(annexure_k_files.c.annexure_id).where(annexure_k_files.c.annexure_id == p["transfer_id"]))).first():
+    if p.get("source", "EPFO") == "EPFO" and p.get("destination", "EPFO") == "EPFO" and not (
+            await session.execute(select(annexure_k_files.c.annexure_id).where(
+                annexure_k_files.c.annexure_id == p["transfer_id"]))).first():
         await session.execute(insert(annexure_k_files).values(       # ANNEXURE K FILE, outward and inward (P2.5c)
             annexure_id=p["transfer_id"], uan=p["uan"], from_account_link_id=p["from_account_link_id"], to_account_link_id=p["to_account_link_id"],
             from_office_id=offices.get(p["from_account_link_id"], "-"), to_office_id=offices.get(p["to_account_link_id"], "-"),
             employee_paise=int(p["employee_paise"]), employer_paise=int(p["employer_paise"]), reco_status="PENDING"))
     for link, sign in ((p["from_account_link_id"], -1), (p["to_account_link_id"], 1)):
+        if (sign < 0 and p.get("source", "EPFO") == "TRUST") or (sign > 0 and p.get("destination", "EPFO") == "TRUST"):
+            continue
         await session.execute(update(accounts).where(accounts.c.account_link_id == link).values(
             employee_paise=accounts.c.employee_paise + sign * int(p["employee_paise"]),
             employer_paise=accounts.c.employer_paise + sign * int(p["employer_paise"])))
     await session.execute(update(auto_transfers).where(auto_transfers.c.transfer_id == p["transfer_id"]).values(   # P2.8b
         state="POSTED", posted_at=datetime.now(UTC)))
+
+
+async def on_trust_transfer_requested(session: AsyncSession, event: dict[str, Any]) -> None:
+    p = event["payload"]
+    if (await session.execute(select(annexure_k_requests.c.annexure_id).where(
+            annexure_k_requests.c.transfer_id == p["transfer_id"]))).first():
+        return
+    await session.execute(insert(annexure_k_requests).values(
+        annexure_id=f"AKT-{secrets.token_hex(8).upper()}", transfer_id=p["transfer_id"], uan=p["uan"],
+        from_account_link_id=p["from_account_link_id"], to_account_link_id=p["to_account_link_id"],
+        establishment_id=p["establishment_id"], trust_id=p["trust_id"], state="REQUESTED"))
 
 
 async def on_claim_debit_posted(session: AsyncSession, event: dict[str, Any]) -> None:
@@ -320,6 +337,7 @@ HANDLERS = {
     "InterestCredited.v1": on_interest_credited,
     "MemberExitMarked.v1": on_member_exit,
     "TransferPosted.v1": on_transfer_posted,
+    "TrustTransferRequested.v1": on_trust_transfer_requested,
     "MemberRegistered.v1": on_member_registered,
     "MemberKycUpdated.v1": on_kyc_updated,
     "NominationRegistered.v1": on_nomination,

@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.claims import NEXT_STEP, OPEN_STATES, ROLE_LABELS, approval_chain, eligibility, months_between, route, rupees, summary
 from app.infra.db import sessions
-from app.infra.tables import accounts, cads, claim_beneficiaries, claim_timeline, claims, office_staff, risk_flags, tax_declarations
+from app.infra.tables import accounts, cads, claim_beneficiaries, claim_timeline, claims, exempted_establishments, office_staff, risk_flags, tax_declarations
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit, find_response, request_hash, store_response
@@ -149,6 +149,9 @@ async def member_id_reasons(session: AsyncSession, account: dict[str, Any], clai
 
 
 async def evaluate(session: AsyncSession, account: dict[str, Any], claim_type: str, rules: dict[str, Any], today: date) -> dict[str, Any]:
+    exemption = (await session.execute(select(exempted_establishments).where(
+        exempted_establishments.c.establishment_id == account["establishment_id"]))).mappings().first()
+    account = {**account, "exemption": dict(exemption) if exemption else None}
     e = eligibility(account, claim_type, rules, today, await previous_claims(session, account["account_link_id"], claim_type))
     extra = await member_id_reasons(session, account, claim_type)
     return {**e, "eligible": False, "max_amount_paise": 0, "reasons": [*e["reasons"], *extra]} if extra else e

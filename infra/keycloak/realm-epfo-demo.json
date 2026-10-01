@@ -245,6 +245,10 @@
       {
         "name": "ext.foreign_ss",
         "description": "Foreign social-security agency (machine) — verifies certificates of coverage"
+      },
+      {
+        "name": "exempted.trust",
+        "description": "Board of Trustees of an exempted establishment's PF trust"
       }
     ]
   },
@@ -1550,6 +1554,82 @@
       "realmRoles": [
         "ext.foreign_ss"
       ]
+    },
+    {
+      "username": "exempted-trust",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "PF trust",
+      "lastName": "Demo",
+      "email": "exempted-trust@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "exempted.trust"
+      ],
+      "id": "00000000-0000-4000-8000-000000000065"
+    },
+    {
+      "username": "member-p",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Member P",
+      "lastName": "Demo",
+      "email": "member-p@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "member"
+      ],
+      "id": "00000000-0000-4000-8000-000000000066"
+    },
+    {
+      "username": "member-r",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Member R",
+      "lastName": "Demo",
+      "email": "member-r@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "member"
+      ],
+      "id": "00000000-0000-4000-8000-000000000067"
+    },
+    {
+      "username": "steel-signatory",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Steel Works signatory",
+      "lastName": "Demo",
+      "email": "steel-signatory@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "employer.signatory"
+      ],
+      "id": "00000000-0000-4000-8000-000000000068"
     }
   ]
 }

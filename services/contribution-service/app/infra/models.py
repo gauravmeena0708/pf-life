@@ -89,6 +89,29 @@ class EstablishmentMember(Base):
     international_worker: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())   # P2.9a: full wages, no ceiling
 
 
+class ExemptedEstablishment(Base):
+    __tablename__ = "exempted_establishments"
+    establishment_id: Mapped[str] = mapped_column(ForeignKey("establishments.id"), primary_key=True)
+    kind: Mapped[str] = mapped_column(String(30))
+    pf_exempt: Mapped[bool] = mapped_column(Boolean)
+    pension_exempt: Mapped[bool] = mapped_column(Boolean)
+    edli_exempt: Mapped[bool] = mapped_column(Boolean)
+    notification_no: Mapped[str] = mapped_column(Text)
+    notification_date: Mapped[date] = mapped_column(Date)
+    effective_from: Mapped[date] = mapped_column(Date)
+    status: Mapped[str] = mapped_column(String(30))
+    trust_id: Mapped[str] = mapped_column(String(80))
+    trust_name: Mapped[str] = mapped_column(Text)
+    trust_users: Mapped[list] = mapped_column(JSON)
+
+
+class TrustPassbookCache(Base):
+    __tablename__ = "trust_passbook_cache"
+    account_link_id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    payload: Mapped[dict] = mapped_column(JSON)
+    fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
 class InoperativeVerification(Base):
     __tablename__ = "inoperative_verifications"
     account_link_id: Mapped[str] = mapped_column(String(80), primary_key=True)
@@ -224,6 +247,19 @@ class TransferPosting(Base):
     approved_by: Mapped[str] = mapped_column(String(80))
     posted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     recredit_journal_id: Mapped[str | None] = mapped_column(String(36))    # the transfer was recredited (reversed)
+
+
+class TransferLeg(Base):
+    __tablename__ = "transfer_legs"
+    transfer_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    uan: Mapped[str] = mapped_column(String(32), index=True)
+    from_account_link_id: Mapped[str] = mapped_column(String(80))
+    to_account_link_id: Mapped[str] = mapped_column(String(80))
+    pf_leg: Mapped[str] = mapped_column(String(30))
+    eps_leg: Mapped[str] = mapped_column(String(30))
+    direction: Mapped[str] = mapped_column(String(30))
+    detail: Mapped[dict] = mapped_column(JSON)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class EstablishmentFreeze(Base):

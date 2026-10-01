@@ -116,5 +116,37 @@
     "period": "Period",
     "months": "Months",
     "inService": "in service"
+  },
+  "trustPf": {
+    "trust": "the trust",
+    "heldBy": "PF held by {{trust}}",
+    "unavailable": "Contact {{trust}} for this balance.",
+    "stale": "Last fetched {{time}} — the trust’s system did not answer just now.",
+    "fetched": "As reported by the trust, fetched at {{time}}.",
+    "servicePeriod": "Service period",
+    "inService": "In service",
+    "date": "Date",
+    "entry": "Entry",
+    "amount": "Amount",
+    "noEntries": "No trust entries reported.",
+    "epsWithEpfo": "Pension (EPS) service for this member ID is with EPFO.",
+    "pfWith": "PF with",
+    "transfer": "Transfer",
+    "pfLeg": "PF",
+    "epsLeg": "Pension (EPS)",
+    "transferStatus": "Transfer status",
+    "transferHelp": "When moving out of a trust, the pension leg starts by itself when the trust’s PF arrives.",
+    "loadingTransfers": "Loading transfer status…",
+    "noTransfers": "No transfers yet.",
+    "pfLabels": {
+      "COMPLETED": "Completed",
+      "SENT_TO_TRUST": "Sent to {{trust}}",
+      "AWAITING_TRUST": "Waiting for the PF from {{trust}}",
+      "ANNEXURE_K_RECEIVED": "Annexure K received from the trust"
+    },
+    "epsLabels": {
+      "COMPLETED": "Completed",
+      "WAITING_FOR_PF": "Waiting for the PF transfer to complete"
+    }
   }
 }

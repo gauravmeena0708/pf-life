@@ -39,6 +39,45 @@ office_staff = Table(
     Column("office_id", String(40), nullable=False),
 )
 
+# Synthetic exemption directory, including the subjects allowed to act for the trust.
+exempted_establishments = Table(
+    "exempted_establishments", metadata,
+    Column("establishment_id", String(40), primary_key=True),
+    Column("kind", String(30), nullable=False),
+    Column("pf_exempt", Boolean, nullable=False),
+    Column("pension_exempt", Boolean, nullable=False),
+    Column("edli_exempt", Boolean, nullable=False),
+    Column("notification_no", String(100), nullable=False),
+    Column("notification_date", Date, nullable=False),
+    Column("effective_from", Date, nullable=False),
+    Column("status", String(20), nullable=False),
+    Column("trust_id", String(40), nullable=False),
+    Column("trust_name", String(160), nullable=False),
+    Column("trust_users", JSON, nullable=False),
+)
+
+annexure_k_requests = Table(
+    "annexure_k_requests", metadata,
+    Column("annexure_id", String(40), primary_key=True),
+    Column("transfer_id", String(80), nullable=False, unique=True),
+    Column("uan", String(12), nullable=False),
+    Column("from_account_link_id", String(40), nullable=False),
+    Column("to_account_link_id", String(40), nullable=False),
+    Column("establishment_id", String(40), nullable=False, index=True),
+    Column("trust_id", String(40), nullable=False),
+    Column("state", String(20), nullable=False),
+    Column("employee_paise", BigInteger),
+    Column("employer_paise", BigInteger),
+    Column("service_from", Date),
+    Column("service_to", Date),
+    Column("breaks_months", Integer),
+    Column("interest_note", Text),
+    Column("receipt_ref", String(100)),
+    Column("received_paise", BigInteger),
+    Column("difference_paise", BigInteger),
+    Column("created_at", DateTime(timezone=True), server_default=func.now()),
+)
+
 claims = Table(
     "claims", metadata,
     Column("claim_id", String(40), primary_key=True),

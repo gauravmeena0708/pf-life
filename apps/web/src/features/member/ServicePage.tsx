@@ -9,6 +9,7 @@ import { dateOnly, stateLabel } from "../journeyB";
 import { statusLabel } from "../statusLabel";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
+import { TransferLegs, type TransferLegsData } from "../TransferLegs";
 
 interface MemberIdRow {
   account_link_id: string; establishment_name: string; date_of_joining: string; date_of_exit: string | null;
@@ -48,6 +49,8 @@ export function ServicePage() {
   const apps = useQuery({ queryKey: ["applications"], retry: false, queryFn: () => api<Envelope<Application[]>>("/api/v1/members/me/applications") });
   const autoTransfers = useQuery({ queryKey: ["member-auto-transfers"], retry: false,
     queryFn: () => api<Envelope<AutoTransfers>>("/api/v1/members/me/transfers/auto") });
+  const legs = useQuery({ queryKey: ["member-transfer-legs"], retry: false,
+    queryFn: () => api<Envelope<{ transfers: TransferLegsData[] }>>("/api/v1/members/me/transfer-legs") });
   const h = history.data?.data;
   const ids = h?.member_ids ?? [];
   const canExit = ids.filter((m) => m.mark_exit_allowed);
@@ -56,6 +59,7 @@ export function ServicePage() {
   const refresh = async () => { await Promise.all([
     qc.invalidateQueries({ queryKey: ["service-history"] }), qc.invalidateQueries({ queryKey: ["applications"] }),
     qc.invalidateQueries({ queryKey: ["member-auto-transfers"] }), qc.invalidateQueries({ queryKey: ["member-passbook"] }),
+    qc.invalidateQueries({ queryKey: ["member-transfer-legs"] }),
   ]); };
 
   async function run(work: () => Promise<string | null>) {
@@ -145,6 +149,13 @@ export function ServicePage() {
           <div className="actions"><button type="submit" className="primary" disabled={busy || !!stepUp.request}>Request transfer</button></div>
         </>}
       </form>
+
+      <section className="card stack" aria-labelledby="transfer-status-heading"><h2 id="transfer-status-heading">{t("trustPf.transferStatus")}</h2>
+        <p className="muted small">{t("trustPf.transferHelp")}</p><ProblemMessage error={legs.error} />
+        {legs.isLoading ? <p role="status">{t("trustPf.loadingTransfers")}</p> : null}
+        {legs.data?.data.transfers.length === 0 ? <p className="muted">{t("trustPf.noTransfers")}</p> : null}
+        {legs.data?.data.transfers.map((item) => <TransferLegs key={item.transfer_id} transfer={item} />)}
+      </section>
 
       <section className="card stack" aria-labelledby="auto-transfer-heading"><h2 id="auto-transfer-heading">Auto-transfer</h2>
         <ProblemMessage error={autoTransfers.error} />

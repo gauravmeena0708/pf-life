@@ -6,6 +6,7 @@ import { api, rupees, type Envelope } from "../../api/client";
 import { AnnualStatement } from "./AnnualStatement";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
+import "./PassbookPage.css";
 
 interface PassbookEntry {
   wage_month: string;
@@ -17,12 +18,12 @@ interface PassbookEntry {
   running_balance_paise: number;
 }
 interface Passbook {
-  accounts: { account_link_id: string; entries: PassbookEntry[] }[];
+  accounts: { account_link_id: string; entries: PassbookEntry[]; trust?: { source?: string; contact?: string; unavailable?: boolean; stale?: boolean; fetched_at?: string; balance?: { employee_paise: number; employer_paise: number }; entries?: { date: string; kind: string; amount_paise: number; note?: string }[]; service_from?: string; service_to?: string | null } }[];
   pending: { account_link_id: string; wage_month: string; trrn: string | null; status: string; message: string }[];
 }
 
 export function PassbookPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const passbook = useQuery({
     queryKey: ["member-passbook"],
     queryFn: () => api<Envelope<Passbook>>("/api/v1/members/me/passbook"),
@@ -52,7 +53,22 @@ export function PassbookPage() {
           <strong>{item.wage_month}</strong> · {item.account_link_id} · {statusLabel(item.status, t)}{item.trrn ? ` · ${item.trrn}` : ""}<br />{item.message}
         </li>)}</ul>
       </section> : null}
-      {entries.length === 0 ? <div className="card empty-state"><h2>{t("passbook.empty")}</h2><p>{t("passbook.emptyDescription")}</p></div> : null}
+      {entries.length === 0 && !accounts.some((account) => account.trust) ? <div className="card empty-state"><h2>{t("passbook.empty")}</h2><p>{t("passbook.emptyDescription")}</p></div> : null}
+      {accounts.filter((account) => account.trust).map((account) => { const trust = account.trust!; const name = trust.source ?? trust.contact ?? t("trustPf.trust");
+        const fetched = trust.fetched_at ? new Intl.DateTimeFormat(i18n.language === "hi" ? "hi-IN" : "en-IN", { dateStyle: "medium", timeStyle: "short" }).format(new Date(trust.fetched_at)) : "";
+        return <section key={`${account.account_link_id}-trust`} className="card stack trust-passbook" aria-label={t("trustPf.heldBy", { trust: name })}>
+          <div className="section-heading"><div><p className="eyebrow">{account.account_link_id}</p><h2>{t("trustPf.heldBy", { trust: name })}</h2></div></div>
+          {trust.unavailable ? <p>{t("trustPf.unavailable", { trust: name })}</p> : <>
+            <strong className="trust-passbook-balance">{rupees((trust.balance?.employee_paise ?? 0) + (trust.balance?.employer_paise ?? 0))}</strong>
+            <p className="muted small">{trust.stale ? t("trustPf.stale", { time: fetched }) : t("trustPf.fetched", { time: fetched })}</p>
+            <p>{t("trustPf.servicePeriod")}: {trust.service_from ?? "—"} – {trust.service_to ?? t("trustPf.inService")}</p>
+            {trust.entries?.length ? <div className="table-scroll"><table><thead><tr><th scope="col">{t("trustPf.date")}</th><th scope="col">{t("trustPf.entry")}</th><th scope="col" className="numeric">{t("trustPf.amount")}</th></tr></thead><tbody>
+              {trust.entries.map((entry, index) => <tr key={`${entry.date}-${index}`}><td>{entry.date}</td><td>{entry.note || statusLabel(entry.kind, t)}</td><td className="numeric">{rupees(entry.amount_paise)}</td></tr>)}
+            </tbody></table></div> : <p className="muted small">{t("trustPf.noEntries")}</p>}
+          </>}
+          <p className="muted small">{t("trustPf.epsWithEpfo")}</p>
+        </section>;
+      })}
       {accounts.filter((account) => account.entries.length > 0).map((account) => <section key={account.account_link_id} className="card stack" aria-labelledby={`account-${account.account_link_id}`}>
         <div className="section-heading"><div><p className="eyebrow">{t("passbook.account")}</p><h2 id={`account-${account.account_link_id}`}>{account.account_link_id}</h2></div></div>
         <div className="table-scroll"><table className="passbook-table">

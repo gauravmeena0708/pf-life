@@ -76,7 +76,7 @@ def test_an_account_without_credit_for_three_years_is_inoperative(ctx):
     client, q = ctx
     da = hdr(SEED["keycloak_subjects"]["do-caseworker"], "fo.da_accounts", [], establishment=None)
     seeded = [a["account_link_id"] for a in client.get("/api/v1/office/accounts/inoperative", headers=da).json()["data"]["accounts"]]
-    assert seeded == ["AL-0913"]                                     # MOHAN DEMO, left in 2019 (P2.12a); the other balances are recent
+    assert seeded == ["AL-0913", "AL-0914"]                          # MOHAN DEMO, left in 2019 (P2.12a); PRIYA DEMO's ID untouched since 2016 (P2.9b)
     import asyncio
     import app.infra.db as db
     from sqlalchemy import text as t
@@ -86,7 +86,7 @@ def test_an_account_without_credit_for_three_years_is_inoperative(ctx):
             await c.execute(t("UPDATE journals SET occurred_at='2020-03-31 23:59:59' WHERE business_key='OPENING-AL-0002'"))
     asyncio.run(backdate())
     found = client.get("/api/v1/office/accounts/inoperative", headers=da).json()["data"]["accounts"]
-    found = [a for a in found if a["account_link_id"] != "AL-0913"]
+    found = [a for a in found if a["account_link_id"] not in ("AL-0913", "AL-0914")]
     assert [a["account_link_id"] for a in found] == ["AL-0002"] and found[0]["last_credit"] == "2020-03-31"
     assert client.get("/api/v1/office/accounts/inoperative", headers=hdr(MEMBER_D, "member", [], establishment=None)).status_code == 403
 

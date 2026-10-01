@@ -22,8 +22,21 @@ async def seed() -> None:
             await session.execute(text("INSERT INTO establishments (id,legal_name,status,exemption_status) VALUES (:id,:name,'REGISTERED',:ex) "
                                        "ON CONFLICT (id) DO UPDATE SET exemption_status=excluded.exemption_status"),
                                   {"id": e["establishment_id"], "name": e["legal_name"], "ex": e.get("exemption_status")})
+        ex = data.get("exempted_establishment")
+        if ex:
+            await session.execute(text("""INSERT INTO exempted_establishments
+                (establishment_id,kind,pf_exempt,pension_exempt,edli_exempt,notification_no,notification_date,
+                 effective_from,status,trust_id,trust_name,trust_users)
+                VALUES (:id,:kind,:pf,:pension,:edli,:notification,:notified,:effective,:status,:trust,:name,:users)
+                ON CONFLICT (establishment_id) DO UPDATE SET status=excluded.status,trust_name=excluded.trust_name,
+                trust_users=excluded.trust_users"""),
+                {"id": ex["establishment_id"], "kind": ex["kind"], "pf": ex["pf_exempt"],
+                 "pension": ex["pension_exempt"], "edli": ex["edli_exempt"], "notification": ex["notification_no"],
+                 "notified": date.fromisoformat(ex["notification_date"]), "effective": date.fromisoformat(ex["effective_from"]),
+                 "status": ex["status"], "trust": ex["trust_id"], "name": ex["trust_name"],
+                 "users": json.dumps(ex.get("trust_users", []))})
         for m in data["members"]:
-            for job in [{**m, "establishment_id": establishment["establishment_id"]}, *m.get("previous_employments", [])]:
+            for job in [{"establishment_id": establishment["establishment_id"], **m}, *m.get("previous_employments", [])]:
                 exited = date.fromisoformat(job["date_of_exit"]) if job.get("date_of_exit") else None
                 # Exits move with MemberExitMarked.v1 after the first load; a re-seed only refreshes identity fields.
                 await session.execute(text("""INSERT INTO establishment_members

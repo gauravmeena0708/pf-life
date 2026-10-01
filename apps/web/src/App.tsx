@@ -64,6 +64,7 @@ import { Home } from "./pages/Home";
 import { InterfacePage } from "./pages/InterfacePage";
 import { CircularsPage } from "./features/ho/CircularsPage";
 import { ExemptedPage } from "./features/office/ExemptedPage";
+import { TrustPage } from "./features/exempted/TrustPage";
 import { PublicGrievancesPage, PublicClaimStatusPage } from "./features/public/PublicGrievancesPage";
 import { PublicCircularsPage } from "./features/public/CircularsList";
 import { EReportCardPage } from "./features/public/EReportCardPage";
@@ -180,6 +181,7 @@ export function App() {
             <Route path="/public/establishments/:estId/e-report-card" element={<EReportCardPage />} />
             <Route path="/ho/circulars" element={<CircularsPage />} />
             <Route path="/office/exempted" element={<ExemptedPage />} />
+            <Route path="/exempted" element={<TrustPage />} />
             <Route path="/security/activity" element={<SecurityActivity />} />
             <Route path="/audit/concurrent" element={<ConcurrentAuditPage />} />
             <Route path="/audit/internal" element={<InternalAuditPage />} />

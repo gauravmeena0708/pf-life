@@ -7,13 +7,14 @@ from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.pension import propose_revisions
-from app.infra.tables import eps_accounts, higher_pension_options, pensioners, updation_activities
+from app.infra.tables import eps_accounts, eps_transfers, higher_pension_options, pensioners, updation_activities
 from epfo_persistence import add_event
 from epfo_persistence.policy import on_policy_published
 
 BINDINGS = ["platform-service.PolicyPublished.v1", "claim-service.PhysicalClaimInwarded.v1", "workflow-service.StaffPostingChanged.v1",
             "contribution-service.HigherPensionTransferPosted.v1", "member-service.MemberRegistered.v1",
-            "member-service.MemberExitMarked.v1", "member-service.PrimaryMemberIdChanged.v1"]
+            "member-service.MemberExitMarked.v1", "member-service.PrimaryMemberIdChanged.v1",
+            "contribution-service.TransferPosted.v1"]
 # PRO counter request → updation activity. PPO amendments are basic-details updations the DA (Pension) takes up.
 INTAKE_ACTIVITIES = {"PHYSICAL_LC_UPDATION": "PHYSICAL_LC", "DEATH_UPDATION": "DEATH", "SPOUSE_REMARRIAGE_UPDATION": "SPOUSE_REMARRIAGE",
                      "PPO_AMENDMENT_BENEFICIARY": "BASIC_DETAILS", "PPO_AMENDMENT_SERVICE": "BASIC_DETAILS", "PPO_AMENDMENT_POHW": "BASIC_DETAILS"}
@@ -72,8 +73,38 @@ async def on_primary_changed(session: AsyncSession, event: dict[str, Any]) -> No
     await session.execute(update(eps_accounts).where(eps_accounts.c.uan.in_(uans)).values(person_key="SET-" + uans[0]))
 
 
+async def on_transfer_posted(session: AsyncSession, event: dict[str, Any]) -> None:
+    """A PF posting completes the EPS leg, including a transfer involving an exempted trust."""
+    p = event["payload"]
+    transfer_id = p["transfer_id"]
+    if (await session.execute(select(eps_transfers.c.transfer_id).where(eps_transfers.c.transfer_id == transfer_id))).first():
+        return
+    frm, to = p["from_account_link_id"], p["to_account_link_id"]
+    source = (await session.execute(select(eps_accounts).where(eps_accounts.c.account_link_id == frm).with_for_update())).mappings().first()
+    destination = (await session.execute(select(eps_accounts).where(eps_accounts.c.account_link_id == to))).mappings().first()
+    if not source or not destination or source["person_key"] != destination["person_key"]:
+        raise ValueError(f"EPS transfer {transfer_id} has missing or unrelated member IDs")
+    service_from = date.fromisoformat(p["service_from"]) if p.get("service_from") else source["date_of_joining"]
+    service_to = date.fromisoformat(p["service_to"]) if p.get("service_to") else source["date_of_exit"] or date.today()
+    service_months = max(0, (service_to.year - service_from.year) * 12 + service_to.month - service_from.month
+                         - (service_to.day < service_from.day))
+    breaks_months = int(p["breaks_months"]) if p.get("breaks_months") is not None else int(source["breaks_months"])
+    if breaks_months < 0 or service_to < service_from:
+        raise ValueError(f"EPS transfer {transfer_id} has invalid service dates or breaks")
+    await session.execute(insert(eps_transfers).values(
+        transfer_id=transfer_id, from_account_link_id=frm, to_account_link_id=to,
+        service_months=service_months, breaks_months=breaks_months, transferred_at=datetime.now(UTC)))
+    await session.execute(update(eps_accounts).where(eps_accounts.c.account_link_id == frm).values(
+        transferred_to=to, breaks_months=breaks_months))
+    await add_event(session, producer="pension-service", event_type="EpsServiceTransferred.v1", aggregate_type="eps_transfer",
+                    aggregate_id=transfer_id, correlation_id=event["correlation_id"], payload={
+                        "transfer_id": transfer_id, "from_account_link_id": frm, "to_account_link_id": to,
+                        "service_months": service_months, "breaks_months": breaks_months})
+
+
 HANDLERS = {"HigherPensionTransferPosted.v1": on_higher_pension_transfer, "MemberRegistered.v1": on_member_registered,
-            "MemberExitMarked.v1": on_member_exit, "PrimaryMemberIdChanged.v1": on_primary_changed}
+            "MemberExitMarked.v1": on_member_exit, "PrimaryMemberIdChanged.v1": on_primary_changed,
+            "TransferPosted.v1": on_transfer_posted}
 
 
 async def dispatch(session: AsyncSession, event: dict[str, Any]) -> None:

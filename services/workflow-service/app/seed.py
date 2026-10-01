@@ -31,12 +31,12 @@ async def main() -> None:
             ).on_conflict_do_nothing())
         for m in seed["members"]:               # process subjects (UANs) belong to the establishment's office
             values = {"office_id": seed["establishment"]["office_id"], "zone_id": office.get("zone_id"),
-                      "member_subject": m.get("subject"), "establishment_id": seed["establishment"]["establishment_id"]}
+                      "member_subject": m.get("subject"), "establishment_id": m.get("establishment_id", seed["establishment"]["establishment_id"])}
             statement = insert(subject_offices).values(subject_ref=m["uan"], **values)
             await session.execute(statement.on_conflict_do_update(index_elements=[subject_offices.c.subject_ref], set_=values))
             # Member accounts: the current one and any earlier member IDs. Exits and transfers move them after
             # the first load (events), so a re-seed does not overwrite them.
-            for a in [{**m, "establishment_id": seed["establishment"]["establishment_id"]}, *m.get("previous_employments", [])]:
+            for a in [{"establishment_id": seed["establishment"]["establishment_id"], **m}, *m.get("previous_employments", [])]:
                 await session.execute(insert(member_accounts).values(
                     account_link_id=a["account_link_id"], uan=m["uan"], member_subject=m.get("subject"), establishment_id=a["establishment_id"],
                     date_of_joining=date.fromisoformat(a["date_of_joining"]),

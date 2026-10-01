@@ -10,6 +10,7 @@ import { useStepUp } from "../stepup/useStepUp";
 import { SharesSection } from "../claimant/DeathClaimPages";
 import { AnnexureKSection, LocksSection } from "./LedgerTools";
 import { statusLabel } from "../statusLabel";
+import { TrustReconciliation } from "./TrustReconciliation";
 
 type Json = Record<string, unknown>;
 const text = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
@@ -218,6 +219,7 @@ export function ClaimToolsPage() {
       {role === "fo.apfc" ? <SharesSection /> : null}
       {role === "fo.oic" ? <LocksSection /> : null}
       {role === "fo.da_accounts" ? <AnnexureKSection /> : null}
+      {role === "fo.da_accounts" ? <TrustReconciliation /> : null}
       <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
     </section>
   );

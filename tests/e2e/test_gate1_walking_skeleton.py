@@ -83,8 +83,8 @@ def test_member_cannot_call_office_endpoint(page):
 
 
 def test_planned_endpoint_answers_501_planned(page):
-    login(page, "do-caseworker")                       # an exempted trust's Annexure K: planned until P2.9b
-    status, body = api(page, "POST", "/api/v1/office/exempted/annexure-k/AK-1/reconciliations")
+    login(page, "ro-da-compliance")                    # compliance proceedings: planned until P2.11
+    status, body = api(page, "POST", "/api/v1/office/compliance/inspections/INS-1/processing-notes")
     assert status == 501 and body["type"] == "/problems/planned"
 
 

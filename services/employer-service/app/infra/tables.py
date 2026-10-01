@@ -1,5 +1,5 @@
 """Tables owned by employer-service (created by migration 0002)."""
-from sqlalchemy import JSON, Column, Date, DateTime, Integer, MetaData, String, Table, Text, func
+from sqlalchemy import JSON, Boolean, Column, Date, DateTime, Integer, MetaData, String, Table, Text, func
 
 metadata = MetaData()
 
@@ -28,6 +28,22 @@ establishments = Table(
     Column("bank_accounts", JSON),                              # remittance accounts (seeded, masked)
     Column("coverage", JSON),                                   # the circle officer's coverage decision (OLRE)
     Column("closed_on", Date),
+)
+
+establishment_exemptions = Table(
+    "establishment_exemptions", metadata,
+    Column("establishment_id", String(40), primary_key=True),
+    Column("kind", String(30), nullable=False),
+    Column("pf_exempt", Boolean, nullable=False),
+    Column("pension_exempt", Boolean, nullable=False),
+    Column("edli_exempt", Boolean, nullable=False),
+    Column("notification_no", String(120), nullable=False),
+    Column("notification_date", Date, nullable=False),
+    Column("effective_from", Date, nullable=False),
+    Column("status", String(30), nullable=False),
+    Column("trust_id", String(40), nullable=False),
+    Column("trust_name", String(200), nullable=False),
+    Column("trust_users", JSON, nullable=False),
 )
 
 registration_requests = Table(

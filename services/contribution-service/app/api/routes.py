@@ -17,6 +17,7 @@ from epfo_auth import Actor, require_actor, require_grant, require_stakeholder, 
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit, find_response, request_hash, store_response
 from app.infra.interest import interest_due, post_interest
+from app.infra.trust_passbook import trust_section
 from epfo_persistence.policy import financial_year, financial_year_bounds, interest_rate_bp, rules_on
 
 router = APIRouter()
@@ -84,7 +85,10 @@ async def _validation(session, filing: dict[str, Any]):
     # A return is checked against the rules in force on the first day of its wage month; until it is
     # submitted, re-validating picks up a newly published version for that month.
     rules = await rules_on(session, wage_month_start(filing["wage_month"]))
-    report = validate(filing["content"], filing["format"], filing["wage_month"], members, rules, comparison)
+    exemption = (await session.execute(text("SELECT trust_name FROM exempted_establishments WHERE establishment_id=:e "
+                                            "AND pf_exempt=true AND status='ACTIVE' AND effective_from<=:d"),
+                                       {"e": filing["establishment_id"], "d": wage_month_start(filing["wage_month"])})).scalar_one_or_none()
+    report = validate(filing["content"], filing["format"], filing["wage_month"], members, rules, comparison, exemption)
     report.update({"filing_id": filing["id"], "version": filing["version"],
                    "state": "VALIDATED" if report["valid"] else "VALIDATION_FAILED",
                    "rule_version": rules["rule_version"]})
@@ -398,7 +402,15 @@ async def _passbook(subject: str, account_link_id: str | None):
             for ent in grouped.values():
                 balance += ent["employee_share_paise"] + ent["employer_share_paise"]
                 entries.append({**ent, "running_balance_paise": balance})
-            out.append({"account_link_id": a["account_link_id"], "entries": entries})
+            account_data = {"account_link_id": a["account_link_id"], "entries": entries}
+            exemption = (await session.execute(text("""SELECT e.trust_id,e.trust_name FROM exempted_establishments e
+                JOIN establishment_members m ON m.establishment_id=e.establishment_id
+                WHERE m.account_link_id=:a AND e.pf_exempt=true AND e.status='ACTIVE'
+                AND e.effective_from<=COALESCE(m.date_of_exit,CURRENT_DATE)"""),
+                {"a": a["account_link_id"]})).mappings().first()
+            if exemption:
+                account_data["trust"] = await trust_section(session, a["account_link_id"], exemption)
+            out.append(account_data)
         pending_rows=(await session.execute(text("SELECT f.wage_month,f.state,f.content,f.format,c.trrn,m.uan,m.account_link_id FROM ecr_filings f LEFT JOIN challans c ON c.filing_id=f.id JOIN establishment_members m ON m.establishment_id=f.establishment_id WHERE m.member_subject=:s AND (CAST(:a AS TEXT) IS NULL OR m.account_link_id=:a) AND f.state IN ('SUBMITTED','PAYMENT_PENDING')"), {"s":subject,"a":account_link_id})).mappings().all()
         for x in pending_rows:
             members,_,_=parse(x["content"],x["format"])

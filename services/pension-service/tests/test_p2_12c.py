@@ -83,7 +83,7 @@ def test_transfer_consumer_is_idempotent(ctx, status, state):
     assert client.post(url, headers=hdr(ACCOUNTS, "fo.da_accounts")).status_code == 400
     first = transfer(client, oid)
     assert first.status_code == 200, first.text
-    assert transfer(client, oid).json() == first.json()
+    assert transfer(client, oid).json()["data"] == first.json()["data"]                  # the replay returns the stored data
     assert transfer(client, oid, "different-key").status_code == 409
     assert event_payload(q, "HigherPensionDuesTransferRequested.v1") == [
         {"option_id": oid, "uan": UAN, "account_link_id": "AL-0907", "amount_paise": DUES}]

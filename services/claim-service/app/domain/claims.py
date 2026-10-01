@@ -107,6 +107,14 @@ def eligibility(account: dict[str, Any], claim_type: str, rules: dict[str, Any],
         reasons.append(f"This claim can be made once every {spec['once_every_months']} months.")
     if account.get("international_worker"):                    # P2.9a: the international-worker rules (illustrative)
         reasons += international_worker_reasons(account, claim_type, rules, today)
+    exemption = account.get("exemption") or {}
+    trust_rules = section(rules, "exempted_establishments")
+    effective = exemption.get("effective_from")
+    if (exemption.get("pf_exempt") and exemption.get("status") == "ACTIVE"
+            and claim_type in trust_rules["trust_claim_types"] and effective
+            and joined and joined <= today and (exited is None or exited >= effective) and effective <= today):
+        reasons.append(f"Your PF for this member ID is with {exemption['trust_name']}; the trust settles it within "
+                       f"{trust_rules['trust_claim_days']} days (Condition 12).")
     served = months_between(joined, exited or today) if joined else 0
     if spec.get("max_service_months") is not None and served > spec["max_service_months"]:
         reasons.append("With this much service a monthly pension or a scheme certificate applies instead (Form 10D / 10C).")

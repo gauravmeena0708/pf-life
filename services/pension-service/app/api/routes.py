@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.pension import age_on, amount_for, approved, arrears, catch_up_payments, month_of, today
 from app.infra.db import sessions
-from app.infra.tables import eps_accounts, member_service, office_staff, pension_payments, pension_revisions, pensioners
+from app.infra.tables import eps_accounts, exempted_establishments, member_service, office_staff, pension_payments, pension_revisions, pensioners
 from epfo_auth import Actor, require_actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import audit
@@ -142,7 +142,8 @@ def eps_service(spells: list[dict[str, Any]], day: date) -> tuple[int, list[dict
         start, end = sp["date_of_joining"], min(sp["date_of_exit"] or day, day)
         by_id.append({"account_link_id": sp["account_link_id"], "establishment_id": sp.get("establishment_id"), "from": start.isoformat(),
                       "to": sp["date_of_exit"].isoformat() if sp["date_of_exit"] else None, "months": months(start, end),
-                      "breaks_months": int(sp.get("breaks_months") or 0)})
+                      "breaks_months": int(sp.get("breaks_months") or 0), "pf_with": sp.get("pf_with", "EPFO"),
+                      "eps_transferred_to": sp.get("transferred_to")})
         if merged and start <= merged[-1][1]:
             merged[-1][1] = max(merged[-1][1], end)
         else:
@@ -162,6 +163,7 @@ async def my_estimate(actor: Actor = Depends(MEMBER), session: AsyncSession = De
         key = (await session.execute(select(eps_accounts.c.person_key).where(eps_accounts.c.uan == m["uan"]).limit(1))).scalar_one_or_none()
         spells = [dict(r) for r in (await session.execute(select(eps_accounts).where(eps_accounts.c.person_key == key)
                                                           .order_by(eps_accounts.c.date_of_joining))).mappings().all()] if key else []
+        exemptions = {r["establishment_id"]: r for r in (await session.execute(select(exempted_establishments))).mappings().all()}
         rules = await rules_on(session, today())
     p = section(rules, "pension")
     day = today()
@@ -169,6 +171,10 @@ async def my_estimate(actor: Actor = Depends(MEMBER), session: AsyncSession = De
     if not spells:                                                  # no EPS accounts known: the one service record
         spells = [{"account_link_id": m["account_link_id"], "establishment_id": m["establishment_id"], "date_of_joining": m["date_of_joining"],
                    "date_of_exit": m["date_of_exit"], "breaks_months": 0}]
+    for sp in spells:
+        exemption = exemptions.get(sp.get("establishment_id"))
+        if exemption and exemption["pf_exempt"] and exemption["status"] == "ACTIVE" and (sp["date_of_exit"] or day) >= exemption["effective_from"]:
+            sp["pf_with"] = "TRUST " + exemption["trust_name"]
     served, by_id = eps_service(spells, day)
     in_service = any(sp["date_of_exit"] is None for sp in spells)
     to_normal = served + max(0, (normal - day).days * 12 // 365) if in_service else served

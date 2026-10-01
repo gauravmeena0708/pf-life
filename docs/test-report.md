@@ -98,6 +98,19 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 9b: members of exempted establishments (1 October 2026)
+
+Unit: employer-service 27, contribution-service 80, claim-service 69, pension-service 41, mock-integrations 7 (new tests
+in each: the exemption record and trust profile; the ECR refusal; the three transfer directions and their legs; the trust's
+Annexure K requests, submission and reconciliation; the EPS leg; the passbook fetched from the trust — fresh, cached,
+stale and unavailable); web 224 (new `P29b.test.tsx`); end to end 89 of 89 (new `test_exempted_members.py`: member P
+into the trust, member R out of it — the PF of ₹7,10,000 reconciled from the trust's Annexure K, then the pension service
+of 137 months with 2 months of breaks moved on its own); must-deny 18; UI smoke 2. Found on the way, fixed: the seeds
+put every member's present job at the demo establishment (a member's own establishment is now honoured); the office had
+no list of the trusts' Annexure K to reconcile (added); the transfer-leg view did not say which member IDs; a seed grant
+id longer than its column; a codex test that compared whole envelopes on a replay (the convention is the stored data
+in a fresh envelope); the walking-skeleton test's "planned" example had been built.
+
 ## Update — Phase 2, slice 9b (first step): pension service across member IDs (1 October 2026)
 
 pension-service 40 (new `test_eps_service.py`: spells add up, an overlap counts once, breaks are taken off; the
@@ -133,7 +146,8 @@ Unit: pension-service 37 (new `test_p2_12c.py`), contribution-service 72 (new `t
 web 186 (new `P212c.test.tsx`); end to end 80 of 81 in the full run (new `test_small_pension_office.py`; member H's
 dues of ₹49,980 were posted to the pension fund) — `test_journey_d_security.py` timed out once waiting for a risk
 signal under load and passed when run again alone (a timing wait, not this slice); must-deny 18; UI smoke 2. Found on
-the way, fixed: a replayed money request returned a fresh envelope instead of the stored response; the office had no
+the way, fixed: a test expected a replayed money request to return the first envelope unchanged (the convention is the
+stored data in a fresh envelope — the test was corrected); the office had no
 list of higher-pension options (added); the P2.8c test assumed the option stays VALIDATED.
 
 ## Update — Phase 2, slice 12b: voluntary coverage, closure, office transfer, contractors, registration feeds (1 October 2026)

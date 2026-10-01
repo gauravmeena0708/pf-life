@@ -24,8 +24,8 @@ def sql(statement, params=None):
 
 
 def listed(response):
-    """The accounts this test works on: all but the seeded inoperative AL-0913 (MOHAN DEMO)."""
-    return [a for a in response.json()["data"]["accounts"] if a["account_link_id"] != "AL-0913"]
+    """The accounts this test works on: all but the seeded inoperative ones (MOHAN DEMO's AL-0913, PRIYA DEMO's AL-0914)."""
+    return [a for a in response.json()["data"]["accounts"] if a["account_link_id"] not in ("AL-0913", "AL-0914")]
 
 
 def old_account():

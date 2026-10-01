@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 import epfo_auth
-from app.api import annexure_routes, catalogue_routes, death_routes, edli_routes, lifecycle_routes, mobility_routes, public_routes, routes, tds_routes
+from app.api import annexure_routes, catalogue_routes, death_routes, edli_routes, exempted_routes, lifecycle_routes, mobility_routes, public_routes, routes, tds_routes
 from app.config import settings
 from app.infra.db import database_ready, engine
 from app.infra.messaging import BINDINGS, dispatch
@@ -36,6 +36,7 @@ def create_app() -> FastAPI:
     app.include_router(routes.router)
     app.include_router(death_routes.router)
     app.include_router(annexure_routes.router)
+    app.include_router(exempted_routes.router)
     app.include_router(mobility_routes.router)
     app.include_router(edli_routes.router)
     app.include_router(public_routes.router)

@@ -207,3 +207,9 @@ dr_and_training:
   rpo_minutes: 15               # replication may lag the primary by at most this much
   rto_minutes: 120              # a failover must bring services up within this long
   sandbox_days: 14              # a training sandbox lives this many days
+
+# P2.9b: members of exempted establishments (illustrative; Exemption Manual and SOPs, Dec 2023)
+exempted_establishments:
+  trust_claim_types: [ADVANCE_ILLNESS, FINAL_SETTLEMENT]   # PF claims, settled by the trust; pension (Form 10C / 10D) and EDLI stay with EPFO
+  trust_claim_days: 20          # Condition 12; the online evaluator scores 10 days (SOP-M p.17)
+  passbook_cache_minutes: 5     # the trust's passbook is fetched again after this long

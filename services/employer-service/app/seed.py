@@ -7,7 +7,8 @@ from datetime import date, datetime
 from sqlalchemy import select, update
 
 from app.infra.db import sessions
-from app.infra.tables import contractors, directory, establishments, grants, office_staff, offices, registration_requests
+from app.infra.tables import (contractors, directory, establishment_exemptions, establishments, grants,
+                              office_staff, offices, registration_requests)
 
 SEED_FILE = os.environ.get("SEED_FILE", "/srv/seed/synthetic.json")
 PUBLIC_FIELDS = ("pincode", "city", "district", "coverage_date", "establishment_type",
@@ -65,6 +66,17 @@ async def main() -> None:
                     if missing:
                         await s.execute(update(establishments).where(
                             establishments.c.establishment_id == public_est["establishment_id"]).values(**missing))
+            exemption = seed.get("exempted_establishment")
+            if exemption and not (await s.execute(select(establishment_exemptions.c.establishment_id).where(
+                    establishment_exemptions.c.establishment_id == exemption["establishment_id"]))).first():
+                await s.execute(establishment_exemptions.insert().values(
+                    establishment_id=exemption["establishment_id"], kind=exemption["kind"],
+                    pf_exempt=exemption["pf_exempt"], pension_exempt=exemption["pension_exempt"],
+                    edli_exempt=exemption["edli_exempt"], notification_no=exemption["notification_no"],
+                    notification_date=date.fromisoformat(exemption["notification_date"]),
+                    effective_from=date.fromisoformat(exemption["effective_from"]), status=exemption["status"],
+                    trust_id=exemption["trust_id"], trust_name=exemption["trust_name"],
+                    trust_users=exemption["trust_users"]))
             profile = {k: est.get(k) for k in ("address", "kyc", "bank_accounts")}    # P2.6: set once, then changed by requests
             current = (await s.execute(select(establishments).where(establishments.c.establishment_id == est["establishment_id"]))).mappings().one()
             unset = {k: v for k, v in profile.items() if v is not None and current[k] is None}
@@ -88,6 +100,16 @@ async def main() -> None:
                         grant_id=f"GR-OWNER-{principal['establishment_id']}", establishment_id=principal["establishment_id"],
                         subject=principal["subject"], username=principal["username"], kind="OWNER",
                         grants=principal.get("grants", []), status="ACTIVE", granted_by="seed"))
+            for extra in seed.get("extra_employer_grants", []):        # P2.9b: e.g. the signatory of an exempted establishment
+                if (await s.execute(select(establishments.c.establishment_id).where(
+                        establishments.c.establishment_id == extra["establishment_id"]))).first() and not (await s.execute(
+                        select(grants.c.grant_id).where(grants.c.subject == extra["subject"],
+                                                        grants.c.establishment_id == extra["establishment_id"],
+                                                        grants.c.kind == extra["kind"]))).first():
+                    await s.execute(grants.insert().values(
+                        grant_id=f"GR-{extra['kind'][:3]}-{extra['establishment_id']}-{extra['username'][:8]}"[:40], establishment_id=extra["establishment_id"],
+                        subject=extra["subject"], username=extra["username"], kind=extra["kind"], grants=extra.get("grants", []),
+                        status="ACTIVE", granted_by="seed"))
             for link in seed.get("contractor_links", []):
                 principal_est = (await s.execute(select(establishments).where(
                     establishments.c.establishment_id == link["principal_establishment_id"]))).mappings().first()
@@ -108,7 +130,8 @@ async def main() -> None:
                         linked_by="seed"))
             for username, subject in seed["keycloak_subjects"].items():
                 if not (await s.execute(select(directory.c.username).where(directory.c.username == username))).first():
-                    role = next((u["role"] for u in seed["employer_users"] if u["username"] == username), "other")
+                    role = next((u["role"] for u in [*seed["employer_users"], *seed.get("extra_employer_grants", [])]
+                                 if u["username"] == username), "other")
                     await s.execute(directory.insert().values(username=username, subject=subject, role=role))
     print(f"employer-service seeded: {est['establishment_id']} ({est['status']}), owner grant, user directory")
 

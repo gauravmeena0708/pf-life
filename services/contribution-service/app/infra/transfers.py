@@ -1,9 +1,9 @@
 """Form 13 transfers and dates of exit (Phase 2, slice 1).
 
 The transfer runs on the process engine (config/processes/transfer-form13.yaml); this service owns its effect:
-when the case is APPROVED the whole balance of the previous member ID (employee and employer shares) moves to
-the current one as one balanced journal, keyed by the case, so a redelivered event never posts twice. It then
-publishes TransferPosted.v1 and keeps the posting for the member's Annexure K."""
+when the case is APPROVED the PF leg is recorded once. EPFO balances move through a balanced journal;
+trust sources wait for a reconciled Annexure K. The EPS leg is updated by the pension service."""
+import json
 from datetime import UTC, date, datetime
 from typing import Any
 
@@ -50,15 +50,49 @@ async def on_auto_transfer(session: AsyncSession, event: dict[str, Any]) -> None
 
 async def post_transfer(session: AsyncSession, transfer_id: str, uan: str, frm: str, to: str, approved_by: str,
                         correlation_id: str | None) -> None:
-    """Move the member ID's whole balance (a balanced journal) and publish TransferPosted.v1."""
+    """Post the PF leg once; the EPS leg is completed by the pension service."""
+    if (await session.execute(text("SELECT 1 FROM transfer_legs WHERE transfer_id=:t"), {"t": transfer_id})).first():
+        return
+    # A transfer posted before this projection was introduced still has its original journal.
     if (await session.execute(text("SELECT 1 FROM transfer_postings WHERE transfer_id=:t"), {"t": transfer_id})).first():
+        await session.execute(text("""INSERT INTO transfer_legs
+            (transfer_id,uan,from_account_link_id,to_account_link_id,pf_leg,eps_leg,direction,detail,updated_at)
+            VALUES (:t,:u,:f,:to,'COMPLETED','WAITING_FOR_PF','EPFO_TO_EPFO','{}',:at)"""),
+            {"t": transfer_id, "u": uan, "f": frm, "to": to, "at": datetime.now(UTC)})
+        return
+    accounts = (await session.execute(text("""SELECT m.account_link_id,m.uan,m.date_of_joining,m.date_of_exit,e.establishment_id,e.trust_id,e.trust_name
+        FROM establishment_members m LEFT JOIN exempted_establishments e ON e.establishment_id=m.establishment_id
+        AND e.pf_exempt=true AND e.status='ACTIVE' AND e.effective_from<=COALESCE(m.date_of_exit,CURRENT_DATE)
+        WHERE m.account_link_id IN (:f,:to)"""), {"f": frm, "to": to})).mappings().all()
+    by_id = {r["account_link_id"]: r for r in accounts}
+    if frm not in by_id or to not in by_id or by_id[frm]["uan"] != uan or by_id[to]["uan"] != uan:
+        raise ValueError("transfer member IDs must belong to the same UAN")
+    source, destination = by_id[frm], by_id[to]
+    if source["trust_id"] and destination["trust_id"]:
+        raise ValueError("a trust-to-trust PF transfer requires a separate process")
+    direction = "TRUST_TO_EPFO" if source["trust_id"] else "EPFO_TO_TRUST" if destination["trust_id"] else "EPFO_TO_EPFO"
+    pf = "AWAITING_TRUST" if direction == "TRUST_TO_EPFO" else "SENT_TO_TRUST" if direction == "EPFO_TO_TRUST" else "COMPLETED"
+    detail = {"trust_name": (source if source["trust_id"] else destination)["trust_name"]}
+    await session.execute(text("""INSERT INTO transfer_legs
+        (transfer_id,uan,from_account_link_id,to_account_link_id,pf_leg,eps_leg,direction,detail,updated_at)
+        VALUES (:t,:u,:f,:to,:pf,'WAITING_FOR_PF',:direction,:detail,:at)"""),
+        {"t": transfer_id, "u": uan, "f": frm, "to": to, "pf": pf, "direction": direction,
+         "detail": json.dumps(detail), "at": datetime.now(UTC)})
+    if direction == "TRUST_TO_EPFO":
+        await add_event(session, producer=PRODUCER, event_type="TrustTransferRequested.v1",
+                        aggregate_type="transfer", aggregate_id=transfer_id, correlation_id=correlation_id,
+                        payload={"transfer_id": transfer_id, "uan": uan, "from_account_link_id": frm,
+                                 "to_account_link_id": to, "establishment_id": source["establishment_id"],
+                                 "trust_id": source["trust_id"]})
         return
     shares = await member_shares(session, frm)
     lines = []
     for share in ("employee", "employer"):
         if shares[share] > 0:
             lines += [{"account_code": "AC01_EPF", "side": "debit", "amount_paise": shares[share], "account_link_id": frm, "share": share},
-                      {"account_code": "AC01_EPF", "side": "credit", "amount_paise": shares[share], "account_link_id": to, "share": share}]
+                      ({"account_code": "PAYABLE_TO_TRUSTS", "side": "credit", "amount_paise": shares[share]}
+                       if direction == "EPFO_TO_TRUST" else
+                       {"account_code": "AC01_EPF", "side": "credit", "amount_paise": shares[share], "account_link_id": to, "share": share})]
     journal_id = await _post(session, f"TRANSFER-{transfer_id}", "TRANSFER", None, lines) if lines else None
     subject = (await session.execute(text("SELECT member_subject FROM establishment_members WHERE account_link_id=:a"),
                                      {"a": to})).scalar_one_or_none()
@@ -71,7 +105,57 @@ async def post_transfer(session: AsyncSession, transfer_id: str, uan: str, frm: 
                     aggregate_id=transfer_id, correlation_id=correlation_id, payload={
                         "transfer_id": transfer_id, "uan": uan, "from_account_link_id": frm, "to_account_link_id": to,
                         "employee_paise": max(shares["employee"], 0), "employer_paise": max(shares["employer"], 0),
-                        "journal_id": journal_id or "", "postings": lines})
+                        "journal_id": journal_id or "", "postings": lines,
+                        "source": "EPFO", "destination": "TRUST" if direction == "EPFO_TO_TRUST" else "EPFO",
+                        "service_from": str(source["date_of_joining"]) if source["date_of_joining"] else None,
+                        "service_to": str(source["date_of_exit"]) if source["date_of_exit"] else None})
+
+
+async def on_trust_annexure_k(session: AsyncSession, event: dict[str, Any]) -> None:
+    p = event["payload"]
+    leg = (await session.execute(text("SELECT * FROM transfer_legs WHERE transfer_id=:t"),
+                                 {"t": p["transfer_id"]})).mappings().first()
+    if not leg or leg["direction"] != "TRUST_TO_EPFO" or leg["to_account_link_id"] != p["to_account_link_id"]:
+        raise ValueError("Annexure K does not match an awaiting trust transfer")
+    if leg["pf_leg"] == "COMPLETED":
+        return
+    ee, er = int(p["employee_paise"]), int(p["employer_paise"])
+    if ee < 0 or er < 0 or ee + er <= 0:
+        raise ValueError("Annexure K amounts must be positive")
+    lines = [{"account_code": "BANK_COLLECTION", "side": "debit", "amount_paise": ee + er}]
+    lines += [{"account_code": "AC01_EPF", "side": "credit", "amount_paise": amount,
+               "account_link_id": leg["to_account_link_id"], "share": share}
+              for share, amount in (("employee", ee), ("employer", er)) if amount]
+    journal_id = await _post(session, f"TRUST-{p['annexure_id']}", "TRUST_TRANSFER", None, lines)
+    if not journal_id:
+        return
+    previous = leg["detail"] if isinstance(leg["detail"], dict) else json.loads(leg["detail"])
+    detail = {**previous, "annexure_id": p["annexure_id"], "service_from": p.get("service_from"),
+              "service_to": p.get("service_to"), "breaks_months": p.get("breaks_months")}
+    await session.execute(text("UPDATE transfer_legs SET pf_leg='ANNEXURE_K_RECEIVED',detail=:d,updated_at=:at WHERE transfer_id=:t"),
+                          {"d": json.dumps(detail), "at": datetime.now(UTC), "t": p["transfer_id"]})
+    await session.execute(text("UPDATE transfer_legs SET pf_leg='COMPLETED',updated_at=:at WHERE transfer_id=:t"),
+                          {"at": datetime.now(UTC), "t": p["transfer_id"]})
+    await add_event(session, producer=PRODUCER, event_type="TransferPosted.v1", aggregate_type="ledger_journal",
+                    aggregate_id=p["transfer_id"], correlation_id=event["correlation_id"], payload={
+                        "transfer_id": p["transfer_id"], "uan": leg["uan"], "from_account_link_id": leg["from_account_link_id"],
+                        "to_account_link_id": leg["to_account_link_id"], "employee_paise": ee, "employer_paise": er,
+                        "journal_id": journal_id, "postings": lines, "source": "TRUST", "destination": "EPFO",
+                        "service_from": p.get("service_from"), "service_to": p.get("service_to"),
+                        "breaks_months": p.get("breaks_months")})
+
+
+async def on_eps_service_transferred(session: AsyncSession, event: dict[str, Any]) -> None:
+    p = event["payload"]
+    leg = (await session.execute(text("SELECT detail FROM transfer_legs WHERE transfer_id=:t AND from_account_link_id=:f "
+                                      "AND to_account_link_id=:to"), {"t": p["transfer_id"],
+                                      "f": p["from_account_link_id"], "to": p["to_account_link_id"]})).scalar_one_or_none()
+    if leg is None:
+        return
+    detail = leg if isinstance(leg, dict) else json.loads(leg)
+    detail.update({"service_months": int(p["service_months"]), "eps_breaks_months": int(p["breaks_months"])})
+    await session.execute(text("UPDATE transfer_legs SET eps_leg='COMPLETED',detail=:d,updated_at=:at WHERE transfer_id=:t"),
+                          {"d": json.dumps(detail), "at": datetime.now(UTC), "t": p["transfer_id"]})
 
 
 async def on_member_registered(session: AsyncSession, event: dict[str, Any]) -> None:

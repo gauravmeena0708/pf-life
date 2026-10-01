@@ -159,6 +159,7 @@ function poc(role: string): NavGroup[] {
 export function menusFor(role: string | undefined): NavGroup[] {
   if (!role || role === "public") return [{ labelKey: "navigation.publicLookups", items: PUBLIC_SERVICES }];
   if (role === "member") return MEMBER;
+  if (role === "exempted.trust") return [{ label: "Trust", to: "/exempted" }];
   if (role.startsWith("employer.")) return EMPLOYER;
   if (role === "pensioner") return PENSIONER;
   if (role === "claimant") return CLAIMANT;
@@ -179,6 +180,7 @@ export function menusFor(role: string | undefined): NavGroup[] {
 
 /** Where "Home" goes for a role. */
 export function homeFor(role: string | undefined): string {
+  if (role === "exempted.trust") return "/exempted";
   if (role === "tech.adc") return "/ndc/dr";
   if (["train.pdnasa", "train.zti", "zo.zti"].includes(role ?? "")) return "/training";
   if (role === "fo.nan") return "/office/nan-camp";

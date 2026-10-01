@@ -235,4 +235,24 @@ eps_accounts = Table(
     Column("date_of_joining", Date, nullable=False),
     Column("date_of_exit", Date),
     Column("breaks_months", Integer, nullable=False, server_default="0"),    # periods with no contribution (para 9)
+    Column("transferred_to", String(40)),
+)
+
+eps_transfers = Table(
+    "eps_transfers", metadata,
+    Column("transfer_id", String(80), primary_key=True),
+    Column("from_account_link_id", String(40), nullable=False),
+    Column("to_account_link_id", String(40), nullable=False),
+    Column("service_months", Integer, nullable=False),
+    Column("breaks_months", Integer, nullable=False),
+    Column("transferred_at", DateTime(timezone=True), server_default=func.now(), nullable=False),
+)
+
+exempted_establishments = Table(
+    "exempted_establishments", metadata,
+    Column("establishment_id", String(40), primary_key=True),
+    Column("trust_name", String(160), nullable=False),
+    Column("pf_exempt", Integer, nullable=False),
+    Column("status", String(20), nullable=False),
+    Column("effective_from", Date, nullable=False),
 )

@@ -67,7 +67,8 @@ def parse(content: str, fmt: str) -> tuple[list[dict[str, str]], list[dict[str, 
     return rows, warnings, normalized
 
 
-def validate(content: str, fmt: str, wage_month: str, members: list[dict[str, Any]], rules: dict[str, Any], last_posted: dict[str, Any] | None = None) -> dict[str, Any]:
+def validate(content: str, fmt: str, wage_month: str, members: list[dict[str, Any]], rules: dict[str, Any], last_posted: dict[str, Any] | None = None,
+             exempt_trust: str | None = None) -> dict[str, Any]:
     rows, issues, _ = parse(content, fmt)
     by_uan = {str(m["uan"]): m for m in members}
     seen: set[str] = set()
@@ -112,6 +113,12 @@ def validate(content: str, fmt: str, wage_month: str, members: list[dict[str, An
         elif int(ncp) > day_count:
             issue(i, row, "NCP Days", "E-NCP-DAYS", "error", f"NCP days cannot exceed {day_count} days in this wage month.", day_count, ncp)
         if numeric:
+            if exempt_trust:
+                for field in (FIELDS[6], FIELDS[8]):
+                    if numeric.get(field, 0) > 0:
+                        issue(i, row, field, "E-EXEMPTED-PF", "error",
+                              f"PF goes to the trust of {exempt_trust}; remit only the pension share and the charges to EPFO",
+                              0, numeric[field] // 100)
             gross, epf, eps, edli = (numeric.get(x, 0) for x in FIELDS[2:6])
             aggregate_epf_wages += epf
             if epf > gross or eps > epf or edli > epf:
@@ -127,6 +134,8 @@ def validate(content: str, fmt: str, wage_month: str, members: list[dict[str, An
             age = int(wage_month[:4]) - born.year - ((int(wage_month[5:7]), day_count) < (born.month, born.day)) if born else 0
             expected = split(epf, eps, age, rules, edli)
             for field, account in zip(ARITHMETIC, ("AC01_EPF_EE", "AC10_EPS", "AC01_EPF_ER")):
+                if exempt_trust and account.startswith("AC01"):
+                    continue
                 got = numeric.get(field, -1)
                 if got != expected[account]:
                     code = {ARITHMETIC[0]: "E-EPF-EE", ARITHMETIC[1]: "E-EPS-SHARE", ARITHMETIC[2]: "E-DIFF-SHARE"}[field]
@@ -140,7 +149,7 @@ def validate(content: str, fmt: str, wage_month: str, members: list[dict[str, An
             if all(k in numeric for k in FIELDS[2:9]):
                 row_total = split(epf, eps, age, rules, edli)
                 for account in ("AC01_EPF_EE", "AC01_EPF_ER", "AC10_EPS", "AC21_EDLI"):
-                    totals[account] += row_total[account]
+                    totals[account] += numeric[FIELDS[6 if account == "AC01_EPF_EE" else 8]] if exempt_trust and account.startswith("AC01") else row_total[account]
             if gross == epf == 0:
                 issue(i, row, "Gross Wages", "W-ZERO-WAGES", "warning", "This row has zero wages.", fix="Confirm this is intentional; remove the row if the member had no employment.")
         corrected.append("#~#".join(row.get(f, "") for f in FIELDS))

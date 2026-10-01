@@ -14,6 +14,7 @@ import { ClaimDocket } from "./ClaimDocket";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 import type { CaseDetail } from "./types";
+import { TransferLegs, type TransferLegsData } from "../TransferLegs";
 
 const CHECK_KEYS = ["kyc", "bank", "balance", "freeze"] as const;
 const CHECK_VALUES: Record<typeof CHECK_KEYS[number], string> = {
@@ -43,6 +44,8 @@ export function CasePage() {
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
   const item = detail.data?.data;
   const role = session.data?.stakeholder;
+  const transferLegs = useQuery({ queryKey: ["office-transfer-legs", caseId], enabled: !!caseId && item?.process === "transfer_form13" && (role === "fo.da_accounts" || role === "fo.ao"), retry: false,
+    queryFn: () => api<Envelope<TransferLegsData>>(`/api/v1/office/transfers/${encodeURIComponent(caseId!)}/legs`) });
   const action = item?.your_turn && item.current_role === role ? item.next_action : null;
   const allowed = action === "recommend" && role === "fo.da_accounts" || action === "decide" && (role === "fo.ss" || role === "fo.ao")
     || action === "second-approve" && (role === "fo.apfc" || role === "fo.oic") || (action === "instruct-payment" || action === "reissue") && role === "fo.cash"
@@ -116,6 +119,9 @@ export function CasePage() {
     <ProblemMessage error={detail.error} />{detail.isLoading ? <p role="status">{t("office.loadingCase")}</p> : null}
     {notice ? <p role="status" className="ok">{t("office.actionSaved")}</p> : null}<ProblemMessage error={error} />
     {item ? <>
+      {item.process === "transfer_form13" && (role === "fo.da_accounts" || role === "fo.ao") ? <section className="card stack" aria-labelledby="office-transfer-legs-heading"><h2 id="office-transfer-legs-heading">Transfer status</h2>
+        <ProblemMessage error={transferLegs.error} />{transferLegs.data ? <TransferLegs transfer={transferLegs.data.data} /> : <p className="muted small">{transferLegs.isLoading ? "Loading PF and pension legs…" : "Transfer legs are not available yet."}</p>}
+      </section> : null}
       {item.process ? <section className="card stack" aria-labelledby="process-heading"><h2 id="process-heading">{item.kind.replaceAll("_", " ").toLowerCase()}</h2>
         <dl className="kv"><dt>Process</dt><dd><code>{item.process}</code> (tier-2, config/processes)</dd><dt>Subject</dt><dd><code>{item.subject_ref}</code></dd>
           <dt>State</dt><dd>{item.state}</dd><dt>{t("office.slaDue")}</dt><dd>{dateTime(item.sla_due_at, i18n.language)}</dd></dl>

@@ -7,9 +7,9 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | # | Interface | Coverage | Stakeholders | W | M | P | ? |
 |---|---|---|---|---|---|---|---|
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 15 | 2 | 0 | 0 |
-| 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 83 | 5 | 8 | 0 |
-| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 84 | 5 | 0 | 0 |
-| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 93 | 0 | 20 | 4 |
+| 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 86 | 5 | 5 | 0 |
+| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 85 | 5 | 0 | 0 |
+| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 96 | 0 | 19 | 4 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 15 | 1 | 0 | 0 |
 | 6 | International worker | **Working** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 6 | 0 | 0 | 0 |
 | 7 | District office | **Working** | `do.incharge`, `do.staff` | 3 | 0 | 0 | 0 |
@@ -91,6 +91,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /employers/me/transfer-requests` | W | claim | employer.signatory |
 | `GET /employers/me/vishwas-applications` | W | compliance | employer.owner, employer.signatory |
 | `GET /employers/registration-requests/{reqId}` | W | employer | employer.owner |
+| `GET /exempted/me/annexure-k-requests` | W | claim | exempted.trust |
+| `GET /exempted/me/profile` | W | employer | exempted.trust |
 | `GET /international/agreements` | W | international | employer.signatory |
 | `GET /international/coc-applications` | W | international | employer.signatory |
 | `GET /international/coc-applications/{id}` | W | international | employer.signatory |
@@ -135,6 +137,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /employers/me/vishwas-applications` | W | compliance | employer.signatory |
 | `POST /employers/registration-requests` | W | employer | employer.owner |
 | `POST /employers/voluntary-coverage-requests` | W | employer | employer.signatory |
+| `POST /exempted/me/annexure-k-submissions` | W | claim | exempted.trust |
 | `POST /international/coc-applications` | W | international | employer.signatory |
 | `POST /international/coc-applications/{id}/extensions` | W | international | employer.signatory |
 | `POST /international/coc-applications/{id}/signed-uploads` | W | international | employer.signatory |
@@ -144,11 +147,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /employers/me/signatories/{signatoryId}/dsc-registrations` | M | employer | employer.owner |
 | `POST /employers/me/signatories/{signatoryId}/esign-registrations` | M | employer | employer.owner |
 | `POST /employers/registration-requests/{reqId}/verification-evidence` | M | employer | employer.owner |
-| `GET /exempted/me/annexure-k-requests` | P | claim | exempted.trust |
-| `GET /exempted/me/profile` | P | employer | exempted.trust |
 | `GET /partners/liquidators/claims/{claimId}` | P | compliance | liquidator |
 | `POST /employers/me/proceedings/{caseId}/submissions` | P | compliance | employer.signatory |
-| `POST /exempted/me/annexure-k-submissions` | P | claim | exempted.trust |
 | `POST /exempted/me/audits` | P | employer | trust_auditor |
 | `POST /exempted/me/returns` | P | contribution | exempted.trust |
 | `POST /exempted/me/surrender-requests` | P | employer | exempted.trust |
@@ -189,6 +189,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /members/me/sessions` | W | gateway | member |
 | `GET /members/me/tax/form-16a` | W | claim | member |
 | `GET /members/me/tax/taxable-interest` | W | contribution | member |
+| `GET /members/me/transfer-legs` | W | contribution | member |
 | `GET /members/me/transfers/auto` | W | claim | member |
 | `GET /members/me/transfers/{transferId}` | W | claim | member |
 | `GET /members/me/transfers/{transferId}/annexure-k` | W | contribution | member |
@@ -267,6 +268,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /office/edli-claims` | W | claim | fo.edli |
 | `GET /office/establishment-registrations` | W | employer | fo.da_compliance |
 | `GET /office/establishment-registrations/{reqId}/documents` | W | employer | fo.da_compliance |
+| `GET /office/exempted/annexure-k` | W | claim | fo.da_accounts |
 | `GET /office/ledger-adjustments` | W | contribution | fo.da_accounts |
 | `GET /office/member-change-requests` | W | member | fo.da_accounts |
 | `GET /office/members/{uan}` | W | member | fo.da_accounts |
@@ -281,6 +283,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /office/receipts/unreconciled` | W | contribution | fo.cash, fo.da_accounts |
 | `GET /office/stopped-cases` | W | workflow | fo.da_accounts |
 | `GET /office/transfers` | W | claim | fo.ao, fo.da_accounts |
+| `GET /office/transfers/{transferId}/legs` | W | contribution | fo.ao |
 | `GET /office/work-queue` | W | workflow | fo.ao, fo.cash, fo.da_accounts, fo.ss |
 | `POST /ai/claims/analyse` | W | intelligence | fo.da_accounts |
 | `POST /ai/feedback` | W | intelligence | fo.da_accounts |
@@ -305,6 +308,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/edli-claims/{claimId}/decisions` | W | claim | fo.edli |
 | `POST /office/establishment-registrations/{reqId}/scrutiny-notes` | W | employer | fo.da_compliance |
 | `POST /office/establishments/{estId}/damages-knock-offs` | W | contribution | fo.da_compliance |
+| `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | W | claim | fo.da_accounts |
 | `POST /office/exempted/{estId}/past-accumulation-ingestions` | W | contribution | fo.exemption |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | workflow | fo.ao, fo.da_accounts, fo.da_compliance, fo.ss |
 | `POST /office/ledger-adjustments` | W | contribution | fo.da_accounts |
@@ -354,7 +358,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/compliance/cases/{caseId}/recovery-certificates` | P | compliance | fo.recovery_officer |
 | `POST /office/compliance/inspections/{inspectionId}/processing-notes` | P | compliance | fo.da_compliance |
 | `POST /office/compliance/inspections/{inspectionId}/reports` | P | compliance | fo.eo, fo.icf |
-| `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P | claim | fo.da_accounts |
 | `POST /office/exempted/past-accumulation-bulk-transfers` | P | contribution | fo.exemption |
 | `POST /office/exempted/{estId}/past-accumulation-transfers` | P | contribution | fo.exemption |
 | `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` | P | contribution | fo.exemption |

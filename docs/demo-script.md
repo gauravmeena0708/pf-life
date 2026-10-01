@@ -453,6 +453,20 @@ contribution- and platform-service*
 3. **`cbt-member` / `fiac-member` → Board packs**: contributions, claims, grievances and investments in aggregate —
    no personal data; FIAC's pack adds the pattern flags.
 
+## Members of an exempted establishment (PF with its trust)
+*Tests: `tests/e2e/test_exempted_members.py`, `services/*/tests/test_exempted*.py`*
+
+1. **`member-p` → Passbook**: her member ID at Demo Steel Works shows the PF *as reported by the trust* with the time
+   fetched; the pension (EPS) service is with EPFO. **My claims**: a final settlement on that ID says the trust settles
+   it within 20 days.
+2. **`member-p` → Service › Transfer**: move her earlier EPFO member ID into the trust; `steel-signatory` attests,
+   `do-caseworker` verifies, `ro-ao` approves. *Transfer status*: PF — sent to the trust; Pension — completed.
+3. **`member-r`**: move his PF out of the trust; once approved, *Transfer status* shows PF — waiting for the trust and
+   Pension — waiting for the PF. **`exempted-trust` → Trust**: the Annexure K request; submit the amount, the service
+   and 2 months of breaks. **`do-caseworker` → Claim tools › Annexure K from exempted trusts**: reconcile it with the
+   receipt (one-time code). Both legs now read *completed* — the pension one started by itself — and the pension
+   estimate shows his trust spell with its breaks.
+
 ## Disaster recovery, training, camps, totalisation, the foreign agency, the composite death claim
 *Tests: `tests/e2e/test_small_rest.py`*
 

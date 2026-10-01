@@ -528,11 +528,14 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `GET /exempted/me/profile` | Trust profile and exemption conditions | P | 3 | employer |
+| `GET /members/me/transfer-legs` | The member's transfers with the status of each leg: PF (EPFO or the trust) and EPS (pension service) | W | 1 | contribution |
+| `GET /office/transfers/{transferId}/legs` | A transfer's PF and EPS legs and their status | W | 1 | contribution |
+| `GET /exempted/me/profile` | Trust profile and exemption conditions | W | 1 | employer |
 | `POST /exempted/me/returns` | Periodic returns of exempted establishment | P | 3 | contribution |
-| `GET /exempted/me/annexure-k-requests` | **Annexure K** requests from the field office (transfers in / out) | P | 3 | claim |
-| `POST /exempted/me/annexure-k-submissions` 💰 | Submit Annexure K with the transfer amount | P | 3 | claim |
-| `POST /office/exempted/annexure-k/{annexureId}/reconciliations` 🔐 | Match Annexure K to receipt / member records | P | 3 | claim |
+| `GET /exempted/me/annexure-k-requests` | **Annexure K** requests from the field office (transfers in / out) | W | 1 | claim |
+| `POST /exempted/me/annexure-k-submissions` 💰 | Submit Annexure K with the transfer amount | W | 1 | claim |
+| `GET /office/exempted/annexure-k?state=` | The trusts' Annexure K for transfers into the office's member IDs, awaiting reconciliation | W | 1 | claim |
+| `POST /office/exempted/annexure-k/{annexureId}/reconciliations` 🔐 | Match Annexure K to receipt / member records | W | 1 | claim |
 | `POST /exempted/me/audits` | Annual trust audit filing | P | 3 | employer |
 | `POST /exempted/me/surrender-requests` 🔐 | Surrender / cancellation of exemption | P | 3 | employer |
 | `POST /office/exempted/{estId}/past-accumulation-transfers` 💰🔐 | Transfer past accumulations to EPFO after surrender / cancellation | P | 3 | contribution |

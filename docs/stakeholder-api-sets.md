@@ -78,6 +78,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/sessions` | W |
 | `GET /members/me/tax/form-16a` | W |
 | `GET /members/me/tax/taxable-interest` | W |
+| `GET /members/me/transfer-legs` | W |
 | `GET /members/me/transfers/auto` | W |
 | `GET /members/me/transfers/{transferId}` | W |
 | `GET /members/me/transfers/{transferId}/annexure-k` | W |
@@ -368,9 +369,9 @@ Activities: **F09.returns** File monthly return of exempted establishment (Parts
 
 | Endpoint | Status |
 |---|---|
-| `GET /exempted/me/annexure-k-requests` | P |
-| `GET /exempted/me/profile` | P |
-| `POST /exempted/me/annexure-k-submissions` | P |
+| `GET /exempted/me/annexure-k-requests` | W |
+| `GET /exempted/me/profile` | W |
+| `POST /exempted/me/annexure-k-submissions` | W |
 | `POST /exempted/me/returns` | P |
 | `POST /exempted/me/surrender-requests` | P |
 
@@ -425,6 +426,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `GET /office/claims/{claimId}/audit-trail` | W |
 | `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/ecr-filings` | W |
+| `GET /office/exempted/annexure-k` | W |
 | `GET /office/ledger-adjustments` | W |
 | `GET /office/member-change-requests` | W |
 | `GET /office/members/{uan}` | W |
@@ -445,6 +447,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /office/cases/{caseId}/stops` | W |
 | `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/ecr-filings/{filingId}/rejections` | W |
+| `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/ledger-adjustments` | W |
 | `POST /office/ledger-journals/{journalId}/reversals` | W |
@@ -458,7 +461,6 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /office/transfers/{transferId}/verifications` | W |
 | `POST /office/vdr-entries` | W |
 | `POST /office/vdr-entries/{vdrId}/rejections` | W |
-| `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P |
 | `POST /office/vdr-entries/{vdrId}/ecr-reconciliations` | ? |
 | `POST /office/vdr-entries/{vdrId}/member-beneficiaries` | ? |
 | `POST /office/vdr-entries/{vdrId}/special-credits` | ? |
@@ -510,6 +512,7 @@ Activities: **F02.jd_verify_ao** Verifier (AO route): cross-check and recommend;
 | `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/pension-claims` | W |
 | `GET /office/transfers` | W |
+| `GET /office/transfers/{transferId}/legs` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/accounts/{accountLinkId}/reactivations` | W |
 | `POST /office/cases/{caseId}/decisions` | W |

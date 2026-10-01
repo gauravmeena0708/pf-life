@@ -26,7 +26,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.8d** | Grievances without a login and their status, reminders, feedback and office transfers; claim status without a login; circulars; the e-Report Card; the approved interest rate recorded by HO F&A (→ a draft rule set); a surrendered trust's past accumulations ingested | **Done** (30 Sep 2026) |
 | **P2.8e** | Security incidents with CERT-In reporting (mock); the Concurrent Audit Cell's daily extract, alerts and OIC replies; the NDC Issue Tracker (freeze / de-freeze / login notice); the zonal fraud-risk case list; HR postings that move jurisdiction everywhere; district and employer dashboards; member location mapping | **Done** (30 Sep 2026) |
 | **P2.9a** | International workers are members: one member login and menu, with what does not apply to them disabled and explained, from rules in the rule set | **Done** (30 Sep 2026) |
-| P2.9b | Members of exempted establishments: PF held by the trust (passbook, claims and transfers say so and route correctly), pension and EDLI with EPFO; the trust's Annexure K | Planned (sources: the Exemption Manual and SOPs, Dec 2023) |
+| **P2.9b** | Members of exempted establishments: PF held by the trust (passbook, claims and transfers say so and route correctly), pension and EDLI with EPFO; the trust's Annexure K; a transfer's PF and EPS legs | **Done** (1 Oct 2026) |
 | P2.9d | Regulating the trust: the monthly online return (employees, contributions, claims and grievances), the online performance evaluator (six parameters) and the priority matrix (Form CE-6) for the exemption cell | Planned |
 | **P2.9c** | Member experience: a life-event home page, one consolidated view, plain-language status, nudges, a mobile pass | **Done** (30 Sep 2026; built before P2.9b, which waits for the Exemption Manual) |
 | **P2.10a** | Vigilance cases: a CAIU-confirmed risk signal (or a complaint) referred to vigilance; the CVO assigns a preliminary inquiry to a zone (90 days); zonal vigilance reports findings; the CVO decides; restricted, access-logged, the complainant masked | **Done** (30 Sep 2026) |
@@ -753,8 +753,8 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 - **Actuarial extract** (new persona `ho-actuarial`, `ho.actuarial`): pensioners and higher-pension options with a
   salted pseudonymous id, age, gender, pension start year, monthly pension, service months and status — no name, UAN,
   PPO, bank or Aadhaar — with aggregates by category and age band; the web page downloads it as CSV.
-- **Fixes on the way**: a replayed money request returned a new envelope (different `meta`) instead of the stored
-  response; the P2.8c test assumed the option stays VALIDATED.
+- **Fixes on the way**: the P2.8c test assumed the option stays VALIDATED. (A replayed money request answers with the
+  stored data in a fresh envelope — the codebase's convention; codex's test compared the whole envelope and was corrected.)
 
 ## P2.12d — how it is built
 
@@ -815,3 +815,34 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 
 With P2.12f every endpoint the catalogue planned outside compliance (P2.11) and the exempted establishments
 (P2.9b / P2.9d) is built.
+
+## P2.9b — how it is built
+
+- **The exemption** (employer-service): one record per establishment — kind (s.17(1)(a), s.17(2)+Para 27A, Para 27,
+  Para 79), what is exempted (PF; pension and EDLI stay with EPFO unless s.17(1C) / s.17(2A)), the notification, the
+  trust, status and dates. The trust (persona `exempted-trust`, `exempted.trust`) sees its profile with the conditions
+  it undertook (Appendix A to Para 27AA). Seed: Demo Steel Works (EST-DEMO-0004), PF exempted under s.17(1)(a); a
+  signatory for it (`steel-signatory`); the other services keep a copy from the seed. Rule-set section
+  `exempted_establishments` (the PF claim types the trust settles, 20 days, the passbook cache).
+- **Claims**: on a member ID whose PF is with the trust, the PF claim types are refused with "Your PF for this member ID
+  is with <trust>; the trust settles it within 20 days (Condition 12)"; pension and EDLI claims stay with EPFO.
+- **ECR**: an exempted establishment's return with an EPF share is refused (E-EXEMPTED-PF): only the pension share and
+  the charges come to EPFO.
+- **A transfer has two legs** (contribution-service `transfer_legs`, shown to the member — `GET /members/me/transfer-legs`
+  — and to the office — `GET /office/transfers/{id}/legs`):
+  - *EPFO → trust*: on approval the member ID's balance is debited to `PAYABLE_TO_TRUSTS` (the PF leg *sent to the
+    trust*); the EPS leg moves the pension service to the EPS account of the trust member ID inside EPFO.
+  - *trust → EPFO*: on approval the PF leg *waits for the trust*; `TrustTransferRequested.v1` puts an Annexure K request
+    in the trust's queue; the trust submits the amount, the service period and the breaks (money route); the DA
+    (Accounts) reconciles it with the receipt (`GET /office/exempted/annexure-k`, added, and step-up) —
+    `TrustAnnexureKReconciled.v1` credits the member ID (the PF leg *completed*); `TransferPosted.v1` then makes
+    pension-service move the EPS service **on its own**, with the breaks the trust reported (`EpsServiceTransferred.v1`
+    → the EPS leg *completed*).
+- **The trust's passbook, fetched not copied**: the passbook of a trust member ID shows the PF as reported by the
+  trust (a signed call to the trust's passbook API — a mock in mock-integrations), with the time fetched, a cache of a
+  few minutes, the last snapshot marked stale when the trust does not answer, and the trust's contact when there is no
+  snapshot; the EPS part is EPFO's own.
+- **Pension**: the estimate's per-member-ID table says who holds the PF of each spell (EPFO or the trust) and where its
+  EPS service went; the service adds up across all of them (first step of this slice).
+- **Seed and test**: PRIYA DEMO (`member-p`) moves an EPFO member ID into the trust; RAVI DEMO (`member-r`) moves his PF
+  out of the trust — `tests/e2e/test_exempted_members.py`. The balance sheet names `PAYABLE_TO_TRUSTS`.

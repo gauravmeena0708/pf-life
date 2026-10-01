@@ -14,8 +14,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import PRODUCER, _establishment_of, _load_establishment, _require_member_of, db
 from app.domain.rules import GSTIN_RE, PAN_RE
-from app.infra.tables import (branches, change_requests, contractors, establishments, office_staff, offices, ownership_declarations,
-                              registration_requests, registration_scrutiny)
+from app.infra.tables import (branches, change_requests, contractors, establishment_exemptions, establishments,
+                              office_staff, offices, ownership_declarations, registration_requests, registration_scrutiny)
 from epfo_auth import Actor, require_actor, require_grant, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit
@@ -114,10 +114,56 @@ async def bank_accounts(actor: Actor = Depends(EMPLOYER), session: AsyncSession 
 @router.get("/api/v1/employers/me/exemption")
 async def exemption(actor: Actor = Depends(EMPLOYER), session: AsyncSession = Depends(db)) -> dict:
     est = await _mine(session, actor)
-    status = est["exemption_status"] or "NOT_EXEMPT"
-    return envelope({"establishment_id": est["establishment_id"], "exemption_status": status, "exempted": status != "NOT_EXEMPT",
-                     "pf_trust": None, "relaxations": [],
-                     "note": "Not exempted: EPF, EPS and EDLI are all administered by EPFO." if status == "NOT_EXEMPT" else "Exempted (synthetic)."})
+    record = (await session.execute(select(establishment_exemptions).where(
+        establishment_exemptions.c.establishment_id == est["establishment_id"]))).mappings().first()
+    if not record:
+        return envelope({"establishment_id": est["establishment_id"], "exempted": False,
+                         "exemption_status": est["exemption_status"] or "NOT_EXEMPT", "pf_trust": None,
+                         "relaxations": [], "note": "Not exempted: EPF, EPS and EDLI are all administered by EPFO."})
+    return envelope({"establishment_id": est["establishment_id"], "exempted": record["status"] == "ACTIVE",
+                     "exemption_status": est["exemption_status"], **_exemption_view(record),
+                     "pf_trust": {"trust_id": record["trust_id"], "trust_name": record["trust_name"]},
+                     "relaxations": []})
+
+
+EXEMPTION_KINDS = {
+    "S17_1A": "Section 17(1)(a): the whole establishment is exempted from the PF scheme.",
+    "S17_2_P27A": "Section 17(2) with Para 27A: a class of employees is exempted.",
+    "PARA_27": "Para 27: a single employee is exempted.",
+    "PARA_79": "Para 79: a relaxation from scheme provisions applies.",
+}
+
+TRUST_CONDITIONS = [
+    {"number": 3, "description": "Enrol all eligible employees."},
+    {"number": 4, "description": "Take over employees' previous PF accumulations."},
+    {"number": 5, "description": "Pay contributions to the trust by the 15th; interest under section 7Q applies when late."},
+    {"number": 7, "description": "Credit interest at least at the statutory PF rate."},
+    {"number": 9, "description": "Provide benefits no less favourable than the statutory PF scheme."},
+    {"number": 12, "description": "Settle claims within 20 days."},
+    {"number": 14, "description": "Give each member a free yearly passbook."},
+    {"number": 15, "description": "Make each member's balance viewable online."},
+]
+
+
+def _exemption_view(record: Any) -> dict[str, Any]:
+    return {"kind": record["kind"], "kind_description": EXEMPTION_KINDS.get(record["kind"], "Exemption"),
+            "pf_exempt": record["pf_exempt"], "pension_exempt": record["pension_exempt"],
+            "edli_exempt": record["edli_exempt"], "notification_no": record["notification_no"],
+            "notification_date": _iso(record["notification_date"]), "effective_from": _iso(record["effective_from"]),
+            "status": record["status"], "trust_id": record["trust_id"], "trust_name": record["trust_name"]}
+
+
+@router.get("/api/v1/exempted/me/profile")
+async def trust_profile(actor: Actor = Depends(require_stakeholder("exempted.trust")),
+                        session: AsyncSession = Depends(db)) -> dict:
+    records = (await session.execute(select(establishment_exemptions))).mappings().all()
+    record = next((r for r in records if any(u.get("subject") == actor.subject for u in r["trust_users"])), None)
+    if record is None:
+        raise Problem(403, "/problems/forbidden", "Not allowed", "No trust is assigned to this account.")
+    est = await _load_establishment(session, record["establishment_id"])
+    return envelope({"establishment": {"establishment_id": est["establishment_id"], "legal_name": est["legal_name"]},
+                     **_exemption_view(record), "conditions": TRUST_CONDITIONS,
+                     "note": "PF is held by the trust; pension (EPS) and EDLI remain with EPFO."})
 
 
 # ── branches (sub-codes, Form 2A) ─────────────────────────────────────────────────────────────────

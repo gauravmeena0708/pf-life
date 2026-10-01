@@ -8,9 +8,13 @@ from epfo_persistence.policy import rules_by_version
 from epfo_persistence import add_event
 
 from app.infra.claims_ledger import on_higher_pension_transfer
+from app.infra.transfers import on_trust_annexure_k, on_eps_service_transferred
 
-BINDINGS = ["pension-service.HigherPensionDuesTransferRequested.v1"]
-HANDLERS = {"HigherPensionDuesTransferRequested.v1": on_higher_pension_transfer}
+BINDINGS = ["pension-service.HigherPensionDuesTransferRequested.v1",
+            "claim-service.TrustAnnexureKReconciled.v1", "pension-service.EpsServiceTransferred.v1"]
+HANDLERS = {"HigherPensionDuesTransferRequested.v1": on_higher_pension_transfer,
+            "TrustAnnexureKReconciled.v1": on_trust_annexure_k,
+            "EpsServiceTransferred.v1": on_eps_service_transferred}
 
 
 async def dispatch(session, event):

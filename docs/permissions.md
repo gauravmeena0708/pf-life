@@ -150,6 +150,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/sessions` | W | self — caller's own member record only |  |
 | `GET /members/me/tax/form-16a` | W | self — caller's own member record only |  |
 | `GET /members/me/tax/taxable-interest` | W | self — caller's own member record only |  |
+| `GET /members/me/transfer-legs` | W | self — caller's own member record only |  |
 | `GET /members/me/transfers/auto` | W | self — caller's own member record only |  |
 | `GET /members/me/transfers/{transferId}` | W | self — caller's own member record only |  |
 | `GET /members/me/transfers/{transferId}/annexure-k` | W | self — caller's own member record only |  |
@@ -400,9 +401,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /exempted/me/annexure-k-requests` | P | own exempted establishment |  |
-| `GET /exempted/me/profile` | P | own exempted establishment |  |
-| `POST /exempted/me/annexure-k-submissions` | P | own exempted establishment |  |
+| `GET /exempted/me/annexure-k-requests` | W | own exempted establishment |  |
+| `GET /exempted/me/profile` | W | own exempted establishment |  |
+| `POST /exempted/me/annexure-k-submissions` | W | own exempted establishment |  |
 | `POST /exempted/me/returns` | P | own exempted establishment |  |
 | `POST /exempted/me/surrender-requests` | P | own exempted establishment | yes |
 
@@ -445,6 +446,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/claims/{claimId}/audit-trail` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/ecr-filings` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/exempted/annexure-k` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/ledger-adjustments` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/member-change-requests` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/members/{uan}` | W | office jurisdiction of the caller's posting |  |
@@ -465,6 +467,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/cases/{caseId}/stops` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/ecr-filings/{filingId}/rejections` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/ledger-adjustments` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/ledger-journals/{journalId}/reversals` | W | office jurisdiction of the caller's posting | yes |
@@ -478,7 +481,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/transfers/{transferId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/vdr-entries` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/vdr-entries/{vdrId}/rejections` | W | office jurisdiction of the caller's posting | yes |
-| `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/vdr-entries/{vdrId}/ecr-reconciliations` | ? | office jurisdiction of the caller's posting | yes |
 | `POST /office/vdr-entries/{vdrId}/member-beneficiaries` | ? | office jurisdiction of the caller's posting | yes |
 | `POST /office/vdr-entries/{vdrId}/special-credits` | ? | office jurisdiction of the caller's posting | yes |
@@ -522,6 +524,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/pension-claims` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/transfers` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/transfers/{transferId}/legs` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/accounts/{accountLinkId}/reactivations` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/cases/{caseId}/decisions` | W | office jurisdiction of the caller's posting | yes |

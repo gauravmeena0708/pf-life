@@ -467,8 +467,8 @@
     "method": "POST",
     "path_template": "/office/exempted/annexure-k/{annexureId}/reconciliations",
     "regex": "^/office/exempted/annexure\\-k/[^/]+/reconciliations$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "claim",
     "upstream": "http://claim-service:8000",
     "money": false,
@@ -2941,8 +2941,8 @@
     "method": "POST",
     "path_template": "/exempted/me/annexure-k-submissions",
     "regex": "^/exempted/me/annexure\\-k\\-submissions$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "claim",
     "upstream": "http://claim-service:8000",
     "money": true,
@@ -3430,6 +3430,22 @@
   },
   {
     "method": "GET",
+    "path_template": "/office/transfers/{transferId}/legs",
+    "regex": "^/office/transfers/[^/]+/legs$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.ao"
+    ],
+    "summary": "A transfer's PF and EPS legs and their status",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/public/defaulting-establishments",
     "regex": "^/public/defaulting\\-establishments$",
     "status": "W",
@@ -3593,8 +3609,8 @@
     "method": "GET",
     "path_template": "/exempted/me/annexure-k-requests",
     "regex": "^/exempted/me/annexure\\-k\\-requests$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "claim",
     "upstream": "http://claim-service:8000",
     "money": false,
@@ -4713,6 +4729,22 @@
     "revocation": false
   },
   {
+    "method": "GET",
+    "path_template": "/office/exempted/annexure-k",
+    "regex": "^/office/exempted/annexure\\-k$",
+    "status": "W",
+    "phase": 1,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "The trusts' Annexure K for transfers into the office's member IDs, awaiting reconciliation",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/office/members/{uan}/freezes",
     "regex": "^/office/members/[^/]+/freezes$",
@@ -5243,6 +5275,22 @@
       "member"
     ],
     "summary": "Notifications (projection fed by claim / payment / grievance events — see §14)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/transfer-legs",
+    "regex": "^/members/me/transfer\\-legs$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "The member's transfers with the status of each leg: PF (EPFO or the trust) and EPS (pension service)",
     "revocation": false
   },
   {
@@ -6160,8 +6208,8 @@
     "method": "GET",
     "path_template": "/exempted/me/profile",
     "regex": "^/exempted/me/profile$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,

@@ -45,7 +45,7 @@ async def main() -> None:
                         email_masked=member["email_masked"], source="SEED", verified=True))
                 names = {e["establishment_id"]: e["legal_name"] for e in [establishment, *seed.get("public_establishments", [])]}
                 offices = {e["establishment_id"]: e["office_id"] for e in [establishment, *seed.get("public_establishments", [])]}
-                for job in [{**member, "establishment_id": establishment["establishment_id"]}, *member.get("previous_employments", [])]:
+                for job in [{"establishment_id": establishment["establishment_id"], **member}, *member.get("previous_employments", [])]:
                     employment = {"account_link_id": job["account_link_id"], "member_id": member["member_id"],
                                   "establishment_id": job["establishment_id"], "establishment_name": names[job["establishment_id"]],
                                   "date_of_joining": date.fromisoformat(job["date_of_joining"]),

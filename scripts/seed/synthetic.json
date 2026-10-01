@@ -92,6 +92,22 @@
       "exemption_status": "SURRENDERED",
       "status": "REGISTERED",
       "pan": "AAAAD0003A"
+    },
+    {
+      "establishment_id": "EST-DEMO-0004",
+      "registration_number": "DEMO/00004/000",
+      "legal_name": "Demo Steel Works",
+      "office_id": "RO-DEMO-01",
+      "pincode": "110003",
+      "city": "New Delhi",
+      "district": "Central Delhi",
+      "coverage_date": "2005-04-01",
+      "establishment_type": "PUBLIC_LIMITED",
+      "industry_group": "STEEL",
+      "exemption_status": "EXEMPTED",
+      "status": "VERIFIED",
+      "verified_at": "2026-04-15T10:00:00+00:00",
+      "pan": "AAAAD0004A"
     }
   ],
   "public_lookup_challan": {
@@ -544,6 +560,73 @@
       "aadhaar_ref": "DEMO-AADHAAR-MOHAN",
       "_comment": "An inoperative account (P2.12a): left in 2019 and never claimed; the balance was brought forward then. DEV and HARI worked at the same establishment at the time and can confirm him.",
       "date_of_exit": "2019-09-30"
+    },
+    {
+      "uan": "100000000911",
+      "name": "PRIYA DEMO",
+      "date_of_birth": "1986-05-09",
+      "subject": "00000000-0000-4000-8000-000000000066",
+      "account_link_id": "AL-0915",
+      "member_id": "DEMO00004000000000911",
+      "date_of_joining": "2016-04-01",
+      "gender": "FEMALE",
+      "mobile_masked": "******0911",
+      "email_masked": "p***@demo.invalid",
+      "bank_ifsc": "DEMO0000911",
+      "bank_account_last4": "0911",
+      "kyc": {
+        "aadhaar": "VERIFIED",
+        "pan": "VERIFIED",
+        "bank": "VERIFIED"
+      },
+      "last_contribution_month": "2026-09",
+      "aadhaar_ref": "DEMO-AADHAAR-PRIYA",
+      "date_of_exit": null,
+      "establishment_id": "EST-DEMO-0004",
+      "previous_employments": [
+        {
+          "account_link_id": "AL-0914",
+          "member_id": "DEMO00001000000000914",
+          "establishment_id": "EST-DEMO-0001",
+          "date_of_joining": "2010-04-01",
+          "date_of_exit": "2016-03-31",
+          "last_contribution_month": "2016-03"
+        }
+      ],
+      "_comment": "P2.9b: now at Demo Steel Works (PF with its trust); her earlier member ID AL-0914 is with EPFO and not yet transferred — she moves it into the trust."
+    },
+    {
+      "uan": "100000000912",
+      "name": "RAVI DEMO",
+      "date_of_birth": "1982-11-23",
+      "subject": "00000000-0000-4000-8000-000000000067",
+      "account_link_id": "AL-0919",
+      "member_id": "DEMO00001000000000912",
+      "date_of_joining": "2026-07-01",
+      "gender": "MALE",
+      "mobile_masked": "******0912",
+      "email_masked": "r***@demo.invalid",
+      "bank_ifsc": "DEMO0000912",
+      "bank_account_last4": "0912",
+      "kyc": {
+        "aadhaar": "VERIFIED",
+        "pan": "VERIFIED",
+        "bank": "VERIFIED"
+      },
+      "last_contribution_month": "2026-09",
+      "aadhaar_ref": "DEMO-AADHAAR-RAVI",
+      "date_of_exit": null,
+      "previous_employments": [
+        {
+          "account_link_id": "AL-0918",
+          "member_id": "DEMO00004000000000918",
+          "establishment_id": "EST-DEMO-0004",
+          "date_of_joining": "2015-01-01",
+          "date_of_exit": "2026-06-30",
+          "last_contribution_month": "2026-06"
+        }
+      ],
+      "_comment": "P2.9b: left Demo Steel Works (PF with its trust) in June 2026; now at the demo establishment — he moves his PF out of the trust."
     }
   ],
   "demo_wage_month": "2026-08",
@@ -611,7 +694,11 @@
     "fiac-member": "00000000-0000-4000-8000-000000000061",
     "ndc-adc": "00000000-0000-4000-8000-000000000062",
     "pdnasa-trainer": "00000000-0000-4000-8000-000000000063",
-    "ro-nan": "00000000-0000-4000-8000-000000000064"
+    "ro-nan": "00000000-0000-4000-8000-000000000064",
+    "exempted-trust": "00000000-0000-4000-8000-000000000065",
+    "member-p": "00000000-0000-4000-8000-000000000066",
+    "member-r": "00000000-0000-4000-8000-000000000067",
+    "steel-signatory": "00000000-0000-4000-8000-000000000068"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -669,6 +756,11 @@
       "employee_paise": 12000000,
       "employer_paise": 8000000,
       "as_of": "2019-09-30"
+    },
+    "AL-0914": {
+      "employee_paise": 30000000,
+      "employer_paise": 10000000,
+      "as_of": "2016-03-31"
     }
   },
   "office_staff": [
@@ -970,6 +1062,93 @@
       "office_id": "RO-DEMO-01",
       "held_on": "2026-10-27",
       "venue": "District Collectorate hall, Central Delhi (synthetic)"
+    }
+  ],
+  "exempted_establishment": {
+    "_comment": "P2.9b: an establishment whose PF is exempted under s.17(1)(a) (Exemption Manual §1.4); pension and EDLI stay with EPFO",
+    "establishment_id": "EST-DEMO-0004",
+    "kind": "S17_1A",
+    "pf_exempt": true,
+    "pension_exempt": false,
+    "edli_exempt": false,
+    "notification_no": "S.O. 1234(E) (synthetic)",
+    "notification_date": "2005-03-15",
+    "effective_from": "2005-04-01",
+    "status": "ACTIVE",
+    "trust_id": "TRUST-DEMO-0004",
+    "trust_name": "Demo Steel Works Employees' Provident Fund Trust",
+    "trust_users": [
+      {
+        "username": "exempted-trust",
+        "subject": "00000000-0000-4000-8000-000000000065"
+      }
+    ]
+  },
+  "trust_ledgers": {
+    "_comment": "P2.9b: the PF accounts the trust of Demo Steel Works holds (synthetic); EPFO reads them through the trust's passbook API",
+    "trust_id": "TRUST-DEMO-0004",
+    "accounts": [
+      {
+        "account_link_id": "AL-0915",
+        "uan": "100000000911",
+        "employee_paise": 45000000,
+        "employer_paise": 16000000,
+        "service_from": "2016-04-01",
+        "service_to": null,
+        "breaks_months": 0,
+        "entries": [
+          {
+            "date": "2026-03-31",
+            "kind": "INTEREST",
+            "amount_paise": 4600000,
+            "note": "Interest 2025-26 at the trust's declared rate"
+          },
+          {
+            "date": "2026-09-15",
+            "kind": "CONTRIBUTION",
+            "amount_paise": 480000,
+            "note": "Contribution for August 2026"
+          }
+        ]
+      },
+      {
+        "account_link_id": "AL-0918",
+        "uan": "100000000912",
+        "employee_paise": 52000000,
+        "employer_paise": 19000000,
+        "service_from": "2015-01-01",
+        "service_to": "2026-06-30",
+        "breaks_months": 2,
+        "entries": [
+          {
+            "date": "2026-03-31",
+            "kind": "INTEREST",
+            "amount_paise": 5300000,
+            "note": "Interest 2025-26 at the trust's declared rate"
+          },
+          {
+            "date": "2026-07-15",
+            "kind": "CONTRIBUTION",
+            "amount_paise": 510000,
+            "note": "Contribution for June 2026 (last)"
+          }
+        ]
+      }
+    ]
+  },
+  "extra_employer_grants": [
+    {
+      "_comment": "P2.9b: the signatory of Demo Steel Works (an exempted establishment), who attests its members' Form 13",
+      "username": "steel-signatory",
+      "subject": "00000000-0000-4000-8000-000000000068",
+      "role": "employer.signatory",
+      "establishment_id": "EST-DEMO-0004",
+      "kind": "SIGNATORY",
+      "grants": [
+        "ecr.approve",
+        "ecr.submit",
+        "payment.initiate"
+      ]
     }
   ]
 }

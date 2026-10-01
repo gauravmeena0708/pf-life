@@ -9,7 +9,7 @@ from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.infra.db import sessions
-from app.infra.tables import accounts, member_bank_accounts, nominations, office_staff
+from app.infra.tables import accounts, exempted_establishments, member_bank_accounts, nominations, office_staff
 
 SEED_FILE = os.getenv("SEED_FILE", "/srv/seed/synthetic.json")
 
@@ -28,7 +28,7 @@ async def main() -> None:
     opening = {k: v for k, v in seed.get("opening_balances", {}).items() if not k.startswith("_")}
     async with sessions()() as session, session.begin():
         insert = pg_insert if session.bind.dialect.name == "postgresql" else sqlite_insert
-        jobs = [{**m, "establishment_id": seed["establishment"]["establishment_id"]} for m in seed["members"]]
+        jobs = [{"establishment_id": seed["establishment"]["establishment_id"], **m} for m in seed["members"]]
         jobs += [{**m, **job} for m in seed["members"] for job in m.get("previous_employments", [])]   # earlier member IDs
         for m in jobs:
             balance = opening.get(m["account_link_id"], {})
@@ -37,6 +37,7 @@ async def main() -> None:
             if exists:   # balances move with events after the first load; only refresh identity fields
                 await session.execute(update(accounts).where(accounts.c.account_link_id == m["account_link_id"])
                                       .values(member_subject=m.get("subject"), member_name=m.get("name"), office_id=office_id, uan=m["uan"],
+                                              establishment_id=m["establishment_id"],
                                               pan_verified=m["kyc"]["pan"] == "VERIFIED", aadhaar_verified=m["kyc"]["aadhaar"] == "VERIFIED",
                                               **_identity(m)))    # exits move with MemberExitMarked.v1
                 continue
@@ -75,6 +76,13 @@ async def main() -> None:
         for s in seed.get("office_staff", []):
             await session.execute(insert(office_staff).values(subject=s["subject"], stakeholder=s["stakeholder"],
                                                               office_id=s["office_id"]).on_conflict_do_nothing())
+        if e := seed.get("exempted_establishment"):
+            values = {k: e[k] for k in ("establishment_id", "kind", "pf_exempt", "pension_exempt", "edli_exempt",
+                                        "notification_no", "status", "trust_id", "trust_name", "trust_users")}
+            values.update(notification_date=date.fromisoformat(e["notification_date"]),
+                          effective_from=date.fromisoformat(e["effective_from"]))
+            await session.execute(insert(exempted_establishments).values(**values).on_conflict_do_update(
+                index_elements=["establishment_id"], set_=values))
     print(f"claim-service seeded: {len(seed['members'])} accounts, {len(seed.get('office_staff', []))} office staff")
 
 

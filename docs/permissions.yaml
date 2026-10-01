@@ -339,6 +339,12 @@ stakeholders:
     step_up: true
     via:
     - F04.transfer
+  - endpoint: GET /members/me/transfer-legs
+    status: W
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F04.transfer
   - endpoint: GET /members/me/transfers/{transferId}
     status: W
     scope: self — caller's own member record only
@@ -1399,19 +1405,20 @@ stakeholders:
     via:
     - F09.returns
   - endpoint: GET /exempted/me/profile
-    status: P
+    status: W
     scope: own exempted establishment
     step_up: false
     via:
     - F09.returns
+    - F09.annexure_k
   - endpoint: GET /exempted/me/annexure-k-requests
-    status: P
+    status: W
     scope: own exempted establishment
     step_up: false
     via:
     - F09.annexure_k
   - endpoint: POST /exempted/me/annexure-k-submissions
-    status: P
+    status: W
     scope: own exempted establishment
     step_up: false
     via:
@@ -1681,8 +1688,14 @@ stakeholders:
     step_up: false
     via:
     - F07.verify_member
+  - endpoint: GET /office/exempted/annexure-k
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F09.annexure_k_reconcile
   - endpoint: POST /office/exempted/annexure-k/{annexureId}/reconciliations
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -1892,6 +1905,12 @@ stakeholders:
     status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
+    via:
+    - F04.transfer_decide
+  - endpoint: GET /office/transfers/{transferId}/legs
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
     via:
     - F04.transfer_decide
   - endpoint: POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals

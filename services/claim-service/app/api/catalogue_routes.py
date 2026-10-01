@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['POST /claimants/death-claims', 'GET /office/annexure-k-files', 'GET /office/edli-claims', 'POST /office/payment-scrolls', 'POST /office/physical-claims', 'GET /office/transfers', 'GET /employers/me/claim-attestations', 'GET /employers/me/transfer-requests', 'GET /members/me/claims', 'POST /members/me/claims', 'POST /members/me/transfers', 'GET /office/payment-scrolls/ready', 'GET /office/system/cad-static-data', 'POST /office/tds/computations', 'POST /public/claims/status-lookups', 'GET /members/me/claims/eligibility-preview', 'GET /members/me/claims/eligible-types', 'POST /members/me/tax/form-15g-15h', 'GET /members/me/tax/form-16a', 'GET /members/me/transfers/auto', 'POST /members/me/transfers/auto/{transferId}/confirmations', 'GET /members/me/claims/{claimId}', 'GET /members/me/transfers/{transferId}', 'POST /employers/me/claim-attestations/{claimId}/decisions', 'POST /employers/me/transfer-requests/{transferId}/decisions', 'GET /members/me/claims/{claimId}/audit-trail', 'GET /members/me/claims/{claimId}/bank-details', 'PUT /members/me/claims/{claimId}/bank-details', 'POST /members/me/claims/{claimId}/cancellations', 'POST /members/me/claims/{claimId}/confirmations', 'POST /members/me/claims/{claimId}/documents', 'POST /members/me/claims/{claimId}/re-disbursement-requests', 'GET /claimants/death-claims/{claimId}', 'POST /claimants/death-claims/{claimId}/beneficiaries', 'POST /office/annexure-k-files/{annexureId}/reconciliations', 'GET /office/claims/{claimId}/additional-forms', 'GET /office/claims/{claimId}/audit-trail', 'GET /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/payment-instructions', 'POST /office/claims/{claimId}/re-disbursement-approvals', 'POST /office/claims/{claimId}/reissues', 'GET /office/death-claims/{claimId}/shares-summary', 'POST /office/edli-claims/{claimId}/benefit-previews', 'POST /office/edli-claims/{claimId}/decisions', 'POST /office/payment-scrolls/{scrollId}/return-reconciliations', 'POST /office/transfers/{transferId}/decisions', 'POST /office/transfers/{transferId}/verifications', 'PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares']
+OPERATIONS = ['POST /claimants/death-claims', 'GET /office/annexure-k-files', 'GET /office/edli-claims', 'POST /office/payment-scrolls', 'POST /office/physical-claims', 'GET /office/transfers', 'GET /employers/me/claim-attestations', 'GET /employers/me/transfer-requests', 'GET /exempted/me/annexure-k-requests', 'POST /exempted/me/annexure-k-submissions', 'GET /members/me/claims', 'POST /members/me/claims', 'POST /members/me/transfers', 'GET /office/exempted/annexure-k', 'GET /office/payment-scrolls/ready', 'GET /office/system/cad-static-data', 'POST /office/tds/computations', 'POST /public/claims/status-lookups', 'GET /members/me/claims/eligibility-preview', 'GET /members/me/claims/eligible-types', 'POST /members/me/tax/form-15g-15h', 'GET /members/me/tax/form-16a', 'GET /members/me/transfers/auto', 'POST /members/me/transfers/auto/{transferId}/confirmations', 'GET /members/me/claims/{claimId}', 'GET /members/me/transfers/{transferId}', 'POST /employers/me/claim-attestations/{claimId}/decisions', 'POST /employers/me/transfer-requests/{transferId}/decisions', 'GET /members/me/claims/{claimId}/audit-trail', 'GET /members/me/claims/{claimId}/bank-details', 'PUT /members/me/claims/{claimId}/bank-details', 'POST /members/me/claims/{claimId}/cancellations', 'POST /members/me/claims/{claimId}/confirmations', 'POST /members/me/claims/{claimId}/documents', 'POST /members/me/claims/{claimId}/re-disbursement-requests', 'POST /office/exempted/annexure-k/{annexureId}/reconciliations', 'GET /claimants/death-claims/{claimId}', 'POST /claimants/death-claims/{claimId}/beneficiaries', 'POST /office/annexure-k-files/{annexureId}/reconciliations', 'GET /office/claims/{claimId}/additional-forms', 'GET /office/claims/{claimId}/audit-trail', 'GET /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/payment-instructions', 'POST /office/claims/{claimId}/re-disbursement-approvals', 'POST /office/claims/{claimId}/reissues', 'GET /office/death-claims/{claimId}/shares-summary', 'POST /office/edli-claims/{claimId}/benefit-previews', 'POST /office/edli-claims/{claimId}/decisions', 'POST /office/payment-scrolls/{scrollId}/return-reconciliations', 'POST /office/transfers/{transferId}/decisions', 'POST /office/transfers/{transferId}/verifications', 'PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares']
 
 @router.api_route("/api/v1/claimants/death-claims", methods=["POST"], include_in_schema=False)
 async def post_claimants_death_claims(actor: Actor = Depends(require_actor)) -> None:
@@ -52,6 +52,16 @@ async def get_employers_me_transfer_requests(actor: Actor = Depends(require_acto
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Form 13 transfer requests awaiting attestation")
 
 
+@router.api_route("/api/v1/exempted/me/annexure-k-requests", methods=["GET"], include_in_schema=False)
+async def get_exempted_me_annexure_k_requests(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Annexure K requests from the field office (transfers in / out)")
+
+
+@router.api_route("/api/v1/exempted/me/annexure-k-submissions", methods=["POST"], include_in_schema=False)
+async def post_exempted_me_annexure_k_submissions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Submit Annexure K with the transfer amount")
+
+
 @router.api_route("/api/v1/members/me/claims", methods=["GET"], include_in_schema=False)
 async def get_members_me_claims(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "List own claims")
@@ -65,6 +75,11 @@ async def post_members_me_claims(actor: Actor = Depends(require_actor)) -> None:
 @router.api_route("/api/v1/members/me/transfers", methods=["POST"], include_in_schema=False)
 async def post_members_me_transfers(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Transfer of PF between member IDs / exempted trusts")
+
+
+@router.api_route("/api/v1/office/exempted/annexure-k", methods=["GET"], include_in_schema=False)
+async def get_office_exempted_annexure_k(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The trusts' Annexure K for transfers into the office's member IDs, awaiting reconciliation")
 
 
 @router.api_route("/api/v1/office/payment-scrolls/ready", methods=["GET"], include_in_schema=False)
@@ -170,6 +185,11 @@ async def post_members_me_claims_claimId_documents(actor: Actor = Depends(requir
 @router.api_route("/api/v1/members/me/claims/{claimId}/re-disbursement-requests", methods=["POST"], include_in_schema=False)
 async def post_members_me_claims_claimId_re_disbursement_requests(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Member submits corrected bank details after a payment return, without re-filing the claim")
+
+
+@router.api_route("/api/v1/office/exempted/annexure-k/{annexureId}/reconciliations", methods=["POST"], include_in_schema=False)
+async def post_office_exempted_annexure_k_annexureId_reconciliations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Match Annexure K to receipt / member records")
 
 
 @router.api_route("/api/v1/claimants/death-claims/{claimId}", methods=["GET"], include_in_schema=False)
