@@ -135,7 +135,8 @@
     "notInPoc": "Not available in this demonstration",
     "notInPocShort": "Not in POC",
     "systemMap": "System map",
-    "publicLookups": "Public lookups"
+    "publicLookups": "Public lookups",
+    "plannedShort": "Planned"
   },
   "passbook": {
     "eyebrow": "Member services · contributions",
@@ -456,7 +457,10 @@
     "reason": "Why you need it",
     "requestRecovery": "Request account recovery",
     "recoveryRequested": "Recovery requested. A security analyst will review it.",
-    "recoverySummary": "Ask EPFO to review your account and restore your last verified contact details."
+    "recoverySummary": "Ask EPFO to review your account and restore your last verified contact details.",
+    "passwordTitle": "Change password",
+    "passwordHelp": "Your password is kept by the sign-in service, not by this portal. Change it there; you will use the new one the next time you sign in.",
+    "passwordOpen": "Change password (opens the sign-in service)"
   },
   "assistant": {
     "eyebrow": "Member services · assistant",

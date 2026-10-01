@@ -35,10 +35,12 @@ export function RoleNav({ role }: { role: string | undefined }) {
     return () => { document.removeEventListener("pointerdown", outside); document.removeEventListener("keydown", escape); };
   }, []);
 
-  const unavailable = (label: string, key: string | number, inMenu = false) => (
-    <span key={key} className="nav-unavailable" aria-disabled="true" title={t("navigation.notInPoc")}>
-      <span>{label}</span>{inMenu ? <span className="nav-tag" aria-hidden="true">{t("navigation.notInPocShort")}</span> : null}
-      <span className="visually-hidden"> — {t("navigation.notInPoc")}</span>
+  // An item without a screen says why: planned in a later slice, awaiting EPFO's definition, or not in this POC.
+  const unavailable = (label: string, key: string | number, inMenu = false, note?: string) => (
+    <span key={key} className="nav-unavailable" aria-disabled="true" title={note ?? t("navigation.notInPoc")}>
+      <span>{label}</span>{inMenu ? <span className="nav-tag" aria-hidden="true">
+        {note?.startsWith("Planned") ? t("navigation.plannedShort") : t("navigation.notInPocShort")}</span> : null}
+      <span className="visually-hidden"> — {note ?? t("navigation.notInPoc")}</span>
     </span>
   );
 
@@ -63,7 +65,7 @@ export function RoleNav({ role }: { role: string | undefined }) {
             {open === i ? (
               <ul id={`nav-menu-${i}`} className="nav-menu">
                 {g.items.map((it, j) => (
-                  <li key={j}>{it.to ? <Link to={it.to}>{text(it)}</Link> : unavailable(text(it), j, true)}</li>
+                  <li key={j}>{it.to ? <Link to={it.to}>{text(it)}</Link> : unavailable(text(it), j, true, it.note)}</li>
                 ))}
               </ul>
             ) : null}

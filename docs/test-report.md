@@ -98,6 +98,12 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 12g: menu clean-up (1 October 2026)
+
+Web 226 (new `MenuNotes.test.tsx`: the three menu items now linked to their screens; the office menu's "Planned" and
+"awaiting EPFO's definition" notes rendered as the tooltip and tag); end to end 14 (walking skeleton, member home,
+member tax and inoperative accounts); UI smoke 2.
+
 ## Update — Phase 2, slice 9b: members of exempted establishments (1 October 2026)
 
 Unit: employer-service 27, contribution-service 80, claim-service 69, pension-service 41, mock-integrations 7 (new tests

@@ -5,10 +5,12 @@
  * build and is shown, not clickable. Official menu names stay as the portals spell them; POC-only screens use
  * `labelKey` (translated).
  */
-export interface NavItem { label?: string; labelKey?: string; to?: string }
+export interface NavItem { label?: string; labelKey?: string; to?: string; note?: string }   // note: why an item without a screen has none
 export interface NavGroup { label?: string; labelKey?: string; to?: string; items?: NavItem[] }
 
-const link = (label: string, to?: string): NavItem => ({ label, to });
+const link = (label: string, to?: string, note?: string): NavItem => ({ label, to, ...(note ? { note } : {}) });
+const UNDEFINED_BY_EPFO = "Awaiting EPFO's definition of this function before it is built";
+const PLANNED_TRUST = "Planned: the exempted-trust lifecycle (P2.14)";
 
 export const PUBLIC_SERVICES: NavItem[] = [
   link("Grievance (without login)", "/public/grievances#public-grievance-heading"),
@@ -25,7 +27,7 @@ const MEMBER: NavGroup[] = [
   { label: "Manage", items: [
     link("Basic Details (Joint Declaration)", "/member/profile#correction-heading"), link("Contact Details", "/member/security#contact-heading"),
     link("KYC", "/member/kyc"), link("e-Nomination", "/member/nomination#nomination-heading"), link("Know your UAN", "/member/nomination#uan-lookup-heading"), link("Mark Exit", "/member/service#exit-heading")] },
-  { label: "Account", items: [link("Change Password"), { labelKey: "navigation.accountSecurity", to: "/member/security" }] },
+  { label: "Account", items: [link("Change Password", "/member/security#password-heading"), { labelKey: "navigation.accountSecurity", to: "/member/security" }] },
   { label: "Online Services", items: [
     link("Claim (Form-31, 19, 10C & 10D)", "/member/claims"), link("One Member – One EPF Account (Transfer Request)", "/member/service#transfer-heading"), link("Auto-transfer", "/member/service#auto-transfer-heading"),
     link("Track Claim Status", "/member/claims"), link("Download Annexure K", "/member/service#applications-heading"), link("Joint Declaration", "/member/profile#correction-heading"),
@@ -56,7 +58,7 @@ const EMPLOYER: NavGroup[] = [
     link("Authorized eSign List", "/employer/establishment#esign-heading")] },
   { label: "Payments", items: [
     link("ECR Upload", "/employer/ecr#ecr-prepare"), link("Return Filing", "/employer/ecr#ecr-returns"), link("Return monthly dashboard", "/employer/returns#returns-dashboard-heading"),
-    link("Direct Challan", "/employer/returns#direct-challan-heading"), link("Demands (14B / 7Q)", "/employer/returns#demands-heading"), link("VISHWAS: settle damages", "/employer/returns#vishwas-heading"), link("Monthly Return for Exempted Establishment"), link("TRRN query / challan status", "/employer/ecr#ecr-challans")] },
+    link("Direct Challan", "/employer/returns#direct-challan-heading"), link("Demands (14B / 7Q)", "/employer/returns#demands-heading"), link("VISHWAS: settle damages", "/employer/returns#vishwas-heading"), link("Monthly Return for Exempted Establishment", undefined, "Planned: the trust's monthly return (P2.9d)"), link("TRRN query / challan status", "/employer/ecr#ecr-challans")] },
   { label: "Dashboards", items: [link("Employer dashboard", "/employer#employer-dashboard-heading"), link("Compliance summary", "/employer/returns#compliance-summary-heading"), link("Active Members details", "/employer/registration#active-heading"), link("Missing details", "/employer/registration#active-heading")] },
   { label: "User", items: [link("Sub-users (payroll operators)", "/employer#people-operator")] },
   { label: "Admin" },
@@ -80,10 +82,11 @@ function fieldOffice(role: string): NavGroup[] {
       ...(role === "fo.apfc" ? [link("Death claims: beneficiary shares", "/office/claim-tools#shares-heading")] : []),
       ...(role === "fo.pro_intake" ? [link("PRO counter: physical claims", "/office/pro-counter")] : [])] },
     { label: "Members", items: [link("Member", role === "fo.oic" ? queue : role === "fo.da_accounts" ? "/office/claim-tools#member360-heading" : undefined),
-      link("Query"), ...(["fo.da_accounts", "fo.oic", "fo.ao", "fo.apfc"].includes(role) ? [link("Inoperative accounts", "/office/claim-tools#inoperative-heading")] : []),
+      link("Query", undefined, "Not in this POC: the menu's meaning is not documented"), ...(["fo.da_accounts", "fo.oic", "fo.ao", "fo.apfc"].includes(role) ? [link("Inoperative accounts", "/office/claim-tools#inoperative-heading")] : []),
       ...(role === "fo.oic" ? [link("Ledger locks", "/office/claim-tools#locks-heading")] : [])] },
     { label: "Receipts & reconciliation", items: [
-      role === "fo.apfc" ? link("ECR Approval") : link("VDR Vs ECR filing"), link("Reco - ECR Vs VDR"), link("VDR Member Beneficiary"),
+      role === "fo.apfc" ? link("ECR Approval", undefined, UNDEFINED_BY_EPFO) : link("VDR Vs ECR filing", undefined, UNDEFINED_BY_EPFO),
+      link("Reco - ECR Vs VDR", undefined, UNDEFINED_BY_EPFO), link("VDR Member Beneficiary", undefined, UNDEFINED_BY_EPFO),
       link("VDR Rejection", role === "fo.da_accounts" ? "/office/ledger#vdr-heading" : undefined),
       ...(["fo.cash", "fo.da_accounts"].includes(role) ? [link("Receipts outside the challan flow (VDR)", "/office/ledger#vdr-heading")] : []), ...["ANNEXURE K RECO", "ANNEXURE K VDR RECO"].map((l) => link(l, role === "fo.da_accounts" ? "/office/claim-tools#annexure-heading" : undefined))] },
     { label: "Establishments & compliance", items: [
@@ -92,9 +95,10 @@ function fieldOffice(role: string): NavGroup[] {
       link("Establishment", ["fo.oic", "fo.apfc"].includes(role) ? "/office/work-queue" : undefined),
       link("OLRE", ["fo.da_compliance", "fo.apfc"].includes(role) ? "/office/olre" : undefined),
       ...(role === "fo.apfc" ? [link("Establishment change requests", "/office/olre#est-changes-heading"), link("DSC / e-sign approvals", "/office/olre#sig-heading")] : []), link("Exempted-Unexempted", role === "fo.exemption" ? "/office/exempted" : undefined), link("Past Accum. File Upload", role === "fo.exemption" ? "/office/exempted#past-accumulation-heading" : undefined),
-      link("PAST ACCUM BULK TRANSFER"), link("PAST ACCUM VDR RECO")] },
-    { label: "Pension", items: [link("Pension"), link("NPPS")] },
-    { label: "Accounts", items: [link("Annual Accounting"),
+      link("PAST ACCUM BULK TRANSFER", undefined, PLANNED_TRUST), link("PAST ACCUM VDR RECO", undefined, PLANNED_TRUST)] },
+    { label: "Pension", items: [link("Pension", ["fo.apfc_pension", "fo.da_pension", "fo.ss_pension"].includes(role) ? "/office/pensions" : undefined),
+      link("NPPS", undefined, "Not in this POC: pension mobility to the National Pension System")] },
+    { label: "Accounts", items: [link("Annual Accounting", undefined, "Interest is credited at head office by F&A (Finance › Interest)"),
       ...(["fo.da_accounts", "fo.apfc"].includes(role) ? [link("Appendix E", "/office/ledger#appendix-e-heading")] : []),
       ...(role === "fo.da_accounts" ? [link("Reverse a journal / recredit a transfer", "/office/ledger#reversal-heading")] : [])] },
     { label: "Office", items: [...(role === "fo.oic" ? [link("Audit alerts", "/audit/concurrent#audit-alerts-heading"), link("Audit paras", "/audit/concurrent#audit-paras-heading"), link("Issue Tracker requests", "/audit/concurrent#issue-tracker-raise-heading")] : []), ...(role === "fo.pro" ? [link("RTI applications", "/office/grievances#rti-applications-heading")] : []), link("Dashboard", role === "fo.oic" ? "/dashboards" : undefined), link("Admin"), link("Services")] },
@@ -119,13 +123,13 @@ const PENSIONER: NavGroup[] = [
   { label: "Pensioners' Portal", items: [
     link("Jeevan Pramaan Enquiry", "/public#pension-enquiries"), link("Know your PPO No.", "/public#pension-enquiries"),
     link("PPO Enquiry / Payment Enquiry", "/pensioner#pension-payments-heading"), link("Know Your Pension Status", "/pensioner#monthly-pension-heading"),
-    link("Know Your Pension Payee Bank")] },
+    link("Know Your Pension Payee Bank", "/pensioner#monthly-pension-heading")] },
 ];
 
 /** A nominee or legal heir of a deceased member: no portal login exists (claims are filed on paper or via UMANG). */
 const CLAIMANT: NavGroup[] = [
   { label: "Death claims", items: [link("PF claim (Form 20)", "/claimant#file-heading"), link("EDLI claim (Form 5IF)", "/claimant#file-heading"),
-    link("Track claim / beneficiaries", "/claimant#claim-status-heading"), link("Composite claim (CCF)")] },
+    link("Track claim / beneficiaries", "/claimant#claim-status-heading"), link("Composite claim (CCF)", "/claimant#file-heading")] },
   { label: "Family pension (Form 10D)", to: "/claimant#family-pension-heading" },
 ];
 

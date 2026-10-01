@@ -14,6 +14,9 @@ interface Me { member_id: string; uan: string; mobile_masked: string; email_mask
 interface SessionRow { session_id: string; created_at: number; last_seen: number; device: string; current: boolean }
 
 /** Member security self-service (Journey D): contact details, sessions, "not me" reports, account recovery. */
+/** The identity provider holds the password (Keycloak in the POC); its account console changes it. */
+const KEYCLOAK_ISSUER = import.meta.env.VITE_KEYCLOAK_ISSUER ?? "http://localhost:8080/realms/epfo-demo";
+
 export function SecurityPage() {
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
@@ -75,6 +78,11 @@ export function SecurityPage() {
       <ProblemMessage error={me.error} />
       <ProblemMessage error={error} />
       {notice ? <p role="status" className="ok">{notice}</p> : null}
+      <section className="card stack" aria-labelledby="password-heading">
+        <h2 id="password-heading">{t("security.passwordTitle")}</h2>
+        <p className="muted">{t("security.passwordHelp")}</p>
+        <div className="actions"><a className="button" href={`${KEYCLOAK_ISSUER}/account/#/security/signingin`} target="_blank" rel="noopener noreferrer">{t("security.passwordOpen")}</a></div>
+      </section>
       <form className="card stack" aria-labelledby="uan-activation-heading" onSubmit={(e) => void activate(e)}>
         <h2 id="uan-activation-heading">Activate your UAN</h2>
         <label>UAN<input value={me.data?.data.uan ?? ""} readOnly /></label>

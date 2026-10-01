@@ -37,6 +37,10 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.12d** | Oversight: internal audit reports, paras, replies and decisions; DPDP data-principal requests; RTI replies; the CPGRAMS feed (mock) | **Done** (1 Oct 2026) |
 | **P2.12e** | Head office reporting: balance sheet, investments, board packs (aggregates), fund-manager position feed (mock) | **Done** (1 Oct 2026) |
 | **P2.12f** | The rest: DR replication status and failover drill, training sandboxes, Nidhi Aapke Nikat camp requests, totalisation claims and the foreign agency's CoC check, the composite death claim | **Done** (1 Oct 2026) |
+| **P2.12g** | Menu clean-up: screens already built linked from their menus (Composite claim, Know Your Pension Payee Bank, Change Password); every other item without a screen says why — planned (with the slice), awaiting EPFO's definition, or not in the POC | **Done** (1 Oct 2026) |
+| P2.13 | Small gaps: disablement pension (EPS para 15); zonal freezing (categories B and C) and zonal ACC decisions above the RO's limits; district office queues; PPO and UAN card issued to DigiLocker (mock) | Planned |
+| P2.14 | The exempted trust's lifecycle: annual audit filing and the exemption cell's review; surrender and cancellation (RPFC report → ZO → HO → the Exempted Establishments Committee → the appropriate Government); HO's decision; past accumulations transferred in bulk and reconciled with the receipts | Planned (sources on disk: the SOPs on surrender and cancellation, Dec 2023) |
+| P2.15 | Larger pieces: the employment-linked incentive (PMVBRY / ELI; earlier PMRPY and ABRY) — eligibility from the ECR, the incentive claim, the central share; SMS and e-mail notifications (a mock gateway with delivery evidence, preferences and retries) | Planned (PMVBRY needs the scheme guidelines) |
 
 ## P2.9 — plan
 
@@ -226,6 +230,33 @@ P2.11 (compliance proceedings) and P2.9b / P2.9d (exempted establishments) wait;
 planned endpoints (41, outside compliance and exemption), grouped by who uses them so each slice is one demo story.
 The HO reports on proceedings and recovery wait for P2.11. Each slice: the endpoints built (rows move P → W), rules in
 the rule set where amounts or periods are involved, unit, must-deny and end-to-end tests, and the web screen.
+
+## P2.13 – P2.15 — plan (gaps found in the ecosystem review)
+
+A review on 1 Oct 2026 (codex and agy asked separately, each claim checked against the repository) found, besides P2.9d
+and P2.11 and the integrations that stay mocks in a POC (UIDAI, banks and NPCI, Income Tax, MCA / GSTN, CPPS, Jeevan
+Pramaan, UMANG, CSC, B2B payroll, CERT-In):
+
+- **P2.13 — small gaps.** *Disablement pension* (EPS para 15; Pension Manual §2.5 and the claim table p.55): the member
+  exits on permanent and total disablement — Form 10D with the medical certificate (100% disability, issued by the
+  medical officer), no minimum service, pension from the date of disablement; the activity `F05.disabled_apply` exists,
+  nothing handles it. *Zonal freezing* (categories B and C, `F07.freeze_zo`) and *zonal ACC decisions* above an RO's
+  limits (`F08.escalate`, `F13.zo`), both marked future in the activity map. *District office* queues (`F06.district`).
+  *DigiLocker*: the PPO and the UAN card pushed to the member's DigiLocker (a mock issuer; `F14.digilocker`).
+- **P2.14 — the exempted trust's lifecycle** (after P2.9d): the trust's annual audited statements and the exemption
+  cell's review; surrender (voluntary) and cancellation (on the priority matrix's category A) as recorded proceedings —
+  the RPFC's report, the zone, head office, the Exempted Establishments Committee and the appropriate Government's
+  notification; then the past accumulations transferred in bulk (`PAST ACCUM BULK TRANSFER`) and reconciled with the
+  receipts (`PAST ACCUM VDR RECO`), building on the ingestion of P2.8d. Sources: the SOPs on surrender and on
+  cancellation (Dec 2023) in `../manuals/exemption/`.
+- **P2.15 — larger pieces.** *The employment-linked incentive* (PMVBRY / ELI, and the earlier PMRPY and ABRY): which new
+  employees qualify from the ECR, the employer's incentive, the central share and its reconciliation; the member and
+  employer PMVBRY menus lead nowhere today. Needs the scheme guidelines (from EPFO's PMVBRY site) before design.
+  *Notifications*: SMS and e-mail through a mock gateway — templates, the member's preferences, retries, delivery
+  evidence — for the events that already raise in-app notices.
+- **Not planned** (needs EPFO first): the seven "?" office functions — VDR Special, VDR member beneficiary, VDR vs ECR
+  reconciliation, EO certification, the APFC's ECR approval queue, bank-counter payment — until a domain owner defines
+  them; the menus say so.
 
 ## P2.1 — how it is built
 
