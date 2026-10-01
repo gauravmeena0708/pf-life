@@ -41,6 +41,10 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | P2.13 | Small gaps: disablement pension (EPS para 15); zonal freezing (categories B and C) and zonal ACC decisions above the RO's limits; district office queues; PPO and UAN card issued to DigiLocker (mock) | Planned |
 | P2.14 | The exempted trust's lifecycle: annual audit filing and the exemption cell's review; surrender and cancellation (RPFC report → ZO → HO → the Exempted Establishments Committee → the appropriate Government); HO's decision; past accumulations transferred in bulk and reconciled with the receipts | Planned (sources on disk: the SOPs on surrender and cancellation, Dec 2023) |
 | P2.15 | Larger pieces: the employment-linked incentive (PMVBRY / ELI; earlier PMRPY and ABRY) — eligibility from the ECR, the incentive claim, the central share; SMS and e-mail notifications (a mock gateway with delivery evidence, preferences and retries) | Planned (PMVBRY needs the scheme guidelines) |
+| P2.16 | Gig and platform workers (Code on Social Security, 2020): aggregators registered, a turnover-based contribution return (1–2% of turnover, capped at 5% of payments to the workers, in the rule set), workers linked by e-Shram number to a UAN, reconciliation | Planned — design only until the scheme is notified |
+| P2.17 | Insolvency: a watchlist from EPFO's own signals (ECR stopping, defaults, MCA status), IBBI announcements matched to the establishment, claim deadlines, dues frozen (7A; damages and interest kept apart), the resolution plan checked for PF dues in full, liquidation claims outside the estate (IBC s.36(4)(a)(iii)), recovery measured | Planned (links to P2.11) |
+| P2.18 | EPF to NPS: the PF leg paid to the member's NPS Tier I (PRAN, KYC match, the trustee bank through the CRA — mock); the EPS leg cannot move — a Scheme Certificate or the withdrawal benefit | Planned (needs PFRDA's circular) |
+| P2.19 | Edge cases as tests first, then the fixes: death during a transfer or claim; minor nominee or no nomination; two UANs to merge; court-ordered back wages after exit; 58 in service; a re-employed pensioner; family pension to a dependent parent or a disabled child; attachment orders refused; mergers without a break; a vanished contractor (s.8A); partial payment; exemption cancelled mid-transfer; returned payments after a bank merger; one bank account for many members; identity mismatches; members abroad without Aadhaar; unclaimed balances | Planned |
 
 ## P2.9 — plan
 
@@ -257,6 +261,40 @@ Pramaan, UMANG, CSC, B2B payroll, CERT-In):
 - **Not planned** (needs EPFO first): the seven "?" office functions — VDR Special, VDR member beneficiary, VDR vs ECR
   reconciliation, EO certification, the APFC's ECR approval queue, bank-counter payment — until a domain owner defines
   them; the menus say so.
+
+## P2.16 – P2.19 — plan (gig workers, insolvency, EPF to NPS, edge cases)
+
+Each starts by fetching its official source and summarising it with page references, as was done for the exemption
+manual; until then the figures below are from general knowledge and marked so.
+
+- **P2.16 — gig and platform workers.** The Code on Social Security, 2020 defines gig and platform workers and lets the
+  central government frame schemes for them; aggregators contribute 1–2% of annual turnover, capped at 5% of what they
+  pay those workers; workers register on e-Shram. *To verify*: whether EPFO administers a scheme and what it provides
+  (the scheme notifications). Then: aggregator registration, the periodic contribution return with the rate and cap in
+  the rule set, workers linked by e-Shram number to a UAN (one worker, many aggregators; a gig worker who is also an
+  EPF member elsewhere), reconciliation of contributions with payments, under-declared turnover flagged.
+- **P2.17 — insolvency.** PF, pension and gratuity dues owed to workers are outside the liquidation estate (IBC
+  s.36(4)(a)(iii)); the moratorium (s.14) stops EPFO's own recovery (8B–8G), so the claim must be early and complete.
+  *To verify*: the IBBI regulations' claim forms and deadlines, and how 14B damages and 7Q interest are treated.
+  Stages: signals (ECR stopping, defaults building up, MCA status — the mock MCA feed exists) scored into a watchlist;
+  IBBI public announcements matched by PAN / CIN with a deadline clock; dues frozen (7A, member-wise, PF / EPS / EDLI,
+  damages and interest apart) and the claim filed with proof; the resolution plan checked for PF dues in full; in
+  liquidation the claim outside the estate; recovery percentage and time per stage. Edge cases: exited members' dues;
+  contractors (s.8A); an exempted establishment's trust at risk; a plan relabelling PF dues; recovery under way when the
+  moratorium starts.
+- **P2.18 — EPF to NPS.** On the two-leg transfer of P2.9b: the PF leg to the member's NPS Tier I (PRAN, KYC matched,
+  paid to the NPS trustee bank through the CRA — mock); the EPS leg cannot move — a Scheme Certificate, or the
+  withdrawal benefit when eligible. *To verify*: PFRDA's circular and EPFO's procedure. Edge cases: an open advance or
+  claim, a frozen account, unlinked earlier member IDs, 58 or over, a part transfer, an inactive or mismatched PRAN.
+- **P2.19 — edge cases.** Written as end-to-end tests first (several may partly work already), then fixed: death during
+  a transfer or claim (to the death-claim route); a minor nominee or no nomination; two UANs of one person merged with
+  their service; court-ordered back wages after exit (arrear ECR, interest, pension recomputed); 58 while in service
+  (EPS to EPF unless deferred pension); a re-employed pensioner (EPF, no new EPS); family pension to a dependent parent or
+  for life to a disabled child; an attachment order refused (*to verify*: s.10 of the Act); a merger or demerger without
+  a break; a vanished contractor paid by the principal (s.8A); a partial challan's allocation; an exemption cancelled while
+  a transfer is in flight; payments returned after a bank merger; one bank account for many members; name or date of
+  birth differing across Aadhaar, PAN and the PF record; a member abroad without Aadhaar; unclaimed balances (*to verify*:
+  the Senior Citizens' Welfare Fund rule).
 
 ## P2.1 — how it is built
 

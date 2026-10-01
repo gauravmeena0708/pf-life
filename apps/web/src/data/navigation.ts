@@ -97,7 +97,7 @@ function fieldOffice(role: string): NavGroup[] {
       ...(role === "fo.apfc" ? [link("Establishment change requests", "/office/olre#est-changes-heading"), link("DSC / e-sign approvals", "/office/olre#sig-heading")] : []), link("Exempted-Unexempted", role === "fo.exemption" ? "/office/exempted" : undefined), link("Past Accum. File Upload", role === "fo.exemption" ? "/office/exempted#past-accumulation-heading" : undefined),
       link("PAST ACCUM BULK TRANSFER", undefined, PLANNED_TRUST), link("PAST ACCUM VDR RECO", undefined, PLANNED_TRUST)] },
     { label: "Pension", items: [link("Pension", ["fo.apfc_pension", "fo.da_pension", "fo.ss_pension"].includes(role) ? "/office/pensions" : undefined),
-      link("NPPS", undefined, "Not in this POC: pension mobility to the National Pension System")] },
+      link("NPPS", undefined, "Not in this POC: the menu's meaning is not documented")] },
     { label: "Accounts", items: [link("Annual Accounting", undefined, "Interest is credited at head office by F&A (Finance › Interest)"),
       ...(["fo.da_accounts", "fo.apfc"].includes(role) ? [link("Appendix E", "/office/ledger#appendix-e-heading")] : []),
       ...(role === "fo.da_accounts" ? [link("Reverse a journal / recredit a transfer", "/office/ledger#reversal-heading")] : [])] },
