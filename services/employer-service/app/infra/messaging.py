@@ -8,10 +8,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.infra.tables import establishments
 from epfo_persistence import audit
 
-BINDINGS = ["workflow-service.ProcessTransitioned.v1", "workflow-service.StaffPostingChanged.v1"]
+BINDINGS = ["workflow-service.ProcessTransitioned.v1", "workflow-service.StaffPostingChanged.v1",
+            "platform-service.PolicyPublished.v1"]
 
 
 async def dispatch(session: AsyncSession, event: dict[str, Any]) -> None:
+    if event["event_type"] == "PolicyPublished.v1":
+        from epfo_persistence.policy import on_policy_published
+        await on_policy_published(session, event)
+        return
     if event["event_type"] == "StaffPostingChanged.v1":           # HR re-posted an officer (P2.8e)
         from app.infra.tables import office_staff
         from epfo_persistence.postings import apply_posting

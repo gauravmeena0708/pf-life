@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     db_pool_size: int = 5
     rabbitmq_url: str = "amqp://epfo:dev@localhost:5672/"
     gateway_jwks_url: str = "http://gateway:8000/internal/jwks"
+    mca_spice_secret: str = "dev-mca-spice"
+    shram_suvidha_secret: str = "dev-shram-suvidha"
 
 
 settings = Settings()

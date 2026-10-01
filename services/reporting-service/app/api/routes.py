@@ -14,7 +14,7 @@ from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra.db import sessions
-from app.infra.tables import claim_facts, contribution_facts, event_freshness, grievance_facts
+from app.infra.tables import claim_facts, contribution_facts, event_freshness, grievance_facts, principal_employer_tags
 from epfo_auth import Actor, require_stakeholder
 from epfo_observability import envelope
 
@@ -88,9 +88,15 @@ async def on_payment_confirmed(session: AsyncSession, event: dict[str, Any]) -> 
             claim_facts.c.claim_id == p["reference_id"], claim_facts.c.settled_at.is_(None)
         ).values(settled_at=_at(event)))
     elif p["purpose"] == "CHALLAN":
+        filing = (await session.execute(select(contribution_facts.c.filing_id).where(
+            contribution_facts.c.trrn == p["reference_id"]))).scalar_one_or_none()
         await session.execute(update(contribution_facts).where(
             contribution_facts.c.trrn == p["reference_id"], contribution_facts.c.paid_at.is_(None)
         ).values(paid_at=_at(event)))
+        if filing is not None:
+            await session.execute(update(principal_employer_tags).where(
+                principal_employer_tags.c.filing_id == filing,
+                principal_employer_tags.c.paid.is_(False)).values(paid=True))
 
 
 async def on_payment_returned(session: AsyncSession, event: dict[str, Any]) -> None:
@@ -133,6 +139,25 @@ async def on_contribution_posted(session: AsyncSession, event: dict[str, Any]) -
     ).values(posted_at=_at(event), wage_month=p["wage_month"]))
 
 
+async def on_principal_employer_tagged(session: AsyncSession, event: dict[str, Any]) -> None:
+    p = event["payload"]
+    key = (principal_employer_tags.c.filing_id == p["filing_id"],
+           principal_employer_tags.c.principal_establishment_id == p["principal_establishment_id"],
+           principal_employer_tags.c.work_order_ref == p["work_order_ref"])
+    existing = (await session.execute(select(principal_employer_tags.c.paid).where(*key))).scalar_one_or_none()
+    filing_paid = (await session.execute(select(contribution_facts.c.paid_at).where(
+        contribution_facts.c.filing_id == p["filing_id"]))).scalar_one_or_none() is not None
+    values = {name: p[name] for name in ("contractor_establishment_id", "wage_month", "members",
+                                          "epf_wages_paise", "contribution_paise")}
+    values["paid"] = bool(p["paid"] or filing_paid or existing)
+    if existing is None:
+        await session.execute(insert(principal_employer_tags).values(
+            filing_id=p["filing_id"], principal_establishment_id=p["principal_establishment_id"],
+            work_order_ref=p["work_order_ref"], **values))
+    else:
+        await session.execute(update(principal_employer_tags).where(*key).values(**values))
+
+
 async def on_observed(session: AsyncSession, event: dict[str, Any]) -> None:
     """Some sources contribute to freshness without adding a fact column."""
 
@@ -169,6 +194,7 @@ HANDLERS = {
     "ECRValidated.v1": on_ecr_validated,
     "ECRSubmitted.v1": on_ecr_submitted,
     "ContributionPosted.v1": on_contribution_posted,
+    "PrincipalEmployerTagged.v1": on_principal_employer_tagged,
     "CaseDecisionSubmitted.v1": on_observed,
     "RiskSignalRaised.v1": on_observed,
     "StaffPostingChanged.v1": on_staff_posting,
@@ -177,7 +203,8 @@ EVENT_PRODUCERS = {
     **{name: "grievance-service" for name in GRIEVANCE_SOURCE},
     **{name: "claim-service" for name in ("ClaimSubmitted.v1", "ClaimDecisionRecorded.v1")},
     **{name: "payment-simulator" for name in ("PaymentConfirmed.v1", "PaymentReturned.v1")},
-    **{name: "contribution-service" for name in ("ECRValidated.v1", "ECRSubmitted.v1", "ContributionPosted.v1")},
+    **{name: "contribution-service" for name in ("ECRValidated.v1", "ECRSubmitted.v1", "ContributionPosted.v1",
+                                                  "PrincipalEmployerTagged.v1")},
     "CaseDecisionSubmitted.v1": "workflow-service",
     "RiskSignalRaised.v1": "intelligence-service",
     "StaffPostingChanged.v1": "workflow-service",

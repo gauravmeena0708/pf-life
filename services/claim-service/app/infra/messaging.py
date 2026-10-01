@@ -37,6 +37,7 @@ BINDINGS = [
     "member-service.NominationRegistered.v1",
     "member-service.MemberInternationalStatusChanged.v1",
     "workflow-service.StaffPostingChanged.v1",
+    "employer-service.EstablishmentOfficeTransferred.v1",
 ]
 
 
@@ -290,6 +291,13 @@ async def _posting(session: AsyncSession, event: dict[str, Any]) -> None:
     await apply_posting(session, event, office_staff)
 
 
+async def on_establishment_office_transferred(session: AsyncSession, event: dict[str, Any]) -> None:
+    p = event["payload"]
+    await session.execute(update(accounts).where(accounts.c.establishment_id == p["establishment_id"],
+                                                 accounts.c.office_id == p["from_office_id"])
+                          .values(office_id=p["to_office_id"]))
+
+
 async def on_international_status(session: AsyncSession, event: dict[str, Any]) -> None:
     """P2.9a: a member declared (or ceased to be) an international worker; the international-worker rules follow."""
     p = event["payload"]
@@ -298,6 +306,7 @@ async def on_international_status(session: AsyncSession, event: dict[str, Any]) 
 
 
 HANDLERS = {
+    "EstablishmentOfficeTransferred.v1": on_establishment_office_transferred,
     "StaffPostingChanged.v1": _posting,
     "PrimaryMemberIdChanged.v1": on_primary_changed,
     "LedgerReversed.v1": on_ledger_reversed,

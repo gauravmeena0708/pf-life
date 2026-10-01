@@ -48,6 +48,19 @@ contribution_facts = Table(
     Column("posted_at", DateTime(timezone=True)),
 )
 
+principal_employer_tags = Table(
+    "principal_employer_tags", metadata,
+    Column("filing_id", String(40), primary_key=True),
+    Column("principal_establishment_id", String(40), primary_key=True),
+    Column("work_order_ref", String(80), primary_key=True),
+    Column("contractor_establishment_id", String(40), nullable=False, index=True),
+    Column("wage_month", String(7), nullable=False),
+    Column("members", Integer, nullable=False),
+    Column("epf_wages_paise", BigInteger, nullable=False),
+    Column("contribution_paise", BigInteger, nullable=False),
+    Column("paid", Boolean, nullable=False, server_default="false"),
+)
+
 event_freshness = Table(
     "event_freshness", metadata,
     Column("source", String(80), primary_key=True),

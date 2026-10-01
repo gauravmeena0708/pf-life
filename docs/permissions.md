@@ -268,6 +268,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /employers/me/compliance-summary` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/configuration` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/contractors` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/contractors/{contractorId}/compliance` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/demands` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/exemption` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/kyc` | W | own establishment (X-Establishment-Id validated against grants) |  |
@@ -327,6 +328,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /employers/me/approvals/{approvalId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/branches` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/claim-attestations/{claimId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
+| `POST /employers/me/closure-requests` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/configuration/change-requests` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/demands/{demandId}/payment-intents` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/direct-challans` | W | own establishment (X-Establishment-Id validated against grants) | yes |
@@ -338,18 +340,17 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /employers/me/joint-declarations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/joint-declarations/{jdId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/kyc-approvals/{requestId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
+| `POST /employers/me/office-transfer-requests` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/transfer-requests/{transferId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/vishwas-applications` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `POST /employers/voluntary-coverage-requests` | W | own registration request | yes |
 | `POST /international/coc-applications` | W | own application (employer) or IWU role |  |
 | `POST /international/coc-applications/{id}/extensions` | W | own application (employer) or IWU role |  |
 | `POST /international/coc-applications/{id}/signed-uploads` | W | own application (employer) or IWU role |  |
 | `PUT /employers/me/ownership-declaration` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/challans/{trrn}/payment-intents` | M | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/kyc/{kycType}` | M | own establishment (X-Establishment-Id validated against grants) | yes |
-| `POST /employers/me/closure-requests` | P | own establishment (X-Establishment-Id validated against grants) | yes |
-| `POST /employers/me/office-transfer-requests` | P | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/proceedings/{caseId}/submissions` | P | own establishment (X-Establishment-Id validated against grants) |  |
-| `POST /employers/voluntary-coverage-requests` | P | own registration request |  |
 
 **`employer.operator`** — Employer sub-user / payroll preparer
 
@@ -373,6 +374,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /employers/me/returns/dashboard` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `PATCH /employers/me/members/{uan}/profile` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/ecr-filings` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `POST /employers/me/ecr-filings/{filingId}/principal-employer-tags` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/ecr-filings/{filingId}/validations` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/kyc-bulk-uploads` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/members` | W | own establishment (X-Establishment-Id validated against grants) |  |
@@ -388,14 +390,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /employers/me/contractors` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/contractors/{contractorId}/compliance` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/contractors` | W | own establishment (X-Establishment-Id validated against grants) |  |
-| `GET /employers/me/contractors/{contractorId}/compliance` | P | own establishment (X-Establishment-Id validated against grants) |  |
-
-**`contractor`** — Contractor establishment (tags its workers to a principal employer)
-
-| Endpoint | Status | Scope | Step-up |
-|---|---|---|---|
-| `POST /employers/me/ecr-filings/{filingId}/principal-employer-tags` | P | own establishment (X-Establishment-Id validated against grants) |  |
+- `contractor` — Contractor establishment (tags its workers to a principal employer) — since P2.12b its own employer users (`employer.operator`) do this: *no endpoints (acts through an adapter or through another role)*
 
 **`exempted.trust`** — Exempted establishment — PF trust and its Board of Trustees
 

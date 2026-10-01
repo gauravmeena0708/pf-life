@@ -343,6 +343,10 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
         on = iw.get("final_settlement_on") or {}
         if not _whole(on.get("min_age"), 18, 80) or not isinstance(on.get("agreement_nationalities"), list):
             problems.append("international_workers.final_settlement_on needs min_age (18-80) and a list of agreement_nationalities")
+    if "voluntary_coverage" in document:
+        vc = document["voluntary_coverage"] or {}
+        if not _whole(vc.get("threshold_employees"), 1, 1000) or not _whole(vc.get("consent_share_bp"), 1, 10000):
+            problems.append("voluntary_coverage needs threshold_employees (1-1000) and consent_share_bp (1-10000)")
     if "inoperative_accounts" in document:
         ia = document["inoperative_accounts"] or {}
         if not _whole(ia.get("months_without_credit"), 12, 120) or not _whole(ia.get("co_workers_required"), 1, 5) \

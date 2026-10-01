@@ -3,15 +3,15 @@
  "totals": {
   "interfaces": 21,
   "stakeholders": 114,
-  "stakeholders_with_access": 96,
+  "stakeholders_with_access": 95,
   "activities": 241,
   "endpoints": {
-   "W": 337,
+   "W": 342,
    "M": 21,
-   "P": 65,
+   "P": 60,
    "?": 5
   },
-  "personas": 52
+  "personas": 53
  },
  "interfaces": [
   {
@@ -39,9 +39,9 @@
    "coverage": "Working",
    "purpose": "Employers: registration, members and KYC, monthly returns and challans, demands, attestations, exits.",
    "endpoints": {
-    "W": 78,
+    "W": 83,
     "M": 5,
-    "P": 13,
+    "P": 8,
     "?": 0
    },
    "stakeholders": [
@@ -717,7 +717,7 @@
    "name": "Establishment owner / employer (legal entity)",
    "group": "B. Employers and intermediaries",
    "endpoints": {
-    "W": 29,
+    "W": 30,
     "M": 4,
     "P": 0,
     "?": 0
@@ -745,16 +745,17 @@
     }
    ],
    "personas": [
-    "emp-owner"
+    "emp-owner",
+    "principal-owner"
    ]
   },
   "employer.signatory": {
    "name": "Authorised signatory (registered DSC / e-sign)",
    "group": "B. Employers and intermediaries",
    "endpoints": {
-    "W": 45,
+    "W": 48,
     "M": 2,
-    "P": 4,
+    "P": 1,
     "?": 0
    },
    "activities": [
@@ -827,7 +828,7 @@
    "name": "Employer sub-user / payroll preparer",
    "group": "B. Employers and intermediaries",
    "endpoints": {
-    "W": 27,
+    "W": 28,
     "M": 0,
     "P": 0,
     "?": 0
@@ -836,6 +837,10 @@
     {
      "id": "F01.profile",
      "does": "View establishment profile, configuration, KYC and home-page alerts"
+    },
+    {
+     "id": "F01.contractor_tag",
+     "does": "As a contractor establishment, tag the ECR members who worked for a principal employer"
     },
     {
      "id": "F02.register",
@@ -870,9 +875,9 @@
    "name": "Principal employer monitoring contractors",
    "group": "B. Employers and intermediaries",
    "endpoints": {
-    "W": 2,
+    "W": 3,
     "M": 0,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
    "activities": [
@@ -884,20 +889,15 @@
    "personas": []
   },
   "contractor": {
-   "name": "Contractor establishment (tags its workers to a principal employer)",
+   "name": "Contractor establishment (tags its workers to a principal employer) — since P2.12b its own employer users (`employer.operator`) do this",
    "group": "B. Employers and intermediaries",
    "endpoints": {
     "W": 0,
     "M": 0,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
-   "activities": [
-    {
-     "id": "F01.contractor_tag",
-     "does": "Tag ECR members to the principal employer"
-    }
-   ],
+   "activities": [],
    "personas": []
   },
   "exempted.trust": {

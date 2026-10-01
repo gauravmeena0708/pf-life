@@ -99,9 +99,12 @@ async def _create(body: FilingInput, actor: Actor):
     if body.type not in ("REGULAR", "ARREAR", "SUPPLEMENTARY"):
         raise Problem(400, "/problems/invalid-ecr-type", "The return type must be REGULAR, ARREAR or SUPPLEMENTARY")
     async with sessions()() as session, session.begin():
-        est = (await session.execute(text("SELECT status FROM establishments WHERE id=:e"), {"e": eid})).scalar_one_or_none()
-        if est != "VERIFIED":
+        est = (await session.execute(text("SELECT status, last_wage_month FROM establishments WHERE id=:e"), {"e": eid})).mappings().first()
+        if not est or est["status"] != "VERIFIED":
             raise Problem(409, "/problems/establishment-not-verified", "Establishment is not verified")
+        if est["last_wage_month"] and body.wage_month > est["last_wage_month"]:
+            raise Problem(409, "/problems/establishment-closed", "Establishment is closed",
+                          f"The last permitted wage month is {est['last_wage_month']}.")
         prior_rows = (await session.execute(text("SELECT * FROM ecr_filings WHERE establishment_id=:e AND wage_month=:m ORDER BY version DESC"), {"e": eid, "m": body.wage_month})).mappings().all()
         regular = [x for x in prior_rows if x["filing_type"] == "REGULAR"]
         if body.type == "REGULAR":
@@ -260,7 +263,12 @@ async def get_filing(filingId: str, actor: Actor = Depends(EMPLOYER)):
     eid = _establishment(actor)
     async with sessions()() as session:
         f = await _fetch_filing(session, filingId, eid)
-        return envelope({**_filing_json(f), "validation_report": f["validation_report"]})
+        tags = (await session.execute(text("SELECT uan, principal_establishment_id, work_order_ref, epf_wages_paise, contribution_paise "
+                                           "FROM principal_employer_tags WHERE filing_id=:f ORDER BY uan"), {"f": filingId})).mappings().all()
+        rows = parse(f["content"], f["format"])[0] if f.get("content") else []
+        members = [{"uan": r.get("UAN"), "name": r.get("Member Name"), "epf_wages": r.get("EPF Wages")} for r in rows]   # P2.12b: for tagging
+        return envelope({**_filing_json(f), "validation_report": f["validation_report"], "members": members,
+                         "principal_tags": [dict(tag) for tag in tags]})
 
 
 @router.get("/api/v1/employers/me/ecr-filings")

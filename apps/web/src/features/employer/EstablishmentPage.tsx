@@ -9,6 +9,7 @@ import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 import { EsignList } from "./SignaturePanels";
+import "./EstablishmentPage.css";
 
 const base = "/api/v1/employers/me";
 const text = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
@@ -30,7 +31,10 @@ interface Person { name: string; designation: string; role: string; pan: string;
 interface Form5A { filed: boolean; note?: string; version?: number; nature_of_business?: string; persons?: Person[]; earlier_versions?: number }
 interface PersonDraft { id: number; name: string; designation: string; role: string; pan: string; share_pct: string }
 interface Contractor { contractor_id: string; registration_number: string; name: string; registered_with_epfo: boolean;
-  work_order_ref: string; valid_from: string; valid_to: string | null }
+  establishment_id: string | null; work_order_ref: string; valid_from: string; valid_to: string | null }
+interface ComplianceMonth { wage_month: string; members: number; epf_wages_paise: number; contribution_paise: number;
+  paid: boolean; filing_id: string; work_order_ref: string }
+interface Compliance { months: ComplianceMonth[]; unpaid_months: string[]; note: string }
 
 function Facts({ rows }: { rows: [string, unknown][] }) {
   return <dl className="kv">{rows.map(([label, value]) => <div key={label} style={{ display: "contents" }}>
@@ -45,6 +49,7 @@ export function EstablishmentPage() {
   const [error, setError] = useState<unknown>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [kycResult, setKycResult] = useState<KycResult | null>(null);
+  const [complianceId, setComplianceId] = useState<string | null>(null);
   const nextPersonId = useRef(1);
   const [persons, setPersons] = useState<PersonDraft[]>([{ id: 0, name: "", designation: "", role: "PROPRIETOR", pan: "", share_pct: "0" }]);
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
@@ -70,6 +75,8 @@ export function EstablishmentPage() {
     queryFn: () => api<Envelope<Form5A>>(`${base}/ownership-declaration`) });
   const contractors = useQuery({ queryKey: ["establishment-contractors"], enabled: employer, retry: false,
     queryFn: () => api<Envelope<Contractor[]>>(`${base}/contractors`) });
+  const compliance = useQuery({ queryKey: ["contractor-compliance", complianceId], enabled: !!complianceId, retry: false,
+    queryFn: () => api<Envelope<Compliance>>(`${base}/contractors/${encodeURIComponent(complianceId!)}/compliance`) });
   const loadError = [session.error, me.error, config.error, changes.error, kyc.error, banks.error, exemption.error,
     branches.error, form5a.error, contractors.error].find(Boolean);
   const establishmentId = me.data?.data.establishment_id;
@@ -173,6 +180,42 @@ export function EstablishmentPage() {
       return `Contractor ${result.data.registration_number} added.`;
     });
   }
+  function requestCoverage(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault(); const form = e.currentTarget; const f = new FormData(form);
+    void run(async () => {
+      const id = requireId();
+      const token = await stepUp.ask({ action: "request-establishment-change", resourceId: id, summary: `Request voluntary coverage for ${id}.` });
+      if (!token) return null;
+      const result = await command<Envelope<ChangeRequest>>("POST", "/api/v1/employers/voluntary-coverage-requests", {
+        employees: Number(text(f, "employees")), employees_consenting: Number(text(f, "employees_consenting")),
+        effective_from: text(f, "effective_from"), reason: text(f, "reason") }, { stepUpToken: token });
+      form.reset(); await refresh("establishment-changes"); return `Change request ${result.data.request_id} submitted.`;
+    });
+  }
+  function requestClosure(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault(); const form = e.currentTarget; const f = new FormData(form);
+    void run(async () => {
+      const id = requireId();
+      const token = await stepUp.ask({ action: "request-closure", resourceId: id, summary: `Request closure of ${id}.` });
+      if (!token) return null;
+      const result = await command<Envelope<ChangeRequest>>("POST", `${base}/closure-requests`, {
+        closed_on: text(f, "closed_on"), reason: text(f, "reason"), last_wage_month: text(f, "last_wage_month"), note: text(f, "note") },
+      { stepUpToken: token });
+      form.reset(); await refresh("establishment-changes"); return `Change request ${result.data.request_id} submitted.`;
+    });
+  }
+  function requestTransfer(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault(); const form = e.currentTarget; const f = new FormData(form);
+    void run(async () => {
+      const id = requireId();
+      const token = await stepUp.ask({ action: "request-office-transfer", resourceId: id, summary: `Request office transfer for ${id}.` });
+      if (!token) return null;
+      const result = await command<Envelope<ChangeRequest>>("POST", `${base}/office-transfer-requests`, {
+        to_office_id: text(f, "to_office_id"), effective_from: text(f, "effective_from"), reason: text(f, "reason") },
+      { stepUpToken: token });
+      form.reset(); await refresh("establishment-changes"); return `Change request ${result.data.request_id} submitted.`;
+    });
+  }
 
   return <section className="stack" aria-labelledby="establishment-heading">
     <PageHeader id="establishment-heading" eyebrow="Employer services" title="Establishment" current="Establishment"
@@ -181,7 +224,7 @@ export function EstablishmentPage() {
     {notice ? <p role="status" className="ok">{notice}</p> : null}
 
     <section className="card stack" aria-labelledby="est-config-heading"><h2 id="est-config-heading">Configuration</h2>
-      {config.data ? <Facts rows={[["Coverage type", config.data.data.coverage_type], ["Coverage date", config.data.data.coverage_date],
+      {config.data ? <Facts rows={[["Coverage type", statusLabel(config.data.data.coverage_type, t)], ["Coverage date", config.data.data.coverage_date],
         ["Exemption status", statusLabel(config.data.data.exemption_status, t)], ["Establishment type", config.data.data.establishment_type],
         ["Industry group", config.data.data.industry_group], ["Jurisdiction office", config.data.data.jurisdiction_office],
         ["Schemes", config.data.data.schemes.join(", ")], ["Sub codes", config.data.data.sub_codes.join(", ")],
@@ -208,11 +251,36 @@ export function EstablishmentPage() {
       </> : null}
       <h3>Your change requests</h3>
       {changes.data?.data.length ? <ul className="plain-list">{changes.data.data.map((request) => <li key={request.request_id}>
-        <strong>{request.request_id}</strong> · {request.kind} <span className="state-pill">{statusLabel(request.state, t)}</span>
+        <strong>{request.request_id}</strong> · {statusLabel(request.kind, t)} <span className="state-pill">{statusLabel(request.state, t)}</span>
         <ul>{Object.entries(request.changes).map(([field, value]) => <li key={field}>{field.replaceAll("_", " ")}: {show(value.from)} → {show(value.to)}</li>)}</ul>
         <p className="small">Reason: {request.reason}{request.decision_note ? ` · Decision note: ${request.decision_note}` : ""}</p>
       </li>)}</ul> : changes.data ? <p className="muted">No change requests.</p> : null}
     </section>
+
+    {role === "employer.signatory" ? <section className="card stack" aria-labelledby="coverage-office-heading"><h2 id="coverage-office-heading">Coverage, closure and office</h2>
+      <form className="stack lifecycle-form" aria-label="Request voluntary coverage" onSubmit={requestCoverage}><h3>Voluntary coverage under section 1(4)</h3>
+        <p className="muted small">Illustrative rule: fewer than 20 employees and consent from a majority of employees.</p>
+        <div className="form-row"><label>Employees<input name="employees" type="number" min="1" required /></label>
+          <label>Employees consenting<input name="employees_consenting" type="number" min="0" required /></label>
+          <label>Effective from<input name="effective_from" type="date" required /></label></div>
+        <label>Reason<input name="reason" required minLength={10} maxLength={500} /></label>
+        <div className="actions"><button type="submit" className="primary">Request voluntary coverage</button></div></form>
+      <form className="stack lifecycle-form" aria-label="Request closure" onSubmit={requestClosure}><h3>Closure</h3>
+        <div className="form-row"><label>Closed on<input name="closed_on" type="date" required /></label>
+          <label>Reason<select name="reason"><option value="CLOSED">{statusLabel("CLOSED", t)}</option>
+            <option value="BUSINESS_DISCONTINUED">{statusLabel("BUSINESS_DISCONTINUED", t)}</option>
+            <option value="MERGED">{statusLabel("MERGED", t)}</option></select></label>
+          <label>Last wage month<input name="last_wage_month" type="month" required /></label></div>
+        <label>Note<input name="note" required minLength={3} maxLength={500} /></label>
+        <div className="actions"><button type="submit" className="primary" disabled={!establishmentId}>Request closure</button></div></form>
+      <form className="stack lifecycle-form" aria-label="Request office transfer" onSubmit={requestTransfer}><h3>Office transfer</h3>
+        <div className="form-row"><label>To office<select name="to_office_id" required>
+          {["RO-DEMO-01", "RO-DEMO-02"].filter((office) => office !== config.data?.data.jurisdiction_office).map((office) =>
+            <option key={office} value={office}>{office}</option>)}</select></label>
+          <label>Effective from<input name="effective_from" type="date" required /></label></div>
+        <label>Reason<input name="reason" required minLength={5} maxLength={500} /></label>
+        <div className="actions"><button type="submit" className="primary" disabled={!establishmentId || !config.data}>Request office transfer</button></div></form>
+    </section> : null}
 
     <section className="card stack" aria-labelledby="est-kyc-heading"><h2 id="est-kyc-heading">KYC</h2>
       {kyc.data ? <><p className="muted small">{kyc.data.data.note}</p><div className="table-scroll"><table><thead><tr>
@@ -281,11 +349,25 @@ export function EstablishmentPage() {
 
     <section className="card stack" aria-labelledby="est-contractors-heading"><h2 id="est-contractors-heading">Contractors (principal employer)</h2>
       {contractors.data?.data.length ? <div className="table-scroll"><table><thead><tr><th scope="col">Registration</th><th scope="col">Name</th>
-        <th scope="col">EPFO registered</th><th scope="col">Work order</th><th scope="col">Valid from</th><th scope="col">Valid to</th>
+        <th scope="col">EPFO registered</th><th scope="col">Work order</th><th scope="col">Valid from</th><th scope="col">Valid to</th><th scope="col">Compliance</th>
       </tr></thead><tbody>{contractors.data.data.map((contractor) => <tr key={contractor.contractor_id}>
         <td>{contractor.registration_number}</td><td>{contractor.name}</td><td>{show(contractor.registered_with_epfo)}</td>
-        <td>{contractor.work_order_ref}</td><td>{contractor.valid_from}</td><td>{show(contractor.valid_to)}</td></tr>)}</tbody></table></div>
+        <td>{contractor.work_order_ref}</td><td>{contractor.valid_from}</td><td>{show(contractor.valid_to)}</td>
+        <td>{contractor.registered_with_epfo && contractor.establishment_id ? <button type="button" onClick={() => {
+          setComplianceId(contractor.establishment_id);
+          if (complianceId === contractor.establishment_id) void qc.invalidateQueries({ queryKey: ["contractor-compliance", complianceId] });
+        }}>Compliance</button> : "—"}</td></tr>)}</tbody></table></div>
         : contractors.data ? <p className="muted">No contractors recorded.</p> : null}
+      {complianceId ? <div className="stack" aria-label={`Compliance for ${complianceId}`}><h3>Compliance · {complianceId}</h3>
+        <ProblemMessage error={compliance.error} />
+        {compliance.isLoading ? <p role="status">Loading compliance…</p> : null}
+        {compliance.data ? <><p className="muted small">{compliance.data.data.note}</p><div className="table-scroll"><table aria-label="Compliance months">
+          <thead><tr><th scope="col">Wage month</th><th scope="col">Members</th><th scope="col">EPF wages</th>
+            <th scope="col">Contribution</th><th scope="col">Work order</th><th scope="col">Payment</th></tr></thead>
+          <tbody>{compliance.data.data.months.map((month) => <tr key={`${month.filing_id}-${month.work_order_ref}`} className={month.paid ? "" : "compliance-unpaid"}>
+            <th scope="row">{month.wage_month}</th><td>{month.members}</td><td>{rupees(month.epf_wages_paise)}</td>
+            <td>{rupees(month.contribution_paise)}</td><td>{month.work_order_ref}</td>
+            <td><span className="state-pill">{month.paid ? "Paid" : "Unpaid"}</span></td></tr>)}</tbody></table></div></> : null}</div> : null}
       {owner ? <form className="stack" aria-labelledby="add-contractor-heading" onSubmit={addContractor}><h3 id="add-contractor-heading">Add a contractor</h3>
         <div className="form-row"><label>Registration number<input name="registration_number" required minLength={5} /></label>
           <label>Name<input name="name" required minLength={3} /></label><label>Work order reference<input name="work_order_ref" required minLength={3} /></label></div>

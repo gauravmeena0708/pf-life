@@ -66,19 +66,19 @@ Rules that apply to every row:
 | `PATCH /employers/me` 🔐 | Update address / contact — creates a change request, not a direct edit | W | 1 | employer |
 | `GET /employers/me/ownership-declaration` | **Form 5A** ownership / management declaration — view | W | 1 | employer |
 | `PUT /employers/me/ownership-declaration` 🔐 | Form 5A — submit / amend | W | 1 | employer |
-| `POST /employers/voluntary-coverage-requests` | Voluntary coverage request | P | 3 | employer |
+| `POST /employers/voluntary-coverage-requests` 🔐 | Voluntary coverage request under section 1(4) (office-approved) | W | 1 | employer |
 | `GET /employers/me/kyc` | Establishment KYC status: PAN, TAN, GSTIN, CIN, LIN | W | 1 | employer |
 | `POST /employers/me/kyc/{kycType}` 🔐 | Seed / update establishment KYC (mock registry verification) | M | 1 | employer |
 | `GET /employers/me/branches` | Sub-codes / branches / departments | W | 1 | employer |
 | `POST /employers/me/branches` | Create sub-code | W | 1 | employer |
 | `GET /employers/me/bank-accounts` | Establishment bank accounts used for remittance | W | 1 | employer |
 | `GET /employers/me/exemption` | Exemption details (PF trust, relaxation) | W | 1 | employer |
-| `POST /employers/me/closure-requests` 🔐 | Closure / business-discontinued declaration | P | 3 | employer |
-| `POST /employers/me/office-transfer-requests` 🔐 | Transfer establishment to another office jurisdiction | P | 3 | employer |
+| `POST /employers/me/closure-requests` 🔐 | Closure / business-discontinued declaration | W | 1 | employer |
+| `POST /employers/me/office-transfer-requests` 🔐 | Transfer establishment to another office jurisdiction | W | 1 | employer |
 | `GET /employers/me/contractors` | Principal employer: linked contractors | W | 1 | employer |
 | `POST /employers/me/contractors` | Principal employer: register / link contractor | W | 1 | employer |
-| `GET /employers/me/contractors/{contractorId}/compliance` | Principal employer: contractor remittance compliance | P | 2 | reporting |
-| `POST /employers/me/ecr-filings/{filingId}/principal-employer-tags` | Contractor: tag ECR members to a principal employer | P | 2 | contribution |
+| `GET /employers/me/contractors/{contractorId}/compliance` | Principal employer: contractor remittance compliance | W | 1 | reporting |
+| `POST /employers/me/ecr-filings/{filingId}/principal-employer-tags` | Contractor: tag ECR members to a principal employer | W | 1 | contribution |
 
 
 **Added from the stakeholder activity map** (`docs/stakeholder-activities.yaml`)
@@ -91,8 +91,8 @@ Rules that apply to every row:
 | `POST /office/establishment-registrations/{reqId}/coverage-decisions` 🔐 | Circle officer's coverage decision on a new establishment | W | 1 | employer |
 | `GET /office/establishment-change-requests` | Establishment change requests of the office, by state | W | 1 | employer |
 | `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` 🔐 | Decide configuration change / closure / office-transfer requests | W | 1 | employer |
-| `POST /integrations/mca/registrations` | MCA SPICe+ / AGILE-PRO auto-registration feed (signed) | M | 2 | employer |
-| `POST /integrations/shram-suvidha/registrations` | Shram Suvidha common-registration feed (signed) | M | 3 | employer |
+| `POST /integrations/mca/registrations` | MCA SPICe+ / AGILE-PRO auto-registration feed (signed) | M | 1 | employer |
+| `POST /integrations/shram-suvidha/registrations` | Shram Suvidha common-registration feed (signed) | M | 1 | employer |
 | `GET /partners/liquidators/claims/{claimId}` | Liquidator / resolution professional views EPFO dues claim | P | 3 | compliance |
 | `GET /employers/me/dashboard` | Employer home alerts and Dashboards (pending KYC, member-detail approvals, missing details) | W | 1 | reporting |
 

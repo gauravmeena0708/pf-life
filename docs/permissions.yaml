@@ -835,6 +835,12 @@ stakeholders:
     step_up: false
     via:
     - F01.establishment_owner
+  - endpoint: GET /employers/me/contractors/{contractorId}/compliance
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.establishment_owner
   - endpoint: PATCH /employers/me
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
@@ -939,13 +945,13 @@ stakeholders:
     via:
     - F01.change_request
   - endpoint: POST /employers/me/closure-requests
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:
     - F01.change_request
   - endpoint: POST /employers/me/office-transfer-requests
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: true
     via:
@@ -957,9 +963,9 @@ stakeholders:
     via:
     - F01.change_request
   - endpoint: POST /employers/voluntary-coverage-requests
-    status: P
+    status: W
     scope: own registration request
-    step_up: false
+    step_up: true
     via:
     - F01.change_request
   - endpoint: GET /employers/me/kyc-approvals
@@ -1227,6 +1233,12 @@ stakeholders:
     step_up: false
     via:
     - F01.profile
+  - endpoint: POST /employers/me/ecr-filings/{filingId}/principal-employer-tags
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.contractor_tag
   - endpoint: POST /employers/me/members
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
@@ -1361,18 +1373,12 @@ stakeholders:
     via:
     - F01.contractors
   - endpoint: GET /employers/me/contractors/{contractorId}/compliance
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
     - F01.contractors
-  contractor:
-  - endpoint: POST /employers/me/ecr-filings/{filingId}/principal-employer-tags
-    status: P
-    scope: own establishment (X-Establishment-Id validated against grants)
-    step_up: false
-    via:
-    - F01.contractor_tag
+  contractor: []
   exempted.trust:
   - endpoint: POST /exempted/me/returns
     status: P

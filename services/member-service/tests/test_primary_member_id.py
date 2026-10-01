@@ -1,11 +1,32 @@
 """Phase 2, slice 7d: the primary member ID — the latest member ID that has received contributions, over the
 member's Aadhaar-verified set — shown to the member and the office, moved by a first contribution and a transfer."""
+import asyncio
+
+from sqlalchemy import select
+
 from tests.test_exits import MEMBER_D, deliver, hdr
 from tests.test_member_api import SEED, api  # noqa: F401  (api is a fixture)
 from tests.test_member_processes import outbox
 from tests.test_onboarding import hdr as office_hdr
 
 MEMBER_B = SEED["keycloak_subjects"]["member-b"]
+
+
+def test_establishment_office_transfer_moves_employments(api):
+    from app.infra.db import sessions
+    from app.infra.tables import employments
+
+    async def offices():
+        async with sessions()() as session:
+            return (await session.execute(select(employments.c.office_id).where(
+                employments.c.establishment_id == "EST-DEMO-0001"))).scalars().all()
+
+    assert set(asyncio.run(offices())) == {"RO-DEMO-01"}
+    payload = {"establishment_id": "EST-DEMO-0001", "from_office_id": "RO-DEMO-01",
+               "to_office_id": "RO-DEMO-02", "effective_from": "2026-10-01"}
+    deliver("EstablishmentOfficeTransferred.v1", payload)
+    deliver("EstablishmentOfficeTransferred.v1", payload)
+    assert set(asyncio.run(offices())) == {"RO-DEMO-02"}
 
 
 def test_primary_and_secondary_member_ids_in_the_service_history(api):

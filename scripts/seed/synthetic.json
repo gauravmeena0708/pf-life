@@ -599,7 +599,8 @@
     "zo-fraud": "00000000-0000-4000-8000-000000000049",
     "do-oic": "00000000-0000-4000-8000-000000000050",
     "zo-vigilance": "00000000-0000-4000-8000-000000000051",
-    "csc-operator": "00000000-0000-4000-8000-000000000052"
+    "csc-operator": "00000000-0000-4000-8000-000000000052",
+    "principal-owner": "00000000-0000-4000-8000-000000000053"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -854,6 +855,23 @@
       "name": "Demo Regional Office 2 (synthetic)",
       "zone_id": "ZO-DEMO-01",
       "_comment": "A second office so a grievance can be transferred between offices (P2.8d); no staff are posted there."
+    }
+  ],
+  "principal_employer": {
+    "_comment": "P2.12b: the owner of Demo Engineering Works, a principal employer whose contractor is the demo establishment",
+    "username": "principal-owner",
+    "subject": "00000000-0000-4000-8000-000000000053",
+    "establishment_id": "EST-DEMO-0002",
+    "grants": [
+      "establishment.manage"
+    ]
+  },
+  "contractor_links": [
+    {
+      "principal_establishment_id": "EST-DEMO-0002",
+      "contractor_establishment_id": "EST-DEMO-0001",
+      "work_order_ref": "WO/DEW/2026/014",
+      "valid_from": "2026-04-01"
     }
   ]
 }

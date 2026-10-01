@@ -13,6 +13,20 @@ BODY = {"username": PRO["username"], "stakeholder": "fo.pro", "office_id": "RO-D
 URL = "/api/v1/hrm/postings"
 
 
+def test_establishment_office_transfer_moves_subject_jurisdiction_but_keeps_open_case(ctx):
+    _, q, deliver = ctx
+    submitted(deliver, claim_id="CLM-OFFICE-TRANSFER")
+    before = q("SELECT subject_ref FROM subject_offices WHERE establishment_id='EST-DEMO-0001'")
+    assert before
+    payload = {"establishment_id": "EST-DEMO-0001", "from_office_id": "RO-DEMO-01",
+               "to_office_id": "RO-DEMO-02", "effective_from": "2026-10-01"}
+    deliver("EstablishmentOfficeTransferred.v1", payload, "employer-service")
+    deliver("EstablishmentOfficeTransferred.v1", payload, "employer-service")
+    assert q("SELECT subject_ref FROM subject_offices WHERE establishment_id='EST-DEMO-0001' AND office_id='RO-DEMO-02'") == before
+    assert q("SELECT office_id, zone_id FROM subject_offices WHERE subject_ref='EST-DEMO-0001'") == [("RO-DEMO-02", "ZO-DEMO-01")]
+    assert q("SELECT office_id FROM cases WHERE claim_id='CLM-OFFICE-TRANSFER'") == [("RO-DEMO-01",)]
+
+
 def hr(step=True, resource=PRO["username"]):
     return hdr(S["hrm-employee"], "ho.hr", {"action": "post-staff", "resource_id": resource} if step else None)
 

@@ -7,7 +7,7 @@ from datetime import date, datetime
 from sqlalchemy import select, update
 
 from app.infra.db import sessions
-from app.infra.tables import directory, establishments, grants, office_staff, registration_requests
+from app.infra.tables import contractors, directory, establishments, grants, office_staff, offices, registration_requests
 
 SEED_FILE = os.environ.get("SEED_FILE", "/srv/seed/synthetic.json")
 PUBLIC_FIELDS = ("pincode", "city", "district", "coverage_date", "establishment_type",
@@ -73,6 +73,39 @@ async def main() -> None:
             for st in seed.get("office_staff", []):
                 if not (await s.execute(select(office_staff.c.subject).where(office_staff.c.subject == st["subject"]))).first():
                     await s.execute(office_staff.insert().values(subject=st["subject"], stakeholder=st["stakeholder"], office_id=st["office_id"]))
+            known_offices = {est["office_id"]: est["office_id"]}
+            known_offices.update({o["office_id"]: o.get("name", o["office_id"]) for o in seed.get("other_offices", [])})
+            for office_id, name in known_offices.items():
+                if not (await s.execute(select(offices.c.office_id).where(offices.c.office_id == office_id))).first():
+                    await s.execute(offices.insert().values(office_id=office_id, name=name))
+            principal = seed.get("principal_employer")
+            if principal and (await s.execute(select(establishments.c.establishment_id).where(
+                    establishments.c.establishment_id == principal["establishment_id"]))).first():
+                if not (await s.execute(select(grants.c.grant_id).where(
+                        grants.c.subject == principal["subject"], grants.c.establishment_id == principal["establishment_id"],
+                        grants.c.kind == "OWNER"))).first():
+                    await s.execute(grants.insert().values(
+                        grant_id=f"GR-OWNER-{principal['establishment_id']}", establishment_id=principal["establishment_id"],
+                        subject=principal["subject"], username=principal["username"], kind="OWNER",
+                        grants=principal.get("grants", []), status="ACTIVE", granted_by="seed"))
+            for link in seed.get("contractor_links", []):
+                principal_est = (await s.execute(select(establishments).where(
+                    establishments.c.establishment_id == link["principal_establishment_id"]))).mappings().first()
+                contractor_est = (await s.execute(select(establishments).where(
+                    establishments.c.establishment_id == link["contractor_establishment_id"]))).mappings().first()
+                if not principal_est or not contractor_est:
+                    continue
+                if not (await s.execute(select(contractors.c.contractor_id).where(
+                        contractors.c.principal_establishment_id == link["principal_establishment_id"],
+                        contractors.c.contractor_establishment_id == link["contractor_establishment_id"],
+                        contractors.c.work_order_ref == link["work_order_ref"]))).first():
+                    await s.execute(contractors.insert().values(
+                        contractor_id=f"CTR-SEED-{len(link['work_order_ref'])}-{link['contractor_establishment_id']}",
+                        principal_establishment_id=link["principal_establishment_id"],
+                        contractor_establishment_id=link["contractor_establishment_id"],
+                        contractor_registration_number=contractor_est["registration_number"], contractor_name=contractor_est["legal_name"],
+                        work_order_ref=link["work_order_ref"], valid_from=date.fromisoformat(link["valid_from"]),
+                        linked_by="seed"))
             for username, subject in seed["keycloak_subjects"].items():
                 if not (await s.execute(select(directory.c.username).where(directory.c.username == username))).first():
                     role = next((u["role"] for u in seed["employer_users"] if u["username"] == username), "other")

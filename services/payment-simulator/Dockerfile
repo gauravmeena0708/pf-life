@@ -11,6 +11,7 @@ COPY services/payment-simulator/pyproject.toml /srv/pyproject.toml
 COPY services/payment-simulator/app /srv/app
 COPY services/payment-simulator/migrations /srv/migrations
 COPY services/payment-simulator/alembic.ini /srv/alembic.ini
+COPY config/demo-rules.yaml /srv/demo-rules.yaml
 RUN pip install /srv
 COPY scripts/seed /srv/seed
 USER app

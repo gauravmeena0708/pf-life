@@ -12,13 +12,14 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.routes import _establishment_of, _load_establishment, _require_member_of, db
+from app.api.routes import PRODUCER, _establishment_of, _load_establishment, _require_member_of, db
 from app.domain.rules import GSTIN_RE, PAN_RE
-from app.infra.tables import (branches, change_requests, contractors, establishments, office_staff, ownership_declarations,
+from app.infra.tables import (branches, change_requests, contractors, establishments, office_staff, offices, ownership_declarations,
                               registration_requests, registration_scrutiny)
 from epfo_auth import Actor, require_actor, require_grant, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
-from epfo_persistence import audit
+from epfo_persistence import add_event, audit
+from epfo_persistence.policy import rules_on, section
 
 router = APIRouter()
 EMPLOYER = require_stakeholder("employer.owner", "employer.operator", "employer.signatory")
@@ -222,7 +223,8 @@ class ContractorInput(BaseModel):
 
 def _contractor_view(c: Any) -> dict[str, Any]:
     return {"contractor_id": c["contractor_id"], "registration_number": c["contractor_registration_number"], "name": c["contractor_name"],
-            "registered_with_epfo": c["contractor_establishment_id"] is not None, "work_order_ref": c["work_order_ref"],
+            "registered_with_epfo": c["contractor_establishment_id"] is not None, "establishment_id": c["contractor_establishment_id"],
+            "work_order_ref": c["work_order_ref"],
             "valid_from": _iso(c["valid_from"]), "valid_to": _iso(c["valid_to"])}
 
 
@@ -281,9 +283,10 @@ def _request_view(r: Any) -> dict[str, Any]:
             "decided_at": _iso(r["decided_at"])}
 
 
-async def _open_request(session: AsyncSession, actor: Actor, kind: str, changes: dict[str, Any], reason: str) -> dict[str, Any]:
+async def _open_request(session: AsyncSession, actor: Actor, kind: str, changes: dict[str, Any], reason: str,
+                        step_up_action: str = "request-establishment-change") -> dict[str, Any]:
     est = await _mine(session, actor)
-    require_step_up(actor, "request-establishment-change", est["establishment_id"])
+    require_step_up(actor, step_up_action, est["establishment_id"])
     if (await session.execute(select(change_requests.c.request_id).where(change_requests.c.establishment_id == est["establishment_id"],
                                                                           change_requests.c.kind == kind, change_requests.c.state == "PENDING"))).first():
         raise Problem(409, "/problems/request-open", "A change of this kind is already with the office")
@@ -309,6 +312,78 @@ async def request_profile_change(body: ProfileChange, actor: Actor = Depends(OWN
         if not changes:
             raise Problem(422, "/problems/no-change", "Nothing would change")
         view = await _open_request(session, actor, "PROFILE", changes, body.reason)
+    return envelope(view)
+
+
+class VoluntaryCoverage(BaseModel):
+    employees: int = Field(ge=1)
+    employees_consenting: int = Field(ge=0)
+    effective_from: date
+    reason: str = Field(min_length=10, max_length=500)
+
+
+@router.post("/api/v1/employers/voluntary-coverage-requests", status_code=201)
+async def request_voluntary_coverage(body: VoluntaryCoverage, actor: Actor = Depends(require_stakeholder("employer.signatory")),
+                                     session: AsyncSession = Depends(db)) -> dict:
+    async with session.begin():
+        est = await _mine(session, actor)
+        rule = section(await rules_on(session, body.effective_from), "voluntary_coverage")
+        if body.employees >= rule["threshold_employees"]:
+            raise Problem(409, "/problems/covered-compulsorily", "Establishment meets the compulsory coverage threshold")
+        if body.employees_consenting > body.employees:
+            raise Problem(422, "/problems/validation", "Consent count cannot exceed employees")
+        if body.employees_consenting * 10000 < body.employees * rule["consent_share_bp"]:
+            raise Problem(422, "/problems/validation", "A majority of employees must consent to voluntary coverage")
+        if (est["coverage"] or {}).get("coverage_type") == "VOLUNTARY":
+            raise Problem(409, "/problems/already-covered", "Establishment already has voluntary coverage")
+        changes = {"coverage_type": {"from": (est["coverage"] or {}).get("coverage_type"), "to": "VOLUNTARY"},
+                   "effective_from": {"from": _iso(est["coverage_date"]), "to": body.effective_from.isoformat()},
+                   "employees": {"from": None, "to": body.employees},
+                   "employees_consenting": {"from": None, "to": body.employees_consenting}}
+        view = await _open_request(session, actor, "VOLUNTARY_COVERAGE", changes, body.reason)
+    return envelope(view)
+
+
+class ClosureRequest(BaseModel):
+    closed_on: date
+    reason: str = Field(pattern="^(CLOSED|BUSINESS_DISCONTINUED|MERGED)$")
+    last_wage_month: str = Field(pattern=r"^[0-9]{4}-(0[1-9]|1[0-2])$")
+    note: str = Field(min_length=3, max_length=500)
+
+
+@router.post("/api/v1/employers/me/closure-requests", status_code=201)
+async def request_closure(body: ClosureRequest, actor: Actor = Depends(require_stakeholder("employer.signatory")),
+                          session: AsyncSession = Depends(db)) -> dict:
+    if body.last_wage_month > body.closed_on.strftime("%Y-%m"):
+        raise Problem(422, "/problems/validation", "Last wage month cannot follow closure")
+    async with session.begin():
+        est = await _mine(session, actor)
+        if est["status"] == "CLOSED":
+            raise Problem(409, "/problems/already-closed", "Establishment is already closed")
+        changes = {"status": {"from": est["status"], "to": "CLOSED"}, "closed_on": {"from": _iso(est["closed_on"]), "to": body.closed_on.isoformat()},
+                   "last_wage_month": {"from": None, "to": body.last_wage_month}, "closure_reason": {"from": None, "to": body.reason}}
+        view = await _open_request(session, actor, "CLOSURE", changes, body.note, "request-closure")
+    return envelope(view)
+
+
+class OfficeTransferRequest(BaseModel):
+    to_office_id: str = Field(min_length=3, max_length=40)
+    reason: str = Field(min_length=5, max_length=500)
+    effective_from: date
+
+
+@router.post("/api/v1/employers/me/office-transfer-requests", status_code=201)
+async def request_office_transfer(body: OfficeTransferRequest, actor: Actor = Depends(require_stakeholder("employer.signatory")),
+                                  session: AsyncSession = Depends(db)) -> dict:
+    async with session.begin():
+        est = await _mine(session, actor)
+        if body.to_office_id == est["office_id"]:
+            raise Problem(409, "/problems/same-office", "Establishment is already assigned to this office")
+        if not (await session.execute(select(offices.c.office_id).where(offices.c.office_id == body.to_office_id))).first():
+            raise Problem(422, "/problems/validation", "Unknown destination office")
+        changes = {"office_id": {"from": est["office_id"], "to": body.to_office_id},
+                   "effective_from": {"from": None, "to": body.effective_from.isoformat()}}
+        view = await _open_request(session, actor, "OFFICE_TRANSFER", changes, body.reason, "request-office-transfer")
     return envelope(view)
 
 
@@ -372,12 +447,32 @@ async def decide_change(estId: str, requestId: str, body: Decision, actor: Actor
         state = "APPROVED" if body.decision == "APPROVE" else "REJECTED"
         if state == "APPROVED":
             changes = {k: v["to"] for k, v in r["changes"].items()}
-            values: dict[str, Any] = {k: v for k, v in changes.items() if k in CONFIG_FIELDS}
-            contact = {k: v for k, v in changes.items() if k not in CONFIG_FIELDS}
-            if contact:
-                values["address"] = {**(est["address"] or {}), **contact}
-                if "pincode" in contact:
-                    values.update(pincode=contact["pincode"], city=contact.get("city", est["city"]), district=contact.get("district", est["district"]))
+            values: dict[str, Any] = {}
+            if r["kind"] == "VOLUNTARY_COVERAGE":
+                values = {"coverage": {**(est["coverage"] or {}), "decision": "COVER", "coverage_type": "VOLUNTARY",
+                                       "coverage_date": changes["effective_from"], "reason": r["reason"]},
+                          "coverage_date": date.fromisoformat(changes["effective_from"])}
+            elif r["kind"] == "CLOSURE":
+                values = {"status": "CLOSED", "closed_on": date.fromisoformat(changes["closed_on"])}
+                await add_event(session, producer=PRODUCER, event_type="EstablishmentClosed.v1", aggregate_type="establishment",
+                                aggregate_id=estId, payload={"establishment_id": estId, "closed_on": changes["closed_on"],
+                                                             "last_wage_month": changes["last_wage_month"], "reason": changes["closure_reason"]})
+            elif r["kind"] == "OFFICE_TRANSFER":
+                if not (await session.execute(select(offices.c.office_id).where(offices.c.office_id == changes["office_id"]))).first():
+                    raise Problem(422, "/problems/validation", "Destination office no longer exists")
+                values = {"office_id": changes["office_id"]}
+                await add_event(session, producer=PRODUCER, event_type="EstablishmentOfficeTransferred.v1", aggregate_type="establishment",
+                                aggregate_id=estId, payload={"establishment_id": estId, "from_office_id": est["office_id"],
+                                                             "to_office_id": changes["office_id"], "effective_from": changes["effective_from"]})
+            elif r["kind"] in ("PROFILE", "CONFIGURATION"):
+                values = {k: v for k, v in changes.items() if k in CONFIG_FIELDS}
+                contact = {k: v for k, v in changes.items() if k not in CONFIG_FIELDS}
+                if contact:
+                    values["address"] = {**(est["address"] or {}), **contact}
+                    if "pincode" in contact:
+                        values.update(pincode=contact["pincode"], city=contact.get("city", est["city"]), district=contact.get("district", est["district"]))
+            else:
+                raise Problem(422, "/problems/validation", "Unknown change request kind")
             await session.execute(update(establishments).where(establishments.c.establishment_id == estId).values(
                 **values, version=establishments.c.version + 1))
         await session.execute(update(change_requests).where(change_requests.c.request_id == requestId).values(

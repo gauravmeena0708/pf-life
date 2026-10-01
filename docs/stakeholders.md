@@ -42,7 +42,7 @@ All sources are official EPFO documents downloaded in September 2026 (list at th
 | `employer.signatory` | Authorised signatory (registered DSC / e-sign) | Login | Core | ✔ | MAP, JD |
 | `employer.operator` | Employer sub-user / payroll preparer | Login (User / Admin menus) | Core | ✔ | WEB |
 | `principal_employer` | Principal employer monitoring contractors | Login | Core | ➕ | CMP, SOP-B |
-| `contractor` | Contractor establishment (tags its workers to a principal employer) | Login | Core | ➕ | CMP |
+| `contractor` | Contractor establishment (tags its workers to a principal employer) — since P2.12b its own employer users (`employer.operator`) do this | Login | Core | ➕ | CMP |
 | `exempted.trust` | Exempted establishment — PF trust and its Board of Trustees | Login (employer ECR menu) | Core | ➕ | EXM (219 mentions of trustees) |
 | `trust_auditor` | Chartered accountant auditing an exempted trust | Via trust | New | — | EXM |
 | `payroll_provider` | Payroll software / HRMS vendor acting for employers | None (portal file uploads) | New (B2B API) | ✔ | — (`init.md` interface 13) |

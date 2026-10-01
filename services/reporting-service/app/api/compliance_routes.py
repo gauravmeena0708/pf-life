@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import _utc, db
-from app.infra.tables import contribution_facts
+from app.infra.tables import contribution_facts, principal_employer_tags
 from epfo_auth import Actor, require_stakeholder
 from epfo_observability import Problem, envelope
 from epfo_persistence.policy import baseline, due_date
@@ -15,6 +15,7 @@ from epfo_persistence.policy import baseline, due_date
 router = APIRouter()
 OFFICE = require_stakeholder("fo.da_compliance", "fo.apfc", "fo.oic")
 EMPLOYER = require_stakeholder("employer.owner", "employer.operator", "employer.signatory")
+PRINCIPAL = require_stakeholder("principal_employer", "employer.owner")
 STATUSES = ("FILED_AND_PAID_ON_TIME", "PAID_LATE", "FILED_NOT_PAID", "NOT_FILED")
 
 
@@ -96,6 +97,29 @@ async def compliance_summary(actor: Actor = Depends(EMPLOYER), session: AsyncSes
     return envelope({"establishment_id": actor.establishment_id, "as_of": as_of.isoformat(),
                      "months": list(reversed(months)),
                      "counts": {status: sum(month["status"] == status for month in months) for status in STATUSES}})
+
+
+@router.get("/api/v1/employers/me/contractors/{contractorId}/compliance")
+async def contractor_compliance(contractorId: str, actor: Actor = Depends(PRINCIPAL),
+                                session: AsyncSession = Depends(db)) -> dict:
+    if not actor.establishment_id:
+        raise Problem(403, "/problems/no-establishment", "No establishment",
+                      "The actor has no establishment assigned.")
+    rows = (await session.execute(select(principal_employer_tags).where(
+        principal_employer_tags.c.principal_establishment_id == actor.establishment_id,
+        principal_employer_tags.c.contractor_establishment_id == contractorId
+    ).order_by(principal_employer_tags.c.wage_month.desc(), principal_employer_tags.c.filing_id,
+               principal_employer_tags.c.work_order_ref))).mappings().all()
+    if not rows:
+        raise Problem(404, "/problems/not-found", "No contractor compliance data is available")
+    months = [{name: row[name] for name in ("wage_month", "members", "epf_wages_paise",
+                                            "contribution_paise", "paid", "filing_id", "work_order_ref")}
+              for row in rows]
+    return envelope({"contractor_establishment_id": contractorId,
+                     "principal_establishment_id": actor.establishment_id,
+                     "months": months,
+                     "unpaid_months": sorted({row["wage_month"] for row in rows if not row["paid"]}, reverse=True),
+                     "note": "Illustrative view of tagged workers and recorded challan payments only."})
 
 
 @router.get("/api/v1/public/establishments/{estId}/e-report-card")

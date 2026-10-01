@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /do/dashboards', 'GET /monitoring/claims', 'GET /monitoring/contributions', 'GET /monitoring/data-freshness', 'GET /monitoring/grievances', 'GET /public/schemes', 'GET /public/statistics', 'GET /zo/dashboards', 'GET /employers/me/compliance-summary', 'GET /employers/me/dashboard', 'GET /office/compliance/defaulters', 'GET /public/establishments/{estId}/e-report-card']
+OPERATIONS = ['GET /do/dashboards', 'GET /monitoring/claims', 'GET /monitoring/contributions', 'GET /monitoring/data-freshness', 'GET /monitoring/grievances', 'GET /public/schemes', 'GET /public/statistics', 'GET /zo/dashboards', 'GET /employers/me/compliance-summary', 'GET /employers/me/dashboard', 'GET /office/compliance/defaulters', 'GET /employers/me/contractors/{contractorId}/compliance', 'GET /public/establishments/{estId}/e-report-card']
 
 @router.api_route("/api/v1/do/dashboards", methods=["GET"], include_in_schema=False)
 async def get_do_dashboards(actor: Actor = Depends(require_actor)) -> None:
@@ -65,6 +65,11 @@ async def get_employers_me_dashboard(actor: Actor = Depends(require_actor)) -> N
 @router.api_route("/api/v1/office/compliance/defaulters", methods=["GET"], include_in_schema=False)
 async def get_office_compliance_defaulters(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Non-filing / short-payment detection")
+
+
+@router.api_route("/api/v1/employers/me/contractors/{contractorId}/compliance", methods=["GET"], include_in_schema=False)
+async def get_employers_me_contractors_contractorId_compliance(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Principal employer: contractor remittance compliance")
 
 
 @router.api_route("/api/v1/public/establishments/{estId}/e-report-card", methods=["GET"], include_in_schema=False)

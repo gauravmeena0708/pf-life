@@ -30,6 +30,7 @@ export const PERSONAS: Persona[] = [
   { username: "emp-owner", label: "Employer owner", role: "employer.owner", group: "Employers", description: "Verify an establishment, manage operators and signatories, and register changes." },
   { username: "emp-preparer", label: "Payroll preparer", role: "employer.operator", group: "Employers", description: "Prepare and validate monthly, arrear and supplementary returns." },
   { username: "emp-signatory", label: "Authorised signatory", role: "employer.signatory", group: "Employers", description: "Approve and submit returns, pay challans and attest member requests." },
+  { username: "principal-owner", label: "Principal employer", role: "employer.owner", group: "Employers", description: "Demo Engineering Works: watch the demo establishment's remittances as its contractor." },
   { username: "do-caseworker", label: "District caseworker (DA)", role: "fo.da_accounts", group: "Field office", description: "Scrutinise claims, generate dockets and recommend decisions." },
   { username: "ro-ss", label: "Section supervisor", role: "fo.ss", group: "Field office", description: "Check claim recommendations and approve demand adjustments." },
   { username: "ro-ao", label: "Accounts officer", role: "fo.ao", group: "Field office", description: "Approve claims and pension Input Data Sheets; send back for corrections." },

@@ -7,7 +7,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | # | Interface | Coverage | Stakeholders | W | M | P | ? |
 |---|---|---|---|---|---|---|---|
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 15 | 2 | 0 | 0 |
-| 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 78 | 5 | 13 | 0 |
+| 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 83 | 5 | 8 | 0 |
 | 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 82 | 5 | 0 | 0 |
 | 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 87 | 0 | 25 | 4 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 12 | 1 | 1 | 0 |
@@ -68,6 +68,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /employers/me/compliance-summary` | W | reporting | employer.operator, employer.owner |
 | `GET /employers/me/configuration` | W | employer | employer.operator, employer.owner |
 | `GET /employers/me/contractors` | W | employer | employer.owner, principal_employer |
+| `GET /employers/me/contractors/{contractorId}/compliance` | W | reporting | employer.owner, principal_employer |
 | `GET /employers/me/dashboard` | W | reporting | employer.operator |
 | `GET /employers/me/demands` | W | contribution | employer.owner, employer.signatory |
 | `GET /employers/me/ecr-filings` | W | contribution | employer.operator, employer.signatory |
@@ -99,6 +100,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /employers/me/approvals/{approvalId}/decisions` | W | member | employer.signatory |
 | `POST /employers/me/branches` | W | employer | employer.owner, employer.signatory |
 | `POST /employers/me/claim-attestations/{claimId}/decisions` | W | claim | employer.signatory |
+| `POST /employers/me/closure-requests` | W | employer | employer.signatory |
 | `POST /employers/me/configuration/change-requests` | W | employer | employer.owner, employer.signatory |
 | `POST /employers/me/contractors` | W | employer | employer.owner, principal_employer |
 | `POST /employers/me/demands/{demandId}/payment-intents` | W | payment-simulator | employer.signatory |
@@ -106,6 +108,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /employers/me/ecr-filings` | W | contribution | employer.operator |
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W | contribution | employer.signatory |
 | `POST /employers/me/ecr-filings/{filingId}/cancellations` | W | contribution | employer.signatory |
+| `POST /employers/me/ecr-filings/{filingId}/principal-employer-tags` | W | contribution | employer.operator |
 | `POST /employers/me/ecr-filings/{filingId}/submissions` | W | contribution | employer.signatory |
 | `POST /employers/me/ecr-filings/{filingId}/validations` | W | contribution | employer.operator |
 | `POST /employers/me/higher-pension-options/{optionId}/dues-previews` | W | pension | employer.signatory |
@@ -121,6 +124,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /employers/me/members/{uan}/exit-corrections` | W | member | employer.operator |
 | `POST /employers/me/members/{uan}/exits` | W | member | employer.operator |
 | `POST /employers/me/members/{uan}/location-mappings` | W | member | employer.operator |
+| `POST /employers/me/office-transfer-requests` | W | employer | employer.signatory |
 | `POST /employers/me/operators/invitations` | W | employer | employer.owner |
 | `POST /employers/me/operators/{operatorId}/revocations` | W | employer | employer.owner |
 | `POST /employers/me/signatories/authorisations` | W | employer | employer.owner |
@@ -130,6 +134,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /employers/me/transfer-requests/{transferId}/decisions` | W | claim | employer.signatory |
 | `POST /employers/me/vishwas-applications` | W | compliance | employer.signatory |
 | `POST /employers/registration-requests` | W | employer | employer.owner |
+| `POST /employers/voluntary-coverage-requests` | W | employer | employer.signatory |
 | `POST /international/coc-applications` | W | international | employer.signatory |
 | `POST /international/coc-applications/{id}/extensions` | W | international | employer.signatory |
 | `POST /international/coc-applications/{id}/signed-uploads` | W | international | employer.signatory |
@@ -139,15 +144,10 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /employers/me/signatories/{signatoryId}/dsc-registrations` | M | employer | employer.owner |
 | `POST /employers/me/signatories/{signatoryId}/esign-registrations` | M | employer | employer.owner |
 | `POST /employers/registration-requests/{reqId}/verification-evidence` | M | employer | employer.owner |
-| `GET /employers/me/contractors/{contractorId}/compliance` | P | reporting | principal_employer |
 | `GET /exempted/me/annexure-k-requests` | P | claim | exempted.trust |
 | `GET /exempted/me/profile` | P | employer | exempted.trust |
 | `GET /partners/liquidators/claims/{claimId}` | P | compliance | liquidator |
-| `POST /employers/me/closure-requests` | P | employer | employer.signatory |
-| `POST /employers/me/ecr-filings/{filingId}/principal-employer-tags` | P | contribution | contractor |
-| `POST /employers/me/office-transfer-requests` | P | employer | employer.signatory |
 | `POST /employers/me/proceedings/{caseId}/submissions` | P | compliance | employer.signatory |
-| `POST /employers/voluntary-coverage-requests` | P | employer | employer.signatory |
 | `POST /exempted/me/annexure-k-submissions` | P | claim | exempted.trust |
 | `POST /exempted/me/audits` | P | employer | trust_auditor |
 | `POST /exempted/me/returns` | P | contribution | exempted.trust |

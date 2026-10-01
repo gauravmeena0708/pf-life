@@ -4,12 +4,19 @@ from typing import Any
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.infra.tables import demands
+from app.infra.tables import demands, establishments
 
-BINDINGS = ["contribution-service.DemandStateChanged.v1", "workflow-service.StaffPostingChanged.v1"]
+BINDINGS = ["contribution-service.DemandStateChanged.v1", "workflow-service.StaffPostingChanged.v1",
+            "employer-service.EstablishmentOfficeTransferred.v1"]
 
 
 async def dispatch(session: AsyncSession, event: dict[str, Any]) -> None:
+    if event["event_type"] == "EstablishmentOfficeTransferred.v1":
+        p = event["payload"]
+        await session.execute(update(establishments).where(establishments.c.establishment_id == p["establishment_id"],
+                                                           establishments.c.office_id == p["from_office_id"])
+                              .values(office_id=p["to_office_id"]))
+        return
     if event["event_type"] == "StaffPostingChanged.v1":           # HR re-posted an officer (P2.8e)
         from app.infra.tables import office_staff
         from epfo_persistence.postings import apply_posting

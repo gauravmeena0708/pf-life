@@ -26,7 +26,11 @@ interface Filing {
   rule_version: string;
   trrn: string | null;
   validation_report?: ValidationReport | string | null;
+  principal_tags?: PrincipalTag[];
+  members?: { uan: string; name: string; epf_wages?: string | number | null }[];
 }
+interface PrincipalTag { uan: string; principal_establishment_id: string; work_order_ref: string;
+  epf_wages_paise: number; contribution_paise: number }
 
 interface ValidationIssue {
   row: number;
@@ -80,7 +84,6 @@ function reportOf(value: Filing["validation_report"]): ValidationReport | null {
     return null;
   }
 }
-
 export function EcrPage() {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -133,6 +136,7 @@ export function EcrPage() {
   const filing = detail.data?.data;
   const report = reportOf(filing?.validation_report);
   const filingChallan = challans.data?.data.find((item) => item.trrn === filing?.trrn);
+  const tagRows = filing?.members ?? [];
 
   function keyFor(action: string) {
     return (retryKeys.current[action] ??= newIdempotencyKey());
@@ -238,6 +242,17 @@ export function EcrPage() {
       `/api/v1/employers/me/ecr-filings/${encodeURIComponent(filing.filing_id)}/cancellations`,
       { reason }, { stepUpToken: token }), "TRRN cancelled. A new return can be prepared for this wage month.");
   }
+  function tagWorkers(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault(); if (!filing) return;
+    const form = e.currentTarget; const f = new FormData(form);
+    const uans = f.getAll("uans").map(String);
+    if (!uans.length) { setError(new Error("Select at least one member row.")); return; }
+    void run(`tag:${filing.filing_id}`, () => command("POST",
+      `/api/v1/employers/me/ecr-filings/${encodeURIComponent(filing.filing_id)}/principal-employer-tags`,
+      { principal_establishment_id: String(f.get("principal_establishment_id") ?? "").trim(),
+        work_order_ref: String(f.get("work_order_ref") ?? "").trim(), uans }),
+    "Selected workers tagged to the principal employer.");
+  }
 
   if (establishment.isLoading || establishment.error) return <div className="stack">
     <PageHeader eyebrow="Monthly returns · Journey A" title="ECR workbench"
@@ -300,6 +315,24 @@ export function EcrPage() {
               <div className="detail-head"><strong>{filing.wage_month}</strong><span className="state-pill">{statusLabel(filing.state, t)}</span></div>
               <p className="muted small">Version {filing.version} · rule set {filing.rule_version} · {filing.filing_id}</p>
               {filing.trrn ? <p>TRRN <code>{filing.trrn}</code></p> : null}
+              {(session.data?.stakeholder === "employer.operator" || signatory) && ["SUBMITTED", "PAYMENT_PENDING", "PAYMENT_FAILED", "PAYMENT_CONFIRMED", "POSTED"].includes(filing.state) ?
+                <div className="stack"><h3>Tag workers to a principal employer</h3>
+                  <p className="muted small">Select the workers on this return who worked for the principal employer.</p>
+                  {!canPrepare ? <p className="muted small">This account needs the ecr.prepare permission to submit tags.</p> : null}
+                  <form className="stack" aria-label="Tag workers to a principal employer" onSubmit={tagWorkers}>
+                    <div className="form-row"><label>Principal establishment ID<input name="principal_establishment_id" defaultValue="EST-DEMO-0002" required /></label>
+                      <label>Work order reference<input name="work_order_ref" required /></label></div>
+                    <fieldset><legend>Members in this filing</legend>{tagRows.length ? tagRows.map((row) =>
+                      <label key={row.uan}><input type="checkbox" name="uans" value={row.uan} /> {row.uan} · {row.name}</label>)
+                      : <p className="muted small">This return has no member rows.</p>}</fieldset>
+                    <div className="actions"><button type="submit" className="primary" disabled={busy || !canPrepare || !tagRows.length}>Tag selected workers</button></div>
+                  </form>
+                  {filing.principal_tags?.length ? <div className="table-scroll"><table><thead><tr><th scope="col">Tagged UAN</th>
+                    <th scope="col">Principal establishment</th><th scope="col">Work order</th><th scope="col">EPF wages</th>
+                    <th scope="col">Contribution</th></tr></thead><tbody>{filing.principal_tags.map((tag) => <tr key={tag.uan}>
+                    <th scope="row">{tag.uan}</th><td>{tag.principal_establishment_id}</td><td>{tag.work_order_ref}</td>
+                    <td>{rupees(tag.epf_wages_paise)}</td><td>{rupees(tag.contribution_paise)}</td></tr>)}</tbody></table></div> : null}
+                </div> : null}
               {signatory && filing.trrn && ["SUBMITTED", "PAYMENT_FAILED"].includes(filing.state) ?
                 filingChallan ? <form className="stack" aria-label={`Cancel TRRN ${filing.trrn}`} onSubmit={(e) => void cancelTrRN(e)}>
                   <label>Cancellation reason <input name="reason" required minLength={10} maxLength={500} /></label>

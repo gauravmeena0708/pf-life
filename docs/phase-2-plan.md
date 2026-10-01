@@ -32,7 +32,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.10a** | Vigilance cases: a CAIU-confirmed risk signal (or a complaint) referred to vigilance; the CVO assigns a preliminary inquiry to a zone (90 days); zonal vigilance reports findings; the CVO decides; restricted, access-logged, the complainant masked | **Done** (30 Sep 2026) |
 | **P2.10b** | Preventive vigilance: sensitive posts and 3-year rotation alerts; vigilance clearance for HR postings, promotions and retirement against open cases and penalties | **Done** (1 Oct 2026) |
 | **P2.12a** | Member and tax: Form 16A, the office's TDS computation; UAN allotment and activation (mock Aadhaar face / OTP); inoperative accounts — the public helpdesk search, verification through co-workers, reactivation in the AO / APFC bands | **Done** (1 Oct 2026) |
-| P2.12b | Employer lifecycle: voluntary coverage, closure, transfer to another office; contractors tagging ECR members to a principal employer and the principal's view of contractor compliance; MCA and Shram Suvidha registration feeds (mock) | Planned |
+| **P2.12b** | Employer lifecycle: voluntary coverage, closure, transfer to another office; contractors tagging ECR members to a principal employer and the principal's view of contractor compliance; MCA and Shram Suvidha registration feeds (mock) | **Done** (1 Oct 2026) |
 | P2.12c | Pension office: deciding a validated higher-pension option and the PF → pension fund transfer after the dues; Special 10D; bank-wise disbursement lists; the actuarial extract | Planned |
 | P2.12d | Oversight: internal audit reports, paras, replies and decisions; DPDP data-principal requests; RTI replies; the CPGRAMS feed (mock) | Planned |
 | P2.12e | Head office reporting: balance sheet, investments, board packs (aggregates), fund-manager position feed (mock) | Planned |
@@ -675,3 +675,25 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 - **Fixes on the way**: member-service had never read the rule set — its image now carries the baseline rules and
   it keeps published rule sets; two gateway tests used these endpoints as examples of planned ones and now use a
   synthetic planned route.
+
+## P2.12b — how it is built
+
+- **Three more change requests** (employer-service, on the P2.6a change-request flow; signatory with step-up, decided
+  by the office's APFC or OIC with step-up):
+  - *voluntary coverage* under section 1(4) — rule-set section `voluntary_coverage` (fewer than 20 employees, consent of
+    a majority; illustrative); approval sets the coverage type to VOLUNTARY;
+  - *closure* (closed on, reason, last wage month) — approval closes the establishment and publishes
+    `EstablishmentClosed.v1`; contribution-service then refuses returns for later wage months;
+  - *office transfer* — approval moves the establishment and publishes `EstablishmentOfficeTransferred.v1`, which
+    contribution-, claim-, member-, workflow- and compliance-service follow so queues and jurisdiction move with it.
+- **Contractors**: a contractor establishment's own users tag the workers of a submitted return to a principal
+  employer and work order (`principal_employer_tags`; the filing detail now lists its member rows for this);
+  `PrincipalEmployerTagged.v1` feeds reporting-service, where the principal's owner sees the contractor's months —
+  members, wages, contribution, paid or not. Seed: Demo Engineering Works (EST-DEMO-0002) is the principal, the demo
+  establishment its contractor (work order WO/DEW/2026/014); persona `principal-owner`.
+- **Registration feeds** (mock, signed like the other callbacks): MCA SPICe+ / AGILE-PRO and Shram Suvidha create an
+  establishment and a registration request that the office's OLRE scrutiny picks up; idempotent on CIN / LIN; a PAN
+  already registered is refused. Covered by unit tests (the gateway needs a machine token for them).
+- **Fixes on the way**: employer-service (and three other services that did not yet read rules) now carry the
+  baseline rule set in their images; a Postgres sum returned as a Decimal broke the tag event (the SQLite unit tests
+  could not see it); voluntary coverage is 🔐 like every other change request.

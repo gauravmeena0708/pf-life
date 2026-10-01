@@ -10,9 +10,9 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 |---|---|
 | Stakeholders | 114 |
 | Activities | 241 |
-| Stakeholders with at least one API | 96 |
+| Stakeholders with at least one API | 95 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
-| Stakeholders with no activity yet | 1 |
+| Stakeholders with no activity yet | 2 |
 | **NEW endpoints to add to the catalogue** | **0** |
 | Catalogue endpoints no stakeholder calls | 0 |
 
@@ -223,6 +223,7 @@ Activities: **F01.register** Register establishment online and submit verificati
 | `GET /employers/me/compliance-summary` | W |
 | `GET /employers/me/configuration` | W |
 | `GET /employers/me/contractors` | W |
+| `GET /employers/me/contractors/{contractorId}/compliance` | W |
 | `GET /employers/me/demands` | W |
 | `GET /employers/me/exemption` | W |
 | `GET /employers/me/kyc` | W |
@@ -284,6 +285,7 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `POST /employers/me/approvals/{approvalId}/decisions` | W |
 | `POST /employers/me/branches` | W |
 | `POST /employers/me/claim-attestations/{claimId}/decisions` | W |
+| `POST /employers/me/closure-requests` | W |
 | `POST /employers/me/configuration/change-requests` | W |
 | `POST /employers/me/demands/{demandId}/payment-intents` | W |
 | `POST /employers/me/direct-challans` | W |
@@ -295,24 +297,23 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `POST /employers/me/joint-declarations` | W |
 | `POST /employers/me/joint-declarations/{jdId}/decisions` | W |
 | `POST /employers/me/kyc-approvals/{requestId}/decisions` | W |
+| `POST /employers/me/office-transfer-requests` | W |
 | `POST /employers/me/transfer-requests/{transferId}/decisions` | W |
 | `POST /employers/me/vishwas-applications` | W |
+| `POST /employers/voluntary-coverage-requests` | W |
 | `POST /international/coc-applications` | W |
 | `POST /international/coc-applications/{id}/extensions` | W |
 | `POST /international/coc-applications/{id}/signed-uploads` | W |
 | `PUT /employers/me/ownership-declaration` | W |
 | `POST /employers/me/challans/{trrn}/payment-intents` | M |
 | `POST /employers/me/kyc/{kycType}` | M |
-| `POST /employers/me/closure-requests` | P |
-| `POST /employers/me/office-transfer-requests` | P |
 | `POST /employers/me/proceedings/{caseId}/submissions` | P |
-| `POST /employers/voluntary-coverage-requests` | P |
 
 Integration adapters: `collecting_bank`, `npci`
 
 #### `employer.operator` — Employer sub-user / payroll preparer
 
-Activities: **F01.profile** View establishment profile, configuration, KYC and home-page alerts; **F02.register** Register a new joinee (create or link UAN), bulk registration, Form 11 declaration; **F02.kyc_bulk** Bulk KYC upload; KYC and PAN verification; **F02.missing_details** Fill missing member details; member location mapping; download active members; **F02.exit** Mark date of exit (single or bulk) and corrections; **F03.ecr_prepare** Prepare regular / arrear / supplementary ECR and validate; **F03.receipt** Download receipt; view return history and compliance summary
+Activities: **F01.profile** View establishment profile, configuration, KYC and home-page alerts; **F01.contractor_tag** As a contractor establishment, tag the ECR members who worked for a principal employer; **F02.register** Register a new joinee (create or link UAN), bulk registration, Form 11 declaration; **F02.kyc_bulk** Bulk KYC upload; KYC and PAN verification; **F02.missing_details** Fill missing member details; member location mapping; download active members; **F02.exit** Mark date of exit (single or bulk) and corrections; **F03.ecr_prepare** Prepare regular / arrear / supplementary ECR and validate; **F03.receipt** Download receipt; view return history and compliance summary
 
 | Endpoint | Status |
 |---|---|
@@ -334,6 +335,7 @@ Activities: **F01.profile** View establishment profile, configuration, KYC and h
 | `GET /employers/me/returns/dashboard` | W |
 | `PATCH /employers/me/members/{uan}/profile` | W |
 | `POST /employers/me/ecr-filings` | W |
+| `POST /employers/me/ecr-filings/{filingId}/principal-employer-tags` | W |
 | `POST /employers/me/ecr-filings/{filingId}/validations` | W |
 | `POST /employers/me/kyc-bulk-uploads` | W |
 | `POST /employers/me/members` | W |
@@ -351,16 +353,12 @@ Activities: **F01.contractors** Link contractors, upload work orders, watch cont
 | Endpoint | Status |
 |---|---|
 | `GET /employers/me/contractors` | W |
+| `GET /employers/me/contractors/{contractorId}/compliance` | W |
 | `POST /employers/me/contractors` | W |
-| `GET /employers/me/contractors/{contractorId}/compliance` | P |
 
-#### `contractor` — Contractor establishment (tags its workers to a principal employer)
+#### `contractor` — Contractor establishment (tags its workers to a principal employer) — since P2.12b its own employer users (`employer.operator`) do this
 
-Activities: **F01.contractor_tag** Tag ECR members to the principal employer
-
-| Endpoint | Status |
-|---|---|
-| `POST /employers/me/ecr-filings/{filingId}/principal-employer-tags` | P |
+*No activity mapped yet.*
 
 #### `exempted.trust` — Exempted establishment — PF trust and its Board of Trustees
 
@@ -1424,6 +1422,7 @@ Either an activity is missing from the map, or the endpoint is not needed.
 ### Stakeholders with no activity
 
 - `intl_worker` — International worker (inbound or outbound, CoC holder) — since P2.9a a member attribute (`members.international`), signs in with the `member` role
+- `contractor` — Contractor establishment (tags its workers to a principal employer) — since P2.12b its own employer users (`employer.operator`) do this
 
 ## Flow diagrams
 
@@ -1450,7 +1449,7 @@ flowchart LR
   F01_change_decide["fo.apfc<br/>Decide establishment change, closure or transfer requests"]
   F01_establishment_owner["employer.owner<br/>Keep the establishment record: KYC, branches (Form 2A), Form"]
   F01_contractors["principal_employer<br/>Link contractors, upload work orders, watch contractor compl"]
-  F01_contractor_tag["contractor<br/>Tag ECR members to the principal employer"]
+  F01_contractor_tag["employer.operator<br/>As a contractor establishment, tag the ECR members who worke"]
   F01_liquidation["liquidator<br/>Receive EPFO dues claim for an employer in liquidation / ins"]
   style F01_liquidation stroke-dasharray: 5 5
   F01_register --> F01_olre_scrutiny

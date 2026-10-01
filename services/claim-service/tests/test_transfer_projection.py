@@ -29,6 +29,18 @@ def test_new_member_id_and_verified_pan_reach_the_projection(ctx):
     assert q("SELECT pan_verified FROM accounts WHERE uan='100000000002'")[0][0] in (True, 1)
 
 
+def test_establishment_office_transfer_moves_accounts_once(ctx):
+    _, q, deliver = ctx
+    payload = {"establishment_id": "EST-DEMO-0001", "from_office_id": "RO-DEMO-01",
+               "to_office_id": "RO-DEMO-02", "effective_from": "2026-10-01"}
+    before = q("SELECT account_link_id FROM accounts WHERE establishment_id='EST-DEMO-0001'")
+    assert before
+    deliver("EstablishmentOfficeTransferred.v1", payload, "employer-service")
+    deliver("EstablishmentOfficeTransferred.v1", payload, "employer-service")
+    assert q("SELECT account_link_id FROM accounts WHERE establishment_id='EST-DEMO-0001' AND office_id='RO-DEMO-02'") == before
+    assert q("SELECT count(*) FROM accounts WHERE establishment_id='EST-DEMO-0001' AND office_id='RO-DEMO-01'") == [(0,)]
+
+
 def test_annexure_k_file_is_listed_and_reconciled_with_the_member_records(ctx):
     from tests.test_claims_api import hdr
     client, q, deliver = ctx

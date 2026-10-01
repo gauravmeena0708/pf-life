@@ -79,6 +79,21 @@ def demand(deliver, demand_id, kind="DAMAGES_14B", amount=1000000, state="OPEN")
                                       "amount_paise": amount, "days_late": 90, "state": state, "working": "w"})
 
 
+def test_establishment_office_transfer_updates_jurisdiction_but_keeps_open_case(ctx):
+    client, q, deliver = ctx
+    body = {"establishment_id": EST, "kind": "NON_PAYMENT", "wage_months": ["2026-07"],
+            "amount_paise": 1000, "note": "Office transfer test"}
+    response = client.post("/api/v1/office/compliance/cases", json=body,
+                           headers=hdr(S["ro-da-compliance"], "fo.da_compliance"))
+    assert response.status_code == 201, response.text
+    payload = {"establishment_id": EST, "from_office_id": "RO-DEMO-01",
+               "to_office_id": "RO-DEMO-02", "effective_from": "2026-10-01"}
+    deliver("EstablishmentOfficeTransferred.v1", payload)
+    deliver("EstablishmentOfficeTransferred.v1", payload)
+    assert q(f"SELECT office_id FROM establishments WHERE establishment_id='{EST}'") == [("RO-DEMO-02",)]
+    assert q("SELECT office_id FROM compliance_cases") == [("RO-DEMO-01",)]
+
+
 def test_cases_opened_searched_and_published(ctx):
     client, q, _ = ctx
     da = hdr(S["ro-da-compliance"], "fo.da_compliance")

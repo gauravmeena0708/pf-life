@@ -98,6 +98,18 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 12b: voluntary coverage, closure, office transfer, contractors, registration feeds (1 October 2026)
+
+Unit: employer-service 24 (new `test_lifecycle_feeds.py`), contribution-service 70 (new
+`test_principal_tags_and_employer_events.py`), reporting-service 65, claim 61, member 56, workflow 48, compliance 6 (each
+with an office-transfer consumer test), gateway 23, platform 21, common-persistence 25; web 178 (new
+`P212b.test.tsx`); end to end 79 (new `test_small_employer_lifecycle.py`, run twice); must-deny 18; UI smoke 2. Found on
+the way, all fixed: employer-service's image had no rules file (a 500 on voluntary coverage — the rules file is now
+in every service image); a Postgres SUM came back as a Decimal and broke the tag event; voluntary coverage asked for
+a step-up the catalogue did not mark, so it is now 🔐; a codex test expected "no step-up" while sending one for
+another action; the tagging form asked users to paste the return's file because the filing detail had no rows — it
+now lists them.
+
 ## Update — Phase 2, slice 12a: Form 16A, TDS statement, UAN allotment and activation, inoperative accounts (1 October 2026)
 
 Unit: claim-service 60 (new `test_tds_documents.py`), member-service 55 (new `test_inoperative_identity.py`),

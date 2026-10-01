@@ -14,7 +14,10 @@ async def seed() -> None:
     establishment = data["establishment"]
     async with sessions()() as session, session.begin():
         # status is owned by EmployerVerified.v1 after the first load; a re-seed must not undo a verification
-        await session.execute(text("INSERT INTO establishments (id,legal_name,status) VALUES (:id,:name,:status) ON CONFLICT (id) DO UPDATE SET legal_name=excluded.legal_name"), {"id": establishment["establishment_id"], "name": establishment["legal_name"], "status": establishment["status"]})
+        await session.execute(text("INSERT INTO establishments (id,legal_name,status,office_id) VALUES (:id,:name,:status,:office) "
+                                   "ON CONFLICT (id) DO UPDATE SET legal_name=excluded.legal_name"),
+                              {"id": establishment["establishment_id"], "name": establishment["legal_name"],
+                               "status": establishment["status"], "office": establishment.get("office_id")})
         for e in data.get("public_establishments", []):   # earlier employers of members (other member IDs)
             await session.execute(text("INSERT INTO establishments (id,legal_name,status,exemption_status) VALUES (:id,:name,'REGISTERED',:ex) "
                                        "ON CONFLICT (id) DO UPDATE SET exemption_status=excluded.exemption_status"),

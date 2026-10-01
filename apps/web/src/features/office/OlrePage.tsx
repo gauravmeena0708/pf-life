@@ -1,11 +1,13 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 
 import { api, command, getSession, rupees, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
+import { statusLabel } from "../statusLabel";
 
 const registrationsPath = "/api/v1/office/establishment-registrations";
 const changesPath = "/api/v1/office/establishment-change-requests?state=PENDING";
@@ -31,6 +33,7 @@ function Facts({ data }: { data: Record<string, unknown> }) {
 }
 
 export function OlrePage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
@@ -41,9 +44,10 @@ export function OlrePage() {
   const role = session.data?.stakeholder ?? "";
   const canView = role === "fo.da_compliance" || role === "fo.apfc";
   const apfc = role === "fo.apfc";
+  const canDecideChange = apfc || role === "fo.oic";
   const registrations = useQuery({ queryKey: ["olre-registrations"], enabled: canView, retry: false,
     queryFn: () => api<Envelope<Registration[]>>(registrationsPath) });
-  const changes = useQuery({ queryKey: ["olre-change-requests"], enabled: apfc, retry: false,
+  const changes = useQuery({ queryKey: ["olre-change-requests"], enabled: canDecideChange, retry: false,
     queryFn: () => api<Envelope<ChangeRequest[]>>(changesPath) });
   const signatures = useQuery({ queryKey: ["olre-signature-registrations"], enabled: apfc, retry: false,
     queryFn: () => api<Envelope<SignatureRegistration[]>>(signaturesPath) });
@@ -167,12 +171,12 @@ export function OlrePage() {
       </li>)}</ul> : registrations.data ? <p className="muted">No new registrations.</p> : null}
     </section>
 
-    {apfc ? <section className="card stack" aria-labelledby="est-changes-heading"><h2 id="est-changes-heading">Change requests</h2>
+    {canDecideChange ? <section className="card stack" aria-labelledby="est-changes-heading"><h2 id="est-changes-heading">Change requests</h2>
       {changes.data?.data.length ? <ul className="plain-list">{changes.data.data.map((request) => <li key={request.request_id} className="stack">
-        <div><strong>{request.legal_name}</strong> · {request.request_id} · {request.kind}
-          {" "}<span className="state-pill">{request.state}</span></div>
+        <div><strong>{request.legal_name}</strong> · {request.request_id} · {statusLabel(request.kind, t)}
+          {" "}<span className="state-pill">{statusLabel(request.state, t)}</span></div>
         <p>Reason: {request.reason}</p><ul>{Object.entries(request.changes).map(([field, values]) => <li key={field}>
-          {field.replaceAll("_", " ")}: {show(values.from)} → {show(values.to)}</li>)}</ul>
+          {field.replaceAll("_", " ")}: {show(values.from)} → {field === "coverage_type" || field === "status" || field === "closure_reason" ? statusLabel(String(values.to), t) : show(values.to)}</li>)}</ul>
         <form className="stack" aria-label={`Decide change request ${request.request_id}`} onSubmit={(e) => decideChange(e, request)}>
           <label>Decision note<input name="note" required minLength={5} maxLength={500} /></label>
           <div className="actions"><button type="submit" value="APPROVE" className="primary">Approve</button>

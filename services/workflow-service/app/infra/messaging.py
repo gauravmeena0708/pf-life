@@ -6,7 +6,7 @@ from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import grievance_case, last_decision, open_case
-from app.infra.tables import cases, claim_dockets, member_accounts, subject_offices, vigilance_signals
+from app.infra.tables import cases, claim_dockets, member_accounts, offices, subject_offices, vigilance_signals
 from epfo_persistence.policy import after_defreeze_chain, approval_chain, on_policy_published, rules_by_version
 
 BINDINGS = [
@@ -28,6 +28,7 @@ BINDINGS = [
     "contribution-service.LedgerReversed.v1",
     "member-service.PrimaryMemberIdChanged.v1",
     "intelligence-service.RiskSignalReviewed.v1",
+    "employer-service.EstablishmentOfficeTransferred.v1",
 ]
 
 
@@ -148,6 +149,14 @@ async def on_member_registered(session: AsyncSession, event: dict[str, Any]) -> 
                                                              establishment_id=p["establishment_id"], date_of_joining=date.fromisoformat(p["date_of_joining"])))
 
 
+async def on_establishment_office_transferred(session: AsyncSession, event: dict[str, Any]) -> None:
+    p = event["payload"]
+    zone = (await session.execute(select(offices.c.zone_id).where(offices.c.office_id == p["to_office_id"]))).scalar_one_or_none()
+    await session.execute(update(subject_offices).where(subject_offices.c.establishment_id == p["establishment_id"],
+                                                       subject_offices.c.office_id == p["from_office_id"])
+                          .values(office_id=p["to_office_id"], zone_id=zone))
+
+
 async def on_cad_generated(session: AsyncSession, event: dict[str, Any]) -> None:
     """A Claim Approval Docket was generated: it counts for that role until the next decision on the case."""
     p = event["payload"]
@@ -185,6 +194,7 @@ async def on_risk_signal_reviewed(session: AsyncSession, event: dict[str, Any]) 
 
 
 HANDLERS = {
+    "EstablishmentOfficeTransferred.v1": on_establishment_office_transferred,
     "RiskSignalReviewed.v1": on_risk_signal_reviewed,
     "PrimaryMemberIdChanged.v1": on_primary_changed,
     "LedgerReversed.v1": on_ledger_reversed,

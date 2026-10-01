@@ -1,7 +1,7 @@
 """Event consumers for payment confirmation/return and employer verification projections."""
 import json
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from sqlalchemy import text
 from app.domain.ecr import FIELDS, parse, split
 from epfo_persistence.policy import rules_by_version
@@ -11,6 +11,19 @@ from epfo_persistence import add_event
 async def handle_employer_verified(session, event):
     p=event["payload"]
     await session.execute(text("UPDATE establishments SET status='VERIFIED',verification_ref=:r WHERE id=:id"), {"r":p["verification_ref"],"id":p["establishment_id"]})
+
+
+async def handle_establishment_closed(session, event):
+    p = event["payload"]
+    await session.execute(text("UPDATE establishments SET closed_on=:closed, last_wage_month=:month WHERE id=:id"),
+                          {"closed": date.fromisoformat(p["closed_on"]), "month": p["last_wage_month"],
+                           "id": p["establishment_id"]})
+
+
+async def handle_establishment_office_transferred(session, event):
+    p = event["payload"]
+    await session.execute(text("UPDATE establishments SET office_id=:office WHERE id=:id"),
+                          {"office": p["to_office_id"], "id": p["establishment_id"]})
 
 
 async def handle_payment_confirmed(session, event):

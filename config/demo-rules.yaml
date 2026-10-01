@@ -181,3 +181,8 @@ inoperative_accounts:
   months_without_credit: 36      # no contribution, transfer in or interest for this long → inoperative
   co_workers_required: 2         # co-workers of the same establishment who confirm the member (crowdsourcing)
   ao_limit_paise: 50000000       # the AO reactivates / settles up to ₹5,00,000; above it the APFC
+
+# P2.12b: voluntary coverage under section 1(4) (illustrative)
+voluntary_coverage:
+  threshold_employees: 20        # below this an establishment may opt in voluntarily …
+  consent_share_bp: 5001         # … with the agreement of the employer and a majority of the employees (basis points)

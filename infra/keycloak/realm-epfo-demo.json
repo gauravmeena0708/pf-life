@@ -1257,6 +1257,25 @@
         "csc_operator"
       ],
       "id": "00000000-0000-4000-8000-000000000052"
+    },
+    {
+      "username": "principal-owner",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Principal employer",
+      "lastName": "Demo",
+      "email": "principal-owner@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "employer.owner"
+      ],
+      "id": "00000000-0000-4000-8000-000000000053"
     }
   ]
 }

@@ -69,6 +69,9 @@ class Establishment(Base):
     status: Mapped[str] = mapped_column(String(30))
     verification_ref: Mapped[str | None] = mapped_column(Text)
     exemption_status: Mapped[str | None] = mapped_column(String(30))   # EXEMPT | SURRENDERED | CANCELLED (P2.8d; seeded)
+    office_id: Mapped[str | None] = mapped_column(String(40))
+    closed_on: Mapped[date | None] = mapped_column(Date)
+    last_wage_month: Mapped[str | None] = mapped_column(String(7))
 
 
 class EstablishmentMember(Base):
@@ -131,6 +134,16 @@ class ECRFiling(Base):
     validation_report: Mapped[dict | None] = mapped_column(JSON)
     trrn: Mapped[str | None] = mapped_column(String(17), unique=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PrincipalEmployerTag(Base):
+    __tablename__ = "principal_employer_tags"
+    filing_id: Mapped[str] = mapped_column(ForeignKey("ecr_filings.id"), primary_key=True)
+    uan: Mapped[str] = mapped_column(String(32), primary_key=True)
+    principal_establishment_id: Mapped[str] = mapped_column(String(80))
+    work_order_ref: Mapped[str] = mapped_column(String(120))
+    epf_wages_paise: Mapped[int] = mapped_column(BigInteger)
+    contribution_paise: Mapped[int] = mapped_column(BigInteger)
 
 
 class Challan(Base):

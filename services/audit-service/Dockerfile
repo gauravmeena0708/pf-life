@@ -11,6 +11,7 @@ COPY services/audit-service/pyproject.toml /srv/pyproject.toml
 COPY services/audit-service/app /srv/app
 COPY services/audit-service/migrations /srv/migrations
 COPY services/audit-service/alembic.ini /srv/alembic.ini
+COPY config/demo-rules.yaml /srv/demo-rules.yaml
 RUN pip install /srv
 COPY scripts/seed /srv/seed
 USER app

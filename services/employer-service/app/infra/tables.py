@@ -27,6 +27,7 @@ establishments = Table(
     Column("kyc", JSON),                                        # PAN / TAN / GSTIN / CIN / LIN: masked value, status, ref
     Column("bank_accounts", JSON),                              # remittance accounts (seeded, masked)
     Column("coverage", JSON),                                   # the circle officer's coverage decision (OLRE)
+    Column("closed_on", Date),
 )
 
 registration_requests = Table(
@@ -40,6 +41,14 @@ registration_requests = Table(
     Column("verification_ref", String(40)),
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
     Column("updated_at", DateTime(timezone=True), server_default=func.now()),
+    Column("source", String(30)),
+    Column("source_ref", String(80)),
+)
+
+offices = Table(
+    "offices", metadata,
+    Column("office_id", String(40), primary_key=True),
+    Column("name", String(200), nullable=False),
 )
 
 grants = Table(

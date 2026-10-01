@@ -411,6 +411,17 @@ contribution- and platform-service*
    100000000906 (one alone is refused). **`ro-ao`** reactivates it (one-time code bound to the balance); it leaves the
    list.
 
+## Coverage, closure, office transfer and contractors
+*Tests: `tests/e2e/test_small_employer_lifecycle.py`, `services/employer-service/tests/test_lifecycle_feeds.py`*
+
+1. **`emp-signatory` → Establishment › Coverage, closure and office**: voluntary coverage for 25 employees is refused
+   (covered compulsorily); for 12 with 8 consenting it goes to the office; ask for closure and for a transfer to
+   RO-DEMO-02 (one-time codes). **`ro-apfc` → OLRE / change requests** sees all three with their details and decides.
+2. **`emp-preparer` → ECR**: on a submitted return, *Tag workers to a principal employer* (EST-DEMO-0002, work order
+   WO/DEW/2026/014) and tick the workers.
+3. **`principal-owner` → Establishment › Contractors › Compliance**: the demo establishment's months for the tagged
+   workers — members, wages, contribution — and the unpaid ones highlighted.
+
 ## Vigilance
 *Tests: `tests/e2e/test_vigilance.py`, `services/workflow-service/tests/test_vigilance.py`*
 
