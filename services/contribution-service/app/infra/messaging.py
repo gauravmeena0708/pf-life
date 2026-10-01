@@ -7,6 +7,17 @@ from app.domain.ecr import FIELDS, parse, split
 from epfo_persistence.policy import rules_by_version
 from epfo_persistence import add_event
 
+from app.infra.claims_ledger import on_higher_pension_transfer
+
+BINDINGS = ["pension-service.HigherPensionDuesTransferRequested.v1"]
+HANDLERS = {"HigherPensionDuesTransferRequested.v1": on_higher_pension_transfer}
+
+
+async def dispatch(session, event):
+    handler = HANDLERS.get(event.get("event_type"))
+    if handler:
+        await handler(session, event)
+
 
 async def handle_employer_verified(session, event):
     p=event["payload"]

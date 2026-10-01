@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 
 import { api, command, getSession, rupees, type Envelope } from "../../api/client";
@@ -35,6 +35,11 @@ export function ClaimToolsPage() {
   const [trail, setTrail] = useState<Json | null>(null);
   const [inoperative, setInoperative] = useState<Json[] | null>(null);
   const [tds, setTds] = useState<Json | null>(null);
+  const [transfer, setTransfer] = useState<{ option_id: string; state: string; next_step: string } | null>(null);
+  const transferKeys = useRef<Record<string, string>>({});
+  const options = useQuery({ queryKey: ["accounts", "higher-pension-options"], enabled: role === "fo.da_accounts", retry: false,
+    queryFn: () => api<Envelope<{ option_id: string; dues_paise: number; state: string; next_step: string }[]>>(
+      "/api/v1/office/pensions/higher-pension-options?state=APPROVED") });
   const [tdsYear, setTdsYear] = useState(() => {
     const today = new Date(); const start = today.getFullYear() - (today.getMonth() < 3 ? 1 : 0);
     return `${start}-${String(start + 1).slice(-2)}`;
@@ -119,6 +124,18 @@ export function ClaimToolsPage() {
         { financial_year: tdsYear, quarter })).data); return null;
     });
   };
+  const requestTransfer = (option: { option_id: string; dues_paise: number }) => void run(async () => {
+    const token = await stepUp.ask({ action: "transfer-higher-pension-dues", resourceId: option.option_id,
+      amountPaise: option.dues_paise, summary: `Request transfer of ${rupees(option.dues_paise)} for higher-pension option ${option.option_id}.` });
+    if (!token) return null;
+    const key = transferKeys.current[option.option_id] ??= crypto.randomUUID();
+    const result = await command<Envelope<{ option_id: string; state: string; next_step: string }>>(
+      "POST", `/api/v1/office/pensions/higher-pension-options/${encodeURIComponent(option.option_id)}/ledger-transfers`,
+      undefined, { stepUpToken: token, idempotencyKey: key });
+    setTransfer(result.data); delete transferKeys.current[option.option_id];
+    await options.refetch();
+    return `Transfer requested for ${option.option_id}.`;
+  });
 
   return (
     <section className="stack" aria-labelledby="claim-tools-heading">
@@ -126,6 +143,16 @@ export function ClaimToolsPage() {
         description="Claim Approval Dockets, payment scrolls, member 360 view, inoperative accounts, claim audit trails, death-claim shares, ledger locks and Annexure K." />
       <ProblemMessage error={error} />
       {notice ? <p role="status" className="ok">{notice}</p> : null}
+
+      {role === "fo.da_accounts" ? <section className="card stack" aria-labelledby="higher-dues-heading"><h2 id="higher-dues-heading">Higher pension dues transfer</h2>
+        <ProblemMessage error={options.error} />{options.isLoading ? <p role="status">Loading approved options…</p> : null}
+        {options.data?.data.length === 0 ? <p className="muted small">No approved options awaiting transfer.</p> : null}
+        {options.data?.data.map((option) => <div className="profile-card stack" key={option.option_id}>
+          <p><strong>{option.option_id}</strong> · {statusLabel(option.state, t)} · {rupees(option.dues_paise)}</p>
+          <p>{option.next_step}</p><div className="actions"><button type="button" onClick={() => requestTransfer(option)}>Request dues transfer</button></div>
+        </div>)}
+        {transfer ? <p role="status">{transfer.option_id} · {statusLabel(transfer.state, t)}. {transfer.next_step}</p> : null}
+      </section> : null}
 
       {role === "fo.fa_accounts" ? <section className="card stack" aria-labelledby="cad-heading"><h2 id="cad-heading">Claim Approval Docket (CAD)</h2>
         <p className="muted small">Each scrutinising officer generates the docket before acting (CITES); the accounts wing views the latest and every level's version.</p>

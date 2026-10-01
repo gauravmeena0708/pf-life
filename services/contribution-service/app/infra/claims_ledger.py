@@ -44,6 +44,46 @@ async def member_shares(session: AsyncSession, account_link_id: str) -> dict[str
     return shares
 
 
+async def on_higher_pension_transfer(session: AsyncSession, event: dict[str, Any]) -> None:
+    """Move higher pension dues from the member's PF shares to EPS once per option."""
+    p = event["payload"]
+    option_id, account = p["option_id"], p["account_link_id"]
+    amount = int(p["amount_paise"])
+    if amount <= 0:
+        raise ValueError("higher pension transfer amount must be positive")
+    lock = " FOR UPDATE" if session.bind.dialect.name == "postgresql" else ""
+    member = (await session.execute(text("SELECT uan FROM establishment_members WHERE account_link_id=:a" + lock),
+                                    {"a": account})).scalar_one_or_none()
+    if member != p["uan"]:
+        raise ValueError(f"higher pension account {account} does not match UAN {p['uan']}")
+    if (await session.execute(text("SELECT 1 FROM journals WHERE business_key=:k"),
+                              {"k": f"HP-{option_id}"})).first():
+        return
+    shares = await member_shares(session, account)
+    if shares["employee"] + shares["employer"] < amount:
+        await add_event(session, producer=PRODUCER, event_type="HigherPensionTransferPosted.v1",
+                        aggregate_type="higher_pension_option", aggregate_id=option_id,
+                        correlation_id=event["correlation_id"], payload={"option_id": option_id,
+                            "status": "INSUFFICIENT_BALANCE", "posted_paise": 0, "journal_id": None})
+        return
+    employer = min(amount, shares["employer"])
+    lines = [{"account_code": "AC01_EPF", "side": "debit", "amount_paise": part,
+              "account_link_id": account, "share": share}
+             for share, part in (("employer", employer), ("employee", amount - employer)) if part]
+    lines.append({"account_code": "AC10_EPS", "side": "credit", "amount_paise": amount})
+    journal_id = await _post(session, f"HP-{option_id}", "HIGHER_PENSION_TRANSFER", None, lines)
+    if journal_id:
+        await add_event(session, producer=PRODUCER, event_type="HigherPensionTransferPosted.v1",
+                        aggregate_type="higher_pension_option", aggregate_id=option_id,
+                        correlation_id=event["correlation_id"], payload={"option_id": option_id,
+                            "status": "POSTED", "posted_paise": amount, "journal_id": journal_id})
+        await add_event(session, producer=PRODUCER, event_type="LedgerAdjusted.v1",
+                        aggregate_type="ledger_journal", aggregate_id=journal_id,
+                        correlation_id=event["correlation_id"], payload={"adjustment_id": option_id,
+                            "journal_id": journal_id, "account_link_id": account,
+                            "appendix_type": "EPS_DIVERSION", "postings": lines})
+
+
 async def on_claim_decision(session: AsyncSession, event: dict[str, Any]) -> None:
     """Approved claim → debit the member's EPF account (employee share first) and credit CLAIMS_PAYABLE."""
     p = event["payload"]

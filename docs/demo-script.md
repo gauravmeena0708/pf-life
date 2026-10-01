@@ -422,6 +422,17 @@ contribution- and platform-service*
 3. **`principal-owner` → Establishment › Contractors › Compliance**: the demo establishment's months for the tagged
    workers — members, wages, contribution — and the unpaid ones highlighted.
 
+## Pension office: higher-pension dues, Special 10D, disbursement lists, actuarial extract
+*Tests: `tests/e2e/test_small_pension_office.py`, `services/pension-service/tests/test_p2_12c.py`*
+
+1. **`ro-pension` → Pension office › Higher pension**: approve member H's validated option (one-time code bound to
+   the dues). **`do-caseworker` → Claim tools › Higher pension dues transfer**: move the dues; member H's passbook
+   shows the transfer to the pension fund and the option reads *dues transferred*.
+2. **`ro-da-pension` → Special 10D case**: MOHAN DEMO, service before 2002 and wages missing, an employer certificate.
+3. **`ro-pension-disbursement` → Disbursement lists**: last month's pensions by bank, with totals; print.
+4. **`ho-actuarial` → Actuarial extract**: pseudonymous rows and aggregates; download CSV — no names or numbers that
+   identify anyone.
+
 ## Vigilance
 *Tests: `tests/e2e/test_vigilance.py`, `services/workflow-service/tests/test_vigilance.py`*
 

@@ -158,6 +158,8 @@ export function menusFor(role: string | undefined): NavGroup[] {
   if (role === "pensioner") return PENSIONER;
   if (role === "claimant") return CLAIMANT;
   if (role === "csc_operator") return [{ label: "UAN allotment", to: "/csc" }];
+  if (role === "fo.pension_disbursement") return [{ label: "Disbursement lists", to: "/office/pension-disbursement" }];
+  if (role === "ho.actuarial") return [{ label: "Actuarial extract", to: "/ho/actuarial" }];
   if (role === "fo.edli") return [{ label: "EDLI claims", to: "/office/edli-claims" }];
   if (role === "fo.iw") return [{ label: "Certificate of coverage queue", to: "/office/international#coc-queue-heading" }];
   if (role === "ho.iwu") return [{ label: "Social-security agreements", to: "/ho/agreements#agreements-heading" }];
@@ -169,6 +171,8 @@ export function menusFor(role: string | undefined): NavGroup[] {
 
 /** Where "Home" goes for a role. */
 export function homeFor(role: string | undefined): string {
+  if (role === "fo.pension_disbursement") return "/office/pension-disbursement";
+  if (role === "ho.actuarial") return "/ho/actuarial";
   if (role === "ho.security") return "/security/activity";
   if (role === "ho.audit") return "/audit/log";
   if (role === "ho.caiu") return "/caiu/signals";

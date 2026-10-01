@@ -98,6 +98,15 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 12c: higher-pension dues, Special 10D, disbursement lists, actuarial extract (1 October 2026)
+
+Unit: pension-service 37 (new `test_p2_12c.py`), contribution-service 72 (new `test_higher_pension_transfer.py`);
+web 186 (new `P212c.test.tsx`); end to end 80 of 81 in the full run (new `test_small_pension_office.py`; member H's
+dues of ₹49,980 were posted to the pension fund) — `test_journey_d_security.py` timed out once waiting for a risk
+signal under load and passed when run again alone (a timing wait, not this slice); must-deny 18; UI smoke 2. Found on
+the way, fixed: a replayed money request returned a fresh envelope instead of the stored response; the office had no
+list of higher-pension options (added); the P2.8c test assumed the option stays VALIDATED.
+
 ## Update — Phase 2, slice 12b: voluntary coverage, closure, office transfer, contractors, registration feeds (1 October 2026)
 
 Unit: employer-service 24 (new `test_lifecycle_feeds.py`), contribution-service 70 (new

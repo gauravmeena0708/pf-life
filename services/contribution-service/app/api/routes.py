@@ -371,7 +371,8 @@ async def _passbook(subject: str, account_link_id: str | None):
                         "CLAIM_REVERSAL": "WITHDRAWAL_REVERSED", "INTEREST": "INTEREST", "INTEREST_REVISION": "INTEREST",
                         "TRANSFER": "TRANSFER_OUT" if ln["side"] == "debit" else "TRANSFER_IN",
                         "TRANSFER_RECREDIT": "TRANSFER_RECREDITED" if ln["side"] == "credit" else "TRANSFER_RECREDIT_OUT",
-                        "REVERSAL": "REVERSAL", "APPENDIX_E": "ADJUSTMENT"}.get(ln["kind"], ln["kind"])
+                        "REVERSAL": "REVERSAL", "APPENDIX_E": "ADJUSTMENT",
+                        "HIGHER_PENSION_TRANSFER": "HIGHER_PENSION_TRANSFER"}.get(ln["kind"], ln["kind"])
                 rate = f"{ln['rate_bp'] / 100:g}%" if ln["rate_bp"] is not None else ""
                 ent = grouped.setdefault(ln["journal_id"], {
                     "kind": kind, "wage_month": ln["wage_month"] or _month(ln["occurred_at"]),
@@ -381,6 +382,7 @@ async def _passbook(subject: str, account_link_id: str | None):
                                     "TRANSFER_OUT": f"Transferred to another member ID (Form 13, {ln['business_key'][9:]})",
                                     "TRANSFER_IN": f"Transferred in from a previous member ID (Form 13, {ln['business_key'][9:]})",
                                     "ADJUSTMENT": "Adjusted by the PF office (Appendix E)",
+                                    "HIGHER_PENSION_TRANSFER": "Higher pension dues transferred from PF to pension fund",
                                     "REVERSAL": "Entry reversed by the PF office",
                                     "TRANSFER_RECREDITED": "Transfer rejected by the receiving office: balance recredited",
                                     "TRANSFER_RECREDIT_OUT": "Transfer rejected by the receiving office: taken back",

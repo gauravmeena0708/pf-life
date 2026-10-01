@@ -53,6 +53,7 @@ export const PERSONAS: Persona[] = [
   { username: "ro-pension", label: "APFC (Pension)", role: "fo.apfc_pension", group: "Field office", description: "Approve pension worksheets and revisions, e-sign PPOs and prepare BRS." },
   { username: "ro-da-pension", label: "Dealing assistant (Pension)", role: "fo.da_pension", group: "Field office", description: "Prepare pension worksheets, issue PPOs and dispatch approved pensions." },
   { username: "ro-ss-pension", label: "Section supervisor (Pension)", role: "fo.ss_pension", group: "Field office", description: "Check initial pension arrears before the PPO is signed." },
+  { username: "ro-pension-disbursement", label: "Pension disbursement", role: "fo.pension_disbursement", group: "Field office", description: "Legacy bank-wise pension disbursement lists, until CPPS pays centrally." },
   { username: "zo-acc", label: "Zonal supervisor (ACC)", role: "zo.acc", group: "Zone, head office and oversight", description: "Resolve escalated grievances and review zonal metrics." },
   { username: "zo-rpfc", label: "Zonal RPFC-I (freeze orders)", role: "zo.rpfc1", group: "Zone, head office and oversight", description: "Order establishment freezes and supervise zonal work." },
   { username: "ho-policy", label: "HO policy drafter (ACC HQ)", role: "ho.acc_hq", group: "Zone, head office and oversight", description: "Draft and submit versioned policy rules for approval." },
@@ -68,5 +69,6 @@ export const PERSONAS: Persona[] = [
   { username: "vigilance-investigator", label: "Chief Vigilance Officer", role: "ho.cvo", group: "Zone, head office and oversight", description: "Assign preliminary inquiries into vigilance referrals and decide on the findings." },
   { username: "csc-operator", label: "CSC operator", role: "csc_operator", group: "Members and public", description: "Allot a UAN for a person at a Common Service Centre (mock Aadhaar face authentication)." },
   { username: "zo-vigilance", label: "Zonal vigilance", role: "zo.vigilance", group: "Zone, head office and oversight", description: "Inquire into vigilance cases assigned to the zone and report findings." },
+  { username: "ho-actuarial", label: "HO actuarial cell", role: "ho.actuarial", group: "Zone, head office and oversight", description: "De-identified EPS extract for the actuarial valuation." },
   { username: "auditor", label: "Independent auditor", role: "ho.audit", group: "Zone, head office and oversight", description: "Inspect the audit log, verify its hash chain and trace request events." },
 ];

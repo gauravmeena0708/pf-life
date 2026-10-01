@@ -1,5 +1,5 @@
 """Tables owned by pension-service (created by migration 0002). Synthetic pensioners only."""
-from sqlalchemy import JSON, BigInteger, Column, Date, DateTime, Integer, MetaData, String, Table, Text, UniqueConstraint, func
+from sqlalchemy import JSON, BigInteger, Column, Date, DateTime, Index, Integer, MetaData, String, Table, Text, UniqueConstraint, func
 
 from app.infra.models import IdType
 
@@ -197,7 +197,7 @@ higher_pension_options = Table(
     Column("establishment_id", String(40), nullable=False, index=True),
     Column("office_id", String(40)),
     Column("higher_wages_from", String(7), nullable=False),       # the member's declaration: wages above the ceiling from
-    Column("state", String(30), nullable=False),                  # SUBMITTED | VALIDATED | REJECTED_BY_EMPLOYER
+    Column("state", String(30), nullable=False),                  # submission, decision and transfer states
     Column("wages", JSON),                                        # [{month, wage_paise, ceiling_paise, excess_paise, dues_paise}]
     Column("dues_paise", BigInteger),
     Column("working", Text),
@@ -207,3 +207,19 @@ higher_pension_options = Table(
     Column("submitted_at", DateTime(timezone=True), server_default=func.now()),
     Column("validated_at", DateTime(timezone=True)),
 )
+
+special_10d_cases = Table(
+    "special_10d_cases", metadata,
+    Column("case_id", String(40), primary_key=True),
+    Column("uan", String(12), nullable=False, index=True),
+    Column("account_link_id", String(40)),
+    Column("office_id", String(40), nullable=False),
+    Column("state", String(20), nullable=False),
+    Column("missing", JSON, nullable=False),
+    Column("details", Text, nullable=False),
+    Column("evidence", JSON, nullable=False),
+    Column("created_by", String(80), nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now()),
+)
+Index("uq_special_10d_open_uan", special_10d_cases.c.uan, unique=True,
+      sqlite_where=special_10d_cases.c.state == "OPEN", postgresql_where=special_10d_cases.c.state == "OPEN")

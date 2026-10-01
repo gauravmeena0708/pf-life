@@ -53,6 +53,9 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `EstablishmentClosed.v1` | employer | contribution, audit | establishment | 1 |
 | `EstablishmentOfficeTransferred.v1` | employer | contribution, claim, member, workflow, compliance, audit | establishment | 1 |
 | `PrincipalEmployerTagged.v1` | contribution | reporting, audit | ecr_filing | 1 |
+| `HigherPensionOptionDecided.v1` | pension | audit | higher_pension_option | 1 |
+| `HigherPensionDuesTransferRequested.v1` | pension | contribution, audit | higher_pension_option | 1 |
+| `HigherPensionTransferPosted.v1` | contribution | pension, audit | higher_pension_option | 1 |
 | `StaffPostingChanged.v1` | workflow | member, claim, grievance, intelligence, compliance, international, pension, employer, reporting, audit | staff_posting | 1 |
 | `AutoTransferConfirmed.v1` | claim | contribution, audit | auto_transfer | 1 |
 | `TransferPosted.v1` | contribution | claim, member, workflow, audit | ledger_journal | 1 |

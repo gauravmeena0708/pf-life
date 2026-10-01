@@ -197,6 +197,14 @@
       {
         "name": "csc_operator",
         "description": "Common Service Centre operator — assisted UAN allotment (mock Aadhaar face authentication)"
+      },
+      {
+        "name": "fo.pension_disbursement",
+        "description": "Pension disbursement section — legacy bank-wise lists until CPPS"
+      },
+      {
+        "name": "ho.actuarial",
+        "description": "HO actuarial cell — EPS valuation extracts"
       }
     ]
   },
@@ -1276,6 +1284,44 @@
         "employer.owner"
       ],
       "id": "00000000-0000-4000-8000-000000000053"
+    },
+    {
+      "username": "ro-pension-disbursement",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Pension disbursement",
+      "lastName": "Demo",
+      "email": "ro-pension-disbursement@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.pension_disbursement"
+      ],
+      "id": "00000000-0000-4000-8000-000000000054"
+    },
+    {
+      "username": "ho-actuarial",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "HO actuarial",
+      "lastName": "Demo",
+      "email": "ho-actuarial@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ho.actuarial"
+      ],
+      "id": "00000000-0000-4000-8000-000000000055"
     }
   ]
 }

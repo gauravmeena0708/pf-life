@@ -45,7 +45,8 @@ def test_joint_option_for_higher_pension_validated_by_the_employer(persona):
                          {"X-Step-Up-Token": step_up(sig, "validate-higher-pension", option["option_id"], None, preview["data"]["dues_paise"])})
         assert status == 200 and r["data"]["state"] == "VALIDATED", r
     mine = call(h, "GET", f"/api/v1/members/me/higher-pension-options/{option['option_id']}")[1]["data"]
-    assert mine["state"] == "VALIDATED" and mine["dues_paise"] > 0 and len(mine["wages"]) == 24
+    after_validation = ("VALIDATED", "APPROVED", "TRANSFER_REQUESTED", "DUES_TRANSFERRED", "TRANSFER_FAILED")   # P2.12c moves it on
+    assert mine["state"] in after_validation and mine["dues_paise"] > 0 and len(mine["wages"]) == 24
 
 
 def test_certificate_of_coverage_issued_and_extended(persona):

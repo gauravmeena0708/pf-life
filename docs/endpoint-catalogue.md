@@ -430,8 +430,9 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /office/pension-claims?state=` | Pension claims (Form 10D) of the office by state: each desk sees what is waiting for it | W | 1 | pension |
 | `POST /office/pensions/{ppoId}/revisions` 💰🔐 | Pension revision (incl. higher-pension outcome) | W | 1 | pension |
 | `GET /office/pensions/revisions?state=` | Pension revisions proposed when a published formula change raises pensions in payment, with arrears to date | W | 1 | pension |
-| `POST /office/pensions/higher-pension-options/{optionId}/decisions` 🔐 | Decide on a validated option → dues demand event | P | 3 | pension |
-| `POST /office/pensions/higher-pension-options/{optionId}/ledger-transfers` 💰🔐 | PF→pension fund transfer after dues are paid → journal via `contribution-service` event | P | 3 | pension |
+| `GET /office/pensions/higher-pension-options?state=` | The office's higher-pension options (to decide, or to transfer the dues) | W | 1 | pension |
+| `POST /office/pensions/higher-pension-options/{optionId}/decisions` 🔐 | Decide on a validated option → dues demand event | W | 1 | pension |
+| `POST /office/pensions/higher-pension-options/{optionId}/ledger-transfers` 💰🔐 | PF→pension fund transfer after dues are paid → journal via `contribution-service` event | W | 1 | pension |
 
 Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`.
 
@@ -444,17 +445,17 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | `POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals` 🔐 | AO approves the IDS | W | 1 | pension |
 | `POST /office/pensions/worksheets` | DA (Pension) generates the worksheet (Pension > Transaction > Pension Worksheet) | W | 1 | pension |
 | `POST /office/pensions/worksheets/{worksheetId}/approvals` 🔐 | APFC (Pension) approves the worksheet | W | 1 | pension |
-| `POST /office/pensions/special-10d-cases` | Special 10D module for incomplete service / wage data | P | 3 | pension |
+| `POST /office/pensions/special-10d-cases` | Special 10D module for incomplete service / wage data | W | 1 | pension |
 | `POST /office/pensions/transfers-in` | Transfer in with / without PPO | W | 1 | pension |
 | `POST /office/pensions/ppos/{ppoId}/initial-arrears` 💰 | Initial arrear (DA(P) → SS(P) → APFC(P)) | W | 1 | pension |
 | `POST /office/pensions/ppos/{ppoId}/e-signatures` 🔐 | APFC (Pension) e-signs the PPO | W | 1 | pension |
 | `POST /office/pensions/ppos/{ppoId}/dispatches` | Dispatch PPO and scroll | W | 1 | pension |
-| `GET /office/pensions/disbursement-lists` | Legacy bank-wise disbursement lists (until CPPS) | P | 3 | pension |
+| `GET /office/pensions/disbursement-lists` | Legacy bank-wise disbursement lists (until CPPS) | W | 1 | pension |
 | `POST /cpps/disbursement-runs` 💰🔐 | CPPS monthly pan-India disbursement run through the sponsor bank | W | 1 | pension |
 | `GET /cpps/disbursement-runs` | CPPS runs with their paid statements and reconciliation exceptions | W | 1 | pension |
 | `POST /cpps/reconciliations` 🔐 | CPPS reconciliation of paid statements | W | 1 | pension |
 | `POST /integrations/mock-pension-bank/paid-statements` | Signed paid-statement callback from the pension bank | M | 1 | pension |
-| `GET /ho/actuarial/extracts` | EPS data extract for actuarial valuation (no direct identifiers) | P | 3 | pension |
+| `GET /ho/actuarial/extracts` | EPS data extract for actuarial valuation (no direct identifiers) | W | 1 | pension |
 
 
 **Added from the Samadhan Setu integration spec** (`../samadhan-setu files/PF_LIFE_INTEGRATION_SPECIFICATION.md`, checked against the tracker issues)

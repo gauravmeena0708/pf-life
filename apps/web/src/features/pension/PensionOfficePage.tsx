@@ -1,11 +1,14 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 
 import { api, command, getSession, rupees, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
+import { statusLabel } from "../statusLabel";
+import { HigherPensionDues, type HigherPensionOption } from "./HigherPensionDetails";
 
 const ENQUIRY_TABS = [
   { key: "ppo_details", label: "PPO Details" },
@@ -103,6 +106,7 @@ function enquiryPanel(value: DetailObject | DetailObject[] | null) {
 }
 
 export function PensionOfficePage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const stepUp = useStepUp();
   const [search, setSearch] = useState<{ ppo: string; memberId: string; uan: string } | null>(null);
@@ -114,10 +118,15 @@ export function PensionOfficePage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [special, setSpecial] = useState<{ case_id: string; state: string; checklist: string[]; next_step: string } | null>(null);
+  const [evidence, setEvidence] = useState([{ kind: "EMPLOYER_CERTIFICATE", ref: "" }]);
+  const [optionNotes, setOptionNotes] = useState<Record<string, string>>({});
 
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
   const isDa = session.data?.stakeholder === "fo.da_pension";
   const isApfc = session.data?.stakeholder === "fo.apfc_pension";
+  const options = useQuery({ queryKey: ["pension-office", "higher-options"], enabled: isApfc, retry: false,
+    queryFn: () => api<Envelope<HigherPensionOption[]>>("/api/v1/office/pensions/higher-pension-options?state=VALIDATED") });
   const enquiry = useQuery({
     queryKey: ["pension-office", "enquiry", search],
     queryFn: () => {
@@ -259,12 +268,72 @@ export function PensionOfficePage() {
     }
   }
 
+  async function decideOption(row: HigherPensionOption, decision: "APPROVE" | "REJECT") {
+    const note = (optionNotes[row.option_id] ?? "").trim();
+    if (note.length < 10) { setError(new Error("Enter a decision note of at least 10 characters.")); return; }
+    setError(null); setNotice(null); setBusy(row.option_id);
+    try {
+      const token = await stepUp.ask({ action: "decide-higher-pension", resourceId: row.option_id,
+        amountPaise: row.dues_paise ?? undefined, summary: `${decision === "APPROVE" ? "Approve" : "Reject"} higher-pension option ${row.option_id} for ${rupees(row.dues_paise)}.` });
+      if (!token) return;
+      const result = await command<Envelope<HigherPensionOption>>("POST", `/api/v1/office/pensions/higher-pension-options/${encodeURIComponent(row.option_id)}/decisions`,
+        { decision, note }, { stepUpToken: token });
+      setNotice(`${statusLabel(result.data.state, t)}: ${row.option_id}. ${result.data.next_step}`);
+      await qc.invalidateQueries({ queryKey: ["pension-office", "higher-options"] });
+    } catch (cause) { setError(cause); } finally { setBusy(null); }
+  }
+
+  async function createSpecial(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); const form = event.currentTarget; const f = new FormData(form);
+    const missing = ["SERVICE_PERIOD", "WAGES", "DATE_OF_BIRTH", "EXIT_DATE"].filter((item) => f.has(item));
+    if (!missing.length) { setError(new Error("Select at least one missing item.")); return; }
+    setError(null); setSpecial(null); setBusy("special");
+    try {
+      const result = await command<Envelope<{ case_id: string; state: string; checklist: string[]; next_step: string }>>(
+        "POST", "/api/v1/office/pensions/special-10d-cases", { uan: String(f.get("uan")).trim(), missing,
+          details: String(f.get("details")).trim(), evidence: evidence.filter((row) => row.ref.trim()).map((row) => ({ kind: row.kind, ref: row.ref.trim() })) });
+      setSpecial(result.data); form.reset(); setEvidence([{ kind: "EMPLOYER_CERTIFICATE", ref: "" }]);
+    } catch (cause) { setError(cause); } finally { setBusy(null); }
+  }
+
   return <div className="stack">
     <PageHeader id="pension-office-heading" eyebrow="Pension administration" title="Pension office"
       description="Pension enquiry, life certificates and updation activities (synthetic)." current="Pension office" />
     {notice ? <p role="status" className="ok">{notice}</p> : null}
     <ProblemMessage error={error} />
     <ProblemMessage error={session.error} />
+
+    {isApfc ? <section className="card stack" aria-labelledby="higher-options-heading"><h2 id="higher-options-heading">Higher-pension options awaiting decision</h2>
+      <ProblemMessage error={options.error} />{options.isLoading ? <p role="status">Loading options…</p> : null}
+      {options.data?.data.length === 0 ? <p className="muted small">No validated options in this office.</p> : null}
+      {options.data?.data.map((row) => <article className="profile-card stack" key={row.option_id}>
+        <h3>Option {row.option_id}</h3><p>UAN {row.uan} · Member ID {row.account_link_id} · {statusLabel(row.state, t)}</p>
+        <HigherPensionDues data={row} /><p>{row.next_step}</p>
+        <label>Decision note<textarea aria-label={`Decision note for ${row.option_id}`} value={optionNotes[row.option_id] ?? ""}
+          onChange={(event) => setOptionNotes((current) => ({ ...current, [row.option_id]: event.target.value }))} minLength={10} maxLength={1000} /></label>
+        <div className="actions"><button type="button" disabled={busy !== null} onClick={() => void decideOption(row, "APPROVE")}>Approve</button>
+          <button type="button" disabled={busy !== null} onClick={() => void decideOption(row, "REJECT")}>Reject</button></div>
+      </article>)}
+    </section> : null}
+
+    {isDa ? <section className="card stack" aria-labelledby="special-10d-heading"><h2 id="special-10d-heading">Special 10D case</h2>
+      <form className="stack" aria-label="Open Special 10D case" onSubmit={(event) => void createSpecial(event)}>
+        <fieldset className="stack" disabled={busy !== null}><legend>Reconstruct missing pension details</legend>
+          <label>UAN<input name="uan" required maxLength={12} /></label>
+          <div><strong>Missing items</strong>{(["SERVICE_PERIOD", "WAGES", "DATE_OF_BIRTH", "EXIT_DATE"] as const).map((item) =>
+            <label className="check-row" key={item}><input type="checkbox" name={item} />{statusLabel(item, t)}</label>)}</div>
+          <label>Details<textarea name="details" required minLength={20} /></label>
+          <div className="stack"><strong>Evidence</strong>{evidence.map((row, index) => <div className="form-row" key={index}>
+            <label>Kind<select value={row.kind} onChange={(event) => setEvidence((current) => current.map((item, i) => i === index ? { ...item, kind: event.target.value } : item))}>
+              <option value="EMPLOYER_CERTIFICATE">Employer certificate</option><option value="SERVICE_RECORD">Service record</option><option value="AFFIDAVIT">Affidavit</option><option value="OTHER">Other</option></select></label>
+            <label>Reference<input value={row.ref} onChange={(event) => setEvidence((current) => current.map((item, i) => i === index ? { ...item, ref: event.target.value } : item))} /></label>
+            <button type="button" onClick={() => setEvidence((current) => current.filter((_, i) => i !== index))}>Remove</button></div>)}
+            <button type="button" onClick={() => setEvidence((current) => [...current, { kind: "EMPLOYER_CERTIFICATE", ref: "" }])}>Add evidence</button></div>
+          <div className="actions"><button type="submit" className="primary">Open case</button></div>
+        </fieldset></form>
+      {special ? <div role="status"><p>Case {special.case_id} · {statusLabel(special.state, t)}</p>
+        <h3>Checklist</h3><ul>{special.checklist.map((item) => <li key={item}>{item}</li>)}</ul><p>{special.next_step}</p></div> : null}
+    </section> : null}
 
     <section className="card stack" aria-labelledby="enquiry-heading">
       <h2 id="enquiry-heading">Pension Enquiry Details</h2>

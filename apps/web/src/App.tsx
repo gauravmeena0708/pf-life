@@ -49,6 +49,8 @@ import { InterestPage } from "./features/finance/InterestPage";
 import { PensionerPage } from "./features/pension/PensionerPage";
 import { PensionerServicesPage } from "./features/pension/PensionerServicesPage";
 import { PensionOfficePage } from "./features/pension/PensionOfficePage";
+import { DisbursementListsPage } from "./features/pension/DisbursementListsPage";
+import { ActuarialExtractPage } from "./features/pension/ActuarialExtractPage";
 import { PensionRevisionsPage } from "./features/pension/PensionRevisionsPage";
 import { DashboardsPage } from "./features/oversight/DashboardsPage";
 import { GrievanceMetricsPage } from "./features/oversight/GrievanceMetricsPage";
@@ -190,6 +192,8 @@ export function App() {
             <Route path="/pensioner" element={<PensionerPage />} />
             <Route path="/pensioner/services" element={<PensionerServicesPage />} />
             <Route path="/office/pensions" element={<PensionOfficePage />} />
+            <Route path="/office/pension-disbursement" element={<DisbursementListsPage />} />
+            <Route path="/ho/actuarial" element={<ActuarialExtractPage />} />
             <Route path="/office/pension-revisions" element={<PensionRevisionsPage />} />
           </Routes>
         </main>

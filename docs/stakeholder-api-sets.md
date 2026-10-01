@@ -427,6 +427,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `GET /office/member-change-requests` | W |
 | `GET /office/members/{uan}` | W |
 | `GET /office/pension-claims` | W |
+| `GET /office/pensions/higher-pension-options` | W |
 | `GET /office/receipts/unreconciled` | W |
 | `GET /office/stopped-cases` | W |
 | `GET /office/transfers` | W |
@@ -447,6 +448,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /office/ledger-journals/{journalId}/reversals` | W |
 | `POST /office/member-change-requests/{requestId}/recommendations` | W |
 | `POST /office/pension-claims/{claimId}/input-data-sheets` | W |
+| `POST /office/pensions/higher-pension-options/{optionId}/ledger-transfers` | W |
 | `POST /office/physical-claims/{intakeId}/identity-validations` | W |
 | `POST /office/receipts/{receiptId}/trrn-adjustments` | W |
 | `POST /office/tds/computations` | W |
@@ -455,7 +457,6 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /office/vdr-entries` | W |
 | `POST /office/vdr-entries/{vdrId}/rejections` | W |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P |
-| `POST /office/pensions/higher-pension-options/{optionId}/ledger-transfers` | P |
 | `POST /office/vdr-entries/{vdrId}/ecr-reconciliations` | ? |
 | `POST /office/vdr-entries/{vdrId}/member-beneficiaries` | ? |
 | `POST /office/vdr-entries/{vdrId}/special-credits` | ? |
@@ -656,10 +657,10 @@ Activities: **F05.worksheet** Generate pension worksheet (Pension > Transaction 
 | `POST /office/pensions/ppos/{ppoId}/initial-arrears` | W |
 | `POST /office/pensions/scheme-certificates/{certId}/surrender-adjudications` | W |
 | `POST /office/pensions/service-aggregations` | W |
+| `POST /office/pensions/special-10d-cases` | W |
 | `POST /office/pensions/transfers-in` | W |
 | `POST /office/pensions/worksheets` | W |
 | `POST /office/pensions/{ppoId}/updation-activities` | W |
-| `POST /office/pensions/special-10d-cases` | P |
 
 #### `fo.ss_pension` — SS (Pension)
 
@@ -678,16 +679,17 @@ Activities: **F05.ppo_approve** Approve worksheet, PPO and initial arrear; e-sig
 |---|---|
 | `GET /cpps/disbursement-runs` | W |
 | `GET /office/pension-claims` | W |
+| `GET /office/pensions/higher-pension-options` | W |
 | `GET /office/pensions/life-certificates/overdue` | W |
 | `GET /office/pensions/revisions` | W |
 | `POST /office/pensions/brs-reconciliations` | W |
+| `POST /office/pensions/higher-pension-options/{optionId}/decisions` | W |
 | `POST /office/pensions/ppos/{ppoId}/e-signatures` | W |
 | `POST /office/pensions/updation-activities/{activityId}/decisions` | W |
 | `POST /office/pensions/worksheets/{worksheetId}/approvals` | W |
 | `POST /office/pensions/{ppoId}/resumptions` | W |
 | `POST /office/pensions/{ppoId}/revisions` | W |
 | `POST /office/pensions/{ppoId}/suspensions` | W |
-| `POST /office/pensions/higher-pension-options/{optionId}/decisions` | P |
 
 #### `fo.pension_disbursement` — Pension Disbursement Section
 
@@ -695,7 +697,7 @@ Activities: **F05.disbursement_section** Legacy bank-wise disbursement tasks unt
 
 | Endpoint | Status |
 |---|---|
-| `GET /office/pensions/disbursement-lists` | P |
+| `GET /office/pensions/disbursement-lists` | W |
 
 #### `fo.eo` — Enforcement Officer
 
@@ -1075,7 +1077,7 @@ Activities: **F05.actuarial** Extract EPS data for actuarial valuation
 
 | Endpoint | Status |
 |---|---|
-| `GET /ho/actuarial/extracts` | P |
+| `GET /ho/actuarial/extracts` | W |
 
 #### `ho.publicity` — Publicity / PR division
 

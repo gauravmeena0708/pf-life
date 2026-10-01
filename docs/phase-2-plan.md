@@ -33,7 +33,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.10b** | Preventive vigilance: sensitive posts and 3-year rotation alerts; vigilance clearance for HR postings, promotions and retirement against open cases and penalties | **Done** (1 Oct 2026) |
 | **P2.12a** | Member and tax: Form 16A, the office's TDS computation; UAN allotment and activation (mock Aadhaar face / OTP); inoperative accounts — the public helpdesk search, verification through co-workers, reactivation in the AO / APFC bands | **Done** (1 Oct 2026) |
 | **P2.12b** | Employer lifecycle: voluntary coverage, closure, transfer to another office; contractors tagging ECR members to a principal employer and the principal's view of contractor compliance; MCA and Shram Suvidha registration feeds (mock) | **Done** (1 Oct 2026) |
-| P2.12c | Pension office: deciding a validated higher-pension option and the PF → pension fund transfer after the dues; Special 10D; bank-wise disbursement lists; the actuarial extract | Planned |
+| **P2.12c** | Pension office: deciding a validated higher-pension option and the PF → pension fund transfer after the dues; Special 10D; bank-wise disbursement lists; the actuarial extract | **Done** (1 Oct 2026) |
 | P2.12d | Oversight: internal audit reports, paras, replies and decisions; DPDP data-principal requests; RTI replies; the CPGRAMS feed (mock) | Planned |
 | P2.12e | Head office reporting: balance sheet, investments, board packs (aggregates), fund-manager position feed (mock) | Planned |
 | P2.12f | The rest: DR replication status and failover drill, training sandboxes, Nidhi Aapke Nikat camp requests, totalisation claims and the foreign agency's CoC check, the composite death claim | Planned |
@@ -697,3 +697,23 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 - **Fixes on the way**: employer-service (and three other services that did not yet read rules) now carry the
   baseline rule set in their images; a Postgres sum returned as a Decimal broke the tag event (the SQLite unit tests
   could not see it); voluntary coverage is 🔐 like every other change request.
+
+## P2.12c — how it is built
+
+- **Higher pension, after the employer** (pension-service): the office lists its options
+  (`GET /office/pensions/higher-pension-options`, added for the queues); the APFC (Pension) approves or rejects a
+  VALIDATED option (step-up bound to the dues) and the member is told; the DA (Accounts) then asks for the dues to be
+  moved (money route: Idempotency-Key, step-up) — `HigherPensionDuesTransferRequested.v1` makes contribution-service
+  post one journal (`HIGHER_PENSION_TRANSFER`, keyed on the option): the member's PF debited (employer share first,
+  then employee) and the pension fund (AC10) credited; or, if the PF holds less than the dues, nothing is posted.
+  `HigherPensionTransferPosted.v1` brings the option to DUES_TRANSFERRED or TRANSFER_FAILED (the member deposits the
+  difference through the office). The passbook shows the entry.
+- **Special 10D** (`fo.da_pension`): a case for incomplete service, wages, date of birth or exit date, with the
+  evidence offered and a checklist of what reconstructs each; one open case per UAN.
+- **Disbursement lists** (new persona `ro-pension-disbursement`, `fo.pension_disbursement`): a month's pension payments
+  grouped by bank, with totals — the legacy lists until CPPS pays centrally.
+- **Actuarial extract** (new persona `ho-actuarial`, `ho.actuarial`): pensioners and higher-pension options with a
+  salted pseudonymous id, age, gender, pension start year, monthly pension, service months and status — no name, UAN,
+  PPO, bank or Aadhaar — with aggregates by category and age band; the web page downloads it as CSV.
+- **Fixes on the way**: a replayed money request returned a new envelope (different `meta`) instead of the stored
+  response; the P2.8c test assumed the option stays VALIDATED.

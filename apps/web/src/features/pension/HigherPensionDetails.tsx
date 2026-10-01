@@ -9,7 +9,7 @@ export interface HigherPensionPreview { dues_paise: number; working: string | nu
 export interface HigherPensionOption extends Omit<HigherPensionPreview, "dues_paise"> {
   dues_paise: number | null;
   option_id: string; uan: string; account_link_id: string;
-  state: "SUBMITTED" | "VALIDATED" | "REJECTED_BY_EMPLOYER"; higher_wages_from: string;
+  state: "SUBMITTED" | "VALIDATED" | "REJECTED_BY_EMPLOYER" | "APPROVED" | "REJECTED_BY_OFFICE" | "TRANSFER_REQUESTED" | "DUES_TRANSFERRED" | "TRANSFER_FAILED"; higher_wages_from: string;
   rule_version: string | null; employer_note: string | null; submitted_at: string | null; validated_at: string | null; next_step: string;
   name?: string; date_of_joining?: string;
 }

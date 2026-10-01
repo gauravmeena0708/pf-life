@@ -14,6 +14,7 @@ from app.infra.transfers import on_member_exit, on_member_registered, on_process
 from app.infra.messaging import (handle_employer_verified, handle_establishment_closed,
                                  handle_establishment_office_transferred, handle_inoperative_verified,
                                  handle_member_change, handle_payment_confirmed, handle_payment_returned)
+from app.infra.messaging import BINDINGS, dispatch
 from epfo_persistence import Consumer, OutboxRelay
 from epfo_persistence.policy import on_policy_published
 from epfo_observability import health_router, install
@@ -42,6 +43,7 @@ def create_app() -> FastAPI:
                           "member-service.InoperativeAccountVerified.v1"], _members_router),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.processes",
                          ["workflow-service.ProcessTransitioned.v1"], on_transfer_step),
+                Consumer(engine(), settings.rabbitmq_url, "contribution-service.pensions", BINDINGS, dispatch),
             ]
             relay.start()
             for consumer in consumers: consumer.start()

@@ -600,7 +600,9 @@
     "do-oic": "00000000-0000-4000-8000-000000000050",
     "zo-vigilance": "00000000-0000-4000-8000-000000000051",
     "csc-operator": "00000000-0000-4000-8000-000000000052",
-    "principal-owner": "00000000-0000-4000-8000-000000000053"
+    "principal-owner": "00000000-0000-4000-8000-000000000053",
+    "ro-pension-disbursement": "00000000-0000-4000-8000-000000000054",
+    "ho-actuarial": "00000000-0000-4000-8000-000000000055"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -800,6 +802,12 @@
       "subject": "00000000-0000-4000-8000-000000000051",
       "stakeholder": "zo.vigilance",
       "office_id": "ZO-DEMO-01"
+    },
+    {
+      "username": "ro-pension-disbursement",
+      "subject": "00000000-0000-4000-8000-000000000054",
+      "stakeholder": "fo.pension_disbursement",
+      "office_id": "RO-DEMO-01"
     }
   ],
   "pensioners": [

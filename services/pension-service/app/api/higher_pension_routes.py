@@ -7,16 +7,16 @@ import secrets
 from datetime import UTC, date, datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Header, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra.db import sessions
-from app.infra.tables import higher_pension_options, member_service
+from app.infra.tables import higher_pension_options, member_service, office_staff
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
-from epfo_persistence import add_event, audit
+from epfo_persistence import add_event, audit, find_response, request_hash, store_response
 from epfo_persistence.policy import rules_on, section
 
 router = APIRouter()
@@ -84,11 +84,16 @@ def _view(r: dict[str, Any]) -> dict[str, Any]:
     return {"option_id": r["option_id"], "uan": r["uan"], "account_link_id": r["account_link_id"], "state": r["state"],
             "higher_wages_from": r["higher_wages_from"], "dues_paise": r["dues_paise"], "working": r["working"],
             "wages": r["wages"] or [], "rule_version": r["rule_version"], "employer_note": r["employer_note"],
-            "submitted_at": r["submitted_at"].isoformat() if r["submitted_at"] else None,
-            "validated_at": r["validated_at"].isoformat() if r["validated_at"] else None,
+            "submitted_at": r["submitted_at"].isoformat() if hasattr(r["submitted_at"], "isoformat") else r["submitted_at"],
+            "validated_at": r["validated_at"].isoformat() if hasattr(r["validated_at"], "isoformat") else r["validated_at"],
             "next_step": {"SUBMITTED": "Your employer validates the option and uploads your wages.",
-                          "VALIDATED": "Validated by your employer. The office decides and works out the dues with interest (Phase 3).",
-                          "REJECTED_BY_EMPLOYER": "Your employer did not validate the option; the reason is shown."}.get(r["state"], "")}
+                          "VALIDATED": "Validated by your employer. The APFC (Pension) decides the option.",
+                          "REJECTED_BY_EMPLOYER": "Your employer did not validate the option; the reason is shown.",
+                          "APPROVED": "The DA (Accounts) requests transfer of the dues from your PF to the pension fund.",
+                          "REJECTED_BY_OFFICE": "The office rejected the option; ask the office about its decision.",
+                          "TRANSFER_REQUESTED": "The transfer of dues from your PF is being processed.",
+                          "DUES_TRANSFERRED": "The dues have moved from your PF to the pension fund.",
+                          "TRANSFER_FAILED": "The member deposits the difference through the office (VDR)."}.get(r["state"], "")}
 
 
 class OptionInput(BaseModel):
@@ -224,3 +229,92 @@ async def preview_dues(optionId: str, body: Validation, actor: Actor = Depends(S
         raise Problem(422, "/problems/validation", "Please correct the wages", "; ".join(problems[:10]), errors=problems)
     wages, dues, working = work_out_dues(lines, await rules_on(session, date.today()))
     return envelope({"option_id": optionId, "dues_paise": dues, "working": working, "wages": wages})
+
+
+@router.get("/api/v1/office/pensions/higher-pension-options")
+async def office_options(state: str | None = Query(default=None, pattern="^[A-Z_]{3,30}$"),
+                         actor: Actor = Depends(require_stakeholder("fo.apfc_pension", "fo.da_accounts")),
+                         session: AsyncSession = Depends(db)) -> dict:
+    """P2.12c: the office's options — the APFC (Pension) decides VALIDATED ones, the DA (Accounts) transfers APPROVED ones."""
+    office = (await session.execute(select(office_staff.c.office_id).where(office_staff.c.subject == actor.subject))).scalar_one_or_none()
+    if not office:
+        raise Problem(403, "/problems/no-posting", "You are not posted to an office")
+    q = select(higher_pension_options).where(higher_pension_options.c.office_id == office)
+    if state:
+        q = q.where(higher_pension_options.c.state == state)
+    rows = (await session.execute(q.order_by(higher_pension_options.c.submitted_at.desc()).limit(200))).mappings().all()
+    return envelope([_view(dict(r)) for r in rows])
+
+
+async def _office_option(session: AsyncSession, option_id: str, actor: Actor) -> dict[str, Any]:
+    office = (await session.execute(select(office_staff.c.office_id).where(office_staff.c.subject == actor.subject))).scalar_one_or_none()
+    if not office:
+        raise Problem(403, "/problems/no-posting", "You are not posted to an office")
+    row = (await session.execute(select(higher_pension_options).where(
+        higher_pension_options.c.option_id == option_id, higher_pension_options.c.office_id == office).with_for_update())).mappings().first()
+    if not row:
+        raise Problem(404, "/problems/not-found", "Option not found in your office")
+    return dict(row)
+
+
+async def _notify(session: AsyncSession, row: dict[str, Any], template: str, correlation_id: str,
+                  reason: str = "") -> None:
+    await add_event(session, producer=PRODUCER, event_type="NotificationRequested.v1", aggregate_type="notification",
+                    aggregate_id=row["option_id"], correlation_id=correlation_id, payload={
+                        "recipient_subject": row["subject"], "template": template, "reference_id": row["option_id"],
+                        "params": {"amount_paise": row["dues_paise"] or 0, "reason": reason}})
+
+
+class OfficeDecision(BaseModel):
+    decision: str = Field(pattern="^(APPROVE|REJECT)$")
+    note: str = Field(min_length=10, max_length=1000)
+
+
+@router.post("/api/v1/office/pensions/higher-pension-options/{optionId}/decisions")
+async def decide_option(optionId: str, body: OfficeDecision,
+                        actor: Actor = Depends(require_stakeholder("fo.apfc_pension")),
+                        session: AsyncSession = Depends(db)) -> dict:
+    async with session.begin():
+        row = await _office_option(session, optionId, actor)
+        if row["state"] != "VALIDATED":
+            raise Problem(409, "/problems/invalid-state", "Only a validated option can be decided")
+        require_step_up(actor, "decide-higher-pension", optionId, None, row["dues_paise"])
+        state = "APPROVED" if body.decision == "APPROVE" else "REJECTED_BY_OFFICE"
+        await session.execute(update(higher_pension_options).where(higher_pension_options.c.option_id == optionId).values(state=state))
+        await add_event(session, producer=PRODUCER, event_type="HigherPensionOptionDecided.v1",
+                        aggregate_type="higher_pension_option", aggregate_id=optionId, correlation_id=actor.correlation_id,
+                        payload={"option_id": optionId, "uan": row["uan"], "account_link_id": row["account_link_id"],
+                                 "decision": body.decision, "dues_paise": row["dues_paise"]})
+        await _notify(session, row, "HIGHER_PENSION_" + state, actor.correlation_id, body.note)
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder,
+                    action="pension.higher_option_decision", target_type="higher_pension_option", target_id=optionId, detail=body.note)
+    return envelope(_view({**row, "state": state}))
+
+
+@router.post("/api/v1/office/pensions/higher-pension-options/{optionId}/ledger-transfers")
+async def request_dues_transfer(optionId: str, idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+                                actor: Actor = Depends(require_stakeholder("fo.da_accounts")),
+                                session: AsyncSession = Depends(db)) -> dict:
+    if not idempotency_key:
+        raise Problem(400, "/problems/idempotency-key-required", "Idempotency-Key header is required")
+    operation = f"POST /office/pensions/higher-pension-options/{optionId}/ledger-transfers"
+    h = request_hash({"option_id": optionId})
+    async with session.begin():
+        row = await _office_option(session, optionId, actor)
+        require_step_up(actor, "transfer-higher-pension-dues", optionId, None, row["dues_paise"])
+        cached = await find_response(session, actor.subject, operation, idempotency_key, h)
+        if cached:
+            return cached.body                                          # the stored response, exactly as first sent
+        if row["state"] != "APPROVED":
+            raise Problem(409, "/problems/invalid-state", "Only an approved option can request a dues transfer")
+        await session.execute(update(higher_pension_options).where(higher_pension_options.c.option_id == optionId).values(
+            state="TRANSFER_REQUESTED"))
+        await add_event(session, producer=PRODUCER, event_type="HigherPensionDuesTransferRequested.v1",
+                        aggregate_type="higher_pension_option", aggregate_id=optionId, correlation_id=actor.correlation_id,
+                        payload={"option_id": optionId, "uan": row["uan"], "account_link_id": row["account_link_id"],
+                                 "amount_paise": row["dues_paise"]})
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder,
+                    action="pension.higher_dues_transfer_requested", target_type="higher_pension_option", target_id=optionId)
+        result = envelope(_view({**row, "state": "TRANSFER_REQUESTED"}))
+        await store_response(session, actor.subject, operation, idempotency_key, h, 200, result)
+    return result
