@@ -121,11 +121,23 @@ the printed ones. What the slice relies on:
     RETURNED with the reason; the EPS leg WAITING_FOR_PF → COMPLETED.
   - This closes the gap the Pension Manual names (p.56): "members get their PF transferred from Trust and fail to get EPS
     service history transferred to EPFO and thus there will be no continuous service".
+- **The trust's passbook, fetched on demand — not copied**: the trust holds the PF account (it credits interest and
+  settles claims), owes the member a passbook and an online balance (Conditions 14–15), and under the Code's draft rules
+  must link its online systems with EPFO's (Exemption Manual p.17). So the trust exposes a small signed passbook API
+  (a mock trust service in the POC) and EPFO reads it when the member opens an exempted member ID: the PF part shows
+  balance, entries and interest *as reported by <trust>, fetched at <time>*; the EPS part comes from EPFO's own record;
+  the two transfer legs show their status. A short cache (minutes) spares the trust repeated calls; if the trust's API is
+  unavailable the page shows the last snapshot with its date, or "Contact <trust>" with its details — never blank.
+  Office officers read the same (e.g. to check an Annexure K amount). EPFO keeps no copy of the trust's ledger: one
+  record holder, no second version to drift, less personal data under the DPDP Act. Data moves in bulk only on a
+  transfer (Annexure K) and on surrender or cancellation (the past-accumulation ingestion of P2.8d).
 - **Pension service adds up across member IDs**: the pension estimate and the pension claim use the EPS accounts of
   all the member's IDs — the exempted spell included — less breaks without contributions (para 9; breaks from
   Annexure K, nil when it shows none, Pension Manual p.45). Today the estimate counts one joining-to-exit record only
   (`services/pension-service/app/api/routes.py`); that is fixed first, as it is wrong for any member with several
   employers.
+- **Tests for the passbook fetch**: the trust's API down (the snapshot or the contact shown), the trust answering only for
+  its own members, the member seeing only their own member IDs, the freshness label.
 - **Test of the whole path**: a member moves unexempted → exempted → unexempted; the PF moves twice through the trust,
   the EPS service moves twice inside EPFO (the second time on its own once the trust's PF arrives), both statuses are
   visible at each step, and the pension service at the end is the sum of the three spells.
@@ -141,6 +153,8 @@ the printed ones. What the slice relies on:
   interest paid for late transfer), and the claims and grievances return (claims received, settled within / beyond
   20 days, pending, with reasons; grievances) — RM pp.8–13. Investments (Part E) and the surcharge on deviations from
   the pattern (SOP-M pp.17–18) are left out.
+- **Reconciliation**: the sum of the member balances the trust's passbook API reports against the corpus in its monthly
+  return; a difference is flagged for the exemption cell.
 - **Online performance evaluator** (SOP-M pp.16–17): six parameters at 100 points each — transfer before the due date,
   investment ≥ 70% of the investible corpus, full remittance to the trust, interest at least EPFO's rate, claims
   settled in time, accounts audited — computed from the returns; the monthly ranking for the exemption cell.
