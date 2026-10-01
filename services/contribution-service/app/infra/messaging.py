@@ -11,10 +11,21 @@ from app.infra.claims_ledger import on_higher_pension_transfer
 from app.infra.transfers import on_trust_annexure_k, on_eps_service_transferred
 
 BINDINGS = ["pension-service.HigherPensionDuesTransferRequested.v1",
-            "claim-service.TrustAnnexureKReconciled.v1", "pension-service.EpsServiceTransferred.v1"]
+            "claim-service.TrustAnnexureKReconciled.v1", "pension-service.EpsServiceTransferred.v1",
+            "workflow-service.StaffPostingChanged.v1"]
 HANDLERS = {"HigherPensionDuesTransferRequested.v1": on_higher_pension_transfer,
             "TrustAnnexureKReconciled.v1": on_trust_annexure_k,
             "EpsServiceTransferred.v1": on_eps_service_transferred}
+
+
+async def on_staff_posting(session, event):
+    """HR re-posted an officer: office routes follow the new posting (P2.9d)."""
+    from app.infra.models import OfficeStaff
+    from epfo_persistence.postings import apply_posting
+    await apply_posting(session, event, OfficeStaff.__table__)
+
+
+HANDLERS["StaffPostingChanged.v1"] = on_staff_posting
 
 
 async def dispatch(session, event):

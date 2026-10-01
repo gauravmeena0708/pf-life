@@ -27,7 +27,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.8e** | Security incidents with CERT-In reporting (mock); the Concurrent Audit Cell's daily extract, alerts and OIC replies; the NDC Issue Tracker (freeze / de-freeze / login notice); the zonal fraud-risk case list; HR postings that move jurisdiction everywhere; district and employer dashboards; member location mapping | **Done** (30 Sep 2026) |
 | **P2.9a** | International workers are members: one member login and menu, with what does not apply to them disabled and explained, from rules in the rule set | **Done** (30 Sep 2026) |
 | **P2.9b** | Members of exempted establishments: PF held by the trust (passbook, claims and transfers say so and route correctly), pension and EDLI with EPFO; the trust's Annexure K; a transfer's PF and EPS legs | **Done** (1 Oct 2026) |
-| P2.9d | Regulating the trust: the monthly online return (employees, contributions, claims and grievances), the online performance evaluator (six parameters) and the priority matrix (Form CE-6) for the exemption cell | Planned |
+| P2.9d | Regulating the trust: the monthly online return (employees, contributions, claims and grievances), the online performance evaluator (six parameters) and the priority matrix (Form CE-6) for the exemption cell | Done |
 | **P2.9c** | Member experience: a life-event home page, one consolidated view, plain-language status, nudges, a mobile pass | **Done** (30 Sep 2026; built before P2.9b, which waits for the Exemption Manual) |
 | **P2.10a** | Vigilance cases: a CAIU-confirmed risk signal (or a complaint) referred to vigilance; the CVO assigns a preliminary inquiry to a zone (90 days); zonal vigilance reports findings; the CVO decides; restricted, access-logged, the complainant masked | **Done** (30 Sep 2026) |
 | **P2.10b** | Preventive vigilance: sensitive posts and 3-year rotation alerts; vigilance clearance for HR postings, promotions and retirement against open cases and penalties | **Done** (1 Oct 2026) |
@@ -884,6 +884,32 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 
 With P2.12f every endpoint the catalogue planned outside compliance (P2.11) and the exempted establishments
 (P2.9b / P2.9d) is built.
+
+## P2.9d — how it is built
+
+- **The monthly return** (`POST /exempted/me/returns`, the trust): Part C employees, which must balance (opening + joined
+  − left − excluded = contract under the trust + elsewhere + direct exempted + direct unexempted); Part D contributions
+  (the due is the two shares; transfers with dates; interest paid for late transfer); claims and grievances (pending
+  needs reasons); the interest declared, the investible corpus and the amount invested, whether the accounts were
+  audited, and optionally the total of the member balances. One return a month; a revision replaces it and keeps the
+  earlier version as *superseded*. The service works out the balance due, the days the last transfer was late (due by
+  the 15th of the following month) and the claims pending.
+- **The online performance evaluator**, six parts of 100: transfer before the due date (share of the due transferred by
+  the 15th), investment (full at 70% of the investible corpus), remittance (share transferred), interest declared
+  (full at EPFO's rate for the year), claims settled within 10 days, accounts audited. The rule set holds the due day,
+  the 10 days, the 70%, the 300-of-600 floor and the 3 months (`exempted_establishments`).
+- **The priority matrix** (Form CE-6): each return raises its flags with the plain consequence — *A* (show-cause for
+  cancellation): no return for 3 months running (counted from the trust's first online return), under 300 for 3 months
+  running, PF dues in default, claims settled late, interest below EPFO's rate (the employer makes good the shortfall,
+  Condition 7); *B* (rectify; cancellation after 2 occasions): the member balances in the return differ from the
+  trust's passbook API. `TrustReturnFiled.v1`.
+- **The exemption cell** (`ro-exemption`, its office from the postings copy that now also lives in contribution-service):
+  the ranking for a month (a missing return scores 0), a trust's returns and flags, and the action on a flag with a
+  one-time code — direction to rectify, advice (not for an *A* flag), show-cause notice, referral for cancellation,
+  closed as rectified (`TrustFlagActioned.v1`). A revision cannot erase a flag the office has acted on.
+- **HO Exemption Division** (new persona `ho-exemption`, `ho.exemption`): the same ranking across all offices, read-only.
+- **Seed and test**: Demo Steel Works' returns for June–August 2026 (July paid 7 days late with claims settled late);
+  `tests/e2e/test_trust_regulation.py`.
 
 ## P2.9b — how it is built
 

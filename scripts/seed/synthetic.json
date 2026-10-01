@@ -698,7 +698,8 @@
     "exempted-trust": "00000000-0000-4000-8000-000000000065",
     "member-p": "00000000-0000-4000-8000-000000000066",
     "member-r": "00000000-0000-4000-8000-000000000067",
-    "steel-signatory": "00000000-0000-4000-8000-000000000068"
+    "steel-signatory": "00000000-0000-4000-8000-000000000068",
+    "ho-exemption": "00000000-0000-4000-8000-000000000069"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -1150,5 +1151,122 @@
         "payment.initiate"
       ]
     }
-  ]
+  ],
+  "trust_returns": {
+    "_comment": "P2.9d: Demo Steel Works' earlier monthly returns (synthetic): July paid late and claims slow, so the evaluator and the matrix have something to show",
+    "establishment_id": "EST-DEMO-0004",
+    "returns": [
+      {
+        "wage_month": "2026-06",
+        "employees_opening": 212,
+        "joined": 3,
+        "left": 2,
+        "excluded": 5,
+        "contract_trust": 20,
+        "contract_elsewhere": 4,
+        "direct_exempted": 184,
+        "direct_unexempted": 0,
+        "international_workers": 1,
+        "disabled_workers": 2,
+        "pf_wages_paise": 40000000000,
+        "employee_share_paise": 4800000000,
+        "employer_share_paise": 1466000000,
+        "due_paise": 6266000000,
+        "transfers": [
+          {
+            "date": "2026-07-14",
+            "amount_paise": 6266000000
+          }
+        ],
+        "interest_paid_paise": 0,
+        "claims_opening": 4,
+        "claims_received": 30,
+        "claims_within_days": 27,
+        "claims_beyond_days": 1,
+        "pending_reasons": null,
+        "grievances_opening": 1,
+        "grievances_received": 2,
+        "grievances_disposed": 2,
+        "interest_rate_declared_bp": 850,
+        "investible_corpus_paise": 900000000000,
+        "invested_paise": 702000000000,
+        "accounts_audited": true,
+        "member_balances_total_paise": null
+      },
+      {
+        "wage_month": "2026-07",
+        "employees_opening": 212,
+        "joined": 3,
+        "left": 2,
+        "excluded": 5,
+        "contract_trust": 20,
+        "contract_elsewhere": 4,
+        "direct_exempted": 184,
+        "direct_unexempted": 0,
+        "international_workers": 1,
+        "disabled_workers": 2,
+        "pf_wages_paise": 40000000000,
+        "employee_share_paise": 4800000000,
+        "employer_share_paise": 1466000000,
+        "due_paise": 6266000000,
+        "transfers": [
+          {
+            "date": "2026-08-22",
+            "amount_paise": 6266000000
+          }
+        ],
+        "interest_paid_paise": 12000000,
+        "claims_opening": 4,
+        "claims_received": 34,
+        "claims_within_days": 20,
+        "claims_beyond_days": 6,
+        "pending_reasons": "Awaiting bank details",
+        "grievances_opening": 1,
+        "grievances_received": 2,
+        "grievances_disposed": 2,
+        "interest_rate_declared_bp": 850,
+        "investible_corpus_paise": 900000000000,
+        "invested_paise": 594000000000,
+        "accounts_audited": true,
+        "member_balances_total_paise": null
+      },
+      {
+        "wage_month": "2026-08",
+        "employees_opening": 212,
+        "joined": 3,
+        "left": 2,
+        "excluded": 5,
+        "contract_trust": 20,
+        "contract_elsewhere": 4,
+        "direct_exempted": 184,
+        "direct_unexempted": 0,
+        "international_workers": 1,
+        "disabled_workers": 2,
+        "pf_wages_paise": 40000000000,
+        "employee_share_paise": 4800000000,
+        "employer_share_paise": 1466000000,
+        "due_paise": 6266000000,
+        "transfers": [
+          {
+            "date": "2026-09-15",
+            "amount_paise": 6266000000
+          }
+        ],
+        "interest_paid_paise": 0,
+        "claims_opening": 4,
+        "claims_received": 28,
+        "claims_within_days": 25,
+        "claims_beyond_days": 2,
+        "pending_reasons": "Awaiting bank details",
+        "grievances_opening": 1,
+        "grievances_received": 2,
+        "grievances_disposed": 2,
+        "interest_rate_declared_bp": 850,
+        "investible_corpus_paise": 900000000000,
+        "invested_paise": 648000000000,
+        "accounts_audited": true,
+        "member_balances_total_paise": null
+      }
+    ]
+  }
 }

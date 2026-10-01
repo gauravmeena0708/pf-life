@@ -350,6 +350,10 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
             problems.append("exempted_establishments.trust_claim_types must list claim types of the rule set")
         if not _whole(ee.get("trust_claim_days"), 1, 90) or not _whole(ee.get("passbook_cache_minutes"), 0, 1440):
             problems.append("exempted_establishments needs trust_claim_days (1-90) and passbook_cache_minutes (0-1440)")
+        if "return_due_day" in ee and not (_whole(ee.get("return_due_day"), 1, 28) and _whole(ee.get("evaluator_claim_days"), 1, 90)
+                                           and _whole(ee.get("investment_threshold_pct"), 1, 100) and _whole(ee.get("min_score"), 0, 600)
+                                           and _whole(ee.get("consecutive_months"), 1, 12)):
+            problems.append("exempted_establishments evaluator settings out of range (due day 1-28, claim days 1-90, threshold 1-100%, score 0-600, months 1-12)")
     if "dr_and_training" in document:
         dt = document["dr_and_training"] or {}
         if not (_whole(dt.get("rpo_minutes"), 1, 1440) and _whole(dt.get("rto_minutes"), 1, 2880) and _whole(dt.get("sandbox_days"), 1, 90)):

@@ -1399,7 +1399,13 @@ stakeholders:
   contractor: []
   exempted.trust:
   - endpoint: POST /exempted/me/returns
-    status: P
+    status: W
+    scope: own exempted establishment
+    step_up: false
+    via:
+    - F09.returns
+  - endpoint: GET /exempted/me/returns
+    status: W
     scope: own exempted establishment
     step_up: false
     via:
@@ -2695,9 +2701,21 @@ stakeholders:
     via:
     - F09.past_accum
   - endpoint: GET /office/exempted/{estId}/returns
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
+    via:
+    - F09.supervise
+  - endpoint: GET /office/exempted/rankings
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F09.supervise
+  - endpoint: POST /office/exempted/{estId}/flags/{flagId}/actions
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
     via:
     - F09.supervise
   - endpoint: GET /office/exempted/{estId}/audits
@@ -3201,6 +3219,12 @@ stakeholders:
     step_up: true
     via:
     - F09.ho
+  - endpoint: GET /office/exempted/rankings
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F09.ho_monitor
   ho.pension:
   - endpoint: GET /monitoring/claims
     status: W

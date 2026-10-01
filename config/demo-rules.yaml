@@ -213,3 +213,9 @@ exempted_establishments:
   trust_claim_types: [ADVANCE_ILLNESS, FINAL_SETTLEMENT]   # PF claims, settled by the trust; pension (Form 10C / 10D) and EDLI stay with EPFO
   trust_claim_days: 20          # Condition 12; the online evaluator scores 10 days (SOP-M p.17)
   passbook_cache_minutes: 5     # the trust's passbook is fetched again after this long
+  # P2.9d: the online performance evaluator and the priority matrix (SOP on management and regulation, Nov 2023, pp.12-17)
+  return_due_day: 15            # contributions reach the trust by the 15th (Condition 5)
+  evaluator_claim_days: 10      # the evaluator scores claims settled within 10 days (SOP-M p.17)
+  investment_threshold_pct: 70  # full points for investing at least 70% of the investible corpus
+  min_score: 300                # of 600; below it for consecutive_months running is category A
+  consecutive_months: 3         # also: no return for this many months running is category A

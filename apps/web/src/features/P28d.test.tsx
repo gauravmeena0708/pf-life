@@ -90,7 +90,7 @@ async function rateForm() {
 }
 async function ingestionForm() {
   renderPage(<ExemptedPage />, "fo.exemption");
-  const form = await screen.findByRole("form", { name: "Ingest past accumulations" });
+  const form = await screen.findByRole("form", { name: "Past accumulation ingestion" });
   fill(form, "Transfer reference", "TRUST-1"); fill(form, header, content);
   return form;
 }
@@ -242,7 +242,7 @@ it("provides the public menu without a login", () => {
 it.each(["finance", "exemption", "publicity"])("hides the %s command form from unrelated roles", async (kind) => {
   renderPage(kind === "finance" ? <InterestPage /> : kind === "exemption" ? <ExemptedPage /> : <CircularsPage />, "member");
   await screen.findByText(kind === "finance" ? "Interest rates are recorded by HO Finance and Accounts." : kind === "exemption" ? "This service is available to the Exemption cell." : "Publishing is available to HO Public Relations.");
-  expect(screen.queryByRole("form", { name: kind === "finance" ? "Record the interest rate" : kind === "exemption" ? "Ingest past accumulations" : "Publish a circular" })).toBeNull();
+  expect(screen.queryByRole("form", { name: kind === "finance" ? "Record the interest rate" : kind === "exemption" ? "Past accumulation ingestion" : "Publish a circular" })).toBeNull();
 });
 it.each([["record-interest-rate", 825, "8.25%"], ["ingest-past-accumulation", 480000, "₹4,800.00"]])("displays the correct unit for %s confirmation and keeps its numeric binding", async (action, amountPaise, displayed) => {
   const { StepUpDialog: ActualDialog } = await vi.importActual<typeof import("./stepup/StepUpDialog")>("./stepup/StepUpDialog");

@@ -4,14 +4,14 @@
   "interfaces": 21,
   "stakeholders": 114,
   "stakeholders_with_access": 95,
-  "activities": 243,
+  "activities": 244,
   "endpoints": {
-   "W": 376,
+   "W": 381,
    "M": 21,
-   "P": 35,
+   "P": 33,
    "?": 5
   },
-  "personas": 68
+  "personas": 69
  },
  "interfaces": [
   {
@@ -39,9 +39,9 @@
    "coverage": "Working",
    "purpose": "Employers: registration, members and KYC, monthly returns and challans, demands, attestations, exits.",
    "endpoints": {
-    "W": 86,
+    "W": 88,
     "M": 5,
-    "P": 5,
+    "P": 4,
     "?": 0
    },
    "stakeholders": [
@@ -84,9 +84,9 @@
    "coverage": "Working",
    "purpose": "Field-office sections: claim scrutiny and payment, compliance, pension, EDLI, exemption, PRO counter.",
    "endpoints": {
-    "W": 96,
+    "W": 99,
     "M": 0,
-    "P": 19,
+    "P": 18,
     "?": 4
    },
    "stakeholders": [
@@ -208,7 +208,7 @@
    "coverage": "Working",
    "purpose": "Head office: policy rules (maker-checker), interest, circulars, the IS Division.",
    "endpoints": {
-    "W": 21,
+    "W": 22,
     "M": 0,
     "P": 4,
     "?": 0
@@ -911,9 +911,9 @@
    "name": "Exempted establishment — PF trust and its Board of Trustees",
    "group": "B. Employers and intermediaries",
    "endpoints": {
-    "W": 3,
+    "W": 5,
     "M": 0,
-    "P": 2,
+    "P": 1,
     "?": 0
    },
    "activities": [
@@ -1648,9 +1648,9 @@
    "name": "Exemption cell (supervising PF trusts)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 1,
+    "W": 4,
     "M": 0,
-    "P": 5,
+    "P": 4,
     "?": 0
    },
    "activities": [
@@ -1664,7 +1664,7 @@
     },
     {
      "id": "F09.supervise",
-     "does": "Supervise PF trusts: returns, investments, audit reports"
+     "does": "Supervise PF trusts: monthly returns, the performance evaluator and its ranking, priority-matrix flags and the action taken, audit reports"
     }
    ],
    "personas": [
@@ -2063,7 +2063,7 @@
    "name": "Exemption Division",
    "group": "F. Head Office (HO) — leadership and divisions",
    "endpoints": {
-    "W": 0,
+    "W": 1,
     "M": 0,
     "P": 1,
     "?": 0
@@ -2072,9 +2072,15 @@
     {
      "id": "F09.ho",
      "does": "Grant / cancel exemption policy decisions"
+    },
+    {
+     "id": "F09.ho_monitor",
+     "does": "Monitor the zones' exempted establishments on the online performance evaluator (ranking of 600)"
     }
    ],
-   "personas": []
+   "personas": [
+    "ho-exemption"
+   ]
   },
   "ho.pension": {
    "name": "Pension Division (verticals: policy, EPS implementation, grievances, pension finance / audit / actuarial, EDLI)",

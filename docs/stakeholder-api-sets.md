@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 243 |
+| Activities | 244 |
 | Stakeholders with at least one API | 95 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 2 |
@@ -371,8 +371,9 @@ Activities: **F09.returns** File monthly return of exempted establishment (Parts
 |---|---|
 | `GET /exempted/me/annexure-k-requests` | W |
 | `GET /exempted/me/profile` | W |
+| `GET /exempted/me/returns` | W |
 | `POST /exempted/me/annexure-k-submissions` | W |
-| `POST /exempted/me/returns` | P |
+| `POST /exempted/me/returns` | W |
 | `POST /exempted/me/surrender-requests` | P |
 
 #### `trust_auditor` — Chartered accountant auditing an exempted trust
@@ -752,13 +753,15 @@ Activities: **F06.legal** Record 7-I appeals, 7-O pre-deposits / waivers and cou
 
 #### `fo.exemption` — Exemption cell (supervising PF trusts)
 
-Activities: **F09.ingest** Bulk-ingest the surrendered trust's member ledgers and past accumulations; **F09.past_accum** Transfer past accumulations after surrender / cancellation; **F09.supervise** Supervise PF trusts: returns, investments, audit reports
+Activities: **F09.ingest** Bulk-ingest the surrendered trust's member ledgers and past accumulations; **F09.past_accum** Transfer past accumulations after surrender / cancellation; **F09.supervise** Supervise PF trusts: monthly returns, the performance evaluator and its ranking, priority-matrix flags and the action taken, audit reports
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/exempted/rankings` | W |
+| `GET /office/exempted/{estId}/returns` | W |
+| `POST /office/exempted/{estId}/flags/{flagId}/actions` | W |
 | `POST /office/exempted/{estId}/past-accumulation-ingestions` | W |
 | `GET /office/exempted/{estId}/audits` | P |
-| `GET /office/exempted/{estId}/returns` | P |
 | `POST /office/exempted/past-accumulation-bulk-transfers` | P |
 | `POST /office/exempted/{estId}/past-accumulation-transfers` | P |
 | `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` | P |
@@ -989,10 +992,11 @@ Activities: **F06.ho_legal** Legal policy; monitoring of court cases
 
 #### `ho.exemption` — Exemption Division
 
-Activities: **F09.ho** Grant / cancel exemption policy decisions
+Activities: **F09.ho** Grant / cancel exemption policy decisions; **F09.ho_monitor** Monitor the zones' exempted establishments on the online performance evaluator (ranking of 600)
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/exempted/rankings` | W |
 | `POST /ho/exemptions/{estId}/decisions` | P |
 
 #### `ho.pension` — Pension Division (verticals: policy, EPS implementation, grievances, pension finance / audit / actuarial, EDLI)
@@ -1841,8 +1845,9 @@ flowchart LR
   F09_trust_handover["exempted.trust_liquidator<br/>Hand over member ledgers and past accumulations of the surre"]
   F09_ingest["fo.exemption<br/>Bulk-ingest the surrendered trust's member ledgers and past "]
   F09_past_accum["fo.exemption<br/>Transfer past accumulations after surrender / cancellation"]
-  F09_supervise["fo.exemption<br/>Supervise PF trusts: returns, investments, audit reports"]
+  F09_supervise["fo.exemption<br/>Supervise PF trusts: monthly returns, the performance evalua"]
   F09_ho["ho.exemption<br/>Grant / cancel exemption policy decisions"]
+  F09_ho_monitor["ho.exemption<br/>Monitor the zones' exempted establishments on the online per"]
   F09_returns --> F09_supervise
   F09_annexure_k --> F09_annexure_k_reconcile
   F09_audit --> F09_supervise
@@ -1850,6 +1855,7 @@ flowchart LR
   F09_surrender --> F09_past_accum
   F09_trust_handover --> F09_ingest
   F09_ingest --> F09_past_accum
+  F09_ho_monitor --> F09_ho
 ```
 
 ### F10 — International workers

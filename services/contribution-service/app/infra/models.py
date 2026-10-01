@@ -1,7 +1,7 @@
 """Standard tables present in every service database (docs/architecture.md §2.2)."""
 from datetime import date, datetime
 
-from sqlalchemy import JSON, BigInteger, Boolean, Date, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, false, func
+from sqlalchemy import JSON, BigInteger, Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, false, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 IdType = BigInteger().with_variant(Integer, "sqlite")  # SQLite only autoincrements INTEGER keys (unit tests)
@@ -110,6 +110,39 @@ class TrustPassbookCache(Base):
     account_link_id: Mapped[str] = mapped_column(String(80), primary_key=True)
     payload: Mapped[dict] = mapped_column(JSON)
     fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class TrustReturn(Base):
+    __tablename__ = "trust_returns"
+    __table_args__ = (UniqueConstraint("establishment_id", "wage_month", "version"),)
+    return_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    establishment_id: Mapped[str] = mapped_column(ForeignKey("exempted_establishments.establishment_id"), index=True)
+    wage_month: Mapped[str] = mapped_column(String(7))
+    version: Mapped[int] = mapped_column(Integer)
+    state: Mapped[str] = mapped_column(String(20))
+    content: Mapped[dict] = mapped_column(JSON)
+    score: Mapped[float] = mapped_column(Float)
+    parts: Mapped[dict] = mapped_column(JSON)
+    balance_due_paise: Mapped[int] = mapped_column(BigInteger)
+    late_transfer_days: Mapped[int] = mapped_column(Integer)
+    claims_pending: Mapped[int] = mapped_column(Integer)
+    filed_by: Mapped[str] = mapped_column(String(80))
+    filed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class TrustFlag(Base):
+    __tablename__ = "trust_flags"
+    flag_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    establishment_id: Mapped[str] = mapped_column(ForeignKey("exempted_establishments.establishment_id"), index=True)
+    wage_month: Mapped[str] = mapped_column(String(7))
+    category: Mapped[str] = mapped_column(String(1))
+    code: Mapped[str] = mapped_column(String(40))
+    text: Mapped[str] = mapped_column(Text)
+    raised_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    action: Mapped[str | None] = mapped_column(String(40))
+    action_note: Mapped[str | None] = mapped_column(Text)
+    actioned_by: Mapped[str | None] = mapped_column(String(80))
+    actioned_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class InoperativeVerification(Base):
@@ -379,3 +412,12 @@ class PastAccumulationIngestion(Base):
     total_paise: Mapped[int] = mapped_column(BigInteger)
     ingested_by: Mapped[str] = mapped_column(String(80))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class OfficeStaff(Base):
+    """Who is posted where (P2.9d): the exemption cell's office scopes the trusts it supervises. From the seed, then
+    StaffPostingChanged.v1 (epfo_persistence.postings)."""
+    __tablename__ = "office_staff"
+    subject: Mapped[str] = mapped_column(String(80), primary_key=True)
+    stakeholder: Mapped[str] = mapped_column(String(60))
+    office_id: Mapped[str] = mapped_column(String(40))

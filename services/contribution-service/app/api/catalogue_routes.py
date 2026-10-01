@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /office/damages-knock-offs', 'GET /office/ecr-filings', 'GET /office/ledger-adjustments', 'POST /office/ledger-adjustments', 'POST /office/vdr-entries', 'POST /public/trrn-status-lookups', 'GET /employers/me/challans', 'GET /employers/me/demands', 'POST /employers/me/direct-challans', 'GET /employers/me/ecr-filings', 'POST /employers/me/ecr-filings', 'GET /ho/finance/balance-sheet', 'GET /members/me/passbook', 'GET /members/me/transfer-legs', 'GET /office/accounts/inoperative', 'GET /office/accounts/interest-postings', 'POST /office/accounts/interest-postings', 'GET /office/receipts/unreconciled', 'POST /public/demo-calculations/epf', 'POST /public/inoperative-accounts/searches', 'GET /employers/me/returns/dashboard', 'GET /members/me/tax/taxable-interest', 'POST /partners/sandbox/payroll/ecr-filings', 'GET /employers/me/challans/{trrn}', 'GET /employers/me/ecr-filings/{filingId}', 'PUT /ho/config/interest-rates/{financialYear}', 'GET /members/me/annual-statements/{financialYear}', 'GET /employers/me/challans/{trrn}/receipt', 'POST /employers/me/ecr-filings/{filingId}/approvals', 'POST /employers/me/ecr-filings/{filingId}/cancellations', 'POST /employers/me/ecr-filings/{filingId}/principal-employer-tags', 'POST /employers/me/ecr-filings/{filingId}/submissions', 'POST /employers/me/ecr-filings/{filingId}/validations', 'GET /employers/me/members/{uan}/contribution-ledger', 'GET /members/me/accounts/{accountLinkId}/passbook', 'GET /members/me/transfers/{transferId}/annexure-k', 'POST /office/accounts/{accountLinkId}/reactivations', 'POST /office/annexure-k-files/{annexureId}/vdr-reconciliations', 'POST /office/damages-knock-offs/{knockOffId}/approvals', 'POST /office/ecr-filings/{filingId}/payment-rejections', 'POST /office/ecr-filings/{filingId}/rejections', 'POST /office/establishments/{estId}/damages-knock-offs', 'POST /office/exempted/{estId}/past-accumulation-ingestions', 'POST /office/ledger-adjustments/{adjustmentId}/approvals', 'POST /office/ledger-journals/{journalId}/reversals', 'POST /office/receipts/{receiptId}/trrn-adjustments', 'GET /office/transfers/{transferId}/legs', 'POST /office/transfers/{transferId}/recredits', 'POST /office/vdr-entries/{vdrId}/rejections']
+OPERATIONS = ['GET /office/damages-knock-offs', 'GET /office/ecr-filings', 'GET /office/ledger-adjustments', 'POST /office/ledger-adjustments', 'POST /office/vdr-entries', 'POST /public/trrn-status-lookups', 'GET /employers/me/challans', 'GET /employers/me/demands', 'POST /employers/me/direct-challans', 'GET /employers/me/ecr-filings', 'POST /employers/me/ecr-filings', 'GET /exempted/me/returns', 'POST /exempted/me/returns', 'GET /ho/finance/balance-sheet', 'GET /members/me/passbook', 'GET /members/me/transfer-legs', 'GET /office/accounts/inoperative', 'GET /office/accounts/interest-postings', 'POST /office/accounts/interest-postings', 'GET /office/exempted/rankings', 'GET /office/receipts/unreconciled', 'POST /public/demo-calculations/epf', 'POST /public/inoperative-accounts/searches', 'GET /employers/me/returns/dashboard', 'GET /members/me/tax/taxable-interest', 'POST /partners/sandbox/payroll/ecr-filings', 'GET /employers/me/challans/{trrn}', 'GET /employers/me/ecr-filings/{filingId}', 'PUT /ho/config/interest-rates/{financialYear}', 'GET /members/me/annual-statements/{financialYear}', 'GET /employers/me/challans/{trrn}/receipt', 'POST /employers/me/ecr-filings/{filingId}/approvals', 'POST /employers/me/ecr-filings/{filingId}/cancellations', 'POST /employers/me/ecr-filings/{filingId}/principal-employer-tags', 'POST /employers/me/ecr-filings/{filingId}/submissions', 'POST /employers/me/ecr-filings/{filingId}/validations', 'GET /employers/me/members/{uan}/contribution-ledger', 'GET /members/me/accounts/{accountLinkId}/passbook', 'GET /members/me/transfers/{transferId}/annexure-k', 'POST /office/accounts/{accountLinkId}/reactivations', 'POST /office/annexure-k-files/{annexureId}/vdr-reconciliations', 'POST /office/damages-knock-offs/{knockOffId}/approvals', 'POST /office/ecr-filings/{filingId}/payment-rejections', 'POST /office/ecr-filings/{filingId}/rejections', 'POST /office/establishments/{estId}/damages-knock-offs', 'POST /office/exempted/{estId}/past-accumulation-ingestions', 'GET /office/exempted/{estId}/returns', 'POST /office/ledger-adjustments/{adjustmentId}/approvals', 'POST /office/ledger-journals/{journalId}/reversals', 'POST /office/receipts/{receiptId}/trrn-adjustments', 'GET /office/transfers/{transferId}/legs', 'POST /office/transfers/{transferId}/recredits', 'POST /office/vdr-entries/{vdrId}/rejections', 'POST /office/exempted/{estId}/flags/{flagId}/actions']
 
 @router.api_route("/api/v1/office/damages-knock-offs", methods=["GET"], include_in_schema=False)
 async def get_office_damages_knock_offs(actor: Actor = Depends(require_actor)) -> None:
@@ -67,6 +67,16 @@ async def post_employers_me_ecr_filings(actor: Actor = Depends(require_actor)) -
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Create regular monthly ECR (upload / wizard)")
 
 
+@router.api_route("/api/v1/exempted/me/returns", methods=["GET"], include_in_schema=False)
+async def get_exempted_me_returns(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The trust's own returns with their evaluator scores")
+
+
+@router.api_route("/api/v1/exempted/me/returns", methods=["POST"], include_in_schema=False)
+async def post_exempted_me_returns(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The trust's monthly online return: employees, contributions transferred, claims and grievances, inte")
+
+
 @router.api_route("/api/v1/ho/finance/balance-sheet", methods=["GET"], include_in_schema=False)
 async def get_ho_finance_balance_sheet(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Balance sheet of the funds from the ledger, for the statutory / attest audit (read-only)")
@@ -95,6 +105,11 @@ async def get_office_accounts_interest_postings(actor: Actor = Depends(require_a
 @router.api_route("/api/v1/office/accounts/interest-postings", methods=["POST"], include_in_schema=False)
 async def post_office_accounts_interest_postings(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Annual interest crediting run (illustrative rate)")
+
+
+@router.api_route("/api/v1/office/exempted/rankings", methods=["GET"], include_in_schema=False)
+async def get_office_exempted_rankings(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The online performance evaluator: every exempted establishment's score of 600 for a month, ranked")
 
 
 @router.api_route("/api/v1/office/receipts/unreconciled", methods=["GET"], include_in_schema=False)
@@ -227,6 +242,11 @@ async def post_office_exempted_estId_past_accumulation_ingestions(actor: Actor =
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Bulk-ingest member ledgers and past accumulations of a surrendered PF trust")
 
 
+@router.api_route("/api/v1/office/exempted/{estId}/returns", methods=["GET"], include_in_schema=False)
+async def get_office_exempted_estId_returns(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Exemption cell reviews trust returns")
+
+
 @router.api_route("/api/v1/office/ledger-adjustments/{adjustmentId}/approvals", methods=["POST"], include_in_schema=False)
 async def post_office_ledger_adjustments_adjustmentId_approvals(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Second approval of a ledger adjustment")
@@ -255,3 +275,8 @@ async def post_office_transfers_transferId_recredits(actor: Actor = Depends(requ
 @router.api_route("/api/v1/office/vdr-entries/{vdrId}/rejections", methods=["POST"], include_in_schema=False)
 async def post_office_vdr_entries_vdrId_rejections(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "VDR Rejection — reject a VDR entry with a reason (top menu *VDR Rejection*)")
+
+
+@router.api_route("/api/v1/office/exempted/{estId}/flags/{flagId}/actions", methods=["POST"], include_in_schema=False)
+async def post_office_exempted_estId_flags_flagId_actions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The exemption cell records its action on a priority-matrix flag (direction, advice, show-cause notic")

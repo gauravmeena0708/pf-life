@@ -58,7 +58,7 @@ const EMPLOYER: NavGroup[] = [
     link("Authorized eSign List", "/employer/establishment#esign-heading")] },
   { label: "Payments", items: [
     link("ECR Upload", "/employer/ecr#ecr-prepare"), link("Return Filing", "/employer/ecr#ecr-returns"), link("Return monthly dashboard", "/employer/returns#returns-dashboard-heading"),
-    link("Direct Challan", "/employer/returns#direct-challan-heading"), link("Demands (14B / 7Q)", "/employer/returns#demands-heading"), link("VISHWAS: settle damages", "/employer/returns#vishwas-heading"), link("Monthly Return for Exempted Establishment", undefined, "Planned: the trust's monthly return (P2.9d)"), link("TRRN query / challan status", "/employer/ecr#ecr-challans")] },
+    link("Direct Challan", "/employer/returns#direct-challan-heading"), link("Demands (14B / 7Q)", "/employer/returns#demands-heading"), link("VISHWAS: settle damages", "/employer/returns#vishwas-heading"), link("Monthly Return for Exempted Establishment", undefined, "Filed by the establishment's PF trust (the trust's login)"), link("TRRN query / challan status", "/employer/ecr#ecr-challans")] },
   { label: "Dashboards", items: [link("Employer dashboard", "/employer#employer-dashboard-heading"), link("Compliance summary", "/employer/returns#compliance-summary-heading"), link("Active Members details", "/employer/registration#active-heading"), link("Missing details", "/employer/registration#active-heading")] },
   { label: "User", items: [link("Sub-users (payroll operators)", "/employer#people-operator")] },
   { label: "Admin" },
@@ -94,7 +94,7 @@ function fieldOffice(role: string): NavGroup[] {
       link("7Q & 14B", ["fo.da_compliance", "fo.ss"].includes(role) ? "/office/returns#knock-off-heading" : undefined),
       link("Establishment", ["fo.oic", "fo.apfc"].includes(role) ? "/office/work-queue" : undefined),
       link("OLRE", ["fo.da_compliance", "fo.apfc"].includes(role) ? "/office/olre" : undefined),
-      ...(role === "fo.apfc" ? [link("Establishment change requests", "/office/olre#est-changes-heading"), link("DSC / e-sign approvals", "/office/olre#sig-heading")] : []), link("Exempted-Unexempted", role === "fo.exemption" ? "/office/exempted" : undefined), link("Past Accum. File Upload", role === "fo.exemption" ? "/office/exempted#past-accumulation-heading" : undefined),
+      ...(role === "fo.apfc" ? [link("Establishment change requests", "/office/olre#est-changes-heading"), link("DSC / e-sign approvals", "/office/olre#sig-heading")] : []), link("Exempted-Unexempted", role === "fo.exemption" ? "/office/exempted" : undefined), link("Monthly Return for Exempted Establishment", role === "fo.exemption" ? "/office/exempted#exempted-rankings-heading" : undefined), link("Past Accum. File Upload", role === "fo.exemption" ? "/office/exempted#past-accumulation-heading" : undefined),
       link("PAST ACCUM BULK TRANSFER", undefined, PLANNED_TRUST), link("PAST ACCUM VDR RECO", undefined, PLANNED_TRUST)] },
     { label: "Pension", items: [link("Pension", ["fo.apfc_pension", "fo.da_pension", "fo.ss_pension"].includes(role) ? "/office/pensions" : undefined),
       link("NPPS", undefined, "Not in this POC: the menu's meaning is not documented")] },
@@ -164,6 +164,7 @@ export function menusFor(role: string | undefined): NavGroup[] {
   if (!role || role === "public") return [{ labelKey: "navigation.publicLookups", items: PUBLIC_SERVICES }];
   if (role === "member") return MEMBER;
   if (role === "exempted.trust") return [{ label: "Trust", to: "/exempted" }];
+  if (role === "ho.exemption") return [{ label: "Exempted establishments ranking", to: "/ho/exempted-rankings" }];
   if (role.startsWith("employer.")) return EMPLOYER;
   if (role === "pensioner") return PENSIONER;
   if (role === "claimant") return CLAIMANT;
@@ -185,6 +186,7 @@ export function menusFor(role: string | undefined): NavGroup[] {
 /** Where "Home" goes for a role. */
 export function homeFor(role: string | undefined): string {
   if (role === "exempted.trust") return "/exempted";
+  if (role === "ho.exemption") return "/ho/exempted-rankings";
   if (role === "tech.adc") return "/ndc/dr";
   if (["train.pdnasa", "train.zti", "zo.zti"].includes(role ?? "")) return "/training";
   if (role === "fo.nan") return "/office/nan-camp";

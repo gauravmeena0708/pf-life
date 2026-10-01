@@ -7,6 +7,7 @@ import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { statusLabel } from "../statusLabel";
 import "./TrustPage.css";
+import { MonthlyReturn } from "./MonthlyReturn";
 
 interface Profile { establishment: { establishment_id: string; legal_name: string }; kind: string; kind_description: string; pf_exempt: boolean; pension_exempt: boolean; edli_exempt: boolean; notification_no: string; notification_date: string; effective_from: string; status: string; trust_name: string; conditions: { number: number; description: string }[]; note: string }
 interface Request { annexure_id: string; transfer_id: string; from_account_link_id: string; to_account_link_id: string; state: string; employee_paise: number | null; employer_paise: number | null }
@@ -43,6 +44,7 @@ export function TrustPage() {
       <p className="muted small">{p.note}</p><h3>Conditions undertaken</h3>
       <ol>{p.conditions.map((condition) => <li key={condition.number}>Condition {condition.number}: {condition.description}</li>)}</ol>
     </section> : null}
+    <MonthlyReturn />
     <section className="card stack" aria-labelledby="trust-requests-heading"><h2 id="trust-requests-heading">Annexure K requests</h2>
       {requests.isLoading ? <p role="status">Loading requests…</p> : null}
       {requests.data?.data.requests.length === 0 ? <p className="muted">No Annexure K requests.</p> : null}

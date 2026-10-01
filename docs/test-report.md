@@ -98,6 +98,19 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 9d: regulating the trust (1 October 2026)
+
+Unit: contribution-service 85 (new `test_exempted_returns.py`: the return's checks, each part of the evaluator with no
+claims and no dues, every flag of the matrix — three low scores, three months without a return, dues, late claims,
+interest below EPFO's rate, member balances differing from the trust's passbook API — a revision keeping the earlier
+version and the office's action, office scope, the ranking, step-up), common-persistence 25, platform-service 31,
+gateway 23; web 230 (new `P29d.test.tsx`); end to end 90 of 90 (new `test_trust_regulation.py`, repeatable); must-deny
+18; UI smoke 2. Found on the way, fixed: a seeded history of returns published events; "no return for 3 months" was
+counted from the exemption's start rather than the trust's first online return; the exemption cell's office came only
+from the token (contribution-service now keeps the postings copy); the ranking looked up the office before opening its
+session; superseded versions were not listed; a revision deleted the flags the office had acted on; the cell had two
+menu items for one screen; the ranking opened on the current month, whose returns are not yet due.
+
 ## Update — Phase 2, slice 12g: menu clean-up (1 October 2026)
 
 Web 226 (new `MenuNotes.test.tsx`: the three menu items now linked to their screens; the office menu's "Planned" and

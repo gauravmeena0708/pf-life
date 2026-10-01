@@ -403,8 +403,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /exempted/me/annexure-k-requests` | W | own exempted establishment |  |
 | `GET /exempted/me/profile` | W | own exempted establishment |  |
+| `GET /exempted/me/returns` | W | own exempted establishment |  |
 | `POST /exempted/me/annexure-k-submissions` | W | own exempted establishment |  |
-| `POST /exempted/me/returns` | P | own exempted establishment |  |
+| `POST /exempted/me/returns` | W | own exempted establishment |  |
 | `POST /exempted/me/surrender-requests` | P | own exempted establishment | yes |
 
 **`trust_auditor`** — Chartered accountant auditing an exempted trust
@@ -732,9 +733,11 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /office/exempted/rankings` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/exempted/{estId}/returns` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/exempted/{estId}/flags/{flagId}/actions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/{estId}/past-accumulation-ingestions` | W | office jurisdiction of the caller's posting | yes |
 | `GET /office/exempted/{estId}/audits` | P | office jurisdiction of the caller's posting |  |
-| `GET /office/exempted/{estId}/returns` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/exempted/past-accumulation-bulk-transfers` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/{estId}/past-accumulation-transfers` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` | P | office jurisdiction of the caller's posting | yes |
@@ -930,6 +933,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /office/exempted/rankings` | W | office jurisdiction of the caller's posting |  |
 | `POST /ho/exemptions/{estId}/decisions` | P | national (Head Office role) | yes |
 
 **`ho.pension`** — Pension Division (verticals: policy, EPS implementation, grievances, pension finance / audit / actuarial, EDLI)

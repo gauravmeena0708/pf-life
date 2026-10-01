@@ -1,0 +1,2 @@
+.trust-ranking-select { background: none; color: #173b66; border: 0; padding: 0; text-decoration: underline; font: inherit; font-weight: 700; cursor: pointer; }
+#exempted-rankings-heading + label { max-width: 15rem; }

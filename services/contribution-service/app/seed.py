@@ -19,9 +19,9 @@ async def seed() -> None:
                               {"id": establishment["establishment_id"], "name": establishment["legal_name"],
                                "status": establishment["status"], "office": establishment.get("office_id")})
         for e in data.get("public_establishments", []):   # earlier employers of members (other member IDs)
-            await session.execute(text("INSERT INTO establishments (id,legal_name,status,exemption_status) VALUES (:id,:name,'REGISTERED',:ex) "
-                                       "ON CONFLICT (id) DO UPDATE SET exemption_status=excluded.exemption_status"),
-                                  {"id": e["establishment_id"], "name": e["legal_name"], "ex": e.get("exemption_status")})
+            await session.execute(text("INSERT INTO establishments (id,legal_name,status,exemption_status,office_id) VALUES (:id,:name,'REGISTERED',:ex,:office) "
+                                       "ON CONFLICT (id) DO UPDATE SET exemption_status=excluded.exemption_status,office_id=COALESCE(establishments.office_id,excluded.office_id)"),
+                                  {"id": e["establishment_id"], "name": e["legal_name"], "ex": e.get("exemption_status"), "office": e.get("office_id")})
         ex = data.get("exempted_establishment")
         if ex:
             await session.execute(text("""INSERT INTO exempted_establishments
@@ -47,6 +47,24 @@ async def seed() -> None:
                   international_worker=excluded.international_worker"""),
                   {"uan":m["uan"],"name":m["name"],"dob":date.fromisoformat(m["date_of_birth"]),"account":job["account_link_id"],"subject":m.get("subject"),
                    "est":job["establishment_id"],"joined":date.fromisoformat(job["date_of_joining"]),"exited":exited,"status":"EXITED" if exited else "ACTIVE","iw":bool(m.get("international"))})
+        from app.infra.models import OfficeStaff               # P2.9d: postings, for office routes
+        for st in data.get("office_staff", []):
+            if not (await session.execute(text("SELECT 1 FROM office_staff WHERE subject=:s"), {"s": st["subject"]})).first():
+                await session.execute(OfficeStaff.__table__.insert().values(subject=st["subject"], stakeholder=st["stakeholder"],
+                                                                            office_id=st["office_id"]))
+        trust_returns = data.get("trust_returns")
+        if trust_returns and ex and trust_returns["establishment_id"] == ex["establishment_id"]:
+            from app.api.exempted_returns_routes import ReturnInput, file_return
+            for item in sorted(trust_returns["returns"], key=lambda r: r["wage_month"]):
+                if (await session.execute(text("SELECT 1 FROM trust_returns WHERE establishment_id=:e AND wage_month=:m"),
+                                          {"e": ex["establishment_id"], "m": item["wage_month"]})).first():
+                    continue                                # a re-seed keeps the returns already loaded
+                source = dict(item)
+                pending = source["claims_opening"] + source["claims_received"] - source["claims_within_days"] - source["claims_beyond_days"]
+                if pending and not source.get("pending_reasons"):
+                    source["pending_reasons"] = "Not recorded in historical synthetic return"
+                await file_return(session, ex["establishment_id"], date.fromisoformat(ex["effective_from"]), ex,
+                                  ReturnInput(**source), "seed", "seed", seeded=True)
         demo = data["public_lookup_challan"]
         await session.execute(text("""INSERT INTO ecr_filings
           (id,establishment_id,wage_month,filing_type,format,content,version,state,preparer_subject,rule_version,trrn)

@@ -531,7 +531,7 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | `GET /members/me/transfer-legs` | The member's transfers with the status of each leg: PF (EPFO or the trust) and EPS (pension service) | W | 1 | contribution |
 | `GET /office/transfers/{transferId}/legs` | A transfer's PF and EPS legs and their status | W | 1 | contribution |
 | `GET /exempted/me/profile` | Trust profile and exemption conditions | W | 1 | employer |
-| `POST /exempted/me/returns` | Periodic returns of exempted establishment | P | 3 | contribution |
+| `POST /exempted/me/returns` | The trust's monthly online return: employees, contributions transferred, claims and grievances, interest, investment, audit (P2.9d) | W | 1 | contribution |
 | `GET /exempted/me/annexure-k-requests` | **Annexure K** requests from the field office (transfers in / out) | W | 1 | claim |
 | `POST /exempted/me/annexure-k-submissions` 💰 | Submit Annexure K with the transfer amount | W | 1 | claim |
 | `GET /office/exempted/annexure-k?state=` | The trusts' Annexure K for transfers into the office's member IDs, awaiting reconciliation | W | 1 | claim |
@@ -547,7 +547,10 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `GET /office/exempted/{estId}/returns` | Exemption cell reviews trust returns | P | 3 | contribution |
+| `GET /exempted/me/returns` | The trust's own returns with their evaluator scores | W | 1 | contribution |
+| `GET /office/exempted/rankings?month=` | The online performance evaluator: every exempted establishment's score of 600 for a month, ranked | W | 1 | contribution |
+| `POST /office/exempted/{estId}/flags/{flagId}/actions` 🔐 | The exemption cell records its action on a priority-matrix flag (direction, advice, show-cause notice, referral for cancellation) | W | 1 | contribution |
+| `GET /office/exempted/{estId}/returns` | Exemption cell reviews trust returns | W | 1 | contribution |
 | `GET /office/exempted/{estId}/audits` | Exemption cell reviews trust audit reports | P | 3 | employer |
 | `POST /ho/exemptions/{estId}/decisions` 🔐 | HO grants / cancels exemption | P | 3 | employer |
 

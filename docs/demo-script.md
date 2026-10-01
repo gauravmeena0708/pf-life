@@ -51,7 +51,8 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `member-h` | Member in service since 2011 on wages above the ceiling | Higher pension |
 | `worker-expat`, `iw-officer`, `ho-iwu` | International worker; International Workers cell; HO International Workers Unit | International workers |
 | `ro-edli` | EDLI section officer | EDLI decision |
-| `ho-publicity`, `ro-exemption` | HO Public Relations (circulars); exemption cell (surrendered trusts) | Public services, trusts |
+| `ho-publicity`, `ro-exemption` | HO Public Relations (circulars); exemption cell (trusts' monthly returns, surrendered trusts) | Public services, trusts |
+| `exempted-trust`, `ho-exemption` | Demo Steel Works' PF trust; HO Exemption Division (ranking of all trusts) | Regulating the trust |
 | `zo-audit`, `ndc-is`, `zo-fraud`, `do-oic` | Concurrent Audit Cell; NDC IS Division; zonal fraud-risk committee; District Office in charge | Oversight and administration |
 
 ---
@@ -466,6 +467,16 @@ contribution- and platform-service*
    and 2 months of breaks. **`do-caseworker` → Claim tools › Annexure K from exempted trusts**: reconcile it with the
    receipt (one-time code). Both legs now read *completed* — the pension one started by itself — and the pension
    estimate shows his trust spell with its breaks.
+
+## Regulating the trust: monthly return, evaluator, priority matrix
+*Tests: `tests/e2e/test_trust_regulation.py`, `services/contribution-service/tests/test_exempted_returns.py`*
+
+1. **`exempted-trust` → Trust › Monthly return**: file September 2026 — the employee figures must balance (the check is
+   shown as you type), the due is the two shares, a transfer on time. *Returns filed* shows 600 of 600 and no flags;
+   July shows a lower score, its transfer 7 days late and claims settled late (category A).
+2. **`ro-exemption` → Exempted establishments**: the ranking for July; open Demo Steel Works, its returns and flags; on
+   the late-claims flag, record a *show-cause notice* with a one-time code (advice is not offered for category A).
+3. **`ho-exemption`**: the ranking across all offices, read-only.
 
 ## Disaster recovery, training, camps, totalisation, the foreign agency, the composite death claim
 *Tests: `tests/e2e/test_small_rest.py`*

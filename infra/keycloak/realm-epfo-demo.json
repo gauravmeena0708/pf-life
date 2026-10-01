@@ -249,6 +249,10 @@
       {
         "name": "exempted.trust",
         "description": "Board of Trustees of an exempted establishment's PF trust"
+      },
+      {
+        "name": "ho.exemption",
+        "description": "HO Exemption Division — monitors the zones' exempted establishments and the evaluator ranking"
       }
     ]
   },
@@ -1630,6 +1634,25 @@
         "employer.signatory"
       ],
       "id": "00000000-0000-4000-8000-000000000068"
+    },
+    {
+      "username": "ho-exemption",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "HO Exemption Division",
+      "lastName": "Demo",
+      "email": "ho-exemption@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ho.exemption"
+      ],
+      "id": "00000000-0000-4000-8000-000000000069"
     }
   ]
 }

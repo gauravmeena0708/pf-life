@@ -24,7 +24,7 @@ async def _fetch_trust(trust_id: str, account: str) -> dict:
     return await asyncio.to_thread(get)
 
 
-async def trust_section(session, account: str, exemption: dict) -> dict:
+async def trust_section(session, account: str, exemption: dict, *, commit: bool = True) -> dict:
     cached = (await session.execute(text("SELECT payload,fetched_at FROM trust_passbook_cache WHERE account_link_id=:a"),
                                     {"a": account})).mappings().first()
     rules = await rules_on(session, date.today())
@@ -51,7 +51,8 @@ async def trust_section(session, account: str, exemption: dict) -> dict:
         await session.execute(text("""INSERT INTO trust_passbook_cache (account_link_id,payload,fetched_at)
             VALUES (:a,:p,:at) ON CONFLICT (account_link_id) DO UPDATE SET payload=excluded.payload,fetched_at=excluded.fetched_at"""),
             {"a": account, "p": json.dumps(payload), "at": now})
-        await session.commit()
+        if commit:
+            await session.commit()
         return render(payload, now, False)
     except (OSError, ValueError, TimeoutError):
         if cached:

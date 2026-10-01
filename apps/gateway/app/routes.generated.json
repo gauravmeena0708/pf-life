@@ -1530,6 +1530,22 @@
   },
   {
     "method": "POST",
+    "path_template": "/office/exempted/{estId}/flags/{flagId}/actions",
+    "regex": "^/office/exempted/[^/]+/flags/[^/]+/actions$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.exemption"
+    ],
+    "summary": "The exemption cell records its action on a priority-matrix flag (direction, advice, show-cause notice, referral for cancellation)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/office/ledger-journals/{journalId}/reversals",
     "regex": "^/office/ledger\\-journals/[^/]+/reversals$",
     "status": "W",
@@ -4180,8 +4196,8 @@
     "method": "GET",
     "path_template": "/office/exempted/{estId}/returns",
     "regex": "^/office/exempted/[^/]+/returns$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "contribution",
     "upstream": "http://contribution-service:8000",
     "money": false,
@@ -5313,6 +5329,23 @@
   },
   {
     "method": "GET",
+    "path_template": "/office/exempted/rankings",
+    "regex": "^/office/exempted/rankings$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.exemption",
+      "ho.exemption"
+    ],
+    "summary": "The online performance evaluator: every exempted establishment's score of 600 for a month, ranked",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/office/members/{uan}/locks",
     "regex": "^/office/members/[^/]+/locks$",
     "status": "W",
@@ -6221,11 +6254,11 @@
     "revocation": false
   },
   {
-    "method": "POST",
+    "method": "GET",
     "path_template": "/exempted/me/returns",
     "regex": "^/exempted/me/returns$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "contribution",
     "upstream": "http://contribution-service:8000",
     "money": false,
@@ -6233,7 +6266,23 @@
     "callers": [
       "exempted.trust"
     ],
-    "summary": "Periodic returns of exempted establishment",
+    "summary": "The trust's own returns with their evaluator scores",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/exempted/me/returns",
+    "regex": "^/exempted/me/returns$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "exempted.trust"
+    ],
+    "summary": "The trust's monthly online return: employees, contributions transferred, claims and grievances, interest, investment, audit (P2.9d)",
     "revocation": false
   },
   {

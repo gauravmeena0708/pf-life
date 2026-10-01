@@ -4207,28 +4207,65 @@ paths:
       security:
       - bffSession: []
   /exempted/me/returns:
-    post:
-      operationId: postExemptedReturns
-      summary: Periodic returns of exempted establishment
+    get:
+      operationId: getExemptedReturns
+      summary: The trust's own returns with their evaluator scores
       tags:
       - Exempted establishments (PF trusts)
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: contribution
       x-callers:
       - exempted.trust
       x-scope: own exempted establishment
       security:
       - bffSession: []
+    post:
+      operationId: postExemptedReturns
+      summary: 'The trust''s monthly online return: employees, contributions transferred, claims and grievances, interest,
+        investment, au'
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - exempted.trust
+      x-scope: own exempted establishment
+      security:
+      - bffSession: []
+      description: 'The trust''s monthly online return: employees, contributions transferred, claims and grievances, interest,
+        investment, audit (P2.9d)'
       requestBody:
         required: false
         content:
@@ -11138,6 +11175,41 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/exempted/rankings:
+    get:
+      operationId: getOfficeExemptedRankings
+      summary: 'The online performance evaluator: every exempted establishment''s score of 600 for a month, ranked'
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: month
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - fo.exemption
+      - ho.exemption
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
   /office/exempted/{estId}/audits:
     get:
       operationId: getOfficeExemptedEstIdAudits
@@ -11166,6 +11238,56 @@ paths:
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+  /office/exempted/{estId}/flags/{flagId}/actions:
+    post:
+      operationId: postOfficeExemptedEstIdFlagsFlagIdActions
+      summary: The exemption cell records its action on a priority-matrix flag (direction, advice, show-cause notice, referral
+        for canc
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: estId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: flagId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - fo.exemption
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: The exemption cell records its action on a priority-matrix flag (direction, advice, show-cause notice,
+        referral for cancellation)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/exempted/{estId}/past-accumulation-ingestions:
     post:
       operationId: postOfficeExemptedEstIdPastAccumulationIngestions
@@ -11298,14 +11420,20 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: contribution
       x-callers:
       - fo.exemption
