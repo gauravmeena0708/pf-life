@@ -102,9 +102,33 @@ the printed ones. What the slice relies on:
   claims with EPFO; the member home's nudge offers to move an old EPFO member ID's balance into the trust (Cond. 4).
 - **ECR**: for an exempted establishment the return's PF lines are refused with a reason and only the pension and
   administrative charges are due to EPFO.
-- **Transfers / Annexure K**: Form 13 from an EPFO member ID to the trust — EPFO pays the trust with Annexure K; and
-  from the trust to EPFO — the trust answers the office's request and submits Annexure K with the amount
-  (`/exempted/me/annexure-k-*`, brought forward from Phase 3); `fo.da_accounts` reconciles it.
+- **Each member ID has two accounts**: the PF account (with EPFO, or with the trust while the establishment is
+  exempted) and the EPS account (always with EPFO — the trust members are EPS members, Pension Manual §1.3.2; the
+  exempted employer pays the pension share to EPFO, Exemption Manual p.164). The EPS account carries the pension
+  service (months, breaks) and contributions of that member ID.
+- **A transfer has two legs, each with its own status** shown to the member, the employer and the office:
+  - *PF leg* — the PF balance and PF service: to or from the trust through Annexure K (the trust answers the office's
+    request and submits the amount, `/exempted/me/annexure-k-*`, brought forward from Phase 3; `fo.da_accounts`
+    reconciles it); between EPFO member IDs as today.
+  - *EPS leg* — the pension service (and its breaks) from the EPS account of the old member ID to the EPS account of
+    the new one, both with EPFO.
+  - **Unexempted → exempted**: the PF leg goes to the trust; the EPS leg moves the service to the EPS account of the
+    member ID linked to the exempted establishment, on approval (it does not depend on the trust).
+  - **Exempted → unexempted**: the PF leg comes from the trust; when it is completed (the trust's Annexure K received
+    and reconciled), the EPS leg from the exempted member ID's EPS account **starts automatically** — no second request.
+    Until then the EPS leg shows *waiting for the PF transfer from the trust*.
+  - Statuses per leg: REQUESTED → (PF from a trust: AWAITING_TRUST → ANNEXURE_K_RECEIVED →) COMPLETED, or
+    RETURNED with the reason; the EPS leg WAITING_FOR_PF → COMPLETED.
+  - This closes the gap the Pension Manual names (p.56): "members get their PF transferred from Trust and fail to get EPS
+    service history transferred to EPFO and thus there will be no continuous service".
+- **Pension service adds up across member IDs**: the pension estimate and the pension claim use the EPS accounts of
+  all the member's IDs — the exempted spell included — less breaks without contributions (para 9; breaks from
+  Annexure K, nil when it shows none, Pension Manual p.45). Today the estimate counts one joining-to-exit record only
+  (`services/pension-service/app/api/routes.py`); that is fixed first, as it is wrong for any member with several
+  employers.
+- **Test of the whole path**: a member moves unexempted → exempted → unexempted; the PF moves twice through the trust,
+  the EPS service moves twice inside EPFO (the second time on its own once the trust's PF arrives), both statuses are
+  visible at each step, and the pension service at the end is the sum of the three spells.
 - **Persona and seed**: `exempted-trust` (Board of Trustees' officer, `exempted.trust`) for a seeded exempted
   establishment (17(1)(a), active) with its trust profile (`GET /exempted/me/profile`, the conditions it has
   undertaken); a member there who also has an EPFO member ID with a balance elsewhere.
