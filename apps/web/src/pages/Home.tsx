@@ -26,6 +26,15 @@ export function Home() {
   const authenticated = !!session.data?.authenticated;
   return <div className="stack home-page">
     <PageHeader eyebrow={t("home.eyebrow")} title={t("home.heading")} description={t("home.intro")} />
+    <section className="card stack handbook-card" aria-labelledby="handbook-heading">
+      <h2 id="handbook-heading">{t("home.handbookTitle")}</h2>
+      <p className="muted">{t("home.handbookDescription")}</p>
+      <div className="actions">
+        <a href="/cto-handbook/index.html" className="button primary" target="_blank" rel="noopener noreferrer">{t("home.handbookOpen")}</a>
+        <a href="/cto-handbook/epfo-cto-handbook.pdf" download>{t("home.handbookPdf")}</a>
+      </div>
+      <p className="muted handbook-language-note">{t("home.handbookLanguageNote")}</p>
+    </section>
     <section className="stack" aria-labelledby="built-heading">
       <h2 id="built-heading">{t("home.built")}</h2>
       <SystemTotals />
