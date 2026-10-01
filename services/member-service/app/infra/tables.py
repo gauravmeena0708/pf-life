@@ -23,6 +23,7 @@ members = Table(
     Column("aadhaar_ref", String(64), index=True),           # a stand-in for the verified Aadhaar (never the number): UANs sharing it form a set
     Column("primary_account_link_id", String(40)),           # the primary member ID of the member's set (P2.7d)
     Column("international", JSON),                           # P2.9a: an international worker — {nationality, passport_masked}
+    Column("activated_at", DateTime(timezone=True)),          # mock OTP activation (P2.12a)
 )
 
 employments = Table(
@@ -49,6 +50,17 @@ office_staff = Table(
     Column("subject", String(80), primary_key=True),
     Column("stakeholder", String(60), nullable=False),
     Column("office_id", String(40), nullable=False),
+)
+
+crowdsource_verifications = Table(
+    "crowdsource_verifications", metadata,
+    Column("account_link_id", String(40), ForeignKey("employments.account_link_id"), primary_key=True),
+    Column("uan", String(12), nullable=False),
+    Column("co_worker_uans", JSON, nullable=False),
+    Column("note", String(1000), nullable=False),
+    Column("verified_by", String(80), nullable=False),
+    Column("verified_by_office", String(40), nullable=False),
+    Column("verified_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
 )
 
 # KYC seeded by the member (or uploaded in bulk by the employer): checked by a mock verifier (UIDAI / NSDL /

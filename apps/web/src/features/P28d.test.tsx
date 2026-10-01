@@ -237,7 +237,7 @@ it.each([["ho.publicity", "/ho/circulars"], ["fo.exemption", "/office/exempted"]
   expect(menusFor(role).some((group) => group.to?.startsWith(path) || group.items?.some((item) => item.to?.startsWith(path)))).toBe(true);
 });
 it("provides the public menu without a login", () => {
-  expect(menusFor(undefined)[0].items?.map((item) => item.label)).toEqual(["Grievance (without login)", "Grievance status", "Claim status", "Circulars"]);
+  expect(menusFor(undefined)[0].items?.map((item) => item.label)).toEqual(["Grievance (without login)", "Grievance status", "Claim status", "Inoperative account search", "Circulars"]);
 });
 it.each(["finance", "exemption", "publicity"])("hides the %s command form from unrelated roles", async (kind) => {
   renderPage(kind === "finance" ? <InterestPage /> : kind === "exemption" ? <ExemptedPage /> : <CircularsPage />, "member");

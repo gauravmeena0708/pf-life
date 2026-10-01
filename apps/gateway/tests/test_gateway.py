@@ -27,10 +27,18 @@ def test_literal_route_beats_template():
     assert match_route(overlapping, "GET", "/foo/literal/very-long-literal")["path_template"] == "/foo/literal/{id}"
 
 
+def planned_route(app, method, path, status, callers, phase=3):
+    import re
+    app.state.routes.append({"method": method, "path_template": path, "regex": "^" + re.escape(path) + "$", "status": status,
+                             "phase": phase, "owner": "member", "upstream": "http://member-service:8000", "money": False,
+                             "step_up": False, "callers": callers, "summary": "synthetic planned route", "revocation": False})
+
+
 @pytest.mark.asyncio
 async def test_planned_public_route_is_501_without_auth(client):
-    http, _, _ = client
-    response = await http.post("/api/v1/public/inoperative-accounts/searches", json={})   # planned for Phase 3
+    http, app, _ = client
+    planned_route(app, "POST", "/public/planned-lookups", "P", [])          # every public route is built now; a synthetic one
+    response = await http.post("/api/v1/public/planned-lookups", json={})
     assert response.status_code == 501
     assert response.headers["content-type"].startswith("application/problem+json")
     assert response.json()["type"] == "/problems/planned"
@@ -338,8 +346,9 @@ def test_backchannel_uses_internal_keycloak_url_but_keeps_public_issuer():
 @pytest.mark.asyncio
 async def test_phase_2_mock_route_answers_planned_not_502(client):
     http, app, _ = client
+    planned_route(app, "POST", "/members/planned-mock-requests", "M", ["member"], phase=2)   # synthetic: a mock route of a later phase
     sid, session = await login_as(app, "member")
-    response = await http.post("/api/v1/members/uan-activations",
+    response = await http.post("/api/v1/members/planned-mock-requests",
                                cookies={"__Host-epfo-session": sid, "epfo-csrf": session["csrf"]},
                                headers={"X-CSRF-Token": session["csrf"]})
     assert response.status_code == 501

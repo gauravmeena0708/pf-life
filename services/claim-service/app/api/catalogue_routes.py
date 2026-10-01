@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['POST /claimants/death-claims', 'GET /office/annexure-k-files', 'GET /office/edli-claims', 'POST /office/payment-scrolls', 'POST /office/physical-claims', 'GET /office/transfers', 'GET /employers/me/claim-attestations', 'GET /employers/me/transfer-requests', 'GET /members/me/claims', 'POST /members/me/claims', 'POST /members/me/transfers', 'GET /office/payment-scrolls/ready', 'GET /office/system/cad-static-data', 'POST /public/claims/status-lookups', 'GET /members/me/claims/eligibility-preview', 'GET /members/me/claims/eligible-types', 'POST /members/me/tax/form-15g-15h', 'GET /members/me/transfers/auto', 'POST /members/me/transfers/auto/{transferId}/confirmations', 'GET /members/me/claims/{claimId}', 'GET /members/me/transfers/{transferId}', 'POST /employers/me/claim-attestations/{claimId}/decisions', 'POST /employers/me/transfer-requests/{transferId}/decisions', 'GET /members/me/claims/{claimId}/audit-trail', 'GET /members/me/claims/{claimId}/bank-details', 'PUT /members/me/claims/{claimId}/bank-details', 'POST /members/me/claims/{claimId}/cancellations', 'POST /members/me/claims/{claimId}/confirmations', 'POST /members/me/claims/{claimId}/documents', 'POST /members/me/claims/{claimId}/re-disbursement-requests', 'GET /claimants/death-claims/{claimId}', 'POST /claimants/death-claims/{claimId}/beneficiaries', 'POST /office/annexure-k-files/{annexureId}/reconciliations', 'GET /office/claims/{claimId}/additional-forms', 'GET /office/claims/{claimId}/audit-trail', 'GET /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/payment-instructions', 'POST /office/claims/{claimId}/re-disbursement-approvals', 'POST /office/claims/{claimId}/reissues', 'GET /office/death-claims/{claimId}/shares-summary', 'POST /office/edli-claims/{claimId}/benefit-previews', 'POST /office/edli-claims/{claimId}/decisions', 'POST /office/payment-scrolls/{scrollId}/return-reconciliations', 'POST /office/transfers/{transferId}/decisions', 'POST /office/transfers/{transferId}/verifications', 'PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares']
+OPERATIONS = ['POST /claimants/death-claims', 'GET /office/annexure-k-files', 'GET /office/edli-claims', 'POST /office/payment-scrolls', 'POST /office/physical-claims', 'GET /office/transfers', 'GET /employers/me/claim-attestations', 'GET /employers/me/transfer-requests', 'GET /members/me/claims', 'POST /members/me/claims', 'POST /members/me/transfers', 'GET /office/payment-scrolls/ready', 'GET /office/system/cad-static-data', 'POST /office/tds/computations', 'POST /public/claims/status-lookups', 'GET /members/me/claims/eligibility-preview', 'GET /members/me/claims/eligible-types', 'POST /members/me/tax/form-15g-15h', 'GET /members/me/tax/form-16a', 'GET /members/me/transfers/auto', 'POST /members/me/transfers/auto/{transferId}/confirmations', 'GET /members/me/claims/{claimId}', 'GET /members/me/transfers/{transferId}', 'POST /employers/me/claim-attestations/{claimId}/decisions', 'POST /employers/me/transfer-requests/{transferId}/decisions', 'GET /members/me/claims/{claimId}/audit-trail', 'GET /members/me/claims/{claimId}/bank-details', 'PUT /members/me/claims/{claimId}/bank-details', 'POST /members/me/claims/{claimId}/cancellations', 'POST /members/me/claims/{claimId}/confirmations', 'POST /members/me/claims/{claimId}/documents', 'POST /members/me/claims/{claimId}/re-disbursement-requests', 'GET /claimants/death-claims/{claimId}', 'POST /claimants/death-claims/{claimId}/beneficiaries', 'POST /office/annexure-k-files/{annexureId}/reconciliations', 'GET /office/claims/{claimId}/additional-forms', 'GET /office/claims/{claimId}/audit-trail', 'GET /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/cad', 'POST /office/claims/{claimId}/payment-instructions', 'POST /office/claims/{claimId}/re-disbursement-approvals', 'POST /office/claims/{claimId}/reissues', 'GET /office/death-claims/{claimId}/shares-summary', 'POST /office/edli-claims/{claimId}/benefit-previews', 'POST /office/edli-claims/{claimId}/decisions', 'POST /office/payment-scrolls/{scrollId}/return-reconciliations', 'POST /office/transfers/{transferId}/decisions', 'POST /office/transfers/{transferId}/verifications', 'PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares']
 
 @router.api_route("/api/v1/claimants/death-claims", methods=["POST"], include_in_schema=False)
 async def post_claimants_death_claims(actor: Actor = Depends(require_actor)) -> None:
@@ -77,6 +77,11 @@ async def get_office_system_cad_static_data(actor: Actor = Depends(require_actor
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Diagnostic view of CAD static reference data (interest tables, bank branch master) and its version (")
 
 
+@router.api_route("/api/v1/office/tds/computations", methods=["POST"], include_in_schema=False)
+async def post_office_tds_computations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "TDS on withdrawal (illustrative rules)")
+
+
 @router.api_route("/api/v1/public/claims/status-lookups", methods=["POST"], include_in_schema=False)
 async def post_public_claims_status_lookups(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Claim status by reference (OTP proof; no PII in response)")
@@ -95,6 +100,11 @@ async def get_members_me_claims_eligible_types(actor: Actor = Depends(require_ac
 @router.api_route("/api/v1/members/me/tax/form-15g-15h", methods=["POST"], include_in_schema=False)
 async def post_members_me_tax_form_15g_15h(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Upload Form 15G / 15H")
+
+
+@router.api_route("/api/v1/members/me/tax/form-16a", methods=["GET"], include_in_schema=False)
+async def get_members_me_tax_form_16a(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "TDS certificate (Form 16A)")
 
 
 @router.api_route("/api/v1/members/me/transfers/auto", methods=["GET"], include_in_schema=False)

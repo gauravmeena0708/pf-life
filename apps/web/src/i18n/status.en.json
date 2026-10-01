@@ -175,6 +175,7 @@
     "ROTATION_DUE": "Due for rotation",
     "ROTATION_OVERDUE": "Overdue for rotation",
     "TENURE_UNKNOWN": "Posting date not recorded",
-    "DUE": "Payment due"
+    "DUE": "Payment due",
+    "REACTIVATED": "Reactivated"
   }
 }

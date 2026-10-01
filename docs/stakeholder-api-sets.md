@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 240 |
+| Activities | 241 |
 | Stakeholders with at least one API | 96 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 1 |
@@ -22,7 +22,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 
 #### `public` — Public visitor (establishment search, calculators, circulars)
 
-Activities: **F13.public** Browse schemes, offices, statistics, circulars; search establishments; calculators; TRRN status
+Activities: **F11.public_search** Search an inoperative account with a demo CAPTCHA and verify an OTP before viewing the balance; **F13.public** Browse schemes, offices, statistics, circulars; search establishments; calculators; TRRN status
 
 | Endpoint | Status |
 |---|---|
@@ -38,6 +38,7 @@ Activities: **F13.public** Browse schemes, offices, statistics, circulars; searc
 | `POST /ai/knowledge/search` | W |
 | `POST /public/demo-calculations/epf` | W |
 | `POST /public/demo-calculations/pension` | W |
+| `POST /public/inoperative-accounts/searches` | W |
 | `GET /public/demo-challenges` | M |
 | `POST /public/trrn-status-lookups` | M |
 
@@ -74,6 +75,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/pension-scheme-certificate` | W |
 | `GET /members/me/service-history` | W |
 | `GET /members/me/sessions` | W |
+| `GET /members/me/tax/form-16a` | W |
 | `GET /members/me/tax/taxable-interest` | W |
 | `GET /members/me/transfers/auto` | W |
 | `GET /members/me/transfers/{transferId}` | W |
@@ -115,18 +117,16 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `PUT /members/me/claims/{claimId}/bank-details` | W |
 | `POST /members/uan-activations` | M |
 | `POST /members/uan-allotments` | M |
-| `GET /members/me/tax/form-16a` | P |
 
 Integration adapters: `uidai`
 
 #### `member.exited` — Member — exited / inoperative account holder
 
-Activities: **F11.search** Search inoperative accounts; request reactivation / settlement (online, at FO or NAN camp)
+Activities: **F11.search** Request reactivation / settlement (online, at FO or NAN camp)
 
 | Endpoint | Status |
 |---|---|
 | `POST /members/me/claims` | W |
-| `POST /public/inoperative-accounts/searches` | P |
 
 #### `member.disabled` — Member with disability (disablement pension)
 
@@ -392,12 +392,11 @@ Activities: **F03.b2b_upload** Upload ECR through the B2B payroll API on behalf 
 
 #### `csc_operator` — Common Service Centre / assisted-access operator (e.g. DLC, UAN)
 
-Activities: **F02.csc_assist** Assist a member or pensioner with UAN or life-certificate services
+Activities: **F02.csc_assist** Assist a member with UAN allotment (mock Aadhaar face authentication)
 
 | Endpoint | Status |
 |---|---|
 | `POST /members/uan-allotments` | M |
-| `POST /pensioners/me/life-certificate/submissions` | M |
 
 #### `liquidator` — Official liquidator / resolution professional of a closed or insolvent employer
 
@@ -436,6 +435,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `GET /office/work-queue` | W |
 | `POST /ai/claims/analyse` | W |
 | `POST /ai/feedback` | W |
+| `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | W |
 | `POST /office/annexure-k-files/{annexureId}/reconciliations` | W |
 | `POST /office/annexure-k-files/{annexureId}/vdr-reconciliations` | W |
 | `POST /office/cases/{caseId}/documents/{docId}/attestation-views` | W |
@@ -451,14 +451,13 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /office/pension-claims/{claimId}/input-data-sheets` | W |
 | `POST /office/physical-claims/{intakeId}/identity-validations` | W |
 | `POST /office/receipts/{receiptId}/trrn-adjustments` | W |
+| `POST /office/tds/computations` | W |
 | `POST /office/transfers/{transferId}/recredits` | W |
 | `POST /office/transfers/{transferId}/verifications` | W |
 | `POST /office/vdr-entries` | W |
 | `POST /office/vdr-entries/{vdrId}/rejections` | W |
-| `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | P |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | P |
 | `POST /office/pensions/higher-pension-options/{optionId}/ledger-transfers` | P |
-| `POST /office/tds/computations` | P |
 | `POST /office/vdr-entries/{vdrId}/ecr-reconciliations` | ? |
 | `POST /office/vdr-entries/{vdrId}/member-beneficiaries` | ? |
 | `POST /office/vdr-entries/{vdrId}/special-credits` | ? |
@@ -505,11 +504,13 @@ Activities: **F02.jd_verify_ao** Verifier (AO route): cross-check and recommend;
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/accounts/inoperative` | W |
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/pension-claims` | W |
 | `GET /office/transfers` | W |
 | `GET /office/work-queue` | W |
+| `POST /office/accounts/{accountLinkId}/reactivations` | W |
 | `POST /office/cases/{caseId}/decisions` | W |
 | `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
@@ -517,7 +518,6 @@ Activities: **F02.jd_verify_ao** Verifier (AO route): cross-check and recommend;
 | `POST /office/member-change-requests/{requestId}/verifications` | W |
 | `POST /office/pension-claims/{claimId}/input-data-sheets/{idsId}/approvals` | W |
 | `POST /office/transfers/{transferId}/decisions` | W |
-| `POST /office/accounts/{accountLinkId}/reactivations` | P |
 
 #### `fo.fa_accounts` — DA / SS in the F&A (Accounts) wing — ledger debit posting, viewing the **Claim Approval Dockets (CAD)** of each level, reconciliation of rejected / returned payments
 
@@ -534,6 +534,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/accounts/inoperative` | W |
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/compliance/vishwas-applications` | W |
@@ -545,6 +546,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `GET /office/ledger-adjustments` | W |
 | `GET /office/signature-registrations` | W |
 | `GET /office/work-queue` | W |
+| `POST /office/accounts/{accountLinkId}/reactivations` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
 | `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/claims/{claimId}/re-disbursement-approvals` | W |
@@ -558,7 +560,6 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/member-change-requests/{requestId}/decisions` | W |
 | `POST /office/members/{uan}/freezes` | W |
 | `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | W |
-| `POST /office/accounts/{accountLinkId}/reactivations` | P |
 | `POST /office/compliance/cases/{caseId}/escaped-assessments-7c` | P |
 | `POST /office/compliance/cases/{caseId}/hearings` | P |
 | `POST /office/compliance/cases/{caseId}/notices` | P |
@@ -1473,8 +1474,7 @@ flowchart LR
   F02_register["employer.operator<br/>Register a new joinee (create or link UAN), bulk registratio"]
   F02_uan_self["member<br/>Self-generate / activate UAN with Aadhaar face authenticatio"]
   F02_uidai["ext.uidai<br/>Aadhaar e-KYC, OTP and face-authentication responses"]
-  F02_csc_assist["csc_operator<br/>Assist a member or pensioner with UAN or life-certificate se"]
-  style F02_csc_assist stroke-dasharray: 5 5
+  F02_csc_assist["csc_operator<br/>Assist a member with UAN allotment (mock Aadhaar face authen"]
   F02_kyc_seed["member<br/>Seed KYC (Aadhaar, bank, PAN)"]
   F02_kyc_approve["employer.signatory<br/>Approve KYC seeded by member / pending for digital signature"]
   F02_pan_verify["ext.income_tax<br/>Verify PAN"]
@@ -1856,13 +1856,15 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  F11_search["member.exited<br/>Search inoperative accounts; request reactivation / settleme"]
+  F11_public_search["public<br/>Search an inoperative account with a demo CAPTCHA and verify"]
+  F11_search["member.exited<br/>Request reactivation / settlement (online, at FO or NAN camp"]
   F11_nan["fo.nan<br/>Help members at Nidhi Aapke Nikat camps"]
   style F11_nan stroke-dasharray: 5 5
   F11_verify["fo.da_accounts<br/>Verify inoperative account (digital records, crowdsourcing t"]
   F11_approve["fo.ao<br/>Approve reactivation / settlement in the AO band; forward hi"]
   F11_approve_apfc["fo.apfc<br/>Approve inoperative-account settlement in higher amount band"]
   F11_oic_monitor["fo.oic<br/>Trigger verification of suspicious inoperative-account reque"]
+  F11_public_search --> F11_verify
   F11_search --> F11_verify
   F11_nan --> F11_verify
   F11_verify --> F11_approve

@@ -63,6 +63,8 @@ import { PublicGrievancesPage, PublicClaimStatusPage } from "./features/public/P
 import { PublicCircularsPage } from "./features/public/CircularsList";
 import { EReportCardPage } from "./features/public/EReportCardPage";
 import { PublicLookups } from "./pages/PublicLookups";
+import { InoperativeSearchPage } from "./features/public/InoperativeSearchPage";
+import { CscPage } from "./features/csc/CscPage";
 import { SecurityActivity } from "./pages/SecurityActivity";
 import { ConcurrentAuditPage } from "./features/audit/ConcurrentAuditPage";
 import { IssueTrackerPage } from "./features/ndc/IssueTrackerPage";
@@ -126,6 +128,7 @@ export function App() {
             <Route path="/employer" element={<EmployerHome />} />
             <Route path="/employer/ecr" element={<EcrPage />} />
             <Route path="/member" element={<MemberHomePage />} />
+            <Route path="/csc" element={<CscPage />} />
             <Route path="/member/passbook" element={<PassbookPage />} />
             <Route path="/member/claims" element={<ClaimsPage />} />
             <Route path="/member/claims/:claimId" element={<ClaimDetailPage />} />
@@ -157,6 +160,7 @@ export function App() {
             <Route path="/office/work-queue" element={<WorkQueuePage />} />
             <Route path="/office/cases/:caseId" element={<CasePage />} />
             <Route path="/public" element={<PublicLookups />} />
+            <Route path="/public/inoperative-accounts" element={<InoperativeSearchPage />} />
             <Route path="/public/grievances" element={<PublicGrievancesPage />} />
             <Route path="/public/claims" element={<PublicClaimStatusPage />} />
             <Route path="/public/circulars" element={<PublicCircularsPage />} />

@@ -31,6 +31,12 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.9c** | Member experience: a life-event home page, one consolidated view, plain-language status, nudges, a mobile pass | **Done** (30 Sep 2026; built before P2.9b, which waits for the Exemption Manual) |
 | **P2.10a** | Vigilance cases: a CAIU-confirmed risk signal (or a complaint) referred to vigilance; the CVO assigns a preliminary inquiry to a zone (90 days); zonal vigilance reports findings; the CVO decides; restricted, access-logged, the complainant masked | **Done** (30 Sep 2026) |
 | **P2.10b** | Preventive vigilance: sensitive posts and 3-year rotation alerts; vigilance clearance for HR postings, promotions and retirement against open cases and penalties | **Done** (1 Oct 2026) |
+| **P2.12a** | Member and tax: Form 16A, the office's TDS computation; UAN allotment and activation (mock Aadhaar face / OTP); inoperative accounts — the public helpdesk search, verification through co-workers, reactivation in the AO / APFC bands | **Done** (1 Oct 2026) |
+| P2.12b | Employer lifecycle: voluntary coverage, closure, transfer to another office; contractors tagging ECR members to a principal employer and the principal's view of contractor compliance; MCA and Shram Suvidha registration feeds (mock) | Planned |
+| P2.12c | Pension office: deciding a validated higher-pension option and the PF → pension fund transfer after the dues; Special 10D; bank-wise disbursement lists; the actuarial extract | Planned |
+| P2.12d | Oversight: internal audit reports, paras, replies and decisions; DPDP data-principal requests; RTI replies; the CPGRAMS feed (mock) | Planned |
+| P2.12e | Head office reporting: balance sheet, investments, board packs (aggregates), fund-manager position feed (mock) | Planned |
+| P2.12f | The rest: DR replication status and failover drill, training sandboxes, Nidhi Aapke Nikat camp requests, totalisation claims and the foreign agency's CoC check, the composite death claim | Planned |
 
 ## P2.9 — plan
 
@@ -175,6 +181,13 @@ advice); every period and outcome is illustrative and lives in the rule set.
 - Vigilance clearance: HR asks before a posting to a sensitive post, a promotion or retirement; clear unless an
   open case names the officer or a penalty is current.
 - Not planned: the Agreed List and doubtful-integrity register (kept with the CBI; too sensitive even as a demo).
+
+## P2.12 — plan (the smaller planned endpoints)
+
+P2.11 (compliance proceedings) and P2.9b / P2.9d (exempted establishments) wait; first the catalogue's smaller
+planned endpoints (41, outside compliance and exemption), grouped by who uses them so each slice is one demo story.
+The HO reports on proceedings and recovery wait for P2.11. Each slice: the endpoints built (rows move P → W), rules in
+the rule set where amounts or periods are involved, unit, must-deny and end-to-end tests, and the web screen.
 
 ## P2.1 — how it is built
 
@@ -631,3 +644,34 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
   even as a demo).
 - **Tests**: workflow-service `test_vigilance.py` (rotation, clearance withheld and restored, the posting check and the
   new posting date); web `Vigilance.test.tsx`; end to end `test_vigilance.py::test_sensitive_posts_clearance_and_posting`.
+
+## P2.12a — how it is built
+
+- **Form 16A** (claim-service, `tds_routes.py`): the member's TDS certificate (section 192A) for a financial year from
+  the tax stored when each claim was paid — never recomputed — by quarter, with a deterministic certificate number and
+  a synthetic deductor TAN; marked illustrative, not for filing.
+- **Quarterly TDS statement** (`POST /office/tds/computations`, `fo.da_accounts`): the office's Form 26Q for a quarter
+  that has ended — deductees, totals — filed with a deterministic Income Tax mock; one filing per office and quarter
+  (`tds_filings`, migration 0015; a second answers 409 with the acknowledgement); `TdsStatementFiled.v1`.
+- **UAN allotment** (member-service, `csc_operator` or `member`): mock Aadhaar face authentication
+  (`MOCK-FACE-MATCH`); only a hashed Aadhaar reference is kept; an Aadhaar that already has a UAN, or a member asking
+  for themselves, gets 409 with the masked UAN; `UanAllotted.v1` carries no Aadhaar or name. New persona `csc-operator`.
+- **UAN activation** (`member`): the caller's own UAN with the demo OTP 123456; `activated_at` (migration 0013).
+- **Inoperative accounts** — rule-set section `inoperative_accounts` (36 months without a transaction — interest is
+  not one, SOP on transaction-less accounts —, 2 co-workers, the AO's band ₹5,00,000):
+  - the office list (contribution-service) takes the period from the rule set and shows *verified* / *reactivated*;
+    the AO and APFC can read it too;
+  - verification through co-workers (member-service, `fo.da_accounts`): at least two members with overlapping
+    service at the same establishment confirm the holder; `InoperativeAccountVerified.v1` → contribution-service;
+  - reactivation (`fo.ao` within the band, `fo.apfc` above it; step-up bound to the balance) only when verified;
+    `AccountReactivated.v1`;
+  - the public search (no login, the gateway's demo CAPTCHA and rate limit): name, date of birth and establishment →
+    masked matches without a balance; the balance only after the OTP (demo OTP shown) on a 15-minute reference.
+  - Seed: MOHAN DEMO (UAN 100000000910, `AL-0913`), left the demo establishment in 2019 with ₹2,00,000; DEV and HARI
+    worked there at the time.
+- **Web**: Form 16A on *My claims*; *Activate your UAN* on the security page; `/csc` for the CSC operator; the public
+  *Inoperative account search*; on the office claim tools the inoperative list with *Verify through co-workers* and
+  *Reactivate*, and the quarterly TDS statement.
+- **Fixes on the way**: member-service had never read the rule set — its image now carries the baseline rules and
+  it keeps published rule sets; two gateway tests used these endpoints as examples of planned ones and now use a
+  synthetic planned route.

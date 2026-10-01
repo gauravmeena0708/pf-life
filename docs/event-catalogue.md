@@ -46,6 +46,10 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `VigilanceFindingsRecorded.v1` | workflow | audit | vigilance_case | 1 |
 | `VigilanceDecisionRecorded.v1` | workflow | audit | vigilance_case | 1 |
 | `VigilanceClearanceIssued.v1` | workflow | audit | vigilance_clearance | 1 |
+| `TdsStatementFiled.v1` | claim | audit | tds_filing | 1 |
+| `UanAllotted.v1` | member | audit | member | 1 |
+| `InoperativeAccountVerified.v1` | member | contribution, audit | member_account | 1 |
+| `AccountReactivated.v1` | contribution | audit | member_account | 1 |
 | `StaffPostingChanged.v1` | workflow | member, claim, grievance, intelligence, compliance, international, pension, employer, reporting, audit | staff_posting | 1 |
 | `AutoTransferConfirmed.v1` | claim | contribution, audit | auto_transfer | 1 |
 | `TransferPosted.v1` | contribution | claim, member, workflow, audit | ledger_journal | 1 |

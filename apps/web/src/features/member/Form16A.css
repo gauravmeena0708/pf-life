@@ -1,0 +1,6 @@
+.form-16a-parties { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem; }
+.form-16a-parties > div { border: 1px solid #c8d3df; padding: .75rem 1rem; background: #fff; }
+.form-16a-parties h3 { margin: 0 0 .4rem; }
+.form-16a-parties p { margin: 0; }
+.form-16a tfoot { font-weight: 700; border-top: 2px solid #193d68; }
+@media print { .form-16a-print { display: none; } .form-16a { break-inside: avoid; } }

@@ -32,11 +32,13 @@ def api(tmp_path, monkeypatch):
 
     from app.infra.models import Base
     from app.infra.tables import metadata
+    from epfo_persistence.policy import policy_metadata
 
     async def setup():
         async with db.engine().begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
             await conn.run_sync(metadata.create_all)
+            await conn.run_sync(policy_metadata.create_all)
         from app import seed
         seed.SEED_FILE = os.environ["SEED_FILE"]
         await seed.main()

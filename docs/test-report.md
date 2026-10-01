@@ -98,6 +98,19 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 12a: Form 16A, TDS statement, UAN allotment and activation, inoperative accounts (1 October 2026)
+
+Unit: claim-service 60 (new `test_tds_documents.py`), member-service 55 (new `test_inoperative_identity.py`),
+contribution-service 66 (new `test_inoperative.py`), gateway 23, platform 21, and every other service suite passes
+with the new seed member; web 172 passed (new `P212a.test.tsx`); end to end 77 passed (new
+`test_small_member_tax_inoperative.py`, run twice: the second run checks the reactivated account stays off the list);
+must-deny 18; UI smoke 2. Found on the way, all fixed: codex's database tests could not run in its sandbox, and on
+this machine they found a test helper reading rows from an UPDATE and SQLite returning a timestamp as text;
+member-service's image lacked the baseline rules (a 500 on the first rule-set read there); interest credits had
+kept an account "operative" (they no longer count as a transaction); three tests (two gateway, one end to end) used
+the now-built endpoints as examples of planned ones; the first seed id chosen for the inoperative member was
+already a member ID of another UAN.
+
 ## Update — Phase 2, slice 10b: sensitive posts and vigilance clearance (1 October 2026)
 
 After `make reset` (member A's balance restored; Journey B passes again) the suites were run on a freshly built stack:

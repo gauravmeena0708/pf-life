@@ -175,3 +175,9 @@ vigilance:
   clearance_valid_days: 90     # a vigilance clearance is valid this long
   clearance_purposes: [POSTING_SENSITIVE, PROMOTION, RETIREMENT, DEPUTATION, PASSPORT_NOC]
   withholding_outcomes: [MINOR_PENALTY_PROCEEDINGS, MAJOR_PENALTY_PROCEEDINGS, REFERRED_TO_CBI]   # an ordered outcome that withholds clearance
+
+# P2.12a: inoperative accounts (illustrative; after the SOP on transaction-less and inoperative accounts)
+inoperative_accounts:
+  months_without_credit: 36      # no contribution, transfer in or interest for this long → inoperative
+  co_workers_required: 2         # co-workers of the same establishment who confirm the member (crowdsourcing)
+  ao_limit_paise: 50000000       # the AO reactivates / settles up to ₹5,00,000; above it the APFC

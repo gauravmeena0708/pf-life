@@ -114,7 +114,7 @@ activities:
   - {id: F02.register, actor: employer.operator, does: "Register a new joinee (create or link UAN), bulk registration, Form 11 declaration", api: ["POST /employers/me/members", "POST /employers/me/members/bulk-registrations", "POST /employers/me/members/{uan}/declarations", "GET /employers/me/members"], next: [F02.kyc_approve], src: MAP, ev: V}
   - {id: F02.uan_self, actor: member, does: "Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP", api: ["POST /members/uan-allotments", "POST /members/uan-activations", "POST /members/uan-lookups"], adapter: uidai, next: [F02.kyc_seed], src: REF, ev: D}
   - {id: F02.uidai, actor: ext.uidai, does: "Aadhaar e-KYC, OTP and face-authentication responses", adapter: uidai, next: [], src: "JD, REF", ev: D}
-  - {id: F02.csc_assist, actor: csc_operator, does: "Assist a member or pensioner with UAN or life-certificate services", api: ["POST /members/uan-allotments", "POST /pensioners/me/life-certificate/submissions"], next: [], src: "PEN, EC", ev: D, fut: true}
+  - {id: F02.csc_assist, actor: csc_operator, does: "Assist a member with UAN allotment (mock Aadhaar face authentication)", api: ["POST /members/uan-allotments"], next: [], src: "PEN, EC", ev: D}
   - {id: F02.kyc_seed, actor: member, does: "Seed KYC (Aadhaar, bank, PAN)", api: ["GET /members/me/kyc", "POST /members/me/kyc/bank-accounts", "POST /members/me/kyc/{kycType}"], next: [F02.kyc_approve], src: MAP, ev: V}
   - {id: F02.kyc_approve, actor: employer.signatory, does: "Approve KYC seeded by member / pending for digital signature, with DSC or e-sign", api: ["GET /employers/me/kyc-approvals", "POST /employers/me/kyc-approvals/{requestId}/decisions"], adapter: npci, next: [], src: MAP, ev: V}
   - {id: F02.pan_verify, actor: ext.income_tax, does: "Verify PAN", adapter: income_tax, next: [], src: EC, ev: U}
@@ -303,11 +303,12 @@ activities:
   - {id: F10.ho, actor: ho.iwu, does: "Maintain social-security agreements; route totalisation claims", api: ["GET /international/agreements", "POST /international/totalisation-claims"], next: [], src: "EC, MAP", ev: D}
 
 # ─────────────────────────── F11 Inoperative accounts ───────────────────────────
-  - {id: F11.search, actor: member.exited, does: "Search inoperative accounts; request reactivation / settlement (online, at FO or NAN camp)", api: ["POST /public/inoperative-accounts/searches", "POST /members/me/claims"], next: [F11.verify], src: WSU, ev: D}
+  - {id: F11.public_search, actor: public, does: "Search an inoperative account with a demo CAPTCHA and verify an OTP before viewing the balance", api: ["POST /public/inoperative-accounts/searches"], next: [F11.verify], src: WSU, ev: D}
+  - {id: F11.search, actor: member.exited, does: "Request reactivation / settlement (online, at FO or NAN camp)", api: ["POST /members/me/claims"], next: [F11.verify], src: WSU, ev: D}
   - {id: F11.nan, actor: fo.nan, does: "Help members at Nidhi Aapke Nikat camps", api: ["POST /office/outreach-camps/{campId}/assisted-requests"], next: [F11.verify], src: "WSU, PEN", ev: D, fut: true}
   - {id: F11.verify, actor: fo.da_accounts, does: "Verify inoperative account (digital records, crowdsourcing through co-workers' logins)", api: ["GET /office/accounts/inoperative", "POST /office/accounts/{accountLinkId}/crowdsource-verifications"], next: [F11.approve], chain: inoperative_settlement, src: WSU, ev: D}
-  - {id: F11.approve, actor: fo.ao, does: "Approve reactivation / settlement in the AO band; forward higher bands", api: ["POST /office/accounts/{accountLinkId}/reactivations"], next: [F11.approve_apfc], chain: inoperative_settlement, src: WSU, ev: D}
-  - {id: F11.approve_apfc, actor: fo.apfc, does: "Approve inoperative-account settlement in higher amount bands", api: ["POST /office/accounts/{accountLinkId}/reactivations"], next: [F11.oic_monitor], chain: inoperative_settlement, src: WSU, ev: D}
+  - {id: F11.approve, actor: fo.ao, does: "Approve reactivation / settlement in the AO band; forward higher bands", api: ["GET /office/accounts/inoperative", "POST /office/accounts/{accountLinkId}/reactivations"], next: [F11.approve_apfc], chain: inoperative_settlement, src: WSU, ev: D}
+  - {id: F11.approve_apfc, actor: fo.apfc, does: "Approve inoperative-account settlement in higher amount bands", api: ["GET /office/accounts/inoperative", "POST /office/accounts/{accountLinkId}/reactivations"], next: [F11.oic_monitor], chain: inoperative_settlement, src: WSU, ev: D}
   - {id: F11.oic_monitor, actor: fo.oic, does: "Trigger verification of suspicious inoperative-account requests and monitor unblocking daily", api: ["GET /office/accounts/inoperative"], next: [F07.block], src: WSU, ev: D}
 
 # ─────────────────────────── F12 Audit ───────────────────────────

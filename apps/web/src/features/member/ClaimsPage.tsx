@@ -9,6 +9,7 @@ import { ProblemMessage } from "../../components/ProblemMessage";
 import { roleLabel, stateLabel, dateTime } from "../journeyB";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { TaxDeclaration } from "./TaxDeclaration";
+import { Form16A } from "./Form16A";
 import { useStepUp } from "../stepup/useStepUp";
 
 interface ClaimType { claim_type: string; form_type: string; label: string; plain_rule: string; eligible: boolean; max_amount_paise: number; reasons: string[] }
@@ -126,6 +127,7 @@ export function ClaimsPage() {
       </tr>)}</tbody></table></div> : null}
     </section>
     <TaxDeclaration />
+    <Form16A />
     <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
   </section>;
 }

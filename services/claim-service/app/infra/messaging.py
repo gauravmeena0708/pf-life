@@ -87,7 +87,7 @@ async def on_member_registered(session: AsyncSession, event: dict[str, Any]) -> 
     known = (await session.execute(select(accounts.c.international_worker, accounts.c.nationality).where(
         accounts.c.uan == p["uan"]).limit(1))).first()          # a new member ID keeps the UAN's international status
     await session.execute(insert(accounts).values(
-        account_link_id=p["account_link_id"], member_subject=p.get("member_subject"), uan=p["uan"], establishment_id=p["establishment_id"],
+        account_link_id=p["account_link_id"], member_subject=p.get("member_subject"), member_name=p.get("name"), uan=p["uan"], establishment_id=p["establishment_id"],
         office_id=office, date_of_joining=date.fromisoformat(p["date_of_joining"]), employee_paise=0, employer_paise=0,
         pan_verified=bool(p.get("pan_verified")), date_of_birth=date.fromisoformat(p["date_of_birth"]) if p.get("date_of_birth") else None,
         international_worker=bool(known and known[0]), nationality=known[1] if known else None))

@@ -343,6 +343,11 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
         on = iw.get("final_settlement_on") or {}
         if not _whole(on.get("min_age"), 18, 80) or not isinstance(on.get("agreement_nationalities"), list):
             problems.append("international_workers.final_settlement_on needs min_age (18-80) and a list of agreement_nationalities")
+    if "inoperative_accounts" in document:
+        ia = document["inoperative_accounts"] or {}
+        if not _whole(ia.get("months_without_credit"), 12, 120) or not _whole(ia.get("co_workers_required"), 1, 5) \
+                or not _whole(ia.get("ao_limit_paise"), 1, 10**12):
+            problems.append("inoperative_accounts needs months_without_credit (12-120), co_workers_required (1-5) and ao_limit_paise")
     if "vigilance" in document:
         vg = document["vigilance"] or {}
         if not _whole(vg.get("pi_days"), 7, 365):

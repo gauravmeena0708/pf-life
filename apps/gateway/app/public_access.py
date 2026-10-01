@@ -9,7 +9,8 @@ from .request_activity import lookup_fingerprint, summarize_body
 
 PROTECTED = {"/public/establishments", "/public/establishments/{estId}",
              "/public/demo-challenges", "/public/trrn-status-lookups", "/public/grievances",
-             "/public/grievances/status-lookups", "/public/claims/status-lookups"}
+             "/public/grievances/status-lookups", "/public/claims/status-lookups",
+             "/public/inoperative-accounts/searches"}
 
 
 def _peer(request: Request) -> str:
@@ -30,7 +31,8 @@ async def limit_public(request: Request, route: dict):
         request.state.rate_decision = "unavailable"
         return problem(request, 503, "public-access-unavailable", "Public lookup temporarily unavailable")
     ceiling = 10 if route["path_template"] in ("/public/trrn-status-lookups", "/public/grievances",
-                                               "/public/grievances/status-lookups", "/public/claims/status-lookups") else 30
+                                               "/public/grievances/status-lookups", "/public/claims/status-lookups",
+                                               "/public/inoperative-accounts/searches") else 30
     if count > ceiling:
         request.state.rate_decision = "limited"
         return problem(request, 429, "rate-limited", "Too many public lookups", "Try again in a minute.")

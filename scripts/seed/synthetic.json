@@ -521,6 +521,29 @@
           "last_contribution_month": "2026-03"
         }
       ]
+    },
+    {
+      "uan": "100000000910",
+      "name": "MOHAN DEMO",
+      "date_of_birth": "1970-02-14",
+      "subject": null,
+      "account_link_id": "AL-0913",
+      "member_id": "DEMO00001000000000910",
+      "date_of_joining": "2012-07-01",
+      "gender": "MALE",
+      "mobile_masked": "******0910",
+      "email_masked": "m***@demo.invalid",
+      "bank_ifsc": "DEMO0000910",
+      "bank_account_last4": "0910",
+      "kyc": {
+        "aadhaar": "VERIFIED",
+        "pan": "NOT_SEEDED",
+        "bank": "VERIFIED"
+      },
+      "last_contribution_month": "2019-09",
+      "aadhaar_ref": "DEMO-AADHAAR-MOHAN",
+      "_comment": "An inoperative account (P2.12a): left in 2019 and never claimed; the balance was brought forward then. DEV and HARI worked at the same establishment at the time and can confirm him.",
+      "date_of_exit": "2019-09-30"
     }
   ],
   "demo_wage_month": "2026-08",
@@ -575,7 +598,8 @@
     "ndc-is": "00000000-0000-4000-8000-000000000048",
     "zo-fraud": "00000000-0000-4000-8000-000000000049",
     "do-oic": "00000000-0000-4000-8000-000000000050",
-    "zo-vigilance": "00000000-0000-4000-8000-000000000051"
+    "zo-vigilance": "00000000-0000-4000-8000-000000000051",
+    "csc-operator": "00000000-0000-4000-8000-000000000052"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -628,6 +652,11 @@
       "employee_paise": 2400000,
       "employer_paise": 800000,
       "as_of": "2025-03-31"
+    },
+    "AL-0913": {
+      "employee_paise": 12000000,
+      "employer_paise": 8000000,
+      "as_of": "2019-09-30"
     }
   },
   "office_staff": [

@@ -1,5 +1,5 @@
 """Tables owned by claim-service (created by migration 0002)."""
-from sqlalchemy import JSON, BigInteger, Boolean, Column, Date, DateTime, Integer, LargeBinary, MetaData, String, Table, Text, false as sa_false, true as sa_true, func
+from sqlalchemy import JSON, BigInteger, Boolean, Column, Date, DateTime, Integer, LargeBinary, MetaData, String, Table, Text, UniqueConstraint, false as sa_false, true as sa_true, func
 
 from app.infra.models import IdType
 
@@ -11,6 +11,7 @@ accounts = Table(
     "accounts", metadata,
     Column("account_link_id", String(40), primary_key=True),
     Column("member_subject", String(80), index=True),
+    Column("member_name", String(120)),
     Column("establishment_id", String(40), nullable=False),
     Column("office_id", String(40), nullable=False),
     Column("date_of_joining", Date, nullable=False),
@@ -225,4 +226,20 @@ auto_transfers = Table(
     Column("state", String(20), nullable=False),            # CONFIRMED | POSTED
     Column("confirmed_at", DateTime(timezone=True), server_default=func.now()),
     Column("posted_at", DateTime(timezone=True)),
+)
+
+# A filed illustrative Form 26Q is an immutable snapshot for one office and quarter.
+tds_filings = Table(
+    "tds_filings", metadata,
+    Column("filing_id", String(40), primary_key=True),
+    Column("office_id", String(40), nullable=False),
+    Column("financial_year", String(7), nullable=False),
+    Column("quarter", String(2), nullable=False),
+    Column("deductees", JSON, nullable=False),
+    Column("amount_paid_paise", BigInteger, nullable=False),
+    Column("tds_paise", BigInteger, nullable=False),
+    Column("acknowledgement", String(80), nullable=False),
+    Column("filed_by", String(80), nullable=False),
+    Column("filed_at", DateTime(timezone=True), server_default=func.now()),
+    UniqueConstraint("office_id", "financial_year", "quarter"),
 )

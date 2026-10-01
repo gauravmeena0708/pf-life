@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
+import { useTranslation } from "react-i18next";
 
 import { api, command, getSession, rupees, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
@@ -8,6 +9,7 @@ import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 import { SharesSection } from "../claimant/DeathClaimPages";
 import { AnnexureKSection, LocksSection } from "./LedgerTools";
+import { statusLabel } from "../statusLabel";
 
 type Json = Record<string, unknown>;
 const text = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
@@ -21,6 +23,7 @@ function Facts({ data }: { data: Json }) {
 /** Claim office tools: the accounts wing's CAD, the cash section's payment scroll, and the dealing assistant's
  * member 360 view, inoperative accounts and claim audit trail. Each role sees its own sections. */
 export function ClaimToolsPage() {
+  const { t } = useTranslation();
   const stepUp = useStepUp();
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
   const role = session.data?.stakeholder ?? "";
@@ -31,6 +34,11 @@ export function ClaimToolsPage() {
   const [lookup, setLookup] = useState<Json | null>(null);
   const [trail, setTrail] = useState<Json | null>(null);
   const [inoperative, setInoperative] = useState<Json[] | null>(null);
+  const [tds, setTds] = useState<Json | null>(null);
+  const [tdsYear, setTdsYear] = useState(() => {
+    const today = new Date(); const start = today.getFullYear() - (today.getMonth() < 3 ? 1 : 0);
+    return `${start}-${String(start + 1).slice(-2)}`;
+  });
   const staticData = useQuery({ queryKey: ["cad-static"], enabled: role === "fo.fa_accounts", retry: false,
     queryFn: () => api<Envelope<Json>>("/api/v1/office/system/cad-static-data") });
 
@@ -80,6 +88,37 @@ export function ClaimToolsPage() {
   const loadInoperative = () => void run(async () => {
     setInoperative((await api<Envelope<{ accounts: Json[] }>>("/api/v1/office/accounts/inoperative")).data.accounts); return null;
   });
+  const verifyInoperative = (e: FormEvent<HTMLFormElement>, id: string) => {
+    e.preventDefault(); const form = e.currentTarget; const fields = new FormData(form);
+    void run(async () => {
+      const co_worker_uans = text(fields, "co_workers").split(",").map((item) => item.trim()).filter(Boolean);
+      await command("POST", `/api/v1/office/accounts/${encodeURIComponent(id)}/crowdsource-verifications`,
+        { co_worker_uans, note: text(fields, "note") });
+      form.reset();
+      setInoperative((current) => current?.map((a) => a.account_link_id === id ? { ...a, verified: true } : a) ?? null);
+      return `Member ID ${id} verified through co-workers.`;
+    });
+  };
+  const reactivate = (e: FormEvent<HTMLFormElement>, id: string, balance: number) => {
+    e.preventDefault(); const note = text(new FormData(e.currentTarget), "note");
+    void run(async () => {
+      const token = await stepUp.ask({ action: "reactivate-account", resourceId: id, amountPaise: balance,
+        summary: `Reactivate member ID ${id} with a balance of ${rupees(balance)}.` });
+      if (!token) return null;
+      await command("POST", `/api/v1/office/accounts/${encodeURIComponent(id)}/reactivations`,
+        { decision: "REACTIVATE", note }, { stepUpToken: token });
+      setInoperative((current) => current?.map((a) => a.account_link_id === id ? { ...a, reactivated: true, status: "REACTIVATED" } : a) ?? null);
+      return `Member ID ${id} reactivated.`;
+    });
+  };
+  const fileTds = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); const quarter = text(new FormData(e.currentTarget), "quarter");
+    setTds(null);
+    void run(async () => {
+      setTds((await command<Envelope<Json>>("POST", "/api/v1/office/tds/computations",
+        { financial_year: tdsYear, quarter })).data); return null;
+    });
+  };
 
   return (
     <section className="stack" aria-labelledby="claim-tools-heading">
@@ -106,7 +145,7 @@ export function ClaimToolsPage() {
         {scroll ? <Facts data={scroll} /> : null}
       </section> : null}
 
-      {role === "fo.da_accounts" || role === "fo.oic" ? <>
+      {["fo.da_accounts", "fo.oic", "fo.ao", "fo.apfc"].includes(role) ? <>
         {role === "fo.da_accounts" ? <form className="card stack" aria-labelledby="member360-heading" onSubmit={view360}><h2 id="member360-heading">Member 360 view</h2>
           <div className="form-row"><label>UAN<input name="uan" required pattern="[0-9]{12}" inputMode="numeric" /></label>
             <label>Purpose (recorded)<input name="purpose" required minLength={10} /></label></div>
@@ -116,10 +155,33 @@ export function ClaimToolsPage() {
         <section className="card stack" aria-labelledby="inoperative-heading"><h2 id="inoperative-heading">Inoperative accounts</h2>
           <p className="muted small">Member IDs with a balance but no credit for 36 months (illustrative, per the SOP on transaction-less and inoperative accounts).</p>
           <div className="actions"><button type="button" onClick={loadInoperative}>List</button></div>
-          {inoperative ? inoperative.length ? <div className="table-scroll"><table><thead><tr><th scope="col">Member ID</th><th scope="col">Name</th><th scope="col">Balance</th><th scope="col">Last credit</th></tr></thead>
-            <tbody>{inoperative.map((a) => <tr key={String(a.account_link_id)}><td>{String(a.account_link_id)}</td><td>{String(a.name)}</td><td>{rupees(Number(a.balance_paise))}</td><td>{String(a.last_credit)}</td></tr>)}</tbody>
-          </table></div> : <p className="muted">None.</p> : null}
+          {inoperative ? inoperative.length ? <div className="stack">{inoperative.map((a) => {
+            const id = String(a.account_link_id); const balance = Number(a.balance_paise);
+            return <section className="profile-card stack" key={id} aria-label={`Inoperative account ${id}`}>
+              <h3>{id} · {String(a.name)}</h3>
+              <p>Balance: {rupees(balance)} · Last credit: {show(a.last_credit)}</p>
+              <p><span className="state-pill">{statusLabel(a.verified ? "VERIFIED" : "NOT_VERIFIED", t)}</span>{" "}
+                <span className="state-pill">{statusLabel(a.reactivated ? "REACTIVATED" : "INOPERATIVE", t)}</span></p>
+              {role === "fo.da_accounts" && !a.verified ? <form className="stack" aria-label={`Verify ${id} through co-workers`} onSubmit={(e) => verifyInoperative(e, id)}>
+                <h4>Verify through co-workers</h4><label>Co-worker UANs (comma separated)<input name="co_workers" required /></label>
+                <label>Verification note<textarea name="note" required minLength={2} maxLength={1000} /></label>
+                <div className="actions"><button type="submit">Verify</button></div></form> : null}
+              {(role === "fo.ao" || role === "fo.apfc") && !a.reactivated ? <form className="stack" aria-label={`Reactivate ${id}`} onSubmit={(e) => reactivate(e, id, balance)}>
+                <label>Decision note<textarea name="note" required maxLength={2000} /></label>
+                <div className="actions"><button type="submit" className="primary">Reactivate</button></div></form> : null}
+            </section>;
+          })}</div> : <p className="muted">None.</p> : null}
         </section>
+        {role === "fo.da_accounts" ? <section className="card stack" aria-labelledby="tds-heading"><h2 id="tds-heading">Quarterly TDS statement (Form 26Q, mock filing)</h2>
+          <form className="search-input-row" onSubmit={fileTds}><label>Financial year<input value={tdsYear} onChange={(e) => setTdsYear(e.target.value)} required pattern="[0-9]{4}-[0-9]{2}" placeholder="2025-26" /></label>
+            <label>Quarter<select name="quarter"><option>Q1</option><option>Q2</option><option>Q3</option><option>Q4</option></select></label>
+            <button type="submit" className="primary">File mock statement</button></form>
+          {tds ? <><p><strong>Acknowledgement:</strong> {show(tds.acknowledgement)}</p>
+            <div className="table-scroll"><table><thead><tr><th scope="col">Deductee UAN</th><th scope="col">Claim</th><th scope="col">Paid on</th><th scope="col" className="numeric">Amount paid</th><th scope="col" className="numeric">TDS</th><th scope="col">PAN</th></tr></thead>
+              <tbody>{(tds.deductees as Json[]).map((item) => <tr key={String(item.claim_id)}><td>{show(item.uan_masked)}</td><td>{show(item.claim_id)}</td><td>{show(item.paid_on)}</td><td className="numeric">{rupees(Number(item.amount_paid_paise))}</td><td className="numeric">{rupees(Number(item.tds_paise))}</td><td>{statusLabel(String(item.pan_status), t)}</td></tr>)}</tbody>
+              <tfoot><tr><th scope="row" colSpan={3}>Total</th><td className="numeric">{rupees(Number((tds.totals as Json).amount_paid_paise))}</td><td className="numeric">{rupees(Number((tds.totals as Json).tds_paise))}</td><td /></tr></tfoot></table></div>
+            <p className="muted small">{show(tds.note)}</p></> : null}
+        </section> : null}
         {role === "fo.da_accounts" ? <form className="card stack" aria-labelledby="trail-heading" onSubmit={viewTrail}><h2 id="trail-heading">Claim audit trail</h2>
           <label>Claim ID<input name="claim" required placeholder="CLM-…" /></label>
           <div className="actions"><button type="submit">Show</button></div>

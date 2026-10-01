@@ -9,7 +9,7 @@ import { dateTime } from "../journeyB";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 
-interface Me { member_id: string; mobile_masked: string; email_masked: string }
+interface Me { member_id: string; uan: string; mobile_masked: string; email_masked: string }
 interface SessionRow { session_id: string; created_at: number; last_seen: number; device: string; current: boolean }
 
 /** Member security self-service (Journey D): contact details, sessions, "not me" reports, account recovery. */
@@ -20,6 +20,7 @@ export function SecurityPage() {
   const [error, setError] = useState<unknown>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [activatedAt, setActivatedAt] = useState<string | null>(null);
   const me = useQuery({ queryKey: ["member-profile"], queryFn: () => api<Envelope<Me>>("/api/v1/members/me"), retry: false });
   const sessions = useQuery({ queryKey: ["member-sessions"], queryFn: () => api<Envelope<SessionRow[]>>("/api/v1/members/me/sessions"), retry: false });
   const memberId = me.data?.data.member_id ?? "";
@@ -55,6 +56,17 @@ export function SecurityPage() {
       t("security.recoveryRequested"), form);
   }
 
+  async function activate(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    setBusy(true); setError(null); setActivatedAt(null);
+    try {
+      const result = await command<Envelope<{ activated_at: string }>>("POST", "/api/v1/members/uan-activations",
+        { uan: me.data?.data.uan, otp: field(e, "otp") });
+      setActivatedAt(result.data.activated_at); form.reset();
+    } catch (cause) { setError(cause); } finally { setBusy(false); }
+  }
+
   return (
     <section className="stack" aria-labelledby="security-heading">
       <PageHeader id="security-heading" eyebrow={t("security.eyebrow")} title={t("security.title")}
@@ -62,6 +74,14 @@ export function SecurityPage() {
       <ProblemMessage error={me.error} />
       <ProblemMessage error={error} />
       {notice ? <p role="status" className="ok">{notice}</p> : null}
+      <form className="card stack" aria-labelledby="uan-activation-heading" onSubmit={(e) => void activate(e)}>
+        <h2 id="uan-activation-heading">Activate your UAN</h2>
+        <label>UAN<input value={me.data?.data.uan ?? ""} readOnly /></label>
+        <label>OTP<input name="otp" required inputMode="numeric" pattern="[0-9]{6}" maxLength={6} autoComplete="one-time-code" /></label>
+        <p className="muted small">Demo OTP: 123456</p>
+        <div className="actions"><button type="submit" className="primary" disabled={busy || !me.data?.data.uan}>Activate UAN</button></div>
+        {activatedAt ? <p role="status" className="ok">Activated at {dateTime(activatedAt, i18n.language)}</p> : null}
+      </form>
       <div className="activity-columns">
         <form className="card stack" onSubmit={(e) => void changeContact(e)} aria-labelledby="contact-heading">
           <h2 id="contact-heading">{t("security.contact")}</h2>

@@ -193,6 +193,10 @@
       {
         "name": "zo.vigilance",
         "description": "Zonal Vigilance Directorate — preliminary inquiries into vigilance cases assigned to the zone"
+      },
+      {
+        "name": "csc_operator",
+        "description": "Common Service Centre operator — assisted UAN allotment (mock Aadhaar face authentication)"
       }
     ]
   },
@@ -1234,6 +1238,25 @@
         "zo.vigilance"
       ],
       "id": "00000000-0000-4000-8000-000000000051"
+    },
+    {
+      "username": "csc-operator",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "CSC operator",
+      "lastName": "Demo",
+      "email": "csc-operator@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "csc_operator"
+      ],
+      "id": "00000000-0000-4000-8000-000000000052"
     }
   ]
 }

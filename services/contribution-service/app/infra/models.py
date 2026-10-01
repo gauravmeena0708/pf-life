@@ -86,6 +86,34 @@ class EstablishmentMember(Base):
     international_worker: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())   # P2.9a: full wages, no ceiling
 
 
+class InoperativeVerification(Base):
+    __tablename__ = "inoperative_verifications"
+    account_link_id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    uan: Mapped[str] = mapped_column(String(32))
+    co_workers: Mapped[int] = mapped_column(Integer)
+    verified_by_office: Mapped[str] = mapped_column(String(80))
+    verified_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AccountReactivation(Base):
+    __tablename__ = "account_reactivations"
+    account_link_id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    uan: Mapped[str] = mapped_column(String(32))
+    balance_paise: Mapped[int] = mapped_column(BigInteger)
+    approved_by: Mapped[str] = mapped_column(String(80))
+    approved_by_role: Mapped[str] = mapped_column(String(60))
+    note: Mapped[str] = mapped_column(Text)
+    reactivated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class InoperativeSearchRef(Base):
+    __tablename__ = "inoperative_search_refs"
+    search_ref: Mapped[str] = mapped_column(String(80), primary_key=True)
+    account_link_id: Mapped[str] = mapped_column(String(80), index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class ECRFiling(Base):
     __tablename__ = "ecr_filings"
     __table_args__ = (UniqueConstraint("establishment_id", "wage_month", "version"),)

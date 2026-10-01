@@ -225,6 +225,13 @@ OTHER_FAMILIES = [
         ("OVS-PREVENTIVE", "Sensitive posts and vigilance clearance", "Officer overdue for rotation; officer named in a case; posting to the cash section",
          "Rotation list; clearance withheld then given after the case is closed; sensitive posting only with a clearance",
          "tests/e2e/test_vigilance.py"),
+        ("LED-INOPERATIVE", "Inoperative account found, verified and reactivated", "Public search with CAPTCHA and OTP; one or two co-workers; AO band",
+         "No balance before the OTP; one co-worker refused; reactivated by the AO after verification",
+         "tests/e2e/test_small_member_tax_inoperative.py"),
+        ("CLM-FORM-16A", "Form 16A and the quarterly TDS statement", "Member's year; office quarter filed twice; a future quarter",
+         "Certificate by quarter; one filing per quarter; future quarter refused", "tests/e2e/test_small_member_tax_inoperative.py"),
+        ("ENR-UAN-ALLOT", "UAN allotment at a CSC and activation", "Face match and mismatch; Aadhaar with a UAN; demo OTP",
+         "UAN allotted; mismatch and existing UAN refused without showing the Aadhaar; activation once", "tests/e2e/test_small_member_tax_inoperative.py"),
     ]),
     ("Oversight and administration", "tests/e2e/test_oversight_administration.py", [
         ("OVS-INCIDENT", "Security incident and CERT-In report", "High severity within and past 6 hours; low severity", "Reportable ones reported (mock) with acknowledgement; late marked"),

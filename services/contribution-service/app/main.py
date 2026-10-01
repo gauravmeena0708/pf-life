@@ -5,13 +5,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 import epfo_auth
-from app.api import catalogue_routes, ledger_routes, returns_routes, routes, statement_routes, trust_routes
+from app.api import catalogue_routes, inoperative_routes, ledger_routes, returns_routes, routes, statement_routes, trust_routes
 from app.config import settings
 from app.infra.db import database_ready
 from app.infra.db import engine
 from app.infra.claims_ledger import on_claim_decision, on_claim_paid, on_tax_deducted
 from app.infra.transfers import on_member_exit, on_member_registered, on_process_transitioned as on_transfer_step
-from app.infra.messaging import handle_employer_verified, handle_member_change, handle_payment_confirmed, handle_payment_returned
+from app.infra.messaging import handle_employer_verified, handle_inoperative_verified, handle_member_change, handle_payment_confirmed, handle_payment_returned
 from epfo_persistence import Consumer, OutboxRelay
 from epfo_persistence.policy import on_policy_published
 from epfo_observability import health_router, install
@@ -35,7 +35,8 @@ def create_app() -> FastAPI:
                          ["platform-service.PolicyPublished.v1"], on_policy_published),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.members",
                          ["member-service.MemberChangeApproved.v1", "member-service.MemberExitMarked.v1",
-                          "member-service.MemberRegistered.v1", "member-service.MemberInternationalStatusChanged.v1"], _members_router),
+                          "member-service.MemberRegistered.v1", "member-service.MemberInternationalStatusChanged.v1",
+                          "member-service.InoperativeAccountVerified.v1"], _members_router),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.processes",
                          ["workflow-service.ProcessTransitioned.v1"], on_transfer_step),
             ]
@@ -54,6 +55,7 @@ def create_app() -> FastAPI:
                         jwks=epfo_auth.JwksCache(settings.gateway_jwks_url))
     app.include_router(health_router(database_ready))
     app.include_router(routes.router)
+    app.include_router(inoperative_routes.router)
     app.include_router(returns_routes.router)
     app.include_router(ledger_routes.router)
     app.include_router(statement_routes.router)
@@ -94,7 +96,9 @@ async def _claims_router(session, event):
 
 
 async def _members_router(session, event):
-    if event.get("event_type") == "MemberExitMarked.v1":
+    if event.get("event_type") == "InoperativeAccountVerified.v1":
+        await handle_inoperative_verified(session, event)
+    elif event.get("event_type") == "MemberExitMarked.v1":
         await on_member_exit(session, event)
     elif event.get("event_type") == "MemberInternationalStatusChanged.v1":      # P2.9a: full wages from the next return
         from sqlalchemy import text

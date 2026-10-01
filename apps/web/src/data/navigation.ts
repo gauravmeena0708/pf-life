@@ -14,6 +14,7 @@ export const PUBLIC_SERVICES: NavItem[] = [
   link("Grievance (without login)", "/public/grievances#public-grievance-heading"),
   link("Grievance status", "/public/grievances#grievance-status-heading"),
   link("Claim status", "/public/claims#claim-status-heading"),
+  link("Inoperative account search", "/public/inoperative-accounts"),
   link("Circulars", "/public/circulars#circulars-heading"),
 ];
 
@@ -28,7 +29,7 @@ const MEMBER: NavGroup[] = [
   { label: "Online Services", items: [
     link("Claim (Form-31, 19, 10C & 10D)", "/member/claims"), link("One Member – One EPF Account (Transfer Request)", "/member/service#transfer-heading"), link("Auto-transfer", "/member/service#auto-transfer-heading"),
     link("Track Claim Status", "/member/claims"), link("Download Annexure K", "/member/service#applications-heading"), link("Joint Declaration", "/member/profile#correction-heading"),
-    link("Form 15G / 15H", "/member/claims#tax-declaration-heading"), link("Pension (Form 10D) / scheme certificate", "/member/pension"),
+    link("Form 15G / 15H", "/member/claims#tax-declaration-heading"), link("Form 16A (TDS certificate)", "/member/claims#form-16a-heading"), link("Pension (Form 10D) / scheme certificate", "/member/pension"),
     link("Pension on higher wages", "/member/higher-pension#higher-pension-heading")] },
   { label: "PMVBRY" },
   { labelKey: "navigation.help", items: [{ labelKey: "navigation.grievances", to: "/member/grievances" }, { labelKey: "navigation.assistant", to: "/member/assistant" }] },
@@ -79,7 +80,7 @@ function fieldOffice(role: string): NavGroup[] {
       ...(role === "fo.apfc" ? [link("Death claims: beneficiary shares", "/office/claim-tools#shares-heading")] : []),
       ...(role === "fo.pro_intake" ? [link("PRO counter: physical claims", "/office/pro-counter")] : [])] },
     { label: "Members", items: [link("Member", role === "fo.oic" ? queue : role === "fo.da_accounts" ? "/office/claim-tools#member360-heading" : undefined),
-      link("Query"), ...(["fo.da_accounts", "fo.oic"].includes(role) ? [link("Inoperative accounts", "/office/claim-tools#inoperative-heading")] : []),
+      link("Query"), ...(["fo.da_accounts", "fo.oic", "fo.ao", "fo.apfc"].includes(role) ? [link("Inoperative accounts", "/office/claim-tools#inoperative-heading")] : []),
       ...(role === "fo.oic" ? [link("Ledger locks", "/office/claim-tools#locks-heading")] : [])] },
     { label: "Receipts & reconciliation", items: [
       role === "fo.apfc" ? link("ECR Approval") : link("VDR Vs ECR filing"), link("Reco - ECR Vs VDR"), link("VDR Member Beneficiary"),
@@ -156,6 +157,7 @@ export function menusFor(role: string | undefined): NavGroup[] {
   if (role.startsWith("employer.")) return EMPLOYER;
   if (role === "pensioner") return PENSIONER;
   if (role === "claimant") return CLAIMANT;
+  if (role === "csc_operator") return [{ label: "UAN allotment", to: "/csc" }];
   if (role === "fo.edli") return [{ label: "EDLI claims", to: "/office/edli-claims" }];
   if (role === "fo.iw") return [{ label: "Certificate of coverage queue", to: "/office/international#coc-queue-heading" }];
   if (role === "ho.iwu") return [{ label: "Social-security agreements", to: "/ho/agreements#agreements-heading" }];
@@ -183,6 +185,7 @@ export function homeFor(role: string | undefined): string {
   if (role?.startsWith("employer.")) return "/employer";
   if (role === "pensioner") return "/pensioner";
   if (role === "claimant") return "/claimant";
+  if (role === "csc_operator") return "/csc";
   if (role === "fo.edli") return "/office/edli-claims";
   if (role === "fo.iw") return "/office/international";
   if (role === "ho.iwu") return "/ho/agreements";

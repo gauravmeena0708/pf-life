@@ -65,6 +65,7 @@ export const PERSONAS: Persona[] = [
   { username: "hrm-employee", label: "HRM employee", role: "ho.hr", group: "Zone, head office and oversight", description: "Manage staff postings that determine officers’ jurisdictions." },
   { username: "security-analyst", label: "Security analyst", role: "ho.security", group: "Zone, head office and oversight", description: "Inspect request activity, sessions, recovery and security incidents." },
   { username: "vigilance-investigator", label: "Chief Vigilance Officer", role: "ho.cvo", group: "Zone, head office and oversight", description: "Assign preliminary inquiries into vigilance referrals and decide on the findings." },
+  { username: "csc-operator", label: "CSC operator", role: "csc_operator", group: "Members and public", description: "Allot a UAN for a person at a Common Service Centre (mock Aadhaar face authentication)." },
   { username: "zo-vigilance", label: "Zonal vigilance", role: "zo.vigilance", group: "Zone, head office and oversight", description: "Inquire into vigilance cases assigned to the zone and report findings." },
   { username: "auditor", label: "Independent auditor", role: "ho.audit", group: "Zone, head office and oversight", description: "Inspect the audit log, verify its hash chain and trace request events." },
 ];

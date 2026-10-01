@@ -397,6 +397,20 @@ contribution- and platform-service*
 4. **Death claims**: after the officers admit the Form 5IF claim, **`ro-edli` → EDLI claims** enters the verified
    average wages, works out the benefit and sanctions it (one-time code bound to the amount).
 
+## Tax certificates, UAN allotment and inoperative accounts
+*Tests: `tests/e2e/test_small_member_tax_inoperative.py`, `services/*/tests/test_tds_documents.py`, `test_inoperative*.py`*
+
+1. **`member-a` → My claims › TDS certificate (Form 16A)**: pick the year; tax deducted by quarter, illustrative.
+   **`do-caseworker` → Claim tools › Quarterly TDS statement**: file Q1 of 2026-27 (mock acknowledgement); filing it
+   again is refused with the acknowledgement.
+2. **`csc-operator` → UAN allotment**: enter a person's details, *Capture face (mock)*, submit — a new UAN; the same
+   Aadhaar again is refused with the masked UAN. **`member-a` → Security › Activate your UAN** with OTP 123456.
+3. **Public › Inoperative account search** (no login): MOHAN DEMO, 14-02-1970, "textiles" — a masked match, no
+   balance; the demo OTP shows ₹2,00,000 and what to do next.
+4. **`do-caseworker` → Claim tools › Inoperative accounts**: *Verify through co-workers* with UANs 100000000004 and
+   100000000906 (one alone is refused). **`ro-ao`** reactivates it (one-time code bound to the balance); it leaves the
+   list.
+
 ## Vigilance
 *Tests: `tests/e2e/test_vigilance.py`, `services/workflow-service/tests/test_vigilance.py`*
 

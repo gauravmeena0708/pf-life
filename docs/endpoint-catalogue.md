@@ -48,7 +48,7 @@ Rules that apply to every row:
 | `POST /public/pension/payment-enquiries` | Pension payment enquiry (month-wise credited / not credited) | W | 1 | pension |
 | `POST /public/pension/status-enquiries` | Pension application / PPO status enquiry | W | 1 | pension |
 | `POST /public/claims/status-lookups` | Claim status by reference (OTP proof; no PII in response) | W | 1 | claim |
-| `POST /public/inoperative-accounts/searches` | Inoperative-account helpdesk search (step-up before any balance is shown) | P | 3 | contribution |
+| `POST /public/inoperative-accounts/searches` | Inoperative-account helpdesk search (step-up before any balance is shown) | W | 1 | contribution |
 | `POST /public/grievances` | Grievance intake from a non-logged-in person (OTP-verified contact) | W | 1 | grievance |
 | `POST /public/grievances/status-lookups` | Grievance status by registration number (OTP proof) | W | 1 | grievance |
 
@@ -225,8 +225,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `POST /members/uan-activations` | UAN activation (mock OTP / mock face authentication) | M | 2 | member |
-| `POST /members/uan-allotments` | Self UAN allotment via mock Aadhaar face auth (UMANG-style) | M | 2 | member |
+| `POST /members/uan-activations` | UAN activation (mock OTP / mock face authentication) | M | 1 | member |
+| `POST /members/uan-allotments` | Self UAN allotment via mock Aadhaar face auth (UMANG-style) | M | 1 | member |
 | `POST /members/uan-lookups` | **Know your UAN** (OTP-verified) | W | 1 | member |
 | `GET /members/me` | Profile | W | 1 | member |
 | `GET /members/me/identity-assurance` | Assurance level | W | 1 | member |
@@ -242,7 +242,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /members/me/accounts/{accountLinkId}/passbook` | Passbook for one linked account; `accountLinkId` is an opaque ID validated against the caller | W | 1 | contribution |
 | `GET /members/me/annual-statements/{financialYear}` | Annual account slip | W | 1 | contribution |
 | `GET /members/me/tax/taxable-interest?financialYear=` | Taxable vs non-taxable interest split | W | 1 | contribution |
-| `GET /members/me/tax/form-16a?financialYear=` | TDS certificate (Form 16A) | P | 3 | claim |
+| `GET /members/me/tax/form-16a?financialYear=` | TDS certificate (Form 16A) | W | 1 | claim |
 | `POST /members/me/tax/form-15g-15h` | Upload Form 15G / 15H | W | 1 | claim |
 | `GET /members/me/nominations` | e-Nomination (Form 2) — view | W | 1 | member |
 | `POST /members/me/nominations` 🔐 | e-Nomination — submit with mock e-sign | W | 1 | member |
@@ -357,8 +357,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/accounts/interest-postings` 💰🔐 | Annual interest crediting run (illustrative rate) | W | 1 | contribution |
 | `GET /office/accounts/interest-postings?financialYear=` | Interest run preview: the rate in the rule set in force, interest due per account (monthly running balance), already credited, the difference to credit, and earlier runs | W | 1 | contribution |
 | `GET /office/accounts/inoperative` | **Inoperative account** identification | W | 1 | contribution |
-| `POST /office/accounts/{accountLinkId}/reactivations` 🔐 | Inoperative account reactivation | P | 3 | contribution |
-| `POST /office/tds/computations` | TDS on withdrawal (illustrative rules) | P | 3 | claim |
+| `POST /office/accounts/{accountLinkId}/reactivations` 🔐 | Inoperative account reactivation | W | 1 | contribution |
+| `POST /office/tds/computations` | TDS on withdrawal (illustrative rules) | W | 1 | claim |
 
 
 **Added from the stakeholder activity map** (`docs/stakeholder-activities.yaml`)
@@ -373,7 +373,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/freeze-cases/{caseId}/verifications` | Freeze-case verification step (DA → SS/AO → APFC/RPFC-II → OIC; tier-2 process `member_freeze`) | W | 1 | workflow |
 | `POST /office/establishments/{estId}/freezes` 🔐 | Freeze an establishment | W | 1 | employer |
 | `POST /office/establishments/{estId}/defreezes` 🔐 | De-freeze an establishment, maker-checker | W | 1 | employer |
-| `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | Inoperative-account crowdsourcing verification through co-workers' logins | P | 3 | member |
+| `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | Inoperative-account crowdsourcing verification through co-workers' logins | W | 1 | member |
 | `POST /office/outreach-camps/{campId}/assisted-requests` | Requests taken at Nidhi Aapke Nikat camps | P | 3 | workflow |
 
 

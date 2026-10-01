@@ -85,6 +85,16 @@ async def handle_member_change(session, event):
                                   {"v": datetime.fromisoformat(change["value"]).date(), "u": p["uan"]})
 
 
+async def handle_inoperative_verified(session, event):
+    """Keep the member service's office verification once, including on message redelivery."""
+    p = event["payload"]
+    await session.execute(text(
+        "INSERT INTO inoperative_verifications (account_link_id,uan,co_workers,verified_by_office) "
+        "VALUES (:a,:u,:c,:v) ON CONFLICT (account_link_id) DO NOTHING"),
+        {"a": p["account_link_id"], "u": p["uan"], "c": int(p["co_workers"]),
+         "v": p["verified_by_office"]})
+
+
 async def _post_direct_challan(session, row, p, event):
     """A paid direct challan: the bank collection against administrative charges or 14B damages / 7Q interest."""
     await session.execute(text("UPDATE challans SET status='PAID',payment_id=:p,paid_at=:at WHERE trrn=:t"),

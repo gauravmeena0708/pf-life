@@ -1905,7 +1905,6 @@ paths:
       x-phase: 1
       x-owner-service: pension
       x-callers:
-      - csc_operator
       - pensioner
       x-scope: self — caller's own PPO only
       security:

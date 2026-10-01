@@ -15,7 +15,8 @@ from .public_access import create_demo_challenge, limit_public, verify_demo_chal
 
 # Public lookups that disclose anything about a person or payment need the demo CAPTCHA first.
 CAPTCHA_PATHS = {"/public/trrn-status-lookups", "/public/grievances", "/public/grievances/status-lookups", "/public/claims/status-lookups", "/public/pension/life-certificate-lookups", "/public/pension/ppo-lookups",
-                 "/public/pension/payment-enquiries", "/public/pension/status-enquiries"}
+                 "/public/pension/payment-enquiries", "/public/pension/status-enquiries",
+                 "/public/inoperative-accounts/searches"}
 from .request_activity import get_request_activity, lookup_fingerprint, summarize_body
 from .revocation import is_revoked, record_revocation
 from .routing import match_route
