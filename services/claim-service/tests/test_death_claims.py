@@ -69,6 +69,53 @@ def test_edli_is_worked_out_and_paid_from_the_edli_fund(ctx):
     assert events(q, "ClaimDecisionRecorded.v1")[0]["fund"] == "EDLI"
 
 
+def test_composite_files_both_claims_with_one_reference_and_separate_events(ctx):
+    client, q, _ = ctx
+    headers = claimant({"action": "file-death-claim", "resource_id": UAN}) | {"Idempotency-Key": "ccf-death-1"}
+    body = {"form_type": "CCF_DEATH", "deceased_uan": UAN}
+    r = client.post("/api/v1/claimants/death-claims", json=body, headers=headers)
+    assert r.status_code == 201, r.json()
+    data = r.json()["data"]
+    assert data["composite_ref"].startswith("CCF-")
+    assert "Form 10D" in data["next_step"] and "PRO counter" in data["next_step"]
+    pf, edli = data["claims"]
+    assert [(c["claim_type"], c["form_type"], c["state"]) for c in (pf, edli)] == [
+        ("DEATH_PF", "20", "UNDER_REVIEW"), ("DEATH_EDLI", "5IF", "UNDER_REVIEW")]
+    assert pf["amount_paise"] == BALANCE and edli["amount_paise"] >= 25000000
+    assert pf["composite_ref"] == edli["composite_ref"] == data["composite_ref"]
+    assert [(b["name"], b["relation"], b["share_pct"]) for b in pf["beneficiaries"]] == [
+        (b["name"], b["relation"], b["share_pct"]) for b in edli["beneficiaries"]]
+    assert q("SELECT claim_type, composite_ref FROM claims WHERE composite_ref IS NOT NULL ORDER BY claim_type") == [
+        ("DEATH_EDLI", data["composite_ref"]), ("DEATH_PF", data["composite_ref"])]
+    submitted = events(q, "ClaimSubmitted.v1")
+    assert [(e["claim_id"], e["claim_type"], e["route"]) for e in submitted] == [
+        (pf["claim_id"], "DEATH_PF", "REVIEW"), (edli["claim_id"], "DEATH_EDLI", "REVIEW")]
+    assert client.get(f"/api/v1/claimants/death-claims/{edli['claim_id']}", headers=claimant()).json()["data"]["composite_ref"] == data["composite_ref"]
+    replay = client.post("/api/v1/claimants/death-claims", json=body, headers=headers)
+    assert replay.status_code == 201 and replay.json()["data"] == data
+    assert len(events(q, "ClaimSubmitted.v1")) == 2
+    reused = client.post("/api/v1/claimants/death-claims", json={**body, "process_as": "LSM"}, headers=headers)
+    assert reused.status_code == 422 and reused.json()["type"] == "/problems/idempotency-key-reused"
+
+
+def test_composite_rolls_back_pf_when_edli_is_ineligible(ctx, monkeypatch):
+    client, q, _ = ctx
+    monkeypatch.setattr("app.api.death_routes.edli_benefit", lambda *args: {"amount_paise": 0, "working": "ineligible"})
+    r = file(client, "CCF_DEATH")
+    assert r.status_code == 422 and r.json()["type"] == "/problems/not-eligible"
+    assert q("SELECT claim_id FROM claims WHERE death_of_uan IS NOT NULL") == []
+    assert events(q, "ClaimSubmitted.v1") == []
+
+
+def test_composite_with_existing_edli_does_not_create_pf(ctx):
+    client, q, _ = ctx
+    assert file(client, "FORM_5IF").status_code == 201
+    r = file(client, "CCF_DEATH")
+    assert r.status_code == 409 and r.json()["type"] == "/problems/claim-already-open"
+    assert q("SELECT claim_type FROM claims WHERE death_of_uan IS NOT NULL") == [("DEATH_EDLI",)]
+    assert len(events(q, "ClaimSubmitted.v1")) == 1
+
+
 def test_only_a_nominee_files_and_the_apfc_amends_shares_before_payment(ctx):
     client, q, deliver = ctx
     stranger = client.post("/api/v1/claimants/death-claims", json={"form_type": "FORM_20", "deceased_uan": UAN},

@@ -775,7 +775,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `POST /office/outreach-camps/{campId}/assisted-requests` | P | office jurisdiction of the caller's posting |  |
+| `POST /office/outreach-camps/{campId}/assisted-requests` | W | office jurisdiction of the caller's posting |  |
 
 **`fo.admin`** — Office administration / HR / physical facilities
 
@@ -865,7 +865,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `POST /training/sandboxes` | P | training administrators; synthetic data only |  |
+| `POST /training/sandboxes` | W | training administrators; synthetic data only |  |
 
 ### F. Head Office (HO) — leadership and divisions
 
@@ -968,7 +968,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /international/agreements` | W | own application (employer) or IWU role |  |
-| `POST /international/totalisation-claims` | P | own application (employer) or IWU role |  |
+| `POST /international/totalisation-claims` | W | own application (employer) or IWU role |  |
 
 **`ho.is`** — IS Division (application ownership, Issue Tracker, block / unblock)
 
@@ -1110,8 +1110,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /ndc/dr/replication-status` | P | NDC / IS operations role |  |
-| `POST /ndc/dr/failover-drills` | P | NDC / IS operations role | yes |
+| `GET /ndc/dr/replication-status` | W | NDC / IS operations role |  |
+| `POST /ndc/dr/failover-drills` | W | NDC / IS operations role | yes |
 
 **`tech.cpps`** — **CPPS / Central Payment and Reconciliation Centre** at NDC (pan-India pension disbursement, sponsor-bank reconciliation)
 
@@ -1140,13 +1140,13 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `POST /training/sandboxes` | P | training administrators; synthetic data only |  |
+| `POST /training/sandboxes` | W | training administrators; synthetic data only |  |
 
 **`train.zti`** — Zonal Training Institutes
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `POST /training/sandboxes` | P | training administrators; synthetic data only |  |
+| `POST /training/sandboxes` | W | training administrators; synthetic data only |  |
 
 ### J. External institutions and systems
 
@@ -1206,7 +1206,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /partners/foreign-agencies/coc-certificates/{id}` | P | authenticated partner client, own records only |  |
+| `GET /partners/foreign-agencies/coc-certificates/{id}` | W | authenticated partner client, own records only |  |
 
 **`ext.fund_manager`** — Portfolio / fund managers and custodian
 

@@ -12,7 +12,7 @@ import base64
 import hashlib
 import secrets
 from datetime import UTC, date, datetime, timedelta
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
@@ -20,7 +20,7 @@ from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra.db import sessions
-from app.infra.tables import agreements, coc_applications, establishments, members, office_staff
+from app.infra.tables import agreements, coc_applications, establishments, members, office_staff, totalisation_claims
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit
@@ -29,6 +29,8 @@ router = APIRouter()
 PRODUCER = "international-service"
 SIGNATORY = require_stakeholder("employer.signatory")
 IW_CELL = require_stakeholder("fo.iw")
+IWU = require_stakeholder("ho.iwu")
+FOREIGN_AGENCY = require_stakeholder("ext.foreign_ss")
 MAX_UPLOAD = 2 * 1024 * 1024
 
 
@@ -103,6 +105,68 @@ async def list_agreements(actor: Actor = Depends(require_stakeholder("ho.iwu", "
     rows = (await session.execute(select(agreements).order_by(agreements.c.country))).mappings().all()
     return envelope({"agreements": [_agreement(a) for a in rows],
                      "note": "Synthetic catalogue: India's agreement partners with illustrative terms, not the agreements' text."})
+
+
+class CoveragePeriod(BaseModel):
+    from_date: date = Field(alias="from")
+    to_date: date = Field(alias="to")
+    country: str = Field(min_length=2, max_length=60)
+
+
+class TotalisationInput(BaseModel):
+    direction: Literal["INBOUND", "OUTBOUND"]
+    country: str = Field(min_length=2, max_length=60)
+    uan: str = Field(pattern=r"^[0-9]{12}$")
+    foreign_insurance_no: str = Field(min_length=1, max_length=80)
+    benefit: Literal["OLD_AGE", "INVALIDITY", "SURVIVORS"]
+    periods: list[CoveragePeriod] = Field(min_length=1)
+    notes: str = Field(default="", max_length=2000)
+
+
+@router.post("/api/v1/international/totalisation-claims", status_code=201)
+async def route_totalisation(body: TotalisationInput, actor: Actor = Depends(IWU),
+                             session: AsyncSession = Depends(db)) -> dict:
+    async with session.begin():
+        agreement = (await session.execute(select(agreements).where(agreements.c.country == body.country))).mappings().first()
+        if not agreement:
+            raise Problem(422, "/problems/totalisation-invalid", "The claim cannot be routed",
+                          f"India has no social-security agreement with {body.country} in this catalogue.")
+        if not agreement["totalisation"]:
+            raise Problem(422, "/problems/totalisation-invalid", "The claim cannot be routed",
+                          f"The agreement with {body.country} does not allow totalisation in this catalogue.")
+        problems = []
+        months_by_country: dict[str, int] = {}
+        for period in body.periods:
+            if period.to_date < period.from_date:
+                problems.append("Each coverage period must end on or after it starts.")
+            if period.country not in ("India", body.country):
+                problems.append(f"A coverage period must be in India or {body.country}.")
+            if period.to_date >= period.from_date and period.country in ("India", body.country):
+                months_by_country[period.country] = months_by_country.get(period.country, 0) + months_between(
+                    period.from_date, period.to_date)
+        if problems:
+            raise Problem(422, "/problems/totalisation-invalid", "The claim cannot be routed",
+                          " ".join(problems), errors=problems)
+        liaison_office = "IWU, Head Office"
+        values = {"direction": body.direction, "country": body.country, "uan": body.uan,
+                  "foreign_insurance_no": body.foreign_insurance_no.strip(), "benefit": body.benefit,
+                  "periods": [p.model_dump(by_alias=True, mode="json") for p in body.periods],
+                  "months_by_country": months_by_country, "liaison_office": liaison_office,
+                  "notes": body.notes.strip(), "created_by": actor.subject}
+        result = await session.execute(insert(totalisation_claims).values(**values).returning(totalisation_claims.c.id))
+        row_id = int(result.scalar_one())
+        claim_id = f"TOT/{agreement['code']}/{row_id}"
+        await session.execute(update(totalisation_claims).where(totalisation_claims.c.id == row_id).values(reference=claim_id))
+        await add_event(session, producer=PRODUCER, event_type="TotalisationClaimRouted.v1",
+                        aggregate_type="totalisation_claim", aggregate_id=claim_id, correlation_id=actor.correlation_id,
+                        payload={"claim_id": claim_id, "country": body.country, "direction": body.direction,
+                                 "benefit": body.benefit})
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder,
+                    action="totalisation.claim_routed", target_type="totalisation_claim", target_id=claim_id,
+                    detail=body.country)
+    return envelope({"claim_id": claim_id, "reference": claim_id, "direction": body.direction,
+                     "country": body.country, "benefit": body.benefit, "liaison_office": liaison_office,
+                     "months_by_country": months_by_country})
 
 
 # ── Certificates of Coverage (employer) ─────────────────────────────────────────────────────────
@@ -250,6 +314,48 @@ async def certificate(id: str, actor: Actor = Depends(SIGNATORY), session: Async
                      "country": row["country"], "host_employer": row["host_employer"], "posting_from": row["posting_from"].isoformat(),
                      "posting_to": row["posting_to"].isoformat(), "issued_at": row["decided_at"].isoformat() if row["decided_at"] else None,
                      "issued_by_office": row["office_id"], "verification_code": seal, "text": text})
+
+
+@router.get("/api/v1/partners/foreign-agencies/coc-certificates/{id}")
+async def verify_certificate(id: str, actor: Actor = Depends(FOREIGN_AGENCY),
+                             session: AsyncSession = Depends(db)) -> dict:
+    async with session.begin():
+        row = (await session.execute(select(coc_applications).where(coc_applications.c.certificate_no == id))).mappings().first()
+        if not row:
+            raise Problem(404, "/problems/not-found", "Certificate not found")
+        root = row
+        while root["parent_id"]:
+            parent = (await session.execute(select(coc_applications).where(
+                coc_applications.c.application_id == root["parent_id"]))).mappings().first()
+            if not parent:
+                break
+            root = parent
+        posting_to = root["posting_to"]
+        pending = [root["application_id"]]
+        extended = False
+        while pending:
+            children = (await session.execute(select(coc_applications).where(
+                coc_applications.c.parent_id.in_(pending), coc_applications.c.state == "ISSUED"))).mappings().all()
+            pending = [child["application_id"] for child in children]
+            for child in children:
+                extended = True
+                posting_to = max(posting_to, child["posting_to"])
+        member_name = (await session.execute(select(members.c.name).where(
+            members.c.account_link_id == row["account_link_id"]))).scalar_one_or_none()
+        if not member_name:
+            raise Problem(404, "/problems/not-found", "Certificate worker not found")
+        status = ("CANCELLED" if row["state"] == "CANCELLED" else
+                  "EXPIRED" if posting_to < datetime.now(UTC).date() else
+                  "EXTENDED" if extended else "ISSUED")
+        issued_on = row["decided_at"]
+        if isinstance(issued_on, str):
+            issued_on = datetime.fromisoformat(issued_on)
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder,
+                    action="coc.verify", target_type="coc_certificate", target_id=id, detail=status)
+    return envelope({"certificate_no": id, "status": status, "worker_name_masked": member_name.strip()[:1] + "***",
+                     "country": row["country"], "posting_from": root["posting_from"].isoformat(),
+                     "posting_to": posting_to.isoformat(), "issuing_office": row["office_id"],
+                     "issued_on": issued_on.date().isoformat() if issued_on else None})
 
 
 # ── the International Workers cell ──────────────────────────────────────────────────────────────

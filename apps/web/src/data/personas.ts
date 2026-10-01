@@ -76,5 +76,8 @@ export const PERSONAS: Persona[] = [
   { username: "ho-investment", label: "HO investment cell", role: "ho.investment", group: "Zone, head office and oversight", description: "Fund and investment reporting." },
   { username: "cbt-member", label: "CBT member", role: "gov.cbt", group: "Zone, head office and oversight", description: "Central Board of Trustees member — board packs." },
   { username: "fiac-member", label: "FIAC member", role: "gov.fiac", group: "Zone, head office and oversight", description: "Finance, Investment and Audit Committee member — board packs and investments." },
+  { username: "ndc-adc", label: "Disaster-recovery site", role: "tech.adc", group: "Zone, head office and oversight", description: "Disaster-recovery site: replication and failover drills." },
+  { username: "pdnasa-trainer", label: "PDUNASS trainer", role: "train.pdnasa", group: "Zone, head office and oversight", description: "National academy trainer — synthetic-data training sandboxes." },
+  { username: "ro-nan", label: "Nidhi Aapke Nikat camp", role: "fo.nan", group: "Field office", description: "Outreach camp team — requests taken at Nidhi Aapke Nikat camps." },
   { username: "auditor", label: "Independent auditor", role: "ho.audit", group: "Zone, head office and oversight", description: "Inspect the audit log, verify its hash chain and trace request events." },
 ];

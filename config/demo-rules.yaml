@@ -201,3 +201,9 @@ investment_pattern:
   SHORT_TERM_DEBT: {min_pct: 0, max_pct: 5}
   EQUITY: {min_pct: 5, max_pct: 15}
   ASSET_BACKED: {min_pct: 0, max_pct: 5}
+
+# P2.12f: the disaster-recovery site and training sandboxes (illustrative)
+dr_and_training:
+  rpo_minutes: 15               # replication may lag the primary by at most this much
+  rto_minutes: 120              # a failover must bring services up within this long
+  sandbox_days: 14              # a training sandbox lives this many days

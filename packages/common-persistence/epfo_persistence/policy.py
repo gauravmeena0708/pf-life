@@ -343,6 +343,10 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
         on = iw.get("final_settlement_on") or {}
         if not _whole(on.get("min_age"), 18, 80) or not isinstance(on.get("agreement_nationalities"), list):
             problems.append("international_workers.final_settlement_on needs min_age (18-80) and a list of agreement_nationalities")
+    if "dr_and_training" in document:
+        dt = document["dr_and_training"] or {}
+        if not (_whole(dt.get("rpo_minutes"), 1, 1440) and _whole(dt.get("rto_minutes"), 1, 2880) and _whole(dt.get("sandbox_days"), 1, 90)):
+            problems.append("dr_and_training needs rpo_minutes (1-1440), rto_minutes (1-2880) and sandbox_days (1-90)")
     if "investment_pattern" in document:
         ip = document["investment_pattern"] or {}
         if not ip or any(not isinstance(b, dict) or not _whole(b.get("min_pct"), 0, 100) or not _whole(b.get("max_pct"), 0, 100)

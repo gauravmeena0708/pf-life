@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /ndc/event-failures', 'GET /ndc/health', 'GET /ho/config/rule-sets', 'POST /ho/config/rule-sets', 'GET /ndc/issue-tracker/requests', 'POST /ndc/issue-tracker/requests', 'GET /public/policy/current', 'GET /ho/config/rule-sets/{versionId}', 'PUT /ho/config/rule-sets/{versionId}', 'POST /ho/config/rule-sets/{versionId}/decisions', 'POST /ho/config/rule-sets/{versionId}/submissions', 'POST /ndc/issue-tracker/requests/{requestId}/executions', 'POST /ndc/event-failures/{eventId}/replays']
+OPERATIONS = ['GET /ndc/event-failures', 'GET /ndc/health', 'POST /training/sandboxes', 'GET /ho/config/rule-sets', 'POST /ho/config/rule-sets', 'POST /ndc/dr/failover-drills', 'GET /ndc/dr/replication-status', 'GET /ndc/issue-tracker/requests', 'POST /ndc/issue-tracker/requests', 'GET /public/policy/current', 'GET /ho/config/rule-sets/{versionId}', 'PUT /ho/config/rule-sets/{versionId}', 'POST /ho/config/rule-sets/{versionId}/decisions', 'POST /ho/config/rule-sets/{versionId}/submissions', 'POST /ndc/issue-tracker/requests/{requestId}/executions', 'POST /ndc/event-failures/{eventId}/replays']
 
 @router.api_route("/api/v1/ndc/event-failures", methods=["GET"], include_in_schema=False)
 async def get_ndc_event_failures(actor: Actor = Depends(require_actor)) -> None:
@@ -22,6 +22,11 @@ async def get_ndc_health(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Platform endpoint defined in init.md §3.1")
 
 
+@router.api_route("/api/v1/training/sandboxes", methods=["POST"], include_in_schema=False)
+async def post_training_sandboxes(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Create a synthetic-data training sandbox (PDNASA / ZTI)")
+
+
 @router.api_route("/api/v1/ho/config/rule-sets", methods=["GET"], include_in_schema=False)
 async def get_ho_config_rule_sets(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Policy administration: rule-set versions in force, scheduled, drafts and history")
@@ -30,6 +35,16 @@ async def get_ho_config_rule_sets(actor: Actor = Depends(require_actor)) -> None
 @router.api_route("/api/v1/ho/config/rule-sets", methods=["POST"], include_in_schema=False)
 async def post_ho_config_rule_sets(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Draft a new rule-set version (wage ceilings, rates, claim types, approval matrix, auto-settlement, g")
+
+
+@router.api_route("/api/v1/ndc/dr/failover-drills", methods=["POST"], include_in_schema=False)
+async def post_ndc_dr_failover_drills(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Run a DR failover drill")
+
+
+@router.api_route("/api/v1/ndc/dr/replication-status", methods=["GET"], include_in_schema=False)
+async def get_ndc_dr_replication_status(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "ADC (DR site) replication status")
 
 
 @router.api_route("/api/v1/ndc/issue-tracker/requests", methods=["GET"], include_in_schema=False)

@@ -1,5 +1,5 @@
 """Tables owned by international-service (Phase 2, slice 8c)."""
-from sqlalchemy import JSON, Boolean, Column, Date, DateTime, Integer, MetaData, String, Table, Text, false, func
+from sqlalchemy import JSON, BigInteger, Boolean, Column, Date, DateTime, Integer, MetaData, String, Table, Text, false, func
 
 metadata = MetaData()
 
@@ -69,4 +69,22 @@ coc_applications = Table(
     Column("created_by", String(80), nullable=False),
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
     Column("decided_at", DateTime(timezone=True)),
+)
+
+
+totalisation_claims = Table(
+    "totalisation_claims", metadata,
+    Column("id", BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True),
+    Column("reference", String(40), unique=True),
+    Column("direction", String(10), nullable=False),
+    Column("country", String(60), nullable=False),
+    Column("uan", String(12), nullable=False),
+    Column("foreign_insurance_no", String(80), nullable=False),
+    Column("benefit", String(20), nullable=False),
+    Column("periods", JSON, nullable=False),
+    Column("months_by_country", JSON, nullable=False),
+    Column("liaison_office", String(120), nullable=False),
+    Column("notes", Text),
+    Column("created_by", String(80), nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now(), nullable=False),
 )

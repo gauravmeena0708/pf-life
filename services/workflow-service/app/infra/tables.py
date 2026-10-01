@@ -1,5 +1,5 @@
 """Tables owned by workflow-service (created by migration 0002)."""
-from sqlalchemy import JSON, BigInteger, Boolean, Column, Date, DateTime, Integer, MetaData, String, Table, Text, false as sa_false, func
+from sqlalchemy import JSON, BigInteger, Boolean, Column, Date, DateTime, ForeignKey, Integer, MetaData, String, Table, Text, UniqueConstraint, false as sa_false, func
 
 from app.infra.models import IdType
 
@@ -22,6 +22,33 @@ office_staff = Table(
     Column("stakeholder", String(60), nullable=False),
     Column("office_id", String(40), nullable=False),
     Column("posted_since", Date),                            # P2.10b: tenure on the post (rotation of sensitive posts)
+)
+
+# Nidhi Aapke Nikat camps and the assistance recorded at each camp (P2.12f).
+outreach_camps = Table(
+    "outreach_camps", metadata,
+    Column("camp_id", String(40), primary_key=True),
+    Column("office_id", String(40), nullable=False, index=True),
+    Column("held_on", Date, nullable=False),
+    Column("venue", String(200), nullable=False),
+)
+
+camp_requests = Table(
+    "camp_requests", metadata,
+    Column("request_id", String(40), primary_key=True),
+    Column("camp_id", String(40), ForeignKey("outreach_camps.camp_id"), nullable=False, index=True),
+    Column("office_id", String(40), nullable=False),
+    Column("request_number", Integer, nullable=False),
+    Column("reference", String(90), nullable=False, unique=True),
+    Column("kind", String(30), nullable=False),
+    Column("name", String(200), nullable=False),
+    Column("mobile", String(10), nullable=False),
+    Column("uan", String(12)),
+    Column("details", Text, nullable=False),
+    Column("next_step", Text, nullable=False),
+    Column("taken_by", String(80), nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now()),
+    UniqueConstraint("camp_id", "request_number"),
 )
 
 # One case per claim. `chain` is the approval chain for the claim's amount band; `step` points at the

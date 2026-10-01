@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /hrm/me', 'POST /hrm/postings', 'GET /office/stopped-cases', 'GET /office/work-queue', 'GET /public/offices', 'GET /vigilance/cases', 'GET /vigilance/clearances', 'POST /vigilance/clearances', 'POST /vigilance/referrals', 'GET /vigilance/sensitive-posts', 'GET /employers/me/pending-approvals', 'GET /zo/fraud-risk/cases', 'POST /office/system/locks/{lockId}/release', 'GET /office/cases/{caseId}', 'GET /vigilance/cases/{caseId}', 'POST /office/cases/{caseId}/assignments', 'POST /office/cases/{caseId}/decisions', 'POST /office/cases/{caseId}/recommendations', 'POST /office/cases/{caseId}/restarts', 'POST /office/cases/{caseId}/second-approvals', 'POST /office/cases/{caseId}/stops', 'POST /office/freeze-cases/{caseId}/verifications', 'GET /office/members/{uan}/locks', 'POST /vigilance/cases/{caseId}/decisions', 'POST /vigilance/cases/{caseId}/findings', 'POST /office/cases/{caseId}/documents/{docId}/attestation-views']
+OPERATIONS = ['GET /hrm/me', 'POST /hrm/postings', 'GET /office/stopped-cases', 'GET /office/work-queue', 'GET /public/offices', 'GET /vigilance/cases', 'GET /vigilance/clearances', 'POST /vigilance/clearances', 'POST /vigilance/referrals', 'GET /vigilance/sensitive-posts', 'GET /employers/me/pending-approvals', 'GET /zo/fraud-risk/cases', 'POST /office/system/locks/{lockId}/release', 'GET /office/cases/{caseId}', 'GET /vigilance/cases/{caseId}', 'POST /office/cases/{caseId}/assignments', 'POST /office/cases/{caseId}/decisions', 'POST /office/cases/{caseId}/recommendations', 'POST /office/cases/{caseId}/restarts', 'POST /office/cases/{caseId}/second-approvals', 'POST /office/cases/{caseId}/stops', 'POST /office/freeze-cases/{caseId}/verifications', 'GET /office/members/{uan}/locks', 'POST /office/outreach-camps/{campId}/assisted-requests', 'POST /vigilance/cases/{caseId}/decisions', 'POST /vigilance/cases/{caseId}/findings', 'POST /office/cases/{caseId}/documents/{docId}/attestation-views']
 
 @router.api_route("/api/v1/hrm/me", methods=["GET"], include_in_schema=False)
 async def get_hrm_me(actor: Actor = Depends(require_actor)) -> None:
@@ -125,6 +125,11 @@ async def post_office_freeze_cases_caseId_verifications(actor: Actor = Depends(r
 @router.api_route("/api/v1/office/members/{uan}/locks", methods=["GET"], include_in_schema=False)
 async def get_office_members_uan_locks(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Active locks on a member ledger (annual accounts, claim adjudication, ECR posting) with owner and ex")
+
+
+@router.api_route("/api/v1/office/outreach-camps/{campId}/assisted-requests", methods=["POST"], include_in_schema=False)
+async def post_office_outreach_camps_campId_assisted_requests(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Requests taken at Nidhi Aapke Nikat camps")
 
 
 @router.api_route("/api/v1/vigilance/cases/{caseId}/decisions", methods=["POST"], include_in_schema=False)

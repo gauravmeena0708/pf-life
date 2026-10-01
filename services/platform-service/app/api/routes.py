@@ -22,7 +22,7 @@ from app.infra.tables import rule_sets
 from epfo_auth import Actor, require_actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit
-from epfo_persistence.policy import baseline, validate
+from epfo_persistence.policy import baseline, policy_rules, validate
 
 router = APIRouter()
 PRODUCER = "platform-service"
@@ -106,7 +106,7 @@ async def load(session: AsyncSession, version_id: str) -> dict[str, Any]:
     return dict(row)
 
 
-SECTIONS = ("interest", "tds", "pension", "death_claims", "late_payment", "vishwas", "higher_pension", "international_workers", "vigilance", "inoperative_accounts", "voluntary_coverage", "oversight_periods", "investment_pattern")
+SECTIONS = ("interest", "tds", "pension", "death_claims", "late_payment", "vishwas", "higher_pension", "international_workers", "vigilance", "inoperative_accounts", "voluntary_coverage", "oversight_periods", "investment_pattern", "dr_and_training")
 
 
 def complete(document: dict[str, Any]) -> dict[str, Any]:
@@ -258,6 +258,8 @@ async def decide(version_id: str, body: Decision, actor: Actor = Depends(APPROVE
             await session.execute(update(rule_sets).where(rule_sets.c.version_id == version_id).values(
                 status="PUBLISHED", decided_by=actor.subject, decision_note=body.note, decided_at=datetime.now(UTC),
                 version=row["version"] + 1))
+            await session.execute(insert(policy_rules).values(rule_version=row["rule_version"],
+                                                           effective_from=row["effective_from"], document=row["document"]))
             await add_event(session, producer=PRODUCER, event_type="PolicyPublished.v1", aggregate_type="rule_set",
                             aggregate_id=version_id, correlation_id=actor.correlation_id, payload={
                                 "version_id": version_id, "rule_version": row["rule_version"],

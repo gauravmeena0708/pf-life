@@ -253,8 +253,8 @@ it("extends an issued certificate and displays a printable certificate without s
 
 it("shows agreements to the HO unit without loading the decision queue", async () => {
   renderPage(<InternationalOfficePage />, "ho.iwu");
-  expect(await screen.findByText(agreements.note)).toBeTruthy(); expect(screen.getByText("Germany")).toBeTruthy();
-  expect(api).not.toHaveBeenCalledWith(officeBase); expect(screen.queryByRole("form")).toBeNull();
+  expect(await screen.findByText(agreements.note)).toBeTruthy(); expect(screen.getByRole("row", { name: /Germany/ })).toBeTruthy();
+  expect(api).not.toHaveBeenCalledWith(officeBase); expect(screen.getByRole("heading", { name: "Totalisation claims" })).toBeTruthy();
 });
 
 it("shows international worker employment, masked passport and service coverage", async () => {

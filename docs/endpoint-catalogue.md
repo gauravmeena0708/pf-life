@@ -296,7 +296,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 |---|---|---|---|---|
 | `POST /claimants/death-claims` 💰 🔐 (`formType=FORM_20`) | PF death claim by nominee / legal heir | W | 1 | claim |
 | `POST /claimants/death-claims` 💰 🔐 (`formType=FORM_5IF`) | **EDLI** insurance claim | W | 1 | claim |
-| `POST /claimants/death-claims` 💰 (`formType=CCF_DEATH`) | Composite claim covering several death benefits | P | 3 | claim |
+| `POST /claimants/death-claims` 💰 (`formType=CCF_DEATH`) | Composite claim covering several death benefits | W | 1 | claim |
 | `GET /claimants/death-claims/{claimId}` | Status (claimant verified separately; no member PII beyond entitlement) | W | 1 | claim |
 | `POST /claimants/family-pension-applications` 💰 🔐 (`formType=FORM_10D`) | Widow / child / orphan pension | W | 1 | pension |
 | `GET /claimants/family-pension-applications` | Status of the family pension application, desk by desk | W | 1 | pension |
@@ -374,7 +374,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/establishments/{estId}/freezes` 🔐 | Freeze an establishment | W | 1 | employer |
 | `POST /office/establishments/{estId}/defreezes` 🔐 | De-freeze an establishment, maker-checker | W | 1 | employer |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | Inoperative-account crowdsourcing verification through co-workers' logins | W | 1 | member |
-| `POST /office/outreach-camps/{campId}/assisted-requests` | Requests taken at Nidhi Aapke Nikat camps | P | 3 | workflow |
+| `POST /office/outreach-camps/{campId}/assisted-requests` | Requests taken at Nidhi Aapke Nikat camps | W | 1 | workflow |
 
 
 **Added from the Samadhan Setu integration spec** (`../samadhan-setu files/PF_LIFE_INTEGRATION_SPECIFICATION.md`, checked against the tracker issues)
@@ -567,7 +567,7 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | `POST /international/coc-applications/{id}/extensions` | CoC extension / renewal | W | 1 | international |
 | `POST /office/international/coc-applications/{id}/decisions` 🔐 | IW cell verification and CoC issuance (mock) | W | 1 | international |
 | `GET /international/agreements` | Social-security agreement catalogue (synthetic, labelled) | W | 1 | international |
-| `POST /international/totalisation-claims` | Route a benefit claim under a social-security agreement | P | 3 | international |
+| `POST /international/totalisation-claims` | Route a benefit claim under a social-security agreement | W | 1 | international |
 
 
 **Added from the stakeholder activity map** (`docs/stakeholder-activities.yaml`)
@@ -576,7 +576,7 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 |---|---|---|---|---|
 | `POST /international/coc-applications/{id}/signed-uploads` | Employer uploads signed CoC application | W | 1 | international |
 | `GET /international/coc-applications/{id}/certificate` | Download issued Certificate of Coverage | W | 1 | international |
-| `GET /partners/foreign-agencies/coc-certificates/{id}` | Foreign agency verifies a CoC (FOREIGN AGENCIES login) | P | 3 | international |
+| `GET /partners/foreign-agencies/coc-certificates/{id}` | Foreign agency verifies a CoC (FOREIGN AGENCIES login) | W | 1 | international |
 
 ## 13. Grievances, security, platform, audit and oversight
 
@@ -658,9 +658,9 @@ Monitoring (`/monitoring/**`), AI (`/ai/**`), audit (`/audit/**`) and NDC (`/ndc
 | `POST /ndc/issue-tracker/requests` | Raise an Issue Tracker request (e.g. freeze / de-freeze), with the order attached | W | 1 | platform |
 | `POST /ndc/issue-tracker/requests/{requestId}/executions` 🔐 | IS Division executes the block / unblock | W | 1 | platform |
 | `GET /ndc/issue-tracker/requests` | Issue Tracker requests: all (IS Division) or the officer's own | W | 1 | platform |
-| `GET /ndc/dr/replication-status` | ADC (DR site) replication status | P | 3 | platform |
-| `POST /ndc/dr/failover-drills` 🔐 | Run a DR failover drill | P | 3 | platform |
-| `POST /training/sandboxes` | Create a synthetic-data training sandbox (PDNASA / ZTI) | P | 3 | platform |
+| `GET /ndc/dr/replication-status` | ADC (DR site) replication status | W | 1 | platform |
+| `POST /ndc/dr/failover-drills` 🔐 | Run a DR failover drill | W | 1 | platform |
+| `POST /training/sandboxes` | Create a synthetic-data training sandbox (PDNASA / ZTI) | W | 1 | platform |
 
 ---
 

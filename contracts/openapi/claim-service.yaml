@@ -52,9 +52,9 @@ paths:
         status: W
         phase: 1
       - formType: CCF_DEATH
-        status: P
-        phase: 3
-      description: 'Variants by `formType`: `FORM_20` (W, phase 1); `FORM_5IF` (W, phase 1); `CCF_DEATH` (P, phase 3)'
+        status: W
+        phase: 1
+      description: 'Variants by `formType`: `FORM_20` (W, phase 1); `FORM_5IF` (W, phase 1); `CCF_DEATH` (W, phase 1)'
       requestBody:
         required: false
         content:

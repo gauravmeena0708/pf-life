@@ -807,7 +807,7 @@ Activities: **F11.nan** Help members at Nidhi Aapke Nikat camps
 
 | Endpoint | Status |
 |---|---|
-| `POST /office/outreach-camps/{campId}/assisted-requests` | P |
+| `POST /office/outreach-camps/{campId}/assisted-requests` | W |
 
 #### `fo.admin` — Office administration / HR / physical facilities
 
@@ -915,7 +915,7 @@ Activities: **F14.zti_zo** Zonal Training Institute uses the training sandbox
 
 | Endpoint | Status |
 |---|---|
-| `POST /training/sandboxes` | P |
+| `POST /training/sandboxes` | W |
 
 ### F. Head Office (HO) — leadership and divisions
 
@@ -1041,7 +1041,7 @@ Activities: **F10.ho** Maintain social-security agreements; route totalisation c
 | Endpoint | Status |
 |---|---|
 | `GET /international/agreements` | W |
-| `POST /international/totalisation-claims` | P |
+| `POST /international/totalisation-claims` | W |
 
 #### `ho.is` — IS Division (application ownership, Issue Tracker, block / unblock)
 
@@ -1227,8 +1227,8 @@ Activities: **F14.adc** Disaster-recovery site: replication status and failover 
 
 | Endpoint | Status |
 |---|---|
-| `GET /ndc/dr/replication-status` | P |
-| `POST /ndc/dr/failover-drills` | P |
+| `GET /ndc/dr/replication-status` | W |
+| `POST /ndc/dr/failover-drills` | W |
 
 #### `tech.cpps` — **CPPS / Central Payment and Reconciliation Centre** at NDC (pan-India pension disbursement, sponsor-bank reconciliation)
 
@@ -1270,7 +1270,7 @@ Activities: **F14.training** Run training on a synthetic-data sandbox
 
 | Endpoint | Status |
 |---|---|
-| `POST /training/sandboxes` | P |
+| `POST /training/sandboxes` | W |
 
 #### `train.zti` — Zonal Training Institutes
 
@@ -1278,7 +1278,7 @@ Activities: **F14.zti** Zonal training on the sandbox
 
 | Endpoint | Status |
 |---|---|
-| `POST /training/sandboxes` | P |
+| `POST /training/sandboxes` | W |
 
 ### J. External institutions and systems
 
@@ -1383,7 +1383,7 @@ Activities: **F10.foreign** Foreign social-security agency verifies CoC (FOREIGN
 
 | Endpoint | Status |
 |---|---|
-| `GET /partners/foreign-agencies/coc-certificates/{id}` | P |
+| `GET /partners/foreign-agencies/coc-certificates/{id}` | W |
 
 #### `ext.fund_manager` — Portfolio / fund managers and custodian
 
@@ -1869,7 +1869,6 @@ flowchart LR
   F11_public_search["public<br/>Search an inoperative account with a demo CAPTCHA and verify"]
   F11_search["member.exited<br/>Request reactivation / settlement (online, at FO or NAN camp"]
   F11_nan["fo.nan<br/>Help members at Nidhi Aapke Nikat camps"]
-  style F11_nan stroke-dasharray: 5 5
   F11_verify["fo.da_accounts<br/>Verify inoperative account (digital records, crowdsourcing t"]
   F11_approve["fo.ao<br/>Approve reactivation / settlement in the AO band; forward hi"]
   F11_approve_apfc["fo.apfc<br/>Approve inoperative-account settlement in higher amount band"]
@@ -1943,7 +1942,6 @@ flowchart LR
 flowchart LR
   F14_ndc["tech.ndc<br/>Run production, batch jobs and health / event monitoring"]
   F14_adc["tech.adc<br/>Disaster-recovery site: replication status and failover dril"]
-  style F14_adc stroke-dasharray: 5 5
   F14_security["ho.security<br/>Inspect recent request rates and redacted activity; session "]
   style F14_security stroke-dasharray: 5 5
   F14_cert_in["ext.cert_in<br/>Receive cyber-incident reports"]
@@ -1952,11 +1950,8 @@ flowchart LR
   F14_privacy["ho.data_protection<br/>Handle data-principal requests and breach records (DPDP Act)"]
   F14_ai["tech.ai_service<br/>Advisory AI: knowledge search, claim analysis, grievance cla"]
   F14_training["train.pdnasa<br/>Run training on a synthetic-data sandbox"]
-  style F14_training stroke-dasharray: 5 5
   F14_zti["train.zti<br/>Zonal training on the sandbox"]
-  style F14_zti stroke-dasharray: 5 5
   F14_zti_zo["zo.zti<br/>Zonal Training Institute uses the training sandbox"]
-  style F14_zti_zo stroke-dasharray: 5 5
   F14_npci["ext.npci<br/>Validate bank accounts (penny drop / name match)"]
   F14_digilocker["ext.digilocker<br/>Issue documents (UAN card, PPO) to DigiLocker"]
   style F14_digilocker stroke-dasharray: 5 5

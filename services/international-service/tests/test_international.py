@@ -256,3 +256,97 @@ def test_a_member_who_is_not_an_international_worker_gets_404_and_status_follows
     deliver("MemberInternationalStatusChanged.v1", {"uan": "100000000001", "international_worker": True, "nationality": "Japan"})
     body = client.get(url, headers=hdr(S["member-a"], "member")).json()["data"]
     assert body["nationality"] == "Japan" and body["agreement"]["country"] == "Japan"
+
+
+TOTALISATION = "/api/v1/international/totalisation-claims"
+VERIFY = "/api/v1/partners/foreign-agencies/coc-certificates"
+
+
+def totalisation(country="Belgium"):
+    return {"direction": "OUTBOUND", "country": country, "uan": "100000000001",
+            "foreign_insurance_no": "BE-12345", "benefit": "OLD_AGE", "notes": "Liaison request",
+            "periods": [{"from": "2020-01-01", "to": "2020-12-31", "country": "India"},
+                        {"from": "2021-01-01", "to": "2021-06-30", "country": country}]}
+
+
+@pytest.mark.parametrize("country,message", [
+    ("United States", "no social-security agreement"),
+    ("Germany", "does not allow totalisation"),
+])
+def test_totalisation_requires_eligible_agreement(ctx, country, message):
+    client, q, _ = ctx
+    response = client.post(TOTALISATION, json=totalisation(country), headers=hdr(S["ho-iwu"], "ho.iwu"))
+    assert response.status_code == 422, response.text
+    assert message in response.json()["detail"]
+    assert q("SELECT COUNT(*) FROM totalisation_claims") == [(0,)]
+    assert q("SELECT COUNT(*) FROM outbox WHERE event_type='TotalisationClaimRouted.v1'") == [(0,)]
+
+
+def test_totalisation_months_reference_and_event(ctx):
+    client, q, _ = ctx
+    body = totalisation()
+    response = client.post(TOTALISATION, json=body, headers=hdr(S["ho-iwu"], "ho.iwu"))
+    assert response.status_code == 201, response.text
+    data = response.json()["data"]
+    assert data["claim_id"] == "TOT/BEL/1"
+    assert data["reference"] == data["claim_id"]
+    assert data["liaison_office"] == "IWU, Head Office"
+    assert data["months_by_country"] == {"India": 12, "Belgium": 6}
+    [(reference, months, periods)] = q("SELECT reference, months_by_country, periods FROM totalisation_claims")
+    assert reference == data["claim_id"]
+    assert json.loads(months) == data["months_by_country"]
+    assert json.loads(periods) == body["periods"]
+    [(payload,)] = q("SELECT payload FROM outbox WHERE event_type='TotalisationClaimRouted.v1'")
+    assert json.loads(payload)["envelope"]["payload"] == {
+        "claim_id": reference, "country": "Belgium", "direction": "OUTBOUND", "benefit": "OLD_AGE"}
+    assert q("SELECT action, target_id FROM audit_local WHERE action='totalisation.claim_routed'") == [
+        ("totalisation.claim_routed", reference)]
+    assert client.post(TOTALISATION, json=body, headers=signatory()).status_code == 403
+
+
+def test_totalisation_rejects_invalid_periods(ctx):
+    client, q, _ = ctx
+    for periods, status in (([], 400), ([{"from": "2021-03-01", "to": "2021-02-28", "country": "India"}], 422),
+                            ([{"from": "2021-01-01", "to": "2021-02-28", "country": "France"}], 422)):
+        response = client.post(TOTALISATION, json={**totalisation(), "periods": periods},
+                               headers=hdr(S["ho-iwu"], "ho.iwu"))
+        assert response.status_code == status, response.text
+    assert q("SELECT COUNT(*) FROM totalisation_claims") == [(0,)]
+
+
+def test_foreign_agency_verifies_minimal_certificate_and_audit(ctx):
+    client, q, _ = ctx
+    application = apply(client)
+    upload(client, application["application_id"])
+    issued = issue(client, application["application_id"])
+    url = f"{VERIFY}/{issued['certificate_no']}"
+    response = client.get(url, headers=hdr("foreign-agency", "ext.foreign_ss"))
+    assert response.status_code == 200, response.text
+    assert response.json()["data"] == {
+        "certificate_no": issued["certificate_no"], "status": "ISSUED", "worker_name_masked": "A***",
+        "country": "Germany", "posting_from": application["posting_from"], "posting_to": application["posting_to"],
+        "issuing_office": q("SELECT office_id FROM coc_applications")[0][0],
+        "issued_on": date.fromisoformat(issued["decided_at"][:10]).isoformat()}
+    assert q("SELECT action, target_id FROM audit_local WHERE action='coc.verify'") == [
+        ("coc.verify", issued["certificate_no"])]
+    assert client.get(f"{VERIFY}/missing", headers=hdr("foreign-agency", "ext.foreign_ss")).status_code == 404
+    assert client.get(url, headers=signatory()).status_code == 403
+
+
+def test_foreign_agency_sees_issued_extension_end(ctx):
+    client, _, _ = ctx
+    application = apply(client)
+    upload(client, application["application_id"])
+    issued = issue(client, application["application_id"])
+    extended_to = posting("Germany", 18)["posting_to"]
+    response = client.post(f"{BASE}/{application['application_id']}/extensions",
+                           json={"posting_to": extended_to}, headers=signatory())
+    assert response.status_code == 201, response.text
+    extension = response.json()["data"]
+    upload(client, extension["application_id"])
+    issue(client, extension["application_id"])
+    verified = client.get(f"{VERIFY}/{issued['certificate_no']}",
+                          headers=hdr("foreign-agency", "ext.foreign_ss"))
+    assert verified.status_code == 200, verified.text
+    assert verified.json()["data"]["status"] == "EXTENDED"
+    assert verified.json()["data"]["posting_to"] == extended_to

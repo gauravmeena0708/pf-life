@@ -6,12 +6,12 @@
   "stakeholders_with_access": 95,
   "activities": 243,
   "endpoints": {
-   "W": 363,
+   "W": 369,
    "M": 21,
-   "P": 45,
+   "P": 39,
    "?": 5
   },
-  "personas": 61
+  "personas": 64
  },
  "interfaces": [
   {
@@ -84,9 +84,9 @@
    "coverage": "Working",
    "purpose": "Field-office sections: claim scrutiny and payment, compliance, pension, EDLI, exemption, PRO counter.",
    "endpoints": {
-    "W": 92,
+    "W": 93,
     "M": 0,
-    "P": 21,
+    "P": 20,
     "?": 4
    },
    "stakeholders": [
@@ -135,9 +135,9 @@
    "coverage": "Working",
    "purpose": "International workers and Certificates of Coverage under social-security agreements.",
    "endpoints": {
-    "W": 4,
+    "W": 6,
     "M": 0,
-    "P": 2,
+    "P": 0,
     "?": 0
    },
    "stakeholders": [
@@ -189,9 +189,9 @@
    "coverage": "Working",
    "purpose": "Zonal offices: grievances escalated to the zone, fraud-risk review, concurrent audit.",
    "endpoints": {
-    "W": 12,
+    "W": 13,
     "M": 0,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
    "stakeholders": [
@@ -236,9 +236,9 @@
    "coverage": "Working",
    "purpose": "National Data Centre: the pension disbursement run and technical operations.",
    "endpoints": {
-    "W": 6,
+    "W": 8,
     "M": 0,
-    "P": 2,
+    "P": 0,
     "?": 0
    },
    "stakeholders": [
@@ -1731,9 +1731,9 @@
    "name": "Nidhi Aapke Nikat outreach camp team",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 0,
+    "W": 1,
     "M": 0,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
    "activities": [
@@ -1742,7 +1742,9 @@
      "does": "Help members at Nidhi Aapke Nikat camps"
     }
    ],
-   "personas": []
+   "personas": [
+    "ro-nan"
+   ]
   },
   "fo.admin": {
    "name": "Office administration / HR / physical facilities",
@@ -1923,9 +1925,9 @@
    "name": "Zonal Training Institute",
    "group": "E. Zonal Office (ZO)",
    "endpoints": {
-    "W": 0,
+    "W": 1,
     "M": 0,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
    "activities": [
@@ -2149,9 +2151,9 @@
    "name": "International Workers Unit",
    "group": "F. Head Office (HO) — leadership and divisions",
    "endpoints": {
-    "W": 1,
+    "W": 2,
     "M": 0,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
    "activities": [
@@ -2529,9 +2531,9 @@
    "name": "**Alternate Data Centre**, Secunderabad (disaster recovery site; part of G-NOC with NDC)",
    "group": "H. Technology and national operations",
    "endpoints": {
-    "W": 0,
+    "W": 2,
     "M": 0,
-    "P": 2,
+    "P": 0,
     "?": 0
    },
    "activities": [
@@ -2540,7 +2542,9 @@
      "does": "Disaster-recovery site: replication status and failover drills"
     }
    ],
-   "personas": []
+   "personas": [
+    "ndc-adc"
+   ]
   },
   "tech.cpps": {
    "name": "**CPPS / Central Payment and Reconciliation Centre** at NDC (pan-India pension disbursement, sponsor-bank reconciliation)",
@@ -2620,9 +2624,9 @@
    "name": "PDNASA — national training academy",
    "group": "I. Training",
    "endpoints": {
-    "W": 0,
+    "W": 1,
     "M": 0,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
    "activities": [
@@ -2631,15 +2635,17 @@
      "does": "Run training on a synthetic-data sandbox"
     }
    ],
-   "personas": []
+   "personas": [
+    "pdnasa-trainer"
+   ]
   },
   "train.zti": {
    "name": "Zonal Training Institutes",
    "group": "I. Training",
    "endpoints": {
-    "W": 0,
+    "W": 1,
     "M": 0,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
    "activities": [
@@ -2875,9 +2881,9 @@
    "name": "Foreign social-security liaison agencies (IWU portal \"FOREIGN AGENCIES\" login)",
    "group": "J. External institutions and systems",
    "endpoints": {
-    "W": 0,
+    "W": 1,
     "M": 0,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
    "activities": [

@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /international/agreements', 'GET /international/coc-applications', 'POST /international/coc-applications', 'GET /members/me/international', 'GET /office/international/coc-applications', 'POST /office/international/coc-applications/{id}/decisions', 'GET /international/coc-applications/{id}', 'GET /international/coc-applications/{id}/certificate', 'POST /international/coc-applications/{id}/extensions', 'POST /international/coc-applications/{id}/signed-uploads']
+OPERATIONS = ['GET /international/agreements', 'GET /international/coc-applications', 'POST /international/coc-applications', 'POST /international/totalisation-claims', 'GET /members/me/international', 'GET /office/international/coc-applications', 'GET /partners/foreign-agencies/coc-certificates/{id}', 'POST /office/international/coc-applications/{id}/decisions', 'GET /international/coc-applications/{id}', 'GET /international/coc-applications/{id}/certificate', 'POST /international/coc-applications/{id}/extensions', 'POST /international/coc-applications/{id}/signed-uploads']
 
 @router.api_route("/api/v1/international/agreements", methods=["GET"], include_in_schema=False)
 async def get_international_agreements(actor: Actor = Depends(require_actor)) -> None:
@@ -27,6 +27,11 @@ async def post_international_coc_applications(actor: Actor = Depends(require_act
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Certificate of Coverage application (mock)")
 
 
+@router.api_route("/api/v1/international/totalisation-claims", methods=["POST"], include_in_schema=False)
+async def post_international_totalisation_claims(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Route a benefit claim under a social-security agreement")
+
+
 @router.api_route("/api/v1/members/me/international", methods=["GET"], include_in_schema=False)
 async def get_members_me_international(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "International worker profile")
@@ -35,6 +40,11 @@ async def get_members_me_international(actor: Actor = Depends(require_actor)) ->
 @router.api_route("/api/v1/office/international/coc-applications", methods=["GET"], include_in_schema=False)
 async def get_office_international_coc_applications(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Certificate of Coverage applications of the office's establishments")
+
+
+@router.api_route("/api/v1/partners/foreign-agencies/coc-certificates/{id}", methods=["GET"], include_in_schema=False)
+async def get_partners_foreign_agencies_coc_certificates_id(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Foreign agency verifies a CoC (FOREIGN AGENCIES login)")
 
 
 @router.api_route("/api/v1/office/international/coc-applications/{id}/decisions", methods=["POST"], include_in_schema=False)

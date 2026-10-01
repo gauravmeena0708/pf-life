@@ -1,5 +1,5 @@
 """Tables owned by platform-service (created by migration 0002): rule-set versions for policy administration."""
-from sqlalchemy import JSON, Column, Date, DateTime, Integer, MetaData, String, Table, Text, func
+from sqlalchemy import JSON, Boolean, Column, Date, DateTime, Integer, MetaData, String, Table, Text, func
 
 metadata = MetaData()
 
@@ -41,4 +41,31 @@ issue_tracker_requests = Table(
     Column("executed_by", String(80)),
     Column("executed_at", DateTime(timezone=True)),
     Column("execution_note", Text),
+)
+
+# P2.12f: illustrative DR drills and training sandboxes; neither provisions infrastructure or accounts.
+failover_drills = Table(
+    "failover_drills", metadata,
+    Column("drill_id", String(40), primary_key=True),
+    Column("scenario", String(30), nullable=False),
+    Column("notes", Text),
+    Column("steps", JSON, nullable=False),
+    Column("rto_minutes", Integer, nullable=False),
+    Column("target_minutes", Integer, nullable=False),
+    Column("within_target", Boolean, nullable=False),
+    Column("recorded_by", String(80), nullable=False),
+    Column("recorded_at", DateTime(timezone=True), server_default=func.now()),
+)
+
+training_sandboxes = Table(
+    "training_sandboxes", metadata,
+    Column("sandbox_id", String(40), primary_key=True),
+    Column("course", String(200), nullable=False),
+    Column("trainees", Integer, nullable=False),
+    Column("personas", JSON, nullable=False),
+    Column("training_logins", JSON, nullable=False),
+    Column("starts_on", Date, nullable=False),
+    Column("expires_on", Date, nullable=False),
+    Column("created_by", String(80), nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now()),
 )

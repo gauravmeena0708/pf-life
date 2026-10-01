@@ -229,6 +229,22 @@
       {
         "name": "gov.fiac",
         "description": "Finance, Investment and Audit Committee member — board packs and investments"
+      },
+      {
+        "name": "tech.adc",
+        "description": "Disaster-recovery site: replication and failover drills"
+      },
+      {
+        "name": "train.pdnasa",
+        "description": "National academy trainer — synthetic-data training sandboxes"
+      },
+      {
+        "name": "fo.nan",
+        "description": "Outreach camp team — requests taken at Nidhi Aapke Nikat camps"
+      },
+      {
+        "name": "ext.foreign_ss",
+        "description": "Foreign social-security agency (machine) — verifies certificates of coverage"
       }
     ]
   },
@@ -280,6 +296,15 @@
       "enabled": true,
       "publicClient": false,
       "secret": "change-me-ai-secret",
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": false
+    },
+    {
+      "clientId": "foreign-agency-demo",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "change-me-foreign-agency-secret",
       "standardFlowEnabled": false,
       "serviceAccountsEnabled": true,
       "directAccessGrantsEnabled": false
@@ -1460,6 +1485,71 @@
         "gov.fiac"
       ],
       "id": "00000000-0000-4000-8000-000000000061"
+    },
+    {
+      "username": "ndc-adc",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Disaster-recovery site",
+      "lastName": "Demo",
+      "email": "ndc-adc@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "tech.adc"
+      ],
+      "id": "00000000-0000-4000-8000-000000000062"
+    },
+    {
+      "username": "pdnasa-trainer",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "PDUNASS trainer",
+      "lastName": "Demo",
+      "email": "pdnasa-trainer@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "train.pdnasa"
+      ],
+      "id": "00000000-0000-4000-8000-000000000063"
+    },
+    {
+      "username": "ro-nan",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Nidhi Aapke Nikat camp",
+      "lastName": "Demo",
+      "email": "ro-nan@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.nan"
+      ],
+      "id": "00000000-0000-4000-8000-000000000064"
+    },
+    {
+      "username": "service-account-foreign-agency-demo",
+      "enabled": true,
+      "serviceAccountClientId": "foreign-agency-demo",
+      "realmRoles": [
+        "ext.foreign_ss"
+      ]
     }
   ]
 }

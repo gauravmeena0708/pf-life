@@ -79,6 +79,9 @@ import { FraudRiskPage } from "./features/office/FraudRiskPage";
 import { DistrictDashboardPage } from "./features/office/DistrictDashboardPage";
 import { HrmPage } from "./features/hrm/HrmPage";
 import { VigilancePage } from "./features/vigilance/VigilancePage";
+import { DrPage } from "./features/ndc/DrPage";
+import { SandboxPage } from "./features/training/SandboxPage";
+import { CampPage } from "./features/office/CampPage";
 
 /** Menu links point at sections (`/member/profile#correction-heading`); scroll there once the section has rendered. */
 function ScrollToHash() {
@@ -150,6 +153,9 @@ export function App() {
             <Route path="/office/edli-claims" element={<EdliPage />} />
             <Route path="/office/international" element={<InternationalOfficePage />} />
             <Route path="/ho/agreements" element={<InternationalOfficePage />} />
+            <Route path="/ndc/dr" element={<DrPage />} />
+            <Route path="/training" element={<SandboxPage />} />
+            <Route path="/office/nan-camp" element={<CampPage />} />
             <Route path="/office/pension-claims" element={<PensionClaimsPage />} />
             <Route path="/office/claim-tools" element={<ClaimToolsPage />} />
             <Route path="/claimant" element={<ClaimantPage />} />

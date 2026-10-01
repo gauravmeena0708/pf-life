@@ -305,7 +305,7 @@ activities:
 # ─────────────────────────── F11 Inoperative accounts ───────────────────────────
   - {id: F11.public_search, actor: public, does: "Search an inoperative account with a demo CAPTCHA and verify an OTP before viewing the balance", api: ["POST /public/inoperative-accounts/searches"], next: [F11.verify], src: WSU, ev: D}
   - {id: F11.search, actor: member.exited, does: "Request reactivation / settlement (online, at FO or NAN camp)", api: ["POST /members/me/claims"], next: [F11.verify], src: WSU, ev: D}
-  - {id: F11.nan, actor: fo.nan, does: "Help members at Nidhi Aapke Nikat camps", api: ["POST /office/outreach-camps/{campId}/assisted-requests"], next: [F11.verify], src: "WSU, PEN", ev: D, fut: true}
+  - {id: F11.nan, actor: fo.nan, does: "Help members at Nidhi Aapke Nikat camps", api: ["POST /office/outreach-camps/{campId}/assisted-requests"], next: [F11.verify], src: "WSU, PEN", ev: D}
   - {id: F11.verify, actor: fo.da_accounts, does: "Verify inoperative account (digital records, crowdsourcing through co-workers' logins)", api: ["GET /office/accounts/inoperative", "POST /office/accounts/{accountLinkId}/crowdsource-verifications"], next: [F11.approve], chain: inoperative_settlement, src: WSU, ev: D}
   - {id: F11.approve, actor: fo.ao, does: "Approve reactivation / settlement in the AO band; forward higher bands", api: ["GET /office/accounts/inoperative", "POST /office/accounts/{accountLinkId}/reactivations"], next: [F11.approve_apfc], chain: inoperative_settlement, src: WSU, ev: D}
   - {id: F11.approve_apfc, actor: fo.apfc, does: "Approve inoperative-account settlement in higher amount bands", api: ["GET /office/accounts/inoperative", "POST /office/accounts/{accountLinkId}/reactivations"], next: [F11.oic_monitor], chain: inoperative_settlement, src: WSU, ev: D}
@@ -346,16 +346,16 @@ activities:
 
 # ─────────────────────────── F14 Technology, security, data protection, training ───────────────────────────
   - {id: F14.ndc, actor: tech.ndc, does: "Run production, batch jobs and health / event monitoring", api: ["GET /ndc/health", "GET /ndc/event-failures", "POST /ndc/event-failures/{eventId}/replays"], next: [F14.adc], src: "AUD, PEN", ev: D}
-  - {id: F14.adc, actor: tech.adc, does: "Disaster-recovery site: replication status and failover drills", api: ["GET /ndc/dr/replication-status", "POST /ndc/dr/failover-drills"], next: [], src: "MAP, AUD, WEB", ev: U, fut: true}
+  - {id: F14.adc, actor: tech.adc, does: "Disaster-recovery site: replication status and failover drills", api: ["GET /ndc/dr/replication-status", "POST /ndc/dr/failover-drills"], next: [], src: "MAP, AUD, WEB", ev: U}
   - {id: F14.security, actor: ho.security, does: "Inspect recent request rates and redacted activity; session inspection and revocation; security events; incident reporting", api: ["GET /security/incidents", "GET /security/request-activity", "GET /security/sessions", "POST /security/sessions/{sessionId}/revocations", "GET /security/account-recovery-requests", "POST /security/account-recovery-requests/{requestId}/decisions", "GET /audit/events", "GET /security/me/permissions", "POST /internal/security-events", "POST /security/incidents"], adapter: cert_in, next: [F14.cert_in], src: "init.md §6", ev: U, fut: true}
   - {id: F14.cert_in, actor: ext.cert_in, does: "Receive cyber-incident reports", adapter: cert_in, next: [], src: WEB, ev: U}
   - {id: F14.step_up, actor: member, does: "Complete step-up confirmation for sensitive actions", api: ["POST /security/step-up-challenges", "POST /security/step-up-challenges/{challengeId}/verifications"], next: [], src: "init.md §6.3", ev: U}
   - {id: F14.privacy_request, actor: member, does: "Ask EPFO about my personal data: access, correction, erasure or a grievance (DPDP Act)", api: ["POST /members/me/privacy-requests", "GET /members/me/privacy-requests"], next: [F14.privacy], src: WEB, ev: U}
   - {id: F14.privacy, actor: ho.data_protection, does: "Handle data-principal requests and breach records (DPDP Act)", api: ["GET /privacy/requests", "POST /privacy/requests/{requestId}/decisions"], next: [], src: WEB, ev: U}
   - {id: F14.ai, actor: tech.ai_service, does: "Advisory AI: knowledge search, claim analysis, grievance classification (no privileged writes)", api: ["POST /ai/knowledge/search", "POST /ai/claims/analyse", "POST /ai/grievances/classify", "GET /ai/models", "POST /ai/feedback"], next: [], src: "init.md §8", ev: U}
-  - {id: F14.training, actor: train.pdnasa, does: "Run training on a synthetic-data sandbox", api: ["POST /training/sandboxes"], next: [], src: EC, ev: U, fut: true}
-  - {id: F14.zti, actor: train.zti, does: "Zonal training on the sandbox", api: ["POST /training/sandboxes"], next: [], src: EC, ev: U, fut: true}
-  - {id: F14.zti_zo, actor: zo.zti, does: "Zonal Training Institute uses the training sandbox", api: ["POST /training/sandboxes"], next: [], src: EC, ev: U, fut: true}
+  - {id: F14.training, actor: train.pdnasa, does: "Run training on a synthetic-data sandbox", api: ["POST /training/sandboxes"], next: [], src: EC, ev: U}
+  - {id: F14.zti, actor: train.zti, does: "Zonal training on the sandbox", api: ["POST /training/sandboxes"], next: [], src: EC, ev: U}
+  - {id: F14.zti_zo, actor: zo.zti, does: "Zonal Training Institute uses the training sandbox", api: ["POST /training/sandboxes"], next: [], src: EC, ev: U}
   - {id: F14.npci, actor: ext.npci, does: "Validate bank accounts (penny drop / name match)", adapter: npci, next: [], src: WEB, ev: U}
   - {id: F14.digilocker, actor: ext.digilocker, does: "Issue documents (UAN card, PPO) to DigiLocker", adapter: digilocker, next: [], src: WEB, ev: U, fut: true}
   - {id: F14.umang, actor: ext.umang, does: "Mobile channel calling the same member / pensioner APIs", api: ["GET /members/me/passbook", "POST /members/me/claims", "GET /members/me/claims"], next: [], src: "EC, REF", ev: D}

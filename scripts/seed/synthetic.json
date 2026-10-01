@@ -608,7 +608,10 @@
     "statutory-auditor": "00000000-0000-4000-8000-000000000058",
     "ho-investment": "00000000-0000-4000-8000-000000000059",
     "cbt-member": "00000000-0000-4000-8000-000000000060",
-    "fiac-member": "00000000-0000-4000-8000-000000000061"
+    "fiac-member": "00000000-0000-4000-8000-000000000061",
+    "ndc-adc": "00000000-0000-4000-8000-000000000062",
+    "pdnasa-trainer": "00000000-0000-4000-8000-000000000063",
+    "ro-nan": "00000000-0000-4000-8000-000000000064"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -820,6 +823,12 @@
       "subject": "00000000-0000-4000-8000-000000000056",
       "stakeholder": "zo.internal_audit",
       "office_id": "ZO-DEMO-01"
+    },
+    {
+      "username": "ro-nan",
+      "subject": "00000000-0000-4000-8000-000000000064",
+      "stakeholder": "fo.nan",
+      "office_id": "RO-DEMO-01"
     }
   ],
   "pensioners": [
@@ -953,5 +962,14 @@
         ]
       }
     ]
-  }
+  },
+  "outreach_camps": [
+    {
+      "_comment": "P2.12f: a Nidhi Aapke Nikat camp of the demo office",
+      "camp_id": "NAN-RO1-2026-10",
+      "office_id": "RO-DEMO-01",
+      "held_on": "2026-10-27",
+      "venue": "District Collectorate hall, Central Delhi (synthetic)"
+    }
+  ]
 }

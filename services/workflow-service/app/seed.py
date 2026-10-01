@@ -10,7 +10,7 @@ from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from app.infra.db import sessions
 from datetime import date, datetime
 
-from app.infra.tables import ledger_locks, member_accounts, office_staff, offices, subject_offices
+from app.infra.tables import ledger_locks, member_accounts, office_staff, offices, outreach_camps, subject_offices
 
 SEED_FILE = os.getenv("SEED_FILE", "/srv/seed/synthetic.json")
 
@@ -24,6 +24,11 @@ async def main() -> None:
         for o in [office, *seed.get("other_offices", [])]:
             await session.execute(insert(offices).values(office_id=o["office_id"], name=o["name"],
                                                          zone_id=o.get("zone_id")).on_conflict_do_nothing())
+        for camp in seed.get("outreach_camps", []):
+            await session.execute(insert(outreach_camps).values(
+                camp_id=camp["camp_id"], office_id=camp["office_id"],
+                held_on=date.fromisoformat(camp["held_on"]), venue=camp["venue"]
+            ).on_conflict_do_nothing())
         for m in seed["members"]:               # process subjects (UANs) belong to the establishment's office
             values = {"office_id": seed["establishment"]["office_id"], "zone_id": office.get("zone_id"),
                       "member_subject": m.get("subject"), "establishment_id": seed["establishment"]["establishment_id"]}

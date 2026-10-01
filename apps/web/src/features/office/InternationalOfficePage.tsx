@@ -6,6 +6,7 @@ import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { AgreementsTable } from "../international/AgreementsTable";
 import { CocDetails } from "../international/CocDetails";
+import { TotalisationClaims } from "../international/TotalisationClaims";
 import type { CocApplication } from "../international/types";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
@@ -63,6 +64,7 @@ export function InternationalOfficePage() {
       {queue.data && !queue.data.data.length ? <p className="muted">No certificate applications to review.</p> : null}
     </section> : null}
     {officer || role === "ho.iwu" ? <AgreementsTable /> : null}
+    {role === "ho.iwu" ? <TotalisationClaims /> : null}
     <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
   </section>;
 }

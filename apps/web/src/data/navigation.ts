@@ -163,6 +163,9 @@ export function menusFor(role: string | undefined): NavGroup[] {
   if (role === "pensioner") return PENSIONER;
   if (role === "claimant") return CLAIMANT;
   if (role === "csc_operator") return [{ label: "UAN allotment", to: "/csc" }];
+  if (role === "tech.adc") return [{ label: "Disaster recovery", to: "/ndc/dr" }];
+  if (["train.pdnasa", "train.zti", "zo.zti"].includes(role)) return [{ label: "Training sandbox", to: "/training" }];
+  if (role === "fo.nan") return [{ label: "Nidhi Aapke Nikat camp", to: "/office/nan-camp" }];
   if (role === "fo.pension_disbursement") return [{ label: "Disbursement lists", to: "/office/pension-disbursement" }];
   if (role === "ho.actuarial") return [{ label: "Actuarial extract", to: "/ho/actuarial" }];
   if (role === "fo.edli") return [{ label: "EDLI claims", to: "/office/edli-claims" }];
@@ -176,6 +179,9 @@ export function menusFor(role: string | undefined): NavGroup[] {
 
 /** Where "Home" goes for a role. */
 export function homeFor(role: string | undefined): string {
+  if (role === "tech.adc") return "/ndc/dr";
+  if (["train.pdnasa", "train.zti", "zo.zti"].includes(role ?? "")) return "/training";
+  if (role === "fo.nan") return "/office/nan-camp";
   if (role === "fo.pension_disbursement") return "/office/pension-disbursement";
   if (role === "ho.actuarial") return "/ho/actuarial";
   if (role === "ho.security") return "/security/activity";

@@ -98,6 +98,14 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 12f: DR site, training sandboxes, NAN camps, totalisation, foreign agency, composite death claim (1 October 2026)
+
+Unit: platform-service 31, workflow-service 51, international-service 23, claim-service 64 (new tests in each), gateway 23;
+web 216 (new `P212f.test.tsx`); end to end 87 of 87 (new `test_small_rest.py`, which also fetches a machine token for the
+foreign agency from Keycloak); must-deny 18; UI smoke 2. The composite death claim's full path is covered by the unit
+tests: on the stack the seeded deceased member already has an open claim from the earlier death-claim tests, so the
+end-to-end test accepts that answer.
+
 ## Update — Phase 2, slice 12e: balance sheet, investments, board packs, fund-manager feed (1 October 2026)
 
 After `make reset` the stack was rebuilt. Unit: contribution-service 76 (balance sheet), reporting-service 68 (feed,

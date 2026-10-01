@@ -16,6 +16,7 @@ interface Share { beneficiary_id: string; name: string; relation: string; share_
 interface TimelineEntry { at: string | null; state: string; by: string; note: string }
 interface DeathClaim { claim_id: string; claim_type: string; form_type: string; amount_paise: number; state: string; summary: string;
   next_step: string; decision_reason: string | null; timeline: TimelineEntry[]; beneficiaries: Share[] }
+interface CompositeClaim { composite_ref: string; claims: DeathClaim[]; next_step: string }
 
 export function SharesTable({ rows }: { rows: Share[] }) {
   return <div className="table-scroll"><table>
@@ -33,6 +34,7 @@ export function ClaimantPage() {
   const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
   const [claim, setClaim] = useState<DeathClaim | null>(null);
+  const [composite, setComposite] = useState<CompositeClaim | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   async function run(work: () => Promise<string | null>) {
@@ -44,15 +46,15 @@ export function ClaimantPage() {
     const uan = text(f, "uan"), form = text(f, "form");
     void run(async () => {
       const token = await stepUp.ask({ action: "file-death-claim", resourceId: uan,
-        summary: `File the ${form === "FORM_5IF" ? "EDLI (Form 5IF)" : "PF (Form 20)"} claim for the member with UAN ending ${uan.slice(-4)}.` });
+        summary: `File the ${form === "CCF_DEATH" ? "composite PF and EDLI" : form === "FORM_5IF" ? "EDLI (Form 5IF)" : "PF (Form 20)"} claim for the member with UAN ending ${uan.slice(-4)}.` });
       if (!token) return null;
-      const r = await command<Envelope<DeathClaim>>("POST", "/api/v1/claimants/death-claims",
+      const r = await command<Envelope<DeathClaim | CompositeClaim>>("POST", "/api/v1/claimants/death-claims",
         { form_type: form, deceased_uan: uan, process_as: "E_NOMINATION" }, { stepUpToken: token });
-      setClaim(r.data);
-      return `Claim ${r.data.claim_id} filed.`;
+      if ("claims" in r.data) { setComposite(r.data); setClaim(null); return `Composite claim ${r.data.composite_ref} filed.`; }
+      setClaim(r.data); setComposite(null); return `Claim ${r.data.claim_id} filed.`;
     }); };
   const track = (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); const id = text(new FormData(e.currentTarget), "claim");
-    void run(async () => { setClaim((await api<Envelope<DeathClaim>>(`/api/v1/claimants/death-claims/${id}`)).data); return null; }); };
+    void run(async () => { setClaim((await api<Envelope<DeathClaim>>(`/api/v1/claimants/death-claims/${id}`)).data); setComposite(null); return null; }); };
   const addBeneficiary = (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); const f = new FormData(e.currentTarget); const form = e.currentTarget;
     if (!claim) return;
     void run(async () => {
@@ -74,13 +76,18 @@ export function ClaimantPage() {
         <div className="form-row">
           <label>Deceased member's UAN<input name="uan" required pattern="[0-9]{12}" inputMode="numeric" defaultValue="100000000901" /></label>
           <label>Claim<select name="form" defaultValue="FORM_20">
-            <option value="FORM_20">Provident Fund — Form 20</option><option value="FORM_5IF">EDLI insurance — Form 5IF</option></select></label>
+            <option value="FORM_20">Provident Fund — Form 20</option><option value="FORM_5IF">EDLI insurance — Form 5IF</option>
+            <option value="CCF_DEATH">Composite claim (PF and EDLI)</option></select></label>
         </div>
         <div className="actions"><button type="submit" className="primary">File claim</button></div>
       </form>
 
       <form className="card search-input-row" aria-label="Track a claim" onSubmit={track}>
         <label>Claim ID<input name="claim" required placeholder="CLM-…" /></label><button type="submit">Track</button></form>
+
+      {composite ? <section className="card stack" aria-labelledby="composite-heading"><h2 id="composite-heading">Composite reference {composite.composite_ref}</h2>
+        <ul>{composite.claims.map((item) => <li key={item.claim_id}><strong>{item.claim_id}</strong> · {item.form_type === "FORM_20" ? "PF (Form 20)" : "EDLI (Form 5IF)"} · {statusLabel(item.state, t)}</li>)}</ul>
+        <p>{composite.next_step}</p></section> : null}
 
       {claim ? <section className="card stack" aria-labelledby="claim-status-heading">
         <h2 id="claim-status-heading">{claim.claim_id} · Form {claim.form_type} <span className="state-pill">{statusLabel(claim.state, t)}</span></h2>

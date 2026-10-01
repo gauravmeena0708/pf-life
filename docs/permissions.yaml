@@ -2812,7 +2812,7 @@ stakeholders:
     - F08.rti_reply
   fo.nan:
   - endpoint: POST /office/outreach-camps/{campId}/assisted-requests
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -3026,7 +3026,7 @@ stakeholders:
     - F07.committee
   zo.zti:
   - endpoint: POST /training/sandboxes
-    status: P
+    status: W
     scope: training administrators; synthetic data only
     step_up: false
     via:
@@ -3278,7 +3278,7 @@ stakeholders:
     via:
     - F10.ho
   - endpoint: POST /international/totalisation-claims
-    status: P
+    status: W
     scope: own application (employer) or IWU role
     step_up: false
     via:
@@ -3562,13 +3562,13 @@ stakeholders:
     - F14.ndc
   tech.adc:
   - endpoint: GET /ndc/dr/replication-status
-    status: P
+    status: W
     scope: NDC / IS operations role
     step_up: false
     via:
     - F14.adc
   - endpoint: POST /ndc/dr/failover-drills
-    status: P
+    status: W
     scope: NDC / IS operations role
     step_up: true
     via:
@@ -3627,14 +3627,14 @@ stakeholders:
     - F14.ai
   train.pdnasa:
   - endpoint: POST /training/sandboxes
-    status: P
+    status: W
     scope: training administrators; synthetic data only
     step_up: false
     via:
     - F14.training
   train.zti:
   - endpoint: POST /training/sandboxes
-    status: P
+    status: W
     scope: training administrators; synthetic data only
     step_up: false
     via:
@@ -3714,7 +3714,7 @@ stakeholders:
     - F08.cpgrams
   ext.foreign_ss:
   - endpoint: GET /partners/foreign-agencies/coc-certificates/{id}
-    status: P
+    status: W
     scope: authenticated partner client, own records only
     step_up: false
     via:

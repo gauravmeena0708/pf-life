@@ -9,14 +9,14 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 15 | 2 | 0 | 0 |
 | 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 83 | 5 | 8 | 0 |
 | 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 84 | 5 | 0 | 0 |
-| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 92 | 0 | 21 | 4 |
+| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 93 | 0 | 20 | 4 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 15 | 1 | 0 | 0 |
-| 6 | International worker | **Working** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 4 | 0 | 2 | 0 |
+| 6 | International worker | **Working** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 6 | 0 | 0 | 0 |
 | 7 | District office | **Working** | `do.incharge`, `do.staff` | 3 | 0 | 0 | 0 |
 | 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 40 | 0 | 8 | 1 |
-| 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 12 | 0 | 1 | 0 |
+| 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 13 | 0 | 0 | 0 |
 | 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 21 | 0 | 4 | 0 |
-| 11 | NDC | **Working** | `tech.ndc`, `tech.adc`, `tech.cpps`, `tech.epfo3` | 6 | 0 | 2 | 0 |
+| 11 | NDC | **Working** | `tech.ndc`, `tech.adc`, `tech.cpps`, `tech.epfo3` | 8 | 0 | 0 | 0 |
 | 12 | Ministry | **Working** | `gov.mole`, `gov.parliament` | 3 | 0 | 0 | 0 |
 | 13 | B2B | **Mock** | `payroll_provider`, `ext.collecting_bank`, `ext.pension_bank`, `ext.mca`, `ext.shram_suvidha`, `ext.fund_manager` | 0 | 7 | 0 | 0 |
 | 14 | CAIU | **Working** | `ho.caiu` | 4 | 0 | 0 | 0 |
@@ -312,6 +312,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/member-change-requests/{requestId}/decisions` | W | member | fo.ao |
 | `POST /office/member-change-requests/{requestId}/recommendations` | W | member | fo.da_accounts |
 | `POST /office/member-change-requests/{requestId}/verifications` | W | member | fo.ao, fo.ss |
+| `POST /office/outreach-camps/{campId}/assisted-requests` | W | workflow | fo.nan |
 | `POST /office/payment-scrolls` | W | claim | fo.cash |
 | `POST /office/payment-scrolls/{scrollId}/return-reconciliations` | W | claim | fo.cash |
 | `POST /office/pension-claims/{claimId}/input-data-sheets` | W | pension | fo.da_accounts |
@@ -359,7 +360,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` | P | contribution | fo.exemption |
 | `POST /office/legal/cases` | P | compliance | fo.legal |
 | `POST /office/legal/cases/{caseId}/orders` | P | compliance | fo.legal |
-| `POST /office/outreach-camps/{campId}/assisted-requests` | P | workflow | fo.nan |
 | `POST /office/recovery/{caseId}/arrest-warrants` | P | compliance | fo.recovery_officer |
 | `POST /office/recovery/{caseId}/attachments` | P | compliance | fo.recovery_officer |
 | `POST /office/recovery/{caseId}/receivers` | P | compliance | fo.recovery_officer |
@@ -397,9 +397,9 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /international/agreements` | W | international | ho.iwu |
 | `GET /international/coc-applications/{id}` | W | international | fo.iw |
 | `GET /office/international/coc-applications` | W | international | fo.iw |
+| `GET /partners/foreign-agencies/coc-certificates/{id}` | W | international | ext.foreign_ss |
+| `POST /international/totalisation-claims` | W | international | ho.iwu |
 | `POST /office/international/coc-applications/{id}/decisions` | W | international | fo.iw |
-| `GET /partners/foreign-agencies/coc-certificates/{id}` | P | international | ext.foreign_ss |
-| `POST /international/totalisation-claims` | P | international | ho.iwu |
 
 ### 7. District office — Working
 
@@ -479,7 +479,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /grievances/{grievanceId}/resolution` | W | grievance | zo.acc |
 | `POST /office/establishments/{estId}/freezes` | W | employer | zo.rpfc1 |
 | `POST /office/members/{uan}/freezes` | W | member | zo.rpfc1 |
-| `POST /training/sandboxes` | P | platform | zo.zti |
+| `POST /training/sandboxes` | W | platform | zo.zti |
 
 ### 10. Head office — Working
 
@@ -516,13 +516,13 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | Endpoint | Status | Owner | Called by |
 |---|---|---|---|
 | `GET /cpps/disbursement-runs` | W | pension | tech.cpps |
+| `GET /ndc/dr/replication-status` | W | platform | tech.adc |
 | `GET /ndc/event-failures` | W | platform | tech.ndc |
 | `GET /ndc/health` | W | platform | tech.ndc |
 | `POST /cpps/disbursement-runs` | W | pension | tech.cpps |
 | `POST /cpps/reconciliations` | W | pension | tech.cpps |
+| `POST /ndc/dr/failover-drills` | W | platform | tech.adc |
 | `POST /ndc/event-failures/{eventId}/replays` | W | platform | tech.ndc |
-| `GET /ndc/dr/replication-status` | P | platform | tech.adc |
-| `POST /ndc/dr/failover-drills` | P | platform | tech.adc |
 
 ### 12. Ministry — Working
 

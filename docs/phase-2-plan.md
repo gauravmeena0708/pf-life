@@ -36,7 +36,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.12c** | Pension office: deciding a validated higher-pension option and the PF → pension fund transfer after the dues; Special 10D; bank-wise disbursement lists; the actuarial extract | **Done** (1 Oct 2026) |
 | **P2.12d** | Oversight: internal audit reports, paras, replies and decisions; DPDP data-principal requests; RTI replies; the CPGRAMS feed (mock) | **Done** (1 Oct 2026) |
 | **P2.12e** | Head office reporting: balance sheet, investments, board packs (aggregates), fund-manager position feed (mock) | **Done** (1 Oct 2026) |
-| P2.12f | The rest: DR replication status and failover drill, training sandboxes, Nidhi Aapke Nikat camp requests, totalisation claims and the foreign agency's CoC check, the composite death claim | Planned |
+| **P2.12f** | The rest: DR replication status and failover drill, training sandboxes, Nidhi Aapke Nikat camp requests, totalisation claims and the foreign agency's CoC check, the composite death claim | **Done** (1 Oct 2026) |
 
 ## P2.9 — plan
 
@@ -756,3 +756,24 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
   contributions, claims (days to settle, share within 20 days), grievances, investments, and the pattern flags for
   FIAC — with no names, UANs or establishment ids.
 - **Web**: `/ho/finance/balance-sheet`, `/ho/finance/investments`, `/governance/board-packs`, each printable.
+
+## P2.12f — how it is built
+
+- **Disaster-recovery site** (platform-service; persona `ndc-adc`, `tech.adc`): replication status per service
+  database — a deterministic simulation, flagged as such — against the rule set's RPO; a failover drill (step-up)
+  whose simulated steps add up to an RTO checked against the target. Nothing is failed over.
+- **Training sandboxes** (platform-service; persona `pdnasa-trainer`; also ZTI roles): a course, up to 60 trainees,
+  the demo personas they practise as, and an expiry from the rule set; the training logins are records only and the
+  data is synthetic. Rule-set section `dr_and_training` (illustrative).
+- **Nidhi Aapke Nikat camps** (workflow-service; persona `ro-nan`, `fo.nan`): requests taken at a camp of the office
+  (grievance, claim help, KYC, inoperative account, pension, UAN help), each with a reference and the next step;
+  the seed has one camp.
+- **Totalisation claims** (international-service, `ho.iwu`): a benefit claim routed under an agreement that allows
+  totalisation, in either direction, with the periods in each country and the months they add up to.
+- **Foreign agency** (`ext.foreign_ss`, a new machine client `foreign-agency-demo` in the realm): verifies a
+  certificate of coverage by number — status, masked name, country, posting period, issuing office; nothing more.
+- **Composite death claim** (`formType=CCF_DEATH`): one submission files the PF (Form 20) and EDLI (Form 5IF)
+  claims with a shared reference, each behaving as if filed alone; if either part fails, neither is filed.
+
+With P2.12f every endpoint the catalogue planned outside compliance (P2.11) and the exempted establishments
+(P2.9b / P2.9d) is built.

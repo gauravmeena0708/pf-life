@@ -453,6 +453,18 @@ contribution- and platform-service*
 3. **`cbt-member` / `fiac-member` → Board packs**: contributions, claims, grievances and investments in aggregate —
    no personal data; FIAC's pack adds the pattern flags.
 
+## Disaster recovery, training, camps, totalisation, the foreign agency, the composite death claim
+*Tests: `tests/e2e/test_small_rest.py`*
+
+1. **`ndc-adc` → DR site**: replication lag per database against the RPO (simulated); run a database failover drill
+   (one-time code) — the steps and the RTO against the target.
+2. **`pdnasa-trainer` → Training sandbox**: a course for three trainees practising as member A and the DA.
+3. **`ro-nan` → NAN camp**: an inoperative-account request for MOHAN DEMO — the reference and what happens next.
+4. **`ho-iwu` → Agreements › Totalisation claims**: route a claim with periods abroad and in India.
+5. A foreign agency (machine login `foreign-agency-demo`) verifies a certificate of coverage: status and posting
+   only, the worker's name masked.
+6. **`claimant-a` → Death claim › Composite claim (PF and EDLI)**: both claims under one reference.
+
 ## Vigilance
 *Tests: `tests/e2e/test_vigilance.py`, `services/workflow-service/tests/test_vigilance.py`*
 

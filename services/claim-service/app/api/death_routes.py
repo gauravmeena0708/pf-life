@@ -7,7 +7,7 @@ import secrets
 from datetime import date
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Header, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,7 +17,7 @@ from app.domain.claims import ROLE_LABELS, approval_chain, months_between, rupee
 from app.infra.tables import accounts, claim_beneficiaries, claim_timeline, claims, nominations, physical_intakes
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
-from epfo_persistence import add_event, audit
+from epfo_persistence import add_event, audit, find_response, request_hash, store_response
 from epfo_persistence.policy import edli_benefit, rules_on
 
 router = APIRouter()
@@ -35,7 +35,7 @@ class Beneficiary(BaseModel):
 
 
 class DeathClaimInput(BaseModel):
-    form_type: str = Field(pattern="^(FORM_20|FORM_5IF)$")
+    form_type: str = Field(pattern="^(FORM_20|FORM_5IF|CCF_DEATH)$")
     deceased_uan: str = Field(pattern=r"^[0-9]{12}$")
     process_as: str = Field(default="E_NOMINATION", pattern="^(E_NOMINATION|LSM|NEW_BENEFICIARIES)$")
     beneficiaries: list[Beneficiary] = Field(default_factory=list)
@@ -57,9 +57,13 @@ def _share_view(claim: dict[str, Any], b: dict[str, Any]) -> dict[str, Any]:
 
 
 @router.post("/api/v1/claimants/death-claims", status_code=201)
-async def file_death_claim(body: DeathClaimInput, actor: Actor = Depends(CLAIMANT), session: AsyncSession = Depends(db)) -> dict:
-    claim_type, form, label = FORMS[body.form_type]
+async def file_death_claim(body: DeathClaimInput, request: Request, actor: Actor = Depends(CLAIMANT),
+                           idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+                           session: AsyncSession = Depends(db)) -> dict:
+    operation, h = f"POST {request.url.path}", request_hash(body.model_dump())
     async with session.begin():
+        if idempotency_key and (cached := await find_response(session, actor.subject, operation, idempotency_key, h)):
+            return envelope(cached.body)
         noms = [dict(n) for n in (await session.execute(select(nominations).where(nominations.c.uan == body.deceased_uan))).mappings().all()]
         if not any(n["subject"] == actor.subject for n in noms):
             raise Problem(404, "/problems/not-found", "No nomination of yours for that UAN",
@@ -74,59 +78,77 @@ async def file_death_claim(body: DeathClaimInput, actor: Actor = Depends(CLAIMAN
             raise Problem(422, "/problems/services-not-transferred", "All services are not transferred to the primary member ID",
                           " ".join(not_moved) + " The office transfers them before the claim is filed.")
         require_step_up(actor, "file-death-claim", body.deceased_uan)
-        open_claim = (await session.execute(select(claims.c.claim_id).where(claims.c.death_of_uan == body.deceased_uan,
-                                                                            claims.c.claim_type == claim_type,
-                                                                            claims.c.state.notin_(("REJECTED_WITH_REASON", "CANCELLED"))))).first()
-        if open_claim:
-            raise Problem(409, "/problems/claim-already-open", f"A {label} claim is already on file", f"Claim {open_claim[0]}.", claim_id=open_claim[0])
         rules = await rules_on(session, date.today())
         balance = account["employee_paise"] + account["employer_paise"]
         service = months_between(account["date_of_joining"], account["deceased_on"])
-        if claim_type == "DEATH_EDLI":
-            benefit = edli_benefit(SYNTHETIC_AVERAGE_WAGES, balance, service, rules)
-            amount, working = benefit["amount_paise"], benefit["working"]
-        else:
-            amount, working = balance, "The PF balance of the member ID"
-        if amount <= 0:
-            raise Problem(422, "/problems/not-eligible", "There is nothing to pay on this member ID")
         if body.process_as == "E_NOMINATION":
             people = [Beneficiary(name=n["name"], relation=n["relation"], share_bp=n["share_bp"], bank_account_last4=n["bank_account_last4"]) for n in noms]
         elif not body.beneficiaries:
             raise Problem(422, "/problems/validation", "List the surviving family members / new beneficiaries")
         else:
             people = body.beneficiaries
-        claim_id = f"CLM-{secrets.token_hex(4).upper()}"
-        chain = approval_chain(amount, rules, claim_type)
-        text = (f"{label} (Form {form}) for the late member with UAN ending {body.deceased_uan[-4:]}: {rupees(amount)} — {working}. "
-                f"Paid to {len(people)} beneficiaries in their shares. Reviewed by: {' → '.join(ROLE_LABELS[r] for r in chain)}. "
-                f"Illustrative rules {rules['rule_version']}.")
-        await session.execute(insert(claims).values(
-            claim_id=claim_id, member_subject=actor.subject, account_link_id=account["account_link_id"], claim_type=claim_type, form_type=form,
-            amount_paise=amount, state="SUBMITTED", version=1, rule_version=rules["rule_version"], office_id=account["office_id"],
-            evaluation={"working": working, "service_months": service, "balance_paise": balance, "process_as": body.process_as},
-            summary=text, death_of_uan=body.deceased_uan))
-        await session.execute(insert(claim_timeline).values(claim_id=claim_id, state="SUBMITTED", actor_role="claimant",
-                                                            note=f"Form {form} filed by the nominee ({body.process_as.replace('_', ' ').lower()})."))
-        for i, p in enumerate(people, start=1):
-            await session.execute(insert(claim_beneficiaries).values(
-                beneficiary_id=f"{claim_id}-B{i}", claim_id=claim_id, name=p.name.upper(), relation=p.relation, share_bp=p.share_bp,
-                source=body.process_as, bank_account_last4=p.bank_account_last4, amendments=[]))
-        claim = await load_claim(session, claim_id)
-        await add_event(session, producer=PRODUCER, event_type="ClaimSubmitted.v1", aggregate_type="claim", aggregate_id=claim_id,
-                        correlation_id=actor.correlation_id, payload={
-                            "claim_id": claim_id, "form_type": form, "amount_paise": amount, "rule_version": rules["rule_version"],
-                            "office_id": account["office_id"], "account_link_id": account["account_link_id"], "route": "REVIEW",
-                            "advisory_signal_id": None, "claim_type": claim_type})
-        claim = await transition(session, claim, "UNDER_REVIEW", "system", "Sent to the regional office: " + " → ".join(ROLE_LABELS[r] for r in chain) + ".")
-        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="claim.death_filed",
-                    target_type="claim", target_id=claim_id, detail=f"{claim_type} {body.deceased_uan}")
-        view = await _claimant_view(session, claim)
-    return envelope(view)
+        composite_ref = f"CCF-{secrets.token_hex(6).upper()}" if body.form_type == "CCF_DEATH" else None
+        forms = ("FORM_20", "FORM_5IF") if composite_ref else (body.form_type,)
+        views = []
+        for form_type in forms:
+            views.append(await _file_one(session, form_type, body, actor, account, rules, balance, service, people, composite_ref))
+        result = ({"composite_ref": composite_ref, "claims": views,
+                   "next_step": "Family pension (Form 10D) is settled by the pension section; file Form 10D at the PRO counter."}
+                  if composite_ref else views[0])
+        if idempotency_key:
+            await store_response(session, actor.subject, operation, idempotency_key, h, 201, result)
+    return envelope(result)
+
+
+async def _file_one(session: AsyncSession, form_type: str, body: DeathClaimInput, actor: Actor,
+                    account: dict[str, Any], rules: dict[str, Any], balance: int, service: int,
+                    people: list[Beneficiary], composite_ref: str | None) -> dict[str, Any]:
+    claim_type, form, label = FORMS[form_type]
+    open_claim = (await session.execute(select(claims.c.claim_id).where(claims.c.death_of_uan == body.deceased_uan,
+                                                                        claims.c.claim_type == claim_type,
+                                                                        claims.c.state.notin_(("REJECTED_WITH_REASON", "CANCELLED"))))).first()
+    if open_claim:
+        raise Problem(409, "/problems/claim-already-open", f"A {label} claim is already on file", f"Claim {open_claim[0]}.", claim_id=open_claim[0])
+    if claim_type == "DEATH_EDLI":
+        benefit = edli_benefit(SYNTHETIC_AVERAGE_WAGES, balance, service, rules)
+        amount, working = benefit["amount_paise"], benefit["working"]
+    else:
+        amount, working = balance, "The PF balance of the member ID"
+    if amount <= 0:
+        raise Problem(422, "/problems/not-eligible", "There is nothing to pay on this member ID")
+    claim_id = f"CLM-{secrets.token_hex(4).upper()}"
+    chain = approval_chain(amount, rules, claim_type)
+    text = (f"{label} (Form {form}) for the late member with UAN ending {body.deceased_uan[-4:]}: {rupees(amount)} — {working}. "
+            f"Paid to {len(people)} beneficiaries in their shares. Reviewed by: {' → '.join(ROLE_LABELS[r] for r in chain)}. "
+            f"Illustrative rules {rules['rule_version']}.")
+    await session.execute(insert(claims).values(
+        claim_id=claim_id, member_subject=actor.subject, account_link_id=account["account_link_id"], claim_type=claim_type, form_type=form,
+        amount_paise=amount, state="SUBMITTED", version=1, rule_version=rules["rule_version"], office_id=account["office_id"],
+        evaluation={"working": working, "service_months": service, "balance_paise": balance, "process_as": body.process_as},
+        summary=text, death_of_uan=body.deceased_uan, composite_ref=composite_ref))
+    await session.execute(insert(claim_timeline).values(claim_id=claim_id, state="SUBMITTED", actor_role="claimant",
+                                                        note=f"Form {form} filed by the nominee ({body.process_as.replace('_', ' ').lower()})."))
+    for i, p in enumerate(people, start=1):
+        await session.execute(insert(claim_beneficiaries).values(
+            beneficiary_id=f"{claim_id}-B{i}", claim_id=claim_id, name=p.name.upper(), relation=p.relation, share_bp=p.share_bp,
+            source=body.process_as, bank_account_last4=p.bank_account_last4, amendments=[]))
+    claim = await load_claim(session, claim_id)
+    await add_event(session, producer=PRODUCER, event_type="ClaimSubmitted.v1", aggregate_type="claim", aggregate_id=claim_id,
+                    correlation_id=actor.correlation_id, payload={
+                        "claim_id": claim_id, "form_type": form, "amount_paise": amount, "rule_version": rules["rule_version"],
+                        "office_id": account["office_id"], "account_link_id": account["account_link_id"], "route": "REVIEW",
+                        "advisory_signal_id": None, "claim_type": claim_type})
+    claim = await transition(session, claim, "UNDER_REVIEW", "system", "Sent to the regional office: " + " → ".join(ROLE_LABELS[r] for r in chain) + ".")
+    await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="claim.death_filed",
+                target_type="claim", target_id=claim_id, detail=f"{claim_type} {body.deceased_uan}")
+    view = await _claimant_view(session, claim)
+    return view
 
 
 async def _claimant_view(session: AsyncSession, claim: dict[str, Any]) -> dict[str, Any]:
     v = await claim_view(session, claim)
-    return {k: v[k] for k in ("claim_id", "claim_type", "form_type", "amount_paise", "state", "summary", "next_step", "timeline", "decision_reason")} | {
+    return {k: v[k] for k in ("claim_id", "claim_type", "form_type", "amount_paise", "state", "summary", "next_step", "timeline", "decision_reason")} | (
+        {"composite_ref": claim["composite_ref"]} if claim["composite_ref"] else {}) | {
         "beneficiaries": [_share_view(claim, b) for b in await _beneficiaries(session, claim["claim_id"])]}
 
 

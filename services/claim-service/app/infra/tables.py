@@ -63,6 +63,7 @@ claims = Table(
     Column("payee_account_last4", String(4)),
     Column("tax", JSON),                               # TDS worked out at the first payment instruction, then fixed
     Column("death_of_uan", String(12)),                # a death claim (Form 20 / 5IF): the deceased member's UAN; member_subject is the claimant
+    Column("composite_ref", String(40), index=True),    # shared by Form 20 and Form 5IF filed together
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
     Column("updated_at", DateTime(timezone=True), server_default=func.now()),
 )

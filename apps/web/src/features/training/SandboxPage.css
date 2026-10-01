@@ -1,0 +1,2 @@
+.training-personas { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: .5rem 1rem; }
+.training-personas label { display: flex; align-items: center; gap: .4rem; }
