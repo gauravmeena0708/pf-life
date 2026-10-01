@@ -26,7 +26,8 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.8d** | Grievances without a login and their status, reminders, feedback and office transfers; claim status without a login; circulars; the e-Report Card; the approved interest rate recorded by HO F&A (→ a draft rule set); a surrendered trust's past accumulations ingested | **Done** (30 Sep 2026) |
 | **P2.8e** | Security incidents with CERT-In reporting (mock); the Concurrent Audit Cell's daily extract, alerts and OIC replies; the NDC Issue Tracker (freeze / de-freeze / login notice); the zonal fraud-risk case list; HR postings that move jurisdiction everywhere; district and employer dashboards; member location mapping | **Done** (30 Sep 2026) |
 | **P2.9a** | International workers are members: one member login and menu, with what does not apply to them disabled and explained, from rules in the rule set | **Done** (30 Sep 2026) |
-| P2.9b | Members of exempted establishments: PF held by the trust (passbook, claims and transfers say so and route correctly), pension and EDLI with EPFO; the trust's Annexure K | Planned — needs the Exemption Manual |
+| P2.9b | Members of exempted establishments: PF held by the trust (passbook, claims and transfers say so and route correctly), pension and EDLI with EPFO; the trust's Annexure K | Planned (sources: the Exemption Manual and SOPs, Dec 2023) |
+| P2.9d | Regulating the trust: the monthly online return (employees, contributions, claims and grievances), the online performance evaluator (six parameters) and the priority matrix (Form CE-6) for the exemption cell | Planned |
 | **P2.9c** | Member experience: a life-event home page, one consolidated view, plain-language status, nudges, a mobile pass | **Done** (30 Sep 2026; built before P2.9b, which waits for the Exemption Manual) |
 | **P2.10a** | Vigilance cases: a CAIU-confirmed risk signal (or a complaint) referred to vigilance; the CVO assigns a preliminary inquiry to a zone (90 days); zonal vigilance reports findings; the CVO decides; restricted, access-logged, the complainant masked | **Done** (30 Sep 2026) |
 | **P2.10b** | Preventive vigilance: sensitive posts and 3-year rotation alerts; vigilance clearance for HR postings, promotions and retirement against open cases and penalties | **Done** (1 Oct 2026) |
@@ -60,22 +61,67 @@ their PF is held by the establishment's trust, which the passbook and claim scre
   old one-permission role removed.
 
 ### P2.9b — members of exempted establishments
-- **Source first**: the rules come from the EPFO *Exemption Manual 2023* (`Exemption_Manual_08122023.pdf`, cited in
-  `../pf-exempted`), read and summarised with page references as was done for the CITES and Pension manuals. It is
-  not on this machine yet.
-- **Model**: an establishment's exemption — which schemes (PF under 17(1)(a), pension, EDLI under 17(2)), from when,
-  and its status (active, surrendered, cancelled). Each member ID at an exempted establishment is marked *PF with
-  the trust* for that period.
-- **Member view**: the passbook shows the PF for those periods as held by the trust (with the trust's name), the
-  pension part with EPFO; the claim screen refuses PF claims on such member IDs with "file with your trust" and
-  keeps pension and EDLI claims with EPFO unless those are exempted too.
-- **ECR**: an exempted establishment remits to EPFO only what is not exempted (pension, and EDLI/admin charges as
-  applicable); PF lines go to the trust.
-- **Transfers**: Form 13 between an EPFO member ID and a trust uses Annexure K — the trust answers requests and
-  submits the amount (`/exempted/me/annexure-k-*`, now Phase 3, brought forward), the office reconciles.
-- **Trust portal**: a trust officer persona with the trust profile and Annexure K; returns, audits and surrender stay
-  Phase 3. Surrender then feeds the existing past-accumulation ingestion (P2.8d).
-- **Seed**: an exempted establishment (active exemption) with a member who also has an EPFO member ID elsewhere.
+**Sources** (downloaded 1 Oct 2026 from EPFO's exempted-establishments page,
+`pmvbry.epfindia.gov.in/exempted-establishments`, to `../manuals/exemption/`): the *Exemption Division Manual*
+(4 Dec 2023, 231 pp. — *EM*), the *SOP for Management and Regulation of EPF Exemption* (29 Nov 2023 — *SOP-M*), the
+SOPs on grant, cancellation and surrender (4 Dec 2023) and the *Exempted Returns Manual* (*RM*). Page numbers are
+the printed ones. What the slice relies on:
+- **Kinds of exemption** (EM §1.4, p.15): the whole establishment (s.17(1)(a)), a class of employees (s.17(2) with
+  Para 27A), a single employee (Para 27, by the RPFC); also *relaxed* establishments (Para 79). Pension can be exempted
+  only under s.17(1C) and EDLI under s.17(2A) (EM pp.10–11) — so by default **PF is with the trust; pension and EDLI
+  stay with EPFO**, and the employer still pays EPFO the pension contribution and administrative charges (EM p.164,
+  the RPFC's certificate on "pension fund contributions as well as Administrative Charges").
+- **What the member is owed** — the conditions of exemption, Para 27AA Appendix A (EM pp.22–23; SOP-M p.6):
+  enrolment of every eligible employee (Cond. 3); previous accumulations transferred into the trust (Cond. 4);
+  contributions to the trust by the 15th, with 7Q interest when late (Cond. 5); interest at least the statutory
+  rate, the employer making good any shortfall (Cond. 7); benefits — contribution rate, interest, advances — not
+  less favourable than EPFO's (Cond. 9); claims for withdrawal, advances and transfers settled **within 20 days**
+  (Cond. 12, SOP-M p.6; the online evaluator scores settlement **within 10 days**, SOP-M p.17 — the rule set will
+  carry one figure, 20, with the other noted); an annual passbook free of cost within six months of the year's end
+  and the balance viewable online (Cond. 14–15; SOP-M p.16).
+- **Transfers** in and out of the trust are the Board of Trustees' duty (EM p.31; SOP-M p.4); the trust's return
+  records *Transfer in* and *Claims including transfer out* (RM Part E, F and W).
+
+**Build**
+- **Model** (employer-service owns it; others keep a copy from `EstablishmentExemptionChanged.v1`): an
+  establishment's exemption — kind (17(1)(a) / 17(2)+27A / 27 / Para 79 relaxation), schemes exempted (PF; pension
+  and EDLI false unless 17(1C) / 17(2A)), the notification or order and its date, the trust's name, status (ACTIVE /
+  SURRENDERED / CANCELLED) and dates. Member IDs at such an establishment are *PF with the trust* for that period.
+- **Rule set** — a new section `exempted_establishments` (illustrative): which claim types the trust settles (the PF
+  ones) and which stay with EPFO (Form 10C / 10D pension, EDLI), `trust_claim_days` 20, interest at least the
+  statutory rate.
+- **Member view**: the passbook shows the PF of those periods as *held by <trust>*, the pension contributions with
+  EPFO, and what the trust owes the member (Cond. 12, 14, 15) in plain words; the claim screen gives PF claims on such
+  a member ID the reason "Your PF is with <trust>; the trust settles it within 20 days" and keeps pension and EDLI
+  claims with EPFO; the member home's nudge offers to move an old EPFO member ID's balance into the trust (Cond. 4).
+- **ECR**: for an exempted establishment the return's PF lines are refused with a reason and only the pension and
+  administrative charges are due to EPFO.
+- **Transfers / Annexure K**: Form 13 from an EPFO member ID to the trust — EPFO pays the trust with Annexure K; and
+  from the trust to EPFO — the trust answers the office's request and submits Annexure K with the amount
+  (`/exempted/me/annexure-k-*`, brought forward from Phase 3); `fo.da_accounts` reconciles it.
+- **Persona and seed**: `exempted-trust` (Board of Trustees' officer, `exempted.trust`) for a seeded exempted
+  establishment (17(1)(a), active) with its trust profile (`GET /exempted/me/profile`, the conditions it has
+  undertaken); a member there who also has an EPFO member ID with a balance elsewhere.
+- **Tests**: claims routed by the rules; the passbook split; the ECR refusal; Annexure K both ways and the
+  reconciliation; must-deny (the trust sees only its own members and requests).
+
+### P2.9d — regulating the trust (after b)
+- **Monthly online return** (RM; SOP-M p.4): Part C employees (on the rolls, joined, left, excluded, contract,
+  international workers), Part D contributions (due, transferred to the Board of Trustees with dates, balance due,
+  interest paid for late transfer), and the claims and grievances return (claims received, settled within / beyond
+  20 days, pending, with reasons; grievances) — RM pp.8–13. Investments (Part E) and the surcharge on deviations from
+  the pattern (SOP-M pp.17–18) are left out.
+- **Online performance evaluator** (SOP-M pp.16–17): six parameters at 100 points each — transfer before the due date,
+  investment ≥ 70% of the investible corpus, full remittance to the trust, interest at least EPFO's rate, claims
+  settled in time, accounts audited — computed from the returns; the monthly ranking for the exemption cell.
+- **Priority matrix** (Form CE-6; SOP-M pp.12–16): *A* — cancellation proceedings by show-cause notice (e.g. no
+  return for 3 consecutive months, under 300 of 600 points for 3 consecutive months, PF dues in default, claims not
+  settled in time); *B* — rectify, cancellation after 2 consecutive occasions; *C* — advise, cancellation after 3.
+  The exemption cell (`fo.exemption`) sees the flags raised from the returns and records the action; the
+  cancellation itself (RPFC report → ZO → HO → the Exempted Establishments Committee → CBT → the appropriate
+  Government, EM ch. 4) stays a recorded referral.
+- **Not planned**: grant of exemption, investments and their pattern, compliance and third-party audits, Board of
+  Trustees' meetings — the manual's chapters 2, 6 and 7.
 
 ### P2.9c — member experience (after a and b)
 - A life-event home page ("I changed jobs", "I'm leaving work", "someone has died", "I need money for …") that
@@ -86,7 +132,7 @@ their PF is held by the establishment's trust, which the passbook and claim scre
 - Nudges: an old member ID with a balance, missing KYC or nomination, an exit not marked.
 - A mobile layout pass, checked by the UI tests at phone width.
 
-**Open questions**: the Exemption Manual PDF (P2.9b cannot start without it); whether international workers'
+**Open questions**: whether international workers'
 withdrawal conditions should stay illustrative or be taken from a source you can provide.
 
 Operations marked **?** (scope unconfirmed, e.g. *ECR Approval*, *VDR Member Beneficiary*) wait until their

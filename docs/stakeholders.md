@@ -220,7 +220,7 @@ The current POC (`init.md` §6.2) seeds 19 personas. The ➕ rows are the person
 | AUD | *Audit Manual* (08/12/2023) — `…/2025/11/Audit_Manual_08122023.pdf` |
 | CMP | *Compliance Manual* (05/02/2024) — `…/2025/11/ComplianceManual.pdf` |
 | REC | *Recovery Manual* (08/12/2023) — `…/2025/11/Recovery_Manual_08122023.pdf` |
-| EXM | *Exemption Manual* (08/12/2023) — `…/2025/11/Exemption_Manual_08122023.pdf` |
+| EXM | *Exemption Division Manual* (04/12/2023) and the SOPs on grant, management and regulation, cancellation and surrender — `pmvbry-cdn.epfindia.gov.in/wp-content/uploads/2025/07/Exemption_Manual_04122023-2.pdf` (from `pmvbry.epfindia.gov.in/exempted-establishments`) |
 | PEN | *Pension Manual* — `…/2025/11/Pension_Manual.pdf` |
 | EDLI | *EDLI Manual* — `…/2025/11/EDLI_Manual.pdf` |
 | SOP-B | *Part B — SOPs and Service Standards* — `…/2025/11/PARTB_SOP_AND_STs_1.pdf` |
