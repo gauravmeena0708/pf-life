@@ -927,6 +927,8 @@ With P2.12f every endpoint the catalogue planned outside compliance (P2.11) and 
   — and to the office — `GET /office/transfers/{id}/legs`):
   - *EPFO → trust*: on approval the member ID's balance is debited to `PAYABLE_TO_TRUSTS` (the PF leg *sent to the
     trust*); the EPS leg moves the pension service to the EPS account of the trust member ID inside EPFO.
+    *Decided (2 Oct 2026)*: this EPS leg completes when EPFO approves the transfer; it does not wait for the trust to
+    acknowledge the PF, since the pension service never leaves EPFO.
   - *trust → EPFO*: on approval the PF leg *waits for the trust*; `TrustTransferRequested.v1` puts an Annexure K request
     in the trust's queue; the trust submits the amount, the service period and the breaks (money route); the DA
     (Accounts) reconciles it with the receipt (`GET /office/exempted/annexure-k`, added, and step-up) —
