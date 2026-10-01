@@ -223,3 +223,16 @@ special_10d_cases = Table(
 )
 Index("uq_special_10d_open_uan", special_10d_cases.c.uan, unique=True,
       sqlite_where=special_10d_cases.c.state == "OPEN", postgresql_where=special_10d_cases.c.state == "OPEN")
+
+# P2.9b: the EPS account of each member ID — the pension service of that spell (always with EPFO, also while the
+# establishment's PF is with a trust). person_key groups a member's IDs: the Aadhaar-verified set, else the UAN.
+eps_accounts = Table(
+    "eps_accounts", metadata,
+    Column("account_link_id", String(40), primary_key=True),
+    Column("uan", String(12), nullable=False, index=True),
+    Column("person_key", String(80), nullable=False, index=True),
+    Column("establishment_id", String(40)),
+    Column("date_of_joining", Date, nullable=False),
+    Column("date_of_exit", Date),
+    Column("breaks_months", Integer, nullable=False, server_default="0"),    # periods with no contribution (para 9)
+)

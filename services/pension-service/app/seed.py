@@ -13,7 +13,7 @@ from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
 from app.domain.pension import catch_up_payments
 from app.infra.db import sessions
-from app.infra.tables import family_members, member_service, office_staff, pensioners
+from app.infra.tables import eps_accounts, family_members, member_service, office_staff, pensioners
 from epfo_persistence.policy import baseline, pension_on
 
 SEED_FILE = os.getenv("SEED_FILE", "/srv/seed/synthetic.json")
@@ -59,6 +59,22 @@ async def main() -> None:
                 await session.execute(update(member_service).where(member_service.c.subject == values["subject"]).values(**values))
             else:
                 await session.execute(insert(member_service).values(**values))
+        # P2.9b: one EPS account per member ID, grouped by the Aadhaar-verified set (else the UAN)
+        sets: dict[str, list[str]] = {}
+        for m in seed["members"]:
+            if m["kyc"]["aadhaar"] == "VERIFIED" and m.get("aadhaar_ref"):
+                sets.setdefault(m["aadhaar_ref"], []).append(m["uan"])
+        key_of = {uan: "SET-" + sorted(uans)[0] for uans in sets.values() if len(uans) > 1 for uan in uans}
+        for m in seed["members"]:
+            for job in [m, *m.get("previous_employments", [])]:
+                if (await session.execute(select(eps_accounts.c.account_link_id).where(
+                        eps_accounts.c.account_link_id == job["account_link_id"]))).first():
+                    continue                                        # later changes arrive by event; a re-seed keeps them
+                await session.execute(insert(eps_accounts).values(
+                    account_link_id=job["account_link_id"], uan=m["uan"], person_key=key_of.get(m["uan"], m["uan"]),
+                    establishment_id=job.get("establishment_id", seed["establishment"]["establishment_id"]),
+                    date_of_joining=date.fromisoformat(job["date_of_joining"]),
+                    date_of_exit=date.fromisoformat(job["date_of_exit"]) if job.get("date_of_exit") else None))
         for s in seed.get("office_staff", []):
             await session.execute(insert(office_staff).values(subject=s["subject"], stakeholder=s["stakeholder"],
                                                               office_id=s["office_id"]).on_conflict_do_nothing())

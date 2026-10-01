@@ -98,6 +98,13 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 9b (first step): pension service across member IDs (1 October 2026)
+
+pension-service 40 (new `test_eps_service.py`: spells add up, an overlap counts once, breaks are taken off; the
+estimate of member G now shows both member IDs — 99 months instead of the 8 of the present job alone; new IDs and exits
+arrive by event); web 216; end to end, the member home, pension services, pension office and higher-pension tests
+pass (10).
+
 ## Update — Phase 2, slice 12f: DR site, training sandboxes, NAN camps, totalisation, foreign agency, composite death claim (1 October 2026)
 
 Unit: platform-service 31, workflow-service 51, international-service 23, claim-service 64 (new tests in each), gateway 23;

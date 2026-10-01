@@ -109,5 +109,12 @@
     "inService": "In service",
     "noEmployment": "No employment records.",
     "profileNote": "As an international worker your EPF is on full wages (no wage ceiling) and it is paid out as a final settlement on leaving service in India at 58, or earlier under a social-security agreement with your country."
+  },
+  "pensionService": {
+    "byMemberId": "Pension service by member ID",
+    "memberId": "Member ID",
+    "period": "Period",
+    "months": "Months",
+    "inService": "in service"
   }
 }

@@ -7,12 +7,13 @@ from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.pension import propose_revisions
-from app.infra.tables import higher_pension_options, pensioners, updation_activities
+from app.infra.tables import eps_accounts, higher_pension_options, pensioners, updation_activities
 from epfo_persistence import add_event
 from epfo_persistence.policy import on_policy_published
 
 BINDINGS = ["platform-service.PolicyPublished.v1", "claim-service.PhysicalClaimInwarded.v1", "workflow-service.StaffPostingChanged.v1",
-            "contribution-service.HigherPensionTransferPosted.v1"]
+            "contribution-service.HigherPensionTransferPosted.v1", "member-service.MemberRegistered.v1",
+            "member-service.MemberExitMarked.v1", "member-service.PrimaryMemberIdChanged.v1"]
 # PRO counter request → updation activity. PPO amendments are basic-details updations the DA (Pension) takes up.
 INTAKE_ACTIVITIES = {"PHYSICAL_LC_UPDATION": "PHYSICAL_LC", "DEATH_UPDATION": "DEATH", "SPOUSE_REMARRIAGE_UPDATION": "SPOUSE_REMARRIAGE",
                      "PPO_AMENDMENT_BENEFICIARY": "BASIC_DETAILS", "PPO_AMENDMENT_SERVICE": "BASIC_DETAILS", "PPO_AMENDMENT_POHW": "BASIC_DETAILS"}
@@ -48,7 +49,31 @@ async def on_higher_pension_transfer(session: AsyncSession, event: dict[str, Any
                         "reason": "The member deposits the difference through the office (VDR)." if state == "TRANSFER_FAILED" else ""}})
 
 
-HANDLERS = {"HigherPensionTransferPosted.v1": on_higher_pension_transfer}
+async def on_member_registered(session: AsyncSession, event: dict[str, Any]) -> None:
+    """A new member ID opens its EPS account; it joins the UAN's existing group (P2.9b)."""
+    p = event["payload"]
+    if (await session.execute(select(eps_accounts.c.account_link_id).where(eps_accounts.c.account_link_id == p["account_link_id"]))).first():
+        return
+    key = (await session.execute(select(eps_accounts.c.person_key).where(eps_accounts.c.uan == p["uan"]).limit(1))).scalar_one_or_none()
+    await session.execute(insert(eps_accounts).values(
+        account_link_id=p["account_link_id"], uan=p["uan"], person_key=key or p["uan"], establishment_id=p.get("establishment_id"),
+        date_of_joining=date.fromisoformat(p["date_of_joining"])))
+
+
+async def on_member_exit(session: AsyncSession, event: dict[str, Any]) -> None:
+    p = event["payload"]
+    await session.execute(update(eps_accounts).where(eps_accounts.c.account_link_id == p["account_link_id"]).values(
+        date_of_exit=date.fromisoformat(p["date_of_exit"])))
+
+
+async def on_primary_changed(session: AsyncSession, event: dict[str, Any]) -> None:
+    """The member's Aadhaar-verified set of UANs is one person: their EPS accounts form one group."""
+    uans = sorted(set(event["payload"].get("set_uans") or []) | {event["payload"]["uan"]})
+    await session.execute(update(eps_accounts).where(eps_accounts.c.uan.in_(uans)).values(person_key="SET-" + uans[0]))
+
+
+HANDLERS = {"HigherPensionTransferPosted.v1": on_higher_pension_transfer, "MemberRegistered.v1": on_member_registered,
+            "MemberExitMarked.v1": on_member_exit, "PrimaryMemberIdChanged.v1": on_primary_changed}
 
 
 async def dispatch(session: AsyncSession, event: dict[str, Any]) -> None:

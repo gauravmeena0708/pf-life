@@ -26,10 +26,10 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `GrievanceResolved.v1` | grievance | workflow, reporting, audit | grievance | 1 |
 | `RiskSignalRaised.v1` | intelligence | claim, workflow, reporting, audit | risk_signal | 1 |
 | `ProcessTransitioned.v1` | workflow | member, contribution, employer, audit | process_instance | 1 |
-| `PrimaryMemberIdChanged.v1` | member | claim, workflow, audit | member | 1 |
-| `MemberExitMarked.v1` | member | contribution, claim, workflow, audit | member_account | 1 |
+| `PrimaryMemberIdChanged.v1` | member | claim, workflow, pension, audit | member | 1 |
+| `MemberExitMarked.v1` | member | contribution, claim, workflow, pension, audit | member_account | 1 |
 | `NominationRegistered.v1` | member | claim, audit | member | 1 |
-| `MemberRegistered.v1` | member | contribution, claim, workflow, audit | member_account | 1 |
+| `MemberRegistered.v1` | member | contribution, claim, workflow, pension, audit | member_account | 1 |
 | `MemberInternationalStatusChanged.v1` | member | contribution, claim, international, audit | member | 1 |
 | `MemberKycUpdated.v1` | member | claim, audit | member | 1 |
 | `HigherPensionOptionValidated.v1` | pension | audit | higher_pension_option | 1 |

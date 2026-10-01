@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.pension import age_on, amount_for, approved, arrears, catch_up_payments, month_of, today
 from app.infra.db import sessions
-from app.infra.tables import member_service, office_staff, pension_payments, pension_revisions, pensioners
+from app.infra.tables import eps_accounts, member_service, office_staff, pension_payments, pension_revisions, pensioners
 from epfo_auth import Actor, require_actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import audit
@@ -132,6 +132,25 @@ async def decide_revision(ppo_id: str, body: RevisionDecision, actor: Actor = De
     return envelope(_revision(r))
 
 
+def eps_service(spells: list[dict[str, Any]], day: date) -> tuple[int, list[dict[str, Any]]]:
+    """Pensionable service across a member's IDs (P2.9b): the union of the spells — overlapping jobs count once — less the
+    breaks without contributions (EPS para 9), in completed months; and each member ID's own months."""
+    def months(a: date, b: date) -> int:
+        return max(0, (b.year - a.year) * 12 + b.month - a.month - (b.day < a.day))
+    by_id, merged = [], []
+    for sp in sorted(spells, key=lambda x: x["date_of_joining"]):
+        start, end = sp["date_of_joining"], min(sp["date_of_exit"] or day, day)
+        by_id.append({"account_link_id": sp["account_link_id"], "establishment_id": sp.get("establishment_id"), "from": start.isoformat(),
+                      "to": sp["date_of_exit"].isoformat() if sp["date_of_exit"] else None, "months": months(start, end),
+                      "breaks_months": int(sp.get("breaks_months") or 0)})
+        if merged and start <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], end)
+        else:
+            merged.append([start, end])
+    total = sum(months(a, b) for a, b in merged) - sum(x["breaks_months"] for x in by_id)
+    return max(0, total), by_id
+
+
 # ── estimates (member, public) under the formula in force today ─────────────────────────────────
 
 @router.get("/api/v1/members/me/pension-eligibility-preview")
@@ -140,19 +159,27 @@ async def my_estimate(actor: Actor = Depends(MEMBER), session: AsyncSession = De
         m = (await session.execute(select(member_service).where(member_service.c.subject == actor.subject))).mappings().first()
         if not m:
             raise Problem(404, "/problems/not-found", "No service record found")
+        key = (await session.execute(select(eps_accounts.c.person_key).where(eps_accounts.c.uan == m["uan"]).limit(1))).scalar_one_or_none()
+        spells = [dict(r) for r in (await session.execute(select(eps_accounts).where(eps_accounts.c.person_key == key)
+                                                          .order_by(eps_accounts.c.date_of_joining))).mappings().all()] if key else []
         rules = await rules_on(session, today())
     p = section(rules, "pension")
     day = today()
     normal = date(m["date_of_birth"].year + p["normal_age_years"], m["date_of_birth"].month, min(m["date_of_birth"].day, 28))
-    served = (min(m["date_of_exit"] or day, day) - m["date_of_joining"]).days * 12 // 365
-    to_normal = served if m["date_of_exit"] else max(served, (normal - m["date_of_joining"]).days * 12 // 365)
+    if not spells:                                                  # no EPS accounts known: the one service record
+        spells = [{"account_link_id": m["account_link_id"], "establishment_id": m["establishment_id"], "date_of_joining": m["date_of_joining"],
+                   "date_of_exit": m["date_of_exit"], "breaks_months": 0}]
+    served, by_id = eps_service(spells, day)
+    in_service = any(sp["date_of_exit"] is None for sp in spells)
+    to_normal = served + max(0, (normal - day).days * 12 // 365) if in_service else served
     scenarios = [
         {"label": f"If you leave now and draw your pension at {p['normal_age_years']}", "service_months": served,
          **pension_on(m["eps_wages_paise"], served, p["normal_age_years"], rules)},
         {"label": f"If you stay in service until {p['normal_age_years']} ({normal.year})", "service_months": to_normal,
          **pension_on(m["eps_wages_paise"], to_normal, p["normal_age_years"], rules)}]
     return envelope({"rule_version": rules["rule_version"], "age_years": age_on(m["date_of_birth"], day),
-                     "service_months_so_far": served, "pensionable_salary_paise": min(m["eps_wages_paise"], p["pensionable_salary_cap_paise"]),
+                     "service_months_so_far": served, "service_by_member_id": by_id,
+                     "pensionable_salary_paise": min(m["eps_wages_paise"], p["pensionable_salary_cap_paise"]),
                      "min_service_years": p["min_service_years"], "scenarios": scenarios,
                      "note": "An estimate under the rules in force today (illustrative). The pension is fixed when it is settled."})
 
