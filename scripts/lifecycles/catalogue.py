@@ -240,6 +240,8 @@ OTHER_FAMILIES = [
          "Para raised, answered, dropped with step-up; other roles refused", "tests/e2e/test_small_oversight.py"),
         ("OVS-DPDP-RTI", "Personal-data request and RTI application", "Refusal without a legal basis; no fee and no BPL; refusal without a section",
          "Request answered and seen by the member; RTI registered and answered in time", "tests/e2e/test_small_oversight.py"),
+        ("OVS-HO-REPORTING", "Balance sheet, investments and board packs", "Statutory auditor, investment cell, CBT and FIAC members; other roles",
+         "Balanced statement; positions against the pattern; packs with aggregates only; others refused", "tests/e2e/test_small_ho_reporting.py"),
         ("CLM-FORM-16A", "Form 16A and the quarterly TDS statement", "Member's year; office quarter filed twice; a future quarter",
          "Certificate by quarter; one filing per quarter; future quarter refused", "tests/e2e/test_small_member_tax_inoperative.py"),
         ("ENR-UAN-ALLOT", "UAN allotment at a CSC and activation", "Face match and mismatch; Aadhaar with a UAN; demo OTP",

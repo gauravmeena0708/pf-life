@@ -10,11 +10,16 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /do/dashboards', 'GET /monitoring/claims', 'GET /monitoring/contributions', 'GET /monitoring/data-freshness', 'GET /monitoring/grievances', 'GET /public/schemes', 'GET /public/statistics', 'GET /zo/dashboards', 'GET /employers/me/compliance-summary', 'GET /employers/me/dashboard', 'GET /office/compliance/defaulters', 'GET /employers/me/contractors/{contractorId}/compliance', 'GET /public/establishments/{estId}/e-report-card']
+OPERATIONS = ['GET /do/dashboards', 'GET /governance/board-packs', 'GET /monitoring/claims', 'GET /monitoring/contributions', 'GET /monitoring/data-freshness', 'GET /monitoring/grievances', 'GET /public/schemes', 'GET /public/statistics', 'GET /zo/dashboards', 'GET /employers/me/compliance-summary', 'GET /employers/me/dashboard', 'GET /ho/finance/investments', 'POST /integrations/fund-managers/positions', 'GET /office/compliance/defaulters', 'GET /employers/me/contractors/{contractorId}/compliance', 'GET /public/establishments/{estId}/e-report-card']
 
 @router.api_route("/api/v1/do/dashboards", methods=["GET"], include_in_schema=False)
 async def get_do_dashboards(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "District dashboard (interface 7)")
+
+
+@router.api_route("/api/v1/governance/board-packs", methods=["GET"], include_in_schema=False)
+async def get_governance_board_packs(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "CBT / EC / FIAC board packs (aggregates only)")
 
 
 @router.api_route("/api/v1/monitoring/claims", methods=["GET"], include_in_schema=False)
@@ -60,6 +65,16 @@ async def get_employers_me_compliance_summary(actor: Actor = Depends(require_act
 @router.api_route("/api/v1/employers/me/dashboard", methods=["GET"], include_in_schema=False)
 async def get_employers_me_dashboard(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Employer home alerts and Dashboards (pending KYC, member-detail approvals, missing details)")
+
+
+@router.api_route("/api/v1/ho/finance/investments", methods=["GET"], include_in_schema=False)
+async def get_ho_finance_investments(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Investment reporting")
+
+
+@router.api_route("/api/v1/integrations/fund-managers/positions", methods=["POST"], include_in_schema=False)
+async def post_integrations_fund_managers_positions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Fund manager / custodian position feed (signed)")
 
 
 @router.api_route("/api/v1/office/compliance/defaulters", methods=["GET"], include_in_schema=False)

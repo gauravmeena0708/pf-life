@@ -35,7 +35,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.12b** | Employer lifecycle: voluntary coverage, closure, transfer to another office; contractors tagging ECR members to a principal employer and the principal's view of contractor compliance; MCA and Shram Suvidha registration feeds (mock) | **Done** (1 Oct 2026) |
 | **P2.12c** | Pension office: deciding a validated higher-pension option and the PF → pension fund transfer after the dues; Special 10D; bank-wise disbursement lists; the actuarial extract | **Done** (1 Oct 2026) |
 | **P2.12d** | Oversight: internal audit reports, paras, replies and decisions; DPDP data-principal requests; RTI replies; the CPGRAMS feed (mock) | **Done** (1 Oct 2026) |
-| P2.12e | Head office reporting: balance sheet, investments, board packs (aggregates), fund-manager position feed (mock) | Planned |
+| **P2.12e** | Head office reporting: balance sheet, investments, board packs (aggregates), fund-manager position feed (mock) | **Done** (1 Oct 2026) |
 | P2.12f | The rest: DR replication status and failover drill, training sandboxes, Nidhi Aapke Nikat camp requests, totalisation claims and the foreign agency's CoC check, the composite death claim | Planned |
 
 ## P2.9 — plan
@@ -738,3 +738,21 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 - **Web**: `/audit/internal`; the OIC's audit paras next to the concurrent-audit alerts; the Audit Division's
   decisions; *Your personal data (DPDP Act)* on the member's security page; `/privacy` for the DPO; *RTI applications*
   for the PRO.
+
+## P2.12e — how it is built
+
+- **Balance sheet** (contribution-service, which owns the double-entry ledger — the catalogue row moved from
+  reporting): every journal line up to the as-of date summed by account; liabilities (members' PF accounts, the pension
+  and insurance funds, the administration account, claims and TDS payable, suspense) against assets (balances brought
+  forward, the collection and settlement banks), with a *balanced* check. Read-only, for the statutory auditor
+  (persona `statutory-auditor`) and HO F&A; each read audited.
+- **Fund-manager positions** (reporting-service; mock, signed like the other callbacks): holdings by fund (EPF, EPS,
+  EDLI) and asset class at a date, replacing the earlier set for the same manager, fund and date; the seed loads one
+  quarter's synthetic positions.
+- **Investments** (`ho.investment` — persona `ho-investment` —, FIAC, HO F&A): book and market value, gain and share of
+  each fund's corpus by asset class, against the pattern of investment in the rule set (`investment_pattern`, the
+  bands summarised in the exemption SOP, Nov 2023, pp.17–18; illustrative), flagged within / below / above.
+- **Board packs** (CBT, EC, FIAC members — personas `cbt-member`, `fiac-member` — and the CPFC): aggregates only —
+  contributions, claims (days to settle, share within 20 days), grievances, investments, and the pattern flags for
+  FIAC — with no names, UANs or establishment ids.
+- **Web**: `/ho/finance/balance-sheet`, `/ho/finance/investments`, `/governance/board-packs`, each printable.

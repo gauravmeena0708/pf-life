@@ -60,6 +60,7 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `AuditParaDecided.v1` | audit |  | audit_para | 1 |
 | `PrivacyRequestDecided.v1` | audit | member | privacy_request | 1 |
 | `RtiReplied.v1` | grievance | audit | rti_request | 1 |
+| `FundPositionsReceived.v1` | reporting | audit | fund_position | 1 |
 | `StaffPostingChanged.v1` | workflow | member, claim, grievance, intelligence, compliance, international, pension, employer, reporting, audit | staff_posting | 1 |
 | `AutoTransferConfirmed.v1` | claim | contribution, audit | auto_transfer | 1 |
 | `TransferPosted.v1` | contribution | claim, member, workflow, audit | ledger_journal | 1 |

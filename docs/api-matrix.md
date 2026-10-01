@@ -15,16 +15,16 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | 7 | District office | **Working** | `do.incharge`, `do.staff` | 3 | 0 | 0 | 0 |
 | 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 40 | 0 | 8 | 1 |
 | 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 12 | 0 | 1 | 0 |
-| 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 19 | 0 | 5 | 0 |
+| 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 21 | 0 | 4 | 0 |
 | 11 | NDC | **Working** | `tech.ndc`, `tech.adc`, `tech.cpps`, `tech.epfo3` | 6 | 0 | 2 | 0 |
 | 12 | Ministry | **Working** | `gov.mole`, `gov.parliament` | 3 | 0 | 0 | 0 |
 | 13 | B2B | **Mock** | `payroll_provider`, `ext.collecting_bank`, `ext.pension_bank`, `ext.mca`, `ext.shram_suvidha`, `ext.fund_manager` | 0 | 7 | 0 | 0 |
 | 14 | CAIU | **Working** | `ho.caiu` | 4 | 0 | 0 | 0 |
 | 15 | HRM | **Working** | `ho.hr` | 5 | 0 | 0 | 0 |
-| 16 | Reporting and monitoring | **Working** | `gov.cbt`, `gov.ec`, `gov.fiac`, `gov.peic` | 1 | 0 | 2 | 0 |
+| 16 | Reporting and monitoring | **Working** | `gov.cbt`, `gov.ec`, `gov.fiac`, `gov.peic` | 3 | 0 | 0 | 0 |
 | 17 | Security | **Working** | `ho.security`, `ho.data_protection` | 12 | 0 | 0 | 0 |
 | 18 | Vigilance | **Working** | `ho.cvo`, `zo.vigilance` | 6 | 0 | 0 | 0 |
-| 19 | Audit | **Working** | `ho.audit`, `zo.rpfc1_audit`, `zo.internal_audit`, `gov.cag`, `gov.statutory_auditor` | 12 | 0 | 1 | 0 |
+| 19 | Audit | **Working** | `ho.audit`, `zo.rpfc1_audit`, `zo.internal_audit`, `gov.cag`, `gov.statutory_auditor` | 13 | 0 | 0 | 0 |
 | 20 | UMANG | **Working** | `ext.umang` | 3 | 0 | 0 | 0 |
 | 21 | AI model / local LLM | **Working** | `tech.ai_service` | 5 | 0 | 0 | 0 |
 
@@ -488,6 +488,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /ho/actuarial/extracts` | W | pension | ho.actuarial |
 | `GET /ho/config/rule-sets` | W | platform | ho.acc_hq, ho.cpfc, ho.pension |
 | `GET /ho/config/rule-sets/{versionId}` | W | platform | ho.acc_hq, ho.cpfc, ho.pension |
+| `GET /ho/finance/balance-sheet` | W | contribution | ho.fa_cao |
+| `GET /ho/finance/investments` | W | reporting | ho.fa_cao, ho.investment |
 | `GET /monitoring/claims` | W | reporting | ho.acc_hq, ho.cpfc, ho.edli, ho.pension |
 | `GET /monitoring/contributions` | W | reporting | ho.cpfc |
 | `GET /monitoring/data-freshness` | W | reporting | ho.cpfc |
@@ -504,7 +506,6 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/members/{uan}/freezes` | W | member | ho.fa_cao |
 | `PUT /ho/config/interest-rates/{financialYear}` | W | contribution | ho.fa_cao |
 | `PUT /ho/config/rule-sets/{versionId}` | W | platform | ho.acc_hq |
-| `GET /ho/finance/investments` | P | reporting | ho.investment |
 | `GET /ho/reports/proceedings` | P | reporting | ho.compliance |
 | `GET /ho/reports/recovery` | P | reporting | ho.recovery |
 | `GET /office/legal/cases` | P | compliance | ho.legal |
@@ -566,9 +567,9 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 
 | Endpoint | Status | Owner | Called by |
 |---|---|---|---|
+| `GET /governance/board-packs` | W | reporting | gov.cbt, gov.ec, gov.fiac |
+| `GET /ho/finance/investments` | W | reporting | gov.fiac |
 | `GET /monitoring/claims` | W | reporting | gov.peic |
-| `GET /governance/board-packs` | P | reporting | gov.cbt, gov.ec, gov.fiac |
-| `GET /ho/finance/investments` | P | reporting | gov.fiac |
 
 ### 17. Security — Working
 
@@ -609,12 +610,12 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /audit/internal/paras` | W | audit | ho.audit, zo.internal_audit |
 | `GET /ho/config/rule-sets` | W | platform | ho.audit |
 | `GET /ho/config/rule-sets/{versionId}` | W | platform | ho.audit |
+| `GET /ho/finance/balance-sheet` | W | contribution | gov.statutory_auditor |
 | `GET /office/claims/{claimId}/audit-trail` | W | claim | zo.rpfc1_audit |
 | `POST /audit/concurrent/alerts` | W | audit | zo.rpfc1_audit |
 | `POST /audit/internal/paras/{paraId}/decisions` | W | audit | ho.audit |
 | `POST /audit/internal/reports` | W | audit | zo.internal_audit |
 | `POST /audit/internal/reports/{reportId}/paras` | W | audit | zo.internal_audit |
-| `GET /ho/finance/balance-sheet` | P | reporting | gov.statutory_auditor |
 
 ### 20. UMANG — Working
 

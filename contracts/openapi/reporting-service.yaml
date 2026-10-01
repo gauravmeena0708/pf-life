@@ -147,43 +147,26 @@ paths:
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: reporting
       x-callers:
       - gov.cbt
       - gov.ec
       - gov.fiac
       x-scope: board members — aggregates only
-      security:
-      - bffSession: []
-  /ho/finance/balance-sheet:
-    get:
-      operationId: getHoFinanceBalanceSheet
-      summary: Balance sheet for statutory / attest audit (read-only)
-      tags:
-      - Grievances, security, platform, audit and oversight
-      parameters:
-      - $ref: '#/components/parameters/CorrelationId'
-      responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
-      x-owner-service: reporting
-      x-callers:
-      - gov.statutory_auditor
-      x-scope: national (Head Office role)
       security:
       - bffSession: []
   /ho/finance/investments:
@@ -195,17 +178,24 @@ paths:
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: reporting
       x-callers:
       - gov.fiac
+      - ho.fa_cao
       - ho.investment
       x-scope: national (Head Office role)
       security:
@@ -278,7 +268,7 @@ paths:
         '409':
           $ref: '#/components/responses/Problem'
       x-status: mock
-      x-phase: 3
+      x-phase: 1
       x-owner-service: reporting
       x-callers:
       - ext.fund_manager

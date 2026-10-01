@@ -21,11 +21,13 @@ def ctx(tmp_path, monkeypatch):
     db._engine = None
     from app.infra.models import Base
     from app.infra.tables import metadata
+    from epfo_persistence.policy import policy_metadata
 
     async def setup():
         async with db.engine().begin() as connection:
             await connection.run_sync(Base.metadata.create_all)
             await connection.run_sync(metadata.create_all)
+            await connection.run_sync(policy_metadata.create_all)
 
     asyncio.run(setup())
     import epfo_auth

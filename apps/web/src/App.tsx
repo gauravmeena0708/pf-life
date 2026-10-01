@@ -46,6 +46,9 @@ import { AuditLogPage } from "./features/oversight/AuditLogPage";
 import { PolicyListPage } from "./features/policy/PolicyListPage";
 import { PolicyVersionPage } from "./features/policy/PolicyVersionPage";
 import { InterestPage } from "./features/finance/InterestPage";
+import { BalanceSheetPage } from "./features/finance/BalanceSheetPage";
+import { InvestmentsPage } from "./features/finance/InvestmentsPage";
+import { BoardPacksPage } from "./features/finance/BoardPacksPage";
 import { PensionerPage } from "./features/pension/PensionerPage";
 import { PensionerServicesPage } from "./features/pension/PensionerServicesPage";
 import { PensionOfficePage } from "./features/pension/PensionOfficePage";
@@ -194,6 +197,9 @@ export function App() {
             <Route path="/policy" element={<PolicyListPage />} />
             <Route path="/policy/:versionId" element={<PolicyVersionPage />} />
             <Route path="/finance/interest" element={<InterestPage />} />
+            <Route path="/ho/finance/balance-sheet" element={<BalanceSheetPage />} />
+            <Route path="/ho/finance/investments" element={<InvestmentsPage />} />
+            <Route path="/governance/board-packs" element={<BoardPacksPage />} />
             <Route path="/pensioner" element={<PensionerPage />} />
             <Route path="/pensioner/services" element={<PensionerServicesPage />} />
             <Route path="/office/pensions" element={<PensionOfficePage />} />

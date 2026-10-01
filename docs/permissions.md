@@ -897,6 +897,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /ho/finance/balance-sheet` | W | national (Head Office role) |  |
+| `GET /ho/finance/investments` | W | national (Head Office role) |  |
 | `GET /office/accounts/interest-postings` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/accounts/interest-postings` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/freezes` | W | office jurisdiction of the caller's posting | yes |
@@ -995,7 +997,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /ho/finance/investments` | P | national (Head Office role) |  |
+| `GET /ho/finance/investments` | W | national (Head Office role) |  |
 
 **`ho.actuarial`** — Actuarial unit
 
@@ -1048,20 +1050,20 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /governance/board-packs` | P | board members — aggregates only |  |
+| `GET /governance/board-packs` | W | board members — aggregates only |  |
 
 **`gov.ec`** — Executive Committee of the CBT
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /governance/board-packs` | P | board members — aggregates only |  |
+| `GET /governance/board-packs` | W | board members — aggregates only |  |
 
 **`gov.fiac`** — Finance, Investment & Audit Committee
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /governance/board-packs` | P | board members — aggregates only |  |
-| `GET /ho/finance/investments` | P | national (Head Office role) |  |
+| `GET /governance/board-packs` | W | board members — aggregates only |  |
+| `GET /ho/finance/investments` | W | national (Head Office role) |  |
 
 **`gov.peic`** — Pension & EDLI Implementation Committee
 
@@ -1091,7 +1093,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /audit/events` | W | read-only for auditors; audit writes by audit roles only |  |
-| `GET /ho/finance/balance-sheet` | P | national (Head Office role) |  |
+| `GET /ho/finance/balance-sheet` | W | national (Head Office role) |  |
 
 ### H. Technology and national operations
 

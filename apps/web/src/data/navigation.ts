@@ -137,6 +137,9 @@ function poc(role: string): NavGroup[] {
   if (["zo.acc", "ho.cpfc", "gov.mole"].includes(role)) out.push({ labelKey: "navigation.dashboards", to: "/dashboards" });
   if (["ho.acc_hq", "ho.cpfc", "ho.pension", "ho.audit"].includes(role)) out.push({ labelKey: "navigation.policy", to: "/policy" });
   if (role === "ho.fa_cao") out.push({ labelKey: "navigation.interest", to: "/finance/interest" }, { label: "Record the interest rate", to: "/finance/interest#interest-rate-record-heading" });
+  if (role === "gov.statutory_auditor" || role === "ho.fa_cao") out.push({ label: "Balance sheet", to: "/ho/finance/balance-sheet" });
+  if (["gov.cbt", "gov.ec", "gov.fiac", "ho.cpfc"].includes(role)) out.push({ label: "Board packs", to: "/governance/board-packs" });
+  if (["ho.investment", "gov.fiac", "ho.fa_cao"].includes(role)) out.push({ label: "Investments", to: "/ho/finance/investments" });
   if (role === "ho.publicity") out.push({ label: "Publish circulars", to: "/ho/circulars#publish-circular-heading" });
   if (role === "ho.security") out.push({ labelKey: "navigation.security", to: "/security/activity" }, { labelKey: "navigation.sessions", to: "/security/sessions" });
   if (role === "ho.security") out.push({ label: "Security incidents", to: "/security/activity#incidents-heading" });
@@ -199,6 +202,9 @@ export function homeFor(role: string | undefined): string {
   if (role === "ho.iwu") return "/ho/agreements";
   if (role === "ho.publicity") return "/ho/circulars";
   if (role === "fo.exemption") return "/office/exempted";
+  if (role === "gov.statutory_auditor") return "/ho/finance/balance-sheet";
+  if (role === "ho.investment") return "/ho/finance/investments";
+  if (["gov.cbt", "gov.ec", "gov.fiac"].includes(role ?? "")) return "/governance/board-packs";
   if (role === "ho.fa_cao") return "/finance/interest";
   if (role === "fo.pro_intake") return "/office/pro-counter";
   if (role === "fo.apfc_pension") return "/office/pension-revisions";

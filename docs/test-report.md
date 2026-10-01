@@ -98,6 +98,13 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 12e: balance sheet, investments, board packs, fund-manager feed (1 October 2026)
+
+After `make reset` the stack was rebuilt. Unit: contribution-service 76 (balance sheet), reporting-service 68 (feed,
+investments, board packs), gateway 23; web 206 (new `P212e.test.tsx`); end to end 84 of 84; must-deny 18; UI smoke 2; the new
+`test_small_ho_reporting.py` passes. My own first version of the board-pack identifier check matched 12-digit paise
+amounts as if they were UANs; it now looks for the synthetic UAN prefix and establishment ids.
+
 ## Update — Phase 2, slice 12d: internal audit, data-principal requests, RTI, the CPGRAMS feed (1 October 2026)
 
 Unit: audit-service 17 (new `test_internal_privacy.py`), grievance-service 22 (new `test_oversight.py`), gateway 23,

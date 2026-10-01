@@ -72,5 +72,9 @@ export const PERSONAS: Persona[] = [
   { username: "ho-actuarial", label: "HO actuarial cell", role: "ho.actuarial", group: "Zone, head office and oversight", description: "De-identified EPS extract for the actuarial valuation." },
   { username: "zo-internal-audit", label: "Zonal internal audit", role: "zo.internal_audit", group: "Zone, head office and oversight", description: "Audit a regional office and raise paras for it to answer." },
   { username: "ho-dpo", label: "Data protection officer", role: "ho.data_protection", group: "Zone, head office and oversight", description: "Answer members' requests about their personal data (DPDP Act)." },
+  { username: "statutory-auditor", label: "Statutory auditor", role: "gov.statutory_auditor", group: "Zone, head office and oversight", description: "Attest audit of the accounts (read-only)." },
+  { username: "ho-investment", label: "HO investment cell", role: "ho.investment", group: "Zone, head office and oversight", description: "Fund and investment reporting." },
+  { username: "cbt-member", label: "CBT member", role: "gov.cbt", group: "Zone, head office and oversight", description: "Central Board of Trustees member — board packs." },
+  { username: "fiac-member", label: "FIAC member", role: "gov.fiac", group: "Zone, head office and oversight", description: "Finance, Investment and Audit Committee member — board packs and investments." },
   { username: "auditor", label: "Independent auditor", role: "ho.audit", group: "Zone, head office and oversight", description: "Inspect the audit log, verify its hash chain and trace request events." },
 ];

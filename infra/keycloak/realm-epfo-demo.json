@@ -213,6 +213,22 @@
       {
         "name": "ho.data_protection",
         "description": "HO data protection — data-principal requests (DPDP Act)"
+      },
+      {
+        "name": "gov.statutory_auditor",
+        "description": "Attest audit of the accounts (read-only)"
+      },
+      {
+        "name": "ho.investment",
+        "description": "Fund and investment reporting"
+      },
+      {
+        "name": "gov.cbt",
+        "description": "Central Board of Trustees member — board packs"
+      },
+      {
+        "name": "gov.fiac",
+        "description": "Finance, Investment and Audit Committee member — board packs and investments"
       }
     ]
   },
@@ -1368,6 +1384,82 @@
         "ho.data_protection"
       ],
       "id": "00000000-0000-4000-8000-000000000057"
+    },
+    {
+      "username": "statutory-auditor",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Statutory auditor",
+      "lastName": "Demo",
+      "email": "statutory-auditor@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "gov.statutory_auditor"
+      ],
+      "id": "00000000-0000-4000-8000-000000000058"
+    },
+    {
+      "username": "ho-investment",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "HO investment cell",
+      "lastName": "Demo",
+      "email": "ho-investment@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ho.investment"
+      ],
+      "id": "00000000-0000-4000-8000-000000000059"
+    },
+    {
+      "username": "cbt-member",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "CBT member",
+      "lastName": "Demo",
+      "email": "cbt-member@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "gov.cbt"
+      ],
+      "id": "00000000-0000-4000-8000-000000000060"
+    },
+    {
+      "username": "fiac-member",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "FIAC member",
+      "lastName": "Demo",
+      "email": "fiac-member@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "gov.fiac"
+      ],
+      "id": "00000000-0000-4000-8000-000000000061"
     }
   ]
 }

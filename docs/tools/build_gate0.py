@@ -279,6 +279,7 @@ EVENTS = [
     ("AuditParaDecided", "audit", [], "audit_para", 1, {"para_id": S, "office_id": S, "decision": {"enum": ["DROPPED", "KEPT"]}}),
     ("PrivacyRequestDecided", "audit", ["member"], "privacy_request", 1, {"request_id": S, "kind": S, "decision": {"enum": ["FULFILLED", "PARTLY_FULFILLED", "REJECTED"]}}),
     ("RtiReplied", "grievance", ["audit"], "rti_request", 1, {"request_id": S, "office_id": S, "outcome": S, "late": B}),
+    ("FundPositionsReceived", "reporting", ["audit"], "fund_position", 1, {"fund_manager": S, "fund": {"enum": ["EPF", "EPS", "EDLI"]}, "as_of": S, "holdings": N, "market_value_paise": N}),
     ("StaffPostingChanged", "workflow", ["member", "claim", "grievance", "intelligence", "compliance", "international", "pension", "employer", "reporting", "audit"], "staff_posting", 1, {"subject": S, "username": S, "stakeholder": S, "office_id": S, "previous_stakeholder": S, "previous_office_id": S}),
     ("AutoTransferConfirmed", "claim", ["contribution", "audit"], "auto_transfer", 1, {"transfer_id": S, "uan": S, "from_account_link_id": S, "to_account_link_id": S}),
     ("TransferPosted", "contribution", ["claim", "member", "workflow", "audit"], "ledger_journal", 1, {"transfer_id": S, "uan": S, "from_account_link_id": S, "to_account_link_id": S, "employee_paise": N, "employer_paise": N, "journal_id": S, "postings": POSTINGS}),

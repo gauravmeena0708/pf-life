@@ -673,6 +673,36 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /ho/finance/balance-sheet:
+    get:
+      operationId: getHoFinanceBalanceSheet
+      summary: Balance sheet of the funds from the ledger, for the statutory / attest audit (read-only)
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - gov.statutory_auditor
+      - ho.fa_cao
+      x-scope: national (Head Office role)
+      security:
+      - bffSession: []
   /members/me/accounts/{accountLinkId}/passbook:
     get:
       operationId: getMembersAccountsAccountLinkIdPassbook

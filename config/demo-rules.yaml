@@ -192,3 +192,12 @@ oversight_periods:
   rti_reply_days: 30             # RTI Act s.7(1): reply within 30 days of receipt
   privacy_response_days: 30      # a data-principal request is answered within this many days (illustrative)
   para_reply_days: 30            # an office replies to an internal-audit para within this many days (illustrative)
+
+# P2.12e: the notified pattern of investment (illustrative bands, % of the corpus; as summarised in the SOP on the
+# management and regulation of EPF exemption, Nov 2023, pp.17-18)
+investment_pattern:
+  GOVT_SECURITIES: {min_pct: 45, max_pct: 65}
+  DEBT: {min_pct: 20, max_pct: 45}
+  SHORT_TERM_DEBT: {min_pct: 0, max_pct: 5}
+  EQUITY: {min_pct: 5, max_pct: 15}
+  ASSET_BACKED: {min_pct: 0, max_pct: 5}

@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     db_pool_size: int = 5
     rabbitmq_url: str = "amqp://epfo:dev@localhost:5672/"
     gateway_jwks_url: str = "http://gateway:8000/internal/jwks"
+    fund_manager_feed_secret: str = "dev-fund-manager-feed"
 
 
 settings = Settings()

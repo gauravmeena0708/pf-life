@@ -1,0 +1,18 @@
+.finance-page .finance-toolbar { display: flex; align-items: end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.finance-page .finance-toolbar label { display: grid; gap: .35rem; font-weight: 600; }
+.finance-page .finance-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.finance-page .finance-columns .card { min-width: 0; }
+.finance-page .finance-table { width: 100%; border-collapse: collapse; }
+.finance-page .finance-table th, .finance-page .finance-table td { border: 1px solid #c7d1dc; padding: .5rem .65rem; text-align: left; }
+.finance-page .finance-table th { background: #edf2f7; color: #142f50; }
+.finance-page .finance-table .amount { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.finance-page .finance-table tfoot th, .finance-page .finance-table tfoot td { border-top: 2px solid #a67a1b; font-weight: 700; }
+.finance-page .finance-pill { display: inline-block; padding: .2rem .55rem; border: 1px solid #40754f; background: #e9f3ec; color: #20522f; border-radius: 1rem; font-size: .85rem; font-weight: 700; }
+.finance-page .finance-pill.alert { border-color: #ab3030; background: #fff0ee; color: #8c2020; }
+.finance-page .finance-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: .65rem; margin: .6rem 0; }
+.finance-page .finance-metrics div { border: 1px solid #c7d1dc; border-top: 3px solid #a67a1b; padding: .55rem .7rem; background: #fff; }
+.finance-page .finance-metrics dt { color: #3e5062; font-size: .83rem; }
+.finance-page .finance-metrics dd { margin: .2rem 0 0; color: #142f50; font-weight: 700; font-variant-numeric: tabular-nums; }
+.finance-page .finance-note { border-left: 3px solid #a67a1b; padding-left: .7rem; }
+@media (max-width: 720px) { .finance-page .finance-columns { grid-template-columns: 1fr; } }
+@media print { .finance-page .finance-toolbar button, .finance-page .finance-toolbar input, .finance-page .finance-toolbar select { display: none; } .finance-page .card { break-inside: avoid; } }

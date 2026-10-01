@@ -3142,6 +3142,18 @@ stakeholders:
     step_up: true
     via:
     - F07.freeze_ho
+  - endpoint: GET /ho/finance/balance-sheet
+    status: W
+    scope: national (Head Office role)
+    step_up: false
+    via:
+    - F13.accounts
+  - endpoint: GET /ho/finance/investments
+    status: W
+    scope: national (Head Office role)
+    step_up: false
+    via:
+    - F13.accounts
   ho.compliance:
   - endpoint: GET /ho/reports/proceedings
     status: P
@@ -3324,7 +3336,7 @@ stakeholders:
     - F13.hr
   ho.investment:
   - endpoint: GET /ho/finance/investments
-    status: P
+    status: W
     scope: national (Head Office role)
     step_up: false
     via:
@@ -3450,27 +3462,27 @@ stakeholders:
     - F14.privacy
   gov.cbt:
   - endpoint: GET /governance/board-packs
-    status: P
+    status: W
     scope: board members — aggregates only
     step_up: false
     via:
     - F13.cbt
   gov.ec:
   - endpoint: GET /governance/board-packs
-    status: P
+    status: W
     scope: board members — aggregates only
     step_up: false
     via:
     - F13.ec
   gov.fiac:
   - endpoint: GET /governance/board-packs
-    status: P
+    status: W
     scope: board members — aggregates only
     step_up: false
     via:
     - F13.fiac
   - endpoint: GET /ho/finance/investments
-    status: P
+    status: W
     scope: national (Head Office role)
     step_up: false
     via:
@@ -3524,7 +3536,7 @@ stakeholders:
     via:
     - F12.statutory
   - endpoint: GET /ho/finance/balance-sheet
-    status: P
+    status: W
     scope: national (Head Office role)
     step_up: false
     via:

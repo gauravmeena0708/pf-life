@@ -604,7 +604,11 @@
     "ro-pension-disbursement": "00000000-0000-4000-8000-000000000054",
     "ho-actuarial": "00000000-0000-4000-8000-000000000055",
     "zo-internal-audit": "00000000-0000-4000-8000-000000000056",
-    "ho-dpo": "00000000-0000-4000-8000-000000000057"
+    "ho-dpo": "00000000-0000-4000-8000-000000000057",
+    "statutory-auditor": "00000000-0000-4000-8000-000000000058",
+    "ho-investment": "00000000-0000-4000-8000-000000000059",
+    "cbt-member": "00000000-0000-4000-8000-000000000060",
+    "fiac-member": "00000000-0000-4000-8000-000000000061"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -889,5 +893,65 @@
       "work_order_ref": "WO/DEW/2026/014",
       "valid_from": "2026-04-01"
     }
-  ]
+  ],
+  "fund_positions": {
+    "_comment": "P2.12e: synthetic custody positions at a quarter end (illustrative amounts in paise), as a fund manager's feed would send them",
+    "as_of": "2026-09-30",
+    "positions": [
+      {
+        "fund_manager": "Synthetic Fund Manager A",
+        "fund": "EPF",
+        "holdings": [
+          {
+            "isin": "IN0020260001",
+            "asset_class": "GOVT_SECURITIES",
+            "book_value_paise": 60000000000,
+            "market_value_paise": 61200000000
+          },
+          {
+            "isin": "INE0000A0001",
+            "asset_class": "DEBT",
+            "book_value_paise": 30000000000,
+            "market_value_paise": 30450000000
+          },
+          {
+            "isin": "INF000000001",
+            "asset_class": "EQUITY",
+            "book_value_paise": 12000000000,
+            "market_value_paise": 13800000000
+          },
+          {
+            "isin": "IN0020260099",
+            "asset_class": "SHORT_TERM_DEBT",
+            "book_value_paise": 3000000000,
+            "market_value_paise": 3010000000
+          }
+        ]
+      },
+      {
+        "fund_manager": "Synthetic Fund Manager B",
+        "fund": "EPS",
+        "holdings": [
+          {
+            "isin": "IN0020260002",
+            "asset_class": "GOVT_SECURITIES",
+            "book_value_paise": 40000000000,
+            "market_value_paise": 40800000000
+          },
+          {
+            "isin": "INE0000B0002",
+            "asset_class": "DEBT",
+            "book_value_paise": 25000000000,
+            "market_value_paise": 25300000000
+          },
+          {
+            "isin": "INF000000002",
+            "asset_class": "EQUITY",
+            "book_value_paise": 3000000000,
+            "market_value_paise": 3350000000
+          }
+        ]
+      }
+    ]
+  }
 }

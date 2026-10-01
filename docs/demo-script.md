@@ -444,6 +444,15 @@ contribution- and platform-service*
 3. **`ro-pro` → RTI applications**: an application with neither fee nor BPL card is refused; register it with the
    fee — reply due in 30 days; a refusal must cite its section; reply with the information.
 
+## Head office reporting: balance sheet, investments, board packs
+*Tests: `tests/e2e/test_small_ho_reporting.py`*
+
+1. **`statutory-auditor` → Balance sheet**: the funds' liabilities against the assets held, from the ledger; it balances.
+2. **`ho-investment` → Investments**: the quarter's positions by fund and asset class against the pattern of
+   investment (illustrative bands); anything outside its band is flagged.
+3. **`cbt-member` / `fiac-member` → Board packs**: contributions, claims, grievances and investments in aggregate —
+   no personal data; FIAC's pack adds the pattern flags.
+
 ## Vigilance
 *Tests: `tests/e2e/test_vigilance.py`, `services/workflow-service/tests/test_vigilance.py`*
 

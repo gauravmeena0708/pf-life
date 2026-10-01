@@ -639,10 +639,10 @@ Monitoring (`/monitoring/**`), AI (`/ai/**`), audit (`/audit/**`) and NDC (`/ndc
 | `GET /audit/internal/paras` | Internal-audit paras: the office's own (OIC), the zone's (internal audit), all (Audit Division) | W | 1 | audit |
 | `POST /audit/internal/paras/{paraId}/replies` | Office compliance reply to a para | W | 1 | audit |
 | `POST /audit/internal/paras/{paraId}/decisions` 🔐 | Audit Division drops / keeps a para | W | 1 | audit |
-| `GET /ho/finance/balance-sheet` | Balance sheet for statutory / attest audit (read-only) | P | 3 | reporting |
-| `GET /ho/finance/investments` | Investment reporting | P | 3 | reporting |
-| `POST /integrations/fund-managers/positions` | Fund manager / custodian position feed (signed) | M | 3 | reporting |
-| `GET /governance/board-packs` | CBT / EC / FIAC board packs (aggregates only) | P | 3 | reporting |
+| `GET /ho/finance/balance-sheet` | Balance sheet of the funds from the ledger, for the statutory / attest audit (read-only) | W | 1 | contribution |
+| `GET /ho/finance/investments` | Investment reporting | W | 1 | reporting |
+| `POST /integrations/fund-managers/positions` | Fund manager / custodian position feed (signed) | M | 1 | reporting |
+| `GET /governance/board-packs` | CBT / EC / FIAC board packs (aggregates only) | W | 1 | reporting |
 | `GET /zo/dashboards` | Zonal comparison dashboard (interface 9, aggregated, read-only) | W | 1 | reporting |
 | `GET /do/dashboards` | District dashboard (interface 7) | W | 1 | reporting |
 | `GET /ho/config/rule-sets` | Policy administration: rule-set versions in force, scheduled, drafts and history | W | 1 | platform |

@@ -331,6 +331,7 @@ activities:
   - {id: F13.acc_hq, actor: ho.acc_hq, does: "Division-level oversight; draft rule-set changes (ceilings, rates, claim types, approval matrix) for CPFC approval", api: ["GET /monitoring/claims", "GET /ho/config/rule-sets", "GET /ho/config/rule-sets/{versionId}", "POST /ho/config/rule-sets", "PUT /ho/config/rule-sets/{versionId}", "POST /ho/config/rule-sets/{versionId}/submissions"], next: [], src: "EC, SOP-B", ev: D}
   - {id: F13.divisions, actor: ho.edli, does: "EDLI policy and monitoring", api: ["GET /monitoring/claims"], next: [], src: EDLI, ev: D}
   - {id: F13.investment, actor: ho.investment, does: "Fund and investment reporting", api: ["GET /ho/finance/investments"], next: [], src: EC, ev: D}
+  - {id: F13.accounts, actor: ho.fa_cao, does: "Prepare the annual accounts: balance sheet of the funds and investment position", api: ["GET /ho/finance/balance-sheet", "GET /ho/finance/investments"], next: [F12.statutory], src: EC, ev: D}
   - {id: F13.fund_feed, actor: ext.fund_manager, does: "Send portfolio / custody positions", api: ["POST /integrations/fund-managers/positions"], next: [F13.investment], src: EC, ev: D}
   - {id: F13.publicity, actor: ho.publicity, does: "Publish circulars and awareness content", api: ["POST /ho/circulars"], next: [F13.public], src: EC, ev: U}
   - {id: F13.mole, actor: gov.mole, does: "Aggregate dashboards (no PII)", api: ["GET /public/statistics", "GET /monitoring/claims", "GET /monitoring/contributions"], next: [F13.parliament], src: "EC, REF", ev: D}

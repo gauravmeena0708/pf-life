@@ -1,7 +1,26 @@
 """Event-built read models owned by reporting-service."""
-from sqlalchemy import BigInteger, Boolean, Column, DateTime, Integer, MetaData, String, Table
+from sqlalchemy import BigInteger, Boolean, Column, Date, DateTime, ForeignKey, Integer, MetaData, String, Table, UniqueConstraint
 
 metadata = MetaData()
+
+fund_positions = Table(
+    "fund_positions", metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("fund_manager", String(120), nullable=False),
+    Column("fund", String(4), nullable=False),
+    Column("as_of", Date, nullable=False),
+    UniqueConstraint("fund_manager", "fund", "as_of"),
+)
+
+fund_holdings = Table(
+    "fund_holdings", metadata,
+    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("position_id", Integer, ForeignKey("fund_positions.id", ondelete="CASCADE"), nullable=False, index=True),
+    Column("isin", String(12), nullable=False),
+    Column("asset_class", String(40), nullable=False),
+    Column("book_value_paise", BigInteger, nullable=False),
+    Column("market_value_paise", BigInteger, nullable=False),
+)
 
 office_staff = Table(
     "office_staff", metadata,

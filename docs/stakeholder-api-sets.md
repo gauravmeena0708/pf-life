@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 242 |
+| Activities | 243 |
 | Stakeholders with at least one API | 95 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 2 |
@@ -948,10 +948,12 @@ Activities: **F13.acc_hq** Division-level oversight; draft rule-set changes (cei
 
 #### `ho.fa_cao` — FA & CAO — Finance & Accounts, **FIA vertical** (freezing category A), Balance Sheet cell
 
-Activities: **F03.interest** Record the approved annual interest rate and run interest crediting; **F07.freeze_ho** Order freezing for Category A (FIA vertical)
+Activities: **F03.interest** Record the approved annual interest rate and run interest crediting; **F07.freeze_ho** Order freezing for Category A (FIA vertical); **F13.accounts** Prepare the annual accounts: balance sheet of the funds and investment position
 
 | Endpoint | Status |
 |---|---|
+| `GET /ho/finance/balance-sheet` | W |
+| `GET /ho/finance/investments` | W |
 | `GET /office/accounts/interest-postings` | W |
 | `POST /office/accounts/interest-postings` | W |
 | `POST /office/establishments/{estId}/freezes` | W |
@@ -1076,7 +1078,7 @@ Activities: **F13.investment** Fund and investment reporting
 
 | Endpoint | Status |
 |---|---|
-| `GET /ho/finance/investments` | P |
+| `GET /ho/finance/investments` | W |
 
 #### `ho.actuarial` — Actuarial unit
 
@@ -1142,7 +1144,7 @@ Activities: **F03.interest_rate** Recommend the annual interest rate (notified w
 
 | Endpoint | Status |
 |---|---|
-| `GET /governance/board-packs` | P |
+| `GET /governance/board-packs` | W |
 
 #### `gov.ec` — Executive Committee of the CBT
 
@@ -1150,7 +1152,7 @@ Activities: **F13.ec** Executive Committee papers and decisions
 
 | Endpoint | Status |
 |---|---|
-| `GET /governance/board-packs` | P |
+| `GET /governance/board-packs` | W |
 
 #### `gov.fiac` — Finance, Investment & Audit Committee
 
@@ -1158,8 +1160,8 @@ Activities: **F13.fiac** Finance, investment and audit review
 
 | Endpoint | Status |
 |---|---|
-| `GET /governance/board-packs` | P |
-| `GET /ho/finance/investments` | P |
+| `GET /governance/board-packs` | W |
+| `GET /ho/finance/investments` | W |
 
 #### `gov.peic` — Pension & EDLI Implementation Committee
 
@@ -1205,7 +1207,7 @@ Activities: **F12.statutory** Attest audit of accounts (read-only)
 | Endpoint | Status |
 |---|---|
 | `GET /audit/events` | W |
-| `GET /ho/finance/balance-sheet` | P |
+| `GET /ho/finance/balance-sheet` | W |
 
 ### H. Technology and national operations
 
@@ -1914,6 +1916,7 @@ flowchart LR
   F13_acc_hq["ho.acc_hq<br/>Division-level oversight; draft rule-set changes (ceilings, "]
   F13_divisions["ho.edli<br/>EDLI policy and monitoring"]
   F13_investment["ho.investment<br/>Fund and investment reporting"]
+  F13_accounts["ho.fa_cao<br/>Prepare the annual accounts: balance sheet of the funds and "]
   F13_fund_feed["ext.fund_manager<br/>Send portfolio / custody positions"]
   F13_publicity["ho.publicity<br/>Publish circulars and awareness content"]
   F13_mole["gov.mole<br/>Aggregate dashboards (no PII)"]
@@ -1925,6 +1928,8 @@ flowchart LR
   F13_insurer["ext.insurer<br/>Provide EDLI / insurance history data"]
   F13_hr["ho.hr<br/>Staff profiles, postings and delegation of roles to offices"]
   F13_admin["fo.admin<br/>Office administration: staff postings and role assignment in"]
+  F12_statutory["gov.statutory_auditor<br/>Attest audit of accounts (read-only)"]
+  F13_accounts --> F12_statutory
   F13_fund_feed --> F13_investment
   F13_publicity --> F13_public
   F13_mole --> F13_parliament
