@@ -34,7 +34,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.12a** | Member and tax: Form 16A, the office's TDS computation; UAN allotment and activation (mock Aadhaar face / OTP); inoperative accounts — the public helpdesk search, verification through co-workers, reactivation in the AO / APFC bands | **Done** (1 Oct 2026) |
 | **P2.12b** | Employer lifecycle: voluntary coverage, closure, transfer to another office; contractors tagging ECR members to a principal employer and the principal's view of contractor compliance; MCA and Shram Suvidha registration feeds (mock) | **Done** (1 Oct 2026) |
 | **P2.12c** | Pension office: deciding a validated higher-pension option and the PF → pension fund transfer after the dues; Special 10D; bank-wise disbursement lists; the actuarial extract | **Done** (1 Oct 2026) |
-| P2.12d | Oversight: internal audit reports, paras, replies and decisions; DPDP data-principal requests; RTI replies; the CPGRAMS feed (mock) | Planned |
+| **P2.12d** | Oversight: internal audit reports, paras, replies and decisions; DPDP data-principal requests; RTI replies; the CPGRAMS feed (mock) | **Done** (1 Oct 2026) |
 | P2.12e | Head office reporting: balance sheet, investments, board packs (aggregates), fund-manager position feed (mock) | Planned |
 | P2.12f | The rest: DR replication status and failover drill, training sandboxes, Nidhi Aapke Nikat camp requests, totalisation claims and the foreign agency's CoC check, the composite death claim | Planned |
 
@@ -717,3 +717,24 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
   PPO, bank or Aadhaar — with aggregates by category and age band; the web page downloads it as CSV.
 - **Fixes on the way**: a replayed money request returned a new envelope (different `meta`) instead of the stored
   response; the P2.8c test assumed the option stays VALIDATED.
+
+## P2.12d — how it is built
+
+- **Internal audit** (audit-service; new persona `zo-internal-audit`): the zone's internal audit reports on an office
+  of its zone and raises paras (category, observation, amount at risk, references, recommendation; reply due after
+  `oversight_periods.para_reply_days`); the OIC sees its office's paras (`GET /audit/internal/paras`, added) and
+  replies, asking for a drop if it has complied (late replies marked); the Audit Division (`ho.audit`) drops the para or
+  keeps it open with a new due date (step-up).
+- **Data-principal requests (DPDP Act)** (audit-service; new persona `ho-dpo`): a member asks for access, correction,
+  erasure, a grievance or a nominee (`POST /members/me/privacy-requests`, added, and their list); the data protection
+  officer answers within `privacy_response_days` (illustrative) — a refusal or partial answer must state its legal
+  basis (e.g. retention under the EPF Scheme); step-up; `PrivacyRequestDecided.v1`.
+- **RTI** (grievance-service, the office PRO): an application is registered (`POST /office/rti-requests`, added) only
+  with the fee or a BPL card; the reply is due in 30 days (s.7(1), `rti_reply_days`); a refusal names its exemption
+  (s.8(1)(d), (e), (g), (j), s.9 or s.11); a transfer under s.6(3) is flagged if made more than five days after receipt;
+  late replies are marked; `RtiReplied.v1`.
+- **CPGRAMS** (mock, signed like the other callbacks): a CPGRAMS grievance becomes an EPFO grievance routed to the
+  office, keeping the CPGRAMS number; idempotent on it. Unit-tested.
+- **Web**: `/audit/internal`; the OIC's audit paras next to the concurrent-audit alerts; the Audit Division's
+  decisions; *Your personal data (DPDP Act)* on the member's security page; `/privacy` for the DPO; *RTI applications*
+  for the PRO.

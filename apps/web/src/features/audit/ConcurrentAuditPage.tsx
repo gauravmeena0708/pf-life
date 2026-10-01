@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { api, command, getSession, rupees, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
+import { InternalParas } from "./InternalParas";
 import { IssueTrackerRequests } from "../ndc/IssueTrackerPage";
 
 interface ExtractItem {
@@ -93,6 +94,7 @@ export function ConcurrentAuditPage() {
       </article>)}
       {alerts.data && !alerts.data.data.length ? <p className="muted">No audit alerts.</p> : null}
     </section> : null}
+    {oic ? <InternalParas role="fo.oic" /> : null}
     {oic ? <IssueTrackerRequests /> : null}
   </section>;
 }

@@ -97,7 +97,7 @@ function fieldOffice(role: string): NavGroup[] {
     { label: "Accounts", items: [link("Annual Accounting"),
       ...(["fo.da_accounts", "fo.apfc"].includes(role) ? [link("Appendix E", "/office/ledger#appendix-e-heading")] : []),
       ...(role === "fo.da_accounts" ? [link("Reverse a journal / recredit a transfer", "/office/ledger#reversal-heading")] : [])] },
-    { label: "Office", items: [...(role === "fo.oic" ? [link("Audit alerts", "/audit/concurrent#audit-alerts-heading"), link("Issue Tracker requests", "/audit/concurrent#issue-tracker-raise-heading")] : []), link("Dashboard", role === "fo.oic" ? "/dashboards" : undefined), link("Admin"), link("Services")] },
+    { label: "Office", items: [...(role === "fo.oic" ? [link("Audit alerts", "/audit/concurrent#audit-alerts-heading"), link("Audit paras", "/audit/concurrent#audit-paras-heading"), link("Issue Tracker requests", "/audit/concurrent#issue-tracker-raise-heading")] : []), ...(role === "fo.pro" ? [link("RTI applications", "/office/grievances#rti-applications-heading")] : []), link("Dashboard", role === "fo.oic" ? "/dashboards" : undefined), link("Admin"), link("Services")] },
   ];
 }
 
@@ -140,6 +140,8 @@ function poc(role: string): NavGroup[] {
   if (role === "ho.publicity") out.push({ label: "Publish circulars", to: "/ho/circulars#publish-circular-heading" });
   if (role === "ho.security") out.push({ labelKey: "navigation.security", to: "/security/activity" }, { labelKey: "navigation.sessions", to: "/security/sessions" });
   if (role === "ho.security") out.push({ label: "Security incidents", to: "/security/activity#incidents-heading" });
+  if (role === "zo.internal_audit") out.push({ label: "Internal audit", to: "/audit/internal" });
+  if (role === "ho.data_protection") out.push({ label: "Data-principal requests", to: "/privacy" });
   if (role === "zo.rpfc1_audit") out.push({ label: "Concurrent audit", to: "/audit/concurrent" });
   if (role === "ho.is") out.push({ label: "Issue Tracker", to: "/ndc/issue-tracker" });
   if (role === "zo.fraud_committee") out.push({ label: "Fraud-risk cases", to: "/zo/fraud-risk" });
@@ -175,6 +177,8 @@ export function homeFor(role: string | undefined): string {
   if (role === "ho.actuarial") return "/ho/actuarial";
   if (role === "ho.security") return "/security/activity";
   if (role === "ho.audit") return "/audit/log";
+  if (role === "zo.internal_audit") return "/audit/internal";
+  if (role === "ho.data_protection") return "/privacy";
   if (role === "ho.caiu") return "/caiu/signals";
   if (role === "ho.cvo" || role === "zo.vigilance") return "/vigilance";
   if (role === "ho.acc_hq") return "/policy";

@@ -1,5 +1,5 @@
 """Tables owned by grievance-service (created by migration 0002)."""
-from sqlalchemy import JSON, Column, DateTime, Integer, LargeBinary, MetaData, String, Table, Text, func
+from sqlalchemy import JSON, Column, Date, DateTime, Integer, LargeBinary, MetaData, String, Table, Text, func
 
 from app.infra.models import IdType
 
@@ -47,6 +47,31 @@ grievances = Table(
     Column("reminders", Integer, nullable=False, server_default="0"),
     Column("last_reminded_at", DateTime(timezone=True)),
     Column("feedback", JSON),                                                     # {rating, satisfied, comment, at}
+    Column("cpgrams_registration_no", String(80), unique=True),
+)
+
+rti_requests = Table(
+    "rti_requests", metadata,
+    Column("request_id", String(40), primary_key=True),
+    Column("registration_no", String(100), nullable=False, unique=True),
+    Column("registration_year", Integer, nullable=False),
+    Column("office_id", String(40), nullable=False, index=True),
+    Column("applicant_name", String(120), nullable=False),
+    Column("received_on", Date, nullable=False),
+    Column("mode", String(20), nullable=False),
+    Column("subject", String(200), nullable=False),
+    Column("information_sought", Text, nullable=False),
+    Column("fee_paid", Integer, nullable=False),
+    Column("bpl", Integer, nullable=False),
+    Column("reply_due", Date, nullable=False),
+    Column("state", String(20), nullable=False),
+    Column("outcome", String(30)),
+    Column("reply", Text),
+    Column("exemption_section", String(20)),
+    Column("transferred_to", String(200)),
+    Column("replied_at", DateTime(timezone=True)),
+    Column("late", Integer),
+    Column("transfer_late", Integer),
 )
 
 # The conversation, status changes and evidence links, in order. Append-only.

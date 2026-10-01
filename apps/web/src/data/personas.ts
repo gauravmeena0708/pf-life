@@ -70,5 +70,7 @@ export const PERSONAS: Persona[] = [
   { username: "csc-operator", label: "CSC operator", role: "csc_operator", group: "Members and public", description: "Allot a UAN for a person at a Common Service Centre (mock Aadhaar face authentication)." },
   { username: "zo-vigilance", label: "Zonal vigilance", role: "zo.vigilance", group: "Zone, head office and oversight", description: "Inquire into vigilance cases assigned to the zone and report findings." },
   { username: "ho-actuarial", label: "HO actuarial cell", role: "ho.actuarial", group: "Zone, head office and oversight", description: "De-identified EPS extract for the actuarial valuation." },
+  { username: "zo-internal-audit", label: "Zonal internal audit", role: "zo.internal_audit", group: "Zone, head office and oversight", description: "Audit a regional office and raise paras for it to answer." },
+  { username: "ho-dpo", label: "Data protection officer", role: "ho.data_protection", group: "Zone, head office and oversight", description: "Answer members' requests about their personal data (DPDP Act)." },
   { username: "auditor", label: "Independent auditor", role: "ho.audit", group: "Zone, head office and oversight", description: "Inspect the audit log, verify its hash chain and trace request events." },
 ];

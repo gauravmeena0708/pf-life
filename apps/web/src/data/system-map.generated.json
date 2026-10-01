@@ -4,14 +4,14 @@
   "interfaces": 21,
   "stakeholders": 114,
   "stakeholders_with_access": 95,
-  "activities": 241,
+  "activities": 242,
   "endpoints": {
-   "W": 348,
+   "W": 360,
    "M": 21,
-   "P": 55,
+   "P": 48,
    "?": 5
   },
-  "personas": 55
+  "personas": 57
  },
  "interfaces": [
   {
@@ -62,7 +62,7 @@
    "coverage": "Working",
    "purpose": "Members, pensioners and claimants: passbook, claims, transfers, nomination, pension and death claims.",
    "endpoints": {
-    "W": 82,
+    "W": 84,
     "M": 5,
     "P": 0,
     "?": 0
@@ -117,9 +117,9 @@
    "coverage": "Working",
    "purpose": "Grievances: routing, replies, escalation to the zone and head office, office transfers.",
    "endpoints": {
-    "W": 12,
+    "W": 15,
     "M": 1,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
    "stakeholders": [
@@ -171,9 +171,9 @@
    "coverage": "Working",
    "purpose": "Regional office officers: approvals above the dealing level, freezes, ledger decisions.",
    "endpoints": {
-    "W": 38,
+    "W": 40,
     "M": 0,
-    "P": 9,
+    "P": 8,
     "?": 1
    },
    "stakeholders": [
@@ -344,9 +344,9 @@
    "coverage": "Working",
    "purpose": "Security: request activity, sessions, security events and incidents.",
    "endpoints": {
-    "W": 10,
+    "W": 12,
     "M": 0,
-    "P": 2,
+    "P": 0,
     "?": 0
    },
    "stakeholders": [
@@ -378,9 +378,9 @@
    "coverage": "Working",
    "purpose": "Audit: the hash-chained audit log, concurrent audit extracts and alerts.",
    "endpoints": {
-    "W": 8,
+    "W": 12,
     "M": 0,
-    "P": 4,
+    "P": 1,
     "?": 0
    },
    "stakeholders": [
@@ -450,7 +450,7 @@
    "name": "Member — active contributor (UAN holder)",
    "group": "A. Members, beneficiaries and the public",
    "endpoints": {
-    "W": 67,
+    "W": 69,
     "M": 2,
     "P": 0,
     "?": 0
@@ -531,6 +531,10 @@
     {
      "id": "F14.step_up",
      "does": "Complete step-up confirmation for sensitive actions"
+    },
+    {
+     "id": "F14.privacy_request",
+     "does": "Ask EPFO about my personal data: access, correction, erasure or a grievance (DPDP Act)"
     }
    ],
    "personas": [
@@ -1329,9 +1333,9 @@
    "name": "Officer-in-Charge of the office",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 17,
+    "W": 19,
     "M": 0,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
    "activities": [
@@ -1704,9 +1708,9 @@
    "name": "PRO / Facilitation centre / grievance cell",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 11,
+    "W": 14,
     "M": 0,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
    "activities": [
@@ -1716,7 +1720,7 @@
     },
     {
      "id": "F08.rti_reply",
-     "does": "Answer RTI requests"
+     "does": "Register RTI applications and reply within the period"
     }
    ],
    "personas": [
@@ -1862,9 +1866,9 @@
    "name": "Internal audit parties auditing ROs",
    "group": "E. Zonal Office (ZO)",
    "endpoints": {
-    "W": 1,
+    "W": 4,
     "M": 0,
-    "P": 2,
+    "P": 0,
     "?": 0
    },
    "activities": [
@@ -1873,7 +1877,9 @@
      "does": "Internal audit of an RO; raise audit paras"
     }
    ],
-   "personas": []
+   "personas": [
+    "zo-internal-audit"
+   ]
   },
   "zo.vigilance": {
    "name": "**Zonal Vigilance Directorate**",
@@ -2097,9 +2103,9 @@
    "name": "Audit Division (internal audit, concurrent audit, IT audit, pre-audit)",
    "group": "F. Head Office (HO) — leadership and divisions",
    "endpoints": {
-    "W": 4,
+    "W": 6,
     "M": 0,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
    "activities": [
@@ -2314,9 +2320,9 @@
    "name": "Data-protection / privacy officer (DPDP Act obligations)",
    "group": "F. Head Office (HO) — leadership and divisions",
    "endpoints": {
-    "W": 0,
+    "W": 2,
     "M": 0,
-    "P": 2,
+    "P": 0,
     "?": 0
    },
    "activities": [
@@ -2325,7 +2331,9 @@
      "does": "Handle data-principal requests and breach records (DPDP Act)"
     }
    ],
-   "personas": []
+   "personas": [
+    "ho-dpo"
+   ]
   },
   "gov.cbt": {
    "name": "Central Board of Trustees (tripartite; chaired by the Labour Minister)",

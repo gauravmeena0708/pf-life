@@ -9,6 +9,7 @@ import { ProblemMessage } from "../../components/ProblemMessage";
 import { dateTime, stateLabel } from "../journeyB";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
+import { RtiApplications } from "./RtiApplications";
 import { GrievanceThread } from "./GrievanceThread";
 import { TriageSuggestion } from "./TriageSuggestion";
 import type { Grievance } from "./types";
@@ -143,6 +144,7 @@ export function GrievanceOfficePage() {
           ) : null}
         </>
       ) : null}
+      {role === "fo.pro" ? <RtiApplications /> : null}
       <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
     </section>
   );

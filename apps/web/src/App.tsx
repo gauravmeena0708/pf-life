@@ -69,6 +69,8 @@ import { InoperativeSearchPage } from "./features/public/InoperativeSearchPage";
 import { CscPage } from "./features/csc/CscPage";
 import { SecurityActivity } from "./pages/SecurityActivity";
 import { ConcurrentAuditPage } from "./features/audit/ConcurrentAuditPage";
+import { InternalAuditPage } from "./features/audit/InternalAuditPage";
+import { PrivacyRequestsPage } from "./features/audit/PrivacyRequestsPage";
 import { IssueTrackerPage } from "./features/ndc/IssueTrackerPage";
 import { FraudRiskPage } from "./features/office/FraudRiskPage";
 import { DistrictDashboardPage } from "./features/office/DistrictDashboardPage";
@@ -171,6 +173,8 @@ export function App() {
             <Route path="/office/exempted" element={<ExemptedPage />} />
             <Route path="/security/activity" element={<SecurityActivity />} />
             <Route path="/audit/concurrent" element={<ConcurrentAuditPage />} />
+            <Route path="/audit/internal" element={<InternalAuditPage />} />
+            <Route path="/privacy" element={<PrivacyRequestsPage />} />
             <Route path="/ndc/issue-tracker" element={<IssueTrackerPage />} />
             <Route path="/zo/fraud-risk" element={<FraudRiskPage />} />
             <Route path="/do/dashboard" element={<DistrictDashboardPage />} />
@@ -180,6 +184,7 @@ export function App() {
             <Route path="/member/grievances/:grievanceId" element={<GrievanceDetailPage />} />
             <Route path="/member/security" element={<SecurityPage />} />
             <Route path="/member/assistant" element={<AssistantPage />} />
+            <Route path="/office/grievances" element={<GrievanceOfficePage />} />
             <Route path="/office/grievances/:grievanceId" element={<GrievanceOfficePage />} />
             <Route path="/caiu/signals" element={<RiskSignalsPage />} />
             <Route path="/security/sessions" element={<SessionsRecoveryPage />} />

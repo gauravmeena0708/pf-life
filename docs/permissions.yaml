@@ -507,6 +507,18 @@ stakeholders:
     step_up: false
     via:
     - F14.step_up
+  - endpoint: POST /members/me/privacy-requests
+    status: W
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F14.privacy_request
+  - endpoint: GET /members/me/privacy-requests
+    status: W
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F14.privacy_request
   member.exited:
   - endpoint: POST /members/me/claims
     status: W
@@ -2259,8 +2271,14 @@ stakeholders:
     step_up: false
     via:
     - F12.reply
+  - endpoint: GET /audit/internal/paras
+    status: W
+    scope: read-only for auditors; audit writes by audit roles only
+    step_up: false
+    via:
+    - F12.para_reply
   - endpoint: POST /audit/internal/paras/{paraId}/replies
-    status: P
+    status: W
     scope: read-only for auditors; audit writes by audit roles only
     step_up: false
     via:
@@ -2774,8 +2792,20 @@ stakeholders:
     step_up: false
     via:
     - F08.triage
+  - endpoint: POST /office/rti-requests
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F08.rti_reply
+  - endpoint: GET /office/rti-requests
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F08.rti_reply
   - endpoint: POST /office/rti-requests/{requestId}/replies
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -2945,13 +2975,19 @@ stakeholders:
     - F12.claim_trail
   zo.internal_audit:
   - endpoint: POST /audit/internal/reports
-    status: P
+    status: W
     scope: read-only for auditors; audit writes by audit roles only
     step_up: false
     via:
     - F12.internal
   - endpoint: POST /audit/internal/reports/{reportId}/paras
-    status: P
+    status: W
+    scope: read-only for auditors; audit writes by audit roles only
+    step_up: false
+    via:
+    - F12.internal
+  - endpoint: GET /audit/internal/paras
+    status: W
     scope: read-only for auditors; audit writes by audit roles only
     step_up: false
     via:
@@ -3173,8 +3209,14 @@ stakeholders:
     step_up: false
     via:
     - F12.ho
+  - endpoint: GET /audit/internal/paras
+    status: W
+    scope: read-only for auditors; audit writes by audit roles only
+    step_up: false
+    via:
+    - F12.ho
   - endpoint: POST /audit/internal/paras/{paraId}/decisions
-    status: P
+    status: W
     scope: read-only for auditors; audit writes by audit roles only
     step_up: true
     via:
@@ -3395,13 +3437,13 @@ stakeholders:
     - F14.security
   ho.data_protection:
   - endpoint: GET /privacy/requests
-    status: P
+    status: W
     scope: data-protection officer only
     step_up: false
     via:
     - F14.privacy
   - endpoint: POST /privacy/requests/{requestId}/decisions
-    status: P
+    status: W
     scope: data-protection officer only
     step_up: true
     via:

@@ -343,6 +343,10 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
         on = iw.get("final_settlement_on") or {}
         if not _whole(on.get("min_age"), 18, 80) or not isinstance(on.get("agreement_nationalities"), list):
             problems.append("international_workers.final_settlement_on needs min_age (18-80) and a list of agreement_nationalities")
+    if "oversight_periods" in document:
+        op_ = document["oversight_periods"] or {}
+        if not all(_whole(op_.get(k), 1, 365) for k in ("rti_reply_days", "privacy_response_days", "para_reply_days")):
+            problems.append("oversight_periods needs rti_reply_days, privacy_response_days and para_reply_days (1-365)")
     if "voluntary_coverage" in document:
         vc = document["voluntary_coverage"] or {}
         if not _whole(vc.get("threshold_employees"), 1, 1000) or not _whole(vc.get("consent_share_bp"), 1, 10000):

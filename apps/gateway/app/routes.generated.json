@@ -2212,8 +2212,8 @@
     "method": "POST",
     "path_template": "/audit/internal/paras/{paraId}/decisions",
     "regex": "^/audit/internal/paras/[^/]+/decisions$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "audit",
     "upstream": "http://audit-service:8000",
     "money": false,
@@ -2228,8 +2228,8 @@
     "method": "POST",
     "path_template": "/audit/internal/reports/{reportId}/paras",
     "regex": "^/audit/internal/reports/[^/]+/paras$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "audit",
     "upstream": "http://audit-service:8000",
     "money": false,
@@ -2502,8 +2502,8 @@
     "method": "POST",
     "path_template": "/office/rti-requests/{requestId}/replies",
     "regex": "^/office/rti\\-requests/[^/]+/replies$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "grievance",
     "upstream": "http://grievance-service:8000",
     "money": false,
@@ -2680,8 +2680,8 @@
     "method": "POST",
     "path_template": "/privacy/requests/{requestId}/decisions",
     "regex": "^/privacy/requests/[^/]+/decisions$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "audit",
     "upstream": "http://audit-service:8000",
     "money": false,
@@ -2712,8 +2712,8 @@
     "method": "POST",
     "path_template": "/audit/internal/paras/{paraId}/replies",
     "regex": "^/audit/internal/paras/[^/]+/replies$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "audit",
     "upstream": "http://audit-service:8000",
     "money": false,
@@ -3644,7 +3644,7 @@
     "path_template": "/integrations/cpgrams/grievances",
     "regex": "^/integrations/cpgrams/grievances$",
     "status": "M",
-    "phase": 3,
+    "phase": 1,
     "owner": "grievance",
     "upstream": "http://grievance-service:8000",
     "money": false,
@@ -4448,6 +4448,38 @@
       "ho.caiu"
     ],
     "summary": "CAIU risk signals (Journey D2)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/privacy-requests",
+    "regex": "^/members/me/privacy\\-requests$",
+    "status": "W",
+    "phase": 1,
+    "owner": "audit",
+    "upstream": "http://audit-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "The member's data-principal requests and their answers",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/privacy-requests",
+    "regex": "^/members/me/privacy\\-requests$",
+    "status": "W",
+    "phase": 1,
+    "owner": "audit",
+    "upstream": "http://audit-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "A member's data-principal request (access, correction, erasure, grievance; DPDP Act)",
     "revocation": false
   },
   {
@@ -5429,8 +5461,8 @@
     "method": "POST",
     "path_template": "/audit/internal/reports",
     "regex": "^/audit/internal/reports$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "audit",
     "upstream": "http://audit-service:8000",
     "money": false,
@@ -5957,6 +5989,24 @@
     "revocation": false
   },
   {
+    "method": "GET",
+    "path_template": "/audit/internal/paras",
+    "regex": "^/audit/internal/paras$",
+    "status": "W",
+    "phase": 1,
+    "owner": "audit",
+    "upstream": "http://audit-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.oic",
+      "ho.audit",
+      "zo.internal_audit"
+    ],
+    "summary": "Internal-audit paras: the office's own (OIC), the zone's (internal audit), all (Audit Division)",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/cpps/reconciliations",
     "regex": "^/cpps/reconciliations$",
@@ -6274,6 +6324,38 @@
       "zo.rpfc1"
     ],
     "summary": "Case detail",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/rti-requests",
+    "regex": "^/office/rti\\-requests$",
+    "status": "W",
+    "phase": 1,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.pro"
+    ],
+    "summary": "The office's RTI applications and their reply due dates",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/rti-requests",
+    "regex": "^/office/rti\\-requests$",
+    "status": "W",
+    "phase": 1,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.pro"
+    ],
+    "summary": "Register an RTI application received (post, counter or the RTI portal)",
     "revocation": false
   },
   {
@@ -6712,8 +6794,8 @@
     "method": "GET",
     "path_template": "/privacy/requests",
     "regex": "^/privacy/requests$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "audit",
     "upstream": "http://audit-service:8000",
     "money": false,

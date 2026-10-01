@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 241 |
+| Activities | 242 |
 | Stakeholders with at least one API | 95 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 2 |
@@ -44,7 +44,7 @@ Activities: **F11.public_search** Search an inoperative account with a demo CAPT
 
 #### `member` — Member — active contributor (UAN holder)
 
-Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP; **F02.kyc_seed** Seed KYC (Aadhaar, bank, PAN); **F02.self_service** View profile, service history, UAN card; change contact details; e-nomination; self-marked exit; **F02.jd_submit** Submit Joint Declaration to correct one of 12 profile parameters; **F03.passbook** View passbook, annual statement and taxable-interest split; **F04.preflight** Pre-flight before filing: check account readiness (blockers), service history and eligibility for the chosen form; **F04.claim_file** Check eligibility and file a claim (Form 31 / 19 / 10C); confirm intent; upload documents; **F04.post_submission** After filing: follow the claim's audit trail, cancel it before a decision, or switch to another KYC-verified bank account before payment; **F04.redisburse_request** Submit corrected bank details after a payment return; **F04.track** Track claims and notifications; download Form 16A; **F04.transfer** Request Form 13 transfer; confirm auto-transfer; view Annexure K; **F05.apply** Apply for monthly pension (Form 10D) or scheme certificate; **F05.preview** Pre-check pension eligibility across all member IDs; see untransferred service to fix first (Form 13); **F05.sc_surrender** Surrender a Scheme Certificate for monthly pension or withdrawal benefit; **F05.higher_member** Apply for pension on higher wages (joint option); track status; **F07.member_report** Report suspicious activity; account recovery; view sessions; **F08.member_file** Register, track, reopen, remind and give feedback on grievances; **F10.worker** An international worker is a member: views their coverage under the international-worker rules (P2.9a); **F14.step_up** Complete step-up confirmation for sensitive actions
+Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP; **F02.kyc_seed** Seed KYC (Aadhaar, bank, PAN); **F02.self_service** View profile, service history, UAN card; change contact details; e-nomination; self-marked exit; **F02.jd_submit** Submit Joint Declaration to correct one of 12 profile parameters; **F03.passbook** View passbook, annual statement and taxable-interest split; **F04.preflight** Pre-flight before filing: check account readiness (blockers), service history and eligibility for the chosen form; **F04.claim_file** Check eligibility and file a claim (Form 31 / 19 / 10C); confirm intent; upload documents; **F04.post_submission** After filing: follow the claim's audit trail, cancel it before a decision, or switch to another KYC-verified bank account before payment; **F04.redisburse_request** Submit corrected bank details after a payment return; **F04.track** Track claims and notifications; download Form 16A; **F04.transfer** Request Form 13 transfer; confirm auto-transfer; view Annexure K; **F05.apply** Apply for monthly pension (Form 10D) or scheme certificate; **F05.preview** Pre-check pension eligibility across all member IDs; see untransferred service to fix first (Form 13); **F05.sc_surrender** Surrender a Scheme Certificate for monthly pension or withdrawal benefit; **F05.higher_member** Apply for pension on higher wages (joint option); track status; **F07.member_report** Report suspicious activity; account recovery; view sessions; **F08.member_file** Register, track, reopen, remind and give feedback on grievances; **F10.worker** An international worker is a member: views their coverage under the international-worker rules (P2.9a); **F14.step_up** Complete step-up confirmation for sensitive actions; **F14.privacy_request** Ask EPFO about my personal data: access, correction, erasure or a grievance (DPDP Act)
 
 | Endpoint | Status |
 |---|---|
@@ -73,6 +73,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/pension-applications` | W |
 | `GET /members/me/pension-eligibility-preview` | W |
 | `GET /members/me/pension-scheme-certificate` | W |
+| `GET /members/me/privacy-requests` | W |
 | `GET /members/me/service-history` | W |
 | `GET /members/me/sessions` | W |
 | `GET /members/me/tax/form-16a` | W |
@@ -106,6 +107,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/me/pension-applications` | W |
 | `POST /members/me/pension-scheme-certificates` | W |
 | `POST /members/me/pension-scheme-certificates/{certId}/surrenders` | W |
+| `POST /members/me/privacy-requests` | W |
 | `POST /members/me/security-reports` | W |
 | `POST /members/me/tax/form-15g-15h` | W |
 | `POST /members/me/transfers` | W |
@@ -587,6 +589,7 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | Endpoint | Status |
 |---|---|
 | `GET /audit/concurrent/alerts` | W |
+| `GET /audit/internal/paras` | W |
 | `GET /monitoring/claims` | W |
 | `GET /ndc/issue-tracker/requests` | W |
 | `GET /office/accounts/inoperative` | W |
@@ -595,6 +598,7 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | `GET /office/members/{uan}/locks` | W |
 | `GET /office/work-queue` | W |
 | `POST /audit/concurrent/alerts/{alertId}/replies` | W |
+| `POST /audit/internal/paras/{paraId}/replies` | W |
 | `POST /ndc/issue-tracker/requests` | W |
 | `POST /office/cases/{caseId}/second-approvals` | W |
 | `POST /office/claims/{claimId}/cad` | W |
@@ -603,7 +607,6 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/members/{uan}/defreezes` | W |
 | `POST /office/system/locks/{lockId}/release` | W |
-| `POST /audit/internal/paras/{paraId}/replies` | P |
 
 #### `fo.cash` — Cashier / Cash branch
 
@@ -779,12 +782,13 @@ Activities: **F10.decide** Verify and issue Certificate of Coverage
 
 #### `fo.pro` — PRO / Facilitation centre / grievance cell
 
-Activities: **F08.triage** Triage, assign, reply with evidence, lodge local grievances, transfer between offices, resolve; **F08.rti_reply** Answer RTI requests
+Activities: **F08.triage** Triage, assign, reply with evidence, lodge local grievances, transfer between offices, resolve; **F08.rti_reply** Register RTI applications and reply within the period
 
 | Endpoint | Status |
 |---|---|
 | `GET /grievances/{grievanceId}` | W |
 | `GET /office/cases/{caseId}` | W |
+| `GET /office/rti-requests` | W |
 | `GET /office/work-queue` | W |
 | `POST /ai/feedback` | W |
 | `POST /ai/grievances/classify` | W |
@@ -794,7 +798,8 @@ Activities: **F08.triage** Triage, assign, reply with evidence, lodge local grie
 | `POST /grievances/{grievanceId}/office-transfers` | W |
 | `POST /grievances/{grievanceId}/resolution` | W |
 | `POST /office/cases/{caseId}/assignments` | W |
-| `POST /office/rti-requests/{requestId}/replies` | P |
+| `POST /office/rti-requests` | W |
+| `POST /office/rti-requests/{requestId}/replies` | W |
 
 #### `fo.nan` — Nidhi Aapke Nikat outreach camp team
 
@@ -882,8 +887,9 @@ Activities: **F12.internal** Internal audit of an RO; raise audit paras
 | Endpoint | Status |
 |---|---|
 | `GET /audit/correlations/{correlationId}` | W |
-| `POST /audit/internal/reports` | P |
-| `POST /audit/internal/reports/{reportId}/paras` | P |
+| `GET /audit/internal/paras` | W |
+| `POST /audit/internal/reports` | W |
+| `POST /audit/internal/reports/{reportId}/paras` | W |
 
 #### `zo.vigilance` — **Zonal Vigilance Directorate**
 
@@ -1010,9 +1016,10 @@ Activities: **F12.ho** Audit Division: plan audits, IT audit, pre-audit, drop pa
 |---|---|
 | `GET /audit/correlations/{correlationId}` | W |
 | `GET /audit/events` | W |
+| `GET /audit/internal/paras` | W |
 | `GET /ho/config/rule-sets` | W |
 | `GET /ho/config/rule-sets/{versionId}` | W |
-| `POST /audit/internal/paras/{paraId}/decisions` | P |
+| `POST /audit/internal/paras/{paraId}/decisions` | W |
 
 #### `ho.caiu` — Central Analysis & Intelligence Unit
 
@@ -1124,8 +1131,8 @@ Activities: **F14.privacy** Handle data-principal requests and breach records (D
 
 | Endpoint | Status |
 |---|---|
-| `GET /privacy/requests` | P |
-| `POST /privacy/requests/{requestId}/decisions` | P |
+| `GET /privacy/requests` | W |
+| `POST /privacy/requests/{requestId}/decisions` | W |
 
 ### G. Governance and oversight bodies
 
@@ -1806,7 +1813,7 @@ flowchart LR
   style F08_escalate stroke-dasharray: 5 5
   F08_ho["ho.customer_service<br/>Monitor grievance pendency and root causes"]
   F08_rti["rti_applicant<br/>File RTI request (handled through the RTI portal; answered b"]
-  F08_rti_reply["fo.pro<br/>Answer RTI requests"]
+  F08_rti_reply["fo.pro<br/>Register RTI applications and reply within the period"]
   F08_member_file --> F08_triage
   F08_public_file --> F08_triage
   F08_pensioner_file --> F08_triage
@@ -1882,7 +1889,6 @@ flowchart LR
   F12_concurrent["zo.rpfc1_audit<br/>Download daily functionality data from the Audit Portal; fla"]
   F12_reply["fo.oic<br/>Reply to concurrent-audit alerts within 3 days"]
   F12_internal["zo.internal_audit<br/>Internal audit of an RO; raise audit paras"]
-  style F12_internal stroke-dasharray: 5 5
   F12_para_reply["fo.oic<br/>Comply with audit paras; request dropping"]
   F12_ho["ho.audit<br/>Audit Division: plan audits, IT audit, pre-audit, drop paras"]
   F12_claim_trail["zo.rpfc1_audit<br/>Inspect a claim's full audit trail (transitions, approval le"]
@@ -1937,8 +1943,8 @@ flowchart LR
   style F14_security stroke-dasharray: 5 5
   F14_cert_in["ext.cert_in<br/>Receive cyber-incident reports"]
   F14_step_up["member<br/>Complete step-up confirmation for sensitive actions"]
+  F14_privacy_request["member<br/>Ask EPFO about my personal data: access, correction, erasure"]
   F14_privacy["ho.data_protection<br/>Handle data-principal requests and breach records (DPDP Act)"]
-  style F14_privacy stroke-dasharray: 5 5
   F14_ai["tech.ai_service<br/>Advisory AI: knowledge search, claim analysis, grievance cla"]
   F14_training["train.pdnasa<br/>Run training on a synthetic-data sandbox"]
   style F14_training stroke-dasharray: 5 5
@@ -1952,5 +1958,6 @@ flowchart LR
   F14_umang["ext.umang<br/>Mobile channel calling the same member / pensioner APIs"]
   F14_ndc --> F14_adc
   F14_security --> F14_cert_in
+  F14_privacy_request --> F14_privacy
 ```
 

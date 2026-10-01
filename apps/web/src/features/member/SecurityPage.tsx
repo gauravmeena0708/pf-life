@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { api, command, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
+import { PrivacyRequests } from "./PrivacyRequests";
 import { dateTime } from "../journeyB";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
@@ -129,6 +130,7 @@ export function SecurityPage() {
           <div className="actions"><button type="submit" className="primary" disabled={busy || !memberId}>{t("security.requestRecovery")}</button></div>
         </form>
       </div>
+      <PrivacyRequests />
       <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
     </section>
   );

@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /audit/events', 'POST /internal/security-events', 'GET /security/incidents', 'POST /security/incidents', 'GET /audit/concurrent/alerts', 'POST /audit/concurrent/alerts', 'GET /audit/concurrent/extracts', 'POST /audit/concurrent/alerts/{alertId}/replies', 'GET /audit/correlations/{correlationId}']
+OPERATIONS = ['GET /audit/events', 'POST /internal/security-events', 'GET /privacy/requests', 'GET /security/incidents', 'POST /security/incidents', 'GET /audit/concurrent/alerts', 'POST /audit/concurrent/alerts', 'GET /audit/concurrent/extracts', 'GET /audit/internal/paras', 'POST /audit/internal/reports', 'GET /members/me/privacy-requests', 'POST /members/me/privacy-requests', 'POST /audit/concurrent/alerts/{alertId}/replies', 'POST /audit/internal/paras/{paraId}/decisions', 'POST /audit/internal/paras/{paraId}/replies', 'POST /audit/internal/reports/{reportId}/paras', 'GET /audit/correlations/{correlationId}', 'POST /privacy/requests/{requestId}/decisions']
 
 @router.api_route("/api/v1/audit/events", methods=["GET"], include_in_schema=False)
 async def get_audit_events(actor: Actor = Depends(require_actor)) -> None:
@@ -20,6 +20,11 @@ async def get_audit_events(actor: Actor = Depends(require_actor)) -> None:
 @router.api_route("/api/v1/internal/security-events", methods=["POST"], include_in_schema=False)
 async def post_internal_security_events(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Ingest IdP events (login, new device, credential change) from the Keycloak event listener into audit")
+
+
+@router.api_route("/api/v1/privacy/requests", methods=["GET"], include_in_schema=False)
+async def get_privacy_requests(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Data-principal requests queue (DPDP Act)")
 
 
 @router.api_route("/api/v1/security/incidents", methods=["GET"], include_in_schema=False)
@@ -47,11 +52,51 @@ async def get_audit_concurrent_extracts(actor: Actor = Depends(require_actor)) -
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Concurrent Audit Cell daily functionality extract (Audit Portal)")
 
 
+@router.api_route("/api/v1/audit/internal/paras", methods=["GET"], include_in_schema=False)
+async def get_audit_internal_paras(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Internal-audit paras: the office's own (OIC), the zone's (internal audit), all (Audit Division)")
+
+
+@router.api_route("/api/v1/audit/internal/reports", methods=["POST"], include_in_schema=False)
+async def post_audit_internal_reports(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Internal audit report for an office")
+
+
+@router.api_route("/api/v1/members/me/privacy-requests", methods=["GET"], include_in_schema=False)
+async def get_members_me_privacy_requests(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The member's data-principal requests and their answers")
+
+
+@router.api_route("/api/v1/members/me/privacy-requests", methods=["POST"], include_in_schema=False)
+async def post_members_me_privacy_requests(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "A member's data-principal request (access, correction, erasure, grievance; DPDP Act)")
+
+
 @router.api_route("/api/v1/audit/concurrent/alerts/{alertId}/replies", methods=["POST"], include_in_schema=False)
 async def post_audit_concurrent_alerts_alertId_replies(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "OIC replies to a concurrent-audit alert")
 
 
+@router.api_route("/api/v1/audit/internal/paras/{paraId}/decisions", methods=["POST"], include_in_schema=False)
+async def post_audit_internal_paras_paraId_decisions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Audit Division drops / keeps a para")
+
+
+@router.api_route("/api/v1/audit/internal/paras/{paraId}/replies", methods=["POST"], include_in_schema=False)
+async def post_audit_internal_paras_paraId_replies(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Office compliance reply to a para")
+
+
+@router.api_route("/api/v1/audit/internal/reports/{reportId}/paras", methods=["POST"], include_in_schema=False)
+async def post_audit_internal_reports_reportId_paras(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Raise an audit para")
+
+
 @router.api_route("/api/v1/audit/correlations/{correlationId}", methods=["GET"], include_in_schema=False)
 async def get_audit_correlations_correlationId(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Platform endpoint defined in init.md §3.1")
+
+
+@router.api_route("/api/v1/privacy/requests/{requestId}/decisions", methods=["POST"], include_in_schema=False)
+async def post_privacy_requests_requestId_decisions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Decide a data-principal request")

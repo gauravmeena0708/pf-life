@@ -98,6 +98,13 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 12d: internal audit, data-principal requests, RTI, the CPGRAMS feed (1 October 2026)
+
+Unit: audit-service 17 (new `test_internal_privacy.py`), grievance-service 22 (new `test_oversight.py`), gateway 23,
+platform 21; web 194 (new `P212d.test.tsx`); end to end 82 of 83 (new `test_small_oversight.py`, run twice) —
+`test_journey_b_claim.py` stopped only because member A's synthetic balance is used up again by the day's runs (it asks
+for `make reset`); must-deny 18; UI smoke 2.
+
 ## Update — Phase 2, slice 12c: higher-pension dues, Special 10D, disbursement lists, actuarial extract (1 October 2026)
 
 Unit: pension-service 37 (new `test_p2_12c.py`), contribution-service 72 (new `test_higher_pension_transfer.py`);

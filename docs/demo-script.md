@@ -433,6 +433,17 @@ contribution- and platform-service*
 4. **`ho-actuarial` → Actuarial extract**: pseudonymous rows and aggregates; download CSV — no names or numbers that
    identify anyone.
 
+## Internal audit, personal-data requests and RTI
+*Tests: `tests/e2e/test_small_oversight.py`, `services/audit-service/tests/test_internal_privacy.py`, `services/grievance-service/tests/test_oversight.py`*
+
+1. **`zo-internal-audit` → Internal audit**: a report on RO-DEMO-01 and a para (claims, ₹50,000 at risk).
+   **`ro-oic` → Audit paras**: reply and ask for the para to be dropped. **`auditor`** (Audit Division) drops it
+   (one-time code).
+2. **`member-a` → Security › Your personal data**: ask for access. **`ho-dpo` → Data-principal requests**: a refusal
+   without its legal basis is not accepted; answer it; the member sees the answer.
+3. **`ro-pro` → RTI applications**: an application with neither fee nor BPL card is refused; register it with the
+   fee — reply due in 30 days; a refusal must cite its section; reply with the information.
+
 ## Vigilance
 *Tests: `tests/e2e/test_vigilance.py`, `services/workflow-service/tests/test_vigilance.py`*
 

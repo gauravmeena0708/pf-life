@@ -611,12 +611,16 @@ Monitoring (`/monitoring/**`), AI (`/ai/**`), audit (`/audit/**`) and NDC (`/ndc
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
 | `POST /grievances/{grievanceId}/office-transfers` | Transfer a grievance to another office | W | 1 | grievance |
-| `POST /integrations/cpgrams/grievances` | CPGRAMS grievance feed (signed) | M | 3 | grievance |
-| `POST /office/rti-requests/{requestId}/replies` | Record RTI replies | P | 3 | grievance |
+| `POST /integrations/cpgrams/grievances` | CPGRAMS grievance feed (signed) | M | 1 | grievance |
+| `POST /office/rti-requests` | Register an RTI application received (post, counter or the RTI portal) | W | 1 | grievance |
+| `GET /office/rti-requests` | The office's RTI applications and their reply due dates | W | 1 | grievance |
+| `POST /office/rti-requests/{requestId}/replies` | Record RTI replies | W | 1 | grievance |
 | `POST /security/incidents` 🔐 | Record a security incident; report to CERT-In | W | 1 | audit |
 | `GET /security/incidents` | Security incidents on record and their CERT-In reporting (mock) | W | 1 | audit |
-| `GET /privacy/requests` | Data-principal requests queue (DPDP Act) | P | 3 | audit |
-| `POST /privacy/requests/{requestId}/decisions` 🔐 | Decide a data-principal request | P | 3 | audit |
+| `POST /members/me/privacy-requests` | A member's data-principal request (access, correction, erasure, grievance; DPDP Act) | W | 1 | audit |
+| `GET /members/me/privacy-requests` | The member's data-principal requests and their answers | W | 1 | audit |
+| `GET /privacy/requests` | Data-principal requests queue (DPDP Act) | W | 1 | audit |
+| `POST /privacy/requests/{requestId}/decisions` 🔐 | Decide a data-principal request | W | 1 | audit |
 | `GET /vigilance/cases` | Vigilance case list (restricted: the CVO, or the zone the inquiry is assigned to) | W | 1 | workflow |
 | `GET /vigilance/cases/{caseId}` | A vigilance case with its evidence and history (restricted; every read audited) | W | 1 | workflow |
 | `POST /vigilance/cases/{caseId}/findings` 🔐 | Zonal vigilance reports the preliminary inquiry's findings | W | 1 | workflow |
@@ -630,10 +634,11 @@ Monitoring (`/monitoring/**`), AI (`/ai/**`), audit (`/audit/**`) and NDC (`/ndc
 | `POST /audit/concurrent/alerts` | Concurrent audit alert to an RO | W | 1 | audit |
 | `POST /audit/concurrent/alerts/{alertId}/replies` | OIC replies to a concurrent-audit alert | W | 1 | audit |
 | `GET /audit/concurrent/alerts` | Concurrent-audit alerts: the zone's (Audit Cell) or the office's (OIC), with overdue replies | W | 1 | audit |
-| `POST /audit/internal/reports` | Internal audit report for an office | P | 3 | audit |
-| `POST /audit/internal/reports/{reportId}/paras` | Raise an audit para | P | 3 | audit |
-| `POST /audit/internal/paras/{paraId}/replies` | Office compliance reply to a para | P | 3 | audit |
-| `POST /audit/internal/paras/{paraId}/decisions` 🔐 | Audit Division drops / keeps a para | P | 3 | audit |
+| `POST /audit/internal/reports` | Internal audit report for an office | W | 1 | audit |
+| `POST /audit/internal/reports/{reportId}/paras` | Raise an audit para | W | 1 | audit |
+| `GET /audit/internal/paras` | Internal-audit paras: the office's own (OIC), the zone's (internal audit), all (Audit Division) | W | 1 | audit |
+| `POST /audit/internal/paras/{paraId}/replies` | Office compliance reply to a para | W | 1 | audit |
+| `POST /audit/internal/paras/{paraId}/decisions` 🔐 | Audit Division drops / keeps a para | W | 1 | audit |
 | `GET /ho/finance/balance-sheet` | Balance sheet for statutory / attest audit (read-only) | P | 3 | reporting |
 | `GET /ho/finance/investments` | Investment reporting | P | 3 | reporting |
 | `POST /integrations/fund-managers/positions` | Fund manager / custodian position feed (signed) | M | 3 | reporting |

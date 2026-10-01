@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 
-import { api, type Envelope } from "../../api/client";
+import { api, getSession, type Envelope } from "../../api/client";
+import { InternalParas } from "../audit/InternalParas";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 
@@ -11,6 +12,7 @@ interface AuditPage { items: AuditItem[]; chain: { valid: boolean; checked: numb
 
 /** Append-only audit log with hash-chain verification and correlation tracing (Journey C5, interface 16). */
 export function AuditLogPage() {
+  const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
   const [filter, setFilter] = useState({ event_type: "", aggregate_id: "" });
   const [correlation, setCorrelation] = useState<string | null>(null);
   const params = new URLSearchParams(Object.entries(filter).filter(([, v]) => v)).toString();
@@ -66,6 +68,7 @@ export function AuditLogPage() {
           {trail.data ? table(trail.data.data.items) : null}
         </section>
       ) : null}
+      {session.data?.stakeholder === "ho.audit" ? <InternalParas role="ho.audit" /> : null}
       <section className="card stack" aria-labelledby="events-heading"><h2 id="events-heading">Events</h2>{log.data ? table(log.data.data.items) : null}</section>
     </section>
   );

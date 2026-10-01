@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 import epfo_auth
-from app.api import catalogue_routes, oversight_routes, routes
+from app.api import catalogue_routes, internal_privacy_routes, oversight_routes, routes
 from app.config import settings
 from app.api.routes import record
 from app.infra.db import database_ready, engine
@@ -34,6 +34,7 @@ def create_app() -> FastAPI:
     app.include_router(health_router(database_ready))
     app.include_router(routes.router)
     app.include_router(oversight_routes.router)
+    app.include_router(internal_privacy_routes.router)
     handled = {(m, r.path) for r in app.router.routes for m in getattr(r, "methods", set())}
     for route in catalogue_routes.router.routes:
         if not any((m, route.path) in handled for m in route.methods):

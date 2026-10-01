@@ -445,7 +445,7 @@ paths:
         '409':
           $ref: '#/components/responses/Problem'
       x-status: mock
-      x-phase: 3
+      x-phase: 1
       x-owner-service: grievance
       x-callers:
       - ext.cpgrams
@@ -523,6 +523,70 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/rti-requests:
+    get:
+      operationId: getOfficeRtiRequests
+      summary: The office's RTI applications and their reply due dates
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: grievance
+      x-callers:
+      - fo.pro
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+    post:
+      operationId: postOfficeRtiRequests
+      summary: Register an RTI application received (post, counter or the RTI portal)
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: grievance
+      x-callers:
+      - fo.pro
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/rti-requests/{requestId}/replies:
     post:
       operationId: postOfficeRtiRequestsRequestIdReplies
@@ -537,14 +601,20 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: grievance
       x-callers:
       - fo.pro

@@ -53,6 +53,9 @@ async def record(session: AsyncSession, event: dict[str, Any]) -> None:
         from app.infra.oversight_tables import office_staff
         from epfo_persistence.postings import apply_posting
         await apply_posting(session, event, office_staff)
+    if event["event_type"] == "PolicyPublished.v1":
+        from epfo_persistence.policy import on_policy_published
+        await on_policy_published(session, event)
 
 
 def _row(r: Any) -> dict[str, Any]:

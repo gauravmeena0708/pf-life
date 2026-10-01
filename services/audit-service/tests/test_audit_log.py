@@ -28,12 +28,14 @@ def ctx(tmp_path, monkeypatch):
     from app.infra.models import Base
     from app.infra.tables import install_append_only, metadata
     from app.infra.oversight_tables import oversight_metadata
+    from epfo_persistence.policy import policy_metadata
 
     async def setup():
         async with db.engine().begin() as c:
             await c.run_sync(Base.metadata.create_all)
             await c.run_sync(metadata.create_all)
             await c.run_sync(oversight_metadata.create_all)
+            await c.run_sync(policy_metadata.create_all)
             await c.run_sync(install_append_only)
         from app import seed
         monkeypatch.setattr(seed, "SEED_FILE", str(SEED_FILE))

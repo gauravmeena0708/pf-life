@@ -186,3 +186,9 @@ inoperative_accounts:
 voluntary_coverage:
   threshold_employees: 20        # below this an establishment may opt in voluntarily …
   consent_share_bp: 5001         # … with the agreement of the employer and a majority of the employees (basis points)
+
+# P2.12d: oversight periods (illustrative)
+oversight_periods:
+  rti_reply_days: 30             # RTI Act s.7(1): reply within 30 days of receipt
+  privacy_response_days: 30      # a data-principal request is answered within this many days (illustrative)
+  para_reply_days: 30            # an office replies to an internal-audit para within this many days (illustrative)

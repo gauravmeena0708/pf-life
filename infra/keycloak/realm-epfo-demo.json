@@ -205,6 +205,14 @@
       {
         "name": "ho.actuarial",
         "description": "HO actuarial cell — EPS valuation extracts"
+      },
+      {
+        "name": "zo.internal_audit",
+        "description": "Zonal internal audit — audits ROs and raises paras"
+      },
+      {
+        "name": "ho.data_protection",
+        "description": "HO data protection — data-principal requests (DPDP Act)"
       }
     ]
   },
@@ -1322,6 +1330,44 @@
         "ho.actuarial"
       ],
       "id": "00000000-0000-4000-8000-000000000055"
+    },
+    {
+      "username": "zo-internal-audit",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Zonal internal audit",
+      "lastName": "Demo",
+      "email": "zo-internal-audit@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "zo.internal_audit"
+      ],
+      "id": "00000000-0000-4000-8000-000000000056"
+    },
+    {
+      "username": "ho-dpo",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Data protection officer",
+      "lastName": "Demo",
+      "email": "ho-dpo@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ho.data_protection"
+      ],
+      "id": "00000000-0000-4000-8000-000000000057"
     }
   ]
 }

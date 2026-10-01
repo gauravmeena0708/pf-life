@@ -10,11 +10,26 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['POST /public/grievances', 'GET /members/me/grievances', 'POST /members/me/grievances', 'POST /public/grievances/status-lookups', 'GET /grievances/{grievanceId}', 'POST /grievances/{grievanceId}/documents', 'POST /grievances/{grievanceId}/escalations', 'POST /grievances/{grievanceId}/evidence-links', 'POST /grievances/{grievanceId}/feedback', 'POST /grievances/{grievanceId}/messages', 'POST /grievances/{grievanceId}/office-transfers', 'POST /grievances/{grievanceId}/reminders', 'POST /grievances/{grievanceId}/reopen-requests', 'POST /grievances/{grievanceId}/resolution']
+OPERATIONS = ['GET /office/rti-requests', 'POST /office/rti-requests', 'POST /public/grievances', 'POST /integrations/cpgrams/grievances', 'GET /members/me/grievances', 'POST /members/me/grievances', 'POST /public/grievances/status-lookups', 'POST /office/rti-requests/{requestId}/replies', 'GET /grievances/{grievanceId}', 'POST /grievances/{grievanceId}/documents', 'POST /grievances/{grievanceId}/escalations', 'POST /grievances/{grievanceId}/evidence-links', 'POST /grievances/{grievanceId}/feedback', 'POST /grievances/{grievanceId}/messages', 'POST /grievances/{grievanceId}/office-transfers', 'POST /grievances/{grievanceId}/reminders', 'POST /grievances/{grievanceId}/reopen-requests', 'POST /grievances/{grievanceId}/resolution']
+
+@router.api_route("/api/v1/office/rti-requests", methods=["GET"], include_in_schema=False)
+async def get_office_rti_requests(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The office's RTI applications and their reply due dates")
+
+
+@router.api_route("/api/v1/office/rti-requests", methods=["POST"], include_in_schema=False)
+async def post_office_rti_requests(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Register an RTI application received (post, counter or the RTI portal)")
+
 
 @router.api_route("/api/v1/public/grievances", methods=["POST"], include_in_schema=False)
 async def post_public_grievances(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Grievance intake from a non-logged-in person (OTP-verified contact)")
+
+
+@router.api_route("/api/v1/integrations/cpgrams/grievances", methods=["POST"], include_in_schema=False)
+async def post_integrations_cpgrams_grievances(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "CPGRAMS grievance feed (signed)")
 
 
 @router.api_route("/api/v1/members/me/grievances", methods=["GET"], include_in_schema=False)
@@ -30,6 +45,11 @@ async def post_members_me_grievances(actor: Actor = Depends(require_actor)) -> N
 @router.api_route("/api/v1/public/grievances/status-lookups", methods=["POST"], include_in_schema=False)
 async def post_public_grievances_status_lookups(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Grievance status by registration number (OTP proof)")
+
+
+@router.api_route("/api/v1/office/rti-requests/{requestId}/replies", methods=["POST"], include_in_schema=False)
+async def post_office_rti_requests_requestId_replies(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Record RTI replies")
 
 
 @router.api_route("/api/v1/grievances/{grievanceId}", methods=["GET"], include_in_schema=False)
