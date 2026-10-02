@@ -84,3 +84,15 @@ def test_the_employer_sees_the_past_months_on_the_employee_ledger(ctx, monkeypat
     assert ledger["months"] == [{"wage_month": "2023-04 to 2026-03 (EEC, 2026)", "trrn": r["trrn"],
                                  "employee_paise": t["AC01_EPF_EE"], "employer_paise": t["AC01_EPF_ER"]}]
     assert t["AC01_EPF_EE"] == 36 * 120000                                    # deducted: the employee's share is paid too
+
+
+def test_a_pension_in_payment_is_known_to_the_return(ctx):
+    """PpoIssued.v1 (member's or disablement pension) marks the UAN; a family pension does not."""
+    from app.infra.messaging import on_ppo_issued
+    _, q = ctx
+    _deliver(on_ppo_issued, {"ppo_id": "PPO-DEMO-0009", "pension_type": "MEMBER", "office_id": "RO-DEMO-01", "uan": "100000000777",
+                             "pension_from": "2026-09-01"}, "PpoIssued.v1")
+    _deliver(on_ppo_issued, {"ppo_id": "PPO-DEMO-0010", "pension_type": "SPOUSE", "office_id": "RO-DEMO-01", "uan": "100000000778",
+                             "pension_from": "2026-09-01"}, "PpoIssued.v1")
+    assert q("SELECT uan, ppo_id FROM eps_pensioners WHERE uan IN ('100000000777', '100000000778')") == [("100000000777", "PPO-DEMO-0009")]
+    assert ("100000000901", "PPO-DEMO-0001") in q("SELECT uan, ppo_id FROM eps_pensioners")              # seeded

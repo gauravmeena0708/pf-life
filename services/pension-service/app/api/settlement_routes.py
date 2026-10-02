@@ -22,7 +22,7 @@ from app.infra.tables import (brs_statements, disbursement_runs, eps_accounts, m
                               pensioners, scheme_certificates)
 from epfo_auth import Actor, require_actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
-from epfo_persistence import audit
+from epfo_persistence import add_event, audit
 from epfo_persistence.policy import family_pension_on, pension_on, rules_on, section
 
 router = APIRouter()
@@ -390,7 +390,8 @@ async def issue_ppo(body: ClaimRef, actor: Actor = Depends(require_stakeholder("
         m = (await session.execute(select(member_service).where(member_service.c.subject == c["member_subject"]))).mappings().first()
         await session.execute(insert(pensioners).values(
             ppo_id=ppo_id, subject=c["member_subject"] if c.get("kind", "MEMBER") not in ("MEMBER", "DISABLED") else None,
-            pension_kind="DISABLED" if c.get("kind") == "DISABLED" else "MEMBER", name=c["name"], uan=c["uan"], date_of_birth=c["date_of_birth"], pension_start=c["pension_from"],
+            pension_kind=("DISABLED" if c.get("kind") == "DISABLED" else
+                          ("DIS_CHILD" if (c.get("family") or {}).get("disabled_child") else "CHILD") if c.get("kind") == "CHILD" else "MEMBER"), name=c["name"], uan=c["uan"], date_of_birth=c["date_of_birth"], pension_start=c["pension_from"],
             service_months=ws["service_months"], pensionable_salary_paise=c["pensionable_salary_paise"], age_at_start=ws["age_at_start"],
             office_id=c["office_id"], bank_ifsc="DEMO0000000", bank_account_last4=(m["account_link_id"] or "0000")[-4:] if m else "0000",
             original_monthly_paise=ws["monthly_paise"], original_rule_version=ws["rule_version"], original_working=ws["working"],
@@ -453,6 +454,12 @@ async def dispatch(ppoId: str, actor: Actor = Depends(require_stakeholder("fo.da
         p = (await session.execute(select(pensioners).where(pensioners.c.ppo_id == ppoId))).mappings().one()
         await catch_up_payments(session, dict(p), released_on=today())       # the initial arrear is credited now
         c = await _move(session, c, "DISPATCHED", actor, f"PPO {ppoId} and scroll sent to the disbursing bank")
+        # P2.19: the pension is in payment — contribution-service learns that this UAN draws a member's pension, so a
+        # re-employment contributes nothing more to the pension fund (the employer's 12% goes to EPF).
+        await add_event(session, producer="pension-service", event_type="PpoIssued.v1", aggregate_type="pension_claim", aggregate_id=cid,
+                        correlation_id=actor.correlation_id, payload={"ppo_id": ppoId, "pension_type": c.get("kind", "MEMBER"),
+                                                                      "office_id": c["office_id"], "uan": c["uan"], "pension_from": c["pension_from"].isoformat()
+                                                                      if hasattr(c["pension_from"], "isoformat") else str(c["pension_from"])})
     return envelope(_view(c))
 
 

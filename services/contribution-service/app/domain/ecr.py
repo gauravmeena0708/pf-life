@@ -70,7 +70,11 @@ def parse(content: str, fmt: str) -> tuple[list[dict[str, str]], list[dict[str, 
 def validate(content: str, fmt: str, wage_month: str, members: list[dict[str, Any]], rules: dict[str, Any], last_posted: dict[str, Any] | None = None,
              exempt_trust: str | None = None) -> dict[str, Any]:
     rows, issues, _ = parse(content, fmt)
-    by_uan = {str(m["uan"]): m for m in members}
+    by_uan: dict[str, Any] = {}
+    for m in members:                                   # a UAN with an open member ID here is that one, else its latest
+        current = by_uan.get(str(m["uan"]))
+        if current is None or (current.get("date_of_exit") and not m.get("date_of_exit")):
+            by_uan[str(m["uan"])] = m
     seen: set[str] = set()
     totals = {a: 0 for a in ACCOUNTS}
     aggregate_epf_wages = 0
@@ -94,8 +98,14 @@ def validate(content: str, fmt: str, wage_month: str, members: list[dict[str, An
             issue(i, row, "UAN", "E-DUPLICATE-UAN", "error", "This UAN appears more than once in the file.", fix="Keep only one row for this UAN.")
         seen.add(uan)
         member = by_uan.get(uan)
+        exited = member.get("date_of_exit") if member else None
+        exited = date.fromisoformat(str(exited)) if exited else None
         if not member:
             issue(i, row, "UAN", "E-UAN-UNKNOWN", "error", "This UAN is not an employee of this establishment.", fix="Check the UAN or establishment employment record.")
+        elif exited and exited.strftime("%Y-%m") < wage_month:
+            # P2.19: nothing is credited for months after the exit — back wages (a court's reinstatement) need the exit set aside first
+            issue(i, row, "UAN", "E-AFTER-EXIT", "error", f"This member left on {exited.isoformat()}, before this wage month.",
+                  fix="If a court or authority ordered back wages, correct the date of exit (Members › Exit correction) and file a supplementary return.")
         elif re.sub(r"\s+", " ", row.get("Member Name", "")).casefold() != re.sub(r"\s+", " ", str(member["name"])).strip().casefold():
             name = str(member["name"])
             masked = " ".join((p[:1] + "***") if p else "" for p in name.split())
@@ -149,6 +159,14 @@ def validate(content: str, fmt: str, wage_month: str, members: list[dict[str, An
                     issue(i, row, field, code, "error", f"{field} does not match the illustrative contribution calculation.", expected[account] // 100, got // 100 if got >= 0 else row.get(field), fix="Replace this amount with the expected whole-rupee value.", auto=True)
                     row[field] = str(expected[account] // 100)
             eps_share_input = numeric.get(FIELDS[7], 0)
+            if member and member.get("eps_pensioner") and (eps > 0 or eps_share_input > 0):
+                # P2.19: a re-employed pensioner is an EPF member only — no pension wages; the employer's 12% goes to EPF
+                issue(i, row, "EPS Wages", "E-EPS-PENSIONER", "error",
+                      f"This member already draws an EPS pension (PPO {member.get('pensioner_ppo') or 'on record'}): no pension contribution on re-employment.",
+                      0, eps // 100, "EPS wages 0; the whole employer share (12%) goes to EPF", auto=True)
+                row["EPS Wages"] = "0"
+                row["EPS Contribution"] = "0"
+                row["EPF-EPS Difference (ER share)"] = str(split(epf, 0, age, rules, edli)["AC01_EPF_EE"] // 100)
             if born and age >= rules["contribution"]["eps_age_limit_years"] and (eps > 0 or eps_share_input > 0 or expected["AC10_EPS"] > 0):
                 issue(i, row, "EPS Wages", "E-AGE-EPS", "error", "This member is at or above the illustrative EPS age limit for the wage month.", 0, eps // 100, "EPS = 0 and the whole employer share goes to EPF")
                 row["EPS Contribution"] = "0"
@@ -159,7 +177,7 @@ def validate(content: str, fmt: str, wage_month: str, members: list[dict[str, An
                       "The wages are within the ceiling, so this member belongs to the pension scheme (EPS) — since 17 September 2026 "
                       "that includes wages up to ₹25,000.", 0, 0, fix="Report EPS wages, unless the member is not eligible (for example, joined above the ceiling earlier).")
             if all(k in numeric for k in FIELDS[2:9]):
-                row_total = split(epf, eps, age, rules, edli)
+                row_total = split(epf, 0 if member and member.get("eps_pensioner") else eps, age, rules, edli)
                 for account in ("AC01_EPF_EE", "AC01_EPF_ER", "AC10_EPS", "AC21_EDLI"):
                     totals[account] += numeric[FIELDS[6 if account == "AC01_EPF_EE" else 8]] if exempt_trust and account.startswith("AC01") else row_total[account]
             if gross == epf == 0:
@@ -184,7 +202,7 @@ def validate(content: str, fmt: str, wage_month: str, members: list[dict[str, An
             issue(0, {}, "headcount", "W-HEADCOUNT-CHANGE", "warning", "The member count differs from the last posted month by more than the configured threshold.", fix="Review joiners and leavers before submission.")
     issues.sort(key=lambda x: (x["severity"] != "error", x["row"]))
     errors = sum(x["severity"] == "error" for x in issues)
-    can_correct = any(x["code"] in {"E-EPF-EE", "E-EPS-SHARE", "E-DIFF-SHARE"} and x["auto_fixable"] for x in issues) and not any(x["code"] == "E-FORMAT-FIELDS" for x in issues)
+    can_correct = any(x["code"] in {"E-EPF-EE", "E-EPS-SHARE", "E-DIFF-SHARE", "E-EPS-PENSIONER"} and x["auto_fixable"] for x in issues) and not any(x["code"] == "E-FORMAT-FIELDS" for x in issues)
     return {"summary": {"rows": len(rows), "accepted_rows": accepted, "rows_with_errors": len({x["row"] for x in issues if x["severity"] == "error"}),
             "warnings": sum(x["severity"] == "warning" for x in issues), "totals_paise": totals,
             "comparison_with_last_posted_month": comparison}, "issues": issues,

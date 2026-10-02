@@ -56,6 +56,10 @@ async def seed() -> None:
                   international_worker=excluded.international_worker"""),
                   {"uan":m["uan"],"name":m["name"],"dob":date.fromisoformat(m["date_of_birth"]),"account":job["account_link_id"],"subject":m.get("subject"),
                    "est":job["establishment_id"],"joined":date.fromisoformat(job["date_of_joining"]),"exited":exited,"status":"EXITED" if exited else "ACTIVE","iw":bool(m.get("international"))})
+        for p in data.get("pensioners", []):                   # P2.19: pensions in payment — a re-employment pays no EPS
+            if p.get("uan") and p.get("ppo_id"):
+                await session.execute(text("INSERT INTO eps_pensioners (uan, ppo_id, pension_from) VALUES (:u, :p, :f) ON CONFLICT (uan) DO NOTHING"),
+                                      {"u": p["uan"], "p": p["ppo_id"], "f": date.fromisoformat(p["pension_start"]) if p.get("pension_start") else None})
         from app.infra.models import OfficeStaff               # P2.9d: postings, for office routes
         for st in data.get("office_staff", []):
             if not (await session.execute(text("SELECT 1 FROM office_staff WHERE subject=:s"), {"s": st["subject"]})).first():

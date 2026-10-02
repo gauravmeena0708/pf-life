@@ -71,7 +71,9 @@ async def _fetch_filing(session, filing_id: str, establishment_id: str):
 
 
 async def _members(session, establishment_id: str):
-    r = await session.execute(text("SELECT * FROM establishment_members WHERE establishment_id=:e"), {"e": establishment_id})
+    r = await session.execute(text("SELECT m.*, CASE WHEN p.uan IS NULL THEN 0 ELSE 1 END AS eps_pensioner, p.ppo_id AS pensioner_ppo "
+                                   "FROM establishment_members m LEFT JOIN eps_pensioners p ON p.uan=m.uan WHERE m.establishment_id=:e"),
+                              {"e": establishment_id})
     return [dict(x) for x in r.mappings().all()]
 
 

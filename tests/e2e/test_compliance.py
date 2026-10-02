@@ -28,10 +28,13 @@ def test_defaulters_case_and_public_list(persona):
 def pay_a_return_late(persona, sig):
     """File and pay a return for a past month: paid after its due date, it raises 14B / 7Q demands."""
     preparer = persona("emp-preparer", "/employer/ecr")
-    month = f"{random.randint(1990, 2000)}-{random.randint(1, 12):02d}"
     m = SEED["members"][0]
-    status, created = call(preparer, "POST", "/api/v1/employers/me/ecr-filings",
-                           {"wage_month": month, "format": "ECR_TXT", "content": ecr_line(m["uan"], m["name"], 15000)})
+    for _ in range(30):                       # another month if an earlier run already filed it
+        month = f"{random.randint(1990, 2000)}-{random.randint(1, 12):02d}"
+        status, created = call(preparer, "POST", "/api/v1/employers/me/ecr-filings",
+                               {"wage_month": month, "format": "ECR_TXT", "content": ecr_line(m["uan"], m["name"], 15000)})
+        if status != 409:
+            break
     assert status == 201, created
     f, total = created["data"]["filing"], created["data"]["validation_report"]["summary"]["totals_paise"]["TOTAL"]
     call(sig, "POST", f"/api/v1/employers/me/ecr-filings/{f['filing_id']}/approvals", {"decision": "APPROVE"},

@@ -48,7 +48,7 @@ async def main() -> None:
                         family_members.c.id == f"FAM-{m['uan']}-{i}"))).first():
                     await session.execute(insert(family_members).values(
                         id=f"FAM-{m['uan']}-{i}", uan=m["uan"], name=n["name"], relation="SPOUSE" if n["relation"] == "SPOUSE" else "CHILD",
-                        date_of_birth=date.fromisoformat(n["date_of_birth"]), subject=n.get("subject")))
+                        date_of_birth=date.fromisoformat(n["date_of_birth"]), subject=n.get("subject"), disabled=bool(n.get("disabled"))))
             # a member without a login (e.g. deceased) is kept under a placeholder subject
             values = {"subject": m.get("subject") or f"NO-LOGIN-{m['uan']}", "name": m["name"], "date_of_birth": date.fromisoformat(m["date_of_birth"]),
                       "date_of_joining": date.fromisoformat(m["date_of_joining"]),

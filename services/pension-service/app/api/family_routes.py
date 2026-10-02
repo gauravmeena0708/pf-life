@@ -10,11 +10,11 @@ from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.settlement_routes import _view, db, months_between
-from app.domain.pension import today
+from app.domain.pension import age_on, today
 from app.infra.tables import family_members, member_service, pension_claims
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
-from epfo_persistence.policy import family_pension_on, rules_on
+from epfo_persistence.policy import family_pension_on, rules_on, section
 
 router = APIRouter()
 FAMILY = require_stakeholder("claimant", "family_pensioner")
@@ -42,11 +42,15 @@ async def apply(body: FamilyApplication, actor: Actor = Depends(FAMILY), session
                                                                           pension_claims.c.state != "REJECTED"))).first():
             raise Problem(409, "/problems/already-applied", "A pension application is already on file")
         rules = await rules_on(session, today())
+        until = section(rules, "pension").get("family", {}).get("child_until_age", 25)
+        if me["relation"] == "CHILD" and not me.get("disabled") and age_on(me["date_of_birth"], m["date_of_exit"]) >= until:
+            raise Problem(422, "/problems/not-eligible", "Not eligible for a children's pension",
+                          f"A child must be under {until} on the member's death (Pension Manual 2.10.1.1), unless disabled — then for life (2.13.10).")
         service = months_between(m["date_of_joining"], m["date_of_exit"])
         estimate = family_pension_on(m["eps_wages_paise"], service, me["relation"], rules)
         start = m["date_of_exit"] + timedelta(days=1)
         family = {"deceased_name": m["name"], "deceased_uan": body.deceased_uan, "died_on": m["date_of_exit"].isoformat(),
-                  "relation": me["relation"], "claimant_name": me["name"]}
+                  "relation": me["relation"], "claimant_name": me["name"], "disabled_child": bool(me.get("disabled"))}
         claim = {"claim_id": f"PC-{secrets.token_hex(4).upper()}", "member_subject": actor.subject, "uan": body.deceased_uan, "name": me["name"],
                  "date_of_birth": me["date_of_birth"], "account_link_id": m["account_link_id"], "office_id": m["office_id"] or "RO-DEMO-01",
                  "pension_from": start, "state": "SUBMITTED", "service_months": service, "aggregated": [],

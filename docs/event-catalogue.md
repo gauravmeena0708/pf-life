@@ -106,7 +106,7 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `MemberChangeApproved.v1` | member | contribution, claim, reporting, audit | member_change_request | 1 |
 | `AccountFrozen.v1` | member | gateway, claim, audit | account | 1 |
 | `AccountDefrozen.v1` | member | gateway, claim, audit | account | 1 |
-| `PpoIssued.v1` | pension | member, reporting, audit | pension_claim | 2 (contract only) |
+| `PpoIssued.v1` | pension | member, contribution, reporting, audit | pension_claim | 2 (contract only) |
 | `LifeCertificateRecorded.v1` | pension | reporting, audit | pensioner | 2 (contract only) |
 | `CADGenerated.v1` | claim | workflow, contribution, payment-simulator, audit | claim | 1 |
 | `PhysicalClaimInwarded.v1` | claim | pension, audit | physical_intake | 1 |

@@ -69,7 +69,16 @@ async def catch_up_payments(session: AsyncSession, pensioner: dict[str, Any], on
     revisions = await approved(session, pensioner["ppo_id"])
     paid = set((await session.execute(select(pension_payments.c.month).where(
         pension_payments.c.ppo_id == pensioner["ppo_id"], pension_payments.c.kind == "MONTHLY"))).scalars())
-    for month in months(month_of(pensioner["pension_start"]), month_of(on or today())):
+    last = month_of(on or today())
+    if pensioner.get("pension_kind") == "CHILD":           # P2.19: to 25 (Pension Manual 2.10.5); a disabled child is paid for life
+        born = pensioner["date_of_birth"]
+        y, m = born.year + 25 + (born.month == 12), born.month % 12 + 1
+        ends = f"{y:04d}-{m:02d}"                          # paid up to the month in which 25 is reached (the range excludes its end)
+        if ends < last:
+            last = ends
+            await session.execute(update(pensioners).where(pensioners.c.ppo_id == pensioner["ppo_id"]).values(
+                status="CEASED", status_reason=f"Children's pension ends at 25 ({born.year + 25}-{born.month:02d}; Pension Manual 2.10.5)"))
+    for month in months(month_of(pensioner["pension_start"]), last):
         if month not in paid:
             await session.execute(insert(pension_payments).values(
                 ppo_id=pensioner["ppo_id"], month=month, kind="MONTHLY", revision_id="",

@@ -98,6 +98,18 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 19a: edge cases where money is at risk (2 October 2026)
+
+Tests first; each of these failed before its fix. Unit: every suite passes — claim-service 75 (new `test_edge_cases.py`: a
+death in service closes an approved advance and credits its debit back, closes a claim under review, ignores a second
+delivery, leaves claims alone on an ordinary exit), contribution-service 111 (a re-employed pensioner's pension wages
+refused and corrected, the employer's 12% to EPF; a pension in payment learnt from `PpoIssued.v1`, a family pension not;
+months after an exit refused, the exit month and a rejoined member's open ID accepted; a short cheque cannot pay a
+challan), pension-service 46 (dispatching a PPO announces it with the UAN; a child's pension paid to the month of the 25th
+birthday and then ceased, a disabled child's for life). Web 298. End to end 107 of 107 after one fix; must-deny 18; UI
+smoke 2. Found on the way, fixed: two end-to-end tests filed a return for a random month in 1990–2000 and failed when an
+earlier run had filed it — they now try another month, as the policy test does.
+
 ## Update — Phase 2, slice 13b: instalments referred to the zone and Head Office (2 October 2026)
 
 Unit: compliance-service 27 (new: the OIC may not refer what is within the OIC's power; arrears above the region's power

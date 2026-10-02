@@ -1,5 +1,5 @@
 """Tables owned by pension-service (created by migration 0002). Synthetic pensioners only."""
-from sqlalchemy import JSON, BigInteger, Column, Date, DateTime, Index, Integer, MetaData, String, Table, Text, UniqueConstraint, func
+from sqlalchemy import JSON, BigInteger, Boolean, Column, Date, DateTime, Index, Integer, MetaData, String, Table, Text, UniqueConstraint, false, func
 
 from app.infra.models import IdType
 
@@ -144,6 +144,7 @@ family_members = Table(
     Column("name", String(120), nullable=False),
     Column("relation", String(20), nullable=False),
     Column("date_of_birth", Date, nullable=False),
+    Column("disabled", Boolean, nullable=False, server_default=false()),   # a disabled child: pension for life (2.13.10)
     Column("subject", String(80)),
 )
 

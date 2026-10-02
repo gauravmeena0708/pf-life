@@ -12,10 +12,11 @@ from app.infra.transfers import on_trust_annexure_k, on_eps_service_transferred
 
 BINDINGS = ["pension-service.HigherPensionDuesTransferRequested.v1",
             "claim-service.TrustAnnexureKReconciled.v1", "pension-service.EpsServiceTransferred.v1",
-            "workflow-service.StaffPostingChanged.v1"]
+            "workflow-service.StaffPostingChanged.v1", "pension-service.PpoIssued.v1"]
 HANDLERS = {"HigherPensionDuesTransferRequested.v1": on_higher_pension_transfer,
             "TrustAnnexureKReconciled.v1": on_trust_annexure_k,
-            "EpsServiceTransferred.v1": on_eps_service_transferred}
+            "EpsServiceTransferred.v1": on_eps_service_transferred,
+            "PpoIssued.v1": lambda session, event: on_ppo_issued(session, event)}
 
 
 async def on_staff_posting(session, event):
@@ -26,6 +27,16 @@ async def on_staff_posting(session, event):
 
 
 HANDLERS["StaffPostingChanged.v1"] = on_staff_posting
+
+
+async def on_ppo_issued(session, event):
+    """P2.19: a member's pension (or a disablement pension) is in payment — on re-employment the UAN contributes to EPF only.
+    A family pension is the dependant's, not the member's: nothing changes for a UAN."""
+    p = event["payload"]
+    if p.get("pension_type", "MEMBER") not in ("MEMBER", "DISABLED"):
+        return
+    await session.execute(text("INSERT INTO eps_pensioners (uan, ppo_id, pension_from) VALUES (:u, :p, :f) ON CONFLICT (uan) DO NOTHING"),
+                          {"u": p["uan"], "p": p["ppo_id"], "f": date.fromisoformat(p["pension_from"]) if p.get("pension_from") else None})
 
 
 async def dispatch(session, event):

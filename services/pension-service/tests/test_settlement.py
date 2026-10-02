@@ -54,6 +54,10 @@ def test_form_10d_goes_through_every_desk_and_the_pension_is_paid_with_its_arrea
     assert c["state"] == "PPO_SIGNED"
     c = step(client, "POST", f"/api/v1/office/pensions/ppos/{ppo}/dispatches", DA_P, "fo.da_pension").json()["data"]
     assert c["state"] == "DISPATCHED"
+    import json as _json
+    [issued] = [_json.loads(p)["envelope"]["payload"] if isinstance(p, str) else p["envelope"]["payload"]
+                for (p,) in ctx[1]("SELECT payload FROM outbox WHERE event_type='PpoIssued.v1'")]
+    assert (issued["ppo_id"], issued["pension_type"], issued["pension_from"]) == (ppo, "MEMBER", "2026-02-01") and issued["uan"]   # P2.19
     enquiry = step(client, "GET", f"/api/v1/office/pensions/enquiries?ppo={ppo}", DA_P, "fo.da_pension").json()["data"]
     paid = [p for p in enquiry["pension_payment_details"] if p["kind"] == "MONTHLY"]
     assert len(paid) == 7 and {p["paid_on"] for p in paid} == {"2026-09-29"} and enquiry["ppo_details"]["status"] == "IN_PAYMENT"

@@ -227,10 +227,22 @@ async def record_disbursements(session: AsyncSession, claim: dict[str, Any]) -> 
 
 
 async def on_member_death(session: AsyncSession, event: dict[str, Any]) -> None:
-    """An exit marked for death in service records the date of death on the member's accounts."""
+    """An exit marked for death in service records the date of death on the member's accounts (P2.19) and closes the
+    member's own claims not yet paid — an advance, a final settlement, a transfer — with the reason: the balance is paid
+    to the nominees through Form 20 instead, and a claim already debited is credited back (ClaimDecided REJECTED). Death
+    claims, and claims already with the bank, are left alone."""
     p = event["payload"]
-    if p.get("reason") == "DEATH_IN_SERVICE":
-        await session.execute(update(accounts).where(accounts.c.uan == p["uan"]).values(deceased_on=date.fromisoformat(p["date_of_exit"])))
+    if p.get("reason") != "DEATH_IN_SERVICE":
+        return
+    died = date.fromisoformat(p["date_of_exit"])
+    await session.execute(update(accounts).where(accounts.c.uan == p["uan"]).values(deceased_on=died))
+    links = (await session.execute(select(accounts.c.account_link_id).where(accounts.c.uan == p["uan"]))).scalars().all()
+    rows = (await session.execute(select(claims).where(claims.c.account_link_id.in_(links), claims.c.state.in_(HOLDABLE | {"ON_HOLD_FROZEN"}),
+                                                       ~claims.c.claim_type.startswith("DEATH_")))).mappings().all()
+    reason = f"The member died on {died.isoformat()}; the balance is claimed by the nominees (Form 20)."
+    for row in rows:
+        claim = await transition(session, dict(row), "REJECTED_WITH_REASON", "system", f"Closed: {reason}", decision_reason=reason)
+        await record_decision(session, claim, "REJECTED", "MEMBER_DECEASED", event["correlation_id"])
 
 
 async def on_risk_signal(session: AsyncSession, event: dict[str, Any]) -> None:

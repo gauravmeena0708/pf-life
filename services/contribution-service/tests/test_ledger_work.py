@@ -126,3 +126,18 @@ def test_appendix_e_other_with_a_reduction_binds_the_code_to_the_amounts_entered
                     headers=office(DA, "fo.da_accounts", {"action": "propose-appendix-e", "resource_id": account, "amount_paise": 25000}))
     assert r.status_code == 201, r.json()
     assert r.json()["data"]["lines"][-1] == {"account_code": "ADJUSTMENT_SUSPENSE", "side": "credit", "amount_paise": 15000}
+
+
+def test_a_short_cheque_cannot_pay_a_challan(ctx):
+    """P2.19: a cheque for less than the TRRN is not split across it — the challan stays due, nothing is posted, and the
+    receipt waits unallocated (to be used for another challan, or rejected and returned)."""
+    client, q = ctx
+    f, total = approved(client)
+    trrn = submit(client, f, total)
+    short = vdr(client, total - 100000, "CHQ-SHORT-1")                       # ₹1,000 short
+    r = client.post(f"/api/v1/office/receipts/{short['vdr_id']}/trrn-adjustments", json={"trrn": trrn},
+                    headers=office(DA, "fo.da_accounts", {"action": "adjust-trrn", "resource_id": short["vdr_id"], "amount_paise": total}))
+    assert r.status_code == 422 and r.json()["type"] == "/problems/receipt-too-small"
+    assert q(f"SELECT status FROM challans WHERE trrn='{trrn}'") == [("DUE",)]
+    assert q(f"SELECT state, allocated_paise FROM vdr_entries WHERE vdr_id='{short['vdr_id']}'") == [("UNRECONCILED", 0)]
+    assert not q(f"SELECT 1 FROM journals WHERE filing_id='{f['filing_id']}'")

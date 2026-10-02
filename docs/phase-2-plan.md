@@ -52,7 +52,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | P2.16 | Gig and platform workers (Code on Social Security, 2020): aggregators registered, a turnover-based contribution return (1–2% of turnover, capped at 5% of payments to the workers, in the rule set), workers linked by e-Shram number to a UAN, reconciliation | Planned — design only until the scheme is notified |
 | P2.17 | Insolvency: a watchlist from EPFO's own signals (ECR stopping, defaults, MCA status), IBBI announcements matched to the establishment, claim deadlines, dues frozen (7A; damages and interest kept apart), the resolution plan checked for PF dues in full, liquidation claims outside the estate (IBC s.36(4)(a)(iii)), recovery measured | Planned (links to P2.11) |
 | P2.18 | EPF to NPS: the PF leg paid to the member's NPS Tier I (PRAN, KYC match, the trustee bank through the CRA — mock); the EPS leg cannot move — a Scheme Certificate or the withdrawal benefit | Planned (needs PFRDA's circular) |
-| P2.19 | Edge cases as tests first, then the fixes: death during a transfer or claim; minor nominee or no nomination; two UANs to merge; court-ordered back wages after exit; 58 in service; a re-employed pensioner; family pension to a dependent parent or a disabled child; attachment orders refused; mergers without a break; a vanished contractor (s.8A); partial payment; exemption cancelled mid-transfer; returned payments after a bank merger; one bank account for many members; identity mismatches; members abroad without Aadhaar; unclaimed balances | Planned |
+| P2.19 | Edge cases as tests first, then the fixes: death during a transfer or claim; minor nominee or no nomination; two UANs to merge; court-ordered back wages after exit; 58 in service; a re-employed pensioner; family pension to a dependent parent or a disabled child; attachment orders refused; mergers without a break; a vanished contractor (s.8A); partial payment; exemption cancelled mid-transfer; returned payments after a bank merger; one bank account for many members; identity mismatches; members abroad without Aadhaar; unclaimed balances | a (money at risk: death, short cheque, re-employed pensioner, child pension to 25, back wages): Done; the rest planned |
 | P2.20 | Navigation and findability: side or top menu (per user, by role), menu search (Ctrl+K), the empty menu headings wired to existing screens; a text-size control (to 150%) for senior citizens; later task-based member and employer menus with the legacy ones behind a toggle | Done (task-based menus later) |
 | P2.21 | Data held, not asked: pre-filled claims, automatic transfer when a new member ID appears, the pension case opened at 58 and on death, settlement by default for low risk with sampled audits | Planned |
 | P2.22 | Real-time contributions: a per-pay-run contribution API and a conformance sandbox for payroll vendors (the ECR kept as a format); a due-date option to model contributions paid with wages | Planned |
@@ -1394,4 +1394,26 @@ From the Pension Manual (Manual of Accounting Procedure — EPS, 1995: 2.5.2.3�
   what is within the OIC's power. *Instalment referrals* (`/zo/instalments`, for `zo.acc` and `ho.cpfc`) lists them with
   the arrears outstanding, and grants (the instalment rules of P2.26a apply: the guarantee, no second facility beyond 36)
   or refuses with reasons; recovery goes on after a refusal.
+
+## P2.19a — how it is built (edge cases where money is at risk)
+
+Tests first; each found a gap that is now closed.
+- **Death during a claim or transfer.** A death in service recorded the date only; the member's own claims went on — an
+  approved advance could be paid to a dead member's account while the nominees claimed the same balance. Now the exit for
+  death closes every open claim of the member not yet with the bank (advances, final settlement, transfers), with the
+  reason, and a debited claim is credited back (ClaimDecided REJECTED); the nominees claim through Form 20. Death claims
+  are untouched; a payment already at the bank completes (it becomes part of the estate).
+- **A short cheque.** A cheque or DD for less than the TRRN is refused against it — one challan, one payment — and stays
+  unallocated; nothing is posted (already so; now tested).
+- **A re-employed pensioner.** Nothing stopped a member drawing an EPS pension from contributing to EPS again. Pension-service
+  now announces a pension in payment (`PpoIssued.v1`, with the UAN, on dispatch — the contract existed, nothing emitted it);
+  contribution-service keeps `eps_pensioners` (also seeded); the ECR refuses pension wages for such a member
+  (`E-EPS-PENSIONER`, correctable: the employer's whole 12% to EPF). A family pension does not count.
+- **Family pension to a disabled child.** Children's pension had no end: it now ends with the month the child turns 25
+  (Pension Manual 2.10.5) and the pension is marked ceased; a child must be under 25 on the member's death to apply
+  (2.10.1.1); a disabled child (RPwD certificate; `family_members.disabled`) is paid for life (2.13.10).
+- **Back wages after an exit.** The ECR accepted rows for months after a member's exit without a word. Now they are refused
+  (`E-AFTER-EXIT`) with the way forward: a court-ordered reinstatement is recorded by correcting the exit date (the
+  employer's exit correction, approved), then a supplementary return for those months. Not built: clearing an exit for a
+  member reinstated and still working; interest on back wages; the pension recomputed.
 

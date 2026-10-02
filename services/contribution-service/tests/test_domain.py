@@ -128,3 +128,30 @@ def test_a_member_within_the_ceiling_without_pension_wages_is_flagged():
     assert warning["severity"] == "warning" and "25,000" in warning["message"]
     # above the old ceiling and before the change: not flagged (an excluded employee then)
     assert not any(i["code"] == "W-EPS-MEMBERSHIP" for i in validate(epf_only, "ECR_TXT", "2026-08", MEMBERS, RULES)["issues"])
+
+
+def test_a_reemployed_pensioner_pays_nothing_to_the_pension_fund():
+    """P2.19: a member who already draws an EPS pension, employed again, is an EPF member only — no pension wages; the
+    employer's whole 12% goes to EPF. The error offers the correction."""
+    pensioner = [{**MEMBERS[0], "eps_pensioner": 1, "pensioner_ppo": "PPO-DEMO-0001"}]
+    wrong = "#~#".join(row(epf="15000", gross="15000", eps="15000", edli="15000", ee="1800", eps_share="1250", er="550"))
+    report = validate(wrong, "ECR_TXT", "2026-08", pensioner, RULES)
+    issue = next(i for i in report["issues"] if i["code"] == "E-EPS-PENSIONER")
+    assert issue["auto_fixable"] and "PPO-DEMO-0001" in issue["message"]
+    assert report["summary"]["totals_paise"]["AC10_EPS"] == 0 and report["summary"]["totals_paise"]["AC01_EPF_ER"] == 180000
+    fixed = report["corrected_content"].split("#~#")
+    assert (fixed[4], fixed[7], fixed[8]) == ("0", "0", "1800")
+    right = "#~#".join(row(epf="15000", gross="15000", eps="0", edli="15000", ee="1800", eps_share="0", er="1800"))
+    assert not [i for i in validate(right, "ECR_TXT", "2026-08", pensioner, RULES)["issues"] if i["severity"] == "error"]
+
+
+def test_months_after_the_exit_are_refused_until_the_exit_is_set_aside():
+    """P2.19: back wages after an exit (a court's reinstatement) — the exit month is fine; a later month is refused with the
+    way forward (correct the exit date, then a supplementary return); a rejoined member's open ID is the one used."""
+    left = [{**MEMBERS[0], "date_of_exit": date(2026, 6, 30)}]
+    line = "#~#".join(row())
+    assert not any(i["code"] == "E-AFTER-EXIT" for i in validate(line, "ECR_TXT", "2026-06", left, RULES)["issues"])
+    issue = next(i for i in validate(line, "ECR_TXT", "2026-08", left, RULES)["issues"] if i["code"] == "E-AFTER-EXIT")
+    assert issue["severity"] == "error" and "2026-06-30" in issue["message"] and "supplementary return" in issue["fix"]
+    rejoined = [*left, {**MEMBERS[0], "account_link_id": "AL-1B", "date_of_exit": None}]
+    assert not any(i["code"] == "E-AFTER-EXIT" for i in validate(line, "ECR_TXT", "2026-08", rejoined, RULES)["issues"])

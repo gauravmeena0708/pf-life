@@ -713,6 +713,15 @@ tests produced, by role (after `python3 scripts/publish_manuals.py`).
 6. As `ro-oic`, grant instalments on a recovery certificate: a bank guarantee of one instalment is required; 40
    instalments are refused (Head Office only). As `ro-recovery`, record a missed instalment: recovery resumes.
 
+## Edge cases (P2.19a)
+
+1. An ECR row with pension wages for a re-employed pensioner (UAN `100000000901`, PPO-DEMO-0001) is refused with
+   `E-EPS-PENSIONER`; *Apply the corrections* moves the employer's whole 12% to EPF.
+2. An ECR row for a month after a member's exit is refused with `E-AFTER-EXIT`: correct the exit date (court-ordered back
+   wages), then file a supplementary return.
+3. When the employer marks a member's exit as death in service, the member's own claims not yet paid close with the reason
+   (the nominees claim through Form 20), and an approved claim's debit comes back to the account.
+
 ## Disablement pension (EPS para 15)
 
 1. Log in as `member-disabled` (SURESH DEMO): Pension (Form 10D). *Apply for monthly pension* is refused — 7 years of

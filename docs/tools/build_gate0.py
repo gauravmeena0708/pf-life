@@ -325,7 +325,7 @@ EVENTS = [
     ("MemberChangeApproved", "member", ["contribution", "claim", "reporting", "audit"], "member_change_request", 1, {"request_id": S, "uan": S, "parameters": "array", "approver_subject": S}),
     ("AccountFrozen", "member", ["gateway", "claim", "audit"], "account", 1, {"target_type": S, "target_id": S, "category": S, "order_ref": S}),
     ("AccountDefrozen", "member", ["gateway", "claim", "audit"], "account", 1, {"target_type": S, "target_id": S, "order_ref": S}),
-    ("PpoIssued", "pension", ["member", "reporting", "audit"], "pension_claim", 2, {"ppo_id": S, "pension_type": S, "office_id": S}),
+    ("PpoIssued", "pension", ["member", "contribution", "reporting", "audit"], "pension_claim", 2, {"ppo_id": S, "pension_type": S, "office_id": S, "uan": S, "pension_from": S}),
     ("LifeCertificateRecorded", "pension", ["reporting", "audit"], "pensioner", 2, {"ppo_id": S, "valid_until": S, "source": S}),
     # From the Samadhan Setu integration spec (payloads converted to paise / basis points, no member identifiers)
     ("CADGenerated", "claim", ["workflow", "contribution", "payment-simulator", "audit"], "claim", 1, {"claim_id": S, "cad_id": S, "net_payable_paise": N, "tds_paise": N, "rule_version": S, "static_data_version": S, "officer_role": S}),

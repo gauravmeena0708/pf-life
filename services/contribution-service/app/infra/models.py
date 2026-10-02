@@ -522,3 +522,12 @@ class PastAccumulationReconciliation(Base):
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
+
+class EpsPensioner(Base):
+    """P2.19: a UAN that draws a member's pension under EPS (PpoIssued.v1, or the seed). On re-employment it is an EPF member
+    only: no pension wages, the employer's whole share to EPF."""
+    __tablename__ = "eps_pensioners"
+    uan: Mapped[str] = mapped_column(String(32), primary_key=True)
+    ppo_id: Mapped[str] = mapped_column(String(40))
+    pension_from: Mapped[date | None] = mapped_column(Date, nullable=True)
+
