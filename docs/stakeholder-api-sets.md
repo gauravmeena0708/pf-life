@@ -239,6 +239,7 @@ Activities: **F01.register** Register establishment online and submit verificati
 | `GET /employers/me/pmvbry` | W |
 | `GET /employers/me/proceedings` | W |
 | `GET /employers/me/prosecutions` | W |
+| `GET /employers/me/recovery-cases` | W |
 | `GET /employers/me/returns/dashboard` | W |
 | `GET /employers/me/signatories` | W |
 | `GET /employers/me/signature-registrations` | W |
@@ -289,6 +290,7 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `GET /employers/me/pending-approvals` | W |
 | `GET /employers/me/proceedings` | W |
 | `GET /employers/me/prosecutions` | W |
+| `GET /employers/me/recovery-cases` | W |
 | `GET /employers/me/returns/dashboard` | W |
 | `GET /employers/me/signature-registrations` | W |
 | `GET /employers/me/transfer-requests` | W |
@@ -558,7 +560,7 @@ Activities: **F04.cad** View the Claim Approval Docket each level generated (int
 
 #### `fo.apfc` — APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)
 
-Activities: **F01.circle_review** Circle officer reviews coverage of the new establishment; **F01.dsc_approve** Approve the DSC / e-sign registration at the PF office; **F01.change_decide** Decide establishment change, closure or transfer requests; **F02.jd_approve** Approver for major changes (APFC / RPFC-II / RPFC-I per JD Table 3): approve / reject / return; **F03.ledger_exception_approve** Approve an exceptional ledger adjustment (RPFC-II F&A); **F03.ecr_office_approval** Approve ECRs held for office approval (ECR Approval menu on the APFC login; scope to be confirmed); **F04.approve_apfc** Approve claims in the APFC / RPFC-II band; **F04.redisburse_approve** Authorise a new payment after a return without reopening adjudication; **F04.shares** Amend beneficiary shares (legacy-settled share, deceased nominee, court order) and check the share summary; **F06.schedule** Circle officer schedules inspection (incl. CAIU-allocated); **F06.decide_report** Circle officer decides on the inspection report (T+7): initiate a 7A inquiry or no action; **F06.proceed** Quasi-judicial authority: issue notice / summons, hold hearings (e-Proceedings Cause List, Daily Order); **F06.order** Pass 7A / 14B / 7Q order (e-Proceedings Final Order); 7B review; 7C; 26B disputes; **F06.vishwas_decide** Recalculate damages under VISHWAS and decide; revised demand is paid through a direct challan; **F06.prosecution** Initiate prosecution; **F07.freeze_ro_member** Order freezing of MID / UAN (Categories B / C); **F07.verify_apfc** Validate verification; **F07.defreeze_est_maker** Recommend de-freezing an establishment (maker); the OIC orders it (checker); **F11.approve_apfc** Approve inoperative-account settlement in higher amount bands
+Activities: **F01.circle_review** Circle officer reviews coverage of the new establishment; **F01.dsc_approve** Approve the DSC / e-sign registration at the PF office; **F01.change_decide** Decide establishment change, closure or transfer requests; **F02.jd_approve** Approver for major changes (APFC / RPFC-II / RPFC-I per JD Table 3): approve / reject / return; **F03.ledger_exception_approve** Approve an exceptional ledger adjustment (RPFC-II F&A); **F03.ecr_office_approval** Approve ECRs held for office approval (ECR Approval menu on the APFC login; scope to be confirmed); **F04.approve_apfc** Approve claims in the APFC / RPFC-II band; **F04.redisburse_approve** Authorise a new payment after a return without reopening adjudication; **F04.shares** Amend beneficiary shares (legacy-settled share, deceased nominee, court order) and check the share summary; **F06.schedule** Circle officer schedules inspection (incl. CAIU-allocated); **F06.decide_report** Circle officer decides on the inspection report (T+7): initiate a 7A inquiry or no action; **F06.proceed** Quasi-judicial authority: issue notice / summons, hold hearings (e-Proceedings Cause List, Daily Order); **F06.order** Pass 7A / 14B / 7Q order (e-Proceedings Final Order); 7B review; 7C; 26B disputes; **F06.vishwas_decide** Recalculate damages under VISHWAS and decide; revised demand is paid through a direct challan; **F06.garnishee** 8F notice to a bank or debtor of the employer to pay EPFO (the CPFC's authorised officer); **F06.prosecution** Initiate prosecution; **F07.freeze_ro_member** Order freezing of MID / UAN (Categories B / C); **F07.verify_apfc** Validate verification; **F07.defreeze_est_maker** Recommend de-freezing an establishment (maker); the OIC orders it (checker); **F11.approve_apfc** Approve inoperative-account settlement in higher amount bands
 
 | Endpoint | Status |
 |---|---|
@@ -578,6 +580,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `GET /office/establishment-registrations/{reqId}/documents` | W |
 | `GET /office/ledger-adjustments` | W |
 | `GET /office/legal/cases` | W |
+| `GET /office/recovery/cases` | W |
 | `GET /office/signature-registrations` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/accounts/{accountLinkId}/reactivations` | W |
@@ -590,6 +593,8 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/compliance/cases/{caseId}/notices` | W |
 | `POST /office/compliance/cases/{caseId}/orders` | W |
 | `POST /office/compliance/cases/{caseId}/prosecutions` | W |
+| `POST /office/compliance/cases/{caseId}/recovery-8f` | W |
+| `POST /office/compliance/cases/{caseId}/recovery-certificates` | W |
 | `POST /office/compliance/cases/{caseId}/reviews-7b` | W |
 | `POST /office/compliance/cases/{caseId}/scrutinies` | W |
 | `POST /office/compliance/cases/{caseId}/set-asides` | W |
@@ -640,6 +645,7 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | `GET /office/exempted/proceedings` | W |
 | `GET /office/legal/cases` | W |
 | `GET /office/members/{uan}/locks` | W |
+| `GET /office/recovery/cases` | W |
 | `GET /office/work-queue` | W |
 | `POST /audit/concurrent/alerts/{alertId}/replies` | W |
 | `POST /audit/internal/paras/{paraId}/replies` | W |
@@ -651,6 +657,8 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | `POST /office/compliance/cases/{caseId}/hearings` | W |
 | `POST /office/compliance/cases/{caseId}/notices` | W |
 | `POST /office/compliance/cases/{caseId}/orders` | W |
+| `POST /office/compliance/cases/{caseId}/recovery-8f` | W |
+| `POST /office/compliance/cases/{caseId}/recovery-certificates` | W |
 | `POST /office/compliance/cases/{caseId}/reviews-7b` | W |
 | `POST /office/compliance/cases/{caseId}/scrutinies` | W |
 | `POST /office/compliance/cases/{caseId}/set-asides` | W |
@@ -660,6 +668,7 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | `POST /office/exempted/proceedings/{proceedingId}/steps` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/members/{uan}/defreezes` | W |
+| `POST /office/recovery/{caseId}/instalments` | W |
 | `POST /office/system/locks/{lockId}/release` | W |
 
 #### `fo.cash` — Cashier / Cash branch
@@ -780,16 +789,17 @@ Integration adapters: `shram_suvidha`
 
 #### `fo.recovery_officer` — Recovery Officer (8B–8G recovery, attachment, arrest warrants)
 
-Activities: **F06.recovery** Take up recovery certificate for unpaid assessed dues; **F06.garnishee** 8F garnishee order on bank / debtor (demo record only); **F06.attach** Attach movable / immovable property (demo record only); **F06.sale** Sale of attached property (demo record only); **F06.receiver** Appoint receiver for business / property (demo record only); **F06.arrest** Arrest and detention of defaulter as last resort (demo record only)
+Activities: **F06.recovery** Execute the recovery certificate: demand notice (EPFCP-1), collections, attachment and sale, receiver, arrest; **F06.attach** Attach movable / immovable property (demo record only); **F06.sale** Sale of attached property (demo record only); **F06.receiver** Appoint receiver for business / property (demo record only); **F06.arrest** Arrest and detention of defaulter as last resort (demo record only)
 
 | Endpoint | Status |
 |---|---|
-| `POST /office/compliance/cases/{caseId}/recovery-8f` | P |
-| `POST /office/compliance/cases/{caseId}/recovery-certificates` | P |
-| `POST /office/recovery/{caseId}/arrest-warrants` | P |
-| `POST /office/recovery/{caseId}/attachments` | P |
-| `POST /office/recovery/{caseId}/receivers` | P |
-| `POST /office/recovery/{caseId}/sales` | P |
+| `GET /office/recovery/cases` | W |
+| `POST /office/recovery/{caseId}/arrest-warrants` | W |
+| `POST /office/recovery/{caseId}/attachments` | W |
+| `POST /office/recovery/{caseId}/demand-notices` | W |
+| `POST /office/recovery/{caseId}/payments` | W |
+| `POST /office/recovery/{caseId}/receivers` | W |
+| `POST /office/recovery/{caseId}/sales` | W |
 
 #### `fo.legal` — Legal Cell (court cases, CGIT appeals)
 
@@ -1039,7 +1049,8 @@ Activities: **F06.ho_policy** Compliance policy and e-Proceedings oversight
 
 | Endpoint | Status |
 |---|---|
-| `GET /ho/reports/proceedings` | P |
+| `GET /ho/reports/proceedings` | W |
+| `GET /ho/reports/recovery` | W |
 
 #### `ho.recovery` — Recovery Division / Current Recovery vertical
 
@@ -1047,7 +1058,8 @@ Activities: **F06.ho_recovery** Recovery policy and monitoring
 
 | Endpoint | Status |
 |---|---|
-| `GET /ho/reports/recovery` | P |
+| `GET /ho/reports/proceedings` | W |
+| `GET /ho/reports/recovery` | W |
 
 #### `ho.legal` — Legal Division
 
@@ -1550,7 +1562,7 @@ flowchart LR
   F01_change_request --> F01_change_decide
   F01_establishment_owner --> F01_change_decide
   F01_contractor_tag --> F01_contractors
-  F06_recovery["fo.recovery_officer<br/>Take up recovery certificate for unpaid assessed dues"]
+  F06_recovery["fo.recovery_officer<br/>Execute the recovery certificate: demand notice (EPFCP-1), c"]
   F01_liquidation --> F06_recovery
 ```
 
@@ -1801,8 +1813,8 @@ flowchart LR
   F06_appeal["ext.cgit<br/>Tribunal hears 7-I appeals and decides 7-O pre-deposit / wai"]
   F06_courts["ext.courts<br/>Writs and orders on EPFO matters"]
   F06_legal["fo.legal<br/>Record 7-I appeals, 7-O pre-deposits / waivers and court / t"]
-  F06_recovery["fo.recovery_officer<br/>Take up recovery certificate for unpaid assessed dues"]
-  F06_garnishee["fo.recovery_officer<br/>8F garnishee order on bank / debtor (demo record only)"]
+  F06_recovery["fo.recovery_officer<br/>Execute the recovery certificate: demand notice (EPFCP-1), c"]
+  F06_garnishee["fo.apfc<br/>8F notice to a bank or debtor of the employer to pay EPFO (t"]
   F06_attach["fo.recovery_officer<br/>Attach movable / immovable property (demo record only)"]
   F06_sale["fo.recovery_officer<br/>Sale of attached property (demo record only)"]
   F06_receiver["fo.recovery_officer<br/>Appoint receiver for business / property (demo record only)"]

@@ -332,6 +332,7 @@ class Demand(Base):
     rule_version: Mapped[str] = mapped_column(String(80))
     state: Mapped[str] = mapped_column(String(20))                  # OPEN | KNOCKED_OFF
     settled_by: Mapped[str | None] = mapped_column(String(40))      # the knock-off
+    realised_paise: Mapped[int] = mapped_column(BigInteger, default=0, server_default="0")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -471,3 +472,14 @@ class PmvbryPayment(Base):
     run_id: Mapped[str] = mapped_column(String(36))
     mock_reference: Mapped[str | None] = mapped_column(String(80))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PmvbryInquiry(Base):
+    """P2.11d: the compliance inquiries that withhold PMVBRY Part B (scheme guidelines 6.2.3): pending, or ordered and not complied with."""
+    __tablename__ = "pmvbry_inquiries"
+    case_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    establishment_id: Mapped[str] = mapped_column(String(40), index=True)
+    section: Mapped[str] = mapped_column(String(4))
+    diary_no: Mapped[str] = mapped_column(String(80))
+    state: Mapped[str] = mapped_column(String(10))           # PENDING | ORDERED
+    demand_id: Mapped[str | None] = mapped_column(String(80), nullable=True)

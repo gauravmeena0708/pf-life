@@ -57,6 +57,7 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `auto-owner`, `member-ft`, `ho-finance` | Owner of Demo Auto Components; ARJUN DEMO, a first timer; FA & CAO | PMVBRY |
 | `ro-eo`, `ro-rpfc2` | Enforcement Officer; RPFC-II (inquiries of 251–1,000 members) | An inspection and a 7A inquiry |
 | `ro-legal` | Legal Cell (appeals, writs, prosecutions) | Appeals, membership disputes and prosecution |
+| `ro-recovery`, `ho-compliance`, `ho-recovery` | Recovery Officer; HO Compliance Division; HO Recovery Division | Recovery of arrears |
 | `zo-audit`, `ndc-is`, `zo-fraud`, `do-oic` | Concurrent Audit Cell; NDC IS Division; zonal fraud-risk committee; District Office in charge | Oversight and administration |
 
 ---
@@ -558,6 +559,17 @@ contribution- and platform-service*
    to the RPFC-II this time. The employer can no longer seek a 7B review of that order.
 3. **`ro-apfc` → Prosecutions**: a show-cause notice for returns not filed. **`emp-owner` → Inquiries** replies. **`ro-oic`**
    sanctions; **`ro-eo`** records the complaint filed in court; **`ro-legal`** records the conviction.
+
+## Recovery of arrears
+*Tests: `tests/e2e/test_recovery.py`, `services/compliance-service/tests/test_recovery.py`*
+
+1. **`ho-analyst` → PMVBRY**: Demo Engineering Works is excluded — its 7A order (June 2026) is not complied with.
+2. **`ro-apfc` → Inspections and 7A inquiries**: open EPR/RO-DEMO-01/2026/0900 and issue the recovery certificate.
+3. **`ro-recovery` → Recovery certificates**: serve the demand notice; attach two lathes (record why it cannot wait);
+   sell them above the reserve. **`ro-apfc`** issues an 8F notice to the bank. **`ro-recovery`** records the rest paid —
+   the certificate closes, and the PMVBRY exclusion lifts once the ledger shows the dues paid.
+4. Also: **`ro-oic`** grants instalments (at most 72); an arrest needs a notice to show cause first.
+5. **`ho-compliance` / `ho-recovery` → Proceedings and recovery**: the two reports.
 
 ## Disaster recovery, training, camps, totalisation, the foreign agency, the composite death claim
 *Tests: `tests/e2e/test_small_rest.py`*

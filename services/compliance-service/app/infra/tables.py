@@ -132,3 +132,23 @@ prosecutions = Table(
     Column("scn_at", DateTime(timezone=True), nullable=False), Column("reply_due", DateTime(timezone=True), nullable=False),
     Column("history", JSON, nullable=False), Column("legal_case_id", String(40)), Column("created_by", String(80), nullable=False),
 )
+
+# P2.11d: recovery under s.8B-8G (Recovery Manual): the certificate, its execution and what it realised
+recovery_cases = Table(
+    "recovery_cases", metadata,
+    Column("recovery_case_id", String(40), primary_key=True), Column("office_id", String(40), nullable=False),
+    Column("establishment_id", String(40), nullable=False), Column("inquiry_case_id", String(40)), Column("certificate_no", String(60), nullable=False),
+    Column("demand_ids", JSON, nullable=False), Column("amount_paise", BigInteger, nullable=False),
+    Column("realised_paise", BigInteger, nullable=False, server_default="0"),
+    Column("state", String(20), nullable=False),        # CERTIFIED | NOTICE_SERVED | IN_EXECUTION | INSTALMENTS | CLOSED
+    Column("recovery_officer", String(80), nullable=False), Column("issued_by", String(80), nullable=False),
+    Column("issued_at", DateTime(timezone=True), nullable=False), Column("pay_by", DateTime(timezone=True)),
+    Column("closed_at", DateTime(timezone=True)),
+)
+
+recovery_actions = Table(
+    "recovery_actions", metadata,
+    Column("action_id", String(40), primary_key=True), Column("recovery_case_id", String(40), nullable=False, index=True),
+    Column("kind", String(30), nullable=False), Column("detail", JSON, nullable=False),
+    Column("actor_subject", String(80), nullable=False), Column("occurred_at", DateTime(timezone=True), nullable=False),
+)

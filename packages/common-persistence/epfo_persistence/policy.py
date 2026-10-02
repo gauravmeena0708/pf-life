@@ -365,7 +365,8 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
         days = ("inspection_report_days", "da_note_days", "ss_note_days", "decision_days", "registration_days", "adjournment_max_days",
                 "order_working_days", "set_aside_months", "escaped_assessment_years")
         later = ("damages_ss_days", "damages_approval_days", "review_days",   # P2.11b-c: a rule set drafted from an earlier one may lack them
-                 "appeal_days", "appeal_condonable_days", "pre_deposit_percent", "scn_reply_working_days", "complaint_days")
+                 "appeal_days", "appeal_condonable_days", "pre_deposit_percent", "scn_reply_working_days", "complaint_days",
+                 "pay_after_order_days", "demand_notice_days", "max_instalments", "custody_before_detention_days")
         tiers = cp.get("allocation_tiers")
         if not all(_whole(cp.get(k), 1, 365) for k in days) or not all(_whole(cp[k], 1, 365) for k in later if k in cp) or not (isinstance(tiers, list) and tiers and tiers[-1].get("up_to_uans") is None
                                                                     and all(t.get("rank") in ("APFC", "RPFC-II", "RPFC-I") for t in tiers)):

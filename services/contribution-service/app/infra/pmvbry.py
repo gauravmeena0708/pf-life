@@ -55,3 +55,35 @@ async def project_paid_filing(session, filing, lines, members):
             'epf_wage_paise': contributions * 100 // rules['contribution_rate_pct'], 'gross_wage_paise': int(line['Gross Wages']) * 100,
             'date_of_joining': joined, 'contribution_received': True, 'kind': kind, 'face_authenticated': True,
             'aadhaar_authenticated': True, 'aadhaar_seeded_bank': True})
+
+
+WITHHOLDING_SECTIONS = ("7A", "7C", "26B")      # inquiries under 7A / 7B / 7C and Para 26B (guidelines 6.2.3)
+
+
+async def on_inquiry_event(session, event) -> None:
+    """InquiryRegistered.v1 / InquiryOrderPassed.v1 from compliance-service: track the inquiries that withhold Part B."""
+    p = event["payload"]
+    if p.get("section") not in WITHHOLDING_SECTIONS:
+        return
+    if event.get("event_type") == "InquiryRegistered.v1":
+        await session.execute(text("""INSERT INTO pmvbry_inquiries (case_id,establishment_id,section,diary_no,state,demand_id)
+            VALUES (:c,:e,:s,:d,'PENDING',NULL) ON CONFLICT (case_id) DO NOTHING"""),
+            {"c": p["case_id"], "e": p["establishment_id"], "s": p["section"], "d": p["diary_no"]})
+    else:
+        await session.execute(text("""INSERT INTO pmvbry_inquiries (case_id,establishment_id,section,diary_no,state,demand_id)
+            VALUES (:c,:e,:s,:d,'ORDERED',:m) ON CONFLICT (case_id) DO UPDATE SET state='ORDERED', demand_id=excluded.demand_id"""),
+            {"c": p["case_id"], "e": p["establishment_id"], "s": p["section"], "d": p["diary_no"], "m": p.get("demand_id") or None})
+    await session.execute(text("INSERT INTO pmvbry_establishments (establishment_id,manufacturing) VALUES (:e,false) ON CONFLICT (establishment_id) DO NOTHING"),
+                          {"e": p["establishment_id"]})
+
+
+async def inquiry_exclusion(session, establishment_id: str) -> str | None:
+    """Why Part B is withheld for an inquiry: one pending, or an order whose dues are not paid (not complied with)."""
+    rows = (await session.execute(text("""SELECT i.section, i.diary_no, i.state, d.state AS demand_state FROM pmvbry_inquiries i
+        LEFT JOIN demands d ON d.demand_id = i.demand_id WHERE i.establishment_id=:e ORDER BY i.diary_no"""), {"e": establishment_id})).mappings().all()
+    for r in rows:
+        if r["state"] == "PENDING":
+            return f"Inquiry under {'Para ' if r['section'] == '26B' else 'section '}{r['section']} pending ({r['diary_no']})"
+        if r["demand_state"] == "OPEN":
+            return f"Order under section {r['section']} ({r['diary_no']}) not complied with: dues unpaid"
+    return None

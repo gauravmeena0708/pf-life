@@ -93,6 +93,7 @@ function fieldOffice(role: string): NavGroup[] {
       ...(["fo.da_compliance", "fo.apfc", "fo.oic"].includes(role) ? [link("Defaulters, cases and VISHWAS", "/office/compliance")] : []),
       ...(["fo.da_compliance", "fo.ss", "fo.apfc", "fo.oic", "fo.eo"].includes(role) ? [link("Inspections and 7A inquiries", "/office/inquiries")] : []),
       ...(["fo.legal", "fo.oic", "fo.apfc"].includes(role) ? [link("Legal cases (appeals, writs, prosecutions)", "/office/legal")] : []),
+      ...(["fo.recovery_officer", "fo.oic", "fo.apfc"].includes(role) ? [link("Recovery certificates", "/office/recovery")] : []),
       link("7Q & 14B", ["fo.da_compliance", "fo.ss"].includes(role) ? "/office/returns#knock-off-heading" : undefined),
       link("Establishment", ["fo.oic", "fo.apfc"].includes(role) ? "/office/work-queue" : undefined),
       link("OLRE", ["fo.da_compliance", "fo.apfc"].includes(role) ? "/office/olre" : undefined),
@@ -169,6 +170,7 @@ export function menusFor(role: string | undefined): NavGroup[] {
   if (!role || role === "public") return [{ labelKey: "navigation.publicLookups", items: PUBLIC_SERVICES }];
   if (role === "member") return MEMBER;
   if (role === "exempted.trust") return [{ label: "Trust", to: "/exempted" }];
+  if (role === "ho.compliance" || role === "ho.recovery") return [{ label: "Proceedings and recovery", to: "/ho/compliance-reports" }];
   if (role === "ho.exemption") return [{ label: "Exempted establishments ranking", to: "/ho/exempted-rankings" }, { label: "Exemption proceedings", to: "/exemption-proceedings" }];
   if (role.startsWith("employer.")) return EMPLOYER;
   if (role === "pensioner") return PENSIONER;
@@ -232,6 +234,8 @@ export function homeFor(role: string | undefined): string {
   if (role === "fo.da_compliance") return "/office/olre";
   if (role === "fo.eo") return "/office/inquiries";
   if (role === "fo.legal") return "/office/legal";
+  if (role === "fo.recovery_officer") return "/office/recovery";
+  if (role === "ho.compliance" || role === "ho.recovery") return "/ho/compliance-reports";
   if (role?.startsWith("fo.")) return "/office/work-queue";
   return "/";
 }

@@ -944,6 +944,12 @@ stakeholders:
     step_up: false
     via:
     - F06.employer_owner_reply
+  - endpoint: GET /employers/me/recovery-cases
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.employer_owner_reply
   - endpoint: GET /employers/me/prosecutions
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
@@ -1228,6 +1234,12 @@ stakeholders:
     via:
     - F06.employer_reply
   - endpoint: POST /employers/me/proceedings/{caseId}/applications
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.employer_reply
+  - endpoint: GET /employers/me/recovery-cases
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
@@ -2334,6 +2346,25 @@ stakeholders:
     step_up: false
     via:
     - F06.order
+  - endpoint: POST /office/compliance/cases/{caseId}/recovery-certificates
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F06.order
+  - endpoint: POST /office/compliance/cases/{caseId}/recovery-8f
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F06.order
+    - F06.garnishee
+  - endpoint: GET /office/recovery/cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.order
   - endpoint: GET /office/compliance/vishwas-applications
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2536,6 +2567,30 @@ stakeholders:
     via:
     - F06.proceed_large
   - endpoint: POST /office/compliance/cases/{caseId}/scrutinies
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.proceed_large
+  - endpoint: POST /office/compliance/cases/{caseId}/recovery-certificates
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F06.proceed_large
+  - endpoint: POST /office/compliance/cases/{caseId}/recovery-8f
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F06.proceed_large
+  - endpoint: GET /office/recovery/cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.proceed_large
+  - endpoint: POST /office/recovery/{caseId}/instalments
     status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
@@ -2943,38 +2998,44 @@ stakeholders:
     via:
     - F06.inspect
   fo.recovery_officer:
-  - endpoint: POST /office/compliance/cases/{caseId}/recovery-certificates
-    status: P
+  - endpoint: GET /office/recovery/cases
+    status: W
     scope: office jurisdiction of the caller's posting
-    step_up: true
+    step_up: false
     via:
     - F06.recovery
-  - endpoint: POST /office/compliance/cases/{caseId}/recovery-8f
-    status: P
+  - endpoint: POST /office/recovery/{caseId}/demand-notices
+    status: W
     scope: office jurisdiction of the caller's posting
-    step_up: true
+    step_up: false
     via:
-    - F06.garnishee
+    - F06.recovery
+  - endpoint: POST /office/recovery/{caseId}/payments
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.recovery
   - endpoint: POST /office/recovery/{caseId}/attachments
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F06.attach
   - endpoint: POST /office/recovery/{caseId}/sales
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F06.sale
   - endpoint: POST /office/recovery/{caseId}/receivers
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F06.receiver
   - endpoint: POST /office/recovery/{caseId}/arrest-warrants
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -3619,14 +3680,26 @@ stakeholders:
     - F13.pmvbry_run
   ho.compliance:
   - endpoint: GET /ho/reports/proceedings
-    status: P
+    status: W
+    scope: national (Head Office role)
+    step_up: false
+    via:
+    - F06.ho_policy
+  - endpoint: GET /ho/reports/recovery
+    status: W
     scope: national (Head Office role)
     step_up: false
     via:
     - F06.ho_policy
   ho.recovery:
   - endpoint: GET /ho/reports/recovery
-    status: P
+    status: W
+    scope: national (Head Office role)
+    step_up: false
+    via:
+    - F06.ho_recovery
+  - endpoint: GET /ho/reports/proceedings
+    status: W
     scope: national (Head Office role)
     step_up: false
     via:

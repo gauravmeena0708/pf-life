@@ -200,52 +200,6 @@ paths:
       x-scope: national (Head Office role)
       security:
       - bffSession: []
-  /ho/reports/proceedings:
-    get:
-      operationId: getHoReportsProceedings
-      summary: HO view of e-Proceedings (7A, 14B & 7Q, virtual hearings)
-      tags:
-      - Compliance, e-proceedings and enforcement
-      parameters:
-      - $ref: '#/components/parameters/CorrelationId'
-      responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
-      x-owner-service: reporting
-      x-callers:
-      - ho.compliance
-      x-scope: national (Head Office role)
-      security:
-      - bffSession: []
-  /ho/reports/recovery:
-    get:
-      operationId: getHoReportsRecovery
-      summary: HO recovery monitoring
-      tags:
-      - Compliance, e-proceedings and enforcement
-      parameters:
-      - $ref: '#/components/parameters/CorrelationId'
-      responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
-      x-owner-service: reporting
-      x-callers:
-      - ho.recovery
-      x-scope: national (Head Office role)
-      security:
-      - bffSession: []
   /integrations/fund-managers/positions:
     post:
       operationId: postIntegrationsFundManagersPositions

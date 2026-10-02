@@ -503,8 +503,8 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | `POST /office/compliance/cases/{caseId}/appeals` | **7-I** appeal against a 7A / 7B / 7C / 14B order on the register (not 7Q interest); within the time, or with delay condonation; bars a 7B review | W | 1 | compliance |
 | `POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposits` 💰 | **7-O** pre-deposit: recorded once per reference; the appeal is heard when the deposit reaches the required share | W | 1 | compliance |
 | `POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposit-waivers` 🔐 | The Tribunal's order reducing or waiving the 7-O pre-deposit | W | 1 | compliance |
-| `POST /office/compliance/cases/{caseId}/recovery-8f` 🔐 | **8F** recovery / attachment (demo record only) | P | 3 | compliance |
-| `POST /office/compliance/cases/{caseId}/recovery-certificates` 🔐 | **8B–8E** recovery certificate execution (demo record only) | P | 3 | compliance |
+| `POST /office/compliance/cases/{caseId}/recovery-8f` 🔐 | **8F** notice to a bank or a debtor of the employer to pay EPFO; what it pays is realised against the certificate | W | 1 | compliance |
+| `POST /office/compliance/cases/{caseId}/recovery-certificates` 🔐 | **8B** recovery certificate on an order left unpaid after its 15 days: to the office's Recovery Officer (P2.11d) | W | 1 | compliance |
 | `GET /office/compliance/prosecutions` | Prosecutions of the office: show-cause, reply, sanction, complaint, outcome | W | 1 | compliance |
 | `POST /office/compliance/prosecutions/{prosecutionId}/steps` | Sanction by the RPFC (OIC), the complaint by the Enforcement Officer within 7 days (s.14AC), or dropped when the default is set right | W | 1 | compliance |
 | `GET /employers/me/prosecutions` | The establishment's prosecution show-cause notices | W | 1 | compliance |
@@ -519,15 +519,20 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
 | `POST /office/compliance/inspections/{inspectionId}/processing-notes` | The report through the file: DA note (T+3), SS note (T+5), circle officer's decision (T+7) — initiate 7A or no action | W | 1 | compliance |
-| `POST /office/recovery/{caseId}/attachments` 🔐 | Attachment of movable / immovable property (demo record only) | P | 3 | compliance |
-| `POST /office/recovery/{caseId}/sales` 🔐 | Sale of attached property (demo record only) | P | 3 | compliance |
-| `POST /office/recovery/{caseId}/receivers` 🔐 | Appointment of receiver (demo record only) | P | 3 | compliance |
-| `POST /office/recovery/{caseId}/arrest-warrants` 🔐 | Arrest and detention of defaulter (demo record only) | P | 3 | compliance |
+| `GET /office/recovery/cases?state=` | Recovery certificates of the office with their actions, realisations, stay | W | 1 | compliance |
+| `POST /office/recovery/{caseId}/demand-notices` | Demand notice EPFCP-1: pay within 15 days of service, then execution | W | 1 | compliance |
+| `POST /office/recovery/{caseId}/instalments` | Instalments for the arrears (at most 72); coercive steps wait while they run | W | 1 | compliance |
+| `POST /office/recovery/{caseId}/payments` | A payment the defaulter makes to the Recovery Officer, realised against the certificate | W | 1 | compliance |
+| `GET /employers/me/recovery-cases` | The establishment's recovery certificates: amount, realised, outstanding, notices, instalments, stay | W | 1 | compliance |
+| `POST /office/recovery/{caseId}/attachments` 🔐 | Attach movable or immovable property, debts or shares — after the demand notice's 15 days, or earlier with recorded reasons (record only) | W | 1 | compliance |
+| `POST /office/recovery/{caseId}/sales` 🔐 | Sale of attached property at or above the reserve price (e-auction, record only); the proceeds are realised | W | 1 | compliance |
+| `POST /office/recovery/{caseId}/receivers` 🔐 | Appoint a receiver for the business or immovable property (record only) | W | 1 | compliance |
+| `POST /office/recovery/{caseId}/arrest-warrants` 🔐 | Arrest and detention steps: notice to show cause, warrant, detention order on the Manual's grounds, release (record only) | W | 1 | compliance |
 | `POST /office/legal/cases` | Register a writ, an NCLT matter or another court case, optionally linked to an inquiry | W | 1 | compliance |
 | `GET /office/legal/cases` | Legal case register: appeals with their pre-deposit, writs, prosecutions in court, their orders and stays | W | 1 | compliance |
 | `POST /office/legal/cases/{caseId}/orders` | Record a court / tribunal order: stay, dismissed, allowed (demand withdrawn), partly allowed (demand revised), remanded (heard by an officer one level higher), conviction or acquittal | W | 1 | compliance |
-| `GET /ho/reports/proceedings` | HO view of e-Proceedings (7A, 14B & 7Q, virtual hearings) | P | 3 | reporting |
-| `GET /ho/reports/recovery` | HO recovery monitoring | P | 3 | reporting |
+| `GET /ho/reports/proceedings` | HO view of e-Proceedings: inquiries by section and stage, pending by office, orders overdue, disposal, legal cases | W | 1 | compliance |
+| `GET /ho/reports/recovery` | HO recovery monitoring: certificates, certified / realised / outstanding, realised by mode, stayed, instalments, older than a year | W | 1 | compliance |
 
 
 **Added from the Samadhan Setu integration spec** (`../samadhan-setu files/PF_LIFE_INTEGRATION_SPECIFICATION.md`, checked against the tracker issues)

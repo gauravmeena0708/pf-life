@@ -98,6 +98,21 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 11d: recovery; PMVBRY exclusions from inquiries (2 October 2026)
+
+Unit: every suite — compliance-service 24 (new `test_recovery.py`: no certificate before the order's 15 days, one per
+order; notice first; attachment inside the notice period only with recorded reasons; sale not below the reserve; 8F
+realised; at most 72 instalments and coercion waiting while they run; payment closing the certificate; detention and a
+warrant for not appearing only after a notice to show cause; a court's stay halting recovery; the employer's view; both
+HO reports), contribution-service 100 (part realisations split across the accounts and balanced, a reference booked
+once, a 14B demand — by agy; Part B withheld while an order is unpaid, lifted when recovered, imposed again by a new
+26B inquiry), workflow-service 51; web 285 (new `P211d.test.tsx`); end to end 103 of 103 (new `test_recovery.py`,
+repeatable); must-deny 18; UI smoke 2. Found on the way, fixed: agy registered the realisation event with two consumers
+(one kept); **realisations arriving together were applied concurrently and each read the same realised amount — the
+last write won, the demand stayed open and was certified and recovered again** (the demands are now locked while a
+realisation is applied; checked on Postgres: three at once book exactly the demand); the Recovery Officer is a sensitive
+post, so the vigilance test expects him; an office-transfer test counted the seeded history's case.
+
 ## Update — Phase 2, slice 11c: appeals, membership disputes, prosecution (2 October 2026)
 
 Unit: every suite (`make test`) — compliance-service 21 (new `test_proceedings_c.py`: 26B registered with a one-time code

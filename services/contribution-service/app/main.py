@@ -29,7 +29,8 @@ def create_app() -> FastAPI:
             consumers = [
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.payments",
                          ["payment-simulator.PaymentConfirmed.v1", "payment-simulator.PaymentReturned.v1",
-                          "compliance-service.DemandRaised.v1"], _payment_router),
+                          "compliance-service.DemandRaised.v1", "compliance-service.RecoveryRealised.v1",
+                          "compliance-service.InquiryRegistered.v1", "compliance-service.InquiryOrderPassed.v1"], _payment_router),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.employers",
                          ["employer-service.EmployerVerified.v1", "employer-service.EstablishmentClosed.v1",
                           "employer-service.EstablishmentOfficeTransferred.v1",
@@ -88,6 +89,12 @@ async def _payment_router(session, event):
     elif event.get("event_type") == "DemandRaised.v1":
         from app.infra.demands import on_demand_raised
         await on_demand_raised(session, event)
+    elif event.get("event_type") == "RecoveryRealised.v1":
+        from app.infra.demands import on_recovery_realised
+        await on_recovery_realised(session, event)
+    elif event.get("event_type") in ("InquiryRegistered.v1", "InquiryOrderPassed.v1"):   # P2.11d: PMVBRY Part B withheld
+        from app.infra.pmvbry import on_inquiry_event
+        await on_inquiry_event(session, event)
     elif event.get("event_type") == "PaymentConfirmed.v1":
         await handle_payment_confirmed(session, event)
     elif event.get("event_type") == "PaymentReturned.v1":

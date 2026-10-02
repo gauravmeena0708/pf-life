@@ -74,6 +74,17 @@ async def seed() -> None:
                     source["pending_reasons"] = "Not recorded in historical synthetic return"
                 await file_return(session, ex["establishment_id"], date.fromisoformat(ex["effective_from"]), ex,
                                   ReturnInput(**source), "seed", "seed", seeded=True)
+        for h in data.get("compliance_history", {}).get("inquiries", []):   # P2.11d: an unpaid 7A order's demand (synthetic history)
+            await session.execute(text("INSERT INTO pmvbry_inquiries (case_id,establishment_id,section,diary_no,state,demand_id) "
+                                       "VALUES (:c,:e,'7A',:d,'ORDERED',:m) ON CONFLICT (case_id) DO NOTHING"),
+                                  {"c": h["case_id"], "e": h["establishment_id"], "d": h["diary_no"], "m": h["demand_id"]})
+            await session.execute(text("INSERT INTO pmvbry_establishments (establishment_id,manufacturing) VALUES (:e,false) ON CONFLICT (establishment_id) DO NOTHING"),
+                                  {"e": h["establishment_id"]})
+            total = sum(v for d in h["dues"] for k, v in d.items() if k.endswith("_paise"))
+            await session.execute(text("INSERT INTO demands (demand_id,establishment_id,kind,trrn,wage_month,amount_paise,days_late,working,rule_version,state,created_at) "
+                                       "VALUES (:d,:e,'DUES_7A','-','-',:a,0,:w,'seed','OPEN',:at) ON CONFLICT (demand_id) DO NOTHING"),
+                                  {"d": h["demand_id"], "e": h["establishment_id"], "a": total, "w": json.dumps(h["dues"]),
+                                   "at": datetime.fromisoformat(h["ordered_at"])})
         demo = data["public_lookup_challan"]
         await session.execute(text("""INSERT INTO ecr_filings
           (id,establishment_id,wage_month,filing_type,format,content,version,state,preparer_subject,rule_version,trrn)

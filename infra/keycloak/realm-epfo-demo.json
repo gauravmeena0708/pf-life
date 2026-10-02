@@ -261,6 +261,18 @@
       {
         "name": "fo.legal",
         "description": "Legal Cell of the regional office — appeals before the Tribunal, court cases, prosecutions"
+      },
+      {
+        "name": "fo.recovery_officer",
+        "description": "Recovery Officer — executes recovery certificates (s.8B-8G): demand notice, attachment and sale, receiver, arrest"
+      },
+      {
+        "name": "ho.compliance",
+        "description": "HO Compliance Division — e-Proceedings oversight"
+      },
+      {
+        "name": "ho.recovery",
+        "description": "HO Recovery Division — recovery monitoring"
       }
     ]
   },
@@ -1794,6 +1806,63 @@
         "fo.legal"
       ],
       "id": "00000000-0000-4000-8000-000000000076"
+    },
+    {
+      "username": "ro-recovery",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Recovery Officer",
+      "lastName": "Demo",
+      "email": "ro-recovery@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.recovery_officer"
+      ],
+      "id": "00000000-0000-4000-8000-000000000077"
+    },
+    {
+      "username": "ho-compliance",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "HO Compliance Division",
+      "lastName": "Demo",
+      "email": "ho-compliance@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ho.compliance"
+      ],
+      "id": "00000000-0000-4000-8000-000000000078"
+    },
+    {
+      "username": "ho-recovery",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "HO Recovery Division",
+      "lastName": "Demo",
+      "email": "ho-recovery@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ho.recovery"
+      ],
+      "id": "00000000-0000-4000-8000-000000000079"
     }
   ]
 }

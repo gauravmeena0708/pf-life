@@ -147,3 +147,28 @@ def test_http_views_option_run_and_replay(ctx):
     assert client.get('/api/v1/ho/pmvbry/dashboard', headers=member()).status_code == 403
     assert client.get('/api/v1/ho/pmvbry/disbursement-runs/preview?as_of_month=2026-09', headers=member()).status_code == 403
     assert month
+
+
+def test_part_b_withheld_while_an_inquiry_is_pending_or_its_order_unpaid(ctx):
+    """P2.11d: Demo Engineering Works has a 7A order whose dues are unpaid; recovering them lifts the bar; a new inquiry imposes it again."""
+    import asyncio
+    import app.infra.db as db
+    from app.infra.demands import on_recovery_realised
+    from app.infra.pmvbry import inquiry_exclusion, on_inquiry_event
+    from tests.test_ecr_api import _deliver, hdr
+    client, q = ctx
+
+    def reason():
+        async def run():
+            async with db.sessions()() as session:
+                return await inquiry_exclusion(session, 'EST-DEMO-0002')
+        return asyncio.run(run())
+    assert 'not complied with' in reason()
+    board = client.get('/api/v1/ho/pmvbry/dashboard', headers=hdr('ho-cpfc-1', 'ho.cpfc', [], establishment=None)).json()['data']
+    assert any(e['establishment_id'] == 'EST-DEMO-0002' and 'not complied' in e['reason'] for e in board['excluded_establishments'])
+    _deliver(on_recovery_realised, {'recovery_case_id': 'RC-1', 'establishment_id': 'EST-DEMO-0002', 'demand_ids': ['D7A-CMP-SEED-0002'],
+                                    'amount_paise': 3000000, 'mode': 'SALE', 'reference': 'SALE-ATT-1'}, 'RecoveryRealised.v1')
+    assert reason() is None
+    _deliver(on_inquiry_event, {'case_id': 'CMP-NEW', 'diary_no': 'EPR/RO-DEMO-01/2026/0950', 'establishment_id': 'EST-DEMO-0002',
+                                'section': '26B', 'officer_rank': 'RPFC-II', 'contributory_uans': 60}, 'InquiryRegistered.v1')
+    assert reason() == 'Inquiry under Para 26B pending (EPR/RO-DEMO-01/2026/0950)'

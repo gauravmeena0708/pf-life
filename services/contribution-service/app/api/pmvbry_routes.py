@@ -52,7 +52,9 @@ async def _employer_plan(session, eid, month):
     # This service has no establishment registration-date projection. A history beginning
     # in the registration period is treated as a new establishment for this POC.
     registered_on = rules['registration_from'] if rows and min(r['wage_month'] for r in rows) >= rules['registration_from'][:7] else None
-    plan = part_b(rows, rules, month, bool(cfg['manufacturing']) if cfg else False, registered_on=registered_on, excluded_reason=cfg['excluded_reason'] if cfg else None, option_exercised=bool(cfg and cfg['option_exercised_at']), payments=payments)
+    from app.infra.pmvbry import inquiry_exclusion
+    excluded = (cfg['excluded_reason'] if cfg else None) or await inquiry_exclusion(session, eid)   # the seed's, or a compliance inquiry
+    plan = part_b(rows, rules, month, bool(cfg['manufacturing']) if cfg else False, registered_on=registered_on, excluded_reason=excluded, option_exercised=bool(cfg and cfg['option_exercised_at']), payments=payments)
     plan.update({'establishment_id': eid, 'option_exercised_at': cfg['option_exercised_at'].isoformat() if cfg and hasattr(cfg['option_exercised_at'], 'isoformat') else cfg['option_exercised_at'] if cfg else None, 'gstin': cfg['gstin'] if cfg else None, 'bank_account_ref': cfg['bank_account_ref'] if cfg else None})
     return plan
 

@@ -206,6 +206,37 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /employers/me/recovery-cases:
+    get:
+      operationId: getEmployersRecoveryCases
+      summary: 'The establishment''s recovery certificates: amount, realised, outstanding, notices, instalments, stay'
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/EstablishmentId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - employer.owner
+      - employer.signatory
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
   /employers/me/vishwas-applications:
     get:
       operationId: getEmployersVishwasApplications
@@ -275,6 +306,70 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /ho/reports/proceedings:
+    get:
+      operationId: getHoReportsProceedings
+      summary: 'HO view of e-Proceedings: inquiries by section and stage, pending by office, orders overdue, disposal, legal
+        cases'
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - ho.compliance
+      - ho.recovery
+      x-scope: national (Head Office role)
+      security:
+      - bffSession: []
+  /ho/reports/recovery:
+    get:
+      operationId: getHoReportsRecovery
+      summary: 'HO recovery monitoring: certificates, certified / realised / outstanding, realised by mode, stayed, instalments,
+        older t'
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - ho.compliance
+      - ho.recovery
+      x-scope: national (Head Office role)
+      security:
+      - bffSession: []
+      description: 'HO recovery monitoring: certificates, certified / realised / outstanding, realised by mode, stayed, instalments,
+        older than a year'
   /office/compliance/cases:
     get:
       operationId: getOfficeComplianceCases
@@ -859,7 +954,7 @@ paths:
   /office/compliance/cases/{caseId}/recovery-8f:
     post:
       operationId: postOfficeComplianceCasesCaseIdRecovery8f
-      summary: 8F recovery / attachment (demo record only)
+      summary: 8F notice to a bank or a debtor of the employer to pay EPFO; what it pays is realised against the certificate
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -871,17 +966,24 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
-      - fo.recovery_officer
+      - fo.apfc
+      - fo.oic
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -895,7 +997,7 @@ paths:
   /office/compliance/cases/{caseId}/recovery-certificates:
     post:
       operationId: postOfficeComplianceCasesCaseIdRecoveryCertificates
-      summary: 8B–8E recovery certificate execution (demo record only)
+      summary: '8B recovery certificate on an order left unpaid after its 15 days: to the office''s Recovery Officer (P2.11d)'
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -907,17 +1009,24 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
-      - fo.recovery_officer
+      - fo.apfc
+      - fo.oic
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -1567,10 +1676,47 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/recovery/cases:
+    get:
+      operationId: getOfficeRecoveryCases
+      summary: Recovery certificates of the office with their actions, realisations, stay
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: state
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - fo.apfc
+      - fo.oic
+      - fo.recovery_officer
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
   /office/recovery/{caseId}/arrest-warrants:
     post:
       operationId: postOfficeRecoveryCaseIdArrestWarrants
-      summary: Arrest and detention of defaulter (demo record only)
+      summary: 'Arrest and detention steps: notice to show cause, warrant, detention order on the Manual''s grounds, release
+        (record only'
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -1582,14 +1728,108 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - fo.recovery_officer
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Arrest and detention steps: notice to show cause, warrant, detention order on the Manual''s grounds, release
+        (record only)'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/recovery/{caseId}/attachments:
+    post:
+      operationId: postOfficeRecoveryCaseIdAttachments
+      summary: Attach movable or immovable property, debts or shares — after the demand notice's 15 days, or earlier with
+        recorded reas
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - fo.recovery_officer
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: Attach movable or immovable property, debts or shares — after the demand notice's 15 days, or earlier with
+        recorded reasons (record only)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/recovery/{caseId}/demand-notices:
+    post:
+      operationId: postOfficeRecoveryCaseIdDemandNotices
+      summary: 'Demand notice EPFCP-1: pay within 15 days of service, then execution'
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
       - fo.recovery_officer
@@ -1603,10 +1843,10 @@ paths:
             schema:
               type: object
               description: Defined when implemented
-  /office/recovery/{caseId}/attachments:
+  /office/recovery/{caseId}/instalments:
     post:
-      operationId: postOfficeRecoveryCaseIdAttachments
-      summary: Attachment of movable / immovable property (demo record only)
+      operationId: postOfficeRecoveryCaseIdInstalments
+      summary: Instalments for the arrears (at most 72); coercive steps wait while they run
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -1616,16 +1856,62 @@ paths:
         required: true
         schema:
           type: string
-      - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - fo.oic
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/recovery/{caseId}/payments:
+    post:
+      operationId: postOfficeRecoveryCaseIdPayments
+      summary: A payment the defaulter makes to the Recovery Officer, realised against the certificate
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
       - fo.recovery_officer
@@ -1642,7 +1928,7 @@ paths:
   /office/recovery/{caseId}/receivers:
     post:
       operationId: postOfficeRecoveryCaseIdReceivers
-      summary: Appointment of receiver (demo record only)
+      summary: Appoint a receiver for the business or immovable property (record only)
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -1654,14 +1940,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
       - fo.recovery_officer
@@ -1678,7 +1970,7 @@ paths:
   /office/recovery/{caseId}/sales:
     post:
       operationId: postOfficeRecoveryCaseIdSales
-      summary: Sale of attached property (demo record only)
+      summary: Sale of attached property at or above the reserve price (e-auction, record only); the proceeds are realised
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -1690,14 +1982,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
       - fo.recovery_officer

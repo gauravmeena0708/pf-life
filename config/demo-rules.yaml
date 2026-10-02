@@ -294,3 +294,8 @@ compliance_proceedings:
   pre_deposit_percent: 75           # s.7-O: the appeal is heard after this share of the amount is deposited (the Tribunal may reduce or waive it)
   scn_reply_working_days: 7         # a prosecution show-cause notice allows at least 7 working days (para 5.2.2 ii)
   complaint_days: 7                 # the Enforcement Officer files the complaint within 7 days of the sanction (para 5.2.2 v)
+  # P2.11d: recovery (Recovery Manual, 08/12/2023)
+  pay_after_order_days: 15          # an order directs payment within 15 days; then a recovery certificate may issue (s.8B)
+  demand_notice_days: 15            # notice EPFCP-1: pay within 15 days of service, then execution (para 1.5 a, i)
+  max_instalments: 72               # instalments for arrears (circular "Grant of 72 instalments", ILLUSTRATIVE ceiling)
+  custody_before_detention_days: 15 # a defaulter may be left in custody up to 15 days to pay before a detention order (6.3)

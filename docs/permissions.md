@@ -284,6 +284,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /employers/me/pmvbry` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/proceedings` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/prosecutions` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/recovery-cases` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/returns/dashboard` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/signatories` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/signature-registrations` | W | own establishment (X-Establishment-Id validated against grants) |  |
@@ -332,6 +333,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /employers/me/pending-approvals` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/proceedings` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/prosecutions` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/recovery-cases` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/returns/dashboard` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/signature-registrations` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/transfer-requests` | W | own establishment (X-Establishment-Id validated against grants) |  |
@@ -585,6 +587,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/establishment-registrations/{reqId}/documents` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/ledger-adjustments` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/legal/cases` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/recovery/cases` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/signature-registrations` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/accounts/{accountLinkId}/reactivations` | W | office jurisdiction of the caller's posting | yes |
@@ -597,6 +600,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/compliance/cases/{caseId}/notices` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/cases/{caseId}/orders` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/cases/{caseId}/prosecutions` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/compliance/cases/{caseId}/recovery-8f` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/compliance/cases/{caseId}/recovery-certificates` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/cases/{caseId}/reviews-7b` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/cases/{caseId}/scrutinies` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/compliance/cases/{caseId}/set-asides` | W | office jurisdiction of the caller's posting | yes |
@@ -643,6 +648,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/exempted/proceedings` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/legal/cases` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/members/{uan}/locks` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/recovery/cases` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /audit/concurrent/alerts/{alertId}/replies` | W | read-only for auditors; audit writes by audit roles only |  |
 | `POST /audit/internal/paras/{paraId}/replies` | W | read-only for auditors; audit writes by audit roles only |  |
@@ -654,6 +660,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/compliance/cases/{caseId}/hearings` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/compliance/cases/{caseId}/notices` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/cases/{caseId}/orders` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/compliance/cases/{caseId}/recovery-8f` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/compliance/cases/{caseId}/recovery-certificates` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/cases/{caseId}/reviews-7b` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/cases/{caseId}/scrutinies` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/compliance/cases/{caseId}/set-asides` | W | office jurisdiction of the caller's posting | yes |
@@ -663,6 +671,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/exempted/proceedings/{proceedingId}/steps` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/members/{uan}/defreezes` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/recovery/{caseId}/instalments` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/system/locks/{lockId}/release` | W | office jurisdiction of the caller's posting | yes |
 
 **`fo.cash`** — Cashier / Cash branch
@@ -763,12 +772,13 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `POST /office/compliance/cases/{caseId}/recovery-8f` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/compliance/cases/{caseId}/recovery-certificates` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/recovery/{caseId}/arrest-warrants` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/recovery/{caseId}/attachments` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/recovery/{caseId}/receivers` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/recovery/{caseId}/sales` | P | office jurisdiction of the caller's posting | yes |
+| `GET /office/recovery/cases` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/recovery/{caseId}/arrest-warrants` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/recovery/{caseId}/attachments` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/recovery/{caseId}/demand-notices` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/recovery/{caseId}/payments` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/recovery/{caseId}/receivers` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/recovery/{caseId}/sales` | W | office jurisdiction of the caller's posting | yes |
 
 **`fo.legal`** — Legal Cell (court cases, CGIT appeals)
 
@@ -981,13 +991,15 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /ho/reports/proceedings` | P | national (Head Office role) |  |
+| `GET /ho/reports/proceedings` | W | national (Head Office role) |  |
+| `GET /ho/reports/recovery` | W | national (Head Office role) |  |
 
 **`ho.recovery`** — Recovery Division / Current Recovery vertical
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /ho/reports/recovery` | P | national (Head Office role) |  |
+| `GET /ho/reports/proceedings` | W | national (Head Office role) |  |
+| `GET /ho/reports/recovery` | W | national (Head Office role) |  |
 
 **`ho.legal`** — Legal Division
 

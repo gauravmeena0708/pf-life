@@ -34,7 +34,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.11a** | Inspections and 7A inquiries: the Enforcement Officer's report through DA / SS / circle officer, registration with a diary number, random allocation by size, summons, hearings and daily orders, the employer's replies, the 7A order (ex parte only after due service) raising the demand | Done |
 | **P2.11b** | 7B review (after the next-higher officer's view), 7C escaped amounts (within 5 years), ex-parte set-aside, administrative scrutiny of orders; the 14B damages and 7Q interest proceedings | Done (the CBT's waiver for sick companies stays planned) |
 | **P2.11c** | Appeals (7-I) with the 7-O pre-deposit, the legal-case register and court orders, 26B membership disputes, prosecution | Done |
-| P2.11d | Recovery (Recovery Manual, 08/12/2023): recovery certificates (8B–8E), 8F garnishee, attachment, sale, receiver, arrest (records only); HO reports on proceedings and recovery; PMVBRY exclusions from open inquiries | Planned |
+| **P2.11d** | Recovery (Recovery Manual, 08/12/2023): recovery certificates (8B–8E), 8F garnishee, attachment, sale, receiver, arrest (records only); HO reports on proceedings and recovery; PMVBRY exclusions from open inquiries | Done |
 | **P2.12h** | Explore pages: the stakeholder chart by EPFO's hierarchy, each lifecycle as a network of stakeholders and steps with how far it is built, and the user manuals published into the portal — all linked from the home page | Done |
 | **P2.12a** | Member and tax: Form 16A, the office's TDS computation; UAN allotment and activation (mock Aadhaar face / OTP); inoperative accounts — the public helpdesk search, verification through co-workers, reactivation in the AO / APFC bands | **Done** (1 Oct 2026) |
 | **P2.12b** | Employer lifecycle: voluntary coverage, closure, transfer to another office; contractors tagging ECR members to a principal employer and the principal's view of contractor compliance; MCA and Shram Suvidha registration feeds (mock) | **Done** (1 Oct 2026) |
@@ -933,6 +933,36 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 
 With P2.12f every endpoint the catalogue planned outside compliance (P2.11) and the exempted establishments
 (P2.9b / P2.9d) is built.
+
+## P2.11d — how it is built
+
+Source: the EPFO *Recovery Manual* (08/12/2023): general procedures (1.5), attachment and sale (2–4), receiver (5), arrest
+and detention (6), s.8F, the instalment circulars.
+
+- **The certificate (s.8B)**: on a passed order whose dues are still unpaid after the 15 days it allows, the officer who
+  passed it (or the RPFC-I) certifies them to the office's Recovery Officer (new persona `ro-recovery`). One open
+  certificate per order.
+- **Execution** (`/office/recovery`): the demand notice EPFCP-1 (15 days to pay); then attachment of movable or immovable
+  property, debts or shares — earlier only with the reasons recorded (the defaulter is likely to conceal or remove it);
+  sale at or above the reserve price, the proceeds realised; a receiver; arrest — a notice to show cause (EPFCP-25) and a
+  hearing before a detention order, which needs one of the Manual's grounds (dishonest transfer; the means to pay and a
+  refusal); a warrant for not appearing; release. All are records: no property, warrant or prison is real. The RPFC-I
+  grants instalments (at most 72, *illustrative*), during which coercive steps wait; a court's stay on the order halts
+  them too (P2.11c's register).
+- **Section 8F**: the officer directs a bank or a debtor of the employer to pay EPFO; what it pays is realised against
+  the certificate.
+- **Into the ledger**: every realisation is `RecoveryRealised.v1`; contribution-service applies it to the certificate's
+  demands (part-payments tracked in `realised_paise`, a DUES_7A share split across A/c 1, 10, 21 and 2 in the order's
+  proportions), one journal per reference, the demand PAID when fully realised (written by agy; the duplicate consumer
+  route it added was removed, and the demands are locked while a realisation is applied — three arriving together had
+  each read the same balance).
+- **PMVBRY**: Part B is withheld from an establishment while a 7A / 7C / 26B inquiry is pending or an order's dues are
+  unpaid (guidelines 6.2.3), from `InquiryRegistered.v1` / `InquiryOrderPassed.v1` and the demand's state — no longer a
+  seeded reason. Seed: Demo Engineering Works' 7A order of June 2026, unpaid.
+- **HO reports** (`/ho/compliance-reports`, `ho-compliance`, `ho-recovery`; moved from reporting-service to
+  compliance-service, which holds the data): inquiries by section and stage, pending by office, orders overdue,
+  disposal and days to order, legal cases; certificates, certified / realised / outstanding, realised by mode, stayed,
+  in instalments, older than a year. The employer sees its recovery certificates on `/employer/proceedings`.
 
 ## P2.11c — how it is built
 

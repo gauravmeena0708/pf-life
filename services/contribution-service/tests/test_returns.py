@@ -164,6 +164,86 @@ def test_a_7a_order_raises_dues_paid_into_their_accounts(ctx):
                      ("AC21_EDLI", "credit", 90000), ("BANK_COLLECTION", "debit", 4500000)]
 
 
+def test_recovery_realised_against_open_demands(ctx):
+    """Recovery realised against open demands: split proportionally across accounts, updates realised_paise, and idempotent."""
+    client, q = ctx
+    import json as _json
+    from app.infra.demands import on_demand_raised, on_recovery_realised
+    dues = [{"wage_month": "2025-04", "ac1_employee_paise": 2160000, "ac1_employer_paise": 660000, "ac10_pension_paise": 1500000,
+             "ac21_edli_paise": 90000, "ac2_admin_paise": 90000}]
+    _deliver(on_demand_raised, {"demand_id": "D7A-REC-1", "establishment_id": EST, "demand_type": "DUES_7A", "amount_paise": 4500000,
+                                "supersedes_demand_ids": [], "working": _json.dumps(dues), "rule_version": "r"}, "DemandRaised.v1")
+
+    # Part 1: 3000000 realised
+    _deliver(on_recovery_realised, {"recovery_case_id": "RC-1", "establishment_id": EST, "demand_ids": ["D7A-REC-1"],
+                                    "amount_paise": 3000000, "mode": "DIRECT", "reference": "REC-7A-PART1"}, "RecoveryRealised.v1")
+    d1 = dict(q("SELECT demand_id, state FROM demands"))["D7A-REC-1"]
+    realised1 = dict(q("SELECT demand_id, realised_paise FROM demands"))["D7A-REC-1"]
+    assert d1 == "OPEN" and realised1 == 3000000
+    lines1 = sorted(q("SELECT jl.account_code, jl.side, jl.amount_paise FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id "
+                      "WHERE j.business_key='RECOVERY-REC-7A-PART1'"))
+    assert lines1 == [("AC01_EPF", "credit", 1880000), ("AC02_ADMIN", "credit", 60000), ("AC10_EPS", "credit", 1000000),
+                      ("AC21_EDLI", "credit", 60000), ("BANK_COLLECTION", "debit", 3000000)]
+    assert sum(amt for _, side, amt in lines1 if side == "credit") == 3000000
+
+    # Idempotency: the same reference twice posts once
+    _deliver(on_recovery_realised, {"recovery_case_id": "RC-1", "establishment_id": EST, "demand_ids": ["D7A-REC-1"],
+                                    "amount_paise": 3000000, "mode": "DIRECT", "reference": "REC-7A-PART1"}, "RecoveryRealised.v1")
+    assert len(q("SELECT id FROM journals WHERE business_key='RECOVERY-REC-7A-PART1'")) == 1
+    assert dict(q("SELECT demand_id, realised_paise FROM demands"))["D7A-REC-1"] == 3000000
+
+    # Part 2: 1500000 realised -> reaches 4500000 -> PAID
+    _deliver(on_recovery_realised, {"recovery_case_id": "RC-1", "establishment_id": EST, "demand_ids": ["D7A-REC-1"],
+                                    "amount_paise": 1500000, "mode": "DIRECT", "reference": "REC-7A-PART2"}, "RecoveryRealised.v1")
+    row2 = q("SELECT state, realised_paise, settled_by FROM demands WHERE demand_id='D7A-REC-1'")[0]
+    assert row2 == ("PAID", 4500000, "REC-7A-PART2")
+    lines2 = sorted(q("SELECT jl.account_code, jl.side, jl.amount_paise FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id "
+                      "WHERE j.business_key='RECOVERY-REC-7A-PART2'"))
+    assert lines2 == [("AC01_EPF", "credit", 940000), ("AC02_ADMIN", "credit", 30000), ("AC10_EPS", "credit", 500000),
+                      ("AC21_EDLI", "credit", 30000), ("BANK_COLLECTION", "debit", 1500000)]
+
+    # A 14B demand realised in full credits DAMAGES_14B
+    _deliver(on_demand_raised, {"demand_id": "DEM-14B-REC", "establishment_id": EST, "demand_type": "DAMAGES_14B", "amount_paise": 200000,
+                                "supersedes_demand_ids": [], "working": "14B damages", "rule_version": "r"}, "DemandRaised.v1")
+    _deliver(on_recovery_realised, {"recovery_case_id": "RC-2", "establishment_id": EST, "demand_ids": ["DEM-14B-REC"],
+                                    "amount_paise": 200000, "mode": "GARNISHEE_8F", "reference": "REC-14B-FULL"}, "RecoveryRealised.v1")
+    row_14b = q("SELECT state, realised_paise, settled_by FROM demands WHERE demand_id='DEM-14B-REC'")[0]
+    assert row_14b == ("PAID", 200000, "REC-14B-FULL")
+    lines_14b = sorted(q("SELECT jl.account_code, jl.side, jl.amount_paise FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id "
+                         "WHERE j.business_key='RECOVERY-REC-14B-FULL'"))
+    assert lines_14b == [("BANK_COLLECTION", "debit", 200000), ("DAMAGES_14B", "credit", 200000)]
+
+    # Routed through app.main._payment_router (one consumer only, so a realisation is never applied twice)
+    from app.main import _payment_router
+    _deliver(on_demand_raised, {"demand_id": "DEM-7Q-REC", "establishment_id": EST, "demand_type": "INTEREST_7Q", "amount_paise": 100000,
+                                "supersedes_demand_ids": [], "working": "7Q interest", "rule_version": "r"}, "DemandRaised.v1")
+    _deliver(_payment_router, {"recovery_case_id": "RC-3", "establishment_id": EST, "demand_ids": ["DEM-7Q-REC"],
+                               "amount_paise": 100000, "mode": "INSTALMENT", "reference": "REC-7Q-FULL"}, "RecoveryRealised.v1")
+    assert q("SELECT state, realised_paise, settled_by FROM demands WHERE demand_id='DEM-7Q-REC'")[0] == ("PAID", 100000, "REC-7Q-FULL")
+    lines_7q = sorted(q("SELECT jl.account_code, jl.side, jl.amount_paise FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id "
+                        "WHERE j.business_key='RECOVERY-REC-7Q-FULL'"))
+    assert lines_7q == [("BANK_COLLECTION", "debit", 100000), ("INTEREST_7Q", "credit", 100000)]
+
+    # Multiple demands in order, merged credits, leftover amount ignored
+    _deliver(on_demand_raised, {"demand_id": "DEM-M1", "establishment_id": EST, "demand_type": "DAMAGES_14B", "amount_paise": 20000,
+                                "supersedes_demand_ids": [], "working": "14B m1", "rule_version": "r"}, "DemandRaised.v1")
+    _deliver(on_demand_raised, {"demand_id": "DEM-M2", "establishment_id": EST, "demand_type": "DAMAGES_14B", "amount_paise": 30000,
+                                "supersedes_demand_ids": [], "working": "14B m2", "rule_version": "r"}, "DemandRaised.v1")
+    _deliver(on_recovery_realised, {"recovery_case_id": "RC-4", "establishment_id": EST, "demand_ids": ["DEM-M1", "DEM-M2"],
+                        "amount_paise": 60000, "mode": "DIRECT", "reference": "REC-MERGED-LEFTOVER"}, "RecoveryRealised.v1")
+    assert q("SELECT state, realised_paise, settled_by FROM demands WHERE demand_id='DEM-M1'")[0] == ("PAID", 20000, "REC-MERGED-LEFTOVER")
+    assert q("SELECT state, realised_paise, settled_by FROM demands WHERE demand_id='DEM-M2'")[0] == ("PAID", 30000, "REC-MERGED-LEFTOVER")
+    lines_m = sorted(q("SELECT jl.account_code, jl.side, jl.amount_paise FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id "
+                       "WHERE j.business_key='RECOVERY-REC-MERGED-LEFTOVER'"))
+    assert lines_m == [("BANK_COLLECTION", "debit", 50000), ("DAMAGES_14B", "credit", 50000)]
+
+    # Demands published as DemandStateChanged.v1
+    published = [_json.loads(p)["envelope"]["payload"] for (p,) in q("SELECT payload FROM outbox WHERE event_type='DemandStateChanged.v1'")]
+    pub_ids = {p["demand_id"] for p in published}
+    assert {"D7A-REC-1", "DEM-14B-REC", "DEM-7Q-REC", "DEM-M1", "DEM-M2"}.issubset(pub_ids)
+
+
+
 def test_interest_7q_demand_replaces_auto_calculated_demand(ctx):
     """A 7Q interest order (DemandRaised.v1, INTEREST_7Q) replaces an open auto-calculated 7Q interest demand."""
     client, q = ctx

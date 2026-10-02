@@ -93,7 +93,7 @@ def test_establishment_office_transfer_updates_jurisdiction_but_keeps_open_case(
     deliver("EstablishmentOfficeTransferred.v1", payload)
     deliver("EstablishmentOfficeTransferred.v1", payload)
     assert q(f"SELECT office_id FROM establishments WHERE establishment_id='{EST}'") == [("RO-DEMO-02",)]
-    assert q("SELECT office_id FROM compliance_cases") == [("RO-DEMO-01",)]
+    assert q(f"SELECT office_id FROM compliance_cases WHERE establishment_id='{EST}'") == [("RO-DEMO-01",)]   # cases keep their office
 
 
 def test_cases_opened_searched_and_published(ctx):

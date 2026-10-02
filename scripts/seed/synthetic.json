@@ -802,7 +802,10 @@
     "auto-owner": "00000000-0000-4000-8000-000000000073",
     "ro-eo": "00000000-0000-4000-8000-000000000074",
     "ro-rpfc2": "00000000-0000-4000-8000-000000000075",
-    "ro-legal": "00000000-0000-4000-8000-000000000076"
+    "ro-legal": "00000000-0000-4000-8000-000000000076",
+    "ro-recovery": "00000000-0000-4000-8000-000000000077",
+    "ho-compliance": "00000000-0000-4000-8000-000000000078",
+    "ho-recovery": "00000000-0000-4000-8000-000000000079"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -1042,6 +1045,12 @@
       "username": "ro-legal",
       "subject": "00000000-0000-4000-8000-000000000076",
       "stakeholder": "fo.legal",
+      "office_id": "RO-DEMO-01"
+    },
+    {
+      "username": "ro-recovery",
+      "subject": "00000000-0000-4000-8000-000000000077",
+      "stakeholder": "fo.recovery_officer",
       "office_id": "RO-DEMO-01"
     }
   ],
@@ -1447,7 +1456,7 @@
     ]
   },
   "pmvbry_demo": {
-    "_comment": "P2.15a: Demo Auto Components (manufacturing) and its ECR history from August 2024 (synthetic). 30 employees through the baseline year; first timers and a re-joinee from October 2025.",
+    "_comment": "P2.15a: Demo Auto Components (manufacturing) and its ECR history from August 2024 (synthetic). 30 employees through the baseline year; first timers and a re-joinee from October 2025. Exclusions now come from compliance inquiries (P2.11d): Demo Engineering Works has an unpaid 7A order.",
     "establishment_id": "EST-DEMO-0007",
     "manufacturing": true,
     "gstin": "07AAAAD0007A1Z5",
@@ -1548,12 +1557,7 @@
         "exit_month": null
       }
     ],
-    "exclusions": [
-      {
-        "establishment_id": "EST-DEMO-0002",
-        "reason": "7A inquiry pending (synthetic)"
-      }
-    ]
+    "exclusions": []
   },
   "compliance_officers": {
     "_comment": "P2.11a: the rank of each officer who conducts inquiries (Compliance Manual para 2.5.1), and who is barred from a sensitive charge (synthetic)",
@@ -1572,5 +1576,34 @@
       }
     ],
     "barred_from_sensitive_charge": []
+  },
+  "compliance_history": {
+    "_comment": "P2.11d: an earlier 7A order on Demo Engineering Works whose dues are still unpaid (synthetic) — for recovery, and the reason PMVBRY Part B is withheld from it",
+    "inquiries": [
+      {
+        "case_id": "CMP-SEED-0002",
+        "diary_no": "EPR/RO-DEMO-01/2026/0900",
+        "establishment_id": "EST-DEMO-0002",
+        "officer": "ro-apfc",
+        "rank": "APFC",
+        "period_from": "2025-01",
+        "period_to": "2025-06",
+        "contributory_uans": 60,
+        "ordered_at": "2026-06-10T10:00:00+00:00",
+        "registered_at": "2026-03-02T10:00:00+00:00",
+        "reasoning": "Wages of 8 workers not declared (synthetic)",
+        "demand_id": "D7A-CMP-SEED-0002",
+        "dues": [
+          {
+            "wage_month": "2025-03",
+            "ac1_employee_paise": 1440000,
+            "ac1_employer_paise": 440000,
+            "ac10_pension_paise": 1000000,
+            "ac21_edli_paise": 60000,
+            "ac2_admin_paise": 60000
+          }
+        ]
+      }
+    ]
   }
 }

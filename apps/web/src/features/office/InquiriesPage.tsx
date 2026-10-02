@@ -9,6 +9,7 @@ import { useStepUp } from "../stepup/useStepUp";
 import "./InquiriesPage.css";
 import { AfterOrder, DamagesNoticeForm, LevyForm, NoticeApproval, ScrutinyList } from "./ProceedingTools";
 import { MembershipDisputeForm, MembershipOrderForm, ProsecutionPanel } from "./ProsecutionTools";
+import { RecoveryActions } from "./RecoveryActions";
 
 /** Inspections and 7A inquiries (Compliance Manual ch. 2): EO report → DA (T+3) → SS (T+5) → circle officer (T+7) → registration with a
  *  diary number → the officer allotted by size → summons → hearings → the 7A order. */
@@ -181,6 +182,8 @@ export function InquiriesPage() {
           <div className="actions"><button className="primary" disabled={busy} type="submit">Record daily order</button></div></form> : null}
       {["fo.apfc", "fo.oic"].includes(role) && ["CONCLUDED", "PART_ORDERED"].includes(inq.state) && inq.section === "14B"
         ? <LevyForm caseId={open} actions={inq.actions} busy={busy} run={(w, ok, f) => void run(w, ok, f)} ask={stepUp.ask} /> : null}
+      {["fo.apfc", "fo.oic"].includes(role) && ["ORDERED", "PART_ORDERED"].includes(inq.state) && inq.section !== "26B"
+        ? <RecoveryActions caseId={open} busy={busy} run={(w, ok, f) => void run(w, ok, f)} ask={stepUp.ask} /> : null}
       {["fo.apfc", "fo.oic"].includes(role) && inq.state === "ORDERED"
         ? <AfterOrder caseId={open} rank={inq.officer_rank} section={inq.section ?? "7A"} actions={inq.actions} busy={busy} run={(w, ok, f) => void run(w, ok, f)} ask={stepUp.ask} /> : null}
       {["fo.apfc", "fo.oic"].includes(role) && inq.state === "CONCLUDED" && inq.section === "26B"

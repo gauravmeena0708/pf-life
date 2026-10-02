@@ -5,6 +5,7 @@ import { api, command, rupees, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { ScnReplies } from "./ScnReplies";
+import { RecoveryCases } from "./RecoveryCases";
 import "../office/InquiriesPage.css";
 
 /** The establishment's side of a 7A inquiry: the summons and hearing link, the daily orders, its replies, and the order. */
@@ -139,5 +140,6 @@ export function EmployerProceedingsPage() {
       </article>;
     })}
     <ScnReplies />
+    <RecoveryCases />
   </section>;
 }
