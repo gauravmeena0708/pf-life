@@ -703,7 +703,11 @@ tests produced, by role (after `python3 scripts/publish_manuals.py`).
 3. As `emp-signatory`, Returns › VISHWAS: each open 14B demand shows its recalculation (arrears x rate x months), or why it
    is not eligible (a default after 14 June 2024, 7Q interest unpaid). Apply with the undertaking not to appeal; as
    `ro-apfc`, approve — one revised demand replaces them.
-4. As `ro-oic`, grant instalments on a recovery certificate: a bank guarantee of one instalment is required; 40
+4. EEC, 2026: as `emp-preparer`, register an employee who joined in January 2024 (Members › Register). As
+   `emp-signatory`, Returns › *EEC, 2026*: choose them, enter ₹14,000 a month, *Work out the dues* — 27 months, the
+   employee's share waived, ₹100 damages — then declare (step-up) and pay the challan; the employee's ledger shows the
+   period credited.
+5. As `ro-oic`, grant instalments on a recovery certificate: a bank guarantee of one instalment is required; 40
    instalments are refused (Head Office only). As `ro-recovery`, record a missed instalment: recovery resumes.
 
 ## Finding your way: side or top menu, Find a screen

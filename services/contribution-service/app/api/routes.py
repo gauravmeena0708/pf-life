@@ -536,7 +536,13 @@ async def employee_ledger(uan: str, actor: Actor = Depends(EMPLOYER)):
             "SELECT f.wage_month, f.trrn, jl.share, jl.side, jl.amount_paise FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id "
             "JOIN ecr_filings f ON f.id=j.filing_id WHERE j.kind='CONTRIBUTION' AND jl.account_code='AC01_EPF' AND jl.account_link_id=:a "
             "ORDER BY f.wage_month"), {"a": m["account_link_id"]})).mappings().all()
+        eec = (await session.execute(text("SELECT * FROM eec_declarations WHERE account_link_id=:a AND state='PAID'"),
+                                     {"a": m["account_link_id"]})).mappings().first()
     months: dict[str, dict] = {}
+    if eec:                                                    # past months paid under the Employees' Enrolment Campaign, 2026
+        t = eec["totals"] if isinstance(eec["totals"], dict) else json.loads(eec["totals"])
+        months["EEC"] = {"wage_month": f"{eec['from_month']} to {eec['to_month']} (EEC, 2026)", "trrn": eec["trrn"],
+                         "employee_paise": t["AC01_EPF_EE"], "employer_paise": t["AC01_EPF_ER"]}
     for r in rows:
         row = months.setdefault(r["wage_month"], {"wage_month": r["wage_month"], "trrn": r["trrn"], "employee_paise": 0, "employer_paise": 0})
         row[f"{r['share']}_paise"] += r["amount_paise"] if r["side"] == "credit" else -r["amount_paise"]

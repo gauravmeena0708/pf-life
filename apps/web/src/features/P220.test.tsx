@@ -65,7 +65,7 @@ it("gives the empty headings a destination or a reason", () => {
   expect(employer.find((g) => g.label === "Admin")?.items?.map((i) => i.to)).toEqual(["/employer#people-operator", "/employer/establishment#config-change-heading"]);
   const eec = employer.find((g) => g.label === "EEC-2026/VISHWAS")?.items ?? [];
   expect(eec[0].to).toBe("/employer/returns#vishwas-heading");
-  expect(eec[1].note).toMatch(/^Planned/);
+  expect(eec[1].to).toBe("/employer/returns#eec-heading");
   const office = (role: string) => menusFor(role).find((g) => g.label === "Office")?.items ?? [];
   expect(office("fo.da_compliance").find((i) => i.label === "Dashboard")?.to).toBe(homeFor("fo.da_compliance"));   // the role's own home
   expect(office("fo.pro").find((i) => i.label === "Services")?.to).toBe("/office/pro-counter");

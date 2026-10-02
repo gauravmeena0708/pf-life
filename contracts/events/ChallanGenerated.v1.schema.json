@@ -70,7 +70,8 @@
         "kind": {
           "enum": [
             "DIRECT_ADMIN",
-            "DIRECT_MISC"
+            "DIRECT_MISC",
+            "EEC"
           ]
         },
         "total_paise": {

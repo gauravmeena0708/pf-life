@@ -44,7 +44,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.12f** | The rest: DR replication status and failover drill, training sandboxes, Nidhi Aapke Nikat camp requests, totalisation claims and the foreign agency's CoC check, the composite death claim | **Done** (1 Oct 2026) |
 | **P2.12g** | Menu clean-up: screens already built linked from their menus (Composite claim, Know Your Pension Payee Bank, Change Password); every other item without a screen says why — planned (with the slice), awaiting EPFO's definition, or not in the POC | **Done** (1 Oct 2026) |
 | P2.25 | Sources checked: the *to verify* rule values, and the Code on Social Security — which turned up the 2026 Schemes and the ₹25,000 ceiling (findings below) | Done (findings) |
-| P2.26 | The Code's transition. **a**: ₹25,000 wage ceiling from 17 Sep 2026 (a second rule-set version; September split by days in one ECR; pension membership flagged; Form 10C at the ceiling of the exit date); VISHWAS, 2026's real terms; instalments by the circulars (powers, guarantee, Head Office beyond 36, withdrawn on default). **b**: EEC, 2026. **c**: the 2026 Schemes' withdrawal, EPS withdrawal-benefit and EDLI rules (needs the gazette text) | a: Done; b, c: Planned |
+| P2.26 | The Code's transition. **a**: ₹25,000 wage ceiling from 17 Sep 2026 (a second rule-set version; September split by days in one ECR; pension membership flagged; Form 10C at the ceiling of the exit date); VISHWAS, 2026's real terms; instalments by the circulars (powers, guarantee, Head Office beyond 36, withdrawn on default). **b**: EEC, 2026. **c**: the 2026 Schemes' withdrawal, EPS withdrawal-benefit and EDLI rules (needs the gazette text) | a, b: Done; c: Planned |
 | P2.13 | Small gaps: disablement pension (EPS para 15); zonal freezing (categories B and C) and zonal ACC decisions above the RO's limits; district office queues; PPO and UAN card issued to DigiLocker (mock) | Planned |
 | P2.14 | The exempted trust's lifecycle: annual audit filing and the exemption cell's review; surrender and cancellation (RPFC report → ZO → HO → the Exempted Establishments Committee → the appropriate Government); HO's decision; past accumulations transferred in bulk and reconciled with the receipts | Done (bulk transfer and VDR reconciliation stay planned) |
 | P2.15a | PMVBRY (Pradhan Mantri Viksit Bharat Rozgar Yojana): Part A for first timers, Part B for employers adding jobs, the disbursement run and the dashboard — from the scheme guidelines and EPFO's SOP for calculating incentives | Done |
@@ -1326,4 +1326,24 @@ Inspector-cum-Facilitator* to `../manuals/compliance/`. Time limits in the rule 
   rule that 14B damages are 1% a month for defaults from 14 June 2024 (to verify); the 2026 Scheme's exemption of
   unexempted-only for 72 instalments (compliance-service does not know exemption yet); screens for the zone and Head
   Office to grant instalments (the API is ready); September 2026 at the old ceiling in the higher-pension dues.
+
+## P2.26b — how it is built
+
+EEC, 2026 (PIB 2300475 of 17 Aug 2026; notified with the EPF Scheme, 2026): from 1 July to 31 October 2026 an employer may
+enrol employees left out of EPF between 1 April 2009 and 31 March 2026 who still work for it.
+- **Register, then declare.** The employee is registered through the usual onboarding (a face-authenticated UAN, mocked),
+  with the real date of joining. They become a candidate when active, joined in the period and nothing was ever
+  contributed for them. The signatory gives the monthly wages and whether the employee's share was deducted.
+- **The dues, month by month** (contribution-service `eec_routes.py`): from the month of joining (not before April 2009)
+  to March 2026, at each month's ceiling (₹6,500, then ₹15,000 from September 2014). The employer's 12% (8.33% to EPS
+  under 58, the rest to EPF), EDLI and administrative charges; the employee's 12% only if it was deducted, otherwise
+  waived; 7Q interest at the late-payment rate from each month's due date; and ₹100 lump-sum damages. Wages above the
+  ceiling at joining are refused (an excluded employee, not one left out). `GET …/eec-declarations/dues` shows them first.
+- **One challan.** Declaring (step-up for the amount) raises a challan of kind `EEC` (`ChallanGenerated.v1` now allows
+  it); paying it credits the member's EPF account, the pension and EDLI funds, the charges, interest and damages in one
+  balanced journal. The employee's ledger shows the period as one line. One declaration per member ID.
+- **Screens.** Returns › *EEC, 2026* (menu *EEC-2026/VISHWAS*): the terms, the declarations, and a form that works out
+  the dues before declaring.
+- Simplified: one monthly wage for the whole period (the real declaration is month-wise ECRs); the 2026 Scheme's other
+  conditions for the campaign are not read yet (only the PIB release).
 

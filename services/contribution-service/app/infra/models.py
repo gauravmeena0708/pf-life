@@ -483,3 +483,24 @@ class PmvbryInquiry(Base):
     diary_no: Mapped[str] = mapped_column(String(80))
     state: Mapped[str] = mapped_column(String(10))           # PENDING | ORDERED
     demand_id: Mapped[str | None] = mapped_column(String(80), nullable=True)
+
+
+class EecDeclaration(Base):
+    """P2.26b: an employee enrolled under the Employees' Enrolment Campaign, 2026 (PIB 2300475): left out between 1 Apr 2009
+    and 31 Mar 2026, declared by the employer, the past dues paid on one challan (kind EEC)."""
+    __tablename__ = "eec_declarations"
+    declaration_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    establishment_id: Mapped[str] = mapped_column(String(40), index=True)
+    uan: Mapped[str] = mapped_column(String(32))
+    account_link_id: Mapped[str] = mapped_column(String(80), unique=True)          # one declaration per member ID
+    monthly_wages_paise: Mapped[int] = mapped_column(BigInteger)
+    employee_share_deducted: Mapped[bool] = mapped_column(Boolean)
+    from_month: Mapped[str] = mapped_column(String(7))
+    to_month: Mapped[str] = mapped_column(String(7))
+    months: Mapped[list] = mapped_column(JSON)                                      # the month-by-month working
+    totals: Mapped[dict] = mapped_column(JSON)
+    trrn: Mapped[str] = mapped_column(String(17))
+    state: Mapped[str] = mapped_column(String(10))                                  # DUE | PAID
+    declared_by: Mapped[str] = mapped_column(String(80))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+

@@ -326,6 +326,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /employers/me/demands` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ecr-filings` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ecr-filings/{filingId}` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/eec-declarations` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/eec-declarations/dues` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/higher-pension-options` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/joint-declarations` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/kyc-approvals` | W | own establishment (X-Establishment-Id validated against grants) |  |
@@ -353,11 +355,13 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/ecr-filings/{filingId}/cancellations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/ecr-filings/{filingId}/submissions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
+| `POST /employers/me/eec-declarations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/higher-pension-options/{optionId}/dues-previews` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/higher-pension-options/{optionId}/validations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/joint-declarations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/joint-declarations/{jdId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/kyc-approvals/{requestId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
+| `POST /employers/me/members` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/office-transfer-requests` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/proceedings/{caseId}/applications` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/proceedings/{caseId}/submissions` | W | own establishment (X-Establishment-Id validated against grants) |  |

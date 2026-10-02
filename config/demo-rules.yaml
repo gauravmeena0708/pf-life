@@ -146,6 +146,17 @@ vishwas:
     - {months_below: 4, rate_bp_pm: 50}     # two to less than four: 0.50%
     - {rate_bp_pm: 100}                     # four or more: 1%
   settlement_share_bp: 3000               # retired with the 2026 terms; kept so older rule versions still validate
+eec:
+  # Employees' Enrolment Campaign, 2026 (with the EPF Scheme, 2026; PIB 2300475 of 17 Aug 2026): an employer may enrol
+  # employees left out of EPF between joined_from and joined_until, still working on the declaration. Where the
+  # employee's share was not deducted from the wages it is waived; the employer pays its share, interest (7Q, at the
+  # late-payment rate from each month's due date) and administrative charges, and lump-sum damages of ₹100.
+  scheme: "EEC, 2026"
+  open_from: "2026-07-01"
+  open_until: "2026-10-31"
+  joined_from: "2009-04-01"
+  joined_until: "2026-03-31"
+  damages_paise: 10000
 higher_pension:
   # Joint option for pension on higher wages (ILLUSTRATIVE, after the Supreme Court's judgment of 4 November 2022):
   # a member of the pension scheme in service on in_service_on, whose wages were above the wage ceiling, may opt

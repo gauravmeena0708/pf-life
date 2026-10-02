@@ -7,7 +7,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | # | Interface | Coverage | Stakeholders | W | M | P | ? |
 |---|---|---|---|---|---|---|---|
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 15 | 2 | 0 | 0 |
-| 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 101 | 5 | 1 | 0 |
+| 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 104 | 5 | 1 | 0 |
 | 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 89 | 5 | 0 | 0 |
 | 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 124 | 0 | 3 | 4 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 17 | 1 | 0 | 0 |
@@ -73,6 +73,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /employers/me/demands` | W | contribution | employer.owner, employer.signatory |
 | `GET /employers/me/ecr-filings` | W | contribution | employer.operator, employer.signatory |
 | `GET /employers/me/ecr-filings/{filingId}` | W | contribution | employer.operator, employer.signatory |
+| `GET /employers/me/eec-declarations` | W | contribution | employer.signatory |
+| `GET /employers/me/eec-declarations/dues` | W | contribution | employer.signatory |
 | `GET /employers/me/exemption` | W | employer | employer.operator, employer.owner |
 | `GET /employers/me/higher-pension-options` | W | pension | employer.signatory |
 | `GET /employers/me/joint-declarations` | W | member | employer.signatory |
@@ -120,13 +122,14 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /employers/me/ecr-filings/{filingId}/principal-employer-tags` | W | contribution | employer.operator |
 | `POST /employers/me/ecr-filings/{filingId}/submissions` | W | contribution | employer.signatory |
 | `POST /employers/me/ecr-filings/{filingId}/validations` | W | contribution | employer.operator |
+| `POST /employers/me/eec-declarations` | W | contribution | employer.signatory |
 | `POST /employers/me/higher-pension-options/{optionId}/dues-previews` | W | pension | employer.signatory |
 | `POST /employers/me/higher-pension-options/{optionId}/validations` | W | pension | employer.signatory |
 | `POST /employers/me/joint-declarations` | W | member | employer.signatory |
 | `POST /employers/me/joint-declarations/{jdId}/decisions` | W | member | employer.signatory |
 | `POST /employers/me/kyc-approvals/{requestId}/decisions` | W | member | employer.signatory |
 | `POST /employers/me/kyc-bulk-uploads` | W | member | employer.operator |
-| `POST /employers/me/members` | W | member | employer.operator |
+| `POST /employers/me/members` | W | member | employer.operator, employer.signatory |
 | `POST /employers/me/members/bulk-registrations` | W | member | employer.operator |
 | `POST /employers/me/members/exit-bulk-uploads` | W | member | employer.operator |
 | `POST /employers/me/members/{uan}/declarations` | W | member | employer.operator |

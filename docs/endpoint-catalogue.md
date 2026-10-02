@@ -542,6 +542,9 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 |---|---|---|---|---|
 | `POST /employers/me/vishwas-applications` 💰 | Apply under **VISHWAS** (one-time settlement of 14B damages / penalty disputes at reduced rates for past defaults) | W | 1 | compliance |
 | `GET /employers/me/vishwas-applications` | The establishment's VISHWAS applications and its open 14B demands | W | 1 | compliance |
+| `POST /employers/me/eec-declarations` 💰🔐 | **EEC, 2026** (Employees' Enrolment Campaign): declare an employee left out between April 2009 and March 2026 — the past dues month by month at each month's ceiling, the employee's share waived if not deducted, ₹100 damages, one challan that credits the member | W | 1 | contribution |
+| `GET /employers/me/eec-declarations` | The campaign's terms, the employees who may be declared, and the declarations made | W | 1 | contribution |
+| `GET /employers/me/eec-declarations/dues` | The past dues an EEC declaration would raise, month by month, before declaring | W | 1 | contribution |
 | `GET /office/compliance/vishwas-applications` | VISHWAS applications of the office's establishments | W | 1 | compliance |
 | `POST /office/compliance/vishwas-applications/{applicationId}/decisions` 🔐 | Recalculate damages under VISHWAS and decide the application → `DemandRaised.v1` for the revised amount | W | 1 | compliance |
 

@@ -66,7 +66,7 @@ const EMPLOYER: NavGroup[] = [
     link("Higher-pension joint-option validation", "/employer/members#higher-pension-validations-heading"), link("International workers (CoC)", "/employer/international")] },
   { label: "PMVBRY", to: "/employer/pmvbry" },
   { label: "EEC-2026/VISHWAS", items: [link("VISHWAS: settle damages", "/employer/returns#vishwas-heading"),
-    link("EEC-2026 (Employees' Enrolment Campaign)", undefined, "Planned: needs the scheme's notification before it is built")] },
+    link("EEC, 2026: enrol employees left out", "/employer/returns#eec-heading")] },
 ];
 
 /** Field Office Interface: the top-level menus seen on live screens, grouped (the real bar wraps onto 2–3 rows). */

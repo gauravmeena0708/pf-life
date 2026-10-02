@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 267 |
+| Activities | 268 |
 | Stakeholders with at least one API | 94 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 3 |
@@ -268,7 +268,7 @@ Activities: **F01.register** Register establishment online and submit verificati
 
 #### `employer.signatory` — Authorised signatory (registered DSC / e-sign)
 
-Activities: **F01.form5a** File / update Form 5A ownership return and branches (Form 2A), signed with DSC / e-sign; **F01.signatory_profile** View the establishment and what waits for its signature before approving returns and payments; **F01.change_request** Request configuration change, closure / deregistration or office transfer; **F02.kyc_approve** Approve KYC seeded by member / pending for digital signature, with DSC or e-sign; **F02.employer_approvals** Approve queued member changes (Member > Approvals); **F02.jd_attest** Attest, return or reject the Joint Declaration; employer-initiated JD; **F03.ecr_approve** Review, approve and submit ECR (generates TRRN); cancel an unpaid TRRN; **F03.pay** Pay challan online (or via bank counter where allowed) and download the payment receipt; **F03.direct_challan** Create a Direct Challan: administrative / inspection charges, or miscellaneous challan for 14B damages and 7Q interest; pay demands; **F04.attest** Attest claims that need employer attestation; **F04.transfer_attest** Attest pending transfer claims (Online Services > Transfer Claims); **F05.higher_employer** Validate joint options and upload wage details; **F06.employer_reply** Reply and submit evidence in proceedings; **F06.vishwas_apply** Apply under VISHWAS to settle a 14B damages / penalty dispute at reduced rates; **F06.signatory_scn** Reply to a prosecution show-cause notice; **F10.apply** Apply for / extend CoC for a posted worker (IWU portal EMPLOYER login); upload signed application; download CoC
+Activities: **F01.form5a** File / update Form 5A ownership return and branches (Form 2A), signed with DSC / e-sign; **F01.signatory_profile** View the establishment and what waits for its signature before approving returns and payments; **F01.change_request** Request configuration change, closure / deregistration or office transfer; **F02.kyc_approve** Approve KYC seeded by member / pending for digital signature, with DSC or e-sign; **F02.employer_approvals** Approve queued member changes (Member > Approvals); **F02.jd_attest** Attest, return or reject the Joint Declaration; employer-initiated JD; **F03.ecr_approve** Review, approve and submit ECR (generates TRRN); cancel an unpaid TRRN; **F03.pay** Pay challan online (or via bank counter where allowed) and download the payment receipt; **F03.direct_challan** Create a Direct Challan: administrative / inspection charges, or miscellaneous challan for 14B damages and 7Q interest; pay demands; **F04.attest** Attest claims that need employer attestation; **F04.transfer_attest** Attest pending transfer claims (Online Services > Transfer Claims); **F05.higher_employer** Validate joint options and upload wage details; **F06.employer_reply** Reply and submit evidence in proceedings; **F06.vishwas_apply** Apply under VISHWAS to settle a 14B damages / penalty dispute at reduced rates; **F06.eec_declare** Enrol employees left out of EPF under EEC, 2026: register them (face-authenticated UAN), declare them, pay the past dues; **F06.signatory_scn** Reply to a prosecution show-cause notice; **F10.apply** Apply for / extend CoC for a posted worker (IWU portal EMPLOYER login); upload signed application; download CoC
 
 | Endpoint | Status |
 |---|---|
@@ -283,6 +283,8 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `GET /employers/me/demands` | W |
 | `GET /employers/me/ecr-filings` | W |
 | `GET /employers/me/ecr-filings/{filingId}` | W |
+| `GET /employers/me/eec-declarations` | W |
+| `GET /employers/me/eec-declarations/dues` | W |
 | `GET /employers/me/higher-pension-options` | W |
 | `GET /employers/me/joint-declarations` | W |
 | `GET /employers/me/kyc-approvals` | W |
@@ -310,11 +312,13 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `POST /employers/me/ecr-filings/{filingId}/approvals` | W |
 | `POST /employers/me/ecr-filings/{filingId}/cancellations` | W |
 | `POST /employers/me/ecr-filings/{filingId}/submissions` | W |
+| `POST /employers/me/eec-declarations` | W |
 | `POST /employers/me/higher-pension-options/{optionId}/dues-previews` | W |
 | `POST /employers/me/higher-pension-options/{optionId}/validations` | W |
 | `POST /employers/me/joint-declarations` | W |
 | `POST /employers/me/joint-declarations/{jdId}/decisions` | W |
 | `POST /employers/me/kyc-approvals/{requestId}/decisions` | W |
+| `POST /employers/me/members` | W |
 | `POST /employers/me/office-transfer-requests` | W |
 | `POST /employers/me/proceedings/{caseId}/applications` | W |
 | `POST /employers/me/proceedings/{caseId}/submissions` | W |
@@ -1812,6 +1816,7 @@ flowchart LR
   F06_employer_reply["employer.signatory<br/>Reply and submit evidence in proceedings"]
   F06_employer_owner_reply["employer.owner<br/>Follow the establishment's inquiries (diary number, summons,"]
   F06_vishwas_apply["employer.signatory<br/>Apply under VISHWAS to settle a 14B damages / penalty disput"]
+  F06_eec_declare["employer.signatory<br/>Enrol employees left out of EPF under EEC, 2026: register th"]
   F06_vishwas_decide["fo.apfc<br/>Recalculate damages under VISHWAS and decide; revised demand"]
   F06_appeal["ext.cgit<br/>Tribunal hears 7-I appeals and decides 7-O pre-deposit / wai"]
   F06_courts["ext.courts<br/>Writs and orders on EPFO matters"]

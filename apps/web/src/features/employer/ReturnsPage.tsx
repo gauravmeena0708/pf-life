@@ -8,6 +8,7 @@ import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
+import { EecSection } from "./EecSection";
 
 const base = "/api/v1/employers/me";
 
@@ -265,6 +266,7 @@ export function ReturnsPage() {
           disabled={busy || !!stepUp.request || !selectedDemands.length || !declaration}>Apply for settlement</button></div>
       </form> : null}
     </section>
+    <EecSection signatory={signatory} />
 
     {signatory ? <section className="card stack" aria-labelledby="direct-challan-heading"><h2 id="direct-challan-heading">Direct challan</h2>
       <form className="stack" onSubmit={(e) => void raiseChallan(e)}>

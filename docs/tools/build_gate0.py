@@ -230,7 +230,7 @@ EVENTS = [
     ("SignatoryRevoked", "employer", ["gateway", "audit"], "establishment", 1, {"establishment_id": S, "signatory_subject": S, "grant_id": S, "scope": {"enum": ["grant", "subject"]}, "revoked_by": S}),
     ("ECRValidated", "contribution", ["reporting"], "ecr_filing", 1, {"filing_id": S, "establishment_id": S, "wage_month": S, "member_count": N}),
     ("ECRSubmitted", "contribution", ["payment-simulator", "reporting", "audit"], "ecr_filing", 1, {"filing_id": S, "establishment_id": S, "trrn": S, "total_paise": N, "rule_version": S}),
-    ("ChallanGenerated", "contribution", ["payment-simulator", "reporting", "audit"], "challan", 1, {"trrn": S, "establishment_id": S, "kind": {"enum": ["DIRECT_ADMIN", "DIRECT_MISC"]}, "total_paise": N, "reference_id": S}),
+    ("ChallanGenerated", "contribution", ["payment-simulator", "reporting", "audit"], "challan", 1, {"trrn": S, "establishment_id": S, "kind": {"enum": ["DIRECT_ADMIN", "DIRECT_MISC", "EEC"]}, "total_paise": N, "reference_id": S}),
     ("ChallanStatusChanged", "contribution", ["payment-simulator", "reporting", "audit"], "challan", 1, {"trrn": S, "status": {"enum": ["CANCELLED", "REJECTED", "PAYMENT_REJECTED", "SETTLED_OFFLINE"]}, "reason": S}),
     ("PaymentConfirmed", "payment-simulator", ["contribution", "claim", "workflow", "audit"], "payment", 1, {"payment_id": S, "purpose": {"enum": ["CHALLAN", "CLAIM_SETTLEMENT", "DEMAND"]}, "reference_type": {"enum": ["trrn", "claim", "demand"]}, "reference_id": S, "amount_paise": N, "mock": B}),
     ("ContributionPosted", "contribution", ["member", "reporting", "audit"], "ledger_journal", 1, {"journal_id": S, "payment_id": S, "filing_id": S, "establishment_id": S, "wage_month": S, "postings": POSTINGS}),

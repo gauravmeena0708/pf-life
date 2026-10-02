@@ -1,11 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { api, command, getSession } from "../api/client";
 import "../i18n";
+import { EecSection } from "./employer/EecSection";
 import { ReturnsPage } from "./employer/ReturnsPage";
+const { ask } = vi.hoisted(() => ({ ask: vi.fn() }));
 vi.mock("../api/client", async (original) => ({ ...await original<typeof import("../api/client")>(), api: vi.fn(), command: vi.fn(), getSession: vi.fn() }));
-vi.mock("./stepup/useStepUp", () => ({ useStepUp: () => ({ ask: vi.fn(), request: null, onConfirmed: vi.fn(), onCancel: vi.fn() }) }));
+vi.mock("./stepup/useStepUp", () => ({ useStepUp: () => ({ ask, request: null, onConfirmed: vi.fn(), onCancel: vi.fn() }) }));
 vi.mock("./stepup/StepUpDialog", () => ({ StepUpDialog: () => null }));
 let responses: Record<string, unknown>;
 beforeEach(() => { vi.clearAllMocks(); responses = {};
@@ -35,4 +37,28 @@ it("shows VISHWAS, 2026: each 14B demand recalculated, or why it is not eligible
   expect(box("DEM-B").disabled).toBe(true);
   expect(box("DEM-A").disabled).toBe(false);
   expect(screen.getByLabelText(/undertake not to pursue any further appeal/)).toBeTruthy();
+});
+
+it("works out the EEC, 2026 dues of a left-out employee and declares them with step-up", async () => {
+  ask.mockResolvedValue("step-token");
+  const totals = { AC01_EPF_EE: 0, AC01_EPF_ER: 1584000, AC10_EPS: 3600000, AC21_EDLI: 216000, AC02_ADMIN: 216000, INTEREST_7Q: 500000, DAMAGES_14B: 10000, TOTAL: 6126000 };
+  responses["/api/v1/employers/me/eec-declarations"] = {
+    scheme: { scheme: "EEC, 2026", open_from: "2026-07-01", open_until: "2026-10-31", joined_from: "2009-04-01", joined_until: "2026-03-31", damages_paise: 10000 },
+    open: true, candidates: [{ uan: "100000000777", name: "LEFT OUT DEMO", date_of_joining: "2023-04-10" }], declarations: [] };
+  responses["/api/v1/employers/me/eec-declarations/dues?uan=100000000777&monthly_wages_paise=1200000&employee_share_deducted=false"] =
+    { from_month: "2023-04", to_month: "2026-03", months: new Array(36).fill({}), totals_paise: totals, employee_share_waived: true };
+  vi.mocked(command).mockResolvedValueOnce({ data: { from_month: "2023-04", to_month: "2026-03", months: [], totals_paise: totals, employee_share_waived: true, trrn: "TRRN9" }, meta: {} });
+  render(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+    <MemoryRouter><EecSection signatory /></MemoryRouter></QueryClientProvider>);
+  const form = await screen.findByRole("form", { name: "EEC declaration" });
+  fireEvent.change(within(form).getByLabelText("Monthly wages (₹)"), { target: { value: "12000" } });
+  fireEvent.click(within(form).getByLabelText(/I declare/));
+  fireEvent.click(within(form).getByRole("button", { name: "Work out the dues" }));
+  expect(await within(form).findByText(/36 months\) — employee's share waived/)).toBeTruthy();
+  expect(within(form).getByText(/₹61,260/, { selector: "strong" })).toBeTruthy();
+  fireEvent.click(within(form).getByRole("button", { name: "Declare and raise the challan" }));
+  await waitFor(() => expect(ask).toHaveBeenCalledWith(expect.objectContaining({ action: "declare-eec", resourceId: "100000000777", amountPaise: 6126000 })));
+  await waitFor(() => expect(command).toHaveBeenLastCalledWith("POST", "/api/v1/employers/me/eec-declarations",
+    { uan: "100000000777", monthly_wages_paise: 1200000, employee_share_deducted: false, declaration: true }, { stepUpToken: "step-token" }));
+  expect(await screen.findByText(/Challan TRRN9 raised/)).toBeTruthy();
 });

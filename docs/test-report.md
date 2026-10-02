@@ -98,6 +98,17 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 26b: EEC, 2026 (2 October 2026)
+
+Unit: contribution-service 105 (new `test_eec.py`: refused outside the window, for a member contributed for, above the
+ceiling at joining, or declared twice; 36 months at ₹12,000 — the employer's ₹440 + ₹1,000 a month, EDLI and charges, the
+employee's share waived, ₹100 damages, interest; the challan paid into one balanced journal crediting the member; the
+ceiling of each month; the employee's share when deducted; the period on the employee's ledger). Web 293. End to end
+103 of 104 (new `test_eec.py`: register a left-out employee, work out the dues, declare, pay, the ledger credited —
+repeatable; refused once the campaign closes); journey B stops on member A's used-up balance as before (`make reset`).
+Must-deny 18; UI smoke 2. Found on the way, fixed: the challan event's contract allowed only direct challans (`EEC`
+added); the gateway asks for step-up on every call to a step-up endpoint, so working out the dues became its own read.
+
 ## Update — text size for senior citizens (2 October 2026)
 
 Web 292 (the control steps to 150%, remembers it and returns to the default); the phone-width end-to-end tests 5 of 5;

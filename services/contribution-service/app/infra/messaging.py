@@ -74,6 +74,10 @@ async def handle_payment_confirmed(session, event):
     if not row or row["status"] == "PAID": return
     if int(p["amount_paise"]) != int(row["total_paise"]):
         raise ValueError("confirmed payment amount does not match challan total")
+    if row.get("kind") == "EEC":                             # past dues under the Employees' Enrolment Campaign, 2026
+        from app.api.eec_routes import post_eec_challan
+        await post_eec_challan(session, row, p)
+        return
     if row.get("kind", "ECR") != "ECR":                      # a direct challan: administrative charges, or 14B / 7Q
         await _post_direct_challan(session, row, p, event)
         return

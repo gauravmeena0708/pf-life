@@ -4,9 +4,9 @@
   "interfaces": 21,
   "stakeholders": 114,
   "stakeholders_with_access": 94,
-  "activities": 267,
+  "activities": 268,
   "endpoints": {
-   "W": 445,
+   "W": 448,
    "M": 21,
    "P": 4,
    "?": 5
@@ -39,7 +39,7 @@
    "coverage": "Working",
    "purpose": "Employers: registration, members and KYC, monthly returns and challans, demands, attestations, exits.",
    "endpoints": {
-    "W": 101,
+    "W": 104,
     "M": 5,
     "P": 1,
     "?": 0
@@ -781,7 +781,7 @@
    "name": "Authorised signatory (registered DSC / e-sign)",
    "group": "B. Employers and intermediaries",
    "endpoints": {
-    "W": 54,
+    "W": 58,
     "M": 2,
     "P": 0,
     "?": 0
@@ -842,6 +842,10 @@
     {
      "id": "F06.vishwas_apply",
      "does": "Apply under VISHWAS to settle a 14B damages / penalty dispute at reduced rates"
+    },
+    {
+     "id": "F06.eec_declare",
+     "does": "Enrol employees left out of EPF under EEC, 2026: register them (face-authenticated UAN), declare them, pay the past dues"
     },
     {
      "id": "F06.signatory_scn",
@@ -4756,6 +4760,16 @@
    "status": "BUILT",
    "endpoints": 2,
    "src": "SS, WEB"
+  },
+  {
+   "id": "F06.eec_declare",
+   "flow": "F06",
+   "actor": "employer.signatory",
+   "does": "Enrol employees left out of EPF under EEC, 2026: register them (face-authenticated UAN), declare them, pay the past dues",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "PIB 2300475"
   },
   {
    "id": "F06.vishwas_decide",

@@ -1257,6 +1257,30 @@ stakeholders:
     step_up: false
     via:
     - F06.vishwas_apply
+  - endpoint: GET /employers/me/eec-declarations
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.eec_declare
+  - endpoint: GET /employers/me/eec-declarations/dues
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.eec_declare
+  - endpoint: POST /employers/me/eec-declarations
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: true
+    via:
+    - F06.eec_declare
+  - endpoint: POST /employers/me/members
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.eec_declare
   - endpoint: GET /employers/me/prosecutions
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
