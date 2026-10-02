@@ -136,7 +136,7 @@ async def file_26q(body: FilingInput, actor: Actor = Depends(require_stakeholder
         await add_event(session, producer="claim-service", event_type="TdsStatementFiled.v1", aggregate_type="tds_filing",
                         aggregate_id=filing_id, correlation_id=actor.correlation_id,
                         payload={"filing_id": filing_id, "office_id": office, "financial_year": body.financial_year,
-                                 "quarter": body.quarter, "deductees": deductees, "tds_paise": total_tds,
+                                 "quarter": body.quarter, "deductees": len(deductees), "tds_paise": total_tds,   # a count: the event carries no list of members
                                  "acknowledgement": acknowledgement})
         await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="tds.statement_filed",
                     target_type="tds_filing", target_id=filing_id, detail=acknowledgement)

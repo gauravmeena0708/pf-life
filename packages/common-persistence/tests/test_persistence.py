@@ -47,7 +47,10 @@ def test_envelope_requires_version():
         envelope(producer="p", event_type="NoVersion", aggregate_type="a", aggregate_id="1", payload={}, correlation_id="c")
 
 
-def test_outbox_row_written_in_callers_transaction(sessions):
+def test_outbox_row_written_in_callers_transaction(sessions, monkeypatch):
+    import epfo_persistence.contracts as contracts
+    monkeypatch.setattr(contracts, "_validator", lambda event_type: None)    # X.v1 is a made-up event with no contract
+
     async def go():
         async with sessions() as s:
             async with s.begin():

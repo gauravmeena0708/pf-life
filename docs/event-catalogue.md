@@ -49,7 +49,7 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `TdsStatementFiled.v1` | claim | audit | tds_filing | 1 |
 | `UanAllotted.v1` | member | audit | member | 1 |
 | `InoperativeAccountVerified.v1` | member | contribution, audit | member_account | 1 |
-| `AccountReactivated.v1` | contribution | audit | member_account | 1 |
+| `AccountReactivated.v1` | contribution | audit | account | 1 |
 | `EstablishmentClosed.v1` | employer | contribution, audit | establishment | 1 |
 | `EstablishmentOfficeTransferred.v1` | employer | contribution, claim, member, workflow, compliance, audit | establishment | 1 |
 | `PrincipalEmployerTagged.v1` | contribution | reporting, audit | ecr_filing | 1 |
@@ -60,8 +60,8 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `AuditParaDecided.v1` | audit |  | audit_para | 1 |
 | `PrivacyRequestDecided.v1` | audit | member | privacy_request | 1 |
 | `RtiReplied.v1` | grievance | audit | rti_request | 1 |
-| `FundPositionsReceived.v1` | reporting | audit | fund_position | 1 |
-| `FailoverDrillRecorded.v1` | platform | audit | dr_drill | 1 |
+| `FundPositionsReceived.v1` | reporting | audit | fund_positions | 1 |
+| `FailoverDrillRecorded.v1` | platform | audit | failover_drill | 1 |
 | `TrainingSandboxCreated.v1` | platform | audit | training_sandbox | 1 |
 | `CampRequestTaken.v1` | workflow | audit | camp_request | 1 |
 | `TotalisationClaimRouted.v1` | international | audit | totalisation_claim | 1 |
@@ -81,21 +81,21 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `NotificationDeliveryFailed.v1` | member | audit | notification_delivery | 1 |
 | `PmvbryOptionExercised.v1` | contribution | audit | establishment | 1 |
 | `PmvbryIncentiveDisbursed.v1` | contribution | audit, reporting | pmvbry_run | 1 |
-| `TrustAuditFiled.v1` | employer | audit | trust_audit | 1 |
-| `ExemptionSurrenderRequested.v1` | employer | audit | exemption_proceeding | 1 |
-| `ExemptionShowCauseIssued.v1` | employer | audit | exemption_proceeding | 1 |
-| `ExemptionProceedingAdvanced.v1` | employer | audit | exemption_proceeding | 1 |
+| `TrustAuditFiled.v1` | employer | audit | establishment | 1 |
+| `ExemptionSurrenderRequested.v1` | employer | audit | establishment | 1 |
+| `ExemptionShowCauseIssued.v1` | employer | audit | establishment | 1 |
+| `ExemptionProceedingAdvanced.v1` | employer | audit | establishment | 1 |
 | `ExemptionStatusChanged.v1` | employer | contribution, claim, pension, audit | establishment | 1 |
 | `TrustReturnFiled.v1` | contribution | audit | trust_return | 1 |
 | `TrustFlagActioned.v1` | contribution | audit | trust_flag | 1 |
 | `StaffPostingChanged.v1` | workflow | member, claim, contribution, grievance, intelligence, compliance, international, pension, employer, reporting, audit | staff_posting | 1 |
 | `AutoTransferConfirmed.v1` | claim | contribution, audit | auto_transfer | 1 |
 | `TransferPosted.v1` | contribution | claim, member, workflow, pension, audit | ledger_journal | 1 |
-| `PolicyPublished.v1` | platform | claim, contribution, compliance, workflow, grievance, intelligence, pension, audit | rule_set | 1 |
+| `PolicyPublished.v1` | platform | claim, contribution, compliance, workflow, grievance, intelligence, pension, reporting, audit | rule_set | 1 |
 | `ClaimStateChanged.v1` | claim | workflow, reporting, audit | claim | 1 |
 | `RiskSignalReviewed.v1` | intelligence | claim, workflow, reporting, audit | risk_signal | 1 |
 | `SecurityEventRecorded.v1` | audit | intelligence, member, gateway | security_event | 1 |
-| `NotificationRequested.v1` | claim, grievance, member, contribution | member | notification | 1 |
+| `NotificationRequested.v1` | claim, grievance, member, contribution, pension | member | notification | 1 |
 | `DemandRaised.v1` | compliance | contribution, audit | demand | 1 |
 | `DemandStateChanged.v1` | contribution | compliance, payment-simulator, reporting, audit | demand | 1 |
 | `LedgerReversed.v1` | contribution | claim, member, workflow, reporting, audit | ledger_journal | 1 |

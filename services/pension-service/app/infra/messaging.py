@@ -97,7 +97,7 @@ async def on_transfer_posted(session: AsyncSession, event: dict[str, Any]) -> No
         service_months=service_months, breaks_months=breaks_months, transferred_at=datetime.now(UTC)))
     await session.execute(update(eps_accounts).where(eps_accounts.c.account_link_id == frm).values(
         transferred_to=to, breaks_months=breaks_months))
-    await add_event(session, producer="pension-service", event_type="EpsServiceTransferred.v1", aggregate_type="eps_transfer",
+    await add_event(session, producer="pension-service", event_type="EpsServiceTransferred.v1", aggregate_type="transfer",
                     aggregate_id=transfer_id, correlation_id=event["correlation_id"], payload={
                         "transfer_id": transfer_id, "from_account_link_id": frm, "to_account_link_id": to,
                         "service_months": service_months, "breaks_months": breaks_months})

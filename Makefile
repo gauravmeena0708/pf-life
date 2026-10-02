@@ -4,7 +4,7 @@ export PYTHONPATH := $(CURDIR)/packages/common-auth-client:$(CURDIR)/packages/co
 SERVICES := employer-service member-service contribution-service claim-service payment-simulator workflow-service \
             grievance-service audit-service reporting-service intelligence-service pension-service platform-service compliance-service international-service mock-integrations
 
-.PHONY: help env up up-lite up-direct down reset ps logs migrate seed test test-packages test-services e2e security resilience check-docs scaffold demo
+.PHONY: help env up up-lite up-direct down reset ps logs migrate seed test test-packages test-services e2e security resilience check-docs scaffold demo consistency
 
 help:
 	@echo "make env | up | up-lite | up-direct | down | reset | ps | logs | migrate | seed | test | e2e | security | resilience | check-docs | scaffold | demo"
@@ -48,6 +48,9 @@ test-packages:
 test-services:
 	@for s in $(SERVICES); do echo "== $$s"; (cd services/$$s && python3 -m pytest -q -p no:cacheprovider) || exit 1; done
 	@test ! -d apps/gateway/tests || (cd apps/gateway && python3 -m pytest -q -p no:cacheprovider)
+
+consistency:
+	python3 scripts/consistency_check.py   # copies of shared facts across services agree (needs the stack running)
 
 e2e:
 	python3 -m pytest -q -p no:cacheprovider tests/e2e   # needs the stack running (make up) and Playwright + Chromium

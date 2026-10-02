@@ -28,7 +28,7 @@
       "const": 1
     },
     "aggregate_type": {
-      "const": "trust_audit"
+      "const": "establishment"
     },
     "aggregate_id": {
       "type": "string"

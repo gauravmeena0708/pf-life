@@ -98,7 +98,19 @@
                   "SUSPENSE_RECEIPTS",
                   "CLAIMS_PAYABLE",
                   "BANK_SETTLEMENT",
-                  "DAMAGES_INTEREST"
+                  "DAMAGES_INTEREST",
+                  "ADJUSTMENT_SUSPENSE",
+                  "INTEREST_EXPENSE",
+                  "INTEREST_SUSPENSE",
+                  "OPENING_BALANCE_BF",
+                  "TDS_PAYABLE",
+                  "PAYABLE_TO_TRUSTS",
+                  "TRUST_TRANSFER_RECEIVABLE",
+                  "SDS_TRANSFER_RECEIVED",
+                  "SECURITIES_TRANSFER_RECEIVED",
+                  "DAMAGES_14B",
+                  "INTEREST_7Q",
+                  "DUES_7A"
                 ]
               },
               "side": {

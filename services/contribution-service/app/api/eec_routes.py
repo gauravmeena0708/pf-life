@@ -199,3 +199,7 @@ async def post_eec_challan(session, row: Any, p: dict[str, Any]) -> None:
                               {"j": jid, "a": line["account_code"], "s": line["side"], "n": line["amount_paise"],
                                "l": line.get("account_link_id"), "h": line.get("share")})
     await session.execute(text("UPDATE eec_declarations SET state='PAID' WHERE declaration_id=:d"), {"d": d["declaration_id"]})
+    # claim-service learns the credit as it does a trust's past accumulations (found missing by the consistency check, P2.27)
+    await add_event(session, producer="contribution-service", event_type="LedgerAdjusted.v1", aggregate_type="ledger_journal", aggregate_id=jid,
+                    correlation_id=None, payload={"adjustment_id": d["declaration_id"], "journal_id": jid, "account_link_id": d["account_link_id"],
+                                                  "appendix_type": "EEC_ARREARS", "postings": lines})

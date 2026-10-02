@@ -45,6 +45,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.12g** | Menu clean-up: screens already built linked from their menus (Composite claim, Know Your Pension Payee Bank, Change Password); every other item without a screen says why — planned (with the slice), awaiting EPFO's definition, or not in the POC | **Done** (1 Oct 2026) |
 | P2.25 | Sources checked: the *to verify* rule values, and the Code on Social Security — which turned up the 2026 Schemes and the ₹25,000 ceiling (findings below) | Done (findings) |
 | P2.26 | The Code's transition. **a**: ₹25,000 wage ceiling from 17 Sep 2026 (a second rule-set version; September split by days in one ECR; pension membership flagged; Form 10C at the ceiling of the exit date); VISHWAS, 2026's real terms; instalments by the circulars (powers, guarantee, Head Office beyond 36, withdrawn on default). **b**: EEC, 2026. **c**: the 2026 Schemes' withdrawal, EPS withdrawal-benefit and EDLI rules (needs the gazette text) | a, b: Done; c: Planned |
+| P2.27 | Contracts and copies: every event checked against its contract in every unit test; a cross-service consistency check of the facts services copy, run after the end-to-end suite in CI | Done |
 | P2.13 | Small gaps: disablement pension (EPS para 15); zonal freezing (categories B and C) and zonal ACC decisions above the RO's limits; district office queues; PPO and UAN card issued to DigiLocker (mock) | Done (a: disablement pension; b: zone and Head Office decide instalments beyond a region's power — zonal freezing and grievance escalation were already built); district queues dropped; DigiLocker moved to P2.21 |
 | P2.14 | The exempted trust's lifecycle: annual audit filing and the exemption cell's review; surrender and cancellation (RPFC report → ZO → HO → the Exempted Establishments Committee → the appropriate Government); HO's decision; past accumulations transferred in bulk and reconciled with the receipts | Done |
 | P2.15a | PMVBRY (Pradhan Mantri Viksit Bharat Rozgar Yojana): Part A for first timers, Part B for employers adding jobs, the disbursement run and the dashboard — from the scheme guidelines and EPFO's SOP for calculating incentives | Done |
@@ -1416,4 +1417,29 @@ Tests first; each found a gap that is now closed.
   (`E-AFTER-EXIT`) with the way forward: a court-ordered reinstatement is recorded by correcting the exit date (the
   employer's exit correction, approved), then a supplementary return for those months. Not built: clearing an exit for a
   member reinstated and still working; interest on back wages; the pension recomputed.
+
+## P2.27 — how it is built (contracts and copies)
+
+- **Every event against its contract.** `add_event` (common-persistence) now checks each envelope against
+  `contracts/events/<Event>.schema.json` wherever the contracts can be found — a checkout, so every service's unit tests,
+  locally and in CI's `make test` (jsonschema is in the package's test extras). A deployed service has no contracts and
+  skips it. A mismatch fails the producer's own test and prints `CONTRACT VIOLATION: …` naming each difference.
+- **What it found** — events that had drifted from their contracts, never noticed because no consumer checks:
+  - stale contracts, corrected to what producers and consumers exchange: `DemandStateChanged` (kind `DUES_7A`, state
+    `WITHDRAWN`), `TransferPosted` (a trust leg's source, destination and service), `MemberChangeApproved` (parameters are
+    `{parameter, value}`), `InterestCredited` (postings are objects), `NotificationRequested` (pension-service sends it),
+    the ledger's account codes (trust receivable, SDS and securities received, interest and TDS accounts…), and the
+    aggregate types of seven events;
+  - producers corrected: `EpsServiceTransferred` (aggregate `transfer`), `TdsStatementFiled` (a count of deductees, not a
+    list of members), `ExemptionShowCauseIssued` (now carries its grounds).
+- **Copies agree** (`scripts/consistency_check.py`, `make consistency`; CI runs it after the end-to-end suite on its fresh
+  stack). Read-only, it compares an exempted establishment's status and end date (employer vs contribution, claim,
+  pension), a member ID's date of exit (member vs contribution, claim, pension), a member ID's balance (the ledger vs the
+  claims projection), each demand's state and amount (contribution vs compliance), and the published rule sets (platform
+  vs every service that keeps them). On first run it found:
+  - **EEC credits never reached claim-service** (P2.26b) — the ledger held them, the claims projection did not, so the
+    member could not claim them. The payment now announces the credit (`LedgerAdjusted.v1`, `EEC_ARREARS`).
+  - **reporting-service never received a published rule set** — it applied the baseline whatever was published. It now
+    keeps the published versions like the other services. (Two reporting screens still read the baseline directly: the
+    claims SLA on the office dashboard and the due day in the compliance summary — to move to the version in force.)
 

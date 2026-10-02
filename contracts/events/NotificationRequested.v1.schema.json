@@ -38,7 +38,8 @@
         "claim-service",
         "grievance-service",
         "member-service",
-        "contribution-service"
+        "contribution-service",
+        "pension-service"
       ]
     },
     "occurred_at": {

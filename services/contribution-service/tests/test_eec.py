@@ -96,3 +96,21 @@ def test_a_pension_in_payment_is_known_to_the_return(ctx):
                              "pension_from": "2026-09-01"}, "PpoIssued.v1")
     assert q("SELECT uan, ppo_id FROM eps_pensioners WHERE uan IN ('100000000777', '100000000778')") == [("100000000777", "PPO-DEMO-0009")]
     assert ("100000000901", "PPO-DEMO-0001") in q("SELECT uan, ppo_id FROM eps_pensioners")              # seeded
+
+
+def test_paying_the_declaration_tells_the_claims_projection(ctx, monkeypatch):
+    """P2.27 found it: the member's credit reached the ledger but not claim-service; it is now announced (LedgerAdjusted)."""
+    import json as _json
+    import app.api.eec_routes as eec
+    monkeypatch.setattr(eec, "today", lambda: date(2026, 10, 1))
+    client, q = ctx
+    regular_posted(client)
+    left_out(uan="100000000781", link="AL-EEC-5")
+    body = {"uan": "100000000781", "monthly_wages_paise": 1200000, "employee_share_deducted": False, "declaration": True}
+    t = dues(client, body).json()["data"]["totals_paise"]
+    r = client.post(URL, json=body, headers=signatory({"action": "declare-eec", "resource_id": "100000000781", "amount_paise": t["TOTAL"]})).json()["data"]
+    pay(r["trrn"], t["TOTAL"], "PAY-EEC-5")
+    [adjusted] = [_json.loads(p)["envelope"]["payload"] if isinstance(p, str) else p["envelope"]["payload"]
+                  for (p,) in q("SELECT payload FROM outbox WHERE event_type='LedgerAdjusted.v1'")]
+    assert adjusted["appendix_type"] == "EEC_ARREARS" and adjusted["account_link_id"] == "AL-EEC-5"
+    assert sum(x["amount_paise"] for x in adjusted["postings"] if x.get("account_link_id") == "AL-EEC-5") == t["AC01_EPF_ER"]

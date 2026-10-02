@@ -69,7 +69,23 @@
         "parameters": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "parameter",
+              "value"
+            ],
+            "properties": {
+              "parameter": {
+                "type": "string"
+              },
+              "value": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
           }
         },
         "approver_subject": {

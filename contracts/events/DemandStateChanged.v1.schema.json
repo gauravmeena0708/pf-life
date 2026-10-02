@@ -74,7 +74,8 @@
         "kind": {
           "enum": [
             "DAMAGES_14B",
-            "INTEREST_7Q"
+            "INTEREST_7Q",
+            "DUES_7A"
           ]
         },
         "trrn": {
@@ -96,7 +97,8 @@
             "OPEN",
             "KNOCKED_OFF",
             "WAIVED",
-            "PAID"
+            "PAID",
+            "WITHDRAWN"
           ]
         },
         "working": {

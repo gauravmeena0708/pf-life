@@ -308,7 +308,8 @@ async def cancellation(estId: str, body: CancellationInput, actor: Actor = Depen
         row = await _create(session, actor, estId, "CANCELLATION", "SHOW_CAUSE_ISSUED", body.model_dump(), reply_due=due,
                             step="SHOW_CAUSE_ISSUED")
         await _event(session, "ExemptionShowCauseIssued.v1", estId,
-                     {"proceeding_id": row["proceeding_id"], "establishment_id": estId, "reply_due": _iso(due)})
+                     {"proceeding_id": row["proceeding_id"], "establishment_id": estId, "grounds": [g.code for g in body.grounds],
+                      "reply_due": _iso(due)})
         view = await _view(session, row)
     return envelope(view)
 

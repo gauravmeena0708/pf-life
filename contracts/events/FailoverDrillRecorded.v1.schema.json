@@ -28,7 +28,7 @@
       "const": 1
     },
     "aggregate_type": {
-      "const": "dr_drill"
+      "const": "failover_drill"
     },
     "aggregate_id": {
       "type": "string"

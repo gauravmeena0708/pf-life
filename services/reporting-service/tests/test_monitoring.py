@@ -75,3 +75,27 @@ def test_grievance_metrics_from_events(ctx):
 def test_members_cannot_see_monitoring(ctx):
     client, _ = ctx
     assert client.get("/api/v1/monitoring/grievances", headers=hdr("member")).status_code == 403
+
+
+def test_a_published_rule_set_reaches_reporting(ctx):
+    """P2.27: reporting looked rules up (investment pattern bands) but never received a published version — always the
+    baseline. It now keeps the published versions like every other service."""
+    import copy
+    from datetime import date
+    import app.infra.db as db
+    from epfo_persistence.policy import baseline, policy_metadata, rules_on
+    _, deliver = ctx
+
+    async def tables():
+        async with db.engine().begin() as c:
+            await c.run_sync(policy_metadata.create_all)
+    asyncio.run(tables())
+    doc = copy.deepcopy(baseline())
+    doc.update(rule_version="demo-rules-2026.5", effective_from="2026-10-01")
+    deliver("PolicyPublished.v1", {"version_id": "POL-5", "rule_version": "demo-rules-2026.5", "effective_from": "2026-10-01",
+                                   "document_sha256": "x" * 64, "approved_by_role": "ho.cpfc", "document": doc})
+
+    async def version():
+        async with db.sessions()() as s:
+            return (await rules_on(s, date(2026, 10, 2)))["rule_version"]
+    assert asyncio.run(version()) == "demo-rules-2026.5"

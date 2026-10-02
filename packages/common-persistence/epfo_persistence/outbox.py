@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from epfo_observability import correlation_id as current_correlation_id
 
+from .contracts import check
 from .events import envelope
 
 metadata = MetaData()
@@ -26,6 +27,7 @@ async def add_event(session: AsyncSession, *, producer: str, event_type: str, ag
     The stored payload is the full envelope, so the relay publishes exactly what was committed."""
     body = envelope(producer=producer, event_type=event_type, aggregate_type=aggregate_type, aggregate_id=aggregate_id,
                     payload=payload, correlation_id=correlation_id or current_correlation_id(), causation_id=causation_id)
+    check(body)                                            # the event's contract (a checkout: every unit test is a contract test)
     await session.execute(insert(outbox_table).values(
         event_id=body["event_id"], event_type=event_type, aggregate_type=aggregate_type, aggregate_id=aggregate_id,
         payload={"producer": producer, "envelope": body}, correlation_id=body["correlation_id"], attempts=0))

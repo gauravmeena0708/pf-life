@@ -65,6 +65,9 @@ jobs:
             python -m pytest -q -p no:cacheprovider "tests/$SUITE" --junitxml=ci-results/results.xml
             python scripts/ci/stack_checks.py results ci-results/results.xml
           fi
+      - name: Copies of shared facts agree across services
+        if: matrix.suite == 'e2e'
+        run: python scripts/consistency_check.py
       - name: Collect stack diagnostics
         if: always()
         run: |

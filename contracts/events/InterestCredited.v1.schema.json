@@ -72,7 +72,30 @@
         "postings": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "account_link_id",
+              "journal_id",
+              "employee_paise",
+              "employer_paise"
+            ],
+            "properties": {
+              "account_link_id": {
+                "type": "string"
+              },
+              "journal_id": {
+                "type": "string"
+              },
+              "employee_paise": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "employer_paise": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
           }
         }
       }

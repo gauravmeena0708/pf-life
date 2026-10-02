@@ -28,7 +28,7 @@
       "const": 1
     },
     "aggregate_type": {
-      "const": "member_account"
+      "const": "account"
     },
     "aggregate_id": {
       "type": "string"

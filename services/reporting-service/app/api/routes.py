@@ -17,6 +17,7 @@ from app.infra.db import sessions
 from app.infra.tables import claim_facts, contribution_facts, event_freshness, grievance_facts, principal_employer_tags
 from epfo_auth import Actor, require_stakeholder
 from epfo_observability import envelope
+from epfo_persistence.policy import on_policy_published
 
 router = APIRouter()
 MONITORS = require_stakeholder("fo.rpfc1", "ho.cpfc", "ho.customer_service", "zo.acc")
@@ -198,6 +199,7 @@ HANDLERS = {
     "CaseDecisionSubmitted.v1": on_observed,
     "RiskSignalRaised.v1": on_observed,
     "StaffPostingChanged.v1": on_staff_posting,
+    "PolicyPublished.v1": on_policy_published,     # P2.27: reporting applies the published rules, not only the baseline
 }
 EVENT_PRODUCERS = {
     **{name: "grievance-service" for name in GRIEVANCE_SOURCE},
@@ -208,6 +210,7 @@ EVENT_PRODUCERS = {
     "CaseDecisionSubmitted.v1": "workflow-service",
     "RiskSignalRaised.v1": "intelligence-service",
     "StaffPostingChanged.v1": "workflow-service",
+    "PolicyPublished.v1": "platform-service",
 }
 BINDINGS = [f"{EVENT_PRODUCERS[name]}.{name}" for name in HANDLERS]
 

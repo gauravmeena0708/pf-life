@@ -28,7 +28,7 @@
       "const": 1
     },
     "aggregate_type": {
-      "const": "fund_position"
+      "const": "fund_positions"
     },
     "aggregate_id": {
       "type": "string"

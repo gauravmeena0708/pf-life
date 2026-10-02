@@ -98,6 +98,17 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 27: contracts and copies (2 October 2026)
+
+Every service's unit tests are now contract tests: each event written to an outbox is checked against its contract. They
+pass: packages 47 (new `test_contracts.py`), every service suite (audit 17, claim 75, compliance 27, contribution 112,
+employer 32, grievance 22, intelligence 26, international 23, member 60, mock 10, payment 15, pension 46, platform 31,
+reporting 69, workflow 51), gateway 23. End to end 107 of 107; must-deny 18; UI smoke 2. The new consistency check, run
+on this long-used stack after the suite: exemptions, exits and demands consistent; five balances differ — the EEC credits
+of earlier runs, from before the fix below (a fresh stack, as in CI, has none). Found and fixed: seventeen events had
+drifted from their contracts (fourteen stale contracts, three producers); EEC credits never reached the claims
+projection; reporting-service never received a published rule set.
+
 ## Update — Phase 2, slice 19a: edge cases where money is at risk (2 October 2026)
 
 Tests first; each of these failed before its fix. Unit: every suite passes — claim-service 75 (new `test_edge_cases.py`: a
