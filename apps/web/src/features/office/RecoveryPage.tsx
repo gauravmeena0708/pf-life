@@ -63,7 +63,12 @@ export function RecoveryPage() {
   }
   function instalments(e: FormEvent<HTMLFormElement>, id: string) {
     e.preventDefault(); const form = e.currentTarget; const f = new FormData(form);
-    void run(() => command("POST", `${base}/${id}/instalments`, { count: Number(f.get("count")), first_due: field(f, "first_due"), note: field(f, "note") }), "Instalments granted.", form);
+    void run(() => command("POST", `${base}/${id}/instalments`, { count: Number(f.get("count")), first_due: field(f, "first_due"), note: field(f, "note"),
+      bank_guarantee_paise: toPaise(f, "guarantee"), bank_guarantee_ref: field(f, "guarantee_ref") }), "Instalments granted.", form);
+  }
+  function defaulted(e: FormEvent<HTMLFormElement>, id: string) {
+    e.preventDefault(); const form = e.currentTarget; const f = new FormData(form);
+    void run(() => command("POST", `${base}/${id}/instalment-defaults`, { missed: field(f, "missed") }), "Instalment facility withdrawn; recovery resumes.", form);
   }
 
   return <section className="stack" aria-labelledby="recovery-heading">
@@ -115,9 +120,20 @@ export function RecoveryPage() {
             <label>Reasons<textarea name="reasons" required /></label>
             <div className="actions"><button disabled={busy} type="submit">Record</button></div></form>
         </div> : null}
+        {role === "fo.recovery_officer" && c.state === "INSTALMENTS" ? <form className="stack" aria-label={`Default ${c.certificate_no}`}
+          onSubmit={(e) => defaulted(e, c.recovery_case_id)}><h3>Instalment missed</h3>
+          <p className="muted small">A missed instalment, or the current dues unpaid, withdraws the facility without notice.</p>
+          <label>What was missed<input name="missed" required /></label>
+          <div className="actions"><button disabled={busy} type="submit">Withdraw the facility</button></div></form> : null}
         {role === "fo.oic" && open && c.state !== "INSTALMENTS" ? <form className="stack" aria-label={`Instalments ${c.certificate_no}`} onSubmit={(e) => instalments(e, c.recovery_case_id)}>
-          <h3>Grant instalments</h3><div className="form-row"><label>Number (at most 72)<input name="count" type="number" min="2" max="72" required /></label>
-            <label>First due<input name="first_due" type="date" required /></label></div><label>Note<textarea name="note" required /></label>
+          <h3>Grant instalments</h3>
+          <p className="muted small">Up to 36 within your power by the arrears (RPFC-II ₹10 lakh, RPFC-I ₹25 lakh); above it, the zone (₹50 lakh) or
+            Head Office, and more than 36 (at most 72) only Head Office. Each instalment is paid with that month&apos;s 7Q interest and the current
+            dues; a revolving bank guarantee of one instalment (six beyond 36) is needed.</p>
+          <div className="form-row"><label>Number<input name="count" type="number" min="2" max="72" required /></label>
+            <label>First due<input name="first_due" type="date" required /></label></div>
+          <div className="form-row"><label>Bank guarantee (₹)<input name="guarantee" type="number" min="0" step="0.01" required /></label>
+            <label>Guarantee reference<input name="guarantee_ref" required /></label></div><label>Note<textarea name="note" required /></label>
           <div className="actions"><button disabled={busy} type="submit">Grant</button></div></form> : null}
       </article>;
     })}

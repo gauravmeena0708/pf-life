@@ -56,8 +56,11 @@ def test_certificate_notice_attachment_sale_8f_instalments_payment(ctx):
     g = client.post(f"{BASE}/cases/{SEEDED}/recovery-8f", json={"garnishee": "BANK", "name": "Demo Bank", "reference": "AC-0002-CURRENT",
                     "amount_paise": 500000}, headers=as_(APFC, {"action": "garnishee-8f", "resource_id": SEEDED, "amount_paise": 500000}))
     assert g.status_code == 200 and g.json()["data"]["realised_paise"] == 1800000, g.json()
-    inst = {"count": 73, "first_due": "2026-11-01", "note": "Hardship"}
+    inst = {"count": 73, "first_due": "2026-11-01", "note": "Hardship", "bank_guarantee_paise": 200000, "bank_guarantee_ref": "BG-0002-1"}
     assert client.post(f"{REC}/{rid}/instalments", json=inst, headers=as_(OIC)).status_code == 422             # at most 72
+    assert client.post(f"{REC}/{rid}/instalments", json={**inst, "count": 40}, headers=as_(OIC)).json()["type"] == "/problems/beyond-powers"
+    assert client.post(f"{REC}/{rid}/instalments", json={**inst, "count": 6, "bank_guarantee_paise": 100000},
+                       headers=as_(OIC)).json()["type"] == "/problems/guarantee"                                    # one instalment is ₹2,000
     assert client.post(f"{REC}/{rid}/instalments", json={**inst, "count": 6}, headers=as_(OIC)).json()["data"]["state"] == "INSTALMENTS"
     assert client.post(f"{REC}/{rid}/attachments", json={**attach, "urgent_reason": "x"}, headers=step).status_code == 409   # instalments run
     paid = client.post(f"{REC}/{rid}/payments", json={"amount_paise": 1200000, "reference": "TRRN-RC-1", "mode": "INSTALMENT"}, headers=ro()).json()["data"]
@@ -104,3 +107,31 @@ def test_employer_view_and_the_ho_reports(ctx):
     assert rec["certificates"] == 1 and rec["realised_paise"] == 1000000 and rec["realised_by_mode_paise"] == {"DIRECT": 1000000}
     proc = client.get("/api/v1/ho/reports/proceedings", headers=hdr(S["ho-compliance"], "ho.compliance")).json()["data"]
     assert proc["inquiries"] >= 1 and proc["by_section"]["7A"]["ORDERED"] >= 1
+
+
+def test_instalments_by_powers_head_office_beyond_36_and_withdrawn_on_default(ctx, monkeypatch):
+    """Circulars of 7.4.2006, 11.4.2012 and 11.02.2014 (Recovery Manual 8.1.2), with the powers scaled down to the
+    seeded ₹30,000: the region up to ₹25,000 here, the zone up to ₹50,000; beyond 36 instalments only Head Office."""
+    import app.api.recovery as recovery_module
+    real = recovery_module.rules
+
+    async def scaled(session):
+        document, limits = await real(session)
+        return document, {**limits, "instalment_powers_paise": {"RPFC-II": 1000000, "RPFC-I": 2500000, "zo.acc": 5000000, "ho.cpfc": None}}
+    monkeypatch.setattr(recovery_module, "rules", scaled)
+    client, _, _ = ctx
+    rid = certified(client)["recovery_case_id"]
+    url = f"{REC}/{rid}/instalments"
+    body = {"count": 12, "first_due": "2026-11-01", "note": "Hardship", "bank_guarantee_paise": 250000, "bank_guarantee_ref": "BG-1"}
+    refused = client.post(url, json=body, headers=as_(OIC)).json()
+    assert refused["type"] == "/problems/beyond-powers" and "RPFC-I" in refused["detail"]               # ₹30,000 > the region's ₹25,000
+    zone = hdr(S["zo-acc"], "zo.acc")
+    assert client.post(url, json={**body, "count": 40}, headers=zone).json()["type"] == "/problems/beyond-powers"   # > 36: Head Office
+    granted = client.post(url, json=body, headers=zone).json()["data"]
+    assert granted["state"] == "INSTALMENTS"
+    client.post(f"{REC}/{rid}/instalment-defaults", json={"missed": "The second instalment, due 1 Dec 2026"}, headers=ro())
+    assert client.get(f"{REC}/cases", headers=ro()).json()["data"][0]["state"] in ("CERTIFIED", "NOTICE_SERVED")
+    ho = hdr(S["ho-analyst"], "ho.cpfc")                                                   # the CPFC persona
+    beyond = {**body, "count": 60, "bank_guarantee_paise": 300000}                                        # six instalments of ₹500
+    again = client.post(url, json=beyond, headers=ho).json()
+    assert again["type"] == "/problems/defaulted-before"                                                   # no second facility

@@ -134,9 +134,18 @@ late_payment:
     - {upto_months: null, rate_bp_pa: 2500}
   interest_7q_rate_bp_pa: 1200
 vishwas:
-  # ILLUSTRATIVE settlement of disputed 14B damages: on approval the establishment pays this share of the damages it
-  # applied for and the rest is waived, as one revised demand. Not the terms of any actual EPFO scheme.
-  settlement_share_bp: 3000
+  # VISHWAS, 2026 (G.S.R. 525(E) of 29 Jun 2026, with the EPF Scheme, 2026; PIB 2285666): damages under s.14B for
+  # defaults before 14 June 2024 recalculated at a monthly rate by the length of the default; all 7Q interest paid
+  # first; no further appeal. Open for six months from the notification. Months of default = days late x 12 / 365.
+  scheme: "VISHWAS, 2026"
+  open_from: "2026-06-29"
+  open_until: "2026-12-28"
+  defaults_before: "2024-06-14"
+  rate_bands:                             # the first band the months of default fall in -> rate per month
+    - {months_upto: 2, rate_bp_pm: 25}      # up to two months: 0.25%
+    - {months_below: 4, rate_bp_pm: 50}     # two to less than four: 0.50%
+    - {rate_bp_pm: 100}                     # four or more: 1%
+  settlement_share_bp: 3000               # retired with the 2026 terms; kept so older rule versions still validate
 higher_pension:
   # Joint option for pension on higher wages (ILLUSTRATIVE, after the Supreme Court's judgment of 4 November 2022):
   # a member of the pension scheme in service on in_service_on, whose wages were above the wage ceiling, may opt
@@ -297,5 +306,33 @@ compliance_proceedings:
   # P2.11d: recovery (Recovery Manual, 08/12/2023)
   pay_after_order_days: 15          # an order directs payment within 15 days; then a recovery certificate may issue (s.8B)
   demand_notice_days: 15            # notice EPFCP-1: pay within 15 days of service, then execution (para 1.5 a, i)
-  max_instalments: 72               # instalments for arrears (circular "Grant of 72 instalments", ILLUSTRATIVE ceiling)
+  max_instalments: 72               # instalments for arrears: the CPFC up to 72 (circular RRC-I/21(17)2011/WB, 11.4.2012)
+  normal_instalments: 36            # up to 36 in the field; beyond, or over the zone's limit, Head Office (circular 11.02.2014 para 4)
+  guarantee_instalments: 1          # a revolving bank guarantee of one instalment (para 2 e) ...
+  guarantee_instalments_beyond_normal: 6   # ... of six for more than 36 (para 3 c); no second facility after a default (3 b)
+  instalment_powers_paise:          # who may grant, by the arrears (circular Co-ord/11(24)05, 7.4.2006; CBT 174th meeting)
+    RPFC-II: 1000000000             # the officer in charge of an SRO: up to ₹10 lakh
+    RPFC-I: 2500000000              # the RPFC-I in charge of the region: up to ₹25 lakh
+    zo.acc: 5000000000              # the zone's ACC: up to ₹50 lakh
+    ho.cpfc: null                   # the CPFC: above
   custody_before_detention_days: 15 # a defaulter may be left in custody up to 15 days to pay before a detention order (6.3)
+# Later versions already decided, published by the seed after the baseline (each one is the baseline with these keys
+# changed; a section given here replaces only the keys it lists). Not part of the baseline document itself.
+revisions:
+  # P2.26: the wage ceiling under Chapter III of the Code on Social Security, 2020 — S.O. 5109(E) of 17 Sep 2026
+  # (PIB 2310973). Mandatory EPF / EPS / EDLI cover and contributions up to ₹25,000 a month; the maximum EPS share
+  # becomes ₹2,083. September 2026 is one ECR, split by days at the two ceilings (contribution-service).
+  - rule_version: demo-rules-2026.2
+    effective_from: "2026-09-17"
+    change_note: "Wage ceiling ₹15,000 → ₹25,000 from 17 Sep 2026 (S.O. 5109(E), Code on Social Security s.2(89))"
+    contribution:
+      eps_wage_ceiling_paise: 2500000
+      edli_wage_ceiling_paise: 2500000
+    pension:
+      pensionable_salary_cap_paise: 2500000
+    higher_pension:
+      wage_ceilings:
+        - {from_month: "1995-11", ceiling_paise: 500000}
+        - {from_month: "2001-06", ceiling_paise: 650000}
+        - {from_month: "2014-09", ceiling_paise: 1500000}
+        - {from_month: "2026-10", ceiling_paise: 2500000}   # September 2026 counted at ₹15,000 here (simplified)

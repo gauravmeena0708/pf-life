@@ -15059,10 +15059,53 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/recovery/{caseId}/instalment-defaults:
+    post:
+      operationId: postOfficeRecoveryCaseIdInstalmentDefaults
+      summary: 'A missed instalment: the facility is withdrawn without notice and recovery resumes; no second facility beyond
+        36'
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - fo.recovery_officer
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/recovery/{caseId}/instalments:
     post:
       operationId: postOfficeRecoveryCaseIdInstalments
-      summary: Instalments for the arrears (at most 72); coercive steps wait while they run
+      summary: 'Instalments for the arrears: up to 36 by the officer whose power covers the arrears (RPFC-II ₹10 lakh, RPFC-I
+        ₹25 lakh, '
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -15090,9 +15133,14 @@ paths:
       x-owner-service: compliance
       x-callers:
       - fo.oic
+      - ho.cpfc
+      - zo.acc
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+      description: 'Instalments for the arrears: up to 36 by the officer whose power covers the arrears (RPFC-II ₹10 lakh,
+        RPFC-I ₹25 lakh, zone ₹50 lakh), more (at most 72) by Head Office; a bank guarantee of one instalment (six beyond
+        36); coercive steps wait while they run'
       requestBody:
         required: false
         content:

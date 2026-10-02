@@ -16,7 +16,7 @@ ACCOUNTS = ("AC01_EPF_EE", "AC01_EPF_ER", "AC10_EPS", "AC21_EDLI", "AC02_ADMIN",
 
 
 # The contribution split is shared with platform-service's policy preview, so both use the same arithmetic.
-from epfo_persistence.policy import round_rupee_half_up, section, split  # noqa: E402,F401
+from epfo_persistence.policy import capped_wages, round_rupee_half_up, section, split  # noqa: E402,F401
 
 
 def _masked_uan(uan: str) -> str:
@@ -124,12 +124,19 @@ def validate(content: str, fmt: str, wage_month: str, members: list[dict[str, An
             if epf > gross or eps > epf or edli > epf:
                 issue(i, row, "EPF Wages", "E-WAGE-ORDER", "error", "Wages must satisfy EPF ≤ gross and EPS/EDLI ≤ EPF.", fix="Correct the wage amounts using payroll records.")
             c = rules["contribution"]
-            above = eps > c["eps_wage_ceiling_paise"] or edli > c["edli_wage_ceiling_paise"]
+            # The most a row may carry: the ceiling — or, in a month the ceiling changed (September 2026), the member's
+            # wages weighed by each day's ceiling.
+            split_month = bool(c.get("ceiling_periods"))
+            eps_bound = capped_wages(epf, c, "eps_wage_ceiling_paise") if split_month else c["eps_wage_ceiling_paise"]
+            edli_bound = capped_wages(epf, c, "edli_wage_ceiling_paise") if split_month else c["edli_wage_ceiling_paise"]
+            above = eps > eps_bound or edli > edli_bound
             if above and member and member.get("international_worker") and section(rules, "international_workers")["no_wage_ceiling"]:
                 issue(i, row, "EPS/EDLI Wages", "W-IW-FULL-WAGES", "warning", "An international worker contributes on the full wages; the wage ceiling does not apply (illustrative).",
                       fix="No action needed.")
             elif above:
-                issue(i, row, "EPS/EDLI Wages", "E-EPS-CEILING", "error", "EPS and EDLI wages cannot exceed the illustrative wage ceiling.", c["eps_wage_ceiling_paise"] // 100)
+                issue(i, row, "EPS/EDLI Wages", "E-EPS-CEILING", "error",
+                      "EPS and EDLI wages cannot exceed the wage ceiling" + (" weighed by the days of each ceiling this month." if c.get("ceiling_periods") else "."),
+                      eps_bound // 100, fix="Use the wages up to the ceiling (in September 2026: up to ₹15,000 for 1–16 September and ₹25,000 from 17 September, by days).")
             born = date.fromisoformat(str(member["date_of_birth"])) if member and member.get("date_of_birth") else None
             age = int(wage_month[:4]) - born.year - ((int(wage_month[5:7]), day_count) < (born.month, born.day)) if born else 0
             expected = split(epf, eps, age, rules, edli)
@@ -146,6 +153,11 @@ def validate(content: str, fmt: str, wage_month: str, members: list[dict[str, An
                 issue(i, row, "EPS Wages", "E-AGE-EPS", "error", "This member is at or above the illustrative EPS age limit for the wage month.", 0, eps // 100, "EPS = 0 and the whole employer share goes to EPF")
                 row["EPS Contribution"] = "0"
                 row["EPF-EPS Difference (ER share)"] = str(expected["AC01_EPF_EE"] // 100)
+            if (eps == 0 and 0 < epf <= c["eps_wage_ceiling_paise"] and not exempt_trust and not (born and age >= c["eps_age_limit_years"])
+                    and not (member and member.get("international_worker"))):
+                issue(i, row, "EPS Wages", "W-EPS-MEMBERSHIP", "warning",
+                      "The wages are within the ceiling, so this member belongs to the pension scheme (EPS) — since 17 September 2026 "
+                      "that includes wages up to ₹25,000.", 0, 0, fix="Report EPS wages, unless the member is not eligible (for example, joined above the ceiling earlier).")
             if all(k in numeric for k in FIELDS[2:9]):
                 row_total = split(epf, eps, age, rules, edli)
                 for account in ("AC01_EPF_EE", "AC01_EPF_ER", "AC10_EPS", "AC21_EDLI"):

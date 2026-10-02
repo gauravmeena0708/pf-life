@@ -152,7 +152,12 @@ async def evaluate(session: AsyncSession, account: dict[str, Any], claim_type: s
     exemption = (await session.execute(select(exempted_establishments).where(
         exempted_establishments.c.establishment_id == account["establishment_id"]))).mappings().first()
     account = {**account, "exemption": dict(exemption) if exemption else None}
-    e = eligibility(account, claim_type, rules, today, await previous_claims(session, account["account_link_id"], claim_type))
+    exited = account.get("date_of_exit")
+    ceiling = None
+    if exited and rules["claims"]["types"].get(claim_type, {}).get("max_from") == "eps_table_d":
+        exited = exited if isinstance(exited, date) else date.fromisoformat(str(exited))
+        ceiling = (await rules_on(session, exited))["contribution"]["eps_wage_ceiling_paise"]
+    e = eligibility(account, claim_type, rules, today, await previous_claims(session, account["account_link_id"], claim_type), ceiling)
     extra = await member_id_reasons(session, account, claim_type)
     return {**e, "eligible": False, "max_amount_paise": 0, "reasons": [*e["reasons"], *extra]} if extra else e
 

@@ -4,9 +4,9 @@
   "interfaces": 21,
   "stakeholders": 114,
   "stakeholders_with_access": 94,
-  "activities": 265,
+  "activities": 267,
   "endpoints": {
-   "W": 444,
+   "W": 445,
    "M": 21,
    "P": 4,
    "?": 5
@@ -84,7 +84,7 @@
    "coverage": "Working",
    "purpose": "Field-office sections: claim scrutiny and payment, compliance, pension, EDLI, exemption, PRO counter.",
    "endpoints": {
-    "W": 123,
+    "W": 124,
     "M": 0,
     "P": 3,
     "?": 4
@@ -189,7 +189,7 @@
    "coverage": "Working",
    "purpose": "Zonal offices: grievances escalated to the zone, fraud-risk review, concurrent audit.",
    "endpoints": {
-    "W": 17,
+    "W": 18,
     "M": 0,
     "P": 0,
     "?": 0
@@ -208,7 +208,7 @@
    "coverage": "Working",
    "purpose": "Head office: policy rules (maker-checker), interest, circulars, the IS Division.",
    "endpoints": {
-    "W": 31,
+    "W": 32,
     "M": 0,
     "P": 0,
     "?": 0
@@ -1660,7 +1660,7 @@
    "name": "Recovery Officer (8B–8G recovery, attachment, arrest warrants)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 7,
+    "W": 8,
     "M": 0,
     "P": 0,
     "?": 0
@@ -1882,7 +1882,7 @@
    "name": "Additional Central PF Commissioner (Zone head)",
    "group": "E. Zonal Office (ZO)",
    "endpoints": {
-    "W": 13,
+    "W": 14,
     "M": 0,
     "P": 0,
     "?": 0
@@ -1891,6 +1891,10 @@
     {
      "id": "F06.zo_scrutiny",
      "does": "Zonal ACC scrutinises the orders the RPFC-I passes (by the 15th of the following month); may direct a 7C"
+    },
+    {
+     "id": "F06.instalments_zo",
+     "does": "Zonal ACC grants instalments (up to 36) on arrears up to ₹50 lakh, above the region's power"
     },
     {
      "id": "F08.escalate",
@@ -2029,12 +2033,16 @@
    "name": "Central Provident Fund Commissioner",
    "group": "F. Head Office (HO) — leadership and divisions",
    "endpoints": {
-    "W": 8,
+    "W": 9,
     "M": 0,
     "P": 0,
     "?": 0
    },
    "activities": [
+    {
+     "id": "F06.instalments_ho",
+     "does": "The CPFC grants instalments on arrears above ₹50 lakh, or more than 36 (at most 72), with a guarantee of six"
+    },
     {
      "id": "F13.cpfc",
      "does": "National dashboards and policy approvals"
@@ -4805,7 +4813,27 @@
     "F06.attach"
    ],
    "status": "BUILT",
-   "endpoints": 3,
+   "endpoints": 4,
+   "src": "REC"
+  },
+  {
+   "id": "F06.instalments_zo",
+   "flow": "F06",
+   "actor": "zo.acc",
+   "does": "Zonal ACC grants instalments (up to 36) on arrears up to ₹50 lakh, above the region's power",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "REC"
+  },
+  {
+   "id": "F06.instalments_ho",
+   "flow": "F06",
+   "actor": "ho.cpfc",
+   "does": "The CPFC grants instalments on arrears above ₹50 lakh, or more than 36 (at most 72), with a guarantee of six",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
    "src": "REC"
   },
   {

@@ -44,7 +44,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.12f** | The rest: DR replication status and failover drill, training sandboxes, Nidhi Aapke Nikat camp requests, totalisation claims and the foreign agency's CoC check, the composite death claim | **Done** (1 Oct 2026) |
 | **P2.12g** | Menu clean-up: screens already built linked from their menus (Composite claim, Know Your Pension Payee Bank, Change Password); every other item without a screen says why — planned (with the slice), awaiting EPFO's definition, or not in the POC | **Done** (1 Oct 2026) |
 | P2.25 | Sources checked: the *to verify* rule values, and the Code on Social Security — which turned up the 2026 Schemes and the ₹25,000 ceiling (findings below) | Done (findings) |
-| P2.26 | The Code's transition: ₹25,000 wage ceiling from 17 Sep 2026 (September split by days in one ECR; the band enrolled; EPS for EPF-only members in it; the Government's 1.16% kept on ₹15,000); VISHWAS, 2026's real terms; EEC, 2026 (to 31 Oct 2026); instalments by the circulars; withdrawal, EPS withdrawal-benefit and EDLI rules of the 2026 Schemes | Planned — next |
+| P2.26 | The Code's transition. **a**: ₹25,000 wage ceiling from 17 Sep 2026 (a second rule-set version; September split by days in one ECR; pension membership flagged; Form 10C at the ceiling of the exit date); VISHWAS, 2026's real terms; instalments by the circulars (powers, guarantee, Head Office beyond 36, withdrawn on default). **b**: EEC, 2026. **c**: the 2026 Schemes' withdrawal, EPS withdrawal-benefit and EDLI rules (needs the gazette text) | a: Done; b, c: Planned |
 | P2.13 | Small gaps: disablement pension (EPS para 15); zonal freezing (categories B and C) and zonal ACC decisions above the RO's limits; district office queues; PPO and UAN card issued to DigiLocker (mock) | Planned |
 | P2.14 | The exempted trust's lifecycle: annual audit filing and the exemption cell's review; surrender and cancellation (RPFC report → ZO → HO → the Exempted Establishments Committee → the appropriate Government); HO's decision; past accumulations transferred in bulk and reconciled with the receipts | Done (bulk transfer and VDR reconciliation stay planned) |
 | P2.15a | PMVBRY (Pradhan Mantri Viksit Bharat Rozgar Yojana): Part A for first timers, Part B for employers adding jobs, the disbursement run and the dashboard — from the scheme guidelines and EPFO's SOP for calculating incentives | Done |
@@ -1291,4 +1291,36 @@ Inspector-cum-Facilitator* to `../manuals/compliance/`. Time limits in the rule 
   overdue life certificates.
 - Left for later: task-based member and employer menus (with the legacy ones behind a toggle), keeping the choice in
   the user's profile rather than the browser.
+
+## P2.26a — how it is built
+
+- **The ₹25,000 ceiling as a rule-set version.** `config/demo-rules.yaml` gains `revisions:` — versions already decided
+  after the baseline, each the baseline with some keys changed. The first is `demo-rules-2026.2` from 17 Sep 2026: EPS and
+  EDLI ceilings and the pensionable salary cap ₹25,000; the higher-pension ceiling table extended. platform-service's seed
+  publishes it as an approval would (stored, `PolicyPublished.v1` to every service), so it shows in Policy administration
+  with the baseline superseded. `baseline()` leaves `revisions` out.
+- **September 2026: one ECR, split by days.** A version can now start inside a wage month. `rules_for_wage_month` takes
+  the version on the first day and, when another starts within the month, lists each day's ceilings
+  (`contribution.ceiling_periods`); `capped_wages` weighs a member's wages by them — ₹20,000 in September is ₹15,000 x
+  16/30 + ₹20,000 x 14/30 = ₹17,333.33, the FAQ's figure (rounded up to the rupee). The ECR check bounds each row's EPS and
+  EDLI wages by that; other months are checked as before.
+- **The newly covered band.** A row whose wages are within the ceiling but with no EPS wages, for a member under 58, gets
+  the warning `W-EPS-MEMBERSHIP` — from 17 Sep 2026 that includes wages up to ₹25,000 (EPF-only members join EPS).
+- **Form 10C** takes the Table D wages at the ceiling in force on the exit date (₹15,000 before 17 Sep 2026).
+- **VISHWAS, 2026** replaces the illustrative 30%: a 14B demand is eligible when its default is before 14 June 2024, no 7Q
+  interest on the same default is open, and the application falls in 29 June – 28 December 2026. The damages are
+  recalculated from the arrears in the demand's working: arrears x rate x months of default (days x 12 / 365) — 0.25% a
+  month up to two months, 0.50% to under four, 1% beyond — and never more than levied. The employer undertakes not to
+  appeal; the screen shows each demand's recalculation or why it is not eligible. A damages order (its own demand, listing
+  the defaults it covers with their automatic damages) is recalculated default by default, the amount paid late worked
+  back from the automatic damages at the band's yearly rate — exact to a few rupees, as those damages were rounded.
+- **Instalments by the circulars.** Up to 36 by the officer whose power covers the arrears (RPFC-II ₹10 lakh, RPFC-I
+  ₹25 lakh by the officer's recorded rank; the zone's ACC ₹50 lakh); more than 36 (at most 72) or more arrears, the CPFC.
+  A revolving bank guarantee of one instalment (six beyond 36). The Recovery Officer records a missed instalment: the
+  facility is withdrawn without notice and recovery resumes; no facility beyond 36 for an establishment that defaulted
+  before. New activities: `F06.instalments_zo`, `F06.instalments_ho`.
+- Left: EEC, 2026 (P2.26b; official terms in PIB 2300475); the 2026 Schemes' withdrawal and EDLI rules (P2.26c); the
+  rule that 14B damages are 1% a month for defaults from 14 June 2024 (to verify); the 2026 Scheme's exemption of
+  unexempted-only for 72 instalments (compliance-service does not know exemption yet); screens for the zone and Head
+  Office to grant instalments (the API is ready); September 2026 at the old ceiling in the higher-pension dues.
 

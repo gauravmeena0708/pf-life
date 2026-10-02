@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 265 |
+| Activities | 267 |
 | Stakeholders with at least one API | 94 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 3 |
@@ -797,6 +797,7 @@ Activities: **F06.recovery** Execute the recovery certificate: demand notice (EP
 | `POST /office/recovery/{caseId}/arrest-warrants` | W |
 | `POST /office/recovery/{caseId}/attachments` | W |
 | `POST /office/recovery/{caseId}/demand-notices` | W |
+| `POST /office/recovery/{caseId}/instalment-defaults` | W |
 | `POST /office/recovery/{caseId}/payments` | W |
 | `POST /office/recovery/{caseId}/receivers` | W |
 | `POST /office/recovery/{caseId}/sales` | W |
@@ -917,7 +918,7 @@ Activities: **F06.district** District-level compliance follow-up and facilitatio
 
 #### `zo.acc` — Additional Central PF Commissioner (Zone head)
 
-Activities: **F06.zo_scrutiny** Zonal ACC scrutinises the orders the RPFC-I passes (by the 15th of the following month); may direct a 7C; **F08.escalate** Handle grievances escalated to the zone; **F09.zo_forward** Zonal ACC forwards the draft agenda to HO with recommendations (SE-3 / CE-4) or remands it; **F13.zo** Zone dashboards; approvals above RO limits
+Activities: **F06.zo_scrutiny** Zonal ACC scrutinises the orders the RPFC-I passes (by the 15th of the following month); may direct a 7C; **F06.instalments_zo** Zonal ACC grants instalments (up to 36) on arrears up to ₹50 lakh, above the region's power; **F08.escalate** Handle grievances escalated to the zone; **F09.zo_forward** Zonal ACC forwards the draft agenda to HO with recommendations (SE-3 / CE-4) or remands it; **F13.zo** Zone dashboards; approvals above RO limits
 
 | Endpoint | Status |
 |---|---|
@@ -934,6 +935,7 @@ Activities: **F06.zo_scrutiny** Zonal ACC scrutinises the orders the RPFC-I pass
 | `POST /grievances/{grievanceId}/resolution` | W |
 | `POST /office/compliance/cases/{caseId}/scrutinies` | W |
 | `POST /office/exempted/proceedings/{proceedingId}/steps` | W |
+| `POST /office/recovery/{caseId}/instalments` | W |
 
 #### `zo.rpfc1` — RPFC-I at the Zonal Office (zonal authority for freezing categories B and C; zone-level monitoring)
 
@@ -1000,7 +1002,7 @@ Activities: **F14.zti_zo** Zonal Training Institute uses the training sandbox
 
 #### `ho.cpfc` — Central Provident Fund Commissioner
 
-Activities: **F13.cpfc** National dashboards and policy approvals; **F13.pmvbry_monitor** Executive Committee chair: monitor PMVBRY beneficiaries, expenditure and pendency
+Activities: **F06.instalments_ho** The CPFC grants instalments on arrears above ₹50 lakh, or more than 36 (at most 72), with a guarantee of six; **F13.cpfc** National dashboards and policy approvals; **F13.pmvbry_monitor** Executive Committee chair: monitor PMVBRY beneficiaries, expenditure and pendency
 
 | Endpoint | Status |
 |---|---|
@@ -1012,6 +1014,7 @@ Activities: **F13.cpfc** National dashboards and policy approvals; **F13.pmvbry_
 | `GET /monitoring/data-freshness` | W |
 | `GET /monitoring/grievances` | W |
 | `POST /ho/config/rule-sets/{versionId}/decisions` | W |
+| `POST /office/recovery/{caseId}/instalments` | W |
 
 #### `ho.acc_hq` — ACC (HQ) and HO division heads
 
@@ -1814,6 +1817,8 @@ flowchart LR
   F06_courts["ext.courts<br/>Writs and orders on EPFO matters"]
   F06_legal["fo.legal<br/>Record 7-I appeals, 7-O pre-deposits / waivers and court / t"]
   F06_recovery["fo.recovery_officer<br/>Execute the recovery certificate: demand notice (EPFCP-1), c"]
+  F06_instalments_zo["zo.acc<br/>Zonal ACC grants instalments (up to 36) on arrears up to ₹50"]
+  F06_instalments_ho["ho.cpfc<br/>The CPFC grants instalments on arrears above ₹50 lakh, or mo"]
   F06_garnishee["fo.apfc<br/>8F notice to a bank or debtor of the employer to pay EPFO (t"]
   F06_attach["fo.recovery_officer<br/>Attach movable / immovable property (demo record only)"]
   F06_sale["fo.recovery_officer<br/>Sale of attached property (demo record only)"]

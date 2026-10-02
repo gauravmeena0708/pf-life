@@ -14,7 +14,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.proceedings import BASE, dt, event, inquiry, iso, now, record, rules
 from app.api.routes import _office, db
-from app.infra.tables import (demands, establishments, inquiries, legal_cases, office_staff, recovery_actions, recovery_cases)
+from app.infra.tables import (compliance_officers, demands, establishments, inquiries, legal_cases, office_staff, recovery_actions,
+                              recovery_cases)
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 
@@ -161,25 +162,88 @@ async def demand_notice(case_id: str, actor: Actor = Depends(require_stakeholder
 class InstalmentInput(BaseModel):
     count: int = Field(ge=2)
     first_due: str = Field(pattern=r"^\d{4}-\d{2}-\d{2}$")
+    bank_guarantee_paise: int = Field(ge=0)
+    bank_guarantee_ref: str = Field(min_length=3, max_length=60)
     note: str = Field(min_length=1)
 
 
+async def _power(session: AsyncSession, actor: Actor, powers: dict) -> tuple[str, int | None]:
+    """Who the actor is for instalments, and the most arrears they may grant them on (None: no limit)."""
+    if actor.stakeholder in powers:
+        return actor.stakeholder, powers[actor.stakeholder]
+    rank = (await session.execute(select(compliance_officers.c.rank).where(compliance_officers.c.subject == actor.subject))).scalar_one_or_none()
+    rank = rank if rank in powers else "RPFC-II"                # an officer in charge without a recorded rank: the lowest power
+    return rank, powers[rank]
+
+
 @router.post(RECOVERY + "/{case_id}/instalments")
-async def instalments(case_id: str, body: InstalmentInput, actor: Actor = Depends(require_stakeholder("fo.oic")), session: AsyncSession = Depends(db)):
+async def instalments(case_id: str, body: InstalmentInput, actor: Actor = Depends(require_stakeholder("fo.oic", "zo.acc", "ho.cpfc")),
+                      session: AsyncSession = Depends(db)):
+    """Instalments on a certificate (Recovery Manual, circulars of 7.4.2006, 11.4.2012 and 11.02.2014): up to 36 by the
+    officer whose power covers the arrears; more than 36 (at most 72) only by Head Office, with a guarantee of six
+    instalments and never for an establishment that defaulted on a facility before. Each instalment is paid with that
+    month's 7Q interest and the current dues; a default withdraws the facility without notice."""
     async with session.begin():
-        row = await case_of(session, case_id, await _office(session, actor))
+        if actor.stakeholder == "fo.oic":
+            row = await case_of(session, case_id, await _office(session, actor))
+        else:                                                   # the zone or Head Office, on a field office's certificate
+            row = (await session.execute(select(recovery_cases).where(recovery_cases.c.recovery_case_id == case_id))).mappings().first()
+            if not row:
+                raise Problem(404, "/problems/not-found", "Recovery case not found")
+            row = dict(row)
         _, limits = await rules(session)
         if body.count > limits["max_instalments"]:
             raise Problem(422, "/problems/validation", f"At most {limits['max_instalments']} instalments")
         if row["state"] in ("CLOSED", "INSTALMENTS"):
             raise Problem(409, "/problems/invalid-state", "Not on a satisfied certificate or one already in instalments")
         outstanding = int(row["amount_paise"]) - int(row["realised_paise"])
+        who, power = await _power(session, actor, limits["instalment_powers_paise"])
+        beyond = body.count > limits["normal_instalments"]
+        if beyond and actor.stakeholder != "ho.cpfc" or power is not None and outstanding > power:
+            raise Problem(403, "/problems/beyond-powers", "Beyond your powers to grant",
+                          f"{who} may grant up to {limits['normal_instalments']} instalments on arrears up to "
+                          f"₹{(power or 0) // 100:,}; more than {limits['normal_instalments']} instalments, or more arrears, go to "
+                          + ("the zone or " if not beyond else "") + "Head Office.")
         each, extra = divmod(outstanding, body.count)
+        need = (each + (1 if extra else 0)) * (limits["guarantee_instalments_beyond_normal"] if beyond else limits["guarantee_instalments"])
+        if body.bank_guarantee_paise < need:
+            raise Problem(422, "/problems/guarantee", "The bank guarantee is too small",
+                          f"A revolving guarantee of {'six instalments' if beyond else 'one instalment'} is needed: ₹{need // 100:,}.")
+        if beyond:
+            defaulted = (await session.execute(select(recovery_actions.c.action_id).join(
+                recovery_cases, recovery_cases.c.recovery_case_id == recovery_actions.c.recovery_case_id).where(
+                recovery_cases.c.establishment_id == row["establishment_id"], recovery_actions.c.kind == "INSTALMENT_DEFAULT"))).first()
+            if defaulted:
+                raise Problem(409, "/problems/defaulted-before", "No second facility after a default",
+                              "This establishment defaulted on instalments before (circular 11.02.2014 para 3 b).")
         schedule = [{"number": i + 1, "amount_paise": each + (1 if i < extra else 0)} for i in range(body.count)]
         await session.execute(update(recovery_cases).where(recovery_cases.c.recovery_case_id == case_id).values(state="INSTALMENTS"))
-        await act(session, case_id, "INSTALMENTS", actor.subject, {"count": body.count, "first_due": body.first_due, "schedule": schedule, "note": body.note})
-        await record(session, actor, "recovery.instalments", "recovery_case", case_id, f"{body.count} from {body.first_due}")
+        await act(session, case_id, "INSTALMENTS", actor.subject, {
+            "count": body.count, "first_due": body.first_due, "schedule": schedule, "note": body.note, "granted_as": who,
+            "bank_guarantee_paise": body.bank_guarantee_paise, "bank_guarantee_ref": body.bank_guarantee_ref,
+            "with_each": "that month's 7Q interest and the current contributions"})
+        await record(session, actor, "recovery.instalments", "recovery_case", case_id, f"{body.count} from {body.first_due} by {who}")
         result = await view(session, {**row, "state": "INSTALMENTS"})
+    return envelope(result)
+
+
+class DefaultInput(BaseModel):
+    missed: str = Field(min_length=3, max_length=200)
+
+
+@router.post(RECOVERY + "/{case_id}/instalment-defaults")
+async def instalment_default(case_id: str, body: DefaultInput, actor: Actor = Depends(require_stakeholder("fo.recovery_officer")),
+                             session: AsyncSession = Depends(db)):
+    """A missed instalment, or the current dues unpaid: the facility is withdrawn without notice and recovery resumes."""
+    async with session.begin():
+        row = await case_of(session, case_id, await _office(session, actor))
+        if row["state"] != "INSTALMENTS":
+            raise Problem(409, "/problems/invalid-state", "No instalments are running")
+        back = "NOTICE_SERVED" if row["pay_by"] else "CERTIFIED"
+        await session.execute(update(recovery_cases).where(recovery_cases.c.recovery_case_id == case_id).values(state=back))
+        await act(session, case_id, "INSTALMENT_DEFAULT", actor.subject, {"missed": body.missed, "facility": "withdrawn without notice"})
+        await record(session, actor, "recovery.instalment_default", "recovery_case", case_id, body.missed)
+        result = await view(session, {**row, "state": back})
     return envelope(result)
 
 

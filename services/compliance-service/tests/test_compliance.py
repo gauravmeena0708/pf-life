@@ -4,6 +4,7 @@ approval raises one revised demand (DemandRaised.v1)."""
 import asyncio
 import importlib
 import json
+from datetime import date
 import time
 import uuid
 from pathlib import Path
@@ -76,9 +77,9 @@ def hdr(subject, stakeholder, step_up=None, establishment=None):
     return {"Authorization": "Bearer " + jwt.encode(claims, KEY, algorithm="EdDSA", headers={"kid": KID})}
 
 
-def demand(deliver, demand_id, kind="DAMAGES_14B", amount=1000000, state="OPEN"):
-    deliver("DemandStateChanged.v1", {"demand_id": demand_id, "establishment_id": EST, "kind": kind, "trrn": "T1", "wage_month": "2026-06",
-                                      "amount_paise": amount, "days_late": 90, "state": state, "working": "w"})
+def demand(deliver, demand_id, kind="DAMAGES_14B", amount=1000000, state="OPEN", trrn="T1", wage_month="2026-06", days=90, working="w"):
+    deliver("DemandStateChanged.v1", {"demand_id": demand_id, "establishment_id": EST, "kind": kind, "trrn": trrn, "wage_month": wage_month,
+                                      "amount_paise": amount, "days_late": days, "state": state, "working": working})
 
 
 def test_establishment_office_transfer_updates_jurisdiction_but_keeps_open_case(ctx):
@@ -112,28 +113,66 @@ def test_cases_opened_searched_and_published(ctx):
     assert [e["establishment_id"] for e in listed["establishments"]] == [EST] and listed["label"] == "SYNTHETIC_DEMO"
 
 
-def test_vishwas_application_approved_raises_one_revised_demand(ctx):
+def test_vishwas_2026_recalculates_old_damages_at_the_monthly_rates(ctx, monkeypatch):
+    """VISHWAS, 2026 (G.S.R. 525(E)): defaults before 14 June 2024; 0.25% a month up to two months of default, 0.50% from
+    two to under four, 1% beyond; all 7Q interest paid first; open 29 June - 28 December 2026."""
+    import app.api.routes as routes
+    monkeypatch.setattr(routes, "today", lambda: date(2026, 10, 1))
     client, q, deliver = ctx
-    demand(deliver, "DEM-A-14B", amount=1000000)
-    demand(deliver, "DEM-B-14B", amount=500000)
-    demand(deliver, "DEM-A-07Q", kind="INTEREST_7Q", amount=200000)
+    late = lambda amount, days: f"{days} days late on ₹{amount:,}: 14B at 5% a year"  # noqa: E731
+    demand(deliver, "DEM-A-14B", amount=1000000, trrn="TA", wage_month="2024-01", days=45, working=late(100000, 45))      # 1.5 months
+    demand(deliver, "DEM-B-14B", amount=500000, trrn="TB", wage_month="2023-06", days=200, working=late(50000, 200))     # 6.6 months
+    demand(deliver, "DEM-C-14B", amount=300000, trrn="TC", wage_month="2024-08", days=30, working=late(40000, 30))       # after the date
+    demand(deliver, "DEM-D-14B", amount=300000, trrn="TD", wage_month="2023-01", days=60, working=late(40000, 60))
+    demand(deliver, "DEM-D-07Q", kind="INTEREST_7Q", amount=20000, trrn="TD", wage_month="2023-01", days=60)          # interest unpaid
     sig = hdr(S["emp-signatory"], "employer.signatory", establishment=EST)
-    assert client.post("/api/v1/employers/me/vishwas-applications", json={"demand_ids": ["DEM-A-07Q"], "declaration": True},
-                       headers=sig).status_code == 422                       # 7Q interest is not covered
-    r = client.post("/api/v1/employers/me/vishwas-applications", json={"demand_ids": ["DEM-A-14B", "DEM-B-14B"], "declaration": True}, headers=sig)
-    assert r.status_code == 201 and r.json()["data"]["damages_paise"] == 1500000 and r.json()["data"]["estimated_settlement_paise"] == 450000
+    apply = lambda ids: client.post("/api/v1/employers/me/vishwas-applications", json={"demand_ids": ids, "declaration": True}, headers=sig)  # noqa: E731
+    assert apply(["DEM-D-07Q"]).status_code == 422                                     # interest is not damages
+    assert "before 2024-06-14" in apply(["DEM-C-14B"]).json()["detail"]
+    assert "7Q interest" in apply(["DEM-D-14B"]).json()["detail"]
+    mine = client.get("/api/v1/employers/me/vishwas-applications", headers=sig).json()["data"]
+    by_id = {a["demand_id"]: a for a in mine["assessment"]}
+    assert (by_id["DEM-A-14B"]["rate_pct_per_month"], by_id["DEM-B-14B"]["rate_pct_per_month"]) == (0.25, 1.0)
+    assert by_id["DEM-A-14B"]["revised_paise"] == 36900 and by_id["DEM-B-14B"]["revised_paise"] == 328700   # ₹1,00,000 x 0.25% x 1.48; ₹50,000 x 1% x 6.58
+    r = apply(["DEM-A-14B", "DEM-B-14B"])
+    assert r.status_code == 201 and r.json()["data"]["damages_paise"] == 1500000 and r.json()["data"]["estimated_settlement_paise"] == 365600
     app_id = r.json()["data"]["application_id"]
-    assert client.post("/api/v1/employers/me/vishwas-applications", json={"demand_ids": ["DEM-A-14B"], "declaration": True},
-                       headers=sig).json()["type"] == "/problems/already-applied"
+    assert apply(["DEM-A-14B"]).json()["type"] == "/problems/already-applied"
     apfc = S["ro-apfc"]
     [listed] = client.get("/api/v1/office/compliance/vishwas-applications", headers=hdr(apfc, "fo.apfc")).json()["data"]
-    assert listed["application_id"] == app_id
+    assert listed["application_id"] == app_id and listed["proposed_revised_paise"] == 365600
     url = f"/api/v1/office/compliance/vishwas-applications/{app_id}/decisions"
     body = {"decision": "APPROVE", "note": "Dispute settled under the scheme"}
     assert client.post(url, json=body, headers=hdr(apfc, "fo.apfc")).status_code == 428
-    done = client.post(url, json=body, headers=hdr(apfc, "fo.apfc", {"action": "decide-vishwas", "resource_id": app_id, "amount_paise": 450000}))
-    assert done.status_code == 200 and done.json()["data"]["revised_paise"] == 450000, done.json()
+    step = hdr(apfc, "fo.apfc", {"action": "decide-vishwas", "resource_id": app_id, "amount_paise": 365600})
+    done = client.post(url, json=body, headers=step)
+    assert done.status_code == 200 and done.json()["data"]["revised_paise"] == 365600, done.json()
     [(payload,)] = q("SELECT payload FROM outbox WHERE event_type='DemandRaised.v1'")
     p = json.loads(payload)["envelope"]["payload"] if isinstance(payload, str) else payload["envelope"]["payload"]
-    assert p["amount_paise"] == 450000 and p["supersedes_demand_ids"] == ["DEM-A-14B", "DEM-B-14B"]
-    assert client.post(url, json=body, headers=hdr(apfc, "fo.apfc", {"action": "decide-vishwas", "resource_id": app_id, "amount_paise": 450000})).status_code == 409
+    assert p["amount_paise"] == 365600 and p["supersedes_demand_ids"] == ["DEM-A-14B", "DEM-B-14B"] and "VISHWAS, 2026" in p["working"]
+    assert client.post(url, json=body, headers=step).status_code == 409
+    monkeypatch.setattr(routes, "today", lambda: date(2026, 12, 29))                   # the window has closed
+    assert "open from" in apply(["DEM-B-14B"]).json()["detail"]
+
+
+def test_vishwas_2026_reads_the_defaults_of_a_damages_order():
+    """A damages order lists its defaults with the automatic damages at the band's yearly rate; the amount paid late is
+    worked back from them, and each default is recalculated at its own monthly rate."""
+    from epfo_persistence.policy import baseline, late_payment_charges, section
+    from app.api.routes import vishwas_terms
+    rules = baseline()
+    auto = lambda arrears, days: late_payment_charges(arrears, date(2015, 7, 15), date(2015, 7, 15) + __import__("datetime").timedelta(days=days), rules)["damages_14b_paise"]  # noqa: E731
+    lines = [{"demand_id": "X1", "wage_month": "2015-06", "days_late": 4097, "auto_paise": auto(1000000, 4097), "levied_paise": 1},
+             {"demand_id": "X2", "wage_month": "2023-11", "days_late": 50, "auto_paise": auto(4000000, 50), "levied_paise": 1}]
+    order = {"demand_id": "D14B-CMP-1", "amount_paise": 99999900, "trrn": "TRRN-X", "wage_month": "2015-06", "working": json.dumps(lines)}
+    a = vishwas_terms(order, set(), section(rules, "vishwas"), section(rules, "late_payment"), date(2026, 10, 1))
+    assert a["eligible"], a["reasons"]
+    long_one, short_one = (x["arrears_paise"] for x in a["defaults"])
+    assert long_one == 1000000 and abs(short_one - 4000000) <= 1000      # the damages were rounded to a rupee: ₹273.97 → ₹274
+    assert [x["rate_pct_per_month"] for x in a["defaults"]] == [1.0, 0.25]       # 134.7 months; 1.6 months
+    assert a["revised_paise"] == sum(x["revised_paise"] for x in a["defaults"])
+    later = vishwas_terms({**order, "working": json.dumps([{**lines[1], "wage_month": "2024-06"}])}, set(), section(rules, "vishwas"),
+                          section(rules, "late_payment"), date(2026, 10, 1))
+    assert not later["eligible"] and "before 2024-06-14" in later["reasons"][0]
+    owed = vishwas_terms(order, {"2023-11"}, section(rules, "vishwas"), section(rules, "late_payment"), date(2026, 10, 1))
+    assert "7Q interest" in " ".join(owed["reasons"])

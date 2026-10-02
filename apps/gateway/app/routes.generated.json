@@ -1751,6 +1751,22 @@
   },
   {
     "method": "POST",
+    "path_template": "/office/recovery/{caseId}/instalment-defaults",
+    "regex": "^/office/recovery/[^/]+/instalment\\-defaults$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.recovery_officer"
+    ],
+    "summary": "A missed instalment: the facility is withdrawn without notice and recovery resumes; no second facility beyond 36",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/office/vdr-entries/{vdrId}/eo-certifications",
     "regex": "^/office/vdr\\-entries/[^/]+/eo\\-certifications$",
     "status": "?",
@@ -3340,9 +3356,11 @@
     "money": false,
     "step_up": false,
     "callers": [
-      "fo.oic"
+      "fo.oic",
+      "ho.cpfc",
+      "zo.acc"
     ],
-    "summary": "Instalments for the arrears (at most 72); coercive steps wait while they run",
+    "summary": "Instalments for the arrears: up to 36 by the officer whose power covers the arrears (RPFC-II ₹10 lakh, RPFC-I ₹25 lakh, zone ₹50 lakh), more (at most 72) by Head Office; a bank guarantee of one instalment (six beyond 36); coercive steps wait while they run",
     "revocation": false
   },
   {

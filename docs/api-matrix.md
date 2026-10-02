@@ -9,13 +9,13 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 15 | 2 | 0 | 0 |
 | 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 101 | 5 | 1 | 0 |
 | 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 89 | 5 | 0 | 0 |
-| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 123 | 0 | 3 | 4 |
+| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 124 | 0 | 3 | 4 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 17 | 1 | 0 | 0 |
 | 6 | International worker | **Working** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 6 | 0 | 0 | 0 |
 | 7 | District office | **Working** | `do.incharge`, `do.staff` | 3 | 0 | 0 | 0 |
 | 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 66 | 0 | 0 | 1 |
-| 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 17 | 0 | 0 | 0 |
-| 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 31 | 0 | 0 | 0 |
+| 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 18 | 0 | 0 | 0 |
+| 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 32 | 0 | 0 | 0 |
 | 11 | NDC | **Working** | `tech.ndc`, `tech.adc`, `tech.cpps`, `tech.epfo3` | 8 | 0 | 0 | 0 |
 | 12 | Ministry | **Working** | `gov.mole`, `gov.parliament` | 3 | 0 | 0 | 0 |
 | 13 | B2B | **Mock** | `payroll_provider`, `ext.collecting_bank`, `ext.pension_bank`, `ext.mca`, `ext.shram_suvidha`, `ext.fund_manager` | 0 | 7 | 0 | 0 |
@@ -381,6 +381,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/recovery/{caseId}/arrest-warrants` | W | compliance | fo.recovery_officer |
 | `POST /office/recovery/{caseId}/attachments` | W | compliance | fo.recovery_officer |
 | `POST /office/recovery/{caseId}/demand-notices` | W | compliance | fo.recovery_officer |
+| `POST /office/recovery/{caseId}/instalment-defaults` | W | compliance | fo.recovery_officer |
 | `POST /office/recovery/{caseId}/payments` | W | compliance | fo.recovery_officer |
 | `POST /office/recovery/{caseId}/receivers` | W | compliance | fo.recovery_officer |
 | `POST /office/recovery/{caseId}/sales` | W | compliance | fo.recovery_officer |
@@ -532,6 +533,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/establishments/{estId}/freezes` | W | employer | zo.rpfc1 |
 | `POST /office/exempted/proceedings/{proceedingId}/steps` | W | employer | zo.acc |
 | `POST /office/members/{uan}/freezes` | W | member | zo.rpfc1 |
+| `POST /office/recovery/{caseId}/instalments` | W | compliance | zo.acc |
 | `POST /training/sandboxes` | W | platform | zo.zti |
 
 ### 10. Head office — Working
@@ -567,6 +569,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/accounts/interest-postings` | W | contribution | ho.fa_cao |
 | `POST /office/establishments/{estId}/freezes` | W | employer | ho.fa_cao |
 | `POST /office/members/{uan}/freezes` | W | member | ho.fa_cao |
+| `POST /office/recovery/{caseId}/instalments` | W | compliance | ho.cpfc |
 | `PUT /ho/config/interest-rates/{financialYear}` | W | contribution | ho.fa_cao |
 | `PUT /ho/config/rule-sets/{versionId}` | W | platform | ho.acc_hq |
 

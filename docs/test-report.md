@@ -98,6 +98,20 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 26a: the ₹25,000 ceiling, VISHWAS, 2026, instalments by the circulars (2 October 2026)
+
+Unit: every suite passes — shared policy 44 (the revision loaded as a whole version and valid; September 2026 split
+16/14 days, ₹20,000 → ₹17,333.33), contribution 102 (September accepted at the day-weighted bound and refused above it;
+the pension-membership warning), claim 72 (Form 10C at the ceiling of the exit date), compliance 26 (VISHWAS, 2026: the
+monthly rates by length of default, defaults after 14 June 2024 and unpaid 7Q refused, the window; a damages order read
+default by default; instalments by powers, the guarantee, Head Office beyond 36, withdrawn on a default, no second
+facility), platform 31; web 291 (new `P226.test.tsx`); must-deny 18; UI smoke 2. End to end: 101 of 103 on the
+long-used local stack — journey B stops because member A's synthetic balance is used up by earlier runs (it asks for
+`make reset`), and the returns-and-demands test, fixed below, passes alone and with its neighbours. Found on the way,
+fixed: the old VISHWAS end-to-end test created the late payment a later test relied on; both now create their own when
+none is left. Rule-set versions published by earlier end-to-end runs on this stack still carry ₹15,000 from today; a
+fresh stack (and CI) builds on ₹25,000.
+
 ## Update — Phase 2, slice 20: side or top menu, Find a screen (2 October 2026)
 
 Web 289 (new `P220.test.tsx`: the side menu by default for office roles and the top bar for members, the choice kept;

@@ -72,8 +72,20 @@ it("lets the RPFC grant instalments; shows a stay", async () => {
   fireEvent.change(within(form).getByLabelText(/Number/), { target: { value: "6" } });
   fireEvent.change(within(form).getByLabelText("First due"), { target: { value: "2026-11-01" } });
   fireEvent.change(within(form).getByLabelText("Note"), { target: { value: "Hardship" } });
+  fireEvent.change(within(form).getByLabelText("Bank guarantee (₹)"), { target: { value: "5000" } });
+  fireEvent.change(within(form).getByLabelText("Guarantee reference"), { target: { value: "BG-1" } });
   fireEvent.click(within(form).getByRole("button", { name: "Grant" }));
-  await waitFor(() => expect(command).toHaveBeenCalledWith("POST", "/api/v1/office/recovery/RC-1/instalments", { count: 6, first_due: "2026-11-01", note: "Hardship" }));
+  await waitFor(() => expect(command).toHaveBeenCalledWith("POST", "/api/v1/office/recovery/RC-1/instalments",
+    { count: 6, first_due: "2026-11-01", note: "Hardship", bank_guarantee_paise: 500000, bank_guarantee_ref: "BG-1" }));
+});
+
+it("lets the Recovery Officer withdraw instalments on a default (P2.26)", async () => {
+  as("fo.recovery_officer"); responses["/api/v1/office/recovery/cases"] = [rc("INSTALMENTS")];
+  show(<RecoveryPage />);
+  const form = await screen.findByRole("form", { name: "Default RC/RO-DEMO-01/2026/1234" });
+  fireEvent.change(within(form).getByLabelText("What was missed"), { target: { value: "December instalment" } });
+  fireEvent.click(within(form).getByRole("button", { name: "Withdraw the facility" }));
+  await waitFor(() => expect(command).toHaveBeenCalledWith("POST", "/api/v1/office/recovery/RC-1/instalment-defaults", { missed: "December instalment" }));
 });
 
 it("shows the employer its recovery and HO its reports; menus", async () => {

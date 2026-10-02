@@ -31,3 +31,12 @@ def test_final_settlement_at_58_or_under_an_agreement():
 
 def test_a_domestic_member_is_not_affected():
     assert eligibility(account(international_worker=False), "FINAL_SETTLEMENT", baseline(), TODAY)["eligible"]
+
+
+def test_pension_withdrawal_uses_the_wage_ceiling_in_force_when_the_member_left():
+    """P2.26: Table D x wages at exit — ₹15,000 for a member who left before 17 Sep 2026, ₹25,000 after."""
+    rules = baseline()
+    left = account(international_worker=False, date_of_exit=date(2026, 3, 31), date_of_joining=date(2023, 4, 1))
+    before = eligibility(left, "PENSION_WITHDRAWAL", rules, date(2026, 10, 1), None, 1500000)
+    after = eligibility(left, "PENSION_WITHDRAWAL", rules, date(2026, 10, 1), None, 2500000)
+    assert before["max_amount_paise"] * 25 == after["max_amount_paise"] * 15 > 0

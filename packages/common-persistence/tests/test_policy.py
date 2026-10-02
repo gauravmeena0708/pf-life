@@ -82,3 +82,34 @@ def test_primary_member_id_is_the_latest_joined_with_contributions():
     assert primary_member_id([{**ids[2]}]) == "AL-3"                 # nothing contributed anywhere: latest joined
     assert primary_member_id([{**ids[1], "transferred_to": "AL-9"}, ids[0]]) == "AL-1"
     assert primary_member_id([]) is None
+
+
+def test_the_25000_ceiling_from_17_september_2026_splits_that_month_by_days(tmp_path):
+    """P2.26: S.O. 5109(E) — ₹25,000 from 17 Sep 2026. September is one return, at ₹15,000 for 16 days and ₹25,000 for 14."""
+    from epfo_persistence.policy import capped_wages, revisions, rules_for_wage_month, validate
+    [revision] = revisions()
+    doc = revision["document"]
+    assert doc["rule_version"] == "demo-rules-2026.2" and doc["effective_from"] == "2026-09-17" and not validate(doc)
+    assert doc["contribution"]["eps_wage_ceiling_paise"] == doc["contribution"]["edli_wage_ceiling_paise"] == 2500000
+    assert doc["claims"] == baseline()["claims"] and "revisions" not in baseline()          # the rest carried over
+    engine = create_async_engine(f"sqlite+aiosqlite:///{tmp_path}/p.db")
+    sessions = async_sessionmaker(engine, expire_on_commit=False)
+
+    async def run():
+        async with engine.begin() as c:
+            await c.run_sync(policy_metadata.create_all)
+        async with sessions() as s, s.begin():
+            await on_policy_published(s, {"payload": {"rule_version": doc["rule_version"], "effective_from": doc["effective_from"], "document": doc}})
+        async with sessions() as s:
+            out = [await rules_for_wage_month(s, m) for m in ("2026-08", "2026-09", "2026-10")]
+        await engine.dispose()
+        return out
+    august, september, october = asyncio.run(run())
+    assert august["contribution"]["eps_wage_ceiling_paise"] == 1500000 and "ceiling_periods" not in august["contribution"]
+    assert october["contribution"]["eps_wage_ceiling_paise"] == 2500000 and "ceiling_periods" not in october["contribution"]
+    c = september["contribution"]
+    assert [(p["days"], p["eps_wage_ceiling_paise"]) for p in c["ceiling_periods"]] == [(16, 1500000), (14, 2500000)]
+    assert c["eps_wage_ceiling_paise"] == 1966700                      # 15,000 x 16/30 + 25,000 x 14/30, rounded up
+    assert capped_wages(2000000, c) == 1733400                         # the FAQ's ₹17,333.33 for wages of ₹20,000
+    assert capped_wages(1200000, c) == 1200000                         # under both ceilings: the wages
+    assert capped_wages(2000000, october["contribution"]) == 2000000

@@ -693,6 +693,19 @@ Compliance*: the chain from a CAIU signal through the inspection, the file, the 
 planned steps dashed in red; choose a step for who does it and what follows. **User manuals** — the manuals the UI
 tests produced, by role (after `python3 scripts/publish_manuals.py`).
 
+## The Code's transition: ₹25,000 from 17 September 2026, VISHWAS, 2026, instalments
+
+1. As `ho-policy`, open Policy administration: `demo-rules-2026.2` is in force from 17 Sep 2026 (EPS and EDLI ceilings
+   ₹25,000); the baseline is superseded.
+2. As `emp-preparer`, file September 2026 with a member on ₹20,000: EPS wages up to ₹17,333 are accepted (16 days at
+   ₹15,000, 14 at ₹20,000); ₹20,000 is refused with the expected figure. In October ₹20,000 is right; a row with no EPS
+   wages gets a warning that the member belongs to the pension scheme.
+3. As `emp-signatory`, Returns › VISHWAS: each open 14B demand shows its recalculation (arrears x rate x months), or why it
+   is not eligible (a default after 14 June 2024, 7Q interest unpaid). Apply with the undertaking not to appeal; as
+   `ro-apfc`, approve — one revised demand replaces them.
+4. As `ro-oic`, grant instalments on a recovery certificate: a bank guarantee of one instalment is required; 40
+   instalments are refused (Head Office only). As `ro-recovery`, record a missed instalment: recovery resumes.
+
 ## Finding your way: side or top menu, Find a screen
 
 1. Log in as `ro-apfc`. The menu is down the side: the group holding the page is open, the item marked. Type

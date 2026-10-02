@@ -3016,6 +3016,12 @@ stakeholders:
     step_up: false
     via:
     - F06.recovery
+  - endpoint: POST /office/recovery/{caseId}/instalment-defaults
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.recovery
   - endpoint: POST /office/recovery/{caseId}/attachments
     status: W
     scope: office jurisdiction of the caller's posting
@@ -3345,6 +3351,12 @@ stakeholders:
     step_up: false
     via:
     - F06.zo_scrutiny
+  - endpoint: POST /office/recovery/{caseId}/instalments
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.instalments_zo
   - endpoint: GET /office/work-queue
     status: W
     scope: office jurisdiction of the caller's posting
@@ -3532,6 +3544,12 @@ stakeholders:
     via:
     - F14.zti_zo
   ho.cpfc:
+  - endpoint: POST /office/recovery/{caseId}/instalments
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.instalments_ho
   - endpoint: GET /monitoring/claims
     status: W
     scope: role jurisdiction; aggregates with small-group suppression

@@ -38,7 +38,24 @@ interface VishwasApplication {
 interface VishwasData {
   applications: VishwasApplication[];
   open_14b_demands: { demand_id: string; wage_month: string; amount_paise: number; working: string }[];
-  settlement_share_pct: number;
+  assessment: VishwasAssessment[];
+  scheme: { scheme: string; open_from: string; open_until: string; defaults_before: string };
+}
+/** VISHWAS, 2026 for one 14B demand: eligible or why not, and the damages recalculated at the monthly rate. */
+interface VishwasAssessment {
+  demand_id: string; eligible: boolean; reasons: string[]; damages_paise: number; arrears_paise: number;
+  months_of_default: number; rate_pct_per_month: number; revised_paise: number | null;
+  defaults?: { wage_month: string; arrears_paise: number; months_of_default: number; rate_pct_per_month: number; revised_paise: number }[];
+}
+
+function VishwasLine({ a }: { a: VishwasAssessment | undefined }) {
+  if (!a) return null;
+  const parts = a.defaults && a.defaults.length > 1
+    ? a.defaults.map((d) => `${d.wage_month}: ${rupees(d.arrears_paise)} × ${d.rate_pct_per_month}% × ${d.months_of_default} months`).join("; ")
+    : `${rupees(a.arrears_paise)} × ${a.rate_pct_per_month}% × ${a.months_of_default} months`;
+  return a.eligible
+    ? <span className="small"> — recalculated: {parts} = <strong>{rupees(a.revised_paise)}</strong></span>
+    : <span className="small muted"> — not eligible: {a.reasons.join(" ")}</span>;
 }
 
 function ReturnDetails({ entry }: { entry: ReturnEntry }) {
@@ -121,7 +138,7 @@ export function ReturnsPage() {
       if (!chosen.length || !declaration) throw new Error("Choose at least one open 14B demand and accept the declaration.");
       const result = await command<Envelope<VishwasApplication & { estimated_settlement_paise: number }>>(
         "POST", `${base}/vishwas-applications`, { demand_ids: chosen.map((item) => item.demand_id), declaration: true });
-      setNotice(`Application ${result.data.application_id} submitted. Illustrative estimated settlement: ${rupees(result.data.estimated_settlement_paise)}.`);
+      setNotice(`Application ${result.data.application_id} submitted. Damages recalculated: ${rupees(result.data.estimated_settlement_paise)}, payable on approval.`);
       setSelectedDemands([]); setDeclaration(false);
       await reloadCompliance();
     } catch (cause) { setError(cause); } finally { setBusy(false); }
@@ -221,9 +238,10 @@ export function ReturnsPage() {
     </section>
 
     <section className="card stack" aria-labelledby="vishwas-heading"><h2 id="vishwas-heading">VISHWAS — settling 14B damages</h2>
-      <p className="muted">This settlement is illustrative. 7Q interest is not covered.</p>
       {vishwas.isLoading ? <p role="status">Loading VISHWAS applications…</p> : null}
-      {vishwas.data ? <p>Illustrative settlement share: {vishwas.data.data.settlement_share_pct}% of selected 14B damages, subject to approval.</p> : null}
+      {vishwas.data?.data.scheme ? <p>{vishwas.data.data.scheme.scheme}, open {vishwas.data.data.scheme.open_from} to {vishwas.data.data.scheme.open_until}:
+        damages for defaults before {vishwas.data.data.scheme.defaults_before} are recalculated at 0.25% a month (default up to two months),
+        0.50% (two to under four) or 1% (four or more), once all 7Q interest on the default is paid. You give up any further appeal.</p> : null}
       {vishwas.data?.data.applications.length ? <div className="table-scroll"><table><thead><tr>
         <th scope="col">Application</th><th scope="col">Demands</th><th scope="col">Damages</th>
         <th scope="col">Revised amount</th><th scope="col">State</th><th scope="col">Decision note</th>
@@ -234,13 +252,15 @@ export function ReturnsPage() {
       {signatory && vishwas.data ? <form className="stack" onSubmit={(e) => void applyVishwas(e)}>
         <fieldset><legend>Open 14B demands</legend>
           {vishwas.data.data.open_14b_demands.length ? vishwas.data.data.open_14b_demands.map((item) => <label key={item.demand_id}>
-            <input type="checkbox" checked={selectedDemands.includes(item.demand_id)} disabled={busy}
+            <input type="checkbox" checked={selectedDemands.includes(item.demand_id)}
+              disabled={busy || vishwas.data?.data.assessment?.find((x) => x.demand_id === item.demand_id)?.eligible === false}
               onChange={(e) => setSelectedDemands((current) => e.target.checked ? [...current, item.demand_id] : current.filter((id) => id !== item.demand_id))} />
             {item.demand_id} · {item.wage_month} · {rupees(item.amount_paise)} · {item.working}
+            <VishwasLine a={vishwas.data?.data.assessment?.find((x) => x.demand_id === item.demand_id)} />
           </label>) : <p className="muted">No open 14B demands available.</p>}
         </fieldset>
         <label><input type="checkbox" required checked={declaration} disabled={busy}
-          onChange={(e) => setDeclaration(e.target.checked)} /> I accept the settlement terms; illustrative</label>
+          onChange={(e) => setDeclaration(e.target.checked)} /> I accept the terms and undertake not to pursue any further appeal on these damages</label>
         <div className="actions"><button type="submit" className="primary"
           disabled={busy || !!stepUp.request || !selectedDemands.length || !declaration}>Apply for settlement</button></div>
       </form> : null}

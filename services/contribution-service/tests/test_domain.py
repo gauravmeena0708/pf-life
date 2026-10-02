@@ -93,3 +93,38 @@ def test_an_international_worker_contributes_on_full_wages():
     assert "W-IW-FULL-WAGES" in codes and "E-EPS-CEILING" not in codes
     domestic = {i["code"] for i in validate(content, "ECR_TXT", "2026-08", MEMBERS, RULES)["issues"]}
     assert "E-EPS-CEILING" in domestic and "W-IW-FULL-WAGES" not in domestic
+
+
+def september_2026():
+    """The rules for wage month 2026-09 as rules_for_wage_month builds them: ₹15,000 for 16 days, ₹25,000 for 14."""
+    rules = copy.deepcopy(RULES)
+    c = rules["contribution"]
+    c["ceiling_periods"] = [{"days": 16, "eps_wage_ceiling_paise": 1500000, "edli_wage_ceiling_paise": 1500000},
+                            {"days": 14, "eps_wage_ceiling_paise": 2500000, "edli_wage_ceiling_paise": 2500000}]
+    c["eps_wage_ceiling_paise"] = c["edli_wage_ceiling_paise"] = 1966700
+    return rules
+
+
+def test_september_2026_is_split_by_days_at_the_two_ceilings():
+    """The FAQ's scenario C: wages of ₹20,000, EPS at ₹15,000 until 16 Sep and ₹20,000 from 17 Sep → EPS wages 17,333."""
+    good = "#~#".join(row(gross="20000", epf="20000", eps="17333", edli="17333", ee="2400", eps_share="1444", er="956"))
+    report = validate(good, "ECR_TXT", "2026-09", MEMBERS, september_2026())
+    assert not [i for i in report["issues"] if i["severity"] == "error"], report["issues"]
+    over = "#~#".join(row(gross="20000", epf="20000", eps="20000", edli="20000", ee="2400", eps_share="1666", er="734"))
+    issue = next(i for i in validate(over, "ECR_TXT", "2026-09", MEMBERS, september_2026())["issues"] if i["code"] == "E-EPS-CEILING")
+    assert issue["expected"] == "17334" and "by days" in issue["fix"]
+    # the same row in October is right: the ceiling is ₹25,000 for the whole month
+    october = copy.deepcopy(RULES)
+    october["contribution"]["eps_wage_ceiling_paise"] = october["contribution"]["edli_wage_ceiling_paise"] = 2500000
+    assert not [i for i in validate(over, "ECR_TXT", "2026-10", MEMBERS, october)["issues"] if i["severity"] == "error"]
+
+
+def test_a_member_within_the_ceiling_without_pension_wages_is_flagged():
+    october = copy.deepcopy(RULES)
+    october["contribution"]["eps_wage_ceiling_paise"] = october["contribution"]["edli_wage_ceiling_paise"] = 2500000
+    epf_only = "#~#".join(row(gross="20000", epf="20000", eps="0", edli="20000", ee="2400", eps_share="0", er="2400"))
+    issues = validate(epf_only, "ECR_TXT", "2026-10", MEMBERS, october)["issues"]
+    warning = next(i for i in issues if i["code"] == "W-EPS-MEMBERSHIP")
+    assert warning["severity"] == "warning" and "25,000" in warning["message"]
+    # above the old ceiling and before the change: not flagged (an excluded employee then)
+    assert not any(i["code"] == "W-EPS-MEMBERSHIP" for i in validate(epf_only, "ECR_TXT", "2026-08", MEMBERS, RULES)["issues"])

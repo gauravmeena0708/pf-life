@@ -12,7 +12,7 @@ Before any version has been published (a fresh stack) both fall back to the base
 import json
 import os
 import re
-from datetime import date
+from datetime import date, timedelta
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -51,9 +51,67 @@ def _baseline_path() -> Path:
 
 
 @lru_cache(maxsize=1)
-def baseline() -> dict[str, Any]:
+def _file() -> dict[str, Any]:
     with _baseline_path().open(encoding="utf-8") as f:
         return yaml.safe_load(f)
+
+
+def baseline() -> dict[str, Any]:
+    return {k: v for k, v in _file().items() if k != "revisions"}
+
+
+def revisions() -> list[dict[str, Any]]:
+    """Versions already decided after the baseline (config/demo-rules.yaml `revisions:`), each as a whole document:
+    the baseline with the listed keys of each section changed. platform-service's seed publishes them in order."""
+    out, current = [], baseline()
+    for change in _file().get("revisions") or []:
+        doc = json.loads(json.dumps(current))
+        for key, value in change.items():
+            if key == "change_note":
+                continue
+            doc[key] = {**doc.get(key, {}), **value} if isinstance(value, dict) and isinstance(doc.get(key), dict) else value
+        out.append({"document": doc, "change_note": change.get("change_note", "")})
+        current = doc
+    return out
+
+
+async def rules_for_wage_month(session: AsyncSession, wage_month: str) -> dict[str, Any]:
+    """The rules for an ECR wage month: the version in force on its first day — and, when a later version takes effect
+    within the month (the ₹25,000 ceiling from 17 September 2026), the wage ceilings in force on each day of it.
+    `contribution.ceiling_periods` then lists (days, EPS ceiling, EDLI ceiling); `capped_wages` weighs a member's
+    wages by them, and the month's ceilings become the day-weighted maximum, so a split by days is accepted."""
+    start = date.fromisoformat(wage_month + "-01")
+    end = date(start.year + start.month // 12, start.month % 12 + 1, 1) - timedelta(days=1)
+    rules = await rules_on(session, start)
+    later = (await session.execute(select(policy_rules.c.effective_from).where(
+        policy_rules.c.effective_from > start, policy_rules.c.effective_from <= end)
+        .order_by(policy_rules.c.effective_from))).scalars().all()
+    if not later:
+        return rules
+    edges = [start, *sorted(set(later)), end + timedelta(days=1)]
+    periods = []
+    for a, b in zip(edges, edges[1:]):
+        c = (await rules_on(session, a))["contribution"]
+        periods.append({"days": (b - a).days, "eps_wage_ceiling_paise": c["eps_wage_ceiling_paise"],
+                        "edli_wage_ceiling_paise": c["edli_wage_ceiling_paise"]})
+    rules = json.loads(json.dumps(rules))
+    c = rules["contribution"]
+    c["ceiling_periods"] = periods
+    for key in ("eps_wage_ceiling_paise", "edli_wage_ceiling_paise"):
+        c[key] = capped_wages(10**12, c, key)
+    return rules
+
+
+def capped_wages(wages_paise: int, contribution: dict[str, Any], key: str = "eps_wage_ceiling_paise") -> int:
+    """The most wages that may carry a contribution in the month: the ceiling, or — when the ceiling changed within the
+    month — each day's ceiling weighed by days (₹20,000 in September 2026: 15,000 x 16/30 + 20,000 x 14/30 = 17,333.33),
+    rounded up to a whole rupee as the ECR carries rupees."""
+    periods = contribution.get("ceiling_periods")
+    if not periods:
+        return min(wages_paise, contribution[key])
+    days = sum(p["days"] for p in periods)
+    exact = sum(min(wages_paise, p[key]) * p["days"] for p in periods)
+    return -(-exact // (days * 100)) * 100
 
 
 def _document(value: Any) -> dict[str, Any]:
@@ -366,7 +424,8 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
                 "order_working_days", "set_aside_months", "escaped_assessment_years")
         later = ("damages_ss_days", "damages_approval_days", "review_days",   # P2.11b-c: a rule set drafted from an earlier one may lack them
                  "appeal_days", "appeal_condonable_days", "pre_deposit_percent", "scn_reply_working_days", "complaint_days",
-                 "pay_after_order_days", "demand_notice_days", "max_instalments", "custody_before_detention_days")
+                 "pay_after_order_days", "demand_notice_days", "max_instalments", "custody_before_detention_days",
+                 "normal_instalments", "guarantee_instalments", "guarantee_instalments_beyond_normal")
         tiers = cp.get("allocation_tiers")
         if not all(_whole(cp.get(k), 1, 365) for k in days) or not all(_whole(cp[k], 1, 365) for k in later if k in cp) or not (isinstance(tiers, list) and tiers and tiers[-1].get("up_to_uans") is None
                                                                     and all(t.get("rank") in ("APFC", "RPFC-II", "RPFC-I") for t in tiers)):

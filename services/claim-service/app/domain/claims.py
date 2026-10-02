@@ -83,7 +83,7 @@ def international_worker_reasons(account: dict[str, Any], claim_type: str, rules
 
 
 def eligibility(account: dict[str, Any], claim_type: str, rules: dict[str, Any], today: date,
-                previous_claims: list[date] | None = None) -> dict[str, Any]:
+                previous_claims: list[date] | None = None, ceiling_at_exit_paise: int | None = None) -> dict[str, Any]:
     """Whether this account may claim this type today, the maximum amount, and why — using only the
     conditions the rule set declares for the type (see config/demo-rules.yaml)."""
     spec = rules["claims"]["types"][claim_type]
@@ -126,7 +126,8 @@ def eligibility(account: dict[str, Any], claim_type: str, rules: dict[str, Any],
         table = spec["table_d_factor_x100"]
         if years < 1:
             reasons.append("At least six months of pension (EPS) service are needed.")
-        wages = rules["contribution"]["eps_wage_ceiling_paise"]
+        # wages at exit, capped — the ceiling in force when the member left (₹15,000 before 17 Sep 2026, ₹25,000 after)
+        wages = ceiling_at_exit_paise or rules["contribution"]["eps_wage_ceiling_paise"]
         base = wages * table[min(years, len(table)) - 1] // 100 if years >= 1 else 0
     else:
         base = employee if spec["max_from"] == "employee_share" else employee + employer

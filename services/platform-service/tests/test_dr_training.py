@@ -53,7 +53,7 @@ def test_replication_status_is_repeatable_per_minute_and_flags_rpo(ctx):
     assert all(r["status"] == ("LAGGING" if r["lag_seconds"] > 60 else "IN_SYNC") for r in data["databases"])
     assert data["overall_status"] == ("LAGGING" if any(r["status"] == "LAGGING" for r in data["databases"]) else "IN_SYNC")
     assert all(datetime.fromisoformat(r["last_applied_at"]).tzinfo is not None for r in data["databases"])
-    assert q("SELECT * FROM outbox") == []
+    assert q("SELECT * FROM outbox WHERE event_type <> 'PolicyPublished.v1'") == []   # the seed publishes the decided rule sets
 
 
 @pytest.mark.parametrize("scenario", ["FULL_SITE", "DATABASE", "APPLICATION_TIER"])
@@ -134,4 +134,4 @@ def test_invalid_input_and_other_roles_create_no_records(ctx):
     assert client.post(TRAINING, json=body, headers=member).status_code == 403
     assert q("SELECT * FROM failover_drills") == []
     assert q("SELECT * FROM training_sandboxes") == []
-    assert q("SELECT * FROM outbox") == []
+    assert q("SELECT * FROM outbox WHERE event_type <> 'PolicyPublished.v1'") == []   # the seed publishes the decided rule sets

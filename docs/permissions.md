@@ -776,6 +776,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/recovery/{caseId}/arrest-warrants` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/recovery/{caseId}/attachments` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/recovery/{caseId}/demand-notices` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/recovery/{caseId}/instalment-defaults` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/recovery/{caseId}/payments` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/recovery/{caseId}/receivers` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/recovery/{caseId}/sales` | W | office jurisdiction of the caller's posting | yes |
@@ -895,6 +896,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /grievances/{grievanceId}/resolution` | W | complainant or the assigned office | yes |
 | `POST /office/compliance/cases/{caseId}/scrutinies` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/exempted/proceedings/{proceedingId}/steps` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/recovery/{caseId}/instalments` | W | office jurisdiction of the caller's posting |  |
 
 **`zo.rpfc1`** — RPFC-I at the Zonal Office (zonal authority for freezing categories B and C; zone-level monitoring)
 
@@ -960,6 +962,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /monitoring/data-freshness` | W | role jurisdiction; aggregates with small-group suppression |  |
 | `GET /monitoring/grievances` | W | role jurisdiction; aggregates with small-group suppression |  |
 | `POST /ho/config/rule-sets/{versionId}/decisions` | W | national (Head Office role) | yes |
+| `POST /office/recovery/{caseId}/instalments` | W | office jurisdiction of the caller's posting |  |
 
 **`ho.acc_hq`** — ACC (HQ) and HO division heads
 

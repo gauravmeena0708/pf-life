@@ -18,7 +18,7 @@ from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit, find_response, request_hash, store_response
 from app.infra.interest import interest_due, post_interest
 from app.infra.trust_passbook import trust_section
-from epfo_persistence.policy import financial_year, financial_year_bounds, interest_rate_bp, rules_on
+from epfo_persistence.policy import financial_year, financial_year_bounds, interest_rate_bp, rules_for_wage_month, rules_on
 
 router = APIRouter()
 
@@ -82,9 +82,9 @@ async def _validation(session, filing: dict[str, Any]):
     if prior:
         old = prior["validation_report"] if isinstance(prior["validation_report"], dict) else json.loads(prior["validation_report"])
         comparison = {"wage_month":prior["wage_month"],"members_then":old["summary"]["rows"],"total_then_paise":old["summary"]["totals_paise"]["TOTAL"],"total_now_paise":0}
-    # A return is checked against the rules in force on the first day of its wage month; until it is
-    # submitted, re-validating picks up a newly published version for that month.
-    rules = await rules_on(session, wage_month_start(filing["wage_month"]))
+    # A return is checked against the rules in force on the first day of its wage month (and, when a version takes effect
+    # within it, each day's wage ceiling); until it is submitted, re-validating picks up a newly published version.
+    rules = await rules_for_wage_month(session, filing["wage_month"])
     exemption = (await session.execute(text("SELECT trust_name FROM exempted_establishments WHERE establishment_id=:e "
                                             "AND pf_exempt=true AND (status='ACTIVE' OR ended_on>:d) AND effective_from<=:d"),
                                        {"e": filing["establishment_id"], "d": wage_month_start(filing["wage_month"])})).scalar_one_or_none()

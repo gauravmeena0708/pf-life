@@ -73,7 +73,7 @@ def baseline_doc(client):
     return client.get("/api/v1/ho/config/rule-sets/POL-BASELINE", headers=drafter()).json()["data"]["document"]
 
 
-def draft(client, change=None, name="demo-rules-2026.2", effective=NEXT_MONTH):
+def draft(client, change=None, name="demo-rules-2026.7", effective=NEXT_MONTH):
     doc = copy.deepcopy(baseline_doc(client))
     (change or (lambda d: d["contribution"].update(eps_wage_ceiling_paise=2500000, edli_wage_ceiling_paise=2500000)))(doc)
     return client.post("/api/v1/ho/config/rule-sets", json={"base_version_id": "POL-BASELINE", "rule_version": name,
@@ -107,13 +107,14 @@ def test_publish_needs_submission_different_person_and_step_up(ctx):
     assert client.post(decide, json=body, headers=hdr(DRAFTER, "ho.cpfc", step)).status_code == 403      # same person
     r = client.post(decide, json=body, headers=hdr(APPROVER, "ho.cpfc", step))
     assert r.status_code == 200 and r.json()["data"]["status"] == "SCHEDULED"
-    [event] = events()
-    assert event["rule_version"] == "demo-rules-2026.2" and event["effective_from"] == NEXT_MONTH
+    *_, event = events()                                                  # after the seed's own publication
+    assert event["rule_version"] == "demo-rules-2026.7" and event["effective_from"] == NEXT_MONTH
     assert event["document"]["contribution"]["eps_wage_ceiling_paise"] == 2500000 and len(event["document_sha256"]) == 64
     listing = client.get("/api/v1/ho/config/rule-sets", headers=hdr(APPROVER, "ho.cpfc")).json()["data"]["items"]
-    assert {i["rule_version"]: i["status"] for i in listing} == {"demo-rules-2026.2": "SCHEDULED", "demo-rules-2026.1": "IN_FORCE"}
+    assert {i["rule_version"]: i["status"] for i in listing} == {"demo-rules-2026.7": "SCHEDULED", "demo-rules-2026.2": "IN_FORCE",
+                                                                  "demo-rules-2026.1": "SUPERSEDED"}   # 2026.2: the ₹25,000 ceiling, seeded
     public = client.get("/api/v1/public/policy/current", headers=hdr("anonymous", "public")).json()["data"]
-    assert public["contribution"]["eps_wage_ceiling_paise"] == 1500000 and public["scheduled"][0]["effective_from"] == NEXT_MONTH
+    assert public["contribution"]["eps_wage_ceiling_paise"] == 2500000 and public["scheduled"][0]["effective_from"] == NEXT_MONTH
 
 
 def test_a_draft_that_fails_checks_cannot_be_submitted(ctx):

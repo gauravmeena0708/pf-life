@@ -39,7 +39,7 @@ def test_interest_declaration_drafts_valid_policy_once_from_in_force_version(ctx
 
     async def publications():
         async with sessions()() as session, session.begin():
-            for vid, effective, ceiling in (("POL-IN-FORCE", date(2026, 9, 1), 2500000),
+            for vid, effective, ceiling in (("POL-IN-FORCE", date(2026, 9, 20), 2500000),   # after the seeded ₹25,000 version of 17 Sep
                                              ("POL-FUTURE", date(2026, 10, 1), 3000000)):
                 doc = copy.deepcopy(base_doc)
                 doc["rule_version"] = vid
