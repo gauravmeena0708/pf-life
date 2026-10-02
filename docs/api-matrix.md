@@ -7,15 +7,15 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | # | Interface | Coverage | Stakeholders | W | M | P | ? |
 |---|---|---|---|---|---|---|---|
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 15 | 2 | 0 | 0 |
-| 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 93 | 5 | 2 | 0 |
-| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 85 | 5 | 0 | 0 |
+| 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 95 | 5 | 2 | 0 |
+| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 87 | 5 | 0 | 0 |
 | 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 103 | 0 | 17 | 4 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 15 | 1 | 0 | 0 |
 | 6 | International worker | **Working** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 6 | 0 | 0 | 0 |
 | 7 | District office | **Working** | `do.incharge`, `do.staff` | 3 | 0 | 0 | 0 |
 | 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 42 | 0 | 8 | 1 |
 | 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 15 | 0 | 0 | 0 |
-| 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 24 | 0 | 3 | 0 |
+| 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 27 | 0 | 3 | 0 |
 | 11 | NDC | **Working** | `tech.ndc`, `tech.adc`, `tech.cpps`, `tech.epfo3` | 8 | 0 | 0 | 0 |
 | 12 | Ministry | **Working** | `gov.mole`, `gov.parliament` | 3 | 0 | 0 | 0 |
 | 13 | B2B | **Mock** | `payroll_provider`, `ext.collecting_bank`, `ext.pension_bank`, `ext.mca`, `ext.shram_suvidha`, `ext.fund_manager` | 0 | 7 | 0 | 0 |
@@ -85,6 +85,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /employers/me/operators` | W | employer | employer.owner |
 | `GET /employers/me/ownership-declaration` | W | employer | employer.owner, employer.signatory |
 | `GET /employers/me/pending-approvals` | W | workflow | employer.operator, employer.signatory |
+| `GET /employers/me/pmvbry` | W | contribution | employer.owner |
 | `GET /employers/me/returns/dashboard` | W | contribution | employer.operator, employer.owner, employer.signatory |
 | `GET /employers/me/signatories` | W | employer | employer.owner |
 | `GET /employers/me/signature-registrations` | W | employer | employer.owner, employer.signatory |
@@ -132,6 +133,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /employers/me/office-transfer-requests` | W | employer | employer.signatory |
 | `POST /employers/me/operators/invitations` | W | employer | employer.owner |
 | `POST /employers/me/operators/{operatorId}/revocations` | W | employer | employer.owner |
+| `POST /employers/me/pmvbry/options` | W | contribution | employer.owner |
 | `POST /employers/me/signatories/authorisations` | W | employer | employer.owner |
 | `POST /employers/me/signatories/{signatoryId}/request-letters` | W | employer | employer.owner |
 | `POST /employers/me/signatories/{signatoryId}/revocations` | W | employer | employer.owner |
@@ -188,6 +190,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /members/me/pension-applications` | W | pension | member |
 | `GET /members/me/pension-eligibility-preview` | W | pension | member |
 | `GET /members/me/pension-scheme-certificate` | W | pension | member |
+| `GET /members/me/pmvbry` | W | contribution | member |
 | `GET /members/me/privacy-requests` | W | audit | member |
 | `GET /members/me/service-history` | W | member | member |
 | `GET /members/me/sessions` | W | gateway | member |
@@ -230,6 +233,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /members/me/pension-applications` | W | pension | member, member.disabled |
 | `POST /members/me/pension-scheme-certificates` | W | pension | member |
 | `POST /members/me/pension-scheme-certificates/{certId}/surrenders` | W | pension | member |
+| `POST /members/me/pmvbry/financial-literacy-completions` | W | contribution | member |
 | `POST /members/me/privacy-requests` | W | audit | member |
 | `POST /members/me/security-reports` | W | member | member |
 | `POST /members/me/tax/form-15g-15h` | W | claim | member |
@@ -506,6 +510,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /ho/config/rule-sets/{versionId}` | W | platform | ho.acc_hq, ho.cpfc, ho.pension |
 | `GET /ho/finance/balance-sheet` | W | contribution | ho.fa_cao |
 | `GET /ho/finance/investments` | W | reporting | ho.fa_cao, ho.investment |
+| `GET /ho/pmvbry/dashboard` | W | contribution | ho.cpfc, ho.fa_cao |
+| `GET /ho/pmvbry/disbursement-runs/preview` | W | contribution | ho.fa_cao |
 | `GET /monitoring/claims` | W | reporting | ho.acc_hq, ho.cpfc, ho.edli, ho.pension |
 | `GET /monitoring/contributions` | W | reporting | ho.cpfc |
 | `GET /monitoring/data-freshness` | W | reporting | ho.cpfc |
@@ -519,6 +525,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /ho/config/rule-sets/{versionId}/decisions` | W | platform | ho.cpfc |
 | `POST /ho/config/rule-sets/{versionId}/submissions` | W | platform | ho.acc_hq |
 | `POST /ho/exemptions/{estId}/decisions` | W | employer | ho.exemption |
+| `POST /ho/pmvbry/disbursement-runs` | W | contribution | ho.fa_cao |
 | `POST /ndc/issue-tracker/requests/{requestId}/executions` | W | platform | ho.is |
 | `POST /office/accounts/interest-postings` | W | contribution | ho.fa_cao |
 | `POST /office/establishments/{estId}/freezes` | W | employer | ho.fa_cao |

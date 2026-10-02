@@ -33,7 +33,7 @@ const MEMBER: NavGroup[] = [
     link("Track Claim Status", "/member/claims"), link("Download Annexure K", "/member/service#applications-heading"), link("Joint Declaration", "/member/profile#correction-heading"),
     link("Form 15G / 15H", "/member/claims#tax-declaration-heading"), link("Form 16A (TDS certificate)", "/member/claims#form-16a-heading"), link("Pension (Form 10D) / scheme certificate", "/member/pension"),
     link("Pension on higher wages", "/member/higher-pension#higher-pension-heading")] },
-  { label: "PMVBRY" },
+  { label: "PMVBRY", to: "/member/pmvbry" },
   { labelKey: "navigation.help", items: [{ labelKey: "navigation.grievances", to: "/member/grievances" }, { labelKey: "navigation.assistant", to: "/member/assistant" }] },
 ];
 
@@ -64,7 +64,7 @@ const EMPLOYER: NavGroup[] = [
   { label: "Admin" },
   { label: "Online Services", items: [link("Transfer Claims", "/employer/members#transfers-heading"), link("Claim attestations", "/employer/members#claim-attestations-heading"),
     link("Higher-pension joint-option validation", "/employer/members#higher-pension-validations-heading"), link("International workers (CoC)", "/employer/international")] },
-  { label: "PMVBRY" },
+  { label: "PMVBRY", to: "/employer/pmvbry" },
   { label: "EEC-2026/VISHWAS" },
 ];
 
@@ -136,6 +136,7 @@ const CLAIMANT: NavGroup[] = [
 /** Head office, zonal and oversight roles: no real menu is documented; the POC's own screens. */
 function poc(role: string): NavGroup[] {
   const out: NavGroup[] = [];
+  if (role === "ho.fa_cao" || role === "ho.cpfc") out.push({ label: "PMVBRY", to: "/ho/pmvbry" });
   if (role === "zo.acc" || role === "zo.rpfc1") out.push({ labelKey: "navigation.workQueue", to: "/office/work-queue" });
   if (role === "zo.acc") out.push({ label: "Exemption proceedings", to: "/exemption-proceedings" });
   if (role === "zo.acc" || role === "ho.cpfc") out.push({ labelKey: "navigation.grievanceMetrics", to: "/monitoring/grievances" });

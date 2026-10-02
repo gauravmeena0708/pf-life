@@ -1,0 +1,8 @@
+.pmvbry .pmvbry-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: .75rem; }
+.pmvbry .pmvbry-metric { border-top: 3px solid #b58b30; display: grid; gap: .35rem; }
+.pmvbry .pmvbry-metric span { color: #334b66; font-size: .88rem; }
+.pmvbry .pmvbry-metric strong { color: #173b66; font-size: 1.35rem; }
+.pmvbry .pmvbry-age { display: flex; flex-wrap: wrap; gap: .75rem; }
+.pmvbry .pmvbry-age p { display: grid; min-width: 8rem; margin: 0; padding: .7rem 1rem; border: 1px solid #c4cfdb; }
+.pmvbry .pmvbry-age strong { color: #173b66; font-size: 1.3rem; }
+.pmvbry table thead { border-bottom: 2px solid #b58b30; }

@@ -115,6 +115,8 @@ async def handle_payment_confirmed(session, event):
     for line in postings:
         await session.execute(text("INSERT INTO journal_lines (journal_id,account_code,side,amount_paise,account_link_id,share) VALUES (:j,:a,:s,:n,:l,:h)"), {"j":jid,"a":line["account_code"],"s":line["side"],"n":line["amount_paise"],"l":line.get("account_link_id"),"h":line.get("share")})
     await session.execute(text("UPDATE ecr_filings SET state='POSTED' WHERE id=:f"), {"f":f["id"]})
+    from app.infra.pmvbry import project_paid_filing
+    await project_paid_filing(session, f, content, members)
     await _raise_late_payment_demands(session, f, row, rules)
     await add_event(session,producer="contribution-service",event_type="ContributionPosted.v1",aggregate_type="ledger_journal",aggregate_id=jid,
        payload={"journal_id":jid,"payment_id":p["payment_id"],"filing_id":f["id"],"establishment_id":f["establishment_id"],"wage_month":f["wage_month"],"postings":postings},correlation_id=event["correlation_id"])

@@ -340,6 +340,10 @@ activities:
   - {id: F13.publicity, actor: ho.publicity, does: "Publish circulars and awareness content", api: ["POST /ho/circulars"], next: [F13.public], src: EC, ev: U}
   - {id: F13.mole, actor: gov.mole, does: "Aggregate dashboards (no PII)", api: ["GET /public/statistics", "GET /monitoring/claims", "GET /monitoring/contributions"], next: [F13.parliament], src: "EC, REF", ev: D}
   - {id: F13.pmvbry, actor: gov.pmvbry_admin, does: "Reconcile employment-linked incentives (PMVBRY, earlier PMRPY / ABRY) computed from ECR data", adapter: pmvbry_portal, next: [], src: "SS, WEB", ev: U}
+  - {id: F13.pmvbry_employer, actor: employer.owner, does: "PMVBRY Part B: exercise the option; see baseline, eligibility, net additional employment and incentive cycles", api: ["POST /employers/me/pmvbry/options", "GET /employers/me/pmvbry"], next: [F13.pmvbry_run], src: PMV, ev: V}
+  - {id: F13.pmvbry_member, actor: member, does: "PMVBRY Part A: first-timer incentive in two instalments; complete the financial literacy course", api: ["GET /members/me/pmvbry", "POST /members/me/pmvbry/financial-literacy-completions"], next: [F13.pmvbry_run], src: PMV, ev: V}
+  - {id: F13.pmvbry_run, actor: ho.fa_cao, does: "PMVBRY disbursement run: employees by Aadhaar-bridge DBT, employers to the PAN-linked account; scheme dashboard", api: ["GET /ho/pmvbry/disbursement-runs/preview", "POST /ho/pmvbry/disbursement-runs", "GET /ho/pmvbry/dashboard"], next: [F13.pmvbry_monitor], src: PMV, ev: V}
+  - {id: F13.pmvbry_monitor, actor: ho.cpfc, does: "Executive Committee chair: monitor PMVBRY beneficiaries, expenditure and pendency", api: ["GET /ho/pmvbry/dashboard"], next: [], src: PMV, ev: D}
   - {id: F13.parliament, actor: gov.parliament, does: "Receive answers to questions through the Ministry", next: [], src: "MAP, REF", ev: D}
   - {id: F13.cbt, actor: gov.cbt, does: "Board dashboards; approve accounts, interest rate, policies", api: ["GET /governance/board-packs"], next: [F03.interest], src: EC, ev: D}
   - {id: F13.ec, actor: gov.ec, does: "Executive Committee papers and decisions", api: ["GET /governance/board-packs"], next: [], src: EC, ev: D}

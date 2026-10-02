@@ -567,6 +567,18 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 |---|---|---|---|---|
 | `POST /office/exempted/{estId}/past-accumulation-ingestions` 💰🔐 | Bulk-ingest member ledgers and past accumulations of a surrendered PF trust | W | 1 | contribution |
 
+## 11a. PMVBRY — employment-linked incentive (P2.15a)
+
+| Endpoint | Purpose | Status | Phase | Service |
+|---|---|---|---|---|
+| `GET /employers/me/pmvbry` | **PMVBRY Part B**: the option, baseline and threshold, month-by-month eligibility, net additional employment, cycles, paid and due, why not eligible | W | 1 | contribution |
+| `POST /employers/me/pmvbry/options` 🔐 | Exercise the PMVBRY option with the GSTN and the PAN-linked bank account | W | 1 | contribution |
+| `GET /members/me/pmvbry` | **PMVBRY Part A**: first-timer status, the two instalments, what is still needed (face authentication, the financial literacy course, an Aadhaar-seeded bank account) | W | 1 | contribution |
+| `POST /members/me/pmvbry/financial-literacy-completions` | Record the financial literacy course as completed (mock module) | W | 1 | contribution |
+| `GET /ho/pmvbry/dashboard` | Scheme dashboard: beneficiaries by part, expenditure, pending by age, sectors, excluded establishments | W | 1 | contribution |
+| `GET /ho/pmvbry/disbursement-runs/preview?as_of_month=` | Preview of a disbursement run: the payments and the amount the one-time code will be bound to | W | 1 | contribution |
+| `POST /ho/pmvbry/disbursement-runs` 💰🔐 | Disbursement run: Part A by Aadhaar-bridge DBT (held while not Aadhaar-seeded), Part B to the PAN-linked account | W | 1 | contribution |
+
 ## 12. International workers
 
 | Method & path | Function | Status | Phase | Owner |

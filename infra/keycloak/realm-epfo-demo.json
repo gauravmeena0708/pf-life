@@ -1691,6 +1691,44 @@
         "exempted.trust"
       ],
       "id": "00000000-0000-4000-8000-000000000071"
+    },
+    {
+      "username": "member-ft",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "ARJUN DEMO",
+      "lastName": "Demo",
+      "email": "member-ft@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "member"
+      ],
+      "id": "00000000-0000-4000-8000-000000000072"
+    },
+    {
+      "username": "auto-owner",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo Auto Components owner",
+      "lastName": "Demo",
+      "email": "auto-owner@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "employer.owner"
+      ],
+      "id": "00000000-0000-4000-8000-000000000073"
     }
   ]
 }

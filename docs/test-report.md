@@ -98,6 +98,19 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 15a: PMVBRY (2 October 2026)
+
+Unit: contribution-service 95 (new `test_pmvbry.py`: the SOP's worked examples — net additional employment in both
+cases, the 70 + 23 slots in month 25, the 4 / 3 / 5 slots, ₹9,500 → ₹950, the 5th of the month — the synthetic
+history, Part A for ARJUN and the leaver who ceases, the employer view and an exclusion, the option with step-up, the
+course, the preview, the run with a held payment, its replay and a second run paying nothing, the dashboard's
+beneficiaries, other roles refused), common-persistence 25, platform-service 31, gateway 23; web 245 (new
+`P215.test.tsx`); end to end 94 of 94 (new `test_pmvbry.py`, repeatable); must-deny 18; UI smoke 2. Found on the way,
+fixed: the gateway asks for the one-time code before the payment route, so a dry run through it could not preview the
+amount the code is bound to (a preview route now); the run's event carried the list of payments where its contract
+says a count; the dashboard counted first timers who do not qualify as beneficiaries; Part A did not say an incentive
+ceased when the first timer left; Keycloak refused a persona's first name with parentheses.
+
 ## Update — Phase 2, slice 14: the exempted trust's lifecycle (2 October 2026)
 
 Unit: employer-service 32 (new `test_exemption_lifecycle.py`: the audit's arithmetic, due date and revision; surrender

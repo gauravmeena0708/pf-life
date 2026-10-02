@@ -566,6 +566,77 @@ paths:
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []
+  /employers/me/pmvbry:
+    get:
+      operationId: getEmployersPmvbry
+      summary: 'PMVBRY Part B: the option, baseline and threshold, month-by-month eligibility, net additional employment,
+        cycles, paid a'
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/EstablishmentId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - employer.owner
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
+      description: 'PMVBRY Part B: the option, baseline and threshold, month-by-month eligibility, net additional employment,
+        cycles, paid and due, why not eligible'
+  /employers/me/pmvbry/options:
+    post:
+      operationId: postEmployersPmvbryOptions
+      summary: Exercise the PMVBRY option with the GSTN and the PAN-linked bank account
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/EstablishmentId'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - employer.owner
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /employers/me/returns/dashboard:
     get:
       operationId: getEmployersReturnsDashboard
@@ -740,6 +811,109 @@ paths:
       x-scope: national (Head Office role)
       security:
       - bffSession: []
+  /ho/pmvbry/dashboard:
+    get:
+      operationId: getHoPmvbryDashboard
+      summary: 'Scheme dashboard: beneficiaries by part, expenditure, pending by age, sectors, excluded establishments'
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - ho.cpfc
+      - ho.fa_cao
+      x-scope: national (Head Office role)
+      security:
+      - bffSession: []
+  /ho/pmvbry/disbursement-runs:
+    post:
+      operationId: postHoPmvbryDisbursementRuns
+      summary: 'Disbursement run: Part A by Aadhaar-bridge DBT (held while not Aadhaar-seeded), Part B to the PAN-linked account'
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - ho.fa_cao
+      x-scope: national (Head Office role)
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /ho/pmvbry/disbursement-runs/preview:
+    get:
+      operationId: getHoPmvbryDisbursementRunsPreview
+      summary: 'Preview of a disbursement run: the payments and the amount the one-time code will be bound to'
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: as_of_month
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - ho.fa_cao
+      x-scope: national (Head Office role)
+      security:
+      - bffSession: []
   /members/me/accounts/{accountLinkId}/passbook:
     get:
       operationId: getMembersAccountsAccountLinkIdPassbook
@@ -838,6 +1012,74 @@ paths:
       x-scope: self — caller's own member record only
       security:
       - bffSession: []
+  /members/me/pmvbry:
+    get:
+      operationId: getMembersPmvbry
+      summary: 'PMVBRY Part A: first-timer status, the two instalments, what is still needed (face authentication, the financial
+        literac'
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+      description: 'PMVBRY Part A: first-timer status, the two instalments, what is still needed (face authentication, the
+        financial literacy course, an Aadhaar-seeded bank account)'
+  /members/me/pmvbry/financial-literacy-completions:
+    post:
+      operationId: postMembersPmvbryFinancialLiteracyCompletions
+      summary: Record the financial literacy course as completed (mock module)
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /members/me/tax/taxable-interest:
     get:
       operationId: getMembersTaxTaxableInterest

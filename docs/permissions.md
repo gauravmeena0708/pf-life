@@ -145,6 +145,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/pension-applications` | W | self — caller's own member record only |  |
 | `GET /members/me/pension-eligibility-preview` | W | self — caller's own member record only |  |
 | `GET /members/me/pension-scheme-certificate` | W | self — caller's own member record only |  |
+| `GET /members/me/pmvbry` | W | self — caller's own member record only |  |
 | `GET /members/me/privacy-requests` | W | self — caller's own member record only |  |
 | `GET /members/me/service-history` | W | self — caller's own member record only |  |
 | `GET /members/me/sessions` | W | self — caller's own member record only |  |
@@ -180,6 +181,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /members/me/pension-applications` | W | self — caller's own member record only |  |
 | `POST /members/me/pension-scheme-certificates` | W | self — caller's own member record only | yes |
 | `POST /members/me/pension-scheme-certificates/{certId}/surrenders` | W | self — caller's own member record only | yes |
+| `POST /members/me/pmvbry/financial-literacy-completions` | W | self — caller's own member record only |  |
 | `POST /members/me/privacy-requests` | W | self — caller's own member record only |  |
 | `POST /members/me/security-reports` | W | self — caller's own member record only |  |
 | `POST /members/me/tax/form-15g-15h` | W | self — caller's own member record only |  |
@@ -277,6 +279,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /employers/me/kyc` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/operators` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ownership-declaration` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/pmvbry` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/returns/dashboard` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/signatories` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/signature-registrations` | W | own establishment (X-Establishment-Id validated against grants) |  |
@@ -288,6 +291,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /employers/me/contractors` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/operators/invitations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/operators/{operatorId}/revocations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
+| `POST /employers/me/pmvbry/options` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/signatories/authorisations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/signatories/{signatoryId}/request-letters` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/signatories/{signatoryId}/revocations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
@@ -888,6 +892,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /ho/config/rule-sets` | W | national (Head Office role) |  |
 | `GET /ho/config/rule-sets/{versionId}` | W | national (Head Office role) |  |
+| `GET /ho/pmvbry/dashboard` | W | national (Head Office role) |  |
 | `GET /monitoring/claims` | W | role jurisdiction; aggregates with small-group suppression |  |
 | `GET /monitoring/contributions` | W | role jurisdiction; aggregates with small-group suppression |  |
 | `GET /monitoring/data-freshness` | W | role jurisdiction; aggregates with small-group suppression |  |
@@ -911,7 +916,10 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /ho/finance/balance-sheet` | W | national (Head Office role) |  |
 | `GET /ho/finance/investments` | W | national (Head Office role) |  |
+| `GET /ho/pmvbry/dashboard` | W | national (Head Office role) |  |
+| `GET /ho/pmvbry/disbursement-runs/preview` | W | national (Head Office role) |  |
 | `GET /office/accounts/interest-postings` | W | office jurisdiction of the caller's posting |  |
+| `POST /ho/pmvbry/disbursement-runs` | W | national (Head Office role) | yes |
 | `POST /office/accounts/interest-postings` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/freezes` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/members/{uan}/freezes` | W | office jurisdiction of the caller's posting | yes |

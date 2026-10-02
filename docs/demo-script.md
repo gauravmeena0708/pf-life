@@ -54,6 +54,7 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `ho-publicity`, `ro-exemption` | HO Public Relations (circulars); exemption cell (trusts' monthly returns, surrendered trusts) | Public services, trusts |
 | `exempted-trust`, `ho-exemption` | Demo Steel Works' PF trust; HO Exemption Division (ranking of all trusts) | Regulating the trust |
 | `textile-trust`, `chemicals-trust` | PF trusts of Demo Textile Mills (surrenders) and Demo Chemicals (cancelled) | The trust's lifecycle |
+| `auto-owner`, `member-ft`, `ho-finance` | Owner of Demo Auto Components; ARJUN DEMO, a first timer; FA & CAO | PMVBRY |
 | `zo-audit`, `ndc-is`, `zo-fraud`, `do-oic` | Concurrent Audit Cell; NDC IS Division; zonal fraud-risk committee; District Office in charge | Oversight and administration |
 
 ---
@@ -495,6 +496,18 @@ contribution- and platform-service*
 5. **`ro-exemption` → Exempted establishments**: on Demo Chemicals, open cancellation — a show-cause notice (CE-1) on
    Condition 25. **`chemicals-trust`** replies, admitting and relinquishing; **`ro-oic`** takes it over at once; the
    same route up ends in *cancelled*, and the trust's monthly returns are refused from then.
+
+## PMVBRY — the employment-linked incentive
+*Tests: `tests/e2e/test_pmvbry.py`, `services/contribution-service/tests/test_pmvbry.py`*
+
+1. **`auto-owner` → PMVBRY**: Demo Auto Components — baseline 30 (Aug 2024 – Jul 2025), threshold 2, crossed in
+   October 2025, 48 months as a manufacturer. October: 33 employees but only 2 additional count (one joiner left before
+   six months). Exercise the option with the GSTN and the PAN-linked account (one-time code); the cycles show what is due.
+2. **`member-ft` → PMVBRY**: ARJUN DEMO, first job from 3 October 2025 at ₹14,000: instalment 1 of ₹7,000 after six
+   months; instalment 2 of ₹7,000 after twelve months once he completes the financial literacy course on the page.
+3. **`ho-finance` → PMVBRY**: preview September 2026 — first-timer instalments and the employer's cycle; one first
+   timer's ₹6,000 is *held* (bank account not Aadhaar-seeded). Pay with a one-time code bound to the amount; a second
+   preview shows nothing left. **`ho-analyst`** (CPFC) sees the dashboard.
 
 ## Disaster recovery, training, camps, totalisation, the foreign agency, the composite death claim
 *Tests: `tests/e2e/test_small_rest.py`*

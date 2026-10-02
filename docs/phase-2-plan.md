@@ -40,7 +40,8 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.12g** | Menu clean-up: screens already built linked from their menus (Composite claim, Know Your Pension Payee Bank, Change Password); every other item without a screen says why — planned (with the slice), awaiting EPFO's definition, or not in the POC | **Done** (1 Oct 2026) |
 | P2.13 | Small gaps: disablement pension (EPS para 15); zonal freezing (categories B and C) and zonal ACC decisions above the RO's limits; district office queues; PPO and UAN card issued to DigiLocker (mock) | Planned |
 | P2.14 | The exempted trust's lifecycle: annual audit filing and the exemption cell's review; surrender and cancellation (RPFC report → ZO → HO → the Exempted Establishments Committee → the appropriate Government); HO's decision; past accumulations transferred in bulk and reconciled with the receipts | Done (bulk transfer and VDR reconciliation stay planned) |
-| P2.15 | Larger pieces: the employment-linked incentive (PMVBRY / ELI; earlier PMRPY and ABRY) — eligibility from the ECR, the incentive claim, the central share; SMS and e-mail notifications (a mock gateway with delivery evidence, preferences and retries) | Planned (PMVBRY needs the scheme guidelines) |
+| P2.15a | PMVBRY (Pradhan Mantri Viksit Bharat Rozgar Yojana): Part A for first timers, Part B for employers adding jobs, the disbursement run and the dashboard — from the scheme guidelines and EPFO's SOP for calculating incentives | Done |
+| P2.15b | SMS and e-mail notifications through a mock gateway — templates, preferences, retries, delivery evidence | Planned |
 | P2.16 | Gig and platform workers (Code on Social Security, 2020): aggregators registered, a turnover-based contribution return (1–2% of turnover, capped at 5% of payments to the workers, in the rule set), workers linked by e-Shram number to a UAN, reconciliation | Planned — design only until the scheme is notified |
 | P2.17 | Insolvency: a watchlist from EPFO's own signals (ECR stopping, defaults, MCA status), IBBI announcements matched to the establishment, claim deadlines, dues frozen (7A; damages and interest kept apart), the resolution plan checked for PF dues in full, liquidation claims outside the estate (IBC s.36(4)(a)(iii)), recovery measured | Planned (links to P2.11) |
 | P2.18 | EPF to NPS: the PF leg paid to the member's NPS Tier I (PRAN, KYC match, the trustee bank through the CRA — mock); the EPS leg cannot move — a Scheme Certificate or the withdrawal benefit | Planned (needs PFRDA's circular) |
@@ -266,11 +267,36 @@ Pramaan, UMANG, CSC, B2B payroll, CERT-In):
     is cancelled (`chemicals-trust`); Demo Steel Works keeps its exemption and files its audit.
   - Left planned: *PAST ACCUM BULK TRANSFER* and *PAST ACCUM VDR RECO* (they need the VDR entries, still planned), the
     third-party audit's report, the securities and Special Deposit Scheme transfers, the Para 79 relaxations.
-- **P2.15 — larger pieces.** *The employment-linked incentive* (PMVBRY / ELI, and the earlier PMRPY and ABRY): which new
-  employees qualify from the ECR, the employer's incentive, the central share and its reconciliation; the member and
-  employer PMVBRY menus lead nowhere today. Needs the scheme guidelines (from EPFO's PMVBRY site) before design.
-  *Notifications*: SMS and e-mail through a mock gateway — templates, the member's preferences, retries, delivery
-  evidence — for the events that already raise in-app notices.
+- **P2.15a — PMVBRY (Pradhan Mantri Viksit Bharat Rozgar Yojana)**. Sources, downloaded from pmvbry.epfindia.gov.in to
+  `../manuals/pmvbry/`: the scheme guidelines (M/o L&E, 16 Aug 2025, 21 pp.) and EPFO's *SOP for calculating
+  incentives* (Nov 2025, 11 pp.). Registration period 1 Aug 2025 – 31 Jul 2027; all figures in the rule set.
+  - *Part A — the first timer* (no contributing membership before 1 Aug 2025; UAN by face authentication; gross wage
+    up to ₹1 lakh at joining): one completed month's EPF wage, at most ₹15,000, in two instalments — half the average EPF
+    wage of 6 continuous completed months (≤ ₹7,500) after 6 ECRs with contributions; the rest of the average of the
+    first 12 after 12 ECRs filed within 18 months *and* the financial literacy course. A completed wage month starts
+    in the joining month if joined by the 5th, else the next; the EPF wage is the contribution × 100 / 24.
+  - *Part B — the employer*: deemed registered; exercises the option with its GSTN and PAN-linked bank account.
+    Baseline = the average ECR headcount Aug 2024 – Jul 2025 (20 for a new establishment); threshold 2 additional
+    employees under a baseline of 50, else 5; eligibility per month on averages (months 1–6 of crossing: the six;
+    7–12: from the first; 13 on: the last 12). Net additional employment = min(headcount − baseline, eligible
+    employees — joined in the period, gross ≤ ₹1 lakh, 6 continuous months of contributions; re-joinees need an
+    Aadhaar-authenticated UAN). Per employee by the EPF wage slab: ≤ ₹10,000 → 10% (at most ₹1,000), up to ₹20,000 →
+    ₹2,000, above → ₹3,000; monthly incentive = the average per eligible employee × net additional; each additional
+    "slot" is paid for 24 months (48 in manufacturing) from its first payment, never extended. Paid as a lump sum for
+    the first six-month cycle, then monthly, each cycle recomputing the whole and deducting what was paid. Not paid
+    while a 7A / 7B / 7C or Para 26-B inquiry, an FIR or an ABRY irregularity stands (from the seed until P2.11 brings
+    the inquiries).
+  - *Payment*: the FA & CAO's disbursement run (`ho-finance`) — the employee's share by Aadhaar-bridge DBT, held while
+    the bank account is not Aadhaar-seeded (accruing), the employer's to the PAN-linked account; within 45 days. The
+    dashboard for the CPFC (scheme guidelines 13.1.4): beneficiaries by part, expenditure, pending by age, sectors.
+  - *Demo*: Demo Auto Components (manufacturing, baseline 30) with a synthetic ECR history from Aug 2024 — an owner
+    (`auto-owner`) and a first timer (`member-ft`, ARJUN DEMO).
+  - *Left out*: exempted trusts' ECR without contributions, the fraud SOP of the Executive Committee, the seasonal
+    industries' 6-in-12 rule, the savings instrument for the 2nd instalment (not yet notified), grievances' own category.
+  - *Wording to confirm with EPFO*: the guidelines say "more than or equal to" baseline + threshold and the SOP says
+    "more than"; we follow the guidelines (and the threshold's "at least").
+- **P2.15b — notifications**: SMS and e-mail through a mock gateway — templates, the member's preferences, retries,
+  delivery evidence — for the events that already raise in-app notices.
 - **Not planned** (needs EPFO first): the seven "?" office functions — VDR Special, VDR member beneficiary, VDR vs ECR
   reconciliation, EO certification, the APFC's ECR approval queue, bank-counter payment — until a domain owner defines
   them; the menus say so.
@@ -897,6 +923,26 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 
 With P2.12f every endpoint the catalogue planned outside compliance (P2.11) and the exempted establishments
 (P2.9b / P2.9d) is built.
+
+## P2.15a — how it is built
+
+- **The ECR, month by month** (contribution-service `pmvbry_ecr_rows`): each employee in a paid ECR with the EPF wage
+  worked back from the contributions (× 100 / 24), the gross wage, the joining date and whether a first timer, a
+  re-joinee or an old employee; written when a challan is paid, and generated for Demo Auto Components from a compact
+  seed (30 employees since 2019, an exit in December 2025, seven joiners from October 2025).
+- **The calculation** (`app/domain/pmvbry.py`, pure functions; every number from the rule set's `pmvbry` section):
+  the first completed wage month (joined by the 5th or not); Part A's two instalments with what is still missing and
+  *ceased* when the first timer leaves before qualifying; Part B's baseline, threshold, crossing month, eligibility on
+  averages, eligible employees, net additional employment, the 24 / 48-month "slots" and the cycles (a six-month lump
+  sum, then monthly, each recomputing the whole less what was paid). The SOP's worked examples are its unit tests.
+- **Screens**: the employer's Part B page with the option (owner only, one-time code), the monthly table and the
+  cycles (`/employer/pmvbry`); the member's Part A page with the financial literacy module (`/member/pmvbry`); the HO
+  dashboard (`/ho/pmvbry`) and, for the FA & CAO, the run: a preview (`GET …/disbursement-runs/preview`, because the
+  gateway asks for the one-time code before the payment route, and the code is bound to the amount), then the payment
+  — instalments to an account not Aadhaar-seeded are *held* and paid on a later run; a second run for the same month
+  pays nothing new. Events `PmvbryOptionExercised.v1`, `PmvbryIncentiveDisbursed.v1`.
+- **Demo and test**: `auto-owner`, `member-ft` (ARJUN DEMO: ₹7,000 + ₹7,000), `ho-finance`, `ho-analyst`;
+  `tests/e2e/test_pmvbry.py` (repeatable).
 
 ## P2.14 — how it is built
 

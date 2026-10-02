@@ -423,3 +423,51 @@ class OfficeStaff(Base):
     subject: Mapped[str] = mapped_column(String(80), primary_key=True)
     stakeholder: Mapped[str] = mapped_column(String(60))
     office_id: Mapped[str] = mapped_column(String(40))
+
+class PmvbryEstablishment(Base):
+    __tablename__ = 'pmvbry_establishments'
+    establishment_id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    manufacturing: Mapped[bool] = mapped_column(Boolean, default=False)
+    gstin: Mapped[str | None] = mapped_column(String(32))
+    bank_account_ref: Mapped[str | None] = mapped_column(String(120))
+    option_exercised_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    excluded_reason: Mapped[str | None] = mapped_column(Text)
+
+
+class PmvbryEcrRow(Base):
+    __tablename__ = 'pmvbry_ecr_rows'
+    establishment_id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    wage_month: Mapped[str] = mapped_column(String(7), primary_key=True)
+    uan: Mapped[str] = mapped_column(String(32), primary_key=True)
+    epf_wage_paise: Mapped[int] = mapped_column(BigInteger)
+    gross_wage_paise: Mapped[int] = mapped_column(BigInteger)
+    date_of_joining: Mapped[date] = mapped_column(Date)
+    contribution_received: Mapped[bool] = mapped_column(Boolean)
+    kind: Mapped[str] = mapped_column(String(20))
+    face_authenticated: Mapped[bool] = mapped_column(Boolean)
+    aadhaar_authenticated: Mapped[bool] = mapped_column(Boolean)
+    aadhaar_seeded_bank: Mapped[bool] = mapped_column(Boolean)
+
+
+class PmvbryLiteracy(Base):
+    __tablename__ = 'pmvbry_literacy'
+    uan: Mapped[str] = mapped_column(String(32), primary_key=True)
+    completed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    member_subject: Mapped[str] = mapped_column(String(80))
+
+
+class PmvbryPayment(Base):
+    __tablename__ = 'pmvbry_payments'
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    payment_key: Mapped[str] = mapped_column(String(160), unique=True)
+    kind: Mapped[str] = mapped_column(String(10))
+    beneficiary: Mapped[str] = mapped_column(String(80))
+    establishment_id: Mapped[str] = mapped_column(String(80))
+    uan: Mapped[str | None] = mapped_column(String(32))
+    instalment: Mapped[int | None] = mapped_column(Integer)
+    cycle_month: Mapped[str | None] = mapped_column(String(7))
+    amount_paise: Mapped[int] = mapped_column(BigInteger)
+    state: Mapped[str] = mapped_column(String(10))
+    run_id: Mapped[str] = mapped_column(String(36))
+    mock_reference: Mapped[str | None] = mapped_column(String(80))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -501,6 +501,18 @@ stakeholders:
     step_up: false
     via:
     - F10.worker
+  - endpoint: GET /members/me/pmvbry
+    status: W
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F13.pmvbry_member
+  - endpoint: POST /members/me/pmvbry/financial-literacy-completions
+    status: W
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F13.pmvbry_member
   - endpoint: POST /security/step-up-challenges
     status: W
     scope: self — challenge bound to one action and resource version
@@ -901,6 +913,18 @@ stakeholders:
     step_up: false
     via:
     - F01.establishment_owner
+  - endpoint: POST /employers/me/pmvbry/options
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: true
+    via:
+    - F13.pmvbry_employer
+  - endpoint: GET /employers/me/pmvbry
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F13.pmvbry_employer
   employer.signatory:
   - endpoint: GET /employers/me/ownership-declaration
     status: W
@@ -3172,6 +3196,12 @@ stakeholders:
     step_up: true
     via:
     - F13.cpfc
+  - endpoint: GET /ho/pmvbry/dashboard
+    status: W
+    scope: national (Head Office role)
+    step_up: false
+    via:
+    - F13.pmvbry_monitor
   ho.acc_hq:
   - endpoint: GET /monitoring/claims
     status: W
@@ -3252,6 +3282,24 @@ stakeholders:
     step_up: false
     via:
     - F13.accounts
+  - endpoint: GET /ho/pmvbry/disbursement-runs/preview
+    status: W
+    scope: national (Head Office role)
+    step_up: false
+    via:
+    - F13.pmvbry_run
+  - endpoint: POST /ho/pmvbry/disbursement-runs
+    status: W
+    scope: national (Head Office role)
+    step_up: true
+    via:
+    - F13.pmvbry_run
+  - endpoint: GET /ho/pmvbry/dashboard
+    status: W
+    scope: national (Head Office role)
+    step_up: false
+    via:
+    - F13.pmvbry_run
   ho.compliance:
   - endpoint: GET /ho/reports/proceedings
     status: P

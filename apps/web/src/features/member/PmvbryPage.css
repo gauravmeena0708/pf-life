@@ -1,0 +1,4 @@
+.pmvbry .pmvbry-instalments { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: .75rem; }
+.pmvbry .pmvbry-instalment { border: 1px solid #c4cfdb; border-top: 3px solid #b58b30; background: #fff; padding: 1rem; }
+.pmvbry .pmvbry-instalment h3 { color: #173b66; }
+.pmvbry .pmvbry-instalment ul { margin: .25rem 0 0; padding-left: 1.3rem; }

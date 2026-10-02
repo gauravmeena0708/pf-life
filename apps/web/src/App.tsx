@@ -9,8 +9,10 @@ import { PersonaSwitcher } from "./components/PersonaSwitcher";
 import { RoleNav } from "./components/RoleNav";
 import { EcrPage } from "./features/employer/EcrPage";
 import { EmployerHome } from "./features/employer/EmployerHome";
+import { PmvbryPage as EmployerPmvbryPage } from "./features/employer/PmvbryPage";
 import { PassbookPage } from "./features/member/PassbookPage";
 import { MemberHomePage } from "./features/member/MemberHomePage";
+import { PmvbryPage as MemberPmvbryPage } from "./features/member/PmvbryPage";
 import { ClaimsPage } from "./features/member/ClaimsPage";
 import { ClaimDetailPage } from "./features/member/ClaimDetailPage";
 import { ProfilePage } from "./features/member/ProfilePage";
@@ -63,6 +65,7 @@ import { SystemMapPage } from "./pages/SystemMapPage";
 import { Home } from "./pages/Home";
 import { InterfacePage } from "./pages/InterfacePage";
 import { CircularsPage } from "./features/ho/CircularsPage";
+import { PmvbryDashboard } from "./features/ho/PmvbryDashboard";
 import { ExemptedPage } from "./features/office/ExemptedPage";
 import { TrustPage } from "./features/exempted/TrustPage";
 import { ProceedingsPage } from "./features/exempted/ProceedingsPage";
@@ -140,7 +143,9 @@ export function App() {
             <Route path="/i/:slug" element={<InterfacePage />} />
             <Route path="/employer" element={<EmployerHome />} />
             <Route path="/employer/ecr" element={<EcrPage />} />
+            <Route path="/employer/pmvbry" element={<EmployerPmvbryPage />} />
             <Route path="/member" element={<MemberHomePage />} />
+            <Route path="/member/pmvbry" element={<MemberPmvbryPage />} />
             <Route path="/csc" element={<CscPage />} />
             <Route path="/member/passbook" element={<PassbookPage />} />
             <Route path="/member/claims" element={<ClaimsPage />} />
@@ -182,6 +187,7 @@ export function App() {
             <Route path="/public/circulars" element={<PublicCircularsPage />} />
             <Route path="/public/establishments/:estId/e-report-card" element={<EReportCardPage />} />
             <Route path="/ho/circulars" element={<CircularsPage />} />
+            <Route path="/ho/pmvbry" element={<PmvbryDashboard />} />
             <Route path="/office/exempted" element={<ExemptedPage />} />
             <Route path="/exempted" element={<TrustPage />} />
             <Route path="/exemption-proceedings" element={<ProceedingsPage />} />

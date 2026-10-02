@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /office/damages-knock-offs', 'GET /office/ecr-filings', 'GET /office/ledger-adjustments', 'POST /office/ledger-adjustments', 'POST /office/vdr-entries', 'POST /public/trrn-status-lookups', 'GET /employers/me/challans', 'GET /employers/me/demands', 'POST /employers/me/direct-challans', 'GET /employers/me/ecr-filings', 'POST /employers/me/ecr-filings', 'GET /exempted/me/returns', 'POST /exempted/me/returns', 'GET /ho/finance/balance-sheet', 'GET /members/me/passbook', 'GET /members/me/transfer-legs', 'GET /office/accounts/inoperative', 'GET /office/accounts/interest-postings', 'POST /office/accounts/interest-postings', 'GET /office/exempted/rankings', 'GET /office/receipts/unreconciled', 'POST /public/demo-calculations/epf', 'POST /public/inoperative-accounts/searches', 'GET /employers/me/returns/dashboard', 'GET /members/me/tax/taxable-interest', 'POST /partners/sandbox/payroll/ecr-filings', 'GET /employers/me/challans/{trrn}', 'GET /employers/me/ecr-filings/{filingId}', 'PUT /ho/config/interest-rates/{financialYear}', 'GET /members/me/annual-statements/{financialYear}', 'GET /employers/me/challans/{trrn}/receipt', 'POST /employers/me/ecr-filings/{filingId}/approvals', 'POST /employers/me/ecr-filings/{filingId}/cancellations', 'POST /employers/me/ecr-filings/{filingId}/principal-employer-tags', 'POST /employers/me/ecr-filings/{filingId}/submissions', 'POST /employers/me/ecr-filings/{filingId}/validations', 'GET /employers/me/members/{uan}/contribution-ledger', 'GET /members/me/accounts/{accountLinkId}/passbook', 'GET /members/me/transfers/{transferId}/annexure-k', 'POST /office/accounts/{accountLinkId}/reactivations', 'POST /office/annexure-k-files/{annexureId}/vdr-reconciliations', 'POST /office/damages-knock-offs/{knockOffId}/approvals', 'POST /office/ecr-filings/{filingId}/payment-rejections', 'POST /office/ecr-filings/{filingId}/rejections', 'POST /office/establishments/{estId}/damages-knock-offs', 'POST /office/exempted/{estId}/past-accumulation-ingestions', 'GET /office/exempted/{estId}/returns', 'POST /office/ledger-adjustments/{adjustmentId}/approvals', 'POST /office/ledger-journals/{journalId}/reversals', 'POST /office/receipts/{receiptId}/trrn-adjustments', 'GET /office/transfers/{transferId}/legs', 'POST /office/transfers/{transferId}/recredits', 'POST /office/vdr-entries/{vdrId}/rejections', 'POST /office/exempted/{estId}/flags/{flagId}/actions']
+OPERATIONS = ['GET /office/damages-knock-offs', 'GET /office/ecr-filings', 'GET /office/ledger-adjustments', 'POST /office/ledger-adjustments', 'POST /office/vdr-entries', 'POST /public/trrn-status-lookups', 'GET /employers/me/challans', 'GET /employers/me/demands', 'POST /employers/me/direct-challans', 'GET /employers/me/ecr-filings', 'POST /employers/me/ecr-filings', 'GET /employers/me/pmvbry', 'GET /exempted/me/returns', 'POST /exempted/me/returns', 'GET /ho/finance/balance-sheet', 'GET /ho/pmvbry/dashboard', 'POST /ho/pmvbry/disbursement-runs', 'GET /members/me/passbook', 'GET /members/me/pmvbry', 'GET /members/me/transfer-legs', 'GET /office/accounts/inoperative', 'GET /office/accounts/interest-postings', 'POST /office/accounts/interest-postings', 'GET /office/exempted/rankings', 'GET /office/receipts/unreconciled', 'POST /public/demo-calculations/epf', 'POST /public/inoperative-accounts/searches', 'POST /employers/me/pmvbry/options', 'GET /employers/me/returns/dashboard', 'GET /ho/pmvbry/disbursement-runs/preview', 'POST /members/me/pmvbry/financial-literacy-completions', 'GET /members/me/tax/taxable-interest', 'POST /partners/sandbox/payroll/ecr-filings', 'GET /employers/me/challans/{trrn}', 'GET /employers/me/ecr-filings/{filingId}', 'PUT /ho/config/interest-rates/{financialYear}', 'GET /members/me/annual-statements/{financialYear}', 'GET /employers/me/challans/{trrn}/receipt', 'POST /employers/me/ecr-filings/{filingId}/approvals', 'POST /employers/me/ecr-filings/{filingId}/cancellations', 'POST /employers/me/ecr-filings/{filingId}/principal-employer-tags', 'POST /employers/me/ecr-filings/{filingId}/submissions', 'POST /employers/me/ecr-filings/{filingId}/validations', 'GET /employers/me/members/{uan}/contribution-ledger', 'GET /members/me/accounts/{accountLinkId}/passbook', 'GET /members/me/transfers/{transferId}/annexure-k', 'POST /office/accounts/{accountLinkId}/reactivations', 'POST /office/annexure-k-files/{annexureId}/vdr-reconciliations', 'POST /office/damages-knock-offs/{knockOffId}/approvals', 'POST /office/ecr-filings/{filingId}/payment-rejections', 'POST /office/ecr-filings/{filingId}/rejections', 'POST /office/establishments/{estId}/damages-knock-offs', 'POST /office/exempted/{estId}/past-accumulation-ingestions', 'GET /office/exempted/{estId}/returns', 'POST /office/ledger-adjustments/{adjustmentId}/approvals', 'POST /office/ledger-journals/{journalId}/reversals', 'POST /office/receipts/{receiptId}/trrn-adjustments', 'GET /office/transfers/{transferId}/legs', 'POST /office/transfers/{transferId}/recredits', 'POST /office/vdr-entries/{vdrId}/rejections', 'POST /office/exempted/{estId}/flags/{flagId}/actions']
 
 @router.api_route("/api/v1/office/damages-knock-offs", methods=["GET"], include_in_schema=False)
 async def get_office_damages_knock_offs(actor: Actor = Depends(require_actor)) -> None:
@@ -67,6 +67,11 @@ async def post_employers_me_ecr_filings(actor: Actor = Depends(require_actor)) -
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Create regular monthly ECR (upload / wizard)")
 
 
+@router.api_route("/api/v1/employers/me/pmvbry", methods=["GET"], include_in_schema=False)
+async def get_employers_me_pmvbry(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "PMVBRY Part B: the option, baseline and threshold, month-by-month eligibility, net additional employ")
+
+
 @router.api_route("/api/v1/exempted/me/returns", methods=["GET"], include_in_schema=False)
 async def get_exempted_me_returns(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "The trust's own returns with their evaluator scores")
@@ -82,9 +87,24 @@ async def get_ho_finance_balance_sheet(actor: Actor = Depends(require_actor)) ->
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Balance sheet of the funds from the ledger, for the statutory / attest audit (read-only)")
 
 
+@router.api_route("/api/v1/ho/pmvbry/dashboard", methods=["GET"], include_in_schema=False)
+async def get_ho_pmvbry_dashboard(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Scheme dashboard: beneficiaries by part, expenditure, pending by age, sectors, excluded establishmen")
+
+
+@router.api_route("/api/v1/ho/pmvbry/disbursement-runs", methods=["POST"], include_in_schema=False)
+async def post_ho_pmvbry_disbursement_runs(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Disbursement run: Part A by Aadhaar-bridge DBT (held while not Aadhaar-seeded), Part B to the PAN-li")
+
+
 @router.api_route("/api/v1/members/me/passbook", methods=["GET"], include_in_schema=False)
 async def get_members_me_passbook(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Passbook across all accounts linked to the caller (no member ID parameter)")
+
+
+@router.api_route("/api/v1/members/me/pmvbry", methods=["GET"], include_in_schema=False)
+async def get_members_me_pmvbry(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "PMVBRY Part A: first-timer status, the two instalments, what is still needed (face authentication, t")
 
 
 @router.api_route("/api/v1/members/me/transfer-legs", methods=["GET"], include_in_schema=False)
@@ -127,9 +147,24 @@ async def post_public_inoperative_accounts_searches(actor: Actor = Depends(requi
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Inoperative-account helpdesk search (step-up before any balance is shown)")
 
 
+@router.api_route("/api/v1/employers/me/pmvbry/options", methods=["POST"], include_in_schema=False)
+async def post_employers_me_pmvbry_options(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Exercise the PMVBRY option with the GSTN and the PAN-linked bank account")
+
+
 @router.api_route("/api/v1/employers/me/returns/dashboard", methods=["GET"], include_in_schema=False)
 async def get_employers_me_returns_dashboard(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Return monthly dashboard by wage month")
+
+
+@router.api_route("/api/v1/ho/pmvbry/disbursement-runs/preview", methods=["GET"], include_in_schema=False)
+async def get_ho_pmvbry_disbursement_runs_preview(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Preview of a disbursement run: the payments and the amount the one-time code will be bound to")
+
+
+@router.api_route("/api/v1/members/me/pmvbry/financial-literacy-completions", methods=["POST"], include_in_schema=False)
+async def post_members_me_pmvbry_financial_literacy_completions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Record the financial literacy course as completed (mock module)")
 
 
 @router.api_route("/api/v1/members/me/tax/taxable-interest", methods=["GET"], include_in_schema=False)

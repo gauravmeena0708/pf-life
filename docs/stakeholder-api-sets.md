@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 247 |
+| Activities | 251 |
 | Stakeholders with at least one API | 94 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 3 |
@@ -44,7 +44,7 @@ Activities: **F11.public_search** Search an inoperative account with a demo CAPT
 
 #### `member` — Member — active contributor (UAN holder)
 
-Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP; **F02.kyc_seed** Seed KYC (Aadhaar, bank, PAN); **F02.self_service** View profile, service history, UAN card; change contact details; e-nomination; self-marked exit; **F02.jd_submit** Submit Joint Declaration to correct one of 12 profile parameters; **F03.passbook** View passbook, annual statement and taxable-interest split; **F04.preflight** Pre-flight before filing: check account readiness (blockers), service history and eligibility for the chosen form; **F04.claim_file** Check eligibility and file a claim (Form 31 / 19 / 10C); confirm intent; upload documents; **F04.post_submission** After filing: follow the claim's audit trail, cancel it before a decision, or switch to another KYC-verified bank account before payment; **F04.redisburse_request** Submit corrected bank details after a payment return; **F04.track** Track claims and notifications; download Form 16A; **F04.transfer** Request Form 13 transfer; confirm auto-transfer; view Annexure K; **F05.apply** Apply for monthly pension (Form 10D) or scheme certificate; **F05.preview** Pre-check pension eligibility across all member IDs; see untransferred service to fix first (Form 13); **F05.sc_surrender** Surrender a Scheme Certificate for monthly pension or withdrawal benefit; **F05.higher_member** Apply for pension on higher wages (joint option); track status; **F07.member_report** Report suspicious activity; account recovery; view sessions; **F08.member_file** Register, track, reopen, remind and give feedback on grievances; **F10.worker** An international worker is a member: views their coverage under the international-worker rules (P2.9a); **F14.step_up** Complete step-up confirmation for sensitive actions; **F14.privacy_request** Ask EPFO about my personal data: access, correction, erasure or a grievance (DPDP Act)
+Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP; **F02.kyc_seed** Seed KYC (Aadhaar, bank, PAN); **F02.self_service** View profile, service history, UAN card; change contact details; e-nomination; self-marked exit; **F02.jd_submit** Submit Joint Declaration to correct one of 12 profile parameters; **F03.passbook** View passbook, annual statement and taxable-interest split; **F04.preflight** Pre-flight before filing: check account readiness (blockers), service history and eligibility for the chosen form; **F04.claim_file** Check eligibility and file a claim (Form 31 / 19 / 10C); confirm intent; upload documents; **F04.post_submission** After filing: follow the claim's audit trail, cancel it before a decision, or switch to another KYC-verified bank account before payment; **F04.redisburse_request** Submit corrected bank details after a payment return; **F04.track** Track claims and notifications; download Form 16A; **F04.transfer** Request Form 13 transfer; confirm auto-transfer; view Annexure K; **F05.apply** Apply for monthly pension (Form 10D) or scheme certificate; **F05.preview** Pre-check pension eligibility across all member IDs; see untransferred service to fix first (Form 13); **F05.sc_surrender** Surrender a Scheme Certificate for monthly pension or withdrawal benefit; **F05.higher_member** Apply for pension on higher wages (joint option); track status; **F07.member_report** Report suspicious activity; account recovery; view sessions; **F08.member_file** Register, track, reopen, remind and give feedback on grievances; **F10.worker** An international worker is a member: views their coverage under the international-worker rules (P2.9a); **F13.pmvbry_member** PMVBRY Part A: first-timer incentive in two instalments; complete the financial literacy course; **F14.step_up** Complete step-up confirmation for sensitive actions; **F14.privacy_request** Ask EPFO about my personal data: access, correction, erasure or a grievance (DPDP Act)
 
 | Endpoint | Status |
 |---|---|
@@ -73,6 +73,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/pension-applications` | W |
 | `GET /members/me/pension-eligibility-preview` | W |
 | `GET /members/me/pension-scheme-certificate` | W |
+| `GET /members/me/pmvbry` | W |
 | `GET /members/me/privacy-requests` | W |
 | `GET /members/me/service-history` | W |
 | `GET /members/me/sessions` | W |
@@ -108,6 +109,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/me/pension-applications` | W |
 | `POST /members/me/pension-scheme-certificates` | W |
 | `POST /members/me/pension-scheme-certificates/{certId}/surrenders` | W |
+| `POST /members/me/pmvbry/financial-literacy-completions` | W |
 | `POST /members/me/privacy-requests` | W |
 | `POST /members/me/security-reports` | W |
 | `POST /members/me/tax/form-15g-15h` | W |
@@ -215,7 +217,7 @@ Integration adapters: `rti_portal`
 
 #### `employer.owner` — Establishment owner / employer (legal entity)
 
-Activities: **F01.register** Register establishment online and submit verification evidence; **F01.dsc_register** Register DSC or e-sign of an authorised signatory and submit the request letter; **F01.signatories** View the establishment; authorise or revoke signatories; **F01.operators** Invite, scope and revoke employer sub-users (User / Admin menus); **F01.establishment_owner** Keep the establishment record: KYC, branches (Form 2A), Form 5A, contractors; ask the office for profile or configuration changes
+Activities: **F01.register** Register establishment online and submit verification evidence; **F01.dsc_register** Register DSC or e-sign of an authorised signatory and submit the request letter; **F01.signatories** View the establishment; authorise or revoke signatories; **F01.operators** Invite, scope and revoke employer sub-users (User / Admin menus); **F01.establishment_owner** Keep the establishment record: KYC, branches (Form 2A), Form 5A, contractors; ask the office for profile or configuration changes; **F13.pmvbry_employer** PMVBRY Part B: exercise the option; see baseline, eligibility, net additional employment and incentive cycles
 
 | Endpoint | Status |
 |---|---|
@@ -232,6 +234,7 @@ Activities: **F01.register** Register establishment online and submit verificati
 | `GET /employers/me/kyc` | W |
 | `GET /employers/me/operators` | W |
 | `GET /employers/me/ownership-declaration` | W |
+| `GET /employers/me/pmvbry` | W |
 | `GET /employers/me/returns/dashboard` | W |
 | `GET /employers/me/signatories` | W |
 | `GET /employers/me/signature-registrations` | W |
@@ -243,6 +246,7 @@ Activities: **F01.register** Register establishment online and submit verificati
 | `POST /employers/me/contractors` | W |
 | `POST /employers/me/operators/invitations` | W |
 | `POST /employers/me/operators/{operatorId}/revocations` | W |
+| `POST /employers/me/pmvbry/options` | W |
 | `POST /employers/me/signatories/authorisations` | W |
 | `POST /employers/me/signatories/{signatoryId}/request-letters` | W |
 | `POST /employers/me/signatories/{signatoryId}/revocations` | W |
@@ -934,12 +938,13 @@ Activities: **F14.zti_zo** Zonal Training Institute uses the training sandbox
 
 #### `ho.cpfc` — Central Provident Fund Commissioner
 
-Activities: **F13.cpfc** National dashboards and policy approvals
+Activities: **F13.cpfc** National dashboards and policy approvals; **F13.pmvbry_monitor** Executive Committee chair: monitor PMVBRY beneficiaries, expenditure and pendency
 
 | Endpoint | Status |
 |---|---|
 | `GET /ho/config/rule-sets` | W |
 | `GET /ho/config/rule-sets/{versionId}` | W |
+| `GET /ho/pmvbry/dashboard` | W |
 | `GET /monitoring/claims` | W |
 | `GET /monitoring/contributions` | W |
 | `GET /monitoring/data-freshness` | W |
@@ -961,13 +966,16 @@ Activities: **F13.acc_hq** Division-level oversight; draft rule-set changes (cei
 
 #### `ho.fa_cao` — FA & CAO — Finance & Accounts, **FIA vertical** (freezing category A), Balance Sheet cell
 
-Activities: **F03.interest** Record the approved annual interest rate and run interest crediting; **F07.freeze_ho** Order freezing for Category A (FIA vertical); **F13.accounts** Prepare the annual accounts: balance sheet of the funds and investment position
+Activities: **F03.interest** Record the approved annual interest rate and run interest crediting; **F07.freeze_ho** Order freezing for Category A (FIA vertical); **F13.accounts** Prepare the annual accounts: balance sheet of the funds and investment position; **F13.pmvbry_run** PMVBRY disbursement run: employees by Aadhaar-bridge DBT, employers to the PAN-linked account; scheme dashboard
 
 | Endpoint | Status |
 |---|---|
 | `GET /ho/finance/balance-sheet` | W |
 | `GET /ho/finance/investments` | W |
+| `GET /ho/pmvbry/dashboard` | W |
+| `GET /ho/pmvbry/disbursement-runs/preview` | W |
 | `GET /office/accounts/interest-postings` | W |
+| `POST /ho/pmvbry/disbursement-runs` | W |
 | `POST /office/accounts/interest-postings` | W |
 | `POST /office/establishments/{estId}/freezes` | W |
 | `POST /office/members/{uan}/freezes` | W |
@@ -1945,6 +1953,10 @@ flowchart LR
   F13_publicity["ho.publicity<br/>Publish circulars and awareness content"]
   F13_mole["gov.mole<br/>Aggregate dashboards (no PII)"]
   F13_pmvbry["gov.pmvbry_admin<br/>Reconcile employment-linked incentives (PMVBRY, earlier PMRP"]
+  F13_pmvbry_employer["employer.owner<br/>PMVBRY Part B: exercise the option; see baseline, eligibilit"]
+  F13_pmvbry_member["member<br/>PMVBRY Part A: first-timer incentive in two instalments; com"]
+  F13_pmvbry_run["ho.fa_cao<br/>PMVBRY disbursement run: employees by Aadhaar-bridge DBT, em"]
+  F13_pmvbry_monitor["ho.cpfc<br/>Executive Committee chair: monitor PMVBRY beneficiaries, exp"]
   F13_parliament["gov.parliament<br/>Receive answers to questions through the Ministry"]
   F13_cbt["gov.cbt<br/>Board dashboards; approve accounts, interest rate, policies"]
   F13_ec["gov.ec<br/>Executive Committee papers and decisions"]
@@ -1957,6 +1969,9 @@ flowchart LR
   F13_fund_feed --> F13_investment
   F13_publicity --> F13_public
   F13_mole --> F13_parliament
+  F13_pmvbry_employer --> F13_pmvbry_run
+  F13_pmvbry_member --> F13_pmvbry_run
+  F13_pmvbry_run --> F13_pmvbry_monitor
   F03_interest["ho.fa_cao<br/>Record the approved annual interest rate and run interest cr"]
   F13_cbt --> F03_interest
 ```

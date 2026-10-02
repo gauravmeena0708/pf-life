@@ -13,6 +13,9 @@ async def seed() -> None:
         data = json.load(f)
     establishment = data["establishment"]
     async with sessions()() as session, session.begin():
+        if data.get('pmvbry_demo'):
+            from app.infra.pmvbry import seed_demo
+            await seed_demo(session, data['pmvbry_demo'])
         # status is owned by EmployerVerified.v1 after the first load; a re-seed must not undo a verification
         await session.execute(text("INSERT INTO establishments (id,legal_name,status,office_id) VALUES (:id,:name,:status,:office) "
                                    "ON CONFLICT (id) DO UPDATE SET legal_name=excluded.legal_name"),

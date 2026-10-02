@@ -807,6 +807,22 @@
   },
   {
     "method": "POST",
+    "path_template": "/members/me/pmvbry/financial-literacy-completions",
+    "regex": "^/members/me/pmvbry/financial\\-literacy\\-completions$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Record the financial literacy course as completed (mock module)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/office/exempted/past-accumulation-bulk-transfers",
     "regex": "^/office/exempted/past\\-accumulation\\-bulk\\-transfers$",
     "status": "P",
@@ -2807,6 +2823,22 @@
     "revocation": false
   },
   {
+    "method": "GET",
+    "path_template": "/ho/pmvbry/disbursement-runs/preview",
+    "regex": "^/ho/pmvbry/disbursement\\-runs/preview$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.fa_cao"
+    ],
+    "summary": "Preview of a disbursement run: the payments and the amount the one-time code will be bound to",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/members/me/claims/{claimId}/documents",
     "regex": "^/members/me/claims/[^/]+/documents$",
@@ -4530,6 +4562,38 @@
       "ho.caiu"
     ],
     "summary": "CAIU risk signals (Journey D2)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/pmvbry/options",
+    "regex": "^/employers/me/pmvbry/options$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.owner"
+    ],
+    "summary": "Exercise the PMVBRY option with the GSTN and the PAN-linked bank account",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/ho/pmvbry/disbursement-runs",
+    "regex": "^/ho/pmvbry/disbursement\\-runs$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "ho.fa_cao"
+    ],
+    "summary": "Disbursement run: Part A by Aadhaar-bridge DBT (held while not Aadhaar-seeded), Part B to the PAN-linked account",
     "revocation": false
   },
   {
@@ -6324,6 +6388,22 @@
   },
   {
     "method": "GET",
+    "path_template": "/employers/me/pmvbry",
+    "regex": "^/employers/me/pmvbry$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.owner"
+    ],
+    "summary": "PMVBRY Part B: the option, baseline and threshold, month-by-month eligibility, net additional employment, cycles, paid and due, why not eligible",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/exempted/me/profile",
     "regex": "^/exempted/me/profile$",
     "status": "W",
@@ -6403,6 +6483,23 @@
       "ho.acc_hq"
     ],
     "summary": "Draft a new rule-set version (wage ceilings, rates, claim types, approval matrix, auto-settlement, grievance settings) from an existing one, with an effective date",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/ho/pmvbry/dashboard",
+    "regex": "^/ho/pmvbry/dashboard$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.cpfc",
+      "ho.fa_cao"
+    ],
+    "summary": "Scheme dashboard: beneficiaries by part, expenditure, pending by age, sectors, excluded establishments",
     "revocation": false
   },
   {
@@ -6822,6 +6919,22 @@
       "member.exited"
     ],
     "summary": "Advance / partial withdrawal (purpose as sub-type)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/pmvbry",
+    "regex": "^/members/me/pmvbry$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "PMVBRY Part A: first-timer status, the two instalments, what is still needed (face authentication, the financial literacy course, an Aadhaar-seeded bank account)",
     "revocation": false
   },
   {

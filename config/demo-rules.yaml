@@ -231,3 +231,30 @@ exempted_establishments:
     zo_forward: 30              # ZO forwards to HO (SE-3 / CE-4)
     ho_placement: 30            # HO places it before the EEC
     to_government: 15           # sent to the appropriate Government after the CBT's minutes
+
+# P2.15a: Pradhan Mantri Viksit Bharat Rozgar Yojana (scheme guidelines, M/o L&E, 16 Aug 2025; EPFO SOP for calculating
+# incentives, Nov 2025). Amounts in paise.
+pmvbry:
+  registration_from: "2025-08-01"
+  registration_to: "2027-07-31"
+  baseline_from: "2024-08"          # baseline: average ECR headcount of these months (existing establishments)
+  baseline_to: "2025-07"
+  new_establishment_baseline: 20
+  joining_day: 5                    # joined by the 5th: that month is the first completed wage month
+  gross_wage_cap_paise: 10000000    # gross wage at joining up to ₹1,00,000
+  contribution_rate_pct: 24         # EPF wage = contribution x 100 / 24 (20 for 10% establishments)
+  part_a_cap_paise: 1500000         # one month's EPF wage, at most ₹15,000
+  part_a_first_cap_paise: 750000    # 1st instalment: half the average of 6 months, at most ₹7,500
+  part_a_second_within_months: 18   # all 12 ECRs within 18 months of joining
+  qualifying_months: 6
+  threshold_small: 2                # baseline under 50
+  threshold_large: 5                # baseline 50 or more
+  threshold_baseline_split: 50
+  slabs:                            # per additional employee per month, by EPF wage
+    - {up_to_paise: 1000000, percent: 10, max_paise: 100000}
+    - {up_to_paise: 2000000, amount_paise: 200000}
+    - {up_to_paise: null, amount_paise: 300000}
+  incentive_months: 24
+  manufacturing_incentive_months: 48
+  first_cycle_months: 6
+  disbursal_days: 45

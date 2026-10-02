@@ -140,6 +140,22 @@
       "status": "VERIFIED",
       "verified_at": "2026-04-15T10:00:00+00:00",
       "pan": "AAAAD0006A"
+    },
+    {
+      "establishment_id": "EST-DEMO-0007",
+      "registration_number": "DEMO/00007/000",
+      "legal_name": "Demo Auto Components",
+      "office_id": "RO-DEMO-01",
+      "pincode": "110003",
+      "city": "New Delhi",
+      "district": "Central Delhi",
+      "coverage_date": "2019-04-01",
+      "establishment_type": "PRIVATE_COMPANY",
+      "industry_group": "AUTO_COMPONENTS",
+      "exemption_status": "NOT_EXEMPT",
+      "status": "VERIFIED",
+      "verified_at": "2026-04-15T10:00:00+00:00",
+      "pan": "AAAAD0007A"
     }
   ],
   "public_lookup_challan": {
@@ -683,6 +699,30 @@
       "date_of_exit": null,
       "establishment_id": "EST-DEMO-0005",
       "_comment": "P2.14: at Demo Textile Mills, whose trust surrenders; her PF comes to EPFO as past accumulations"
+    },
+    {
+      "uan": "100000000914",
+      "name": "ARJUN DEMO",
+      "date_of_birth": "2004-07-21",
+      "subject": "00000000-0000-4000-8000-000000000072",
+      "account_link_id": "AL-0922",
+      "member_id": "DEMO00007000000000922",
+      "date_of_joining": "2025-10-03",
+      "gender": "MALE",
+      "mobile_masked": "******0914",
+      "email_masked": "a***@demo.invalid",
+      "bank_ifsc": "DEMO0000914",
+      "bank_account_last4": "0914",
+      "kyc": {
+        "aadhaar": "VERIFIED",
+        "pan": "VERIFIED",
+        "bank": "VERIFIED"
+      },
+      "last_contribution_month": "2026-09",
+      "aadhaar_ref": "DEMO-AADHAAR-ARJUN",
+      "date_of_exit": null,
+      "establishment_id": "EST-DEMO-0007",
+      "_comment": "P2.15a: a first timer at Demo Auto Components (joined 3 Oct 2025, UAN by face authentication) — PMVBRY Part A"
     }
   ],
   "demo_wage_month": "2026-08",
@@ -757,7 +797,9 @@
     "steel-signatory": "00000000-0000-4000-8000-000000000068",
     "ho-exemption": "00000000-0000-4000-8000-000000000069",
     "textile-trust": "00000000-0000-4000-8000-000000000070",
-    "chemicals-trust": "00000000-0000-4000-8000-000000000071"
+    "chemicals-trust": "00000000-0000-4000-8000-000000000071",
+    "member-ft": "00000000-0000-4000-8000-000000000072",
+    "auto-owner": "00000000-0000-4000-8000-000000000073"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -1208,6 +1250,19 @@
         "ecr.submit",
         "payment.initiate"
       ]
+    },
+    {
+      "_comment": "P2.15a: the owner of Demo Auto Components (PMVBRY Part B)",
+      "username": "auto-owner",
+      "subject": "00000000-0000-4000-8000-000000000073",
+      "role": "employer.owner",
+      "establishment_id": "EST-DEMO-0007",
+      "kind": "OWNER",
+      "grants": [
+        "establishment.manage",
+        "operators.manage",
+        "signatories.manage"
+      ]
     }
   ],
   "trust_returns": {
@@ -1367,6 +1422,115 @@
             "subject": "00000000-0000-4000-8000-000000000071"
           }
         ]
+      }
+    ]
+  },
+  "pmvbry_demo": {
+    "_comment": "P2.15a: Demo Auto Components (manufacturing) and its ECR history from August 2024 (synthetic). 30 employees through the baseline year; first timers and a re-joinee from October 2025.",
+    "establishment_id": "EST-DEMO-0007",
+    "manufacturing": true,
+    "gstin": "07AAAAD0007A1Z5",
+    "history_from": "2024-08",
+    "history_to": "2026-09",
+    "old_staff": 30,
+    "old_epf_wage_paise": 1500000,
+    "old_gross_wage_paise": 2200000,
+    "old_staff_exits": [
+      {
+        "month": "2025-12",
+        "count": 1
+      }
+    ],
+    "joiners": [
+      {
+        "uan": "100000000914",
+        "name": "ARJUN DEMO",
+        "date_of_joining": "2025-10-03",
+        "epf_wage_paise": 1400000,
+        "gross_wage_paise": 1800000,
+        "kind": "FIRST_TIMER",
+        "face_authenticated": true,
+        "aadhaar_authenticated": true,
+        "aadhaar_seeded_bank": true,
+        "exit_month": null
+      },
+      {
+        "uan": "200007000101",
+        "name": "SYNTH FT ONE",
+        "date_of_joining": "2025-10-02",
+        "epf_wage_paise": 950000,
+        "gross_wage_paise": 1100000,
+        "kind": "FIRST_TIMER",
+        "face_authenticated": true,
+        "aadhaar_authenticated": true,
+        "aadhaar_seeded_bank": true,
+        "exit_month": null
+      },
+      {
+        "uan": "200007000102",
+        "name": "SYNTH FT TWO",
+        "date_of_joining": "2025-10-04",
+        "epf_wage_paise": 2500000,
+        "gross_wage_paise": 3200000,
+        "kind": "FIRST_TIMER",
+        "face_authenticated": true,
+        "aadhaar_authenticated": true,
+        "aadhaar_seeded_bank": true,
+        "exit_month": "2026-03"
+      },
+      {
+        "uan": "200007000103",
+        "name": "SYNTH REJOINEE",
+        "date_of_joining": "2025-11-01",
+        "epf_wage_paise": 1800000,
+        "gross_wage_paise": 2400000,
+        "kind": "REJOINEE",
+        "face_authenticated": true,
+        "aadhaar_authenticated": true,
+        "aadhaar_seeded_bank": true,
+        "exit_month": null
+      },
+      {
+        "uan": "200007000104",
+        "name": "SYNTH FT THREE",
+        "date_of_joining": "2026-01-05",
+        "epf_wage_paise": 1200000,
+        "gross_wage_paise": 1500000,
+        "kind": "FIRST_TIMER",
+        "face_authenticated": true,
+        "aadhaar_authenticated": true,
+        "aadhaar_seeded_bank": false,
+        "exit_month": null
+      },
+      {
+        "uan": "200007000105",
+        "name": "SYNTH HIGH PAY",
+        "date_of_joining": "2026-01-03",
+        "epf_wage_paise": 1500000,
+        "gross_wage_paise": 12000000,
+        "kind": "FIRST_TIMER",
+        "face_authenticated": true,
+        "aadhaar_authenticated": true,
+        "aadhaar_seeded_bank": true,
+        "exit_month": null
+      },
+      {
+        "uan": "200007000106",
+        "name": "SYNTH NO FAT",
+        "date_of_joining": "2026-01-02",
+        "epf_wage_paise": 1200000,
+        "gross_wage_paise": 1500000,
+        "kind": "FIRST_TIMER",
+        "face_authenticated": false,
+        "aadhaar_authenticated": true,
+        "aadhaar_seeded_bank": true,
+        "exit_month": null
+      }
+    ],
+    "exclusions": [
+      {
+        "establishment_id": "EST-DEMO-0002",
+        "reason": "7A inquiry pending (synthetic)"
       }
     ]
   }

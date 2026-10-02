@@ -360,6 +360,13 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
                                            and _whole(ee.get("investment_threshold_pct"), 1, 100) and _whole(ee.get("min_score"), 0, 600)
                                            and _whole(ee.get("consecutive_months"), 1, 12)):
             problems.append("exempted_establishments evaluator settings out of range (due day 1-28, claim days 1-90, threshold 1-100%, score 0-600, months 1-12)")
+    if "pmvbry" in document:
+        pm = document["pmvbry"] or {}
+        whole = ("new_establishment_baseline", "joining_day", "gross_wage_cap_paise", "contribution_rate_pct", "part_a_cap_paise",
+                 "part_a_first_cap_paise", "part_a_second_within_months", "qualifying_months", "threshold_small", "threshold_large",
+                 "threshold_baseline_split", "incentive_months", "manufacturing_incentive_months", "first_cycle_months", "disbursal_days")
+        if not all(_whole(pm.get(k), 1, 10**9) for k in whole) or not pm.get("slabs") or str(pm.get("registration_from")) >= str(pm.get("registration_to")):
+            problems.append("pmvbry needs the registration period, positive whole numbers for its limits and at least one slab")
     if "dr_and_training" in document:
         dt = document["dr_and_training"] or {}
         if not (_whole(dt.get("rpo_minutes"), 1, 1440) and _whole(dt.get("rto_minutes"), 1, 2880) and _whole(dt.get("sandbox_days"), 1, 90)):

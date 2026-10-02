@@ -1,0 +1,8 @@
+.pmvbry .pmvbry-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: .75rem; }
+.pmvbry .pmvbry-metric { border-top: 3px solid #b58b30; display: grid; gap: .35rem; }
+.pmvbry .pmvbry-metric span { color: #334b66; font-size: .88rem; }
+.pmvbry .pmvbry-metric strong { color: #173b66; font-size: 1.35rem; }
+.pmvbry .pmvbry-excluded { border-left: 4px solid #ae2430; background: #fff3f3; color: #751522; padding: .85rem 1rem; }
+.pmvbry table th, .pmvbry table td { vertical-align: top; }
+.pmvbry table thead { border-bottom: 2px solid #b58b30; }
+.pmvbry .amount { white-space: nowrap; }
