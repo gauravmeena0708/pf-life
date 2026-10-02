@@ -43,6 +43,8 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.12e** | Head office reporting: balance sheet, investments, board packs (aggregates), fund-manager position feed (mock) | **Done** (1 Oct 2026) |
 | **P2.12f** | The rest: DR replication status and failover drill, training sandboxes, Nidhi Aapke Nikat camp requests, totalisation claims and the foreign agency's CoC check, the composite death claim | **Done** (1 Oct 2026) |
 | **P2.12g** | Menu clean-up: screens already built linked from their menus (Composite claim, Know Your Pension Payee Bank, Change Password); every other item without a screen says why — planned (with the slice), awaiting EPFO's definition, or not in the POC | **Done** (1 Oct 2026) |
+| P2.25 | Sources checked: the *to verify* rule values, and the Code on Social Security — which turned up the 2026 Schemes and the ₹25,000 ceiling (findings below) | Done (findings) |
+| P2.26 | The Code's transition: ₹25,000 wage ceiling from 17 Sep 2026 (September split by days in one ECR; the band enrolled; EPS for EPF-only members in it; the Government's 1.16% kept on ₹15,000); VISHWAS, 2026's real terms; EEC, 2026 (to 31 Oct 2026); instalments by the circulars; withdrawal, EPS withdrawal-benefit and EDLI rules of the 2026 Schemes | Planned — next |
 | P2.13 | Small gaps: disablement pension (EPS para 15); zonal freezing (categories B and C) and zonal ACC decisions above the RO's limits; district office queues; PPO and UAN card issued to DigiLocker (mock) | Planned |
 | P2.14 | The exempted trust's lifecycle: annual audit filing and the exemption cell's review; surrender and cancellation (RPFC report → ZO → HO → the Exempted Establishments Committee → the appropriate Government); HO's decision; past accumulations transferred in bulk and reconciled with the receipts | Done (bulk transfer and VDR reconciliation stay planned) |
 | P2.15a | PMVBRY (Pradhan Mantri Viksit Bharat Rozgar Yojana): Part A for first timers, Part B for employers adding jobs, the disbursement run and the dashboard — from the scheme guidelines and EPFO's SOP for calculating incentives | Done |
@@ -315,6 +317,75 @@ Pramaan, UMANG, CSC, B2B payroll, CERT-In):
 - **Not planned** (needs EPFO first): the seven "?" office functions — VDR Special, VDR member beneficiary, VDR vs ECR
   reconciliation, EO certification, the APFC's ECR approval queue, bank-counter payment — until a domain owner defines
   them; the menus say so.
+
+## P2.25 — findings (2 October 2026)
+
+**The values marked *to verify*:**
+- *7B review: 45 days* — confirmed: an application in Form 9 within 45 days of the 7A order (Compliance Manual 2.7.6).
+- *Appeal: 60 + 60 days* — confirmed: EPF Appellate Tribunal (Procedure) Rules, 1997, rule 7(2); the extension is
+  capped, so nothing is condoned after 120 days.
+- *Pre-deposit: 75%* — confirmed: s.7-O; the Tribunal may waive or reduce it for reasons recorded.
+- *72 instalments* — confirmed as the outer limit, with conditions the POC does not enforce (Recovery Manual, circulars
+  of 11.4.2012, 11.02.2014, 7.4.2006). Up to 36 is the norm. Beyond 36 only for unexempted establishments, with no
+  second facility after a default, and a revolving bank guarantee for six instalments. Each instalment is paid with that
+  month's 7Q interest and current dues. A default withdraws the facility without notice. More than 36 instalments or
+  over ₹50 lakh goes to Head Office. Who grants, by arrears: the RPFC-II in charge of an SRO up to ₹10 lakh, the RPFC-I up
+  to ₹25 lakh, the zone's ACC up to ₹50 lakh, the CPFC above. **Gap:** the POC lets the OIC grant up to 72 for any
+  amount.
+
+**What the check found besides** (official: PIB releases 2310973 of 16 Sep 2026, 2313829 of 23 Sep 2026 and 2285666 of
+17 Jul 2026; secondary: KPMG's flash of 2 Jul 2026, BDO's alert, an FAQ on the ceiling circulating among employers —
+the official texts of the Schemes and the gazette notification were not reachable, and are to be read before the
+figures marked *secondary* are relied on):
+- **The Code has applied to provident funds since 21 November 2025**, and on **29 June 2026** the Ministry notified the
+  **EPF Scheme, 2026** (G.S.R. 525(E)), the **EDLI Scheme, 2026** (526(E)) and the **EPS, 2026** (527(E)). They supersede
+  the 1952, 1976 and 1995 Schemes: the POC's citations of their paragraphs are now history. *Wages* is s.2(88) of the
+  Code: basic, DA and retaining allowance, with excluded components above half of the remuneration counted back.
+- **The wage ceiling is ₹25,000 from 17 September 2026** (S.O. 5109(E); official). Mandatory EPF, EPS and EDLI cover
+  reaches employees with wages up to ₹25,000. The maximum EPS share rises from ₹1,250 to ₹2,083 (official). *Secondary
+  (the FAQ):* September 2026 is one ECR, split by days at the old and new ceilings. Employees in the ₹15,000–25,000 band
+  are enrolled from 17 September by the employer, without an application, and EPF-only members in the band join EPS
+  from that date. The Government's 1.16% stays on ₹15,000. Part A of PMVBRY stays capped at ₹15,000, and the EDLI maximum
+  stays at ₹7 lakh. **Gap:** the POC's ceiling is ₹15,000, and its rule sets change only at the start of a wage month.
+- **VISHWAS, 2026** (official): damages for defaults before 14 June 2024 are recalculated at 0.25% a month (up to two
+  months), 0.50% (two to under four) and 1% (four or more). All 7Q interest must be paid first, further appeal is given
+  up, fraud is excluded, and applications go online with a DSC or e-sign, from 29 June to 28 December 2026. **Gap:**
+  the POC settles at a flat 30%.
+- **EEC, 2026** (*secondary*): employers may enrol employees who joined between 1 April 2009 and 31 March 2026 and were
+  left out, until 31 October 2026. **AMNESTY, 2026**: unrecognised PF trusts may regularise. This is the menu item
+  *EEC-2026/VISHWAS*.
+- **Other changes in the 2026 Schemes** (*secondary*):
+  - partial withdrawal after 12 months of membership, keeping 25% of the contributions;
+  - final settlement 12 months after leaving (the POC: 2);
+  - the EPS withdrawal benefit 36 months after the last contribution (the POC: 2);
+  - EDLI with a base benefit of ₹50,000–1 lakh without 12 months' service, and ₹2.5–7 lakh with it;
+  - a late fee of ₹500 a day for returns;
+  - Forms X, XI and XII for contractors;
+  - 9.49% to EPS for members on higher wages.
+
+## Pending items reviewed (2 October 2026)
+
+Each pending item weighed for value, cost and whether its source is in hand; the order that follows.
+
+- **Unblocked, do next.** P2.14's bulk transfer and VDR reconciliation waited for VDR entries, which exist now. P2.13's
+  disablement pension (EPS para 15) and zonal freezing / escalation complete rules the POC already enforces. P2.19,
+  ranked by money at risk: death during a transfer or claim, a partial challan's allocation, a re-employed pensioner,
+  family pension for a disabled child, back wages after exit first; UAN merge, bank merger and unclaimed balances later.
+  *58 in service* already works (the ECR split stops EPS at 58). P2.23 reads data the system has.
+- **Rescoped.** P2.21 extends what exists (auto-settlement below a limit, auto-transfer) rather than building it; the
+  pension case opened on death needs a mock civil-registry feed; DigiLocker (from P2.13) joins it. P2.22 keeps per-pay-run
+  submissions that add up into the ECR (one record of what was paid) and drops the payday due date (a foreign policy, not
+  India's). P2.24 keeps service standards (from EPFO's Citizen's Charter), rule-change simulation on balances and
+  authorised representatives; drops an independent review tier (EPFO has none) and interest sustainability (needs
+  investment data, out of scope). P2.17 keeps the watchlist, the claim against its deadline and recovery stopped by the
+  moratorium (like a court's stay, P2.11d); drops checking resolution plans (legal judgement).
+- **Held for the source.** P2.16 (who administers the gig workers' fund) and P2.18 (PFRDA's circular). P2.13's district
+  office queues dropped (district offices facilitate; they do not decide cases).
+- **Added.** P2.25: the values marked *to verify*, and the Code on Social Security's definition of wages, which would
+  change the contribution base more than anything in P2.16–P2.24. A cross-service consistency checker and event
+  contract tests in CI get a slice of their own (P2.14's status column showed why).
+- **Order.** P2.25 → P2.26 (the Code's transition: money is wrong until it is done) → the P2.14 leftovers → P2.13 core → P2.19 (money at risk) → consistency checks → P2.21 → P2.23 →
+  P2.22 (adapter) → P2.24 and P2.17 (trimmed); P2.16 and P2.18 wait.
 
 ## P2.20 – P2.24 — plan (what a mature social-security system does)
 
