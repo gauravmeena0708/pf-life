@@ -708,7 +708,9 @@ tests produced, by role (after `python3 scripts/publish_manuals.py`).
    `emp-signatory`, Returns › *EEC, 2026*: choose them, enter ₹14,000 a month, *Work out the dues* — 27 months, the
    employee's share waived, ₹100 damages — then declare (step-up) and pay the challan; the employee's ledger shows the
    period credited.
-5. As `ro-oic`, grant instalments on a recovery certificate: a bank guarantee of one instalment is required; 40
+5. As `ro-oic`, on a recovery certificate, *Refer beyond your power* with 48 instalments: it goes to Head Office. As
+   `ho-analyst` (CPFC), *Instalment referrals*: grant with a guarantee of six instalments, or refuse with reasons.
+6. As `ro-oic`, grant instalments on a recovery certificate: a bank guarantee of one instalment is required; 40
    instalments are refused (Head Office only). As `ro-recovery`, record a missed instalment: recovery resumes.
 
 ## Disablement pension (EPS para 15)

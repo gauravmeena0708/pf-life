@@ -676,6 +676,7 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | `POST /office/exempted/proceedings/{proceedingId}/steps` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/members/{uan}/defreezes` | W |
+| `POST /office/recovery/{caseId}/instalment-referrals` | W |
 | `POST /office/recovery/{caseId}/instalments` | W |
 | `POST /office/system/locks/{lockId}/release` | W |
 
@@ -923,7 +924,7 @@ Activities: **F06.district** District-level compliance follow-up and facilitatio
 
 #### `zo.acc` — Additional Central PF Commissioner (Zone head)
 
-Activities: **F06.zo_scrutiny** Zonal ACC scrutinises the orders the RPFC-I passes (by the 15th of the following month); may direct a 7C; **F06.instalments_zo** Zonal ACC grants instalments (up to 36) on arrears up to ₹50 lakh, above the region's power; **F08.escalate** Handle grievances escalated to the zone; **F09.zo_forward** Zonal ACC forwards the draft agenda to HO with recommendations (SE-3 / CE-4) or remands it; **F13.zo** Zone dashboards; approvals above RO limits
+Activities: **F06.zo_scrutiny** Zonal ACC scrutinises the orders the RPFC-I passes (by the 15th of the following month); may direct a 7C; **F06.instalments_zo** Zonal ACC grants or refuses instalments (up to 36) on arrears up to ₹50 lakh, referred by the region; **F08.escalate** Handle grievances escalated to the zone; **F09.zo_forward** Zonal ACC forwards the draft agenda to HO with recommendations (SE-3 / CE-4) or remands it; **F13.zo** Zone dashboards; approvals above RO limits
 
 | Endpoint | Status |
 |---|---|
@@ -935,12 +936,14 @@ Activities: **F06.zo_scrutiny** Zonal ACC scrutinises the orders the RPFC-I pass
 | `GET /office/exempted/proceedings` | W |
 | `GET /office/work-queue` | W |
 | `GET /zo/dashboards` | W |
+| `GET /zo/recovery/instalment-referrals` | W |
 | `POST /grievances/{grievanceId}/escalations` | W |
 | `POST /grievances/{grievanceId}/messages` | W |
 | `POST /grievances/{grievanceId}/resolution` | W |
 | `POST /office/compliance/cases/{caseId}/scrutinies` | W |
 | `POST /office/exempted/proceedings/{proceedingId}/steps` | W |
 | `POST /office/recovery/{caseId}/instalments` | W |
+| `POST /zo/recovery/instalment-referrals/{caseId}/refusals` | W |
 
 #### `zo.rpfc1` — RPFC-I at the Zonal Office (zonal authority for freezing categories B and C; zone-level monitoring)
 
@@ -1007,7 +1010,7 @@ Activities: **F14.zti_zo** Zonal Training Institute uses the training sandbox
 
 #### `ho.cpfc` — Central Provident Fund Commissioner
 
-Activities: **F06.instalments_ho** The CPFC grants instalments on arrears above ₹50 lakh, or more than 36 (at most 72), with a guarantee of six; **F13.cpfc** National dashboards and policy approvals; **F13.pmvbry_monitor** Executive Committee chair: monitor PMVBRY beneficiaries, expenditure and pendency
+Activities: **F06.instalments_ho** The CPFC grants or refuses instalments on arrears above ₹50 lakh, or more than 36 (at most 72), with a guarantee of six; **F13.cpfc** National dashboards and policy approvals; **F13.pmvbry_monitor** Executive Committee chair: monitor PMVBRY beneficiaries, expenditure and pendency
 
 | Endpoint | Status |
 |---|---|
@@ -1018,8 +1021,10 @@ Activities: **F06.instalments_ho** The CPFC grants instalments on arrears above 
 | `GET /monitoring/contributions` | W |
 | `GET /monitoring/data-freshness` | W |
 | `GET /monitoring/grievances` | W |
+| `GET /zo/recovery/instalment-referrals` | W |
 | `POST /ho/config/rule-sets/{versionId}/decisions` | W |
 | `POST /office/recovery/{caseId}/instalments` | W |
+| `POST /zo/recovery/instalment-referrals/{caseId}/refusals` | W |
 
 #### `ho.acc_hq` — ACC (HQ) and HO division heads
 
@@ -1823,8 +1828,8 @@ flowchart LR
   F06_courts["ext.courts<br/>Writs and orders on EPFO matters"]
   F06_legal["fo.legal<br/>Record 7-I appeals, 7-O pre-deposits / waivers and court / t"]
   F06_recovery["fo.recovery_officer<br/>Execute the recovery certificate: demand notice (EPFCP-1), c"]
-  F06_instalments_zo["zo.acc<br/>Zonal ACC grants instalments (up to 36) on arrears up to ₹50"]
-  F06_instalments_ho["ho.cpfc<br/>The CPFC grants instalments on arrears above ₹50 lakh, or mo"]
+  F06_instalments_zo["zo.acc<br/>Zonal ACC grants or refuses instalments (up to 36) on arrear"]
+  F06_instalments_ho["ho.cpfc<br/>The CPFC grants or refuses instalments on arrears above ₹50 "]
   F06_garnishee["fo.apfc<br/>8F notice to a bank or debtor of the employer to pay EPFO (t"]
   F06_attach["fo.recovery_officer<br/>Attach movable / immovable property (demo record only)"]
   F06_sale["fo.recovery_officer<br/>Sale of attached property (demo record only)"]
@@ -1881,7 +1886,6 @@ flowchart LR
 flowchart LR
   F07_freeze_ho["ho.fa_cao<br/>Order freezing for Category A (FIA vertical)"]
   F07_freeze_zo["zo.rpfc1<br/>Order freezing (Categories B / C) at zone level"]
-  style F07_freeze_zo stroke-dasharray: 5 5
   F07_freeze_ro_member["fo.apfc<br/>Order freezing of MID / UAN (Categories B / C)"]
   F07_freeze_ro_est["fo.oic<br/>Order freezing of an establishment (Category B); report to f"]
   F07_issue_raise["fo.oic<br/>Raise an Issue Tracker request (freeze / de-freeze a member "]
@@ -1933,7 +1937,6 @@ flowchart LR
   F08_cpgrams["ext.cpgrams<br/>Route CPGRAMS grievances to EPFO"]
   F08_triage["fo.pro<br/>Triage, assign, reply with evidence, lodge local grievances,"]
   F08_escalate["zo.acc<br/>Handle grievances escalated to the zone"]
-  style F08_escalate stroke-dasharray: 5 5
   F08_ho["ho.customer_service<br/>Monitor grievance pendency and root causes"]
   F08_rti["rti_applicant<br/>File RTI request (handled through the RTI portal; answered b"]
   F08_rti_reply["fo.pro<br/>Register RTI applications and reply within the period"]
@@ -2042,7 +2045,6 @@ flowchart LR
   F13_ro["fo.rpfc1<br/>RO-level monitoring (claims, grievances, compliance)"]
   F13_oic["fo.oic<br/>Office-level pendency and daily unblocking monitoring"]
   F13_zo["zo.acc<br/>Zone dashboards; approvals above RO limits"]
-  style F13_zo stroke-dasharray: 5 5
   F13_cpfc["ho.cpfc<br/>National dashboards and policy approvals"]
   F13_acc_hq["ho.acc_hq<br/>Division-level oversight; draft rule-set changes (ceilings, "]
   F13_divisions["ho.edli<br/>EDLI policy and monitoring"]

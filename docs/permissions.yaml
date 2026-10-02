@@ -2644,6 +2644,12 @@ stakeholders:
     step_up: false
     via:
     - F06.proceed_large
+  - endpoint: POST /office/recovery/{caseId}/instalment-referrals
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.proceed_large
   - endpoint: GET /office/compliance/prosecutions
     status: W
     scope: office jurisdiction of the caller's posting
@@ -3381,9 +3387,21 @@ stakeholders:
     step_up: false
     via:
     - F06.zo_scrutiny
+  - endpoint: GET /zo/recovery/instalment-referrals
+    status: W
+    scope: zone jurisdiction
+    step_up: false
+    via:
+    - F06.instalments_zo
   - endpoint: POST /office/recovery/{caseId}/instalments
     status: W
     scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.instalments_zo
+  - endpoint: POST /zo/recovery/instalment-referrals/{caseId}/refusals
+    status: W
+    scope: zone jurisdiction
     step_up: false
     via:
     - F06.instalments_zo
@@ -3574,9 +3592,21 @@ stakeholders:
     via:
     - F14.zti_zo
   ho.cpfc:
+  - endpoint: GET /zo/recovery/instalment-referrals
+    status: W
+    scope: zone jurisdiction
+    step_up: false
+    via:
+    - F06.instalments_ho
   - endpoint: POST /office/recovery/{caseId}/instalments
     status: W
     scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.instalments_ho
+  - endpoint: POST /zo/recovery/instalment-referrals/{caseId}/refusals
+    status: W
+    scope: zone jurisdiction
     step_up: false
     via:
     - F06.instalments_ho

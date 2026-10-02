@@ -79,6 +79,16 @@ it("lets the RPFC grant instalments; shows a stay", async () => {
     { count: 6, first_due: "2026-11-01", note: "Hardship", bank_guarantee_paise: 500000, bank_guarantee_ref: "BG-1" }));
 });
 
+it("lets the OIC refer instalments beyond the region's power (P2.13b)", async () => {
+  as("fo.oic"); responses["/api/v1/office/recovery/cases"] = [rc("NOTICE_SERVED")];
+  show(<RecoveryPage />);
+  const form = await screen.findByRole("form", { name: "Refer RC/RO-DEMO-01/2026/1234" });
+  fireEvent.change(within(form).getByLabelText("Instalments asked"), { target: { value: "48" } });
+  fireEvent.change(within(form).getByLabelText("Note for the zone / Head Office"), { target: { value: "More than 36 asked" } });
+  fireEvent.click(within(form).getByRole("button", { name: "Refer" }));
+  await waitFor(() => expect(command).toHaveBeenCalledWith("POST", "/api/v1/office/recovery/RC-1/instalment-referrals", { count: 48, note: "More than 36 asked" }));
+});
+
 it("lets the Recovery Officer withdraw instalments on a default (P2.26)", async () => {
   as("fo.recovery_officer"); responses["/api/v1/office/recovery/cases"] = [rc("INSTALMENTS")];
   show(<RecoveryPage />);

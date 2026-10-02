@@ -679,6 +679,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/exempted/proceedings/{proceedingId}/steps` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/members/{uan}/defreezes` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/recovery/{caseId}/instalment-referrals` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/recovery/{caseId}/instalments` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/system/locks/{lockId}/release` | W | office jurisdiction of the caller's posting | yes |
 
@@ -896,12 +897,14 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/exempted/proceedings` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `GET /zo/dashboards` | W | zone jurisdiction |  |
+| `GET /zo/recovery/instalment-referrals` | W | zone jurisdiction |  |
 | `POST /grievances/{grievanceId}/escalations` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/messages` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/resolution` | W | complainant or the assigned office | yes |
 | `POST /office/compliance/cases/{caseId}/scrutinies` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/exempted/proceedings/{proceedingId}/steps` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/recovery/{caseId}/instalments` | W | office jurisdiction of the caller's posting |  |
+| `POST /zo/recovery/instalment-referrals/{caseId}/refusals` | W | zone jurisdiction |  |
 
 **`zo.rpfc1`** — RPFC-I at the Zonal Office (zonal authority for freezing categories B and C; zone-level monitoring)
 
@@ -966,8 +969,10 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /monitoring/contributions` | W | role jurisdiction; aggregates with small-group suppression |  |
 | `GET /monitoring/data-freshness` | W | role jurisdiction; aggregates with small-group suppression |  |
 | `GET /monitoring/grievances` | W | role jurisdiction; aggregates with small-group suppression |  |
+| `GET /zo/recovery/instalment-referrals` | W | zone jurisdiction |  |
 | `POST /ho/config/rule-sets/{versionId}/decisions` | W | national (Head Office role) | yes |
 | `POST /office/recovery/{caseId}/instalments` | W | office jurisdiction of the caller's posting |  |
+| `POST /zo/recovery/instalment-referrals/{caseId}/refusals` | W | zone jurisdiction |  |
 
 **`ho.acc_hq`** — ACC (HQ) and HO division heads
 

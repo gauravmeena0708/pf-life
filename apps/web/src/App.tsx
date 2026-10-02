@@ -45,6 +45,7 @@ import { CompliancePage } from "./features/office/CompliancePage";
 import { InquiriesPage } from "./features/office/InquiriesPage";
 import { LegalPage } from "./features/office/LegalPage";
 import { RecoveryPage } from "./features/office/RecoveryPage";
+import { InstalmentReferralsPage } from "./features/office/InstalmentReferralsPage";
 import { ComplianceReportsPage } from "./features/ho/ComplianceReportsPage";
 import { EmployerProceedingsPage } from "./features/employer/ProceedingsPage";
 import { ClaimantPage, ProCounterPage } from "./features/claimant/DeathClaimPages";
@@ -201,6 +202,7 @@ export function App() {
             <Route path="/office/inquiries" element={<InquiriesPage />} />
             <Route path="/office/legal" element={<LegalPage />} />
             <Route path="/office/recovery" element={<RecoveryPage />} />
+            <Route path="/zo/instalments" element={<InstalmentReferralsPage />} />
             <Route path="/ho/compliance-reports" element={<ComplianceReportsPage />} />
             <Route path="/employer/proceedings" element={<EmployerProceedingsPage />} />
             <Route path="/employer/returns" element={<ReturnsPage />} />

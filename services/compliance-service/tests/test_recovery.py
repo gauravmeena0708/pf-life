@@ -135,3 +135,32 @@ def test_instalments_by_powers_head_office_beyond_36_and_withdrawn_on_default(ct
     beyond = {**body, "count": 60, "bank_guarantee_paise": 300000}                                        # six instalments of ₹500
     again = client.post(url, json=beyond, headers=ho).json()
     assert again["type"] == "/problems/defaulted-before"                                                   # no second facility
+
+
+def test_beyond_the_region_the_oic_refers_and_the_zone_or_head_office_decides(ctx, monkeypatch):
+    """P2.13b: what the region may not grant is referred — to the zone's ACC within its ₹50 lakh and 36 instalments, else HO."""
+    import app.api.recovery as recovery_module
+    real = recovery_module.rules
+
+    async def scaled(session):
+        document, limits = await real(session)
+        return document, {**limits, "instalment_powers_paise": {"RPFC-II": 1000000, "RPFC-I": 2500000, "zo.acc": 5000000, "ho.cpfc": None}}
+    monkeypatch.setattr(recovery_module, "rules", scaled)
+    client, _, _ = ctx
+    rid = certified(client)["recovery_case_id"]
+    refer = f"{REC}/{rid}/instalment-referrals"
+    assert client.post(refer, json={"count": 12, "note": "x"}, headers=as_(OIC)).status_code == 400              # a reason
+    r = client.post(refer, json={"count": 12, "note": "Arrears above the region's power"}, headers=as_(OIC))
+    assert r.status_code == 201 and r.json()["data"]["referred_to"] == "zo.acc", r.json()
+    zone, ho = hdr(S["zo-acc"], "zo.acc"), hdr(S["ho-analyst"], "ho.cpfc")
+    listed = client.get("/api/v1/zo/recovery/instalment-referrals", headers=zone).json()["data"]
+    assert [(x["recovery_case_id"], x["count"], x["outstanding_paise"]) for x in listed] == [(rid, 12, 3000000)]
+    assert client.get("/api/v1/zo/recovery/instalment-referrals", headers=ho).json()["data"] == []
+    client.post(f"/api/v1/zo/recovery/instalment-referrals/{rid}/refusals", json={"reasons": "No hardship shown in the papers"}, headers=zone)
+    assert client.get("/api/v1/zo/recovery/instalment-referrals", headers=zone).json()["data"] == []           # refused
+    assert client.post(refer, json={"count": 48, "note": "More than 36 asked"}, headers=as_(OIC)).json()["data"]["referred_to"] == "ho.cpfc"
+    [x] = client.get("/api/v1/zo/recovery/instalment-referrals", headers=ho).json()["data"]
+    assert x["count"] == 48
+    grant = {"count": 48, "first_due": "2026-11-01", "note": "Granted at HO", "bank_guarantee_paise": 400000, "bank_guarantee_ref": "BG-HO-1"}
+    assert client.post(f"{REC}/{rid}/instalments", json=grant, headers=ho).json()["data"]["state"] == "INSTALMENTS"
+    assert client.get("/api/v1/zo/recovery/instalment-referrals", headers=ho).json()["data"] == []

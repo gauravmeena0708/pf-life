@@ -50,3 +50,20 @@ def test_ho_reports_and_who_may_see_them(persona):
     assert call(ho, "GET", "/api/v1/ho/reports/recovery")[0] == 200
     assert call(persona("ho-recovery", "/ho/compliance-reports"), "GET", "/api/v1/ho/reports/proceedings")[0] == 403
     assert call(persona("emp-owner", "/employer"), "GET", "/api/v1/ho/reports/recovery")[0] == 403
+
+
+def test_instalment_referrals_reach_the_zone_and_head_office(persona):
+    """P2.13b through the gateway: the zone's ACC and the CPFC read their referrals; others may not; a referral on a closed
+    certificate is refused by the service (not by the gateway)."""
+    for who, role in (("zo-acc", "zo.acc"), ("ho-analyst", "ho.cpfc")):
+        page = persona(who, "/zo/instalments")
+        status, r = call(page, "GET", "/api/v1/zo/recovery/instalment-referrals")
+        assert status == 200 and isinstance(r["data"], list), (role, r)
+    member = persona("member-a", "/member")
+    assert call(member, "GET", "/api/v1/zo/recovery/instalment-referrals")[0] == 403
+    oic = persona("ro-oic", "/office/recovery")
+    cases = call(oic, "GET", "/api/v1/office/recovery/cases")[1]["data"]
+    closed = next((c for c in cases if c["state"] == "CLOSED"), None)
+    if closed:
+        status, r = call(oic, "POST", f"/api/v1/office/recovery/{closed['recovery_case_id']}/instalment-referrals", {"count": 48, "note": "More than 36 asked"})
+        assert status == 409 and r["type"] == "/problems/invalid-state", r

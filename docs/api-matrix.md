@@ -13,9 +13,9 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 17 | 1 | 0 | 0 |
 | 6 | International worker | **Working** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 6 | 0 | 0 | 0 |
 | 7 | District office | **Working** | `do.incharge`, `do.staff` | 3 | 0 | 0 | 0 |
-| 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 68 | 0 | 0 | 1 |
-| 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 18 | 0 | 0 | 0 |
-| 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 32 | 0 | 0 | 0 |
+| 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 69 | 0 | 0 | 1 |
+| 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 20 | 0 | 0 | 0 |
+| 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 34 | 0 | 0 | 0 |
 | 11 | NDC | **Working** | `tech.ndc`, `tech.adc`, `tech.cpps`, `tech.epfo3` | 8 | 0 | 0 | 0 |
 | 12 | Ministry | **Working** | `gov.mole`, `gov.parliament` | 3 | 0 | 0 | 0 |
 | 13 | B2B | **Mock** | `payroll_provider`, `ext.collecting_bank`, `ext.pension_bank`, `ext.mca`, `ext.shram_suvidha`, `ext.fund_manager` | 0 | 7 | 0 | 0 |
@@ -512,6 +512,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/member-change-requests/{requestId}/decisions` | W | member | fo.apfc |
 | `POST /office/members/{uan}/defreezes` | W | member | fo.oic |
 | `POST /office/members/{uan}/freezes` | W | member | fo.apfc |
+| `POST /office/recovery/{caseId}/instalment-referrals` | W | compliance | fo.oic |
 | `POST /office/recovery/{caseId}/instalments` | W | compliance | fo.oic |
 | `POST /office/system/locks/{lockId}/release` | W | workflow | fo.oic |
 | `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | W | claim | fo.apfc |
@@ -530,6 +531,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /office/work-queue` | W | workflow | zo.acc, zo.rpfc1 |
 | `GET /zo/dashboards` | W | reporting | zo.acc |
 | `GET /zo/fraud-risk/cases` | W | workflow | zo.fraud_committee |
+| `GET /zo/recovery/instalment-referrals` | W | compliance | zo.acc |
 | `POST /grievances/{grievanceId}/escalations` | W | grievance | zo.acc |
 | `POST /grievances/{grievanceId}/messages` | W | grievance | zo.acc |
 | `POST /grievances/{grievanceId}/resolution` | W | grievance | zo.acc |
@@ -539,6 +541,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/members/{uan}/freezes` | W | member | zo.rpfc1 |
 | `POST /office/recovery/{caseId}/instalments` | W | compliance | zo.acc |
 | `POST /training/sandboxes` | W | platform | zo.zti |
+| `POST /zo/recovery/instalment-referrals/{caseId}/refusals` | W | compliance | zo.acc |
 
 ### 10. Head office — Working
 
@@ -563,6 +566,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /office/exempted/rankings` | W | contribution | ho.exemption |
 | `GET /office/legal/cases` | W | compliance | ho.legal |
 | `GET /office/notification-deliveries` | W | member | ho.is |
+| `GET /zo/recovery/instalment-referrals` | W | compliance | ho.cpfc |
 | `POST /ho/circulars` | W | intelligence | ho.publicity |
 | `POST /ho/config/rule-sets` | W | platform | ho.acc_hq |
 | `POST /ho/config/rule-sets/{versionId}/decisions` | W | platform | ho.cpfc |
@@ -574,6 +578,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/establishments/{estId}/freezes` | W | employer | ho.fa_cao |
 | `POST /office/members/{uan}/freezes` | W | member | ho.fa_cao |
 | `POST /office/recovery/{caseId}/instalments` | W | compliance | ho.cpfc |
+| `POST /zo/recovery/instalment-referrals/{caseId}/refusals` | W | compliance | ho.cpfc |
 | `PUT /ho/config/interest-rates/{financialYear}` | W | contribution | ho.fa_cao |
 | `PUT /ho/config/rule-sets/{versionId}` | W | platform | ho.acc_hq |
 

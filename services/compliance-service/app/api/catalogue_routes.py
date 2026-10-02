@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /public/defaulting-establishments', 'GET /employers/me/proceedings', 'GET /employers/me/prosecutions', 'GET /employers/me/recovery-cases', 'GET /employers/me/vishwas-applications', 'POST /employers/me/vishwas-applications', 'GET /ho/reports/proceedings', 'GET /ho/reports/recovery', 'GET /office/compliance/cases', 'POST /office/compliance/cases', 'GET /office/compliance/inspections', 'POST /office/compliance/inspections', 'POST /office/compliance/membership-disputes', 'GET /office/compliance/prosecutions', 'GET /office/compliance/scrutinies', 'GET /office/compliance/vishwas-applications', 'GET /office/legal/cases', 'POST /office/legal/cases', 'GET /office/recovery/cases', 'GET /office/compliance/cases/{caseId}', 'POST /employers/me/proceedings/{caseId}/applications', 'POST /employers/me/proceedings/{caseId}/submissions', 'POST /employers/me/prosecutions/{prosecutionId}/replies', 'POST /office/compliance/cases/{caseId}/allocations', 'POST /office/compliance/cases/{caseId}/appeals', 'POST /office/compliance/cases/{caseId}/approvals', 'POST /office/compliance/cases/{caseId}/escaped-assessments-7c', 'POST /office/compliance/cases/{caseId}/hearings', 'POST /office/compliance/cases/{caseId}/notices', 'POST /office/compliance/cases/{caseId}/orders', 'POST /office/compliance/cases/{caseId}/prosecutions', 'POST /office/compliance/cases/{caseId}/recovery-8f', 'POST /office/compliance/cases/{caseId}/recovery-certificates', 'POST /office/compliance/cases/{caseId}/reviews-7b', 'POST /office/compliance/cases/{caseId}/scrutinies', 'POST /office/compliance/cases/{caseId}/set-asides', 'POST /office/compliance/inspections/{inspectionId}/processing-notes', 'POST /office/compliance/inspections/{inspectionId}/reports', 'POST /office/compliance/prosecutions/{prosecutionId}/steps', 'POST /office/compliance/vishwas-applications/{applicationId}/decisions', 'POST /office/legal/cases/{caseId}/orders', 'POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposit-waivers', 'POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposits', 'POST /office/recovery/{caseId}/arrest-warrants', 'POST /office/recovery/{caseId}/attachments', 'POST /office/recovery/{caseId}/demand-notices', 'POST /office/recovery/{caseId}/instalment-defaults', 'POST /office/recovery/{caseId}/instalments', 'POST /office/recovery/{caseId}/payments', 'POST /office/recovery/{caseId}/receivers', 'POST /office/recovery/{caseId}/sales']
+OPERATIONS = ['GET /public/defaulting-establishments', 'GET /employers/me/proceedings', 'GET /employers/me/prosecutions', 'GET /employers/me/recovery-cases', 'GET /employers/me/vishwas-applications', 'POST /employers/me/vishwas-applications', 'GET /ho/reports/proceedings', 'GET /ho/reports/recovery', 'GET /office/compliance/cases', 'POST /office/compliance/cases', 'GET /office/compliance/inspections', 'POST /office/compliance/inspections', 'POST /office/compliance/membership-disputes', 'GET /office/compliance/prosecutions', 'GET /office/compliance/scrutinies', 'GET /office/compliance/vishwas-applications', 'GET /office/legal/cases', 'POST /office/legal/cases', 'GET /office/recovery/cases', 'GET /zo/recovery/instalment-referrals', 'GET /office/compliance/cases/{caseId}', 'POST /employers/me/proceedings/{caseId}/applications', 'POST /employers/me/proceedings/{caseId}/submissions', 'POST /employers/me/prosecutions/{prosecutionId}/replies', 'POST /office/compliance/cases/{caseId}/allocations', 'POST /office/compliance/cases/{caseId}/appeals', 'POST /office/compliance/cases/{caseId}/approvals', 'POST /office/compliance/cases/{caseId}/escaped-assessments-7c', 'POST /office/compliance/cases/{caseId}/hearings', 'POST /office/compliance/cases/{caseId}/notices', 'POST /office/compliance/cases/{caseId}/orders', 'POST /office/compliance/cases/{caseId}/prosecutions', 'POST /office/compliance/cases/{caseId}/recovery-8f', 'POST /office/compliance/cases/{caseId}/recovery-certificates', 'POST /office/compliance/cases/{caseId}/reviews-7b', 'POST /office/compliance/cases/{caseId}/scrutinies', 'POST /office/compliance/cases/{caseId}/set-asides', 'POST /office/compliance/inspections/{inspectionId}/processing-notes', 'POST /office/compliance/inspections/{inspectionId}/reports', 'POST /office/compliance/prosecutions/{prosecutionId}/steps', 'POST /office/compliance/vishwas-applications/{applicationId}/decisions', 'POST /office/legal/cases/{caseId}/orders', 'POST /zo/recovery/instalment-referrals/{caseId}/refusals', 'POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposit-waivers', 'POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposits', 'POST /office/recovery/{caseId}/arrest-warrants', 'POST /office/recovery/{caseId}/attachments', 'POST /office/recovery/{caseId}/demand-notices', 'POST /office/recovery/{caseId}/instalment-defaults', 'POST /office/recovery/{caseId}/instalment-referrals', 'POST /office/recovery/{caseId}/instalments', 'POST /office/recovery/{caseId}/payments', 'POST /office/recovery/{caseId}/receivers', 'POST /office/recovery/{caseId}/sales']
 
 @router.api_route("/api/v1/public/defaulting-establishments", methods=["GET"], include_in_schema=False)
 async def get_public_defaulting_establishments(actor: Actor = Depends(require_actor)) -> None:
@@ -105,6 +105,11 @@ async def post_office_legal_cases(actor: Actor = Depends(require_actor)) -> None
 @router.api_route("/api/v1/office/recovery/cases", methods=["GET"], include_in_schema=False)
 async def get_office_recovery_cases(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Recovery certificates of the office with their actions, realisations, stay")
+
+
+@router.api_route("/api/v1/zo/recovery/instalment-referrals", methods=["GET"], include_in_schema=False)
+async def get_zo_recovery_instalment_referrals(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Instalment referrals waiting for the zone's ACC or the CPFC: the certificate, arrears outstanding, i")
 
 
 @router.api_route("/api/v1/office/compliance/cases/{caseId}", methods=["GET"], include_in_schema=False)
@@ -217,6 +222,11 @@ async def post_office_legal_cases_caseId_orders(actor: Actor = Depends(require_a
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Record a court / tribunal order: stay, dismissed, allowed (demand withdrawn), partly allowed (demand")
 
 
+@router.api_route("/api/v1/zo/recovery/instalment-referrals/{caseId}/refusals", methods=["POST"], include_in_schema=False)
+async def post_zo_recovery_instalment_referrals_caseId_refusals(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The zone or Head Office refuses the instalments asked for; recovery goes on")
+
+
 @router.api_route("/api/v1/office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposit-waivers", methods=["POST"], include_in_schema=False)
 async def post_office_compliance_cases_caseId_appeals_appealId_pre_deposit_waivers(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "The Tribunal's order reducing or waiving the 7-O pre-deposit")
@@ -245,6 +255,11 @@ async def post_office_recovery_caseId_demand_notices(actor: Actor = Depends(requ
 @router.api_route("/api/v1/office/recovery/{caseId}/instalment-defaults", methods=["POST"], include_in_schema=False)
 async def post_office_recovery_caseId_instalment_defaults(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "A missed instalment: the facility is withdrawn without notice and recovery resumes; no second facili")
+
+
+@router.api_route("/api/v1/office/recovery/{caseId}/instalment-referrals", methods=["POST"], include_in_schema=False)
+async def post_office_recovery_caseId_instalment_referrals(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The OIC refers instalments beyond the region's power — to the zone's ACC (arrears up to ₹50 lakh, at")
 
 
 @router.api_route("/api/v1/office/recovery/{caseId}/instalments", methods=["POST"], include_in_schema=False)

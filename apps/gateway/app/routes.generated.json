@@ -910,6 +910,23 @@
   },
   {
     "method": "POST",
+    "path_template": "/zo/recovery/instalment-referrals/{caseId}/refusals",
+    "regex": "^/zo/recovery/instalment\\-referrals/[^/]+/refusals$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.cpfc",
+      "zo.acc"
+    ],
+    "summary": "The zone or Head Office refuses the instalments asked for; recovery goes on",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/employers/me/ecr-filings/{filingId}/cancellations",
     "regex": "^/employers/me/ecr\\-filings/[^/]+/cancellations$",
     "status": "W",
@@ -1505,6 +1522,22 @@
       "fo.edli"
     ],
     "summary": "The EDLI benefit from the verified average wages, before deciding",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/recovery/{caseId}/instalment-referrals",
+    "regex": "^/office/recovery/[^/]+/instalment\\-referrals$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.oic"
+    ],
+    "summary": "The OIC refers instalments beyond the region's power — to the zone's ACC (arrears up to ₹50 lakh, at most 36) or else Head Office",
     "revocation": false
   },
   {
@@ -3866,6 +3899,23 @@
       "ho.cvo"
     ],
     "summary": "CVO / Director (Vigilance): assign an inquiry, or decide on the findings",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/zo/recovery/instalment-referrals",
+    "regex": "^/zo/recovery/instalment\\-referrals$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.cpfc",
+      "zo.acc"
+    ],
+    "summary": "Instalment referrals waiting for the zone's ACC or the CPFC: the certificate, arrears outstanding, instalments asked for, the OIC's note",
     "revocation": false
   },
   {

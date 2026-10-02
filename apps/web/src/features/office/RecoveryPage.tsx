@@ -66,6 +66,11 @@ export function RecoveryPage() {
     void run(() => command("POST", `${base}/${id}/instalments`, { count: Number(f.get("count")), first_due: field(f, "first_due"), note: field(f, "note"),
       bank_guarantee_paise: toPaise(f, "guarantee"), bank_guarantee_ref: field(f, "guarantee_ref") }), "Instalments granted.", form);
   }
+  function refer(e: FormEvent<HTMLFormElement>, id: string) {
+    e.preventDefault(); const form = e.currentTarget; const f = new FormData(form);
+    void run(() => command<Envelope<{ referred_to: string }>>("POST", `${base}/${id}/instalment-referrals`, { count: Number(f.get("count")), note: field(f, "note") }),
+      "Referred for instalments beyond your power.", form);
+  }
   function defaulted(e: FormEvent<HTMLFormElement>, id: string) {
     e.preventDefault(); const form = e.currentTarget; const f = new FormData(form);
     void run(() => command("POST", `${base}/${id}/instalment-defaults`, { missed: field(f, "missed") }), "Instalment facility withdrawn; recovery resumes.", form);
@@ -135,6 +140,12 @@ export function RecoveryPage() {
           <div className="form-row"><label>Bank guarantee (₹)<input name="guarantee" type="number" min="0" step="0.01" required /></label>
             <label>Guarantee reference<input name="guarantee_ref" required /></label></div><label>Note<textarea name="note" required /></label>
           <div className="actions"><button disabled={busy} type="submit">Grant</button></div></form> : null}
+        {role === "fo.oic" && open && c.state !== "INSTALMENTS" ? <form className="stack" aria-label={`Refer ${c.certificate_no}`} onSubmit={(e) => refer(e, c.recovery_case_id)}>
+          <h3>Refer beyond your power</h3>
+          <p className="muted small">More arrears, or more than 36 instalments, than you may grant: to the zone&apos;s ACC (up to ₹50 lakh and 36), else Head Office.</p>
+          <div className="form-row"><label>Instalments asked<input name="count" type="number" min="2" max="72" required /></label>
+            <label>Note for the zone / Head Office<input name="note" required minLength={5} /></label></div>
+          <div className="actions"><button disabled={busy} type="submit">Refer</button></div></form> : null}
       </article>;
     })}
     <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />

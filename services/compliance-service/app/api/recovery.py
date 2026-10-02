@@ -2,6 +2,7 @@
 certificate, the Recovery Officer's demand notice (EPFCP-1, 15 days), instalments, the other modes of s.8F (a bank or a debtor
 pays EPFO), attachment and sale, a receiver, arrest and detention (records only — no property, warrant or prison in a POC);
 and the HO reports on proceedings and recovery. Realisations reach contribution-service as RecoveryRealised.v1."""
+import json
 import secrets
 from collections import Counter, defaultdict
 from datetime import timedelta
@@ -224,6 +225,82 @@ async def instalments(case_id: str, body: InstalmentInput, actor: Actor = Depend
             "with_each": "that month's 7Q interest and the current contributions"})
         await record(session, actor, "recovery.instalments", "recovery_case", case_id, f"{body.count} from {body.first_due} by {who}")
         result = await view(session, {**row, "state": "INSTALMENTS"})
+    return envelope(result)
+
+
+class Referral(BaseModel):
+    count: int = Field(ge=2, le=72)
+    note: str = Field(min_length=5, max_length=500)
+
+
+def _referred_to(outstanding: int, count: int, limits: dict) -> str:
+    """Who decides instalments beyond the region's power: the zone's ACC up to its limit and 36 instalments, else the CPFC."""
+    zone = limits["instalment_powers_paise"].get("zo.acc")
+    return "zo.acc" if count <= limits["normal_instalments"] and zone is not None and outstanding <= zone else "ho.cpfc"
+
+
+@router.post(RECOVERY + "/{case_id}/instalment-referrals", status_code=201)
+async def refer_instalments(case_id: str, body: Referral, actor: Actor = Depends(require_stakeholder("fo.oic")),
+                            session: AsyncSession = Depends(db)):
+    """The establishment asks for more instalments, or on more arrears, than the region may grant: the OIC refers it to
+    the zone's ACC or to Head Office (circular 11.02.2014 para 4), who grant or refuse it."""
+    async with session.begin():
+        row = await case_of(session, case_id, await _office(session, actor))
+        if row["state"] in ("CLOSED", "INSTALMENTS"):
+            raise Problem(409, "/problems/invalid-state", "Not on a satisfied certificate or one already in instalments")
+        _, limits = await rules(session)
+        outstanding = int(row["amount_paise"]) - int(row["realised_paise"])
+        who, power = await _power(session, actor, limits["instalment_powers_paise"])
+        if body.count <= limits["normal_instalments"] and (power is None or outstanding <= power):
+            raise Problem(409, "/problems/within-powers", "Within your powers", "Grant the instalments yourself.")
+        to = _referred_to(outstanding, body.count, limits)
+        await act(session, case_id, "INSTALMENT_REFERRAL", actor.subject, {"count": body.count, "note": body.note, "referred_to": to,
+                                                                            "outstanding_paise": outstanding, "by_rank": who})
+        await record(session, actor, "recovery.instalment_referral", "recovery_case", case_id, f"{body.count} to {to}")
+        result = await view(session, row)
+    return envelope({**result, "referred_to": to})
+
+
+@router.get("/api/v1/zo/recovery/instalment-referrals")
+async def instalment_referrals(actor: Actor = Depends(require_stakeholder("zo.acc", "ho.cpfc")), session: AsyncSession = Depends(db)):
+    """Referrals waiting for this level: the case, the arrears outstanding, the instalments asked for and the OIC's note."""
+    rows = (await session.execute(select(recovery_actions).where(recovery_actions.c.kind == "INSTALMENT_REFERRAL")
+                                  .order_by(recovery_actions.c.occurred_at.desc()))).mappings().all()
+    names = {e["establishment_id"]: e["legal_name"] for e in (await session.execute(select(establishments))).mappings().all()}
+    out, seen = [], set()
+    for a in rows:
+        if a["recovery_case_id"] in seen:
+            continue                                                  # the latest referral of a case
+        seen.add(a["recovery_case_id"])
+        detail = a["detail"] if isinstance(a["detail"], dict) else json.loads(a["detail"])
+        c = dict((await session.execute(select(recovery_cases).where(recovery_cases.c.recovery_case_id == a["recovery_case_id"]))).mappings().one())
+        refused = (await session.execute(select(recovery_actions.c.action_id).where(
+            recovery_actions.c.recovery_case_id == c["recovery_case_id"], recovery_actions.c.kind == "INSTALMENT_REFUSED",
+            recovery_actions.c.occurred_at >= a["occurred_at"]))).first()
+        if detail["referred_to"] != actor.stakeholder or c["state"] in ("INSTALMENTS", "CLOSED") or refused:
+            continue
+        v = await view(session, c)
+        out.append({"recovery_case_id": c["recovery_case_id"], "certificate_no": v.get("certificate_no"), "establishment_id": c["establishment_id"],
+                    "legal_name": names.get(c["establishment_id"]), "office_id": c["office_id"], "outstanding_paise": v["outstanding_paise"],
+                    "count": detail["count"], "note": detail["note"], "by_rank": detail["by_rank"], "referred_at": iso(a["occurred_at"])})
+    return envelope(out)
+
+
+class Refusal(BaseModel):
+    reasons: str = Field(min_length=10, max_length=500)
+
+
+@router.post("/api/v1/zo/recovery/instalment-referrals/{case_id}/refusals")
+async def refuse_instalments(case_id: str, body: Refusal, actor: Actor = Depends(require_stakeholder("zo.acc", "ho.cpfc")),
+                             session: AsyncSession = Depends(db)):
+    """The zone or Head Office refuses the instalments asked for; recovery goes on."""
+    async with session.begin():
+        row = (await session.execute(select(recovery_cases).where(recovery_cases.c.recovery_case_id == case_id))).mappings().first()
+        if not row:
+            raise Problem(404, "/problems/not-found", "Recovery case not found")
+        await act(session, case_id, "INSTALMENT_REFUSED", actor.subject, {"reasons": body.reasons, "by": actor.stakeholder})
+        await record(session, actor, "recovery.instalments_refused", "recovery_case", case_id, body.reasons[:120])
+        result = await view(session, dict(row))
     return envelope(result)
 
 

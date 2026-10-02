@@ -15225,6 +15225,50 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/recovery/{caseId}/instalment-referrals:
+    post:
+      operationId: postOfficeRecoveryCaseIdInstalmentReferrals
+      summary: The OIC refers instalments beyond the region's power — to the zone's ACC (arrears up to ₹50 lakh, at most 36)
+        or else He
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - fo.oic
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: The OIC refers instalments beyond the region's power — to the zone's ACC (arrears up to ₹50 lakh, at most
+        36) or else Head Office
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/recovery/{caseId}/instalments:
     post:
       operationId: postOfficeRecoveryCaseIdInstalments
@@ -18053,6 +18097,81 @@ paths:
       x-scope: zone jurisdiction
       security:
       - bffSession: []
+  /zo/recovery/instalment-referrals:
+    get:
+      operationId: getZoRecoveryInstalmentReferrals
+      summary: 'Instalment referrals waiting for the zone''s ACC or the CPFC: the certificate, arrears outstanding, instalments
+        asked for'
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - ho.cpfc
+      - zo.acc
+      x-scope: zone jurisdiction
+      security:
+      - bffSession: []
+      description: 'Instalment referrals waiting for the zone''s ACC or the CPFC: the certificate, arrears outstanding, instalments
+        asked for, the OIC''s note'
+  /zo/recovery/instalment-referrals/{caseId}/refusals:
+    post:
+      operationId: postZoRecoveryInstalmentReferralsCaseIdRefusals
+      summary: The zone or Head Office refuses the instalments asked for; recovery goes on
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - ho.cpfc
+      - zo.acc
+      x-scope: zone jurisdiction
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
 components:
   securitySchemes:
     bffSession:

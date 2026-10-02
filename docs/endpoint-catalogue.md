@@ -523,6 +523,9 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | `POST /office/recovery/{caseId}/demand-notices` | Demand notice EPFCP-1: pay within 15 days of service, then execution | W | 1 | compliance |
 | `POST /office/recovery/{caseId}/instalments` | Instalments for the arrears: up to 36 by the officer whose power covers the arrears (RPFC-II ₹10 lakh, RPFC-I ₹25 lakh, zone ₹50 lakh), more (at most 72) by Head Office; a bank guarantee of one instalment (six beyond 36); coercive steps wait while they run | W | 1 | compliance |
 | `POST /office/recovery/{caseId}/instalment-defaults` | A missed instalment: the facility is withdrawn without notice and recovery resumes; no second facility beyond 36 | W | 1 | compliance |
+| `POST /office/recovery/{caseId}/instalment-referrals` | The OIC refers instalments beyond the region's power — to the zone's ACC (arrears up to ₹50 lakh, at most 36) or else Head Office | W | 1 | compliance |
+| `GET /zo/recovery/instalment-referrals` | Instalment referrals waiting for the zone's ACC or the CPFC: the certificate, arrears outstanding, instalments asked for, the OIC's note | W | 1 | compliance |
+| `POST /zo/recovery/instalment-referrals/{caseId}/refusals` | The zone or Head Office refuses the instalments asked for; recovery goes on | W | 1 | compliance |
 | `POST /office/recovery/{caseId}/payments` | A payment the defaulter makes to the Recovery Officer, realised against the certificate | W | 1 | compliance |
 | `GET /employers/me/recovery-cases` | The establishment's recovery certificates: amount, realised, outstanding, notices, instalments, stay | W | 1 | compliance |
 | `POST /office/recovery/{caseId}/attachments` 🔐 | Attach movable or immovable property, debts or shares — after the demand notice's 15 days, or earlier with recorded reasons (record only) | W | 1 | compliance |
