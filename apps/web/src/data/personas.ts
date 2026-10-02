@@ -26,6 +26,7 @@ export const PERSONAS: Persona[] = [
   { username: "member-h", label: "Member H (higher pension option)", role: "member", group: "Members and public", description: "In service since 2011 above the wage ceiling — joint option for higher pension." },
   { username: "member-p", label: "Member P", role: "member", group: "Members and public", description: "Works at Demo Steel Works (PF with its trust); moves an earlier EPFO member ID into the trust." },
   { username: "member-ft", label: "ARJUN DEMO (first timer)", role: "member", group: "Members and public", description: "Joined Demo Auto Components in October 2025, his first job: PMVBRY Part A instalments." },
+  { username: "member-disabled", label: "SURESH DEMO (disablement)", role: "member", group: "Members and public", description: "Left Demo Engineering Works on permanent and total disablement after 7 years: a disablement pension (EPS para 15)." },
   { username: "member-r", label: "Member R", role: "member", group: "Members and public", description: "Left Demo Steel Works' trust; moves the PF out of the trust — the pension service follows on its own." },
   { username: "worker-expat", label: "International worker", role: "member", group: "Members and public", description: "Foreign national employed in India — international-worker coverage." },
   { username: "pensioner-a", label: "Pensioner A", role: "pensioner", group: "Members and public", description: "Pension payments, life certificates, bank changes and declarations." },

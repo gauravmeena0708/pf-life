@@ -50,7 +50,7 @@ async def main() -> None:
                                   "establishment_id": job["establishment_id"], "establishment_name": names[job["establishment_id"]],
                                   "date_of_joining": date.fromisoformat(job["date_of_joining"]),
                                   "date_of_exit": date.fromisoformat(job["date_of_exit"]) if job.get("date_of_exit") else None,
-                                  "exit_marked_by": "SEED" if job.get("date_of_exit") else None,
+                                  "exit_marked_by": "SEED" if job.get("date_of_exit") else None, "exit_reason": job.get("exit_reason"),
                                   "last_contribution_month": job.get("last_contribution_month"), "office_id": offices[job["establishment_id"]]}
                     statement = insert(employments).values(**employment)
                     # Exits, contributions and transfers move after the first load; a re-seed keeps them.

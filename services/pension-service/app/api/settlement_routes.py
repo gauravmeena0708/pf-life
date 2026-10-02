@@ -9,7 +9,7 @@ import hmac
 import os
 import secrets
 from datetime import UTC, date, datetime, timedelta
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.pension import age_on, catch_up_payments, month_of, months, today
 from app.infra.db import sessions
-from app.infra.tables import (brs_statements, disbursement_runs, member_service, office_staff, pension_claims, pension_payments,
+from app.infra.tables import (brs_statements, disbursement_runs, eps_accounts, member_service, office_staff, pension_claims, pension_payments,
                               pensioners, scheme_certificates)
 from epfo_auth import Actor, require_actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
@@ -82,7 +82,7 @@ def _view(c: dict[str, Any]) -> dict[str, Any]:
             "service_months": c["service_months"], "aggregated": c["aggregated"], "pensionable_salary_paise": c["pensionable_salary_paise"],
             "ids": c.get("ids"), "worksheet": c.get("worksheet"), "ppo_id": c.get("ppo_id"), "arrears": c.get("arrears"),
             "history": [{**{k: v for k, v in h.items() if k != "by"}, "role": ROLE.get(h["role"], h["role"])} for h in c["history"]],
-            "next_step": NEXT.get(c["state"]), "kind": c.get("kind", "MEMBER"), "family": c.get("family")}
+            "next_step": NEXT.get(c["state"]), "kind": c.get("kind", "MEMBER"), "family": c.get("family"), "disablement": c.get("disablement")}
 
 
 NEXT = {"SUBMITTED": "DA (Accounts) prepares the Input Data Sheet", "IDS_PREPARED": "AO approves the Input Data Sheet",
@@ -94,8 +94,42 @@ NEXT = {"SUBMITTED": "DA (Accounts) prepares the Input Data Sheet", "IDS_PREPARE
 
 # ── member: Form 10D, status, scheme certificate ───────────────────────────────────────────────
 
+class Disablement(BaseModel):
+    """Permanent and total disablement in service (EPS para 15; Pension Manual 2.7): a Medical Board's certificate, or a
+    certificate under the Rights of Persons with Disabilities Act, 2016 saying the member is permanently and totally unfit
+    for the work done at the time."""
+    date_of_disablement: date
+    certificate_kind: Literal["MEDICAL_BOARD", "RPWD_CERTIFICATE"]
+    certificate_ref: str = Field(min_length=3, max_length=80)
+    issued_by: str = Field(min_length=3, max_length=200)
+    permanent_and_total: bool
+
+
 class PensionApplication(BaseModel):
     pension_from: date | None = None              # default: the later of the day after exit and the 58th birthday
+    disablement: Disablement | None = None        # a disablement pension: from the day after the exit, whatever the age or service
+
+
+DISABLEMENT_FROM = date(1993, 4, 1)
+
+
+async def _disablement_check(session: AsyncSession, m: dict[str, Any], d: Disablement, normal_age: int) -> None:
+    """Pension Manual 2.7 and its guidelines (Figure 6): the exit recorded as permanent and total disablement; the
+    disablement on or after 1 April 1993, while in service and before 58; certified permanent and total."""
+    reason = (await session.execute(select(eps_accounts.c.exit_reason).where(eps_accounts.c.account_link_id == m["account_link_id"]))).scalar_one_or_none()
+    problems = []
+    if reason != "PERMANENT_DISABLEMENT":
+        problems.append("The employer must record the exit as permanent and total disablement.")
+    if d.date_of_disablement < DISABLEMENT_FROM:
+        problems.append("The disablement must be on or after 1 April 1993.")
+    if not m["date_of_joining"] <= d.date_of_disablement <= m["date_of_exit"]:
+        problems.append("The disablement must have occurred while in service (between joining and the exit).")
+    if age_on(m["date_of_birth"], d.date_of_disablement) >= normal_age:
+        problems.append(f"The disablement must be before the age of {normal_age}.")
+    if not d.permanent_and_total:
+        problems.append("The certificate must say the member is permanently and totally unfit for the work done at the time.")
+    if problems:
+        raise Problem(422, "/problems/not-eligible", "Not eligible for a disablement pension", " ".join(problems), problems=problems)
 
 
 async def _me(session: AsyncSession, actor: Actor) -> dict[str, Any]:
@@ -114,9 +148,13 @@ async def apply(body: PensionApplication, actor: Actor = Depends(MEMBER), sessio
         rules = await rules_on(session, today())
         p = section(rules, "pension")
         at58 = date(m["date_of_birth"].year + p["normal_age_years"], m["date_of_birth"].month, min(m["date_of_birth"].day, 28))
-        start = body.pension_from or max(m["date_of_exit"] + timedelta(days=1), at58)
+        disabled = body.disablement is not None
+        if disabled:
+            await _disablement_check(session, m, body.disablement, p["normal_age_years"])
+        start = (m["date_of_exit"] + timedelta(days=1) if disabled                 # the day after the disablement and exit
+                 else body.pension_from or max(m["date_of_exit"] + timedelta(days=1), at58))
         service = months_between(m["date_of_joining"], m["date_of_exit"])
-        check = pension_on(m["eps_wages_paise"], service, age_on(m["date_of_birth"], start), rules)
+        check = pension_on(m["eps_wages_paise"], service, age_on(m["date_of_birth"], start), rules, disablement=disabled)
         if not check["eligible"]:
             raise Problem(422, "/problems/not-eligible", "Not eligible for a monthly pension", check["reason"] +
                           (" You can ask for a scheme certificate instead." if "years of service" in check["reason"] else ""))
@@ -128,8 +166,10 @@ async def apply(body: PensionApplication, actor: Actor = Depends(MEMBER), sessio
         claim = {"claim_id": f"PC-{secrets.token_hex(4).upper()}", "member_subject": actor.subject, "uan": m["uan"] or "", "name": m["name"],
                  "date_of_birth": m["date_of_birth"], "account_link_id": m["account_link_id"], "office_id": m["office_id"] or "RO-DEMO-01",
                  "pension_from": start, "state": "SUBMITTED", "service_months": service, "aggregated": [],
-                 "pensionable_salary_paise": m["eps_wages_paise"],
-                 "history": [{"state": "SUBMITTED", "role": "member", "by": actor.subject, "note": "Form 10D filed online", "at": datetime.now(UTC).isoformat()}]}
+                 "pensionable_salary_paise": m["eps_wages_paise"], "kind": "DISABLED" if disabled else "MEMBER",
+                 "disablement": {**body.disablement.model_dump(mode="json"), "medical_scrutiny": "RPFC in charge decides any doubt (2.7.5)"} if disabled else None,
+                 "history": [{"state": "SUBMITTED", "role": "member", "by": actor.subject,
+                              "note": "Form 10D filed online" + (" — disablement pension (para 15)" if disabled else ""), "at": datetime.now(UTC).isoformat()}]}
         await session.execute(insert(pension_claims).values(**claim))
     return envelope({**_view(claim), "estimate": {k: check[k] for k in ("monthly_paise", "working")}})
 
@@ -309,8 +349,9 @@ async def worksheet(body: WorksheetInput, actor: Actor = Depends(require_stakeho
         _separate(c, actor)
         rules = await rules_on(session, c["pension_from"])            # the formula in force when the pension starts
         total = c["service_months"] + sum(a["service_months"] for a in c["aggregated"])
-        r = (pension_on(c["pensionable_salary_paise"], total, age_on(c["date_of_birth"], c["pension_from"]), rules)
-             if c.get("kind", "MEMBER") == "MEMBER" else family_pension_on(c["pensionable_salary_paise"], total, c["kind"], rules))
+        kind = c.get("kind", "MEMBER")
+        r = (pension_on(c["pensionable_salary_paise"], total, age_on(c["date_of_birth"], c["pension_from"]), rules, disablement=kind == "DISABLED")
+             if kind in ("MEMBER", "DISABLED") else family_pension_on(c["pensionable_salary_paise"], total, kind, rules))
         if not r["eligible"]:
             raise Problem(422, "/problems/not-eligible", "Not eligible on these data", r["reason"])
         ws = {"worksheet_id": f"WS-{secrets.token_hex(3).upper()}", "service_months": total, "monthly_paise": r["monthly_paise"],
@@ -348,7 +389,8 @@ async def issue_ppo(body: ClaimRef, actor: Actor = Depends(require_stakeholder("
         ws = c["worksheet"]
         m = (await session.execute(select(member_service).where(member_service.c.subject == c["member_subject"]))).mappings().first()
         await session.execute(insert(pensioners).values(
-            ppo_id=ppo_id, subject=c["member_subject"] if c.get("kind", "MEMBER") != "MEMBER" else None, name=c["name"], uan=c["uan"], date_of_birth=c["date_of_birth"], pension_start=c["pension_from"],
+            ppo_id=ppo_id, subject=c["member_subject"] if c.get("kind", "MEMBER") not in ("MEMBER", "DISABLED") else None,
+            pension_kind="DISABLED" if c.get("kind") == "DISABLED" else "MEMBER", name=c["name"], uan=c["uan"], date_of_birth=c["date_of_birth"], pension_start=c["pension_from"],
             service_months=ws["service_months"], pensionable_salary_paise=c["pensionable_salary_paise"], age_at_start=ws["age_at_start"],
             office_id=c["office_id"], bank_ifsc="DEMO0000000", bank_account_last4=(m["account_link_id"] or "0000")[-4:] if m else "0000",
             original_monthly_paise=ws["monthly_paise"], original_rule_version=ws["rule_version"], original_working=ws["working"],

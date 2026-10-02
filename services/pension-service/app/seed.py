@@ -74,7 +74,8 @@ async def main() -> None:
                     account_link_id=job["account_link_id"], uan=m["uan"], person_key=key_of.get(m["uan"], m["uan"]),
                     establishment_id=job.get("establishment_id", seed["establishment"]["establishment_id"]),
                     date_of_joining=date.fromisoformat(job["date_of_joining"]),
-                    date_of_exit=date.fromisoformat(job["date_of_exit"]) if job.get("date_of_exit") else None))
+                    date_of_exit=date.fromisoformat(job["date_of_exit"]) if job.get("date_of_exit") else None,
+                    exit_reason=job.get("exit_reason")))
         exemptions = ([seed["exempted_establishment"]] if seed.get("exempted_establishment") else []) + seed.get("more_exempted_establishments", {}).get("establishments", [])
         for exemption in exemptions:
             await session.execute(insert(exempted_establishments).values(

@@ -11,7 +11,7 @@
    "P": 1,
    "?": 5
   },
-  "personas": 79
+  "personas": 80
  },
  "interfaces": [
   {
@@ -550,6 +550,7 @@
     "member-b",
     "member-c",
     "member-d",
+    "member-disabled",
     "member-e",
     "member-f",
     "member-ft",

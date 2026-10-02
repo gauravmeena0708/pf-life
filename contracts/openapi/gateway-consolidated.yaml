@@ -7940,7 +7940,8 @@ paths:
       - bffSession: []
     post:
       operationId: postMembersPensionApplications
-      summary: Monthly pension application
+      summary: 'Monthly pension application — or a disablement pension (EPS para 15: permanently and totally disabled in service,
+        any ag'
       tags:
       - Member claims, transfers and pension applications
       parameters:
@@ -7969,11 +7970,15 @@ paths:
       x-scope: self — caller's own member record only
       security:
       - bffSession: []
+      description: 'Monthly pension application — or a disablement pension (EPS para 15: permanently and totally disabled
+        in service, any age or service, with the medical certificate)
+
+
+        Variants by `formType`: `FORM_10D` (W, phase 1)'
       x-variants:
       - formType: FORM_10D
         status: W
         phase: 1
-      description: 'Variants by `formType`: `FORM_10D` (W, phase 1)'
       requestBody:
         required: false
         content:

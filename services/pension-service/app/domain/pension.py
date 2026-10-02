@@ -98,7 +98,8 @@ async def propose_revisions(session: AsyncSession, rules: dict[str, Any], effect
     proposed = []
     for row in (await session.execute(select(pensioners).where(pensioners.c.status == "IN_PAYMENT"))).mappings().all():
         p = dict(row)
-        result = pension_on(p["pensionable_salary_paise"], p["service_months"], p["age_at_start"], rules)
+        result = pension_on(p["pensionable_salary_paise"], p["service_months"], p["age_at_start"], rules,
+                            disablement=p.get("pension_kind") == "DISABLED")
         effective = max(effective_from, p["pension_start"])
         current = amount_for(p, await approved(session, p["ppo_id"]), month_of(effective))
         if not result["eligible"] or result["monthly_paise"] <= current["monthly_paise"]:

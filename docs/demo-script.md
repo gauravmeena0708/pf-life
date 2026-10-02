@@ -55,6 +55,7 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `exempted-trust`, `ho-exemption` | Demo Steel Works' PF trust; HO Exemption Division (ranking of all trusts) | Regulating the trust |
 | `textile-trust`, `chemicals-trust` | PF trusts of Demo Textile Mills (surrenders) and Demo Chemicals (cancelled) | The trust's lifecycle |
 | `auto-owner`, `member-ft`, `ho-finance` | Owner of Demo Auto Components; ARJUN DEMO, a first timer; FA & CAO | PMVBRY |
+| `member-disabled` | SURESH DEMO, left Demo Engineering Works on permanent and total disablement | Disablement pension |
 | `ro-eo`, `ro-rpfc2` | Enforcement Officer; RPFC-II (inquiries of 251–1,000 members) | An inspection and a 7A inquiry |
 | `ro-legal` | Legal Cell (appeals, writs, prosecutions) | Appeals, membership disputes and prosecution |
 | `ro-recovery`, `ho-compliance`, `ho-recovery` | Recovery Officer; HO Compliance Division; HO Recovery Division | Recovery of arrears |
@@ -709,6 +710,14 @@ tests produced, by role (after `python3 scripts/publish_manuals.py`).
    period credited.
 5. As `ro-oic`, grant instalments on a recovery certificate: a bank guarantee of one instalment is required; 40
    instalments are refused (Head Office only). As `ro-recovery`, record a missed instalment: recovery resumes.
+
+## Disablement pension (EPS para 15)
+
+1. Log in as `member-disabled` (SURESH DEMO): Pension (Form 10D). *Apply for monthly pension* is refused — 7 years of
+   service. Open *Apply for a disablement pension*: date 12 Aug 2026, a Medical Board or RPwD certificate, tick
+   *permanently and totally unfit*, apply: ₹1,500 a month from 21 Aug 2026, no reduction at 46.
+2. As `do-caseworker` (DA Accounts), Office › Pension claims: the claim is marked *Disablement pension (para 15)*, with the
+   certificate to scrutinise; it goes through the same desks to the PPO.
 
 ## A trust's past accumulations reconciled (PAST ACCUM VDR RECO)
 

@@ -65,7 +65,7 @@ async def on_member_registered(session: AsyncSession, event: dict[str, Any]) -> 
 async def on_member_exit(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
     await session.execute(update(eps_accounts).where(eps_accounts.c.account_link_id == p["account_link_id"]).values(
-        date_of_exit=date.fromisoformat(p["date_of_exit"])))
+        date_of_exit=date.fromisoformat(p["date_of_exit"]), exit_reason=p.get("reason")))
 
 
 async def on_primary_changed(session: AsyncSession, event: dict[str, Any]) -> None:

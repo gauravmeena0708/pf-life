@@ -84,7 +84,7 @@ async def get_members_me_pension_applications(actor: Actor = Depends(require_act
 
 @router.api_route("/api/v1/members/me/pension-applications", methods=["POST"], include_in_schema=False)
 async def post_members_me_pension_applications(actor: Actor = Depends(require_actor)) -> None:
-    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Monthly pension application")
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Monthly pension application — or a disablement pension (EPS para 15: permanently and totally disable")
 
 
 @router.api_route("/api/v1/members/me/pension-eligibility-preview", methods=["GET"], include_in_schema=False)

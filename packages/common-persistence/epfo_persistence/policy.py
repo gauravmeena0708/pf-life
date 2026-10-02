@@ -245,25 +245,32 @@ def tds_on(amount_paise: int, claim_type: str, service_months: int, pan_verified
             "basis": f"{rate / 100:g}% {'with a verified PAN' if pan_verified else 'without a verified PAN'}."}
 
 
-def pension_on(salary_paise: int, service_months: int, age_years: int, rules: dict[str, Any]) -> dict[str, Any]:
-    """Monthly EPS pension under the formula in the rules, with the working shown."""
+def pension_on(salary_paise: int, service_months: int, age_years: int, rules: dict[str, Any], disablement: bool = False) -> dict[str, Any]:
+    """Monthly EPS pension under the formula in the rules, with the working shown. A disablement pension (EPS para 15) is
+    the formula as if retiring on the day of invalidation, whatever the age or service — one month's contribution is
+    enough, there is no reduction for age — and not less than the minimum pension."""
     p = section(rules, "pension")
     years = service_months // 12 + (1 if service_months % 12 >= 6 else 0)        # six months or more count as a year
-    if years < p["min_service_years"]:
+    if disablement and service_months < 1:
+        return {"eligible": False, "monthly_paise": 0, "service_years": years,
+                "reason": "A disablement pension needs at least one month's contribution to the pension fund."}
+    if not disablement and years < p["min_service_years"]:
         return {"eligible": False, "monthly_paise": 0, "service_years": years,
                 "reason": f"At least {p['min_service_years']} years of service are needed for a monthly pension."}
-    if age_years < p["earliest_age_years"]:
+    if not disablement and age_years < p["earliest_age_years"]:
         return {"eligible": False, "monthly_paise": 0, "service_years": years,
                 "reason": f"A monthly pension starts at {p['earliest_age_years']} at the earliest."}
     salary = min(salary_paise, p["pensionable_salary_cap_paise"])
     weightage = p["weightage_years"] if years >= p["weightage_after_service_years"] else 0
     formula = salary * (years + weightage) // p["divisor"]
-    early_years = max(0, p["normal_age_years"] - age_years)
+    early_years = 0 if disablement else max(0, p["normal_age_years"] - age_years)
     reduction_bp = min(10_000, early_years * p["early_reduction_bp_per_year"])
     reduced = formula * (10_000 - reduction_bp) // 10_000
     by_formula = round_rupee_half_up(reduced * 10_000)
     monthly = max(by_formula, p["minimum_pension_paise"])
     working = f"₹{salary // 100:,} x ({years}{f' + {weightage} weightage' if weightage else ''} years) / {p['divisor']}"
+    if disablement:
+        working = "Disablement pension (para 15): " + working
     if reduction_bp:
         working += f", less {reduction_bp / 100:g}% for {early_years} years before age {p['normal_age_years']}"
     if monthly > by_formula:

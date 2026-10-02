@@ -18,6 +18,7 @@ pensioners = Table(
     Column("service_months", Integer, nullable=False),
     Column("pensionable_salary_paise", BigInteger, nullable=False),
     Column("age_at_start", Integer, nullable=False),
+    Column("pension_kind", String(12), nullable=False, server_default="MEMBER"),   # MEMBER | DISABLED (no age test on revision)
     Column("office_id", String(40), nullable=False),
     Column("bank_ifsc", String(11), nullable=False),
     Column("bank_account_last4", String(4), nullable=False),
@@ -131,7 +132,8 @@ pension_claims = Table(
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
     Column("updated_at", DateTime(timezone=True), server_default=func.now()),
     Column("kind", String(10), nullable=False, server_default="MEMBER"),   # MEMBER | SPOUSE | CHILD (family pension)
-    Column("family", JSON),                                   # the deceased member and the claimant, for a family pension
+    Column("family", JSON),
+    Column("disablement", JSON),                             # kind DISABLED: the date and the medical certificate (para 15)                                   # the deceased member and the claimant, for a family pension
 )
 
 # The family of a member (synthetic seed, from the nomination): who may claim a family pension on the member's death.
@@ -234,6 +236,7 @@ eps_accounts = Table(
     Column("establishment_id", String(40)),
     Column("date_of_joining", Date, nullable=False),
     Column("date_of_exit", Date),
+    Column("exit_reason", String(40)),                       # PERMANENT_DISABLEMENT opens a disablement pension (para 15)
     Column("breaks_months", Integer, nullable=False, server_default="0"),    # periods with no contribution (para 9)
     Column("transferred_to", String(40)),
 )

@@ -98,6 +98,16 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 13a: disablement pension (2 October 2026)
+
+Unit: every suite passes with the new member (SURESH DEMO, `member-disabled`); pension-service 45 (new
+`test_disablement.py`: an ordinary pension refused for 7 years' service; refused for a disablement after the exit or a
+certificate that does not say permanent and total, and for a member whose exit was not for disablement; ₹1,500 a month from
+the day after the exit, no reduction at 46, through the desks to a PPO marked DISABLED; one month's contribution is enough
+and the minimum pension applies). Web 296 (new `P213.test.tsx`). End to end 106 of 106 (new
+`test_disablement_pension.py`, repeatable); must-deny 18; UI smoke 2. Found on the way, fixed: the new member's first ID,
+AL-0915, already belonged to PRIYA DEMO's earlier employment, so his pension account was never created — he is AL-0950.
+
 ## Update — P2.14 completed: past accumulations reconciled; the ceiling test after ₹25,000 (2 October 2026)
 
 Unit: contribution-service 107 (new `test_pa_reco.py`: nothing to reconcile before members are credited; a demand draft and

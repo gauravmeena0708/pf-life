@@ -1,7 +1,7 @@
 import { statusLabel } from "../statusLabel";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 
 import { api, command, rupees, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
@@ -39,6 +39,15 @@ export function PensionApplicationPage() {
     const r = await command<Envelope<Claim & { estimate: { monthly_paise: number } }>>("POST", "/api/v1/members/me/pension-applications", {});
     return `Form 10D filed (${r.data.claim_id}); pension from ${r.data.pension_from}, estimated ${rupees(r.data.estimate.monthly_paise)} a month.`;
   });
+  const applyDisabled = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); const f = new FormData(e.currentTarget);
+    void run(async () => {
+      const r = await command<Envelope<Claim & { estimate: { monthly_paise: number } }>>("POST", "/api/v1/members/me/pension-applications", { disablement: {
+        date_of_disablement: String(f.get("date_of_disablement")), certificate_kind: String(f.get("certificate_kind")),
+        certificate_ref: String(f.get("certificate_ref")), issued_by: String(f.get("issued_by")), permanent_and_total: f.get("permanent_and_total") === "on" } });
+      return `Form 10D filed for a disablement pension (${r.data.claim_id}); pension from ${r.data.pension_from}, estimated ${rupees(r.data.estimate.monthly_paise)} a month.`;
+    });
+  };
   const requestCertificate = () => void run(async () => {
     const token = await stepUp.ask({ action: "request-scheme-certificate", resourceId: me.data!.data.uan,
       summary: "Ask for a scheme certificate: your pension service is kept instead of being withdrawn." });
@@ -72,6 +81,18 @@ export function PensionApplicationPage() {
         </> : <>
           <p className="muted small">Needs a date of exit, at least 10 years of service and age 50 or more (a reduced pension before 58). Illustrative rules.</p>
           <div className="actions"><button type="button" className="primary" onClick={apply}>Apply for monthly pension</button></div>
+          <details><summary>Permanently and totally disabled while in service? Apply for a disablement pension</summary>
+            <form className="stack" aria-label="Disablement pension" onSubmit={applyDisabled}>
+              <p className="muted small">EPS para 15: payable from the day after you left, whatever your age or years of service (one month&apos;s contribution
+                is enough), if your employer recorded the exit as permanent and total disablement and the disablement was before 58. A Medical Board&apos;s
+                certificate, or a disability certificate under the RPwD Act, 2016, must say you are permanently and totally unfit for the work you did.</p>
+              <div className="form-row"><label>Date of disablement<input type="date" name="date_of_disablement" required /></label>
+                <label>Certificate<select name="certificate_kind"><option value="MEDICAL_BOARD">Medical Board certificate</option>
+                  <option value="RPWD_CERTIFICATE">Disability certificate (RPwD Act, 2016)</option></select></label></div>
+              <div className="form-row"><label>Certificate number<input name="certificate_ref" required /></label><label>Issued by<input name="issued_by" required /></label></div>
+              <label className="check-row"><input type="checkbox" name="permanent_and_total" /> The certificate says I am permanently and totally unfit for the work I did</label>
+              <div className="actions"><button type="submit" className="primary">Apply for disablement pension</button></div>
+            </form></details>
         </>}
       </section>
       <PensionEstimate />

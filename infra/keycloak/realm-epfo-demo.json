@@ -1863,6 +1863,25 @@
         "ho.recovery"
       ],
       "id": "00000000-0000-4000-8000-000000000079"
+    },
+    {
+      "username": "member-disabled",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Member with disability",
+      "lastName": "Demo",
+      "email": "member-disabled@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "member"
+      ],
+      "id": "00000000-0000-4000-8000-000000000080"
     }
   ]
 }

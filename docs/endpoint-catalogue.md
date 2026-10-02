@@ -282,7 +282,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /members/me/claims` 💰 (`formType=FORM_19`) | **Final PF settlement** | W | 1 | claim |
 | `POST /members/me/claims` 💰 (`formType=FORM_10C`) | **Pension withdrawal benefit** (cash benefit) | W | 1 | claim |
 | `POST /members/me/pension-scheme-certificates` 🔐 | **Scheme certificate** request (Form 10C option) | W | 1 | pension |
-| `POST /members/me/pension-applications` 💰 (`formType=FORM_10D`) | **Monthly pension** application | W | 1 | pension |
+| `POST /members/me/pension-applications` 💰 (`formType=FORM_10D`) | **Monthly pension** application — or a **disablement pension** (EPS para 15: permanently and totally disabled in service, any age or service, with the medical certificate) | W | 1 | pension |
 | `GET /members/me/pension-applications` | The member's pension application: its desk-by-desk progress, the PPO number once issued | W | 1 | pension |
 | `POST /members/me/transfers` 💰🔐 (`formType=FORM_13`) | **Transfer** of PF between member IDs / exempted trusts | W | 1 | claim |
 | `GET /members/me/transfers/{transferId}` | Transfer status | W | 1 | claim |

@@ -45,7 +45,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.12g** | Menu clean-up: screens already built linked from their menus (Composite claim, Know Your Pension Payee Bank, Change Password); every other item without a screen says why — planned (with the slice), awaiting EPFO's definition, or not in the POC | **Done** (1 Oct 2026) |
 | P2.25 | Sources checked: the *to verify* rule values, and the Code on Social Security — which turned up the 2026 Schemes and the ₹25,000 ceiling (findings below) | Done (findings) |
 | P2.26 | The Code's transition. **a**: ₹25,000 wage ceiling from 17 Sep 2026 (a second rule-set version; September split by days in one ECR; pension membership flagged; Form 10C at the ceiling of the exit date); VISHWAS, 2026's real terms; instalments by the circulars (powers, guarantee, Head Office beyond 36, withdrawn on default). **b**: EEC, 2026. **c**: the 2026 Schemes' withdrawal, EPS withdrawal-benefit and EDLI rules (needs the gazette text) | a, b: Done; c: Planned |
-| P2.13 | Small gaps: disablement pension (EPS para 15); zonal freezing (categories B and C) and zonal ACC decisions above the RO's limits; district office queues; PPO and UAN card issued to DigiLocker (mock) | Planned |
+| P2.13 | Small gaps: disablement pension (EPS para 15); zonal freezing (categories B and C) and zonal ACC decisions above the RO's limits; district office queues; PPO and UAN card issued to DigiLocker (mock) | a (disablement pension): Done; zonal freezing and escalation next; district queues dropped; DigiLocker moved to P2.21 |
 | P2.14 | The exempted trust's lifecycle: annual audit filing and the exemption cell's review; surrender and cancellation (RPFC report → ZO → HO → the Exempted Establishments Committee → the appropriate Government); HO's decision; past accumulations transferred in bulk and reconciled with the receipts | Done |
 | P2.15a | PMVBRY (Pradhan Mantri Viksit Bharat Rozgar Yojana): Part A for first timers, Part B for employers adding jobs, the disbursement run and the dashboard — from the scheme guidelines and EPFO's SOP for calculating incentives | Done |
 | P2.15b | SMS and e-mail for in-app notices through a mock gateway — preferences and language, essential messages, retries, delivery evidence, the PRO desk's follow-up | Done |
@@ -1363,4 +1363,23 @@ From the SOP on surrender of exemption (Dec 2023, (ix)–(xxiv)) and the SOP on 
   once; receipts cannot exceed what was credited (the remaining members are ingested first).
 - Simplified: one approval (the SOP has DA → APFC (Cash) → RPFC-II (FA) with OTP); the 14B / 7Q on accumulations received
   after the 30 days are noted on ingestion, not yet raised as demands.
+
+## P2.13a — how it is built (disablement pension)
+
+From the Pension Manual (Manual of Accounting Procedure — EPS, 1995: 2.5.2.3–2.5.2.4, 2.7 and the guidelines in Figure 6).
+- **Who.** A member permanently and totally incapacitated for the work done at the time, while in service: the disablement
+  on or after 1 April 1993 and before 58, the exit recorded by the employer as *permanent disablement* (the employer's exit
+  form already offered it; the reason now reaches pension-service with the exit and is kept on the EPS account), at least
+  one month's contribution. A Medical Board's certificate, or a disability certificate under the RPwD Act, 2016, saying
+  *permanently and totally unfit*.
+- **How much, from when.** The formula as if retiring on the day of invalidation — no minimum service, no age limit, no
+  reduction for age — and not less than the minimum pension; from the day after the exit, for life (then family pension).
+  `pension_on(..., disablement=True)`; the worksheet uses it for a claim of kind `DISABLED`, and a pension in payment keeps
+  `pension_kind = DISABLED` so a later revision applies no age test.
+- **Screens.** The member's Form 10D page offers *Apply for a disablement pension* with the date and the certificate; the
+  pension desks see the claim marked, with the certificate to scrutinise (doubts to the RPFC in charge, 2.7.5).
+- **Demo.** New persona `member-disabled` (SURESH DEMO): 7 years at Demo Engineering Works, left on 20 Aug 2026 — no
+  monthly pension on ordinary terms, ₹1,500 a month as a disablement pension (₹15,000 x 7 / 70).
+- Not built: the RPFC referring the member to a Medical Board (the certificate is taken as given); the case of disablement
+  after 50 with 10 years' service, where an early pension needs no certificate (that route already exists).
 

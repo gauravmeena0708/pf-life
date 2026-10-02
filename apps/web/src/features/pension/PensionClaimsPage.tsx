@@ -8,6 +8,8 @@ import { StepUpDialog, type StepUpRequest } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 
 interface PensionClaim {
+  kind?: string;
+  disablement?: { date_of_disablement: string; certificate_kind: string; certificate_ref: string; issued_by: string } | null;
   claim_id: string;
   uan: string;
   name: string;
@@ -256,7 +258,8 @@ export function PensionClaimsPage() {
           <th scope="col">State</th><th scope="col">Next step</th></tr></thead>
         <tbody>{claims.data.data.map((claim) => <tr key={claim.claim_id}>
           <td>{claim.claim_id}</td>
-          <td><strong>{claim.name}</strong><br /><span className="muted small">UAN {claim.uan}</span></td>
+          <td><strong>{claim.name}</strong><br /><span className="muted small">UAN {claim.uan}</span>
+            {claim.kind === "DISABLED" ? <><br /><span className="state-pill">Disablement pension (para 15)</span></> : null}</td>
           <td>{claim.pension_from}</td>
           <td><span className="state-pill">{label(claim.state)}</span></td>
           <td><div className="stack">
@@ -268,6 +271,11 @@ export function PensionClaimsPage() {
                   <div><dt>Pensionable salary</dt><dd>{rupees(claim.pensionable_salary_paise)}</dd></div>
                   {claim.ppo_id ? <div><dt>PPO</dt><dd>{claim.ppo_id}</dd></div> : null}
                 </dl>
+                {claim.disablement ? <><h3>Disablement — scrutinise the certificate (2.7.5)</h3><dl className="kv">
+                  <div><dt>Date of disablement</dt><dd>{claim.disablement.date_of_disablement}</dd></div>
+                  <div><dt>Certificate</dt><dd>{claim.disablement.certificate_kind === "MEDICAL_BOARD" ? "Medical Board" : "Disability certificate (RPwD Act, 2016)"} · {claim.disablement.certificate_ref}</dd></div>
+                  <div><dt>Issued by</dt><dd>{claim.disablement.issued_by}</dd></div></dl>
+                  <p className="muted small">Any doubt goes to the RPFC in charge, who decides. No age or service test; no reduction for age.</p></> : null}
                 {claim.ids ? <><h3>Input Data Sheet</h3><dl className="kv">
                   <div><dt>Sheet</dt><dd>{claim.ids.ids_id}</dd></div>
                   <div><dt>Service months</dt><dd>{claim.ids.service_months}</dd></div>
