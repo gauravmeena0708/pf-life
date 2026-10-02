@@ -71,3 +71,19 @@ it("gives the empty headings a destination or a reason", () => {
   expect(office("fo.pro").find((i) => i.label === "Services")?.to).toBe("/office/pro-counter");
   expect(office("fo.apfc").find((i) => i.label === "Admin")?.note).toMatch(/HR/);
 });
+
+it("lets anyone enlarge the text in steps up to 150%, remembered, and back to the default", async () => {
+  const { TextSizeControl } = await import("../components/TextSizeControl");
+  render(<TextSizeControl />);
+  const larger = screen.getByRole("button", { name: "Larger text" });
+  expect(screen.getByRole("button", { name: "Smaller text" })).toHaveProperty("disabled", true);
+  fireEvent.click(larger); fireEvent.click(larger);
+  expect(document.documentElement.style.fontSize).toBe("130%");
+  expect(window.localStorage.getItem("epfo.text-size")).toBe("130");
+  fireEvent.click(larger);
+  expect(document.documentElement.style.fontSize).toBe("150%");
+  expect(larger).toHaveProperty("disabled", true);
+  expect(screen.getByText("Text size 150%")).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Default text size" }));
+  expect(document.documentElement.style.fontSize).toBe("");
+});

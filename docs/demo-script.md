@@ -714,6 +714,8 @@ tests produced, by role (after `python3 scripts/publish_manuals.py`).
 2. Press Ctrl+K (or *Find a screen*), type *legal*, press Enter: the legal cases open.
 3. Choose *Top menu* in the header: the familiar bar returns, and the choice stays for this browser. Log in as
    `member-a`: the top bar is the default for members.
+4. As `pensioner-a`, press *A+* three times: the text grows to 150% on every page and stays so after a reload; *A*
+   returns to the default.
 
 ## What the tests cover
 

@@ -98,6 +98,12 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — text size for senior citizens (2 October 2026)
+
+Web 292 (the control steps to 150%, remembers it and returns to the default); the phone-width end-to-end tests 5 of 5;
+UI smoke 2. Checked in a browser at 100% and 150% on a desktop and a phone: nothing scrolls sideways; at 150% the
+header's controls first squeezed (the *A−* button was clipped), so they now keep their width and wrap onto a second row.
+
 ## Update — Phase 2, slice 26a: the ₹25,000 ceiling, VISHWAS, 2026, instalments by the circulars (2 October 2026)
 
 Unit: every suite passes — shared policy 44 (the revision loaded as a whole version and valid; September 2026 split

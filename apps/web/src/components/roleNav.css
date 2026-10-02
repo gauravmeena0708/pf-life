@@ -51,6 +51,14 @@
   .side-nav-items { display: none; }
   .side-nav .nav-expanded .side-nav-items { display: block; margin-top: .5rem; }
 }
+.header-tools { flex-wrap: wrap; justify-content: flex-end; row-gap: 8px; }
+.text-size, .nav-layout-toggle, .menu-search-button { flex-shrink: 0; white-space: nowrap; }
+.text-size { display: inline-flex; border: 1px solid #ffffff80; border-radius: 4px; overflow: hidden; }
+.text-size button { background: none; border: 0; color: #fff; padding: .3rem .55rem; font-family: Georgia, serif; font-weight: 700; cursor: pointer; line-height: 1; }
+.text-size button:nth-child(1) { font-size: .78rem; } .text-size button:nth-child(2) { font-size: .95rem; } .text-size button:nth-child(3) { font-size: 1.12rem; }
+.text-size button[aria-pressed="true"] { background: #d4af37; color: #0b2e59; }
+.text-size button:disabled { opacity: .45; cursor: default; }
+.text-size button:focus-visible, .nav-layout-toggle button:focus-visible, .menu-search-button:focus-visible { outline: 3px solid #d4af37; outline-offset: 1px; }
 @media (max-width: 620px) {
   .header-tools { flex-wrap: wrap; row-gap: 8px; }
   .nav-layout-toggle, .menu-search-button kbd { display: none; }      /* on a phone both menus are the same drawer */

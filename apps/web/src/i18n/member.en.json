@@ -88,7 +88,12 @@
     "layoutLabel": "Menu layout",
     "layoutTop": "Top menu",
     "layoutSide": "Side menu",
-    "showIdle": "Show items not built"
+    "showIdle": "Show items not built",
+    "textSize": "Text size",
+    "textSmaller": "Smaller text",
+    "textDefault": "Default text size",
+    "textLarger": "Larger text",
+    "textNow": "Text size {{size}}%"
   },
   "iw": {
     "title": "International worker coverage",

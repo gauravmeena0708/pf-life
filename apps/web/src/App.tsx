@@ -8,6 +8,7 @@ import { DemoBanner } from "./components/DemoBanner";
 import { PersonaSwitcher } from "./components/PersonaSwitcher";
 import { RoleNav } from "./components/RoleNav";
 import { MenuSearch } from "./components/MenuSearch";
+import { TextSizeControl } from "./components/TextSizeControl";
 import { useNavLayout } from "./data/navLayout";
 import { EcrPage } from "./features/employer/EcrPage";
 import { EmployerHome } from "./features/employer/EmployerHome";
@@ -142,6 +143,7 @@ export function App() {
               <button type="button" onClick={() => setLanguage("en")} aria-pressed={i18n.language === "en"}>English</button>
               <button type="button" onClick={() => setLanguage("hi")} aria-pressed={i18n.language === "hi"}>हिन्दी</button>
             </nav>
+            <TextSizeControl />
             <MenuSearch role={role} />
             <div className="nav-layout-toggle" role="group" aria-label={t("nav.layoutLabel")}>
               <button type="button" aria-pressed={navLayout === "top"} onClick={() => setNavLayout("top")}>{t("nav.layoutTop")}</button>

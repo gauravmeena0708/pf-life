@@ -53,7 +53,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | P2.17 | Insolvency: a watchlist from EPFO's own signals (ECR stopping, defaults, MCA status), IBBI announcements matched to the establishment, claim deadlines, dues frozen (7A; damages and interest kept apart), the resolution plan checked for PF dues in full, liquidation claims outside the estate (IBC s.36(4)(a)(iii)), recovery measured | Planned (links to P2.11) |
 | P2.18 | EPF to NPS: the PF leg paid to the member's NPS Tier I (PRAN, KYC match, the trustee bank through the CRA — mock); the EPS leg cannot move — a Scheme Certificate or the withdrawal benefit | Planned (needs PFRDA's circular) |
 | P2.19 | Edge cases as tests first, then the fixes: death during a transfer or claim; minor nominee or no nomination; two UANs to merge; court-ordered back wages after exit; 58 in service; a re-employed pensioner; family pension to a dependent parent or a disabled child; attachment orders refused; mergers without a break; a vanished contractor (s.8A); partial payment; exemption cancelled mid-transfer; returned payments after a bank merger; one bank account for many members; identity mismatches; members abroad without Aadhaar; unclaimed balances | Planned |
-| P2.20 | Navigation and findability: side or top menu (per user, by role), menu search (Ctrl+K), the empty menu headings wired to existing screens; later task-based member and employer menus with the legacy ones behind a toggle | Done (task-based menus later) |
+| P2.20 | Navigation and findability: side or top menu (per user, by role), menu search (Ctrl+K), the empty menu headings wired to existing screens; a text-size control (to 150%) for senior citizens; later task-based member and employer menus with the legacy ones behind a toggle | Done (task-based menus later) |
 | P2.21 | Data held, not asked: pre-filled claims, automatic transfer when a new member ID appears, the pension case opened at 58 and on death, settlement by default for low risk with sampled audits | Planned |
 | P2.22 | Real-time contributions: a per-pay-run contribution API and a conformance sandbox for payroll vendors (the ECR kept as a format); a due-date option to model contributions paid with wages | Planned |
 | P2.23 | Retirement view: one forecast across PF and pension with VPF what-if and replacement rate; every rejection saying what fixes it | Planned |
@@ -1289,6 +1289,9 @@ Inspector-cum-Facilitator* to `../manuals/compliance/`. Time limits in the rule 
   marks EEC-2026 planned until its notification is read; the office *Dashboard* opens the role's home, *Services* the
   PRO counter for PRO roles, *Admin* says postings come from HR; the pension office's *Services* opens enquiries and
   overdue life certificates.
+- **Text size** (added after a request for senior citizens): *A− · A · A+* in the header sets the page's base size —
+  100, 115, 130 or 150% — which every rem-sized style follows; kept in the browser and applied before the first paint.
+  At 150% the header's controls wrap onto a second row; no page scrolls sideways on a desktop or a phone.
 - Left for later: task-based member and employer menus (with the legacy ones behind a toggle), keeping the choice in
   the user's profile rather than the browser.
 
