@@ -253,6 +253,10 @@
       {
         "name": "ho.exemption",
         "description": "HO Exemption Division — monitors the zones' exempted establishments and the evaluator ranking"
+      },
+      {
+        "name": "fo.eo",
+        "description": "Enforcement Officer — inspects establishments and reports; Departmental Representative in inquiries"
       }
     ]
   },
@@ -1729,6 +1733,44 @@
         "employer.owner"
       ],
       "id": "00000000-0000-4000-8000-000000000073"
+    },
+    {
+      "username": "ro-eo",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Enforcement Officer",
+      "lastName": "Demo",
+      "email": "ro-eo@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.eo"
+      ],
+      "id": "00000000-0000-4000-8000-000000000074"
+    },
+    {
+      "username": "ro-rpfc2",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "RPFC-II Compliance",
+      "lastName": "Demo",
+      "email": "ro-rpfc2@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.apfc"
+      ],
+      "id": "00000000-0000-4000-8000-000000000075"
     }
   ]
 }

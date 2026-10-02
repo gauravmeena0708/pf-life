@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 
 from app.infra.db import sessions
-from app.infra.tables import establishments, office_staff
+from app.infra.tables import compliance_officers, establishments, office_staff
 
 SEED_FILE = os.getenv("SEED_FILE", "/srv/seed/synthetic.json")
 
@@ -22,6 +22,13 @@ async def main() -> None:
         for s in seed.get("office_staff", []):
             await session.execute(insert(office_staff).values(subject=s["subject"], stakeholder=s["stakeholder"],
                                                               office_id=s["office_id"]).on_conflict_do_nothing())
+        staff = {s.get("username"): s for s in seed.get("office_staff", [])}
+        barred = set(seed.get("compliance_officers", {}).get("barred_from_sensitive_charge", []))
+        for officer in seed.get("compliance_officers", {}).get("officers", []):
+            posting = staff.get(officer["username"])
+            if posting:
+                await session.execute(insert(compliance_officers).values(subject=posting["subject"], rank=officer["rank"],
+                    office_id=posting["office_id"], barred=officer["username"] in barred or posting["subject"] in barred).on_conflict_do_nothing())
     print(f"compliance-service seeded: {len(seed.get('office_staff', []))} postings")
 
 

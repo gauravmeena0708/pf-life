@@ -20,7 +20,7 @@ from epfo_persistence.policy import baseline, section
 
 router = APIRouter()
 PRODUCER = "compliance-service"
-CASE_OFFICERS = require_stakeholder("fo.da_compliance", "fo.apfc", "fo.oic", "do.staff")
+CASE_OFFICERS = require_stakeholder("fo.da_compliance", "fo.ss", "fo.apfc", "fo.oic", "do.staff")
 
 
 async def db() -> AsyncSession:
@@ -53,15 +53,29 @@ def _case(c: Any, names: dict[str, str]) -> dict[str, Any]:
 
 class CaseInput(BaseModel):
     establishment_id: str = Field(min_length=3, max_length=40)
-    kind: str = Field(pattern="^(NON_FILING|NON_PAYMENT|LATE_PAYMENT_DAMAGES|OTHER)$")
+    kind: str = Field(pattern="^(NON_FILING|NON_PAYMENT|LATE_PAYMENT_DAMAGES|OTHER|INQUIRY_7A)$")
     wage_months: list[str] = Field(default_factory=list, max_length=60)
     amount_paise: int = Field(default=0, ge=0)
     note: str = Field(min_length=10, max_length=1000)
+    dispute: str | None = None
+    period_from: str | None = None
+    period_to: str | None = None
+    inspection_id: str | None = None
+    contributory_uans: int | None = None
+    oic_approval: str | None = None
 
 
 @router.post("/api/v1/office/compliance/cases", status_code=201)
-async def open_case(body: CaseInput, actor: Actor = Depends(require_stakeholder("fo.da_compliance")), session: AsyncSession = Depends(db)) -> dict:
+async def open_case(body: CaseInput, actor: Actor = Depends(require_stakeholder("fo.da_compliance", "fo.ss")), session: AsyncSession = Depends(db)) -> dict:
     async with session.begin():
+        if body.kind == "INQUIRY_7A":
+            from app.api.proceedings import InquiryInput, register
+            if body.dispute is None or body.period_from is None or body.period_to is None or body.contributory_uans is None:
+                raise Problem(422, "/problems/validation", "Dispute, period and contributory UANs are required")
+            inquiry_body = InquiryInput(**body.model_dump(exclude_none=True))
+            return envelope(await register(inquiry_body, actor, session))
+        if actor.stakeholder != "fo.da_compliance":
+            raise Problem(403, "/problems/role", "Only DA Compliance opens this kind of case")
         office = await _office(session, actor)
         if any(len(m) != 7 or m[4] != "-" for m in body.wage_months):
             raise Problem(422, "/problems/validation", "Wage months are written YYYY-MM")
@@ -105,7 +119,11 @@ async def get_case(caseId: str, actor: Actor = Depends(CASE_OFFICERS), session: 
     names = await _names(session)
     open_demands = (await session.execute(select(demands).where(demands.c.establishment_id == c["establishment_id"],
                                                                 demands.c.state == "OPEN"))).mappings().all()
-    return envelope({**_case(c, names), "open_demands": [dict(d) for d in open_demands]})
+    detail = {**_case(c, names), "open_demands": [dict(d) for d in open_demands]}
+    if c["kind"] == "INQUIRY_7A":                                  # P2.11a: the inquiry behind the case, with its history
+        from app.api.proceedings import case_actions, inquiry, inquiry_view
+        detail["inquiry"] = {**inquiry_view(await inquiry(session, caseId)), "actions": await case_actions(session, caseId)}
+    return envelope(detail)
 
 
 @router.get("/api/v1/public/defaulting-establishments")
@@ -221,7 +239,7 @@ async def decide(applicationId: str, body: Decision, actor: Actor = Depends(requ
                                                                                   demands.c.state == "OPEN"))).scalars().all()
             if len(still_open) != len(a["demand_ids"]):
                 raise Problem(409, "/problems/demand-settled", "A demand in the application was settled meanwhile", "Reject the application.")
-            await add_event(session, producer=PRODUCER, event_type="DemandRaised.v1", aggregate_type="vishwas_application",
+            await add_event(session, producer=PRODUCER, event_type="DemandRaised.v1", aggregate_type="demand",
                             aggregate_id=applicationId, correlation_id=actor.correlation_id, payload={
                                 "demand_id": f"DEM-{applicationId}", "establishment_id": a["establishment_id"], "demand_type": "DAMAGES_14B_VISHWAS",
                                 "amount_paise": revised, "supersedes_demand_ids": a["demand_ids"],

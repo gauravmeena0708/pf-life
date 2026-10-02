@@ -58,7 +58,7 @@ const EMPLOYER: NavGroup[] = [
     link("Authorized eSign List", "/employer/establishment#esign-heading")] },
   { label: "Payments", items: [
     link("ECR Upload", "/employer/ecr#ecr-prepare"), link("Return Filing", "/employer/ecr#ecr-returns"), link("Return monthly dashboard", "/employer/returns#returns-dashboard-heading"),
-    link("Direct Challan", "/employer/returns#direct-challan-heading"), link("Demands (14B / 7Q)", "/employer/returns#demands-heading"), link("VISHWAS: settle damages", "/employer/returns#vishwas-heading"), link("Monthly Return for Exempted Establishment", undefined, "Filed by the establishment's PF trust (the trust's login)"), link("TRRN query / challan status", "/employer/ecr#ecr-challans")] },
+    link("Direct Challan", "/employer/returns#direct-challan-heading"), link("Demands (14B / 7Q)", "/employer/returns#demands-heading"), link("Inquiries (e-Proceedings)", "/employer/proceedings"), link("VISHWAS: settle damages", "/employer/returns#vishwas-heading"), link("Monthly Return for Exempted Establishment", undefined, "Filed by the establishment's PF trust (the trust's login)"), link("TRRN query / challan status", "/employer/ecr#ecr-challans")] },
   { label: "Dashboards", items: [link("Employer dashboard", "/employer#employer-dashboard-heading"), link("Compliance summary", "/employer/returns#compliance-summary-heading"), link("Active Members details", "/employer/registration#active-heading"), link("Missing details", "/employer/registration#active-heading")] },
   { label: "User", items: [link("Sub-users (payroll operators)", "/employer#people-operator")] },
   { label: "Admin" },
@@ -91,6 +91,7 @@ function fieldOffice(role: string): NavGroup[] {
       ...(["fo.cash", "fo.da_accounts"].includes(role) ? [link("Receipts outside the challan flow (VDR)", "/office/ledger#vdr-heading")] : []), ...["ANNEXURE K RECO", "ANNEXURE K VDR RECO"].map((l) => link(l, role === "fo.da_accounts" ? "/office/claim-tools#annexure-heading" : undefined))] },
     { label: "Establishments & compliance", items: [
       ...(["fo.da_compliance", "fo.apfc", "fo.oic"].includes(role) ? [link("Defaulters, cases and VISHWAS", "/office/compliance")] : []),
+      ...(["fo.da_compliance", "fo.ss", "fo.apfc", "fo.oic", "fo.eo"].includes(role) ? [link("Inspections and 7A inquiries", "/office/inquiries")] : []),
       link("7Q & 14B", ["fo.da_compliance", "fo.ss"].includes(role) ? "/office/returns#knock-off-heading" : undefined),
       link("Establishment", ["fo.oic", "fo.apfc"].includes(role) ? "/office/work-queue" : undefined),
       link("OLRE", ["fo.da_compliance", "fo.apfc"].includes(role) ? "/office/olre" : undefined),
@@ -227,6 +228,7 @@ export function homeFor(role: string | undefined): string {
   if (role === "fo.da_pension" || role === "fo.ss_pension") return "/office/pension-claims";
   if (role === "tech.cpps") return "/cpps";
   if (role === "fo.da_compliance") return "/office/olre";
+  if (role === "fo.eo") return "/office/inquiries";
   if (role?.startsWith("fo.")) return "/office/work-queue";
   return "/";
 }

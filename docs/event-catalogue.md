@@ -68,6 +68,10 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `TrustTransferRequested.v1` | contribution | claim, audit | transfer | 1 |
 | `TrustAnnexureKReconciled.v1` | claim | contribution, audit | annexure_k | 1 |
 | `EpsServiceTransferred.v1` | pension | contribution, audit | transfer | 1 |
+| `InspectionReported.v1` | compliance | audit | inspection | 1 |
+| `InquiryRegistered.v1` | compliance | audit | compliance_case | 1 |
+| `SummonsIssued.v1` | compliance | audit | compliance_case | 1 |
+| `InquiryOrderPassed.v1` | compliance | audit | compliance_case | 1 |
 | `NotificationDeliveryFailed.v1` | member | audit | notification_delivery | 1 |
 | `PmvbryOptionExercised.v1` | contribution | audit | establishment | 1 |
 | `PmvbryIncentiveDisbursed.v1` | contribution | audit, reporting | pmvbry_run | 1 |
@@ -81,12 +85,12 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `StaffPostingChanged.v1` | workflow | member, claim, contribution, grievance, intelligence, compliance, international, pension, employer, reporting, audit | staff_posting | 1 |
 | `AutoTransferConfirmed.v1` | claim | contribution, audit | auto_transfer | 1 |
 | `TransferPosted.v1` | contribution | claim, member, workflow, pension, audit | ledger_journal | 1 |
-| `PolicyPublished.v1` | platform | claim, contribution, workflow, grievance, intelligence, pension, audit | rule_set | 1 |
+| `PolicyPublished.v1` | platform | claim, contribution, compliance, workflow, grievance, intelligence, pension, audit | rule_set | 1 |
 | `ClaimStateChanged.v1` | claim | workflow, reporting, audit | claim | 1 |
 | `RiskSignalReviewed.v1` | intelligence | claim, workflow, reporting, audit | risk_signal | 1 |
 | `SecurityEventRecorded.v1` | audit | intelligence, member, gateway | security_event | 1 |
 | `NotificationRequested.v1` | claim, grievance, member, contribution | member | notification | 1 |
-| `DemandRaised.v1` | compliance | contribution, audit | vishwas_application | 1 |
+| `DemandRaised.v1` | compliance | contribution, audit | demand | 1 |
 | `DemandStateChanged.v1` | contribution | compliance, payment-simulator, reporting, audit | demand | 1 |
 | `LedgerReversed.v1` | contribution | claim, member, workflow, reporting, audit | ledger_journal | 1 |
 | `LedgerAdjusted.v1` | contribution | claim, reporting, audit | ledger_journal | 1 |

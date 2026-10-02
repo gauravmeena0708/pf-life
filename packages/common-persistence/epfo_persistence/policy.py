@@ -360,6 +360,14 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
                                            and _whole(ee.get("investment_threshold_pct"), 1, 100) and _whole(ee.get("min_score"), 0, 600)
                                            and _whole(ee.get("consecutive_months"), 1, 12)):
             problems.append("exempted_establishments evaluator settings out of range (due day 1-28, claim days 1-90, threshold 1-100%, score 0-600, months 1-12)")
+    if "compliance_proceedings" in document:
+        cp = document["compliance_proceedings"] or {}
+        days = ("inspection_report_days", "da_note_days", "ss_note_days", "decision_days", "registration_days", "adjournment_max_days",
+                "order_working_days", "set_aside_months", "escaped_assessment_years")
+        tiers = cp.get("allocation_tiers")
+        if not all(_whole(cp.get(k), 1, 365) for k in days) or not (isinstance(tiers, list) and tiers and tiers[-1].get("up_to_uans") is None
+                                                                    and all(t.get("rank") in ("APFC", "RPFC-II", "RPFC-I") for t in tiers)):
+            problems.append("compliance_proceedings needs its day limits (1-365) and allocation tiers ending with an open tier")
     if "notifications" in document:
         nt = document["notifications"] or {}
         retries = nt.get("retry_minutes")

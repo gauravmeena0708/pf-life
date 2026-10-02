@@ -7,10 +7,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.infra.tables import demands, establishments
 
 BINDINGS = ["contribution-service.DemandStateChanged.v1", "workflow-service.StaffPostingChanged.v1",
-            "employer-service.EstablishmentOfficeTransferred.v1"]
+            "employer-service.EstablishmentOfficeTransferred.v1", "platform-service.PolicyPublished.v1"]
 
 
 async def dispatch(session: AsyncSession, event: dict[str, Any]) -> None:
+    if event["event_type"] == "PolicyPublished.v1":              # the rule set in force for inquiries' time limits (P2.11a)
+        from epfo_persistence.policy import on_policy_published
+        await on_policy_published(session, event)
+        return
     if event["event_type"] == "EstablishmentOfficeTransferred.v1":
         p = event["payload"]
         await session.execute(update(establishments).where(establishments.c.establishment_id == p["establishment_id"],

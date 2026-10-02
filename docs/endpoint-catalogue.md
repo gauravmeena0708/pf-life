@@ -479,13 +479,16 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | `GET /caiu/synthetic-risk-signals` | CAIU risk signals (Journey D2) | W | 1 | intelligence |
 | `POST /caiu/synthetic-risk-signals/{signalId}/reviews` | Investigator disposition (Journey D4) | W | 1 | intelligence |
 | `GET /office/compliance/defaulters` | Non-filing / short-payment detection | W | 1 | reporting |
-| `POST /office/compliance/cases` | Open proceeding / enforcement case | W | 1 | compliance |
+| `POST /office/compliance/cases` | Open a case, or register a 7A inquiry (diary number; allocated at random to an officer of the rank its size calls for) | W | 1 | compliance |
 | `GET /office/compliance/cases?type=&status=` | Case search | W | 1 | compliance |
 | `GET /office/compliance/cases/{caseId}` | Case detail with full proceeding history | W | 1 | compliance |
-| `POST /office/compliance/cases/{caseId}/notices` 🔐 | Issue and serve notice / summons | P | 3 | compliance |
-| `POST /office/compliance/cases/{caseId}/hearings` | Schedule / record hearing | P | 3 | compliance |
-| `POST /employers/me/proceedings/{caseId}/submissions` | Employer reply / evidence submission | P | 3 | compliance |
-| `POST /office/compliance/cases/{caseId}/orders` 🔐 (`kind=7A`) | **7A** dues-determination order | P | 3 | compliance |
+| `GET /office/compliance/inspections?state=` | Inspections of the office: scheduled, reported, in processing, decided — with each stage's due date | W | 1 | compliance |
+| `POST /office/compliance/cases/{caseId}/allocations` 🔐 | Officer in charge reassigns an inquiry (transfer, sensitive-post bar, officer earlier in the case) | W | 1 | compliance |
+| `GET /employers/me/proceedings` | The establishment's inquiries: diary number, officer, next hearing, daily orders, the order | W | 1 | compliance |
+| `POST /office/compliance/cases/{caseId}/notices` 🔐 | Summons / notice of the inquiry: scope, period, virtual hearing date and link; served by e-mail and speed post (mock) | W | 1 | compliance |
+| `POST /office/compliance/cases/{caseId}/hearings` | Daily order sheet of a hearing: who attended, what happened, documents received, the next date (≤ 7 days) or the hearing concluded | W | 1 | compliance |
+| `POST /employers/me/proceedings/{caseId}/submissions` | Employer's reply and evidence in an inquiry | W | 1 | compliance |
+| `POST /office/compliance/cases/{caseId}/orders` 🔐 (`kind=7A`) | **7A** dues-determination order: month-wise dues by account, ex parte only after due service, within 15 working days of the last hearing → `DemandRaised.v1` | W | 1 | compliance |
 | `POST /office/compliance/cases/{caseId}/orders` 🔐 (`kind=14B`) | **14B damages** order (illustrative formula) | P | 3 | compliance |
 | `POST /office/compliance/cases/{caseId}/orders` 🔐 (`kind=7Q`) | **7Q interest** order | P | 3 | compliance |
 | `POST /office/compliance/cases/{caseId}/reviews-7b` 🔐 | **7B** review of an order | P | 3 | compliance |
@@ -497,15 +500,15 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | `POST /office/compliance/cases/{caseId}/recovery-8f` 🔐 | **8F** recovery / attachment (demo record only) | P | 3 | compliance |
 | `POST /office/compliance/cases/{caseId}/recovery-certificates` 🔐 | **8B–8E** recovery certificate execution (demo record only) | P | 3 | compliance |
 | `POST /office/compliance/cases/{caseId}/prosecutions` 🔐 | Prosecution / legal referral record | P | 3 | compliance |
-| `POST /office/compliance/inspections` | Inspection scheduling, including CAIU-allocated inspections | P | 3 | compliance |
-| `POST /office/compliance/inspections/{inspectionId}/reports` | Enforcement officer inspection report | P | 3 | compliance |
+| `POST /office/compliance/inspections` | Circle officer schedules an inspection for an Enforcement Officer: purpose (complaint, CAIU allocation, defaulter, survey), period, due date (P2.11a) | W | 1 | compliance |
+| `POST /office/compliance/inspections/{inspectionId}/reports` | Enforcement Officer's inspection report: findings, employees found and not enrolled, period, dues estimated, recommendation | W | 1 | compliance |
 
 
 **Added from the stakeholder activity map** (`docs/stakeholder-activities.yaml`)
 
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
-| `POST /office/compliance/inspections/{inspectionId}/processing-notes` | DA (Compliance) processes the inspection report in the e-file | P | 3 | compliance |
+| `POST /office/compliance/inspections/{inspectionId}/processing-notes` | The report through the file: DA note (T+3), SS note (T+5), circle officer's decision (T+7) — initiate 7A or no action | W | 1 | compliance |
 | `POST /office/recovery/{caseId}/attachments` 🔐 | Attachment of movable / immovable property (demo record only) | P | 3 | compliance |
 | `POST /office/recovery/{caseId}/sales` 🔐 | Sale of attached property (demo record only) | P | 3 | compliance |
 | `POST /office/recovery/{caseId}/receivers` 🔐 | Appointment of receiver (demo record only) | P | 3 | compliance |

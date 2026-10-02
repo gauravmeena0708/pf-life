@@ -143,3 +143,22 @@ def test_demands_are_published_revised_under_vishwas_and_paid_directly(ctx):
     assert dict(q("SELECT demand_id, state FROM demands"))["DEM-VIS-1"] == "PAID"
     assert sorted(q("SELECT jl.account_code, jl.side FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id WHERE j.kind='DEMAND_PAYMENT'")) == [
         ("BANK_COLLECTION", "debit"), ("DAMAGES_14B", "credit")]
+
+
+def test_a_7a_order_raises_dues_paid_into_their_accounts(ctx):
+    """P2.11a: a 7A order's dues (DemandRaised.v1, DUES_7A) — paid directly, they are credited to the accounts the order split them into."""
+    client, q = ctx
+    import json as _json
+    from app.infra.demands import on_demand_paid, on_demand_raised
+    dues = [{"wage_month": "2025-04", "ac1_employee_paise": 2160000, "ac1_employer_paise": 660000, "ac10_pension_paise": 1500000,
+             "ac21_edli_paise": 90000, "ac2_admin_paise": 90000}]
+    _deliver(on_demand_raised, {"demand_id": "D7A-CMP-1", "establishment_id": EST, "demand_type": "DUES_7A", "amount_paise": 4500000,
+                                "supersedes_demand_ids": [], "working": _json.dumps(dues), "rule_version": "r"}, "DemandRaised.v1")
+    assert dict(q("SELECT demand_id, kind FROM demands"))["D7A-CMP-1"] == "DUES_7A"
+    _deliver(on_demand_paid, {"payment_id": "PAY-7A-1", "purpose": "DEMAND", "reference_type": "demand", "reference_id": "D7A-CMP-1",
+                              "amount_paise": 4500000, "mock": True}, "PaymentConfirmed.v1")
+    assert dict(q("SELECT demand_id, state FROM demands"))["D7A-CMP-1"] == "PAID"
+    lines = sorted(q("SELECT jl.account_code, jl.side, jl.amount_paise FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id "
+                     "WHERE j.business_key='PAY-7A-1'"))
+    assert lines == [("AC01_EPF", "credit", 2820000), ("AC02_ADMIN", "credit", 90000), ("AC10_EPS", "credit", 1500000),
+                     ("AC21_EDLI", "credit", 90000), ("BANK_COLLECTION", "debit", 4500000)]

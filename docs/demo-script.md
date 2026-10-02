@@ -55,6 +55,7 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `exempted-trust`, `ho-exemption` | Demo Steel Works' PF trust; HO Exemption Division (ranking of all trusts) | Regulating the trust |
 | `textile-trust`, `chemicals-trust` | PF trusts of Demo Textile Mills (surrenders) and Demo Chemicals (cancelled) | The trust's lifecycle |
 | `auto-owner`, `member-ft`, `ho-finance` | Owner of Demo Auto Components; ARJUN DEMO, a first timer; FA & CAO | PMVBRY |
+| `ro-eo`, `ro-rpfc2` | Enforcement Officer; RPFC-II (inquiries of 251–1,000 members) | An inspection and a 7A inquiry |
 | `zo-audit`, `ndc-is`, `zo-fraud`, `do-oic` | Concurrent Audit Cell; NDC IS Division; zonal fraud-risk committee; District Office in charge | Oversight and administration |
 
 ---
@@ -518,6 +519,19 @@ contribution- and platform-service*
    a\*\*\*@bounce.invalid · Failed: BOUNCED*.
 3. **`ro-pro` → SMS / e-mail deliveries**: the failed e-mail with each attempt (time, HTTP 422, BOUNCED); *Send again*
    once the member's e-mail is corrected. **`ndc-is`** sees the gateway's deliveries across offices.
+
+## An inspection and a 7A inquiry
+*Tests: `tests/e2e/test_inquiry_7a.py`, `services/compliance-service/tests/test_proceedings.py`*
+
+1. **`ro-apfc` → Inspections and 7A inquiries**: schedule an inspection of EST-DEMO-0001 on a workers' complaint.
+2. **`ro-eo`**: report — 40 employees found, 12 not enrolled, dues estimated at ₹50,000; recommend a 7A inquiry.
+3. **`ro-da-compliance`**, then **`ro-ss`**: put the report up (each step shows its due date); **`ro-apfc`** decides
+   to initiate. **`ro-ss`** registers it: a diary number, and with 40 contributory UANs it goes to an APFC.
+4. **`ro-apfc`**: open the inquiry; issue summons (one-time code) — the hearing is virtual; record the daily order;
+   **`emp-owner` → Inquiries (e-Proceedings)** sees the summons and the link, and replies; record the last hearing as
+   concluded (the order is due in 15 working days).
+5. **`ro-apfc`**: pass the 7A order — dues by account and month, a one-time code for the amount. The order appears to
+   the employer, and the dues as a demand payable by a direct challan.
 
 ## Disaster recovery, training, camps, totalisation, the foreign agency, the composite death claim
 *Tests: `tests/e2e/test_small_rest.py`*

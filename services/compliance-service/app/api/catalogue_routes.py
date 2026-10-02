@@ -10,11 +10,16 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /public/defaulting-establishments', 'GET /employers/me/vishwas-applications', 'POST /employers/me/vishwas-applications', 'GET /office/compliance/cases', 'POST /office/compliance/cases', 'GET /office/compliance/vishwas-applications', 'GET /office/compliance/cases/{caseId}', 'POST /office/compliance/vishwas-applications/{applicationId}/decisions']
+OPERATIONS = ['GET /public/defaulting-establishments', 'GET /employers/me/proceedings', 'GET /employers/me/vishwas-applications', 'POST /employers/me/vishwas-applications', 'GET /office/compliance/cases', 'POST /office/compliance/cases', 'GET /office/compliance/inspections', 'POST /office/compliance/inspections', 'GET /office/compliance/vishwas-applications', 'GET /office/compliance/cases/{caseId}', 'POST /employers/me/proceedings/{caseId}/submissions', 'POST /office/compliance/cases/{caseId}/allocations', 'POST /office/compliance/cases/{caseId}/hearings', 'POST /office/compliance/cases/{caseId}/notices', 'POST /office/compliance/cases/{caseId}/orders', 'POST /office/compliance/inspections/{inspectionId}/processing-notes', 'POST /office/compliance/inspections/{inspectionId}/reports', 'POST /office/compliance/vishwas-applications/{applicationId}/decisions']
 
 @router.api_route("/api/v1/public/defaulting-establishments", methods=["GET"], include_in_schema=False)
 async def get_public_defaulting_establishments(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Published defaulter list (synthetic)")
+
+
+@router.api_route("/api/v1/employers/me/proceedings", methods=["GET"], include_in_schema=False)
+async def get_employers_me_proceedings(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The establishment's inquiries: diary number, officer, next hearing, daily orders, the order")
 
 
 @router.api_route("/api/v1/employers/me/vishwas-applications", methods=["GET"], include_in_schema=False)
@@ -34,7 +39,17 @@ async def get_office_compliance_cases(actor: Actor = Depends(require_actor)) -> 
 
 @router.api_route("/api/v1/office/compliance/cases", methods=["POST"], include_in_schema=False)
 async def post_office_compliance_cases(actor: Actor = Depends(require_actor)) -> None:
-    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Open proceeding / enforcement case")
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Open a case, or register a 7A inquiry (diary number; allocated at random to an officer of the rank i")
+
+
+@router.api_route("/api/v1/office/compliance/inspections", methods=["GET"], include_in_schema=False)
+async def get_office_compliance_inspections(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Inspections of the office: scheduled, reported, in processing, decided — with each stage's due date")
+
+
+@router.api_route("/api/v1/office/compliance/inspections", methods=["POST"], include_in_schema=False)
+async def post_office_compliance_inspections(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Circle officer schedules an inspection for an Enforcement Officer: purpose (complaint, CAIU allocati")
 
 
 @router.api_route("/api/v1/office/compliance/vishwas-applications", methods=["GET"], include_in_schema=False)
@@ -45,6 +60,41 @@ async def get_office_compliance_vishwas_applications(actor: Actor = Depends(requ
 @router.api_route("/api/v1/office/compliance/cases/{caseId}", methods=["GET"], include_in_schema=False)
 async def get_office_compliance_cases_caseId(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Case detail with full proceeding history")
+
+
+@router.api_route("/api/v1/employers/me/proceedings/{caseId}/submissions", methods=["POST"], include_in_schema=False)
+async def post_employers_me_proceedings_caseId_submissions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Employer's reply and evidence in an inquiry")
+
+
+@router.api_route("/api/v1/office/compliance/cases/{caseId}/allocations", methods=["POST"], include_in_schema=False)
+async def post_office_compliance_cases_caseId_allocations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Officer in charge reassigns an inquiry (transfer, sensitive-post bar, officer earlier in the case)")
+
+
+@router.api_route("/api/v1/office/compliance/cases/{caseId}/hearings", methods=["POST"], include_in_schema=False)
+async def post_office_compliance_cases_caseId_hearings(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Daily order sheet of a hearing: who attended, what happened, documents received, the next date (≤ 7 ")
+
+
+@router.api_route("/api/v1/office/compliance/cases/{caseId}/notices", methods=["POST"], include_in_schema=False)
+async def post_office_compliance_cases_caseId_notices(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Summons / notice of the inquiry: scope, period, virtual hearing date and link; served by e-mail and ")
+
+
+@router.api_route("/api/v1/office/compliance/cases/{caseId}/orders", methods=["POST"], include_in_schema=False)
+async def post_office_compliance_cases_caseId_orders(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "7A dues-determination order: month-wise dues by account, ex parte only after due service, within 15 ")
+
+
+@router.api_route("/api/v1/office/compliance/inspections/{inspectionId}/processing-notes", methods=["POST"], include_in_schema=False)
+async def post_office_compliance_inspections_inspectionId_processing_notes(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The report through the file: DA note (T+3), SS note (T+5), circle officer's decision (T+7) — initiat")
+
+
+@router.api_route("/api/v1/office/compliance/inspections/{inspectionId}/reports", methods=["POST"], include_in_schema=False)
+async def post_office_compliance_inspections_inspectionId_reports(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Enforcement Officer's inspection report: findings, employees found and not enrolled, period, dues es")
 
 
 @router.api_route("/api/v1/office/compliance/vishwas-applications/{applicationId}/decisions", methods=["POST"], include_in_schema=False)

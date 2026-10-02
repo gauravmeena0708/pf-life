@@ -31,6 +31,10 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.9c** | Member experience: a life-event home page, one consolidated view, plain-language status, nudges, a mobile pass | **Done** (30 Sep 2026; built before P2.9b, which waits for the Exemption Manual) |
 | **P2.10a** | Vigilance cases: a CAIU-confirmed risk signal (or a complaint) referred to vigilance; the CVO assigns a preliminary inquiry to a zone (90 days); zonal vigilance reports findings; the CVO decides; restricted, access-logged, the complainant masked | **Done** (30 Sep 2026) |
 | **P2.10b** | Preventive vigilance: sensitive posts and 3-year rotation alerts; vigilance clearance for HR postings, promotions and retirement against open cases and penalties | **Done** (1 Oct 2026) |
+| **P2.11a** | Inspections and 7A inquiries: the Enforcement Officer's report through DA / SS / circle officer, registration with a diary number, random allocation by size, summons, hearings and daily orders, the employer's replies, the 7A order (ex parte only after due service) raising the demand | Done |
+| P2.11b | 7B review (after the next-higher officer's view), 7C escaped amounts (within 5 years), ex-parte set-aside, administrative scrutiny of orders; the 14B damages and 7Q interest proceedings and waiver | Planned |
+| P2.11c | Appeals (7-I) with the 7-O pre-deposit, the legal-case register and court orders, 26B membership disputes, prosecution | Planned |
+| P2.11d | Recovery (Recovery Manual, 08/12/2023): recovery certificates (8B–8E), 8F garnishee, attachment, sale, receiver, arrest (records only); HO reports on proceedings and recovery; PMVBRY exclusions from open inquiries | Planned |
 | **P2.12a** | Member and tax: Form 16A, the office's TDS computation; UAN allotment and activation (mock Aadhaar face / OTP); inoperative accounts — the public helpdesk search, verification through co-workers, reactivation in the AO / APFC bands | **Done** (1 Oct 2026) |
 | **P2.12b** | Employer lifecycle: voluntary coverage, closure, transfer to another office; contractors tagging ECR members to a principal employer and the principal's view of contractor compliance; MCA and Shram Suvidha registration feeds (mock) | **Done** (1 Oct 2026) |
 | **P2.12c** | Pension office: deciding a validated higher-pension option and the PF → pension fund transfer after the dues; Special 10D; bank-wise disbursement lists; the actuarial extract | **Done** (1 Oct 2026) |
@@ -928,6 +932,37 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 
 With P2.12f every endpoint the catalogue planned outside compliance (P2.11) and the exempted establishments
 (P2.9b / P2.9d) is built.
+
+## P2.11a — how it is built
+
+Source: EPFO *Compliance Manual* (05/02/2024), chapter 2, downloaded with the *Recovery Manual* and the *Manual for
+Inspector-cum-Facilitator* to `../manuals/compliance/`. Time limits in the rule set (`compliance_proceedings`).
+
+- **Inspection** (compliance-service): the circle officer (`ro-apfc`) schedules it for an Enforcement Officer of the
+  office (`ro-eo`, new role `fo.eo`; one is picked if none is named); the EO reports the employees found and not
+  enrolled, the wages, the findings, the dues estimated and a recommendation (`InspectionReported.v1`). The report goes
+  through the file: DA note (T+3), SS note (T+5), the circle officer's decision (T+7) — each step's due date and lateness
+  shown.
+- **Registration** (`POST /office/compliance/cases`, kind `INQUIRY_7A`, by the SS or DA): a diary number
+  `EPR/<office>/<year>/<n>`; the inquiry goes at random to an officer of the rank its size calls for — up to 250
+  contributory UANs an APFC, up to 1,000 an RPFC-II (`ro-rpfc2`), above that the RPFC-I (para 2.5.1) — never one barred
+  from a sensitive charge nor the inspecting EO; without an inspection, the OIC's approval on credible information is
+  recorded (para 2.3.1 iii). The OIC reassigns with a reason (`InquiryRegistered.v1`).
+- **Proceedings** (only the allotted officer): summons with the diary number, the virtual-hearing link and the
+  e-Proceedings case-status address, served by e-mail and speed post (mock) — `SummonsIssued.v1`; each hearing's daily
+  order (who attended, what happened, documents), the next date within 7 days unless a reason is recorded, or the
+  hearing concluded — the order then due within 15 *working* days. The employer (`emp-owner`, `/employer/proceedings`)
+  sees the summons, the daily orders and the order, and files replies and evidence until the order.
+- **The 7A order**: month-wise dues by account (A/c 1 employee and employer, A/c 10, A/c 21, A/c 2) within the
+  inquiry's period; ex parte only when the summons was served and the employer was absent at the last hearing (para
+  2.6.2); the order text follows the indicative structure (2.12); a one-time code bound to the amount.
+  `DemandRaised.v1` (type `DUES_7A`) puts the dues before the employer as a demand; paid directly, contribution-service
+  credits each account its share. `InquiryOrderPassed.v1`.
+- **Also**: compliance-service now keeps the published rule set (it did not), and `DemandRaised.v1`'s aggregate is
+  `demand` for both VISHWAS and 7A. Screens: `/office/inquiries` (EO, DA, SS, circle officer, OIC) and
+  `/employer/proceedings`.
+- **Left for P2.11b–d**: 7B review, 7C, ex-parte set-aside, administrative scrutiny, 14B / 7Q proceedings, appeals,
+  26B, prosecution, recovery; member-wise credit of 7A dues (the POC credits the pooled accounts).
 
 ## P2.15b — how it is built
 

@@ -163,16 +163,18 @@
     "method": "POST",
     "path_template": "/office/compliance/inspections/{inspectionId}/processing-notes",
     "regex": "^/office/compliance/inspections/[^/]+/processing\\-notes$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "compliance",
     "upstream": "http://compliance-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
-      "fo.da_compliance"
+      "fo.apfc",
+      "fo.da_compliance",
+      "fo.ss"
     ],
-    "summary": "DA (Compliance) processes the inspection report in the e-file",
+    "summary": "The report through the file: DA note (T+3), SS note (T+5), circle officer's decision (T+7) — initiate 7A or no action",
     "revocation": false
   },
   {
@@ -645,8 +647,8 @@
     "method": "POST",
     "path_template": "/office/compliance/inspections/{inspectionId}/reports",
     "regex": "^/office/compliance/inspections/[^/]+/reports$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "compliance",
     "upstream": "http://compliance-service:8000",
     "money": false,
@@ -655,7 +657,7 @@
       "fo.eo",
       "fo.icf"
     ],
-    "summary": "Enforcement officer inspection report",
+    "summary": "Enforcement Officer's inspection report: findings, employees found and not enrolled, period, dues estimated, recommendation",
     "revocation": false
   },
   {
@@ -1372,16 +1374,17 @@
     "method": "POST",
     "path_template": "/employers/me/proceedings/{caseId}/submissions",
     "regex": "^/employers/me/proceedings/[^/]+/submissions$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "compliance",
     "upstream": "http://compliance-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
+      "employer.owner",
       "employer.signatory"
     ],
-    "summary": "Employer reply / evidence submission",
+    "summary": "Employer's reply and evidence in an inquiry",
     "revocation": false
   },
   {
@@ -1576,6 +1579,22 @@
       "fo.cash"
     ],
     "summary": "Settlement payment instruction → PaymentInstructed.v1 (Journey B6)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/cases/{caseId}/allocations",
+    "regex": "^/office/compliance/cases/[^/]+/allocations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.oic"
+    ],
+    "summary": "Officer in charge reassigns an inquiry (transfer, sensitive-post bar, officer earlier in the case)",
     "revocation": false
   },
   {
@@ -1989,16 +2008,17 @@
     "method": "POST",
     "path_template": "/office/compliance/cases/{caseId}/hearings",
     "regex": "^/office/compliance/cases/[^/]+/hearings$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "compliance",
     "upstream": "http://compliance-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
-      "fo.apfc"
+      "fo.apfc",
+      "fo.oic"
     ],
-    "summary": "Schedule / record hearing",
+    "summary": "Daily order sheet of a hearing: who attended, what happened, documents received, the next date (≤ 7 days) or the hearing concluded",
     "revocation": false
   },
   {
@@ -2213,16 +2233,17 @@
     "method": "POST",
     "path_template": "/office/compliance/cases/{caseId}/notices",
     "regex": "^/office/compliance/cases/[^/]+/notices$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "compliance",
     "upstream": "http://compliance-service:8000",
     "money": false,
     "step_up": true,
     "callers": [
-      "fo.apfc"
+      "fo.apfc",
+      "fo.oic"
     ],
-    "summary": "Issue and serve notice / summons",
+    "summary": "Summons / notice of the inquiry: scope, period, virtual hearing date and link; served by e-mail and speed post (mock)",
     "revocation": false
   },
   {
@@ -2503,16 +2524,17 @@
     "method": "POST",
     "path_template": "/office/compliance/cases/{caseId}/orders",
     "regex": "^/office/compliance/cases/[^/]+/orders$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "compliance",
     "upstream": "http://compliance-service:8000",
     "money": false,
     "step_up": true,
     "callers": [
-      "fo.apfc"
+      "fo.apfc",
+      "fo.oic"
     ],
-    "summary": "7A dues-determination order",
+    "summary": "7A dues-determination order: month-wise dues by account, ex parte only after due service, within 15 working days of the last hearing → DemandRaised.v1",
     "revocation": false
   },
   {
@@ -4121,7 +4143,10 @@
     "money": false,
     "step_up": false,
     "callers": [
-      "fo.da_compliance"
+      "fo.apfc",
+      "fo.da_compliance",
+      "fo.oic",
+      "fo.ss"
     ],
     "summary": "Case detail with full proceeding history",
     "revocation": false
@@ -4324,11 +4349,30 @@
     "revocation": false
   },
   {
+    "method": "GET",
+    "path_template": "/office/compliance/inspections",
+    "regex": "^/office/compliance/inspections$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc",
+      "fo.da_compliance",
+      "fo.eo",
+      "fo.ss"
+    ],
+    "summary": "Inspections of the office: scheduled, reported, in processing, decided — with each stage's due date",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/office/compliance/inspections",
     "regex": "^/office/compliance/inspections$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "compliance",
     "upstream": "http://compliance-service:8000",
     "money": false,
@@ -4336,7 +4380,7 @@
     "callers": [
       "fo.apfc"
     ],
-    "summary": "Inspection scheduling, including CAIU-allocated inspections",
+    "summary": "Circle officer schedules an inspection for an Enforcement Officer: purpose (complaint, CAIU allocation, defaulter, survey), period, due date (P2.11a)",
     "revocation": false
   },
   {
@@ -5395,6 +5439,23 @@
   },
   {
     "method": "GET",
+    "path_template": "/employers/me/proceedings",
+    "regex": "^/employers/me/proceedings$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.owner",
+      "employer.signatory"
+    ],
+    "summary": "The establishment's inquiries: diary number, officer, next hearing, daily orders, the order",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/employers/me/signatories",
     "regex": "^/employers/me/signatories$",
     "status": "W",
@@ -5683,7 +5744,10 @@
     "step_up": false,
     "callers": [
       "do.staff",
-      "fo.da_compliance"
+      "fo.apfc",
+      "fo.da_compliance",
+      "fo.oic",
+      "fo.ss"
     ],
     "summary": "Case search",
     "revocation": false
@@ -5699,9 +5763,10 @@
     "money": false,
     "step_up": false,
     "callers": [
-      "fo.da_compliance"
+      "fo.da_compliance",
+      "fo.ss"
     ],
-    "summary": "Open proceeding / enforcement case",
+    "summary": "Open a case, or register a 7A inquiry (diary number; allocated at random to an officer of the rank its size calls for)",
     "revocation": false
   },
   {

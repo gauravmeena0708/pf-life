@@ -1,5 +1,5 @@
 """Tables owned by compliance-service (Phase 2, slice 8a)."""
-from sqlalchemy import JSON, BigInteger, Column, DateTime, Integer, MetaData, String, Table, Text, func
+from sqlalchemy import JSON, BigInteger, Boolean, Column, DateTime, Integer, MetaData, String, Table, Text, func
 
 metadata = MetaData()
 
@@ -60,4 +60,48 @@ vishwas_applications = Table(
     Column("decided_by", String(80)),
     Column("decision_note", Text),
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
+)
+
+compliance_officers = Table(
+    "compliance_officers", metadata,
+    Column("subject", String(80), primary_key=True), Column("rank", String(20), nullable=False),
+    Column("office_id", String(40), nullable=False), Column("barred", Boolean, nullable=False, server_default="0"),
+)
+
+inspections = Table(
+    "inspections", metadata,
+    Column("inspection_id", String(40), primary_key=True), Column("establishment_id", String(40), nullable=False),
+    Column("office_id", String(40), nullable=False), Column("eo_subject", String(80), nullable=False),
+    Column("circle_officer", String(80), nullable=False), Column("purpose", String(30), nullable=False),
+    Column("period_from", String(7), nullable=False), Column("period_to", String(7), nullable=False),
+    Column("signal_id", String(80)), Column("note", Text, nullable=False), Column("state", String(30), nullable=False),
+    Column("report", JSON), Column("decision", String(20)), Column("due_at", DateTime(timezone=True), nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+)
+
+inspection_steps = Table(
+    "inspection_steps", metadata,
+    Column("step_id", String(40), primary_key=True), Column("inspection_id", String(40), nullable=False),
+    Column("stage", String(20), nullable=False), Column("actor_subject", String(80), nullable=False),
+    Column("note", Text), Column("detail", JSON), Column("due_at", DateTime(timezone=True)),
+    Column("occurred_at", DateTime(timezone=True), nullable=False),
+)
+
+inquiries = Table(
+    "inquiries", metadata,
+    Column("case_id", String(40), primary_key=True), Column("diary_no", String(80), unique=True, nullable=False),
+    Column("office_id", String(40), nullable=False), Column("establishment_id", String(40), nullable=False),
+    Column("dispute", String(20), nullable=False), Column("period_from", String(7), nullable=False),
+    Column("period_to", String(7), nullable=False), Column("inspection_id", String(40)),
+    Column("contributory_uans", Integer, nullable=False), Column("officer_rank", String(20), nullable=False),
+    Column("officer_subject", String(80), nullable=False), Column("registered_at", DateTime(timezone=True), nullable=False),
+    Column("registration_due_at", DateTime(timezone=True)), Column("concluded_on", DateTime(timezone=True)),
+    Column("order_due_at", DateTime(timezone=True)), Column("state", String(20), nullable=False),
+)
+
+inquiry_actions = Table(
+    "inquiry_actions", metadata,
+    Column("action_id", String(40), primary_key=True), Column("case_id", String(40), nullable=False),
+    Column("kind", String(30), nullable=False), Column("actor_subject", String(80), nullable=False),
+    Column("detail", JSON, nullable=False), Column("occurred_at", DateTime(timezone=True), nullable=False),
 )

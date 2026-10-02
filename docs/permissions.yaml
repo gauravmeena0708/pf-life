@@ -926,6 +926,18 @@ stakeholders:
     step_up: false
     via:
     - F01.establishment_owner
+  - endpoint: GET /employers/me/proceedings
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.employer_owner_reply
+  - endpoint: POST /employers/me/proceedings/{caseId}/submissions
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.employer_owner_reply
   - endpoint: POST /employers/me/pmvbry/options
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
@@ -1185,8 +1197,14 @@ stakeholders:
     step_up: true
     via:
     - F05.higher_employer
+  - endpoint: GET /employers/me/proceedings
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.employer_reply
   - endpoint: POST /employers/me/proceedings/{caseId}/submissions
-    status: P
+    status: W
     scope: own establishment (X-Establishment-Id validated against grants)
     step_up: false
     via:
@@ -1834,6 +1852,7 @@ stakeholders:
     step_up: false
     via:
     - F06.defaulters
+    - F06.report_process
   - endpoint: GET /office/compliance/cases
     status: W
     scope: office jurisdiction of the caller's posting
@@ -1846,8 +1865,14 @@ stakeholders:
     step_up: false
     via:
     - F06.defaulters
+  - endpoint: GET /office/compliance/inspections
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.report_process
   - endpoint: POST /office/compliance/inspections/{inspectionId}/processing-notes
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -1907,6 +1932,36 @@ stakeholders:
     step_up: true
     via:
     - F04.approve_ss
+  - endpoint: GET /office/compliance/inspections
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.ss_note
+  - endpoint: POST /office/compliance/inspections/{inspectionId}/processing-notes
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.ss_note
+  - endpoint: POST /office/compliance/cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.ss_note
+  - endpoint: GET /office/compliance/cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.ss_note
+  - endpoint: GET /office/compliance/cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.ss_note
   - endpoint: POST /office/freeze-cases/{caseId}/verifications
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2139,25 +2194,50 @@ stakeholders:
     via:
     - F04.shares
   - endpoint: POST /office/compliance/inspections
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F06.schedule
+  - endpoint: GET /office/compliance/inspections
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.schedule
+    - F06.decide_report
+  - endpoint: POST /office/compliance/inspections/{inspectionId}/processing-notes
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.decide_report
+  - endpoint: GET /office/compliance/cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.proceed
+  - endpoint: GET /office/compliance/cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.proceed
   - endpoint: POST /office/compliance/cases/{caseId}/notices
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F06.proceed
   - endpoint: POST /office/compliance/cases/{caseId}/hearings
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F06.proceed
   - endpoint: POST /office/compliance/cases/{caseId}/orders
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -2297,6 +2377,42 @@ stakeholders:
     step_up: true
     via:
     - F04.lock_admin
+  - endpoint: GET /office/compliance/cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.allocate
+  - endpoint: POST /office/compliance/cases/{caseId}/allocations
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F06.allocate
+  - endpoint: GET /office/compliance/cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.proceed_large
+  - endpoint: POST /office/compliance/cases/{caseId}/notices
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F06.proceed_large
+  - endpoint: POST /office/compliance/cases/{caseId}/hearings
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.proceed_large
+  - endpoint: POST /office/compliance/cases/{caseId}/orders
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F06.proceed_large
   - endpoint: POST /office/establishments/{estId}/freezes
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2655,15 +2771,21 @@ stakeholders:
     step_up: true
     via:
     - F03.eo_certify
+  - endpoint: GET /office/compliance/inspections
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.inspect_legacy
   - endpoint: POST /office/compliance/inspections/{inspectionId}/reports
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F06.inspect_legacy
   fo.icf:
   - endpoint: POST /office/compliance/inspections/{inspectionId}/reports
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:

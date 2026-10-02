@@ -39,6 +39,8 @@ import { DeliveriesPage } from "./features/office/DeliveriesPage";
 import { CasePage } from "./features/office/CasePage";
 import { ClaimToolsPage } from "./features/office/ClaimToolsPage";
 import { CompliancePage } from "./features/office/CompliancePage";
+import { InquiriesPage } from "./features/office/InquiriesPage";
+import { EmployerProceedingsPage } from "./features/employer/ProceedingsPage";
 import { ClaimantPage, ProCounterPage } from "./features/claimant/DeathClaimPages";
 import { GrievanceDetailPage } from "./features/grievance/GrievanceDetailPage";
 import { GrievanceOfficePage } from "./features/grievance/GrievanceOfficePage";
@@ -176,6 +178,8 @@ export function App() {
             <Route path="/employer/establishment" element={<EstablishmentPage />} />
             <Route path="/office/olre" element={<OlrePage />} />
             <Route path="/office/compliance" element={<CompliancePage />} />
+            <Route path="/office/inquiries" element={<InquiriesPage />} />
+            <Route path="/employer/proceedings" element={<EmployerProceedingsPage />} />
             <Route path="/employer/returns" element={<ReturnsPage />} />
             <Route path="/office/returns" element={<ReturnsOfficePage />} />
             <Route path="/office/ledger" element={<LedgerOfficePage />} />

@@ -130,7 +130,7 @@ def test_sensitive_posts_and_rotation(ctx):
     client, q, _ = ctx
     data = client.get("/api/v1/vigilance/sensitive-posts", headers=hr()).json()["data"]
     by = {o["username"]: o for o in data["officers"]}
-    assert set(by) == {"ro-cashier", "ro-da-compliance"}                          # the seeded officers on sensitive posts
+    assert set(by) == {"ro-cashier", "ro-da-compliance", "ro-eo"}                 # the seeded officers on sensitive posts (EO: P2.11a)
     assert by["ro-cashier"]["posted_since"] == "2023-06-01" and by["ro-cashier"]["rotation"] in ("ROTATION_DUE", "ROTATION_OVERDUE")
     assert data["transfer_list"] and all(by[u]["rotation"] in ("ROTATION_DUE", "ROTATION_OVERDUE") for u in data["transfer_list"])
     assert client.get("/api/v1/vigilance/sensitive-posts", headers=cvo()).status_code == 200

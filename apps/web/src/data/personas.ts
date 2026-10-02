@@ -43,6 +43,8 @@ export const PERSONAS: Persona[] = [
   { username: "ro-ss", label: "Section supervisor", role: "fo.ss", group: "Field office", description: "Check claim recommendations and approve demand adjustments." },
   { username: "ro-ao", label: "Accounts officer", role: "fo.ao", group: "Field office", description: "Approve claims and pension Input Data Sheets; send back for corrections." },
   { username: "ro-apfc", label: "Regional approving officer (APFC)", role: "fo.apfc", group: "Field office", description: "Approve higher-band claims, establishment coverage and payment re-issues." },
+  { username: "ro-eo", label: "Enforcement Officer", role: "fo.eo", group: "Field office", description: "Inspect an establishment and report the findings and the dues estimated." },
+  { username: "ro-rpfc2", label: "RPFC-II (Compliance)", role: "fo.apfc", group: "Field office", description: "Quasi-judicial authority for inquiries of establishments with 251 to 1,000 contributory members." },
   { username: "ro-oic", label: "Officer-in-charge", role: "fo.oic", group: "Field office", description: "Review office work, release ledger locks and reply to audit alerts." },
   { username: "ro-cashier", label: "Cashier", role: "fo.cash", group: "Field office", description: "Pay claims, reconcile payment scrolls and handle simulated bank returns." },
   { username: "ro-fa-accounts", label: "Accounts wing (F&A, CAD)", role: "fo.fa_accounts", group: "Field office", description: "Inspect Claim Approval Dockets, including tax and net amounts." },

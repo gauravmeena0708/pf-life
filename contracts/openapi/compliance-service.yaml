@@ -12,10 +12,41 @@ servers:
 - url: http://localhost:8000/api/v1
   description: Gateway (init.md §2.4)
 paths:
+  /employers/me/proceedings:
+    get:
+      operationId: getEmployersProceedings
+      summary: 'The establishment''s inquiries: diary number, officer, next hearing, daily orders, the order'
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/EstablishmentId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - employer.owner
+      - employer.signatory
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
   /employers/me/proceedings/{caseId}/submissions:
     post:
       operationId: postEmployersProceedingsCaseIdSubmissions
-      summary: Employer reply / evidence submission
+      summary: Employer's reply and evidence in an inquiry
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -27,16 +58,23 @@ paths:
           type: string
       - $ref: '#/components/parameters/EstablishmentId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
+      - employer.owner
       - employer.signatory
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
@@ -153,13 +191,17 @@ paths:
       x-owner-service: compliance
       x-callers:
       - do.staff
+      - fo.apfc
       - fo.da_compliance
+      - fo.oic
+      - fo.ss
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
     post:
       operationId: postOfficeComplianceCases
-      summary: Open proceeding / enforcement case
+      summary: Open a case, or register a 7A inquiry (diary number; allocated at random to an officer of the rank its size
+        calls for)
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -182,6 +224,7 @@ paths:
       x-owner-service: compliance
       x-callers:
       - fo.da_compliance
+      - fo.ss
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -222,10 +265,55 @@ paths:
       x-phase: 1
       x-owner-service: compliance
       x-callers:
+      - fo.apfc
       - fo.da_compliance
+      - fo.oic
+      - fo.ss
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+  /office/compliance/cases/{caseId}/allocations:
+    post:
+      operationId: postOfficeComplianceCasesCaseIdAllocations
+      summary: Officer in charge reassigns an inquiry (transfer, sensitive-post bar, officer earlier in the case)
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - fo.oic
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/compliance/cases/{caseId}/appeals:
     post:
       operationId: postOfficeComplianceCasesCaseIdAppeals
@@ -383,7 +471,8 @@ paths:
   /office/compliance/cases/{caseId}/hearings:
     post:
       operationId: postOfficeComplianceCasesCaseIdHearings
-      summary: Schedule / record hearing
+      summary: 'Daily order sheet of a hearing: who attended, what happened, documents received, the next date (≤ 7 days)
+        or the hearing'
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -394,20 +483,29 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
       - fo.apfc
+      - fo.oic
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+      description: 'Daily order sheet of a hearing: who attended, what happened, documents received, the next date (≤ 7 days)
+        or the hearing concluded'
       requestBody:
         required: false
         content:
@@ -418,7 +516,8 @@ paths:
   /office/compliance/cases/{caseId}/notices:
     post:
       operationId: postOfficeComplianceCasesCaseIdNotices
-      summary: Issue and serve notice / summons
+      summary: 'Summons / notice of the inquiry: scope, period, virtual hearing date and link; served by e-mail and speed
+        post (mock)'
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -430,17 +529,24 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
       - fo.apfc
+      - fo.oic
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -454,7 +560,8 @@ paths:
   /office/compliance/cases/{caseId}/orders:
     post:
       operationId: postOfficeComplianceCasesCaseIdOrders
-      summary: 7A dues-determination order
+      summary: '7A dues-determination order: month-wise dues by account, ex parte only after due service, within 15 working
+        days of the '
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -466,31 +573,42 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
       - fo.apfc
+      - fo.oic
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+      description: '7A dues-determination order: month-wise dues by account, ex parte only after due service, within 15 working
+        days of the last hearing → DemandRaised.v1
+
+
+        Variants by `kind`: `7A` (W, phase 1); `14B` (P, phase 3); `7Q` (P, phase 3)'
       x-variants:
       - kind: 7A
-        status: P
-        phase: 3
+        status: W
+        phase: 1
       - kind: 14B
         status: P
         phase: 3
       - kind: 7Q
         status: P
         phase: 3
-      description: 'Variants by `kind`: `7A` (P, phase 3); `14B` (P, phase 3); `7Q` (P, phase 3)'
       requestBody:
         required: false
         content:
@@ -643,28 +761,73 @@ paths:
               type: object
               description: Defined when implemented
   /office/compliance/inspections:
+    get:
+      operationId: getOfficeComplianceInspections
+      summary: 'Inspections of the office: scheduled, reported, in processing, decided — with each stage''s due date'
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: state
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - fo.apfc
+      - fo.da_compliance
+      - fo.eo
+      - fo.ss
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
     post:
       operationId: postOfficeComplianceInspections
-      summary: Inspection scheduling, including CAIU-allocated inspections
+      summary: 'Circle officer schedules an inspection for an Enforcement Officer: purpose (complaint, CAIU allocation, defaulter,
+        surve'
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
       - fo.apfc
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+      description: 'Circle officer schedules an inspection for an Enforcement Officer: purpose (complaint, CAIU allocation,
+        defaulter, survey), period, due date (P2.11a)'
       requestBody:
         required: false
         content:
@@ -675,7 +838,8 @@ paths:
   /office/compliance/inspections/{inspectionId}/processing-notes:
     post:
       operationId: postOfficeComplianceInspectionsInspectionIdProcessingNotes
-      summary: DA (Compliance) processes the inspection report in the e-file
+      summary: 'The report through the file: DA note (T+3), SS note (T+5), circle officer''s decision (T+7) — initiate 7A
+        or no action'
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -686,17 +850,25 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
+      - fo.apfc
       - fo.da_compliance
+      - fo.ss
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -710,7 +882,8 @@ paths:
   /office/compliance/inspections/{inspectionId}/reports:
     post:
       operationId: postOfficeComplianceInspectionsInspectionIdReports
-      summary: Enforcement officer inspection report
+      summary: 'Enforcement Officer''s inspection report: findings, employees found and not enrolled, period, dues estimated,
+        recommendat'
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -721,14 +894,20 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
       - fo.eo
@@ -736,6 +915,8 @@ paths:
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+      description: 'Enforcement Officer''s inspection report: findings, employees found and not enrolled, period, dues estimated,
+        recommendation'
       requestBody:
         required: false
         content:

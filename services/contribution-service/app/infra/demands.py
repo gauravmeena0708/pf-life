@@ -2,6 +2,7 @@
 DemandStateChanged.v1 — compliance-service projects them for VISHWAS, the mock bank for paying a demand directly.
 A VISHWAS decision (DemandRaised.v1 from compliance-service) replaces the demands it covers with one revised demand;
 a demand paid directly (PaymentConfirmed.v1, purpose DEMAND) is posted to the ledger and closed."""
+import json
 import uuid
 from datetime import UTC, datetime
 from typing import Any
@@ -27,7 +28,7 @@ async def publish(session, demand_ids: list[str], correlation_id: str | None) ->
 
 
 async def on_demand_raised(session, event: dict[str, Any]) -> None:
-    """VISHWAS (compliance-service): the covered 14B demands are waived and one revised demand takes their place."""
+    """Create a VISHWAS revised demand or a section 7A dues demand."""
     p = event["payload"]
     if (await session.execute(text("SELECT 1 FROM demands WHERE demand_id=:d"), {"d": p["demand_id"]})).first():
         return
@@ -36,7 +37,7 @@ async def on_demand_raised(session, event: dict[str, Any]) -> None:
                                    {"ids": covered or ["-"]})).mappings().first()
     await session.execute(text("INSERT INTO demands (demand_id,establishment_id,kind,trrn,wage_month,amount_paise,days_late,working,rule_version,state,created_at) "
                                "VALUES (:d,:e,:k,:t,:m,:a,:days,:w,:r,'OPEN',:at)"),
-                          {"d": p["demand_id"], "e": p["establishment_id"], "k": "DAMAGES_14B", "t": first["trrn"] if first else "-",
+                          {"d": p["demand_id"], "e": p["establishment_id"], "k": "DUES_7A" if p.get("demand_type") == "DUES_7A" else "DAMAGES_14B", "t": first["trrn"] if first else "-",
                            "m": first["wage_month"] if first else "-", "a": int(p["amount_paise"]), "days": first["days_late"] if first else 0,
                            "w": p.get("working") or "Revised under VISHWAS", "r": p.get("rule_version") or "-", "at": datetime.now(UTC)})
     if covered:
@@ -55,8 +56,22 @@ async def on_demand_paid(session, event: dict[str, Any]) -> None:
         jid = str(uuid.uuid4())
         await session.execute(text("INSERT INTO journals (id,business_key,kind,occurred_at) VALUES (:id,:k,'DEMAND_PAYMENT',:at)"),
                               {"id": jid, "k": p["payment_id"], "at": datetime.now(UTC)})
-        for code, side in (("BANK_COLLECTION", "debit"), (d["kind"], "credit")):
+        credits = [(d["kind"], int(d["amount_paise"]))]
+        if d["kind"] == "DUES_7A":
+            dues = json.loads(d["working"] or "[]")
+            credits = [(code, sum(int(row[key]) for row in dues)) for code, key in (
+                ("AC01_EPF", "ac1_employee_paise"), ("AC01_EPF", "ac1_employer_paise"),
+                ("AC10_EPS", "ac10_pension_paise"), ("AC21_EDLI", "ac21_edli_paise"),
+                ("AC02_ADMIN", "ac2_admin_paise"))]
+            grouped = {}
+            for code, amount in credits:
+                grouped[code] = grouped.get(code, 0) + amount
+            credits = [(code, amount) for code, amount in grouped.items() if amount]
+            if sum(amount for _, amount in credits) != int(d["amount_paise"]):
+                raise ValueError("7A demand working does not reconcile to its total")
+        for code, side, amount in [("BANK_COLLECTION", "debit", int(d["amount_paise"])),
+                                   *((code, "credit", amount) for code, amount in credits)]:
             await session.execute(text("INSERT INTO journal_lines (journal_id,account_code,side,amount_paise) VALUES (:j,:a,:s,:n)"),
-                                  {"j": jid, "a": code, "s": side, "n": int(d["amount_paise"])})
+                                  {"j": jid, "a": code, "s": side, "n": amount})
     await session.execute(text("UPDATE demands SET state='PAID', settled_by=:p WHERE demand_id=:d"), {"p": p["payment_id"], "d": d["demand_id"]})
     await publish(session, [d["demand_id"]], event.get("correlation_id"))

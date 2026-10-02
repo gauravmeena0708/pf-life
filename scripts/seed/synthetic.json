@@ -799,7 +799,9 @@
     "textile-trust": "00000000-0000-4000-8000-000000000070",
     "chemicals-trust": "00000000-0000-4000-8000-000000000071",
     "member-ft": "00000000-0000-4000-8000-000000000072",
-    "auto-owner": "00000000-0000-4000-8000-000000000073"
+    "auto-owner": "00000000-0000-4000-8000-000000000073",
+    "ro-eo": "00000000-0000-4000-8000-000000000074",
+    "ro-rpfc2": "00000000-0000-4000-8000-000000000075"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -1021,6 +1023,18 @@
       "username": "ro-nan",
       "subject": "00000000-0000-4000-8000-000000000064",
       "stakeholder": "fo.nan",
+      "office_id": "RO-DEMO-01"
+    },
+    {
+      "username": "ro-eo",
+      "subject": "00000000-0000-4000-8000-000000000074",
+      "stakeholder": "fo.eo",
+      "office_id": "RO-DEMO-01"
+    },
+    {
+      "username": "ro-rpfc2",
+      "subject": "00000000-0000-4000-8000-000000000075",
+      "stakeholder": "fo.apfc",
       "office_id": "RO-DEMO-01"
     }
   ],
@@ -1533,5 +1547,23 @@
         "reason": "7A inquiry pending (synthetic)"
       }
     ]
+  },
+  "compliance_officers": {
+    "_comment": "P2.11a: the rank of each officer who conducts inquiries (Compliance Manual para 2.5.1), and who is barred from a sensitive charge (synthetic)",
+    "officers": [
+      {
+        "username": "ro-apfc",
+        "rank": "APFC"
+      },
+      {
+        "username": "ro-rpfc2",
+        "rank": "RPFC-II"
+      },
+      {
+        "username": "ro-oic",
+        "rank": "RPFC-I"
+      }
+    ],
+    "barred_from_sensitive_charge": []
   }
 }

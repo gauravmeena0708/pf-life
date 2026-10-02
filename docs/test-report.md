@@ -98,6 +98,23 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 11a: inspections and 7A inquiries (2 October 2026)
+
+Unit: every suite (`make test`) — compliance-service 10 (new `test_proceedings.py`: the report through DA / SS / circle
+officer with steps out of turn refused; registration from an inspection, below the EO's count refused, without one only
+with the OIC's approval; allocation by size — 120 → APFC, 600 → RPFC-II, 5,000 → RPFC-I; reallocation with step-up and
+the rank rule; summons by the allotted officer only, adjournment beyond 7 days refused; the employer's view and replies,
+not after the order; the order — none before summons and a concluded hearing, ex parte refused when the employer was
+present, dues outside the period refused, the one-time code bound to the amount, the order text in rupees,
+`DemandRaised.v1` DUES_7A; working days across a weekend), contribution-service 96 (a 7A demand paid into A/c 1, 2, 10
+and 21); web 255 (new `P211a.test.tsx`); end to end 96 of 96 (new `test_inquiry_7a.py`, repeatable); must-deny 18; UI
+smoke 2. Codex reached its usage limit half-way through the backend; the rest was finished here. Found on the way, fixed:
+the check for the OIC's approval compared a lower-cased note with a capitalised phrase and could never pass (now an
+explicit field); compliance-service had no copy of the published rule set; event payloads and aggregates did not match
+their contracts; the gateway did not let the SS, the circle officer or the RPFC-I reach the routes they act on, nor the
+owner see the inquiries; the Enforcement Officer is a sensitive post, so the vigilance test now expects him; the walking
+skeleton's "planned" example had been built.
+
 ## Update — Phase 2, slice 15b: SMS and e-mail; CI fixes for 14 and 15a (2 October 2026)
 
 Unit: every suite (`make test`) — member-service 60 (new `test_notification_delivery.py`: preferences and essential
