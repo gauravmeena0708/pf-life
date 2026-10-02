@@ -50,7 +50,7 @@ exempted_establishments = Table(
     Column("notification_no", String(100), nullable=False),
     Column("notification_date", Date, nullable=False),
     Column("effective_from", Date, nullable=False),
-    Column("status", String(20), nullable=False),
+    Column("status", String(30), nullable=False),   # ACTIVE | UNEXEMPTED_COMPLIANCE | SURRENDERED | CANCELLED
     Column("ended_on", Date),
     Column("trust_id", String(40), nullable=False),
     Column("trust_name", String(160), nullable=False),

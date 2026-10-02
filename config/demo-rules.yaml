@@ -258,3 +258,12 @@ pmvbry:
   manufacturing_incentive_months: 48
   first_cycle_months: 6
   disbursal_days: 45
+
+# P2.15b: SMS and e-mail for the notices members already get in the app (illustrative; a mock gateway stands in for
+# the SMS aggregator with DLT-registered templates and for the mail relay)
+notifications:
+  max_attempts: 4                   # the first try and three retries
+  retry_minutes: [1, 5, 30]         # wait before each retry
+  sms_max_chars: 160                # one SMS segment; longer texts are cut with "…"
+  sender_id: "EPFOHO"               # the SMS header (mock)
+  essential_templates: [CLAIM_SETTLED, CLAIM_REJECTED, CLAIM_PAYMENT_RETURNED, CONTACT_DETAILS_CHANGED, ACCOUNT_RECOVERY_REJECTED, TRANSFER_POSTED]   # always by SMS: money, account security

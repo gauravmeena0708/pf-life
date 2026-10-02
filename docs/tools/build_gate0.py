@@ -287,6 +287,7 @@ EVENTS = [
     ("TrustTransferRequested", "contribution", ["claim", "audit"], "transfer", 1, {"transfer_id": S, "uan": S, "from_account_link_id": S, "to_account_link_id": S, "establishment_id": S, "trust_id": S}),
     ("TrustAnnexureKReconciled", "claim", ["contribution", "audit"], "annexure_k", 1, {"annexure_id": S, "transfer_id": S, "to_account_link_id": S, "employee_paise": N, "employer_paise": N, "service_from": S, "service_to": S, "breaks_months": N}),
     ("EpsServiceTransferred", "pension", ["contribution", "audit"], "transfer", 1, {"transfer_id": S, "from_account_link_id": S, "to_account_link_id": S, "service_months": N, "breaks_months": N}),
+    ("NotificationDeliveryFailed", "member", ["audit"], "notification_delivery", 1, {"delivery_id": S, "channel": {"enum": ["SMS", "EMAIL"]}, "template": S, "attempts": N, "reason": S}),
     ("PmvbryOptionExercised", "contribution", ["audit"], "establishment", 1, {"establishment_id": S, "gstin": S, "baseline": N}),
     ("PmvbryIncentiveDisbursed", "contribution", ["audit", "reporting"], "pmvbry_run", 1, {"run_id": S, "as_of": S, "part_a_paise": N, "part_b_paise": N, "held_paise": N, "payments": N}),
     ("TrustAuditFiled", "employer", ["audit"], "trust_audit", 1, {"audit_id": S, "establishment_id": S, "financial_year": S, "opinion": S, "late_days": N}),

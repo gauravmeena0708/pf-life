@@ -6,6 +6,7 @@ import { api, command, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
 import { PrivacyRequests } from "./PrivacyRequests";
+import { MessagePreferences } from "./MessagePreferences";
 import { dateTime } from "../journeyB";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
@@ -78,6 +79,7 @@ export function SecurityPage() {
       <ProblemMessage error={me.error} />
       <ProblemMessage error={error} />
       {notice ? <p role="status" className="ok">{notice}</p> : null}
+      <MessagePreferences />
       <section className="card stack" aria-labelledby="password-heading">
         <h2 id="password-heading">{t("security.passwordTitle")}</h2>
         <p className="muted">{t("security.passwordHelp")}</p>

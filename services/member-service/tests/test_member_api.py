@@ -139,7 +139,10 @@ def test_employer_list_requires_grant_and_establishment(api):
     assert no_grant.json()["type"] == "/problems/missing-grant"
     own = api.get(path, headers=token(subject, "employer.operator", ("ecr.prepare",), ESTABLISHMENT))
     assert own.status_code == 200
-    assert len(own.json()["data"]) == len(SEED["members"])
+    demo = SEED["establishment"]["establishment_id"]
+    worked_here = [m for m in SEED["members"]            # now, or in an earlier job; not members only ever elsewhere
+                   if any(job.get("establishment_id", demo) == demo for job in [m, *m.get("previous_employments", [])])]
+    assert len(own.json()["data"]) == len(worked_here)
     other = api.get(path, headers=token(subject, "employer.operator", ("members.manage",), "EST-OTHER"))
     assert other.status_code == 200
     assert other.json()["data"] == []

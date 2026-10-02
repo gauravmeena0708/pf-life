@@ -8,14 +8,14 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 |---|---|---|---|---|---|---|---|
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 15 | 2 | 0 | 0 |
 | 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 95 | 5 | 2 | 0 |
-| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 87 | 5 | 0 | 0 |
+| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 89 | 5 | 0 | 0 |
 | 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 103 | 0 | 17 | 4 |
-| 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 15 | 1 | 0 | 0 |
+| 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 17 | 1 | 0 | 0 |
 | 6 | International worker | **Working** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 6 | 0 | 0 | 0 |
 | 7 | District office | **Working** | `do.incharge`, `do.staff` | 3 | 0 | 0 | 0 |
 | 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 42 | 0 | 8 | 1 |
 | 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 15 | 0 | 0 | 0 |
-| 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 27 | 0 | 3 | 0 |
+| 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 28 | 0 | 3 | 0 |
 | 11 | NDC | **Working** | `tech.ndc`, `tech.adc`, `tech.cpps`, `tech.epfo3` | 8 | 0 | 0 | 0 |
 | 12 | Ministry | **Working** | `gov.mole`, `gov.parliament` | 3 | 0 | 0 | 0 |
 | 13 | B2B | **Mock** | `payroll_provider`, `ext.collecting_bank`, `ext.pension_bank`, `ext.mca`, `ext.shram_suvidha`, `ext.fund_manager` | 0 | 7 | 0 | 0 |
@@ -185,6 +185,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /members/me/international` | W | international | member |
 | `GET /members/me/kyc` | W | member | member |
 | `GET /members/me/nominations` | W | member | member |
+| `GET /members/me/notification-preferences` | W | member | member |
 | `GET /members/me/notifications` | W | member | member |
 | `GET /members/me/passbook` | W | contribution | member |
 | `GET /members/me/pension-applications` | W | pension | member |
@@ -250,6 +251,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /security/step-up-challenges` | W | gateway | member |
 | `POST /security/step-up-challenges/{challengeId}/verifications` | W | gateway | member |
 | `PUT /members/me/claims/{claimId}/bank-details` | W | claim | member |
+| `PUT /members/me/notification-preferences` | W | member | member |
 | `GET /pensioners/me/life-certificate` | M | pension | pensioner |
 | `POST /members/uan-activations` | M | member | member |
 | `POST /members/uan-allotments` | M | member | csc_operator, member |
@@ -392,6 +394,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /grievances/{grievanceId}` | W | grievance | fo.pro |
 | `GET /monitoring/grievances` | W | reporting | ho.customer_service |
 | `GET /office/cases/{caseId}` | W | workflow | fo.pro |
+| `GET /office/notification-deliveries` | W | member | fo.pro |
 | `GET /office/rti-requests` | W | grievance | fo.pro |
 | `GET /office/work-queue` | W | workflow | fo.pro |
 | `POST /ai/feedback` | W | intelligence | fo.pro |
@@ -402,6 +405,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /grievances/{grievanceId}/office-transfers` | W | grievance | fo.pro |
 | `POST /grievances/{grievanceId}/resolution` | W | grievance | fo.pro |
 | `POST /office/cases/{caseId}/assignments` | W | workflow | fo.pro |
+| `POST /office/notification-deliveries/{deliveryId}/retries` | W | member | fo.pro |
 | `POST /office/rti-requests` | W | grievance | fo.pro |
 | `POST /office/rti-requests/{requestId}/replies` | W | grievance | fo.pro |
 | `POST /integrations/cpgrams/grievances` | M | grievance | ext.cpgrams |
@@ -520,6 +524,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /office/accounts/interest-postings` | W | contribution | ho.fa_cao |
 | `GET /office/exempted/proceedings` | W | employer | ho.exemption |
 | `GET /office/exempted/rankings` | W | contribution | ho.exemption |
+| `GET /office/notification-deliveries` | W | member | ho.is |
 | `POST /ho/circulars` | W | intelligence | ho.publicity |
 | `POST /ho/config/rule-sets` | W | platform | ho.acc_hq |
 | `POST /ho/config/rule-sets/{versionId}/decisions` | W | platform | ho.cpfc |

@@ -4,9 +4,9 @@
   "interfaces": 21,
   "stakeholders": 114,
   "stakeholders_with_access": 94,
-  "activities": 251,
+  "activities": 254,
   "endpoints": {
-   "W": 398,
+   "W": 402,
    "M": 21,
    "P": 29,
    "?": 5
@@ -62,7 +62,7 @@
    "coverage": "Working",
    "purpose": "Members, pensioners and claimants: passbook, claims, transfers, nomination, pension and death claims.",
    "endpoints": {
-    "W": 87,
+    "W": 89,
     "M": 5,
     "P": 0,
     "?": 0
@@ -117,7 +117,7 @@
    "coverage": "Working",
    "purpose": "Grievances: routing, replies, escalation to the zone and head office, office transfers.",
    "endpoints": {
-    "W": 15,
+    "W": 17,
     "M": 1,
     "P": 0,
     "?": 0
@@ -208,7 +208,7 @@
    "coverage": "Working",
    "purpose": "Head office: policy rules (maker-checker), interest, circulars, the IS Division.",
    "endpoints": {
-    "W": 27,
+    "W": 28,
     "M": 0,
     "P": 3,
     "?": 0
@@ -450,7 +450,7 @@
    "name": "Member — active contributor (UAN holder)",
    "group": "A. Members, beneficiaries and the public",
    "endpoints": {
-    "W": 72,
+    "W": 74,
     "M": 2,
     "P": 0,
     "?": 0
@@ -531,6 +531,10 @@
     {
      "id": "F13.pmvbry_member",
      "does": "PMVBRY Part A: first-timer incentive in two instalments; complete the financial literacy course"
+    },
+    {
+     "id": "F13.notify_member",
+     "does": "Choose SMS / e-mail and the language of messages; see each notice's delivery"
     },
     {
      "id": "F14.step_up",
@@ -1732,7 +1736,7 @@
    "name": "PRO / Facilitation centre / grievance cell",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 14,
+    "W": 16,
     "M": 0,
     "P": 0,
     "?": 0
@@ -1745,6 +1749,10 @@
     {
      "id": "F08.rti_reply",
      "does": "Register RTI applications and reply within the period"
+    },
+    {
+     "id": "F13.notify_desk",
+     "does": "Follow up SMS / e-mail that could not be delivered to the office's members; send again"
     }
    ],
    "personas": [
@@ -2212,7 +2220,7 @@
    "name": "IS Division (application ownership, Issue Tracker, block / unblock)",
    "group": "F. Head Office (HO) — leadership and divisions",
    "endpoints": {
-    "W": 2,
+    "W": 3,
     "M": 0,
     "P": 0,
     "?": 0
@@ -2221,6 +2229,10 @@
     {
      "id": "F07.block",
      "does": "Execute block / unblock raised through the Issue Tracker; show login pop-ups"
+    },
+    {
+     "id": "F13.notify_gateway",
+     "does": "Watch the SMS and e-mail gateway: deliveries, failures, retries"
     }
    ],
    "personas": [

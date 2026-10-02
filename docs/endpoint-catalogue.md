@@ -230,6 +230,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /members/uan-lookups` | **Know your UAN** (OTP-verified) | W | 1 | member |
 | `GET /members/me` | Profile | W | 1 | member |
 | `GET /members/me/identity-assurance` | Assurance level | W | 1 | member |
+| `GET /members/me/notification-preferences` | SMS and e-mail preferences and the language of messages (P2.15b) | W | 1 | member |
+| `PUT /members/me/notification-preferences` | Change them (essential messages always go by SMS) | W | 1 | member |
 | `PATCH /members/me/contact-details` 🔐 | Change mobile / email (Journey D1) | W | 1 | member |
 | `GET /members/me/kyc` | KYC status (Aadhaar, PAN, bank) | W | 1 | member |
 | `POST /members/me/kyc/bank-accounts` 🔐 | Seed / change bank account (mock penny-drop, employer approval) | W | 1 | member |
@@ -687,6 +689,13 @@ Monitoring (`/monitoring/**`), AI (`/ai/**`), audit (`/audit/**`) and NDC (`/ndc
 | `POST /training/sandboxes` | Create a synthetic-data training sandbox (PDNASA / ZTI) | W | 1 | platform |
 
 ---
+
+### SMS and e-mail deliveries (P2.15b)
+
+| Endpoint | Purpose | Status | Phase | Service |
+|---|---|---|---|---|
+| `GET /office/notification-deliveries?state=` | Deliveries of the office's members (PRO / facilitation) or all (NDC IS): channel, attempts, gateway reference, outcome | W | 1 | member |
+| `POST /office/notification-deliveries/{deliveryId}/retries` | Send a failed delivery again (after the member's contact details were corrected) | W | 1 | member |
 
 ## 14. Event-only contracts these functions rely on
 

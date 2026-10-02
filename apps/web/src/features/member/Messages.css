@@ -1,0 +1,7 @@
+.message-deliveries { margin: .45rem 0 0; padding-left: 1.15rem; color: #31465f; font-size: .88rem; }
+.message-deliveries li + li { margin-top: .2rem; }
+.message-options { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem 1.5rem; }
+.message-options label { display: flex; align-items: center; gap: .45rem; }
+.message-options input[type="checkbox"] { width: 1rem; height: 1rem; padding: 0; accent-color: #004d99; }
+.message-options label:has(select) { align-items: start; flex-direction: column; }
+.message-essential { margin: 0; padding-left: 1.5rem; }

@@ -35,6 +35,7 @@ import { ReturnsPage } from "./features/employer/ReturnsPage";
 import { ReturnsOfficePage } from "./features/office/ReturnsOfficePage";
 import { LedgerOfficePage } from "./features/office/LedgerOfficePage";
 import { WorkQueuePage } from "./features/office/WorkQueuePage";
+import { DeliveriesPage } from "./features/office/DeliveriesPage";
 import { CasePage } from "./features/office/CasePage";
 import { ClaimToolsPage } from "./features/office/ClaimToolsPage";
 import { CompliancePage } from "./features/office/CompliancePage";
@@ -179,6 +180,7 @@ export function App() {
             <Route path="/office/returns" element={<ReturnsOfficePage />} />
             <Route path="/office/ledger" element={<LedgerOfficePage />} />
             <Route path="/office/work-queue" element={<WorkQueuePage />} />
+            <Route path="/office/notification-deliveries" element={<DeliveriesPage />} />
             <Route path="/office/cases/:caseId" element={<CasePage />} />
             <Route path="/public" element={<PublicLookups />} />
             <Route path="/public/inoperative-accounts" element={<InoperativeSearchPage />} />

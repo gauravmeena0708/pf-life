@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 251 |
+| Activities | 254 |
 | Stakeholders with at least one API | 94 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 3 |
@@ -44,7 +44,7 @@ Activities: **F11.public_search** Search an inoperative account with a demo CAPT
 
 #### `member` — Member — active contributor (UAN holder)
 
-Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP; **F02.kyc_seed** Seed KYC (Aadhaar, bank, PAN); **F02.self_service** View profile, service history, UAN card; change contact details; e-nomination; self-marked exit; **F02.jd_submit** Submit Joint Declaration to correct one of 12 profile parameters; **F03.passbook** View passbook, annual statement and taxable-interest split; **F04.preflight** Pre-flight before filing: check account readiness (blockers), service history and eligibility for the chosen form; **F04.claim_file** Check eligibility and file a claim (Form 31 / 19 / 10C); confirm intent; upload documents; **F04.post_submission** After filing: follow the claim's audit trail, cancel it before a decision, or switch to another KYC-verified bank account before payment; **F04.redisburse_request** Submit corrected bank details after a payment return; **F04.track** Track claims and notifications; download Form 16A; **F04.transfer** Request Form 13 transfer; confirm auto-transfer; view Annexure K; **F05.apply** Apply for monthly pension (Form 10D) or scheme certificate; **F05.preview** Pre-check pension eligibility across all member IDs; see untransferred service to fix first (Form 13); **F05.sc_surrender** Surrender a Scheme Certificate for monthly pension or withdrawal benefit; **F05.higher_member** Apply for pension on higher wages (joint option); track status; **F07.member_report** Report suspicious activity; account recovery; view sessions; **F08.member_file** Register, track, reopen, remind and give feedback on grievances; **F10.worker** An international worker is a member: views their coverage under the international-worker rules (P2.9a); **F13.pmvbry_member** PMVBRY Part A: first-timer incentive in two instalments; complete the financial literacy course; **F14.step_up** Complete step-up confirmation for sensitive actions; **F14.privacy_request** Ask EPFO about my personal data: access, correction, erasure or a grievance (DPDP Act)
+Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP; **F02.kyc_seed** Seed KYC (Aadhaar, bank, PAN); **F02.self_service** View profile, service history, UAN card; change contact details; e-nomination; self-marked exit; **F02.jd_submit** Submit Joint Declaration to correct one of 12 profile parameters; **F03.passbook** View passbook, annual statement and taxable-interest split; **F04.preflight** Pre-flight before filing: check account readiness (blockers), service history and eligibility for the chosen form; **F04.claim_file** Check eligibility and file a claim (Form 31 / 19 / 10C); confirm intent; upload documents; **F04.post_submission** After filing: follow the claim's audit trail, cancel it before a decision, or switch to another KYC-verified bank account before payment; **F04.redisburse_request** Submit corrected bank details after a payment return; **F04.track** Track claims and notifications; download Form 16A; **F04.transfer** Request Form 13 transfer; confirm auto-transfer; view Annexure K; **F05.apply** Apply for monthly pension (Form 10D) or scheme certificate; **F05.preview** Pre-check pension eligibility across all member IDs; see untransferred service to fix first (Form 13); **F05.sc_surrender** Surrender a Scheme Certificate for monthly pension or withdrawal benefit; **F05.higher_member** Apply for pension on higher wages (joint option); track status; **F07.member_report** Report suspicious activity; account recovery; view sessions; **F08.member_file** Register, track, reopen, remind and give feedback on grievances; **F10.worker** An international worker is a member: views their coverage under the international-worker rules (P2.9a); **F13.pmvbry_member** PMVBRY Part A: first-timer incentive in two instalments; complete the financial literacy course; **F13.notify_member** Choose SMS / e-mail and the language of messages; see each notice's delivery; **F14.step_up** Complete step-up confirmation for sensitive actions; **F14.privacy_request** Ask EPFO about my personal data: access, correction, erasure or a grievance (DPDP Act)
 
 | Endpoint | Status |
 |---|---|
@@ -68,6 +68,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/international` | W |
 | `GET /members/me/kyc` | W |
 | `GET /members/me/nominations` | W |
+| `GET /members/me/notification-preferences` | W |
 | `GET /members/me/notifications` | W |
 | `GET /members/me/passbook` | W |
 | `GET /members/me/pension-applications` | W |
@@ -120,6 +121,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /security/step-up-challenges` | W |
 | `POST /security/step-up-challenges/{challengeId}/verifications` | W |
 | `PUT /members/me/claims/{claimId}/bank-details` | W |
+| `PUT /members/me/notification-preferences` | W |
 | `POST /members/uan-activations` | M |
 | `POST /members/uan-allotments` | M |
 
@@ -797,12 +799,13 @@ Activities: **F10.decide** Verify and issue Certificate of Coverage
 
 #### `fo.pro` — PRO / Facilitation centre / grievance cell
 
-Activities: **F08.triage** Triage, assign, reply with evidence, lodge local grievances, transfer between offices, resolve; **F08.rti_reply** Register RTI applications and reply within the period
+Activities: **F08.triage** Triage, assign, reply with evidence, lodge local grievances, transfer between offices, resolve; **F08.rti_reply** Register RTI applications and reply within the period; **F13.notify_desk** Follow up SMS / e-mail that could not be delivered to the office's members; send again
 
 | Endpoint | Status |
 |---|---|
 | `GET /grievances/{grievanceId}` | W |
 | `GET /office/cases/{caseId}` | W |
+| `GET /office/notification-deliveries` | W |
 | `GET /office/rti-requests` | W |
 | `GET /office/work-queue` | W |
 | `POST /ai/feedback` | W |
@@ -813,6 +816,7 @@ Activities: **F08.triage** Triage, assign, reply with evidence, lodge local grie
 | `POST /grievances/{grievanceId}/office-transfers` | W |
 | `POST /grievances/{grievanceId}/resolution` | W |
 | `POST /office/cases/{caseId}/assignments` | W |
+| `POST /office/notification-deliveries/{deliveryId}/retries` | W |
 | `POST /office/rti-requests` | W |
 | `POST /office/rti-requests/{requestId}/replies` | W |
 
@@ -1068,11 +1072,12 @@ Activities: **F10.ho** Maintain social-security agreements; route totalisation c
 
 #### `ho.is` — IS Division (application ownership, Issue Tracker, block / unblock)
 
-Activities: **F07.block** Execute block / unblock raised through the Issue Tracker; show login pop-ups
+Activities: **F07.block** Execute block / unblock raised through the Issue Tracker; show login pop-ups; **F13.notify_gateway** Watch the SMS and e-mail gateway: deliveries, failures, retries
 
 | Endpoint | Status |
 |---|---|
 | `GET /ndc/issue-tracker/requests` | W |
+| `GET /office/notification-deliveries` | W |
 | `POST /ndc/issue-tracker/requests/{requestId}/executions` | W |
 
 #### `ho.customer_service` — Customer Service / Public Grievances cell
@@ -1957,6 +1962,9 @@ flowchart LR
   F13_pmvbry_member["member<br/>PMVBRY Part A: first-timer incentive in two instalments; com"]
   F13_pmvbry_run["ho.fa_cao<br/>PMVBRY disbursement run: employees by Aadhaar-bridge DBT, em"]
   F13_pmvbry_monitor["ho.cpfc<br/>Executive Committee chair: monitor PMVBRY beneficiaries, exp"]
+  F13_notify_member["member<br/>Choose SMS / e-mail and the language of messages; see each n"]
+  F13_notify_desk["fo.pro<br/>Follow up SMS / e-mail that could not be delivered to the of"]
+  F13_notify_gateway["ho.is<br/>Watch the SMS and e-mail gateway: deliveries, failures, retr"]
   F13_parliament["gov.parliament<br/>Receive answers to questions through the Ministry"]
   F13_cbt["gov.cbt<br/>Board dashboards; approve accounts, interest rate, policies"]
   F13_ec["gov.ec<br/>Executive Committee papers and decisions"]
@@ -1972,6 +1980,7 @@ flowchart LR
   F13_pmvbry_employer --> F13_pmvbry_run
   F13_pmvbry_member --> F13_pmvbry_run
   F13_pmvbry_run --> F13_pmvbry_monitor
+  F13_notify_member --> F13_notify_desk
   F03_interest["ho.fa_cao<br/>Record the approved annual interest rate and run interest cr"]
   F13_cbt --> F03_interest
 ```

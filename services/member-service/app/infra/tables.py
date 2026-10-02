@@ -124,6 +124,48 @@ notifications = Table(
     Column("read_at", DateTime(timezone=True)),
 )
 
+notification_preferences = Table(
+    "notification_preferences", metadata,
+    Column("subject", String(80), primary_key=True),
+    Column("sms", Boolean, nullable=False, server_default="1"),
+    Column("email", Boolean, nullable=False, server_default="1"),
+    Column("language", String(2), nullable=False, server_default="en"),
+    Column("updated_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+)
+
+notification_deliveries = Table(
+    "notification_deliveries", metadata,
+    Column("delivery_id", String(36), primary_key=True),
+    Column("notification_id", IdType, ForeignKey("notifications.id"), nullable=False, index=True),
+    Column("recipient_subject", String(80), nullable=False, index=True),
+    Column("office_id", String(40), index=True),
+    Column("channel", String(5), nullable=False),
+    Column("destination_masked", String(200), nullable=False),
+    Column("language", String(2), nullable=False),
+    Column("text", String(1200), nullable=False),
+    Column("subject", String(200)),
+    Column("state", String(12), nullable=False),
+    Column("reason", String(300)),
+    Column("attempts", Integer, nullable=False, server_default="0"),
+    Column("next_attempt_at", DateTime(timezone=True)),
+    Column("gateway_message_id", String(80)),
+    Column("sender_id", String(20)),
+    Column("last_error", String(300)),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    Column("updated_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+)
+
+notification_delivery_attempts = Table(
+    "notification_delivery_attempts", metadata,
+    Column("delivery_id", String(36), ForeignKey("notification_deliveries.delivery_id"), primary_key=True),
+    Column("attempt", Integer, primary_key=True),
+    Column("at", DateTime(timezone=True), nullable=False),
+    Column("outcome", String(20), nullable=False),
+    Column("http_status", Integer),
+    Column("gateway_message_id", String(80)),
+    Column("error", String(300)),
+)
+
 # Every change of contact details, newest last. `verified` rows (seed or an approved recovery) are what an
 # account recovery restores. Only masked values are kept.
 contact_history = Table(

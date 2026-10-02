@@ -4,6 +4,7 @@ permits compliance as un-exempted, the past accumulations come to EPFO, the agen
 appropriate Government) and the RO notifies it in the gazette; Demo Chemicals gets a show-cause notice, admits and
 relinquishes, and is taken over the same way. Repeatable: a proceeding already closed is only checked."""
 import secrets
+import time
 from datetime import date, timedelta
 
 from tests.e2e.test_journey_a_ecr import call, step_up
@@ -89,9 +90,13 @@ def test_surrender(persona):
         profile = call(trust, "GET", "/api/v1/exempted/me/profile")[1]["data"]
         assert profile["status"] == "UNEXEMPTED_COMPLIANCE", profile
         content = "uan,account_link_id,employee_rupees,employer_rupees,pension_rupees\n100000000913,AL-0921,180000,60000,0"
-        status, r = call(cell, "POST", f"/api/v1/office/exempted/{TEXTILE}/past-accumulation-ingestions",
-                         {"transfer_reference": f"PA-TEXTILE-{secrets.token_hex(3)}", "content": content},
-                         {"X-Step-Up-Token": step_up(cell, "ingest-past-accumulation", TEXTILE, None, 24000000)})
+        for _ in range(30):                      # contribution-service learns of the permission by an event; wait for it
+            status, r = call(cell, "POST", f"/api/v1/office/exempted/{TEXTILE}/past-accumulation-ingestions",
+                             {"transfer_reference": f"PA-TEXTILE-{secrets.token_hex(3)}", "content": content},
+                             {"X-Step-Up-Token": step_up(cell, "ingest-past-accumulation", TEXTILE, None, 24000000)})
+            if status != 409:
+                break
+            time.sleep(1)
         assert status == 201, r
 
     if proceeding is None:

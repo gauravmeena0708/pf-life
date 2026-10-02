@@ -27,7 +27,7 @@ const MEMBER: NavGroup[] = [
   { label: "Manage", items: [
     link("Basic Details (Joint Declaration)", "/member/profile#correction-heading"), link("Contact Details", "/member/security#contact-heading"),
     link("KYC", "/member/kyc"), link("e-Nomination", "/member/nomination#nomination-heading"), link("Know your UAN", "/member/nomination#uan-lookup-heading"), link("Mark Exit", "/member/service#exit-heading")] },
-  { label: "Account", items: [link("Change Password", "/member/security#password-heading"), { labelKey: "navigation.accountSecurity", to: "/member/security" }] },
+  { label: "Account", items: [link("Change Password", "/member/security#password-heading"), { labelKey: "navigation.accountSecurity", to: "/member/security" }, { labelKey: "messages.heading", to: "/member/security#messages-heading" }] },
   { label: "Online Services", items: [
     link("Claim (Form-31, 19, 10C & 10D)", "/member/claims"), link("One Member – One EPF Account (Transfer Request)", "/member/service#transfer-heading"), link("Auto-transfer", "/member/service#auto-transfer-heading"),
     link("Track Claim Status", "/member/claims"), link("Download Annexure K", "/member/service#applications-heading"), link("Joint Declaration", "/member/profile#correction-heading"),
@@ -101,7 +101,7 @@ function fieldOffice(role: string): NavGroup[] {
     { label: "Accounts", items: [link("Annual Accounting", undefined, "Interest is credited at head office by F&A (Finance › Interest)"),
       ...(["fo.da_accounts", "fo.apfc"].includes(role) ? [link("Appendix E", "/office/ledger#appendix-e-heading")] : []),
       ...(role === "fo.da_accounts" ? [link("Reverse a journal / recredit a transfer", "/office/ledger#reversal-heading")] : [])] },
-    { label: "Office", items: [...(role === "fo.oic" ? [link("Audit alerts", "/audit/concurrent#audit-alerts-heading"), link("Audit paras", "/audit/concurrent#audit-paras-heading"), link("Issue Tracker requests", "/audit/concurrent#issue-tracker-raise-heading")] : []), ...(role === "fo.pro" ? [link("RTI applications", "/office/grievances#rti-applications-heading")] : []), link("Dashboard", role === "fo.oic" ? "/dashboards" : undefined), link("Admin"), link("Services")] },
+    { label: "Office", items: [...(role === "fo.oic" ? [link("Audit alerts", "/audit/concurrent#audit-alerts-heading"), link("Audit paras", "/audit/concurrent#audit-paras-heading"), link("Issue Tracker requests", "/audit/concurrent#issue-tracker-raise-heading")] : []), ...(role === "fo.pro" ? [link("RTI applications", "/office/grievances#rti-applications-heading")] : []), link("SMS / e-mail deliveries", role === "fo.pro" ? "/office/notification-deliveries" : undefined), link("Dashboard", role === "fo.oic" ? "/dashboards" : undefined), link("Admin"), link("Services")] },
   ];
 }
 
@@ -152,7 +152,7 @@ function poc(role: string): NavGroup[] {
   if (role === "zo.internal_audit") out.push({ label: "Internal audit", to: "/audit/internal" });
   if (role === "ho.data_protection") out.push({ label: "Data-principal requests", to: "/privacy" });
   if (role === "zo.rpfc1_audit") out.push({ label: "Concurrent audit", to: "/audit/concurrent" });
-  if (role === "ho.is") out.push({ label: "Issue Tracker", to: "/ndc/issue-tracker" });
+  if (role === "ho.is") out.push({ label: "Issue Tracker", to: "/ndc/issue-tracker" }, { label: "SMS / e-mail gateway", to: "/office/notification-deliveries" });
   if (role === "zo.fraud_committee") out.push({ label: "Fraud-risk cases", to: "/zo/fraud-risk" });
   if (role === "do.incharge") out.push({ label: "District dashboard", to: "/do/dashboard" });
   if (role === "ho.hr") out.push({ label: "HRM", to: "/i/hrm" }, { label: "Staff postings", to: "/i/hrm#postings-heading" });

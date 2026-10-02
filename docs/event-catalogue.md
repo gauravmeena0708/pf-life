@@ -68,6 +68,7 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `TrustTransferRequested.v1` | contribution | claim, audit | transfer | 1 |
 | `TrustAnnexureKReconciled.v1` | claim | contribution, audit | annexure_k | 1 |
 | `EpsServiceTransferred.v1` | pension | contribution, audit | transfer | 1 |
+| `NotificationDeliveryFailed.v1` | member | audit | notification_delivery | 1 |
 | `PmvbryOptionExercised.v1` | contribution | audit | establishment | 1 |
 | `PmvbryIncentiveDisbursed.v1` | contribution | audit, reporting | pmvbry_run | 1 |
 | `TrustAuditFiled.v1` | employer | audit | trust_audit | 1 |

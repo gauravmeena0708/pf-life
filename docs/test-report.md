@@ -98,6 +98,25 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 15b: SMS and e-mail; CI fixes for 14 and 15a (2 October 2026)
+
+Unit: every suite (`make test`) — member-service 60 (new `test_notification_delivery.py`: preferences and essential
+SMS, deliveries per channel, delivered, the 1 / 5 / 30-minute retries and failure after four, a bounce failing at once,
+the evidence, office scope, retry only for failed; Hindi for every template), mock-integrations 10, claim-service and
+pension-service (a new check that the exemption status column holds every status); web 250 (new `P215b.test.tsx`);
+end to end with the new `test_notifications.py`; must-deny 18; UI smoke 2.
+
+CI had failed on the pushed P2.14 and P2.15a commits; found and fixed here:
+- claim-service and pension-service kept the exemption status in 20 characters; `UNEXEMPTED_COMPLIANCE` has 21, so
+  their consumer of `ExemptionStatusChanged.v1` failed on Postgres and kept retrying (SQLite in the unit tests does not
+  enforce lengths). Widened to 30 by migration; the copies caught up.
+- `test_exemption_lifecycle.py` sent the past accumulations before contribution-service had heard of the permission;
+  it now waits for the event.
+- member-service's employer-list test counted every seeded member; members who never worked at the demo
+  establishment (P2.14's and P2.15a's) are not on its list.
+- Journey D's risk-signal and the member home page timed out on CI only; to be watched on the next run — the stuck
+  consumer above is the likeliest cause.
+
 ## Update — Phase 2, slice 15a: PMVBRY (2 October 2026)
 
 Unit: contribution-service 95 (new `test_pmvbry.py`: the SOP's worked examples — net additional employment in both

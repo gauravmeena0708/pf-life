@@ -509,6 +509,16 @@ contribution- and platform-service*
    timer's ₹6,000 is *held* (bank account not Aadhaar-seeded). Pay with a one-time code bound to the amount; a second
    preview shows nothing left. **`ho-analyst`** (CPFC) sees the dashboard.
 
+## SMS and e-mail
+*Tests: `tests/e2e/test_notifications.py`, `services/member-service/tests/test_notification_delivery.py`*
+
+1. **`member-ft` → Account security › SMS and e-mail**: SMS and e-mail on, English or हिन्दी; the essential messages
+   that always go by SMS are listed.
+2. **`member-ft` → Grievances**: register one. Under the notice: *SMS to ******0914 · Delivered*; *E-mail to
+   a\*\*\*@bounce.invalid · Failed: BOUNCED*.
+3. **`ro-pro` → SMS / e-mail deliveries**: the failed e-mail with each attempt (time, HTTP 422, BOUNCED); *Send again*
+   once the member's e-mail is corrected. **`ndc-is`** sees the gateway's deliveries across offices.
+
 ## Disaster recovery, training, camps, totalisation, the foreign agency, the composite death claim
 *Tests: `tests/e2e/test_small_rest.py`*
 

@@ -1,5 +1,11 @@
 {
   "status": {
+    "QUEUED": "Queued",
+    "DELIVERED": "Delivered",
+    "RETRYING": "Retrying",
+    "SKIPPED": "Skipped",
+    "SMS": "SMS",
+    "EMAIL": "E-mail",
     "ABOVE": "Above band",
     "ACCEPTED": "Accepted",
     "ACCESS": "Access",

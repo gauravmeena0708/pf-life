@@ -27,3 +27,9 @@ def test_exemption_event_reseed_and_claim_dates(ctx):
     after = eligibility(account, "ADVANCE_ILLNESS", baseline(), date(2026, 9, 1))
     assert any("trust settles" in reason for reason in before["reasons"])
     assert not any("trust settles" in reason for reason in after["reasons"])
+
+
+def test_status_column_holds_every_exemption_status():
+    """SQLite does not enforce VARCHAR lengths; Postgres does (UNEXEMPTED_COMPLIANCE once broke this copy's consumer)."""
+    from app.infra.tables import exempted_establishments
+    assert exempted_establishments.c.status.type.length >= max(map(len, ("ACTIVE", "UNEXEMPTED_COMPLIANCE", "SURRENDERED", "CANCELLED")))

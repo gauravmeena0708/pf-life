@@ -360,6 +360,13 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
                                            and _whole(ee.get("investment_threshold_pct"), 1, 100) and _whole(ee.get("min_score"), 0, 600)
                                            and _whole(ee.get("consecutive_months"), 1, 12)):
             problems.append("exempted_establishments evaluator settings out of range (due day 1-28, claim days 1-90, threshold 1-100%, score 0-600, months 1-12)")
+    if "notifications" in document:
+        nt = document["notifications"] or {}
+        retries = nt.get("retry_minutes")
+        if not (_whole(nt.get("max_attempts"), 1, 10) and isinstance(retries, list) and len(retries) == nt["max_attempts"] - 1
+                and all(_whole(m, 1, 1440) for m in retries) and _whole(nt.get("sms_max_chars"), 70, 1000)
+                and isinstance(nt.get("essential_templates"), list)):
+            problems.append("notifications needs max_attempts (1-10), one retry_minutes entry per retry (1-1440), sms_max_chars and essential_templates")
     if "pmvbry" in document:
         pm = document["pmvbry"] or {}
         whole = ("new_establishment_baseline", "joining_day", "gross_wage_cap_paise", "contribution_rate_pct", "part_a_cap_paise",

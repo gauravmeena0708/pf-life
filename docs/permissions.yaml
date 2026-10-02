@@ -327,6 +327,7 @@ stakeholders:
     step_up: false
     via:
     - F04.track
+    - F13.notify_member
   - endpoint: POST /public/claims/status-lookups
     status: W
     scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
@@ -513,6 +514,18 @@ stakeholders:
     step_up: false
     via:
     - F13.pmvbry_member
+  - endpoint: GET /members/me/notification-preferences
+    status: W
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F13.notify_member
+  - endpoint: PUT /members/me/notification-preferences
+    status: W
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F13.notify_member
   - endpoint: POST /security/step-up-challenges
     status: W
     scope: self — challenge bound to one action and resource version
@@ -2920,6 +2933,18 @@ stakeholders:
     step_up: false
     via:
     - F08.rti_reply
+  - endpoint: GET /office/notification-deliveries
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F13.notify_desk
+  - endpoint: POST /office/notification-deliveries/{deliveryId}/retries
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F13.notify_desk
   fo.nan:
   - endpoint: POST /office/outreach-camps/{campId}/assisted-requests
     status: W
@@ -3454,6 +3479,12 @@ stakeholders:
     step_up: true
     via:
     - F07.block
+  - endpoint: GET /office/notification-deliveries
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F13.notify_gateway
   ho.customer_service:
   - endpoint: GET /monitoring/grievances
     status: W

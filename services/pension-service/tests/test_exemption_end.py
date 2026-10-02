@@ -33,3 +33,9 @@ def test_exemption_event_reseed_and_spell_dates(ctx):
     assert priya.status_code == ravi.status_code == 200
     assert next(s for s in priya.json()["data"]["service_by_member_id"] if s["account_link_id"] == "AL-0915")["pf_with"] == "EPFO"
     assert next(s for s in ravi.json()["data"]["service_by_member_id"] if s["account_link_id"] == "AL-0918")["pf_with"].startswith("TRUST ")
+
+
+def test_status_column_holds_every_exemption_status():
+    """SQLite does not enforce VARCHAR lengths; Postgres does (UNEXEMPTED_COMPLIANCE once broke this copy's consumer)."""
+    from app.infra.tables import exempted_establishments
+    assert exempted_establishments.c.status.type.length >= max(map(len, ("ACTIVE", "UNEXEMPTED_COMPLIANCE", "SURRENDERED", "CANCELLED")))

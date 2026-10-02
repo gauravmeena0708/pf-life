@@ -1,5 +1,7 @@
 """member-service — EPFO POC (SYNTHETIC DEMONSTRATION, NOT AN OFFICIAL EPFO SYSTEM)."""
 import os
+import asyncio
+from datetime import UTC, datetime
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -8,10 +10,10 @@ from sqlalchemy import update
 import epfo_auth
 from app.api import catalogue_routes, inoperative_routes, nomination_routes, onboarding_routes, routes
 from app.config import settings
-from app.domain.notifications import handle_notification_requested
+from app.domain.notifications import handle_notification_requested, deliver_due
 from app.domain.exits import on_contribution_posted, on_ledger_reversed, on_transfer_posted
 from app.domain.processes import on_issue_tracker, on_process_transitioned
-from app.infra.db import database_ready, engine
+from app.infra.db import database_ready, engine, sessions
 from app.infra.tables import employments
 from epfo_observability import health_router, install
 from epfo_persistence import Consumer, OutboxRelay
@@ -22,6 +24,7 @@ from epfo_persistence.policy import on_policy_published
 async def lifespan(app: FastAPI):
     relay = None
     consumer = None
+    worker = None
     if os.environ.get("DISABLE_MESSAGING") != "1":
         relay = OutboxRelay(engine(), settings.rabbitmq_url)
         consumer = Consumer(engine(), settings.rabbitmq_url, "member-service.notifications",
@@ -34,12 +37,34 @@ async def lifespan(app: FastAPI):
         relay.start()
         consumer.start()
         processes.start()
+    if os.environ.get("DISABLE_NOTIFICATION_WORKER") != "1" and os.environ.get("DISABLE_MESSAGING") != "1":
+        worker = asyncio.create_task(_notification_loop())
     yield
+    if worker:
+        worker.cancel()
+        try:
+            await worker
+        except asyncio.CancelledError:
+            pass
     if relay:
         await relay.stop()
     if consumer:
         await consumer.stop()
         await processes.stop()
+
+
+async def _notification_loop() -> None:
+    while True:
+        try:
+            async with sessions()() as session:
+                async with session.begin():
+                    await deliver_due(session, datetime.now(UTC))
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            import logging
+            logging.getLogger(__name__).exception("Notification delivery worker failed")
+        await asyncio.sleep(settings.notification_worker_seconds)
 
 
 def create_app() -> FastAPI:

@@ -41,7 +41,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | P2.13 | Small gaps: disablement pension (EPS para 15); zonal freezing (categories B and C) and zonal ACC decisions above the RO's limits; district office queues; PPO and UAN card issued to DigiLocker (mock) | Planned |
 | P2.14 | The exempted trust's lifecycle: annual audit filing and the exemption cell's review; surrender and cancellation (RPFC report → ZO → HO → the Exempted Establishments Committee → the appropriate Government); HO's decision; past accumulations transferred in bulk and reconciled with the receipts | Done (bulk transfer and VDR reconciliation stay planned) |
 | P2.15a | PMVBRY (Pradhan Mantri Viksit Bharat Rozgar Yojana): Part A for first timers, Part B for employers adding jobs, the disbursement run and the dashboard — from the scheme guidelines and EPFO's SOP for calculating incentives | Done |
-| P2.15b | SMS and e-mail notifications through a mock gateway — templates, preferences, retries, delivery evidence | Planned |
+| P2.15b | SMS and e-mail for in-app notices through a mock gateway — preferences and language, essential messages, retries, delivery evidence, the PRO desk's follow-up | Done |
 | P2.16 | Gig and platform workers (Code on Social Security, 2020): aggregators registered, a turnover-based contribution return (1–2% of turnover, capped at 5% of payments to the workers, in the rule set), workers linked by e-Shram number to a UAN, reconciliation | Planned — design only until the scheme is notified |
 | P2.17 | Insolvency: a watchlist from EPFO's own signals (ECR stopping, defaults, MCA status), IBBI announcements matched to the establishment, claim deadlines, dues frozen (7A; damages and interest kept apart), the resolution plan checked for PF dues in full, liquidation claims outside the estate (IBC s.36(4)(a)(iii)), recovery measured | Planned (links to P2.11) |
 | P2.18 | EPF to NPS: the PF leg paid to the member's NPS Tier I (PRAN, KYC match, the trustee bank through the CRA — mock); the EPS leg cannot move — a Scheme Certificate or the withdrawal benefit | Planned (needs PFRDA's circular) |
@@ -295,8 +295,13 @@ Pramaan, UMANG, CSC, B2B payroll, CERT-In):
     industries' 6-in-12 rule, the savings instrument for the 2nd instalment (not yet notified), grievances' own category.
   - *Wording to confirm with EPFO*: the guidelines say "more than or equal to" baseline + threshold and the SOP says
     "more than"; we follow the guidelines (and the threshold's "at least").
-- **P2.15b — notifications**: SMS and e-mail through a mock gateway — templates, the member's preferences, retries,
-  delivery evidence — for the events that already raise in-app notices.
+- **P2.15b — notifications**: the notices members already get in the app (`NotificationRequested.v1`, raised by
+  claim-, contribution-, grievance-, member- and pension-service) also go by SMS and e-mail, through a mock SMS
+  aggregator and mail relay in mock-integrations (signed calls; a bounce, a number that does not exist, the gateway
+  down). The member chooses SMS / e-mail and English or Hindi; *essential* messages (money, account security) always
+  go by SMS. A worker sends and retries on the rule set's schedule (1, 5, 30 minutes; four attempts), keeping every
+  attempt as delivery evidence; a failure reaches the PRO / facilitation desk of the member's office, which can send it
+  again once the contact details are right; NDC IS watches the gateway. Demo: ARJUN DEMO's e-mail bounces.
 - **Not planned** (needs EPFO first): the seven "?" office functions — VDR Special, VDR member beneficiary, VDR vs ECR
   reconciliation, EO certification, the APFC's ECR approval queue, bank-counter payment — until a domain owner defines
   them; the menus say so.
@@ -923,6 +928,24 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 
 With P2.12f every endpoint the catalogue planned outside compliance (P2.11) and the exempted establishments
 (P2.9b / P2.9d) is built.
+
+## P2.15b — how it is built
+
+- **One point of entry**: the notices raised by `NotificationRequested.v1` (claims, grievances, transfers, KYC,
+  pension, interest…) are rendered by member-service as before; each now also gets an SMS and an e-mail delivery.
+- **Preferences and language** (`/members/me/notification-preferences`; the account security page): SMS, e-mail,
+  English or Hindi — every template has a Hindi text. *Essential* messages (a claim paid or rejected, a payment
+  returned, a transfer, a contact change, account recovery) always go by SMS (rule set `notifications`).
+- **The gateway** (mock-integrations): a mock SMS aggregator (sender `EPFOHO`, 160 characters) and mail relay, signed
+  calls; an address `@bounce.invalid` bounces, an empty number is invalid, `MOCK_SMS_DOWN` / `MOCK_EMAIL_DOWN` take it
+  down. The POC sends to the masked contact details — it has no real ones.
+- **The worker** (member-service, every few seconds): delivered; a temporary failure retried after 1, 5 and 30
+  minutes, failed after four attempts; a permanent one (bounce, invalid number) failed at once. Every attempt is kept
+  — time, HTTP status, gateway reference, error — as delivery evidence; a failure publishes
+  `NotificationDeliveryFailed.v1`.
+- **Follow-up**: the member sees each channel's outcome under the notice; the PRO / facilitation desk of the
+  member's office (`ro-pro`, `/office/notification-deliveries`) sees failures with the evidence and sends one again;
+  NDC IS (`ndc-is`) sees all. Demo: ARJUN DEMO's e-mail bounces; `tests/e2e/test_notifications.py`.
 
 ## P2.15a — how it is built
 

@@ -140,6 +140,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/international` | W | self — caller's own member record only |  |
 | `GET /members/me/kyc` | W | self — caller's own member record only |  |
 | `GET /members/me/nominations` | W | self — caller's own member record only |  |
+| `GET /members/me/notification-preferences` | W | self — caller's own member record only |  |
 | `GET /members/me/notifications` | W | self — caller's own member record only |  |
 | `GET /members/me/passbook` | W | self — caller's own member record only |  |
 | `GET /members/me/pension-applications` | W | self — caller's own member record only |  |
@@ -192,6 +193,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /security/step-up-challenges` | W | self — challenge bound to one action and resource version |  |
 | `POST /security/step-up-challenges/{challengeId}/verifications` | W | self — challenge bound to one action and resource version |  |
 | `PUT /members/me/claims/{claimId}/bank-details` | W | self — caller's own member record only | yes |
+| `PUT /members/me/notification-preferences` | W | self — caller's own member record only |  |
 | `POST /members/uan-activations` | M | unauthenticated with OTP / face-auth proof |  |
 | `POST /members/uan-allotments` | M | unauthenticated with OTP / face-auth proof |  |
 
@@ -772,6 +774,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /grievances/{grievanceId}` | W | complainant or the assigned office |  |
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/notification-deliveries` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/rti-requests` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /ai/feedback` | W | caller's own permissions; advisory output only |  |
@@ -782,6 +785,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /grievances/{grievanceId}/office-transfers` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/resolution` | W | complainant or the assigned office | yes |
 | `POST /office/cases/{caseId}/assignments` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/notification-deliveries/{deliveryId}/retries` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/rti-requests` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/rti-requests/{requestId}/replies` | W | office jurisdiction of the caller's posting |  |
 
@@ -997,6 +1001,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /ndc/issue-tracker/requests` | W | NDC / IS operations role |  |
+| `GET /office/notification-deliveries` | W | office jurisdiction of the caller's posting |  |
 | `POST /ndc/issue-tracker/requests/{requestId}/executions` | W | NDC / IS operations role | yes |
 
 **`ho.customer_service`** — Customer Service / Public Grievances cell

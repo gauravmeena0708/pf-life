@@ -1,4 +1,16 @@
 {
+  "messages": {
+    "heading": "SMS and e-mail",
+    "loading": "Loading message preferences…",
+    "sms": "SMS",
+    "email": "E-mail",
+    "language": "Message language",
+    "essential": "These essential messages always go by SMS, even when SMS is turned off:",
+    "save": "Save",
+    "saved": "Message preferences saved.",
+    "to": "{{channel}} to {{destination}}",
+    "skipped": "Skipped (you turned {{channel}} off)"
+  },
   "banner": "SYNTHETIC DEMONSTRATION — NOT AN OFFICIAL EPFO SYSTEM",
   "title": "EPFO platform POC",
   "skip": "Skip to content",

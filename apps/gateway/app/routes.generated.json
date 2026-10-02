@@ -757,6 +757,22 @@
     "revocation": false
   },
   {
+    "method": "POST",
+    "path_template": "/office/notification-deliveries/{deliveryId}/retries",
+    "regex": "^/office/notification\\-deliveries/[^/]+/retries$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.pro"
+    ],
+    "summary": "Send a failed delivery again (after the member's contact details were corrected)",
+    "revocation": false
+  },
+  {
     "method": "GET",
     "path_template": "/employers/me/contractors/{contractorId}/compliance",
     "regex": "^/employers/me/contractors/[^/]+/compliance$",
@@ -2855,6 +2871,38 @@
     "revocation": false
   },
   {
+    "method": "GET",
+    "path_template": "/members/me/notification-preferences",
+    "regex": "^/members/me/notification\\-preferences$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "SMS and e-mail preferences and the language of messages (P2.15b)",
+    "revocation": false
+  },
+  {
+    "method": "PUT",
+    "path_template": "/members/me/notification-preferences",
+    "regex": "^/members/me/notification\\-preferences$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Change them (essential messages always go by SMS)",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/office/cases/{caseId}/recommendations",
     "regex": "^/office/cases/[^/]+/recommendations$",
@@ -4076,6 +4124,23 @@
       "fo.da_compliance"
     ],
     "summary": "Case detail with full proceeding history",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/notification-deliveries",
+    "regex": "^/office/notification\\-deliveries$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.pro",
+      "ho.is"
+    ],
+    "summary": "Deliveries of the office's members (PRO / facilitation) or all (NDC IS): channel, attempts, gateway reference, outcome",
     "revocation": false
   },
   {

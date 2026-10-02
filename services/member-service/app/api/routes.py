@@ -1,7 +1,7 @@
 """Member profile, employment and notification routes (Journey B)."""
 import secrets
 from datetime import UTC, date, datetime
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
@@ -10,7 +10,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra.db import sessions
 from app.domain.exits import month_after, open_applications, record_exit, self_exit_problems, track
-from app.infra.tables import contact_history, employments, member_applications, members, notifications, recovery_requests, security_reports
+from app.infra.tables import (contact_history, employments, member_applications, members, notifications,
+                              notification_preferences, notification_deliveries, notification_delivery_attempts,
+                              office_staff, recovery_requests, security_reports)
+from epfo_persistence.policy import rules_on, section
 from epfo_auth import Actor, require_grant, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit
@@ -81,10 +84,108 @@ async def list_notifications(actor: Actor = Depends(require_stakeholder("member"
     rows = (await session.execute(select(notifications).where(
         notifications.c.recipient_subject == actor.subject).order_by(
         notifications.c.created_at.desc(), notifications.c.id.desc()).limit(50))).mappings().all()
+    ids = [row["id"] for row in rows]
+    deliveries = (await session.execute(select(notification_deliveries).where(
+        notification_deliveries.c.notification_id.in_(ids)))).mappings().all() if ids else []
+    by_notice = {id: [] for id in ids}
+    for delivery in deliveries:
+        by_notice[delivery["notification_id"]].append({key: delivery[key] for key in
+            ("channel", "state", "attempts", "destination_masked", "updated_at", "reason")})
+        by_notice[delivery["notification_id"]][-1]["updated_at"] = delivery["updated_at"].isoformat()
     return envelope([{"id": row["id"], "template": row["template"], "reference_id": row["reference_id"],
                       "title": row["title"], "body": row["body"],
+                      "deliveries": by_notice[row["id"]],
                       "created_at": row["created_at"].isoformat(),
                       "read_at": row["read_at"].isoformat() if row["read_at"] else None} for row in rows])
+
+
+class PreferenceInput(BaseModel):
+    sms: bool
+    email: bool
+    language: Literal["en", "hi"]
+
+
+async def _preference_response(session: AsyncSession, subject: str) -> dict:
+    row = (await session.execute(select(notification_preferences).where(
+        notification_preferences.c.subject == subject))).mappings().first()
+    rules = section(await rules_on(session, datetime.now(UTC).date()), "notifications")
+    from app.domain.notifications import TEMPLATES, HI_TEMPLATES
+    titles = HI_TEMPLATES if row and row["language"] == "hi" else TEMPLATES
+    return {"sms": row["sms"] if row else True, "email": row["email"] if row else True,
+            "language": row["language"] if row else "en",
+            "updated_at": row["updated_at"].isoformat() if row else None,
+            "essential_sms_titles": [titles[key][0] for key in rules["essential_templates"]],
+            "essential_sms_notice": "Essential messages still go by SMS."}
+
+
+@router.get("/api/v1/members/me/notification-preferences")
+async def get_notification_preferences(actor: Actor = Depends(require_stakeholder("member")),
+                                       session: AsyncSession = Depends(db)) -> dict:
+    await _member(session, actor.subject)
+    return envelope(await _preference_response(session, actor.subject))
+
+
+@router.put("/api/v1/members/me/notification-preferences")
+async def put_notification_preferences(body: PreferenceInput, actor: Actor = Depends(require_stakeholder("member")),
+                                       session: AsyncSession = Depends(db)) -> dict:
+    from sqlalchemy.dialects.postgresql import insert as pg_insert
+    from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+    async with session.begin():
+        await _member(session, actor.subject)
+        insert_pref = sqlite_insert if session.bind.dialect.name == "sqlite" else pg_insert
+        statement = insert_pref(notification_preferences).values(subject=actor.subject, **body.model_dump(),
+                                                                  updated_at=datetime.now(UTC))
+        await session.execute(statement.on_conflict_do_update(index_elements=[notification_preferences.c.subject],
+            set_={key: statement.excluded[key] for key in ("sms", "email", "language", "updated_at")}))
+        return envelope(await _preference_response(session, actor.subject))
+
+
+OFFICE_NOTIFICATIONS = require_stakeholder("fo.pro", "ho.is")
+
+
+@router.get("/api/v1/office/notification-deliveries")
+async def office_notification_deliveries(state: str | None = None, actor: Actor = Depends(OFFICE_NOTIFICATIONS),
+                                         session: AsyncSession = Depends(db)) -> dict:
+    query = select(notification_deliveries, notifications.c.template).join(
+        notifications, notifications.c.id == notification_deliveries.c.notification_id)
+    if actor.stakeholder == "fo.pro":
+        office = (await session.execute(select(office_staff.c.office_id).where(
+            office_staff.c.subject == actor.subject, office_staff.c.stakeholder == "fo.pro"))).scalar_one_or_none()
+        if not office:
+            raise Problem(403, "/problems/no-office", "No office assignment")
+        query = query.where(notification_deliveries.c.office_id == office)
+    if state:
+        query = query.where(notification_deliveries.c.state == state)
+    rows = (await session.execute(query.order_by(notification_deliveries.c.created_at.desc()).limit(100))).mappings().all()
+    ids = [row["delivery_id"] for row in rows]
+    attempts = (await session.execute(select(notification_delivery_attempts).where(
+        notification_delivery_attempts.c.delivery_id.in_(ids)).order_by(
+        notification_delivery_attempts.c.attempt))).mappings().all() if ids else []
+    return envelope([{**dict(row), "attempts_evidence": [dict(a) for a in attempts if a["delivery_id"] == row["delivery_id"]]}
+                     for row in rows])
+
+
+@router.post("/api/v1/office/notification-deliveries/{delivery_id}/retries")
+async def retry_notification_delivery(delivery_id: str, actor: Actor = Depends(require_stakeholder("fo.pro")),
+                                      session: AsyncSession = Depends(db)) -> dict:
+    async with session.begin():
+        office = (await session.execute(select(office_staff.c.office_id).where(
+            office_staff.c.subject == actor.subject, office_staff.c.stakeholder == "fo.pro"))).scalar_one_or_none()
+        row = (await session.execute(select(notification_deliveries).where(
+            notification_deliveries.c.delivery_id == delivery_id))).mappings().first()
+        if not office or not row or row["office_id"] != office:
+            raise Problem(404, "/problems/not-found", "Delivery not found")
+        if row["state"] != "FAILED":
+            raise Problem(409, "/problems/invalid-state", "Only failed deliveries can be sent again")
+        note = f"Sent again by {actor.subject}"
+        now = datetime.now(UTC)
+        await session.execute(update(notification_deliveries).where(
+            notification_deliveries.c.delivery_id == delivery_id).values(
+            state="QUEUED", reason=note, next_attempt_at=now, last_error=None, updated_at=now))
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder,
+                    action="notification.delivery_retry", target_type="notification_delivery",
+                    target_id=delivery_id, detail=note)
+    return envelope({"delivery_id": delivery_id, "state": "QUEUED", "attempts": row["attempts"], "reason": note})
 
 
 @router.get("/api/v1/employers/me/members")

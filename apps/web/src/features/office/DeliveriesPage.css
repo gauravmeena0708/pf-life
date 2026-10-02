@@ -1,0 +1,5 @@
+.delivery-filter { max-width: 16rem; }
+.delivery-actions { min-width: 9rem; }
+.delivery-actions button { margin: .15rem .25rem .15rem 0; }
+.delivery-evidence { border-left: 3px solid #b08b37; padding: .6rem .8rem; background: #fff; }
+.delivery-evidence table { margin-top: .5rem; }

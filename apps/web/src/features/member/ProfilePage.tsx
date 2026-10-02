@@ -4,14 +4,17 @@ import { useTranslation } from "react-i18next";
 import { api, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { ProblemMessage } from "../../components/ProblemMessage";
+import { statusLabel } from "../statusLabel";
 import { dateOnly, dateTime, stateLabel } from "../journeyB";
+import "./Messages.css";
 import { CorrectionForm } from "./CorrectionForm";
 import { PensionEstimate } from "./PensionEstimate";
 
 interface Member { member_id: string; uan: string; name: string; date_of_birth: string; gender: string; mobile_masked: string; email_masked: string; bank: { ifsc: string; account_last4: string }; kyc: { aadhaar: string; pan: string; bank: string }; account_link_ids: string[]; international_worker?: boolean; nationality?: string | null }
 interface Assurance { kyc: Member["kyc"]; level: "FULL" | "PARTIAL"; next_step: string }
 interface Employment { account_link_id: string; establishment_name: string; date_of_joining: string; date_of_exit: string | null; status: string }
-interface Notice { id: string; template: string; reference_id: string; title: string; body: string; created_at: string; read_at: string | null }
+interface Delivery { channel: string; state: string; attempts: number; destination_masked: string; updated_at: string; reason: string | null }
+interface Notice { id: string; template: string; reference_id: string; title: string; body: string; created_at: string; read_at: string | null; deliveries?: Delivery[] }
 
 export function ProfilePage() {
   const { t, i18n } = useTranslation();
@@ -41,7 +44,10 @@ export function ProfilePage() {
     <section className="card stack" aria-labelledby="notices-heading"><h2 id="notices-heading">{t("profile.notices")}</h2><ProblemMessage error={notices.error} />
       {notices.isLoading ? <p role="status">{t("profile.loadingNotices")}</p> : null}
       {notices.data?.data.length === 0 ? <p className="muted">{t("profile.noNotices")}</p> : null}
-      {notices.data?.data.length ? <ol className="notice-list">{[...notices.data.data].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)).map((notice) => <li key={notice.id}><h3>{notice.title}</h3><p>{notice.body}</p><time dateTime={notice.created_at} className="muted small">{dateTime(notice.created_at, i18n.language)}</time></li>)}</ol> : null}
+      {notices.data?.data.length ? <ol className="notice-list">{[...notices.data.data].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)).map((notice) => <li key={notice.id}><h3>{notice.title}</h3><p>{notice.body}</p><time dateTime={notice.created_at} className="muted small">{dateTime(notice.created_at, i18n.language)}</time>
+        {notice.deliveries?.length ? <ul className="message-deliveries">{notice.deliveries.map((delivery) => <li key={delivery.channel}>
+          {delivery.state === "SKIPPED" ? t("messages.skipped", { channel: statusLabel(delivery.channel, t) }) : <>{t("messages.to", { channel: statusLabel(delivery.channel, t), destination: delivery.destination_masked })} · {statusLabel(delivery.state, t)}{delivery.reason ? `: ${delivery.reason}` : ""}</>}
+        </li>)}</ul> : null}</li>)}</ol> : null}
     {member ? <CorrectionForm uan={member.uan} onDone={() => void profile.refetch()} /> : null}
     <PensionEstimate />
     </section>

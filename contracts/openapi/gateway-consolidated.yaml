@@ -7475,6 +7475,70 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /members/me/notification-preferences:
+    get:
+      operationId: getMembersNotificationPreferences
+      summary: SMS and e-mail preferences and the language of messages (P2.15b)
+      tags:
+      - Member self-service
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: member
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+    put:
+      operationId: putMembersNotificationPreferences
+      summary: Change them (essential messages always go by SMS)
+      tags:
+      - Member self-service
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: member
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /members/me/notifications:
     get:
       operationId: getMembersNotifications
@@ -12661,6 +12725,83 @@ paths:
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+  /office/notification-deliveries:
+    get:
+      operationId: getOfficeNotificationDeliveries
+      summary: 'Deliveries of the office''s members (PRO / facilitation) or all (NDC IS): channel, attempts, gateway reference,
+        outcome'
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: state
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: member
+      x-callers:
+      - fo.pro
+      - ho.is
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+  /office/notification-deliveries/{deliveryId}/retries:
+    post:
+      operationId: postOfficeNotificationDeliveriesDeliveryIdRetries
+      summary: Send a failed delivery again (after the member's contact details were corrected)
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: deliveryId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: member
+      x-callers:
+      - fo.pro
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/outreach-camps/{campId}/assisted-requests:
     post:
       operationId: postOfficeOutreachCampsCampIdAssistedRequests
