@@ -100,7 +100,8 @@
         "title": "Oversight: concurrent audit and the Issue Tracker",
         "description": "Raise an audit alert, reply from the regional office and execute an approved Issue Tracker request."
       }
-    }
+    },
+    "exploreMore": "Also: who works in and with EPFO and how they connect, each lifecycle step by step, and the role-by-role manuals made from the tested screens."
   },
   "interface": {
     "unknown": "Unknown interface.",
@@ -148,7 +149,10 @@
     "notInPocShort": "Not in POC",
     "systemMap": "System map",
     "publicLookups": "Public lookups",
-    "plannedShort": "Planned"
+    "plannedShort": "Planned",
+    "stakeholders": "Stakeholders",
+    "lifecycles": "Lifecycles",
+    "manuals": "User manuals"
   },
   "passbook": {
     "eyebrow": "Member services · contributions",

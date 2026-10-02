@@ -1,0 +1,31 @@
+.org-layout { display: grid; grid-template-columns: minmax(0, 1fr) 22rem; gap: 1.25rem; align-items: start; }
+.org-chart { display: grid; gap: 0; }
+.org-level { display: grid; justify-items: stretch; }
+.org-connector { width: 2px; height: 1.25rem; background: #b8860b; justify-self: center; }
+.org-row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 0.75rem; }
+.org-units { display: grid; gap: 0.75rem; align-content: start; }
+.org-tier { background: #fff; border: 1px solid #d0d5dd; border-top: 4px solid #0b2e59; border-radius: 6px; padding: 0.75rem 0.9rem; }
+.org-tier h3 { font-family: Georgia, "Times New Roman", serif; margin: 0 0 0.25rem; color: #0b2e59; }
+.org-side { border-top-color: #b8860b; }
+.org-outside-heading { margin: 1.5rem 0 0.5rem; font-family: Georgia, "Times New Roman", serif; color: #0b2e59; }
+.org-outside { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0.75rem; }
+.org-roles { list-style: none; margin: 0.5rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.org-role { font: inherit; font-size: 0.85rem; padding: 0.25rem 0.55rem; border: 1px solid #98a2b3; border-radius: 4px; background: #f8f9fb;
+  color: #0b2e59; cursor: pointer; text-align: left; }
+.org-role.org-login { border-left: 4px solid #b8860b; }
+.org-role[aria-pressed="true"] { background: #0b2e59; color: #fff; border-color: #0b2e59; }
+.org-role:focus-visible { outline: 3px solid #b8860b; outline-offset: 2px; }
+.org-dim { opacity: 0.35; }
+.org-detail { position: sticky; top: 1rem; }
+.org-acts { padding-left: 1.1rem; display: grid; gap: 0.4rem; }
+.org-acts .life-status { margin-left: 0.4rem; }
+.life-status { display: inline-block; font-size: 0.75rem; padding: 0.05rem 0.4rem; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.life-built { color: #1b6b3a; }
+.life-partly { color: #8a5a00; }
+.life-planned { color: #b42318; }
+.life-external, .life-offline, .life-future { color: #475467; }
+@media (max-width: 900px) {
+  .org-layout { grid-template-columns: 1fr; }
+  .org-row { grid-template-columns: 1fr; }
+  .org-detail { position: static; }
+}

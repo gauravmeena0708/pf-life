@@ -1231,7 +1231,7 @@
    ]
   },
   "fo.fa_accounts": {
-   "name": "DA / SS in the F&A (Accounts) wing — ledger debit posting, viewing the **Claim Approval Dockets (CAD)** of each level, reconciliation of rejected / returned payments",
+   "name": "DA / SS in the F&A (Accounts) wing — ledger debit posting, viewing the Claim Approval Dockets (CAD) of each level, reconciliation of rejected / returned payments",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
     "W": 2,
@@ -1616,7 +1616,7 @@
    ]
   },
   "fo.icf": {
-   "name": "**Inspector-cum-Facilitator** (replaces EO under the Labour Codes; web-based inspection scheme)",
+   "name": "Inspector-cum-Facilitator (replaces EO under the Labour Codes; web-based inspection scheme)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
     "W": 1,
@@ -1901,7 +1901,7 @@
    ]
   },
   "zo.rpfc1_audit": {
-   "name": "RPFC-I (Audit) and **Zonal Concurrent Audit Cell (CAC)** — daily download from the Audit Portal, alerts to ROs",
+   "name": "RPFC-I (Audit) and Zonal Concurrent Audit Cell (CAC) — daily download from the Audit Portal, alerts to ROs",
    "group": "E. Zonal Office (ZO)",
    "endpoints": {
     "W": 6,
@@ -1943,7 +1943,7 @@
    ]
   },
   "zo.vigilance": {
-   "name": "**Zonal Vigilance Directorate**",
+   "name": "Zonal Vigilance Directorate",
    "group": "E. Zonal Office (ZO)",
    "endpoints": {
     "W": 3,
@@ -2040,7 +2040,7 @@
    ]
   },
   "ho.fa_cao": {
-   "name": "FA & CAO — Finance & Accounts, **FIA vertical** (freezing category A), Balance Sheet cell",
+   "name": "FA & CAO — Finance & Accounts, FIA vertical (freezing category A), Balance Sheet cell",
    "group": "F. Head Office (HO) — leadership and divisions",
    "endpoints": {
     "W": 10,
@@ -2360,7 +2360,7 @@
    ]
   },
   "ho.cvo": {
-   "name": "**Chief Vigilance Officer** and **Director (Vigilance)**",
+   "name": "Chief Vigilance Officer and Director (Vigilance)",
    "group": "F. Head Office (HO) — leadership and divisions",
    "endpoints": {
     "W": 5,
@@ -2586,7 +2586,7 @@
    ]
   },
   "tech.ndc": {
-   "name": "**National Data Centre**, Dwarka (G-NOC, application hosting, batch jobs)",
+   "name": "National Data Centre, Dwarka (G-NOC, application hosting, batch jobs)",
    "group": "H. Technology and national operations",
    "endpoints": {
     "W": 3,
@@ -2605,7 +2605,7 @@
    ]
   },
   "tech.adc": {
-   "name": "**Alternate Data Centre**, Secunderabad (disaster recovery site; part of G-NOC with NDC)",
+   "name": "Alternate Data Centre, Secunderabad (disaster recovery site; part of G-NOC with NDC)",
    "group": "H. Technology and national operations",
    "endpoints": {
     "W": 2,
@@ -2624,7 +2624,7 @@
    ]
   },
   "tech.cpps": {
-   "name": "**CPPS / Central Payment and Reconciliation Centre** at NDC (pan-India pension disbursement, sponsor-bank reconciliation)",
+   "name": "CPPS / Central Payment and Reconciliation Centre at NDC (pan-India pension disbursement, sponsor-bank reconciliation)",
    "group": "H. Technology and national operations",
    "endpoints": {
     "W": 3,
@@ -3073,5 +3073,2972 @@
    ],
    "personas": []
   }
- }
+ },
+ "flows": {
+  "F01": "Establishment onboarding, signatories and configuration",
+  "F02": "Member onboarding, KYC and profile correction",
+  "F03": "ECR, challan, payment and contribution posting",
+  "F04": "PF claims, transfers and death / EDLI claims",
+  "F05": "Pension: application, PPO, disbursement, life certificate",
+  "F06": "Compliance, inspection, quasi-judicial proceedings and recovery",
+  "F07": "Freezing, de-freezing, fraud and vigilance",
+  "F08": "Grievances",
+  "F09": "Exempted establishments (PF trusts)",
+  "F10": "International workers",
+  "F11": "Inoperative accounts",
+  "F12": "Audit (concurrent, internal, external)",
+  "F13": "Monitoring, governance and reporting",
+  "F14": "Technology, security, data protection and training"
+ },
+ "activities": [
+  {
+   "id": "F01.register",
+   "flow": "F01",
+   "actor": "employer.owner",
+   "does": "Register establishment online and submit verification evidence",
+   "next": [
+    "F01.olre_scrutiny"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "CMP"
+  },
+  {
+   "id": "F01.mca_autoreg",
+   "flow": "F01",
+   "actor": "ext.mca",
+   "does": "Auto-register companies incorporated through SPICe+ / AGILE-PRO",
+   "next": [
+    "F01.olre_scrutiny"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "REF"
+  },
+  {
+   "id": "F01.ssp_reg",
+   "flow": "F01",
+   "actor": "ext.shram_suvidha",
+   "does": "Common registration through Shram Suvidha",
+   "next": [
+    "F01.olre_scrutiny"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "REF, CMP"
+  },
+  {
+   "id": "F01.kyc_registry",
+   "flow": "F01",
+   "actor": "ext.gstn",
+   "does": "Verify GSTIN of the establishment",
+   "next": [],
+   "status": "EXTERNAL",
+   "endpoints": 0,
+   "src": "EC"
+  },
+  {
+   "id": "F01.olre_scrutiny",
+   "flow": "F01",
+   "actor": "fo.da_compliance",
+   "does": "Scrutinise documents of a newly registered establishment (FO-interface >> OLRE >> View Documents) and open the compliance e-file",
+   "next": [
+    "F01.circle_review"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "CMP"
+  },
+  {
+   "id": "F01.circle_review",
+   "flow": "F01",
+   "actor": "fo.apfc",
+   "does": "Circle officer reviews coverage of the new establishment",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "CMP"
+  },
+  {
+   "id": "F01.form5a",
+   "flow": "F01",
+   "actor": "employer.signatory",
+   "does": "File / update Form 5A ownership return and branches (Form 2A), signed with DSC / e-sign",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "MAP"
+  },
+  {
+   "id": "F01.dsc_register",
+   "flow": "F01",
+   "actor": "employer.owner",
+   "does": "Register DSC or e-sign of an authorised signatory and submit the request letter",
+   "next": [
+    "F01.dsc_approve"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "MAP"
+  },
+  {
+   "id": "F01.dsc_approve",
+   "flow": "F01",
+   "actor": "fo.apfc",
+   "does": "Approve the DSC / e-sign registration at the PF office",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "MAP"
+  },
+  {
+   "id": "F01.signatories",
+   "flow": "F01",
+   "actor": "employer.owner",
+   "does": "View the establishment; authorise or revoke signatories",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 7,
+   "src": "MAP"
+  },
+  {
+   "id": "F01.operators",
+   "flow": "F01",
+   "actor": "employer.owner",
+   "does": "Invite, scope and revoke employer sub-users (User / Admin menus)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "WEB"
+  },
+  {
+   "id": "F01.signatory_profile",
+   "flow": "F01",
+   "actor": "employer.signatory",
+   "does": "View the establishment and what waits for its signature before approving returns and payments",
+   "next": [
+    "F03.ecr_approve"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "MAP"
+  },
+  {
+   "id": "F01.profile",
+   "flow": "F01",
+   "actor": "employer.operator",
+   "does": "View establishment profile, configuration, KYC and home-page alerts",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 7,
+   "src": "MAP"
+  },
+  {
+   "id": "F01.change_request",
+   "flow": "F01",
+   "actor": "employer.signatory",
+   "does": "Request configuration change, closure / deregistration or office transfer",
+   "next": [
+    "F01.change_decide"
+   ],
+   "status": "BUILT",
+   "endpoints": 7,
+   "src": "MAP"
+  },
+  {
+   "id": "F01.change_decide",
+   "flow": "F01",
+   "actor": "fo.apfc",
+   "does": "Decide establishment change, closure or transfer requests",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "MAP"
+  },
+  {
+   "id": "F01.establishment_owner",
+   "flow": "F01",
+   "actor": "employer.owner",
+   "does": "Keep the establishment record: KYC, branches (Form 2A), Form 5A, contractors; ask the office for profile or configuration changes",
+   "next": [
+    "F01.change_decide"
+   ],
+   "status": "BUILT",
+   "endpoints": 19,
+   "src": "MAP"
+  },
+  {
+   "id": "F01.contractors",
+   "flow": "F01",
+   "actor": "principal_employer",
+   "does": "Link contractors, upload work orders, watch contractor compliance",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "CMP, SOP-B"
+  },
+  {
+   "id": "F01.contractor_tag",
+   "flow": "F01",
+   "actor": "employer.operator",
+   "does": "As a contractor establishment, tag the ECR members who worked for a principal employer",
+   "next": [
+    "F01.contractors"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "CMP"
+  },
+  {
+   "id": "F01.liquidation",
+   "flow": "F01",
+   "actor": "liquidator",
+   "does": "Receive EPFO dues claim for an employer in liquidation / insolvency",
+   "next": [
+    "F06.recovery"
+   ],
+   "status": "FUTURE",
+   "endpoints": 1,
+   "src": "SOP-B, CMP"
+  },
+  {
+   "id": "F02.register",
+   "flow": "F02",
+   "actor": "employer.operator",
+   "does": "Register a new joinee (create or link UAN), bulk registration, Form 11 declaration",
+   "next": [
+    "F02.kyc_approve"
+   ],
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "MAP"
+  },
+  {
+   "id": "F02.uan_self",
+   "flow": "F02",
+   "actor": "member",
+   "does": "Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP",
+   "next": [
+    "F02.kyc_seed"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "REF"
+  },
+  {
+   "id": "F02.uidai",
+   "flow": "F02",
+   "actor": "ext.uidai",
+   "does": "Aadhaar e-KYC, OTP and face-authentication responses",
+   "next": [],
+   "status": "EXTERNAL",
+   "endpoints": 0,
+   "src": "JD, REF"
+  },
+  {
+   "id": "F02.csc_assist",
+   "flow": "F02",
+   "actor": "csc_operator",
+   "does": "Assist a member with UAN allotment (mock Aadhaar face authentication)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "PEN, EC"
+  },
+  {
+   "id": "F02.kyc_seed",
+   "flow": "F02",
+   "actor": "member",
+   "does": "Seed KYC (Aadhaar, bank, PAN)",
+   "next": [
+    "F02.kyc_approve"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "MAP"
+  },
+  {
+   "id": "F02.kyc_approve",
+   "flow": "F02",
+   "actor": "employer.signatory",
+   "does": "Approve KYC seeded by member / pending for digital signature, with DSC or e-sign",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "MAP"
+  },
+  {
+   "id": "F02.pan_verify",
+   "flow": "F02",
+   "actor": "ext.income_tax",
+   "does": "Verify PAN",
+   "next": [],
+   "status": "EXTERNAL",
+   "endpoints": 0,
+   "src": "EC"
+  },
+  {
+   "id": "F02.kyc_bulk",
+   "flow": "F02",
+   "actor": "employer.operator",
+   "does": "Bulk KYC upload; KYC and PAN verification",
+   "next": [
+    "F02.kyc_approve"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "MAP"
+  },
+  {
+   "id": "F02.missing_details",
+   "flow": "F02",
+   "actor": "employer.operator",
+   "does": "Fill missing member details; member location mapping; download active members",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "MAP"
+  },
+  {
+   "id": "F02.exit",
+   "flow": "F02",
+   "actor": "employer.operator",
+   "does": "Mark date of exit (single or bulk) and corrections",
+   "next": [
+    "F02.employer_approvals"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "MAP"
+  },
+  {
+   "id": "F02.employer_approvals",
+   "flow": "F02",
+   "actor": "employer.signatory",
+   "does": "Approve queued member changes (Member > Approvals)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "MAP"
+  },
+  {
+   "id": "F02.self_service",
+   "flow": "F02",
+   "actor": "member",
+   "does": "View profile, service history, UAN card; change contact details; e-nomination; self-marked exit",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 11,
+   "src": "MAP, WEB"
+  },
+  {
+   "id": "F02.jd_submit",
+   "flow": "F02",
+   "actor": "member",
+   "does": "Submit Joint Declaration to correct one of 12 profile parameters",
+   "next": [
+    "F02.jd_attest"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "JD"
+  },
+  {
+   "id": "F02.jd_attest",
+   "flow": "F02",
+   "actor": "employer.signatory",
+   "does": "Attest, return or reject the Joint Declaration; employer-initiated JD",
+   "next": [
+    "F02.jd_initiate"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "JD"
+  },
+  {
+   "id": "F02.jd_initiate",
+   "flow": "F02",
+   "actor": "fo.da_accounts",
+   "does": "Initiator: examine JD and documents, recommend",
+   "next": [
+    "F02.jd_verify",
+    "F02.jd_verify_ao"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "JD"
+  },
+  {
+   "id": "F02.jd_verify",
+   "flow": "F02",
+   "actor": "fo.ss",
+   "does": "Verifier (SS route): cross-check and recommend",
+   "next": [
+    "F02.jd_approve",
+    "F02.jd_approve_minor"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "JD"
+  },
+  {
+   "id": "F02.jd_verify_ao",
+   "flow": "F02",
+   "actor": "fo.ao",
+   "does": "Verifier (AO route): cross-check and recommend",
+   "next": [
+    "F02.jd_approve",
+    "F02.jd_approve_minor"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "JD"
+  },
+  {
+   "id": "F02.jd_approve",
+   "flow": "F02",
+   "actor": "fo.apfc",
+   "does": "Approver for major changes (APFC / RPFC-II / RPFC-I per JD Table 3): approve / reject / return",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "JD"
+  },
+  {
+   "id": "F02.jd_approve_minor",
+   "flow": "F02",
+   "actor": "fo.ao",
+   "does": "Approver for minor changes (AO / SS per JD Table 3)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "JD"
+  },
+  {
+   "id": "F02.jd_monitor",
+   "flow": "F02",
+   "actor": "fo.rpfc1",
+   "does": "Monitor JD pendency across the RO",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "JD"
+  },
+  {
+   "id": "F03.ecr_prepare",
+   "flow": "F03",
+   "actor": "employer.operator",
+   "does": "Prepare regular / arrear / supplementary ECR and validate",
+   "next": [
+    "F03.ecr_approve"
+   ],
+   "status": "BUILT",
+   "endpoints": 5,
+   "src": "MAP, WEB"
+  },
+  {
+   "id": "F03.b2b_upload",
+   "flow": "F03",
+   "actor": "payroll_provider",
+   "does": "Upload ECR through the B2B payroll API on behalf of an employer",
+   "next": [
+    "F03.ecr_approve"
+   ],
+   "status": "FUTURE",
+   "endpoints": 1,
+   "src": "WEB"
+  },
+  {
+   "id": "F03.ecr_approve",
+   "flow": "F03",
+   "actor": "employer.signatory",
+   "does": "Review, approve and submit ECR (generates TRRN); cancel an unpaid TRRN",
+   "next": [
+    "F03.pay"
+   ],
+   "status": "BUILT",
+   "endpoints": 6,
+   "src": "MAP"
+  },
+  {
+   "id": "F03.pay",
+   "flow": "F03",
+   "actor": "employer.signatory",
+   "does": "Pay challan online (or via bank counter where allowed) and download the payment receipt",
+   "next": [
+    "F03.bank_confirm"
+   ],
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "MAP"
+  },
+  {
+   "id": "F03.bank_confirm",
+   "flow": "F03",
+   "actor": "ext.collecting_bank",
+   "does": "Confirm or return the payment",
+   "next": [
+    "F03.post"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "MAP"
+  },
+  {
+   "id": "F03.post",
+   "flow": "F03",
+   "actor": "tech.epfo3",
+   "does": "Post balanced ledger entries and emit ContributionPosted",
+   "next": [
+    "F03.passbook",
+    "F03.receipt"
+   ],
+   "status": "OFFLINE",
+   "endpoints": 0,
+   "src": "init.md §3.3"
+  },
+  {
+   "id": "F03.receipt",
+   "flow": "F03",
+   "actor": "employer.operator",
+   "does": "Download receipt; view return history and compliance summary",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "MAP"
+  },
+  {
+   "id": "F03.passbook",
+   "flow": "F03",
+   "actor": "member",
+   "does": "View passbook, annual statement and taxable-interest split",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "MAP"
+  },
+  {
+   "id": "F03.direct_challan",
+   "flow": "F03",
+   "actor": "employer.signatory",
+   "does": "Create a Direct Challan: administrative / inspection charges, or miscellaneous challan for 14B damages and 7Q interest; pay demands",
+   "next": [
+    "F03.knock_off"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "MAP"
+  },
+  {
+   "id": "F03.knock_off",
+   "flow": "F03",
+   "actor": "fo.da_compliance",
+   "does": "Knock off auto-calculated 14B / 7Q against a miscellaneous challan (FO INTERFACE >> 14B/7Q Knock Off)",
+   "next": [
+    "F03.knock_off_approve"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CMP"
+  },
+  {
+   "id": "F03.knock_off_approve",
+   "flow": "F03",
+   "actor": "fo.ss",
+   "does": "Approve the knock-off (14B/7Q Knock Off >> Approve)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CMP"
+  },
+  {
+   "id": "F03.receipts",
+   "flow": "F03",
+   "actor": "fo.cash",
+   "does": "Handle cheques / DDs and receipts outside the online flow; record VDR entries",
+   "next": [
+    "F03.vdr_reconcile"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "PEN, FRM"
+  },
+  {
+   "id": "F03.vdr_reconcile",
+   "flow": "F03",
+   "actor": "fo.da_accounts",
+   "does": "Reconcile VDR entries with ECRs; TRRN adjustment; Member VDR deposits",
+   "next": [
+    "F03.eo_certify"
+   ],
+   "status": "PARTLY",
+   "endpoints": 5,
+   "src": "PEN, FRM"
+  },
+  {
+   "id": "F03.eo_certify",
+   "flow": "F03",
+   "actor": "fo.eo",
+   "does": "Certify an employer's revised ECR for major corrections (VDR-ECR process)",
+   "next": [],
+   "status": "PLANNED",
+   "endpoints": 1,
+   "src": "FRM"
+  },
+  {
+   "id": "F03.ledger_exception",
+   "flow": "F03",
+   "actor": "fo.da_accounts",
+   "does": "Appendix-E adjustment (e.g. PF → EPS) or VDR (Special) credit — exceptional",
+   "next": [
+    "F03.ledger_exception_approve"
+   ],
+   "status": "PARTLY",
+   "endpoints": 3,
+   "src": "PEN, FRM, FIA"
+  },
+  {
+   "id": "F03.ledger_exception_approve",
+   "flow": "F03",
+   "actor": "fo.apfc",
+   "does": "Approve an exceptional ledger adjustment (RPFC-II F&A)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "FRM"
+  },
+  {
+   "id": "F03.ecr_reject",
+   "flow": "F03",
+   "actor": "fo.da_accounts",
+   "does": "Reject an ECR before posting; reverse a posted journal",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "FRM"
+  },
+  {
+   "id": "F03.ecr_office_approval",
+   "flow": "F03",
+   "actor": "fo.apfc",
+   "does": "Approve ECRs held for office approval (ECR Approval menu on the APFC login; scope to be confirmed)",
+   "next": [],
+   "status": "PARTLY",
+   "endpoints": 2,
+   "src": "SS"
+  },
+  {
+   "id": "F03.payment_reject",
+   "flow": "F03",
+   "actor": "fo.cash",
+   "does": "Reject an unpaid or erroneous challan stuck in pending bank status",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "SS"
+  },
+  {
+   "id": "F03.annual_batch",
+   "flow": "F03",
+   "actor": "tech.batch.annual_accounts",
+   "does": "Year-end interest crediting; locks each member ledger while it runs (claims wait)",
+   "next": [
+    "F03.passbook",
+    "F04.lock_admin"
+   ],
+   "status": "OFFLINE",
+   "endpoints": 0,
+   "src": "SS, MAP"
+  },
+  {
+   "id": "F03.interest",
+   "flow": "F03",
+   "actor": "ho.fa_cao",
+   "does": "Record the approved annual interest rate and run interest crediting",
+   "next": [
+    "F03.passbook"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "EC, MAP"
+  },
+  {
+   "id": "F03.interest_rate",
+   "flow": "F03",
+   "actor": "gov.cbt",
+   "does": "Recommend the annual interest rate (notified with Ministry concurrence)",
+   "next": [
+    "F03.interest"
+   ],
+   "status": "OFFLINE",
+   "endpoints": 0,
+   "src": "EC"
+  },
+  {
+   "id": "F04.preflight",
+   "flow": "F04",
+   "actor": "member",
+   "does": "Pre-flight before filing: check account readiness (blockers), service history and eligibility for the chosen form",
+   "next": [
+    "F04.claim_file",
+    "F04.transfer",
+    "F02.kyc_seed"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "SS"
+  },
+  {
+   "id": "F04.claim_file",
+   "flow": "F04",
+   "actor": "member",
+   "does": "Check eligibility and file a claim (Form 31 / 19 / 10C); confirm intent; upload documents",
+   "next": [
+    "F04.auto_settle",
+    "F04.attest"
+   ],
+   "status": "BUILT",
+   "endpoints": 5,
+   "src": "PEN, REF"
+  },
+  {
+   "id": "F04.auto_settle",
+   "flow": "F04",
+   "actor": "tech.epfo3",
+   "does": "Auto-settle claims that clear risk checks; route the rest to the office",
+   "next": [
+    "F04.process",
+    "F04.pay"
+   ],
+   "status": "OFFLINE",
+   "endpoints": 0,
+   "src": "REF"
+  },
+  {
+   "id": "F04.attest",
+   "flow": "F04",
+   "actor": "employer.signatory",
+   "does": "Attest claims that need employer attestation",
+   "next": [
+    "F04.process"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "WEB"
+  },
+  {
+   "id": "F04.physical",
+   "flow": "F04",
+   "actor": "fo.diary",
+   "does": "Diarise physical claims and documents",
+   "next": [
+    "F04.physical_validate"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "PEN"
+  },
+  {
+   "id": "F04.physical_validate",
+   "flow": "F04",
+   "actor": "fo.da_accounts",
+   "does": "UAN allocation / Aadhaar validation of a physical claim",
+   "next": [
+    "F04.process"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "PEN"
+  },
+  {
+   "id": "F04.process",
+   "flow": "F04",
+   "actor": "fo.da_accounts",
+   "does": "Scrutinise and process the claim (Claims > Transaction); recommend",
+   "next": [
+    "F04.approve_ss",
+    "F04.approve_ao"
+   ],
+   "status": "BUILT",
+   "endpoints": 12,
+   "src": "PEN, FIA"
+  },
+  {
+   "id": "F04.approve_ss",
+   "flow": "F04",
+   "actor": "fo.ss",
+   "does": "Approve claims in the SS band",
+   "next": [
+    "F04.approve_apfc",
+    "F04.pay"
+   ],
+   "status": "BUILT",
+   "endpoints": 5,
+   "src": "FIA"
+  },
+  {
+   "id": "F04.approve_ao",
+   "flow": "F04",
+   "actor": "fo.ao",
+   "does": "Approve claims in the AO band",
+   "next": [
+    "F04.approve_oic",
+    "F04.pay"
+   ],
+   "status": "BUILT",
+   "endpoints": 5,
+   "src": "FIA"
+  },
+  {
+   "id": "F04.approve_apfc",
+   "flow": "F04",
+   "actor": "fo.apfc",
+   "does": "Approve claims in the APFC / RPFC-II band",
+   "next": [
+    "F04.pay"
+   ],
+   "status": "BUILT",
+   "endpoints": 5,
+   "src": "FIA"
+  },
+  {
+   "id": "F04.approve_oic",
+   "flow": "F04",
+   "actor": "fo.oic",
+   "does": "Approve claims above the top threshold",
+   "next": [
+    "F04.pay"
+   ],
+   "status": "BUILT",
+   "endpoints": 5,
+   "src": "FIA"
+  },
+  {
+   "id": "F04.pay",
+   "flow": "F04",
+   "actor": "fo.cash",
+   "does": "Issue payment instruction / payment scroll; reconcile returns; re-issue",
+   "next": [
+    "F04.track"
+   ],
+   "status": "BUILT",
+   "endpoints": 7,
+   "src": "PEN, MAP"
+  },
+  {
+   "id": "F04.cad",
+   "flow": "F04",
+   "actor": "fo.fa_accounts",
+   "does": "View the Claim Approval Docket each level generated (interest split, TDS, net payable) and the CAD static data",
+   "next": [
+    "F04.pay"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "SS"
+  },
+  {
+   "id": "F04.post_submission",
+   "flow": "F04",
+   "actor": "member",
+   "does": "After filing: follow the claim's audit trail, cancel it before a decision, or switch to another KYC-verified bank account before payment",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "SS"
+  },
+  {
+   "id": "F04.redisburse_request",
+   "flow": "F04",
+   "actor": "member",
+   "does": "Submit corrected bank details after a payment return",
+   "next": [
+    "F04.redisburse_approve"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "SS"
+  },
+  {
+   "id": "F04.redisburse_approve",
+   "flow": "F04",
+   "actor": "fo.apfc",
+   "does": "Authorise a new payment after a return without reopening adjudication",
+   "next": [
+    "F04.pay"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "SS"
+  },
+  {
+   "id": "F04.attestation_view",
+   "flow": "F04",
+   "actor": "fo.da_accounts",
+   "does": "Open the employer-signed PDF / DSC document before the approve action is enabled",
+   "next": [
+    "F04.process"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "SS"
+  },
+  {
+   "id": "F04.lock_admin",
+   "flow": "F04",
+   "actor": "fo.oic",
+   "does": "Inspect member-ledger locks and release an orphaned one with a recorded reason",
+   "next": [
+    "F04.process"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "SS"
+  },
+  {
+   "id": "F04.pro_intake",
+   "flow": "F04",
+   "actor": "fo.pro_intake",
+   "does": "Inward claims at the PRO counter; check death certificates; resolve UAN registration problems at intake",
+   "next": [
+    "F04.process"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "SS, PEN"
+  },
+  {
+   "id": "F04.track",
+   "flow": "F04",
+   "actor": "member",
+   "does": "Track claims and notifications; download Form 16A",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 5,
+   "src": "WEB"
+  },
+  {
+   "id": "F04.tds",
+   "flow": "F04",
+   "actor": "fo.da_accounts",
+   "does": "Compute TDS on withdrawals and file with Income Tax",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "MAP"
+  },
+  {
+   "id": "F04.transfer",
+   "flow": "F04",
+   "actor": "member",
+   "does": "Request Form 13 transfer; confirm auto-transfer; view Annexure K",
+   "next": [
+    "F04.transfer_attest"
+   ],
+   "status": "BUILT",
+   "endpoints": 6,
+   "src": "MAP, WEB"
+  },
+  {
+   "id": "F04.transfer_attest",
+   "flow": "F04",
+   "actor": "employer.signatory",
+   "does": "Attest pending transfer claims (Online Services > Transfer Claims)",
+   "next": [
+    "F04.transfer_process"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "MAP"
+  },
+  {
+   "id": "F04.transfer_process",
+   "flow": "F04",
+   "actor": "fo.da_accounts",
+   "does": "Verify a transfer between member IDs / offices (service at both establishments)",
+   "next": [
+    "F04.transfer_decide"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "MAP"
+  },
+  {
+   "id": "F04.transfer_decide",
+   "flow": "F04",
+   "actor": "fo.ao",
+   "does": "Approve, reject or return a verified Form 13 transfer (the ledger moves the balance)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "MAP, PD"
+  },
+  {
+   "id": "F04.transfer_recredit",
+   "flow": "F04",
+   "actor": "fo.da_accounts",
+   "does": "Recredit a rejected transfer-in to the member ledger",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "SS"
+  },
+  {
+   "id": "F04.death_claim",
+   "flow": "F04",
+   "actor": "claimant",
+   "does": "File PF (Form 20), EDLI (Form 5IF) or composite death claim",
+   "next": [
+    "F04.edli"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "PEN, EDLI"
+  },
+  {
+   "id": "F04.co_beneficiary",
+   "flow": "F04",
+   "actor": "claimant.nominee",
+   "does": "Inward as an additional beneficiary on an open death claim and track own share",
+   "next": [
+    "F04.shares"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "SS, EDLI"
+  },
+  {
+   "id": "F04.shares",
+   "flow": "F04",
+   "actor": "fo.apfc",
+   "does": "Amend beneficiary shares (legacy-settled share, deceased nominee, court order) and check the share summary",
+   "next": [
+    "F04.edli",
+    "F04.cad"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "SS"
+  },
+  {
+   "id": "F04.edli",
+   "flow": "F04",
+   "actor": "fo.edli",
+   "does": "Process EDLI assurance benefit",
+   "next": [
+    "F04.pay"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "EDLI"
+  },
+  {
+   "id": "F05.apply",
+   "flow": "F05",
+   "actor": "member",
+   "does": "Apply for monthly pension (Form 10D) or scheme certificate",
+   "next": [
+    "F05.ids"
+   ],
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.preview",
+   "flow": "F05",
+   "actor": "member",
+   "does": "Pre-check pension eligibility across all member IDs; see untransferred service to fix first (Form 13)",
+   "next": [
+    "F04.transfer",
+    "F05.apply"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "SS"
+  },
+  {
+   "id": "F05.sc_surrender",
+   "flow": "F05",
+   "actor": "member",
+   "does": "Surrender a Scheme Certificate for monthly pension or withdrawal benefit",
+   "next": [
+    "F05.sc_adjudicate"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "SS"
+  },
+  {
+   "id": "F05.disabled_apply",
+   "flow": "F05",
+   "actor": "member.disabled",
+   "does": "Apply for disablement pension",
+   "next": [
+    "F05.ids"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.family_apply",
+   "flow": "F05",
+   "actor": "family_pensioner",
+   "does": "Apply for widow / child / orphan / dependent-parent pension",
+   "next": [
+    "F05.ids"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.ids",
+   "flow": "F05",
+   "actor": "fo.da_accounts",
+   "does": "Prepare Input Data Sheet (Claims > Transaction > Form-10D/10C); update service history in FO Interface",
+   "next": [
+    "F05.ids_approve"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.ids_approve",
+   "flow": "F05",
+   "actor": "fo.ao",
+   "does": "Approve the Input Data Sheet and send to the Pension section via inter-section diary",
+   "next": [
+    "F05.worksheet"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.worksheet",
+   "flow": "F05",
+   "actor": "fo.da_pension",
+   "does": "Generate pension worksheet (Pension > Transaction > Pension Worksheet); Special 10D for incomplete data; send errors back",
+   "next": [
+    "F05.ppo"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.aggregate",
+   "flow": "F05",
+   "actor": "fo.da_pension",
+   "does": "Aggregate untransferred past service into the calculation sheet",
+   "next": [
+    "F05.worksheet"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "SS"
+  },
+  {
+   "id": "F05.sc_adjudicate",
+   "flow": "F05",
+   "actor": "fo.da_pension",
+   "does": "Validate and cancel a surrendered Scheme Certificate",
+   "next": [
+    "F05.ids"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "SS"
+  },
+  {
+   "id": "F05.ppo",
+   "flow": "F05",
+   "actor": "fo.da_pension",
+   "does": "Generate PPO; process transfer-in with / without PPO",
+   "next": [
+    "F05.ppo_approve"
+   ],
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.initial_arrear",
+   "flow": "F05",
+   "actor": "fo.ss_pension",
+   "does": "Check initial arrear and forward",
+   "next": [
+    "F05.ppo_approve"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.ppo_approve",
+   "flow": "F05",
+   "actor": "fo.apfc_pension",
+   "does": "Approve worksheet, PPO and initial arrear; e-sign PPO; decide higher-pension options",
+   "next": [
+    "F05.dispatch"
+   ],
+   "status": "BUILT",
+   "endpoints": 7,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.dispatch",
+   "flow": "F05",
+   "actor": "fo.da_pension",
+   "does": "Dispatch PPO and scroll to the bank",
+   "next": [
+    "F05.cpps"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.cpps",
+   "flow": "F05",
+   "actor": "tech.cpps",
+   "does": "Monthly pan-India disbursement through the sponsor bank; reconcile paid statements",
+   "next": [
+    "F05.bank"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "PEN, REF"
+  },
+  {
+   "id": "F05.disbursement_section",
+   "flow": "F05",
+   "actor": "fo.pension_disbursement",
+   "does": "Legacy bank-wise disbursement tasks until CPPS takes over",
+   "next": [
+    "F05.cpps"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.bank",
+   "flow": "F05",
+   "actor": "ext.pension_bank",
+   "does": "Credit pensions; send paid statements",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.pensioner_view",
+   "flow": "F05",
+   "actor": "pensioner",
+   "does": "View PPO, pension slips, payments; change bank; declarations; public pension enquiries",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 9,
+   "src": "PEN, WEB"
+  },
+  {
+   "id": "F05.family_apply_claimant",
+   "flow": "F05",
+   "actor": "claimant",
+   "does": "The widow / widower or child of a member who died in service files Form 10D for a family pension and follows it",
+   "next": [
+    "F05.ids"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.family_view",
+   "flow": "F05",
+   "actor": "family_pensioner",
+   "does": "View pension; submit non-remarriage / non-employment declarations",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.dlc",
+   "flow": "F05",
+   "actor": "pensioner",
+   "does": "Submit Digital Life Certificate; check status",
+   "next": [
+    "F05.dlc_event"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.dlc_event",
+   "flow": "F05",
+   "actor": "ext.jeevan_pramaan",
+   "does": "Send the DLC result",
+   "next": [
+    "F05.dlc_monitor"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.dlc_doorstep",
+   "flow": "F05",
+   "actor": "ext.ippb",
+   "does": "Doorstep DLC through India Post Payments Bank",
+   "next": [
+    "F05.dlc_event"
+   ],
+   "status": "EXTERNAL",
+   "endpoints": 0,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.dlc_monitor",
+   "flow": "F05",
+   "actor": "fo.apfc_pension",
+   "does": "Monitor overdue life certificates; suspend or resume pension",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.updation",
+   "flow": "F05",
+   "actor": "fo.da_pension",
+   "does": "Pension enquiry (PPO, payments, arrears, recovery, TDS); initiate and track updation activities (basic details, pension start / stop, DLC revalidation, unhold) and PRO-inwarded PPO amendments and death / LC / remarriage updations",
+   "next": [
+    "F05.dlc_monitor"
+   ],
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "SS"
+  },
+  {
+   "id": "F05.brs",
+   "flow": "F05",
+   "actor": "fo.apfc_pension",
+   "does": "Monthly Bank Reconciliation Statement of pension scrolls vs bank debit advices",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "SS, PEN"
+  },
+  {
+   "id": "F05.higher_member",
+   "flow": "F05",
+   "actor": "member",
+   "does": "Apply for pension on higher wages (joint option); track status",
+   "next": [
+    "F05.higher_employer"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.higher_employer",
+   "flow": "F05",
+   "actor": "employer.signatory",
+   "does": "Validate joint options and upload wage details",
+   "next": [
+    "F05.higher_deposit"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.higher_deposit",
+   "flow": "F05",
+   "actor": "fo.da_accounts",
+   "does": "Book dues deposit through Member VDR ('Pension on Higher Wages'); Appendix-E code for PF → EPS diversion",
+   "next": [
+    "F05.ppo_approve"
+   ],
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.actuarial",
+   "flow": "F05",
+   "actor": "ho.actuarial",
+   "does": "Extract EPS data for actuarial valuation",
+   "next": [
+    "F05.valuation"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.valuation",
+   "flow": "F05",
+   "actor": "ext.actuary",
+   "does": "Perform EPS actuarial valuation",
+   "next": [],
+   "status": "OFFLINE",
+   "endpoints": 0,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.policy",
+   "flow": "F05",
+   "actor": "ho.pension",
+   "does": "Pension policy, monitoring of DLC / higher-pension / death-claim pendency",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.peic",
+   "flow": "F05",
+   "actor": "gov.peic",
+   "does": "Review pension and EDLI implementation",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "PEN"
+  },
+  {
+   "id": "F06.detect",
+   "flow": "F06",
+   "actor": "ho.caiu",
+   "does": "Analyse data and allocate risk-based inspections / risk signals",
+   "next": [
+    "F06.schedule"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "SOP-B, EC"
+  },
+  {
+   "id": "F06.defaulters",
+   "flow": "F06",
+   "actor": "fo.da_compliance",
+   "does": "Identify non-filers / short payers; open compliance case",
+   "next": [
+    "F06.schedule"
+   ],
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "CMP"
+  },
+  {
+   "id": "F06.schedule",
+   "flow": "F06",
+   "actor": "fo.apfc",
+   "does": "Circle officer schedules inspection (incl. CAIU-allocated)",
+   "next": [
+    "F06.inspect"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CMP, ICF"
+  },
+  {
+   "id": "F06.inspect",
+   "flow": "F06",
+   "actor": "fo.icf",
+   "does": "Conduct inspection; upload report on Unified Portal and Shram Suvidha",
+   "next": [
+    "F06.report_process"
+   ],
+   "status": "FUTURE",
+   "endpoints": 1,
+   "src": "ICF"
+  },
+  {
+   "id": "F06.inspect_legacy",
+   "flow": "F06",
+   "actor": "fo.eo",
+   "does": "Enforcement Officer inspection (legacy role before ICF)",
+   "next": [
+    "F06.report_process"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CMP, MAP"
+  },
+  {
+   "id": "F06.decide_report",
+   "flow": "F06",
+   "actor": "fo.apfc",
+   "does": "Circle officer decides on the inspection report (T+7): initiate a 7A inquiry or no action",
+   "next": [
+    "F06.allocate"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CMP"
+  },
+  {
+   "id": "F06.report_process",
+   "flow": "F06",
+   "actor": "fo.da_compliance",
+   "does": "Process the inspection report (DA T+3, SS T+5); register the inquiry the circle officer decides on",
+   "next": [
+    "F06.ss_note"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "CMP"
+  },
+  {
+   "id": "F06.ss_note",
+   "flow": "F06",
+   "actor": "fo.ss",
+   "does": "Section Supervisor puts the report up to the circle officer (T+5) and registers the inquiry on e-Proceedings within 2 working days of approval",
+   "next": [
+    "F06.decide_report"
+   ],
+   "status": "BUILT",
+   "endpoints": 5,
+   "src": "CMP"
+  },
+  {
+   "id": "F06.allocate",
+   "flow": "F06",
+   "actor": "fo.oic",
+   "does": "Officer in charge: inquiries allocated at random by size; reassign on transfer, a sensitive-post bar or an officer earlier in the case",
+   "next": [
+    "F06.proceed"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CMP"
+  },
+  {
+   "id": "F06.proceed",
+   "flow": "F06",
+   "actor": "fo.apfc",
+   "does": "Quasi-judicial authority: issue notice / summons, hold hearings (e-Proceedings Cause List, Daily Order)",
+   "next": [
+    "F06.employer_reply"
+   ],
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "CMP, EP"
+  },
+  {
+   "id": "F06.proceed_large",
+   "flow": "F06",
+   "actor": "fo.oic",
+   "does": "RPFC-I / officer in charge conducts inquiries of establishments above 1,000 contributory members: summons, hearings, the 7A order",
+   "next": [
+    "F06.employer_reply"
+   ],
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "CMP"
+  },
+  {
+   "id": "F06.order",
+   "flow": "F06",
+   "actor": "fo.apfc",
+   "does": "Pass 7A / 14B / 7Q order (e-Proceedings Final Order); 7B review; 7C; 26B disputes",
+   "next": [
+    "F03.direct_challan",
+    "F06.appeal",
+    "F06.recovery"
+   ],
+   "status": "PARTLY",
+   "endpoints": 4,
+   "src": "CMP, EP"
+  },
+  {
+   "id": "F06.employer_reply",
+   "flow": "F06",
+   "actor": "employer.signatory",
+   "does": "Reply and submit evidence in proceedings",
+   "next": [
+    "F06.order"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CMP"
+  },
+  {
+   "id": "F06.employer_owner_reply",
+   "flow": "F06",
+   "actor": "employer.owner",
+   "does": "Follow the establishment's inquiries (diary number, summons, daily orders, the order) and reply",
+   "next": [
+    "F06.order"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CMP"
+  },
+  {
+   "id": "F06.vishwas_apply",
+   "flow": "F06",
+   "actor": "employer.signatory",
+   "does": "Apply under VISHWAS to settle a 14B damages / penalty dispute at reduced rates",
+   "next": [
+    "F06.vishwas_decide"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "SS, WEB"
+  },
+  {
+   "id": "F06.vishwas_decide",
+   "flow": "F06",
+   "actor": "fo.apfc",
+   "does": "Recalculate damages under VISHWAS and decide; revised demand is paid through a direct challan",
+   "next": [
+    "F03.direct_challan"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "SS, WEB"
+  },
+  {
+   "id": "F06.appeal",
+   "flow": "F06",
+   "actor": "ext.cgit",
+   "does": "Tribunal hears 7-I appeals and decides 7-O pre-deposit / waiver",
+   "next": [
+    "F06.legal"
+   ],
+   "status": "OFFLINE",
+   "endpoints": 0,
+   "src": "EC, CMP"
+  },
+  {
+   "id": "F06.courts",
+   "flow": "F06",
+   "actor": "ext.courts",
+   "does": "Writs and orders on EPFO matters",
+   "next": [
+    "F06.legal"
+   ],
+   "status": "OFFLINE",
+   "endpoints": 0,
+   "src": "EC, CMP, EXM"
+  },
+  {
+   "id": "F06.legal",
+   "flow": "F06",
+   "actor": "fo.legal",
+   "does": "Record 7-I appeals, 7-O pre-deposits / waivers and court / tribunal orders; track compliance",
+   "next": [],
+   "status": "PLANNED",
+   "endpoints": 6,
+   "src": "SOP-B, CMP"
+  },
+  {
+   "id": "F06.recovery",
+   "flow": "F06",
+   "actor": "fo.recovery_officer",
+   "does": "Take up recovery certificate for unpaid assessed dues",
+   "next": [
+    "F06.garnishee",
+    "F06.attach"
+   ],
+   "status": "PLANNED",
+   "endpoints": 1,
+   "src": "REC"
+  },
+  {
+   "id": "F06.garnishee",
+   "flow": "F06",
+   "actor": "fo.recovery_officer",
+   "does": "8F garnishee order on bank / debtor (demo record only)",
+   "next": [],
+   "status": "PLANNED",
+   "endpoints": 1,
+   "src": "REC"
+  },
+  {
+   "id": "F06.attach",
+   "flow": "F06",
+   "actor": "fo.recovery_officer",
+   "does": "Attach movable / immovable property (demo record only)",
+   "next": [
+    "F06.sale",
+    "F06.receiver"
+   ],
+   "status": "PLANNED",
+   "endpoints": 1,
+   "src": "REC"
+  },
+  {
+   "id": "F06.sale",
+   "flow": "F06",
+   "actor": "fo.recovery_officer",
+   "does": "Sale of attached property (demo record only)",
+   "next": [],
+   "status": "PLANNED",
+   "endpoints": 1,
+   "src": "REC"
+  },
+  {
+   "id": "F06.receiver",
+   "flow": "F06",
+   "actor": "fo.recovery_officer",
+   "does": "Appoint receiver for business / property (demo record only)",
+   "next": [
+    "F06.arrest"
+   ],
+   "status": "PLANNED",
+   "endpoints": 1,
+   "src": "REC"
+  },
+  {
+   "id": "F06.arrest",
+   "flow": "F06",
+   "actor": "fo.recovery_officer",
+   "does": "Arrest and detention of defaulter as last resort (demo record only)",
+   "next": [],
+   "status": "PLANNED",
+   "endpoints": 1,
+   "src": "REC"
+  },
+  {
+   "id": "F06.prosecution",
+   "flow": "F06",
+   "actor": "fo.apfc",
+   "does": "Initiate prosecution",
+   "next": [
+    "F06.legal"
+   ],
+   "status": "PLANNED",
+   "endpoints": 1,
+   "src": "CMP"
+  },
+  {
+   "id": "F06.district",
+   "flow": "F06",
+   "actor": "do.staff",
+   "does": "District-level compliance follow-up and facilitation",
+   "next": [
+    "F06.schedule"
+   ],
+   "status": "FUTURE",
+   "endpoints": 2,
+   "src": "CMP"
+  },
+  {
+   "id": "F06.ho_policy",
+   "flow": "F06",
+   "actor": "ho.compliance",
+   "does": "Compliance policy and e-Proceedings oversight",
+   "next": [],
+   "status": "PLANNED",
+   "endpoints": 1,
+   "src": "CMP, EP"
+  },
+  {
+   "id": "F06.ho_recovery",
+   "flow": "F06",
+   "actor": "ho.recovery",
+   "does": "Recovery policy and monitoring",
+   "next": [],
+   "status": "PLANNED",
+   "endpoints": 1,
+   "src": "REC"
+  },
+  {
+   "id": "F06.ho_legal",
+   "flow": "F06",
+   "actor": "ho.legal",
+   "does": "Legal policy; monitoring of court cases",
+   "next": [],
+   "status": "PLANNED",
+   "endpoints": 1,
+   "src": "SOP-B"
+  },
+  {
+   "id": "F07.freeze_ho",
+   "flow": "F07",
+   "actor": "ho.fa_cao",
+   "does": "Order freezing for Category A (FIA vertical)",
+   "next": [
+    "F07.block"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "FIA"
+  },
+  {
+   "id": "F07.freeze_zo",
+   "flow": "F07",
+   "actor": "zo.rpfc1",
+   "does": "Order freezing (Categories B / C) at zone level",
+   "next": [
+    "F07.block"
+   ],
+   "status": "FUTURE",
+   "endpoints": 4,
+   "src": "FIA"
+  },
+  {
+   "id": "F07.freeze_ro_member",
+   "flow": "F07",
+   "actor": "fo.apfc",
+   "does": "Order freezing of MID / UAN (Categories B / C)",
+   "next": [
+    "F07.block"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "FIA"
+  },
+  {
+   "id": "F07.freeze_ro_est",
+   "flow": "F07",
+   "actor": "fo.oic",
+   "does": "Order freezing of an establishment (Category B); report to fraud committee",
+   "next": [
+    "F07.block",
+    "F07.committee"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "FIA"
+  },
+  {
+   "id": "F07.issue_raise",
+   "flow": "F07",
+   "actor": "fo.oic",
+   "does": "Raise an Issue Tracker request (freeze / de-freeze a member account, or a login notice) with the order",
+   "next": [
+    "F07.block"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "FIA"
+  },
+  {
+   "id": "F07.block",
+   "flow": "F07",
+   "actor": "ho.is",
+   "does": "Execute block / unblock raised through the Issue Tracker; show login pop-ups",
+   "next": [
+    "F07.verify_member",
+    "F07.verify_est"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "FIA"
+  },
+  {
+   "id": "F07.verify_member",
+   "flow": "F07",
+   "actor": "fo.da_accounts",
+   "does": "Open e-file and verify the frozen MID / UAN (member ledger, crowdsourcing)",
+   "next": [
+    "F07.verify_ss",
+    "F07.verify_ao"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "FIA"
+  },
+  {
+   "id": "F07.verify_est",
+   "flow": "F07",
+   "actor": "fo.da_compliance",
+   "does": "Verify the frozen establishment",
+   "next": [
+    "F07.verify_ss"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "FIA"
+  },
+  {
+   "id": "F07.verify_ss",
+   "flow": "F07",
+   "actor": "fo.ss",
+   "does": "Review verification (SS route)",
+   "next": [
+    "F07.verify_apfc"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "FIA"
+  },
+  {
+   "id": "F07.verify_ao",
+   "flow": "F07",
+   "actor": "fo.ao",
+   "does": "Review verification (AO route, accounts cases)",
+   "next": [
+    "F07.verify_apfc"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "FIA"
+  },
+  {
+   "id": "F07.verify_apfc",
+   "flow": "F07",
+   "actor": "fo.apfc",
+   "does": "Validate verification",
+   "next": [
+    "F07.defreeze"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "FIA"
+  },
+  {
+   "id": "F07.defreeze_est_maker",
+   "flow": "F07",
+   "actor": "fo.apfc",
+   "does": "Recommend de-freezing an establishment (maker); the OIC orders it (checker)",
+   "next": [
+    "F07.defreeze"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "FIA"
+  },
+  {
+   "id": "F07.defreeze",
+   "flow": "F07",
+   "actor": "fo.oic",
+   "does": "Recommend / order de-freezing; post-defreeze claims use the higher chain",
+   "next": [
+    "F07.block"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "FIA"
+  },
+  {
+   "id": "F07.committee",
+   "flow": "F07",
+   "actor": "zo.fraud_committee",
+   "does": "Review suspected fraud cases reported by OICs",
+   "next": [
+    "F07.vig_referral"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "FIA"
+  },
+  {
+   "id": "F07.vig_referral",
+   "flow": "F07",
+   "actor": "ho.caiu",
+   "does": "Refer a confirmed risk signal, a member's report or a complaint to vigilance",
+   "next": [
+    "F07.vig_ho"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "EC, MAP"
+  },
+  {
+   "id": "F07.vig_zone",
+   "flow": "F07",
+   "actor": "zo.vigilance",
+   "does": "Inquire into vigilance cases assigned to the zone, with restricted evidence access; report findings",
+   "next": [
+    "F07.vig_ho"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "MAP, EC"
+  },
+  {
+   "id": "F07.vig_ho",
+   "flow": "F07",
+   "actor": "ho.cvo",
+   "does": "CVO / Director (Vigilance): assign preliminary inquiries and decide on the findings",
+   "next": [
+    "F07.vig_zone"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "MAP, EC"
+  },
+  {
+   "id": "F07.vig_preventive",
+   "flow": "F07",
+   "actor": "ho.cvo",
+   "does": "Preventive vigilance: officers on sensitive posts and their rotation; clearances issued and what withheld them",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "MAP, EC"
+  },
+  {
+   "id": "F07.vig_clearance",
+   "flow": "F07",
+   "actor": "ho.hr",
+   "does": "Ask for vigilance clearance before a posting to a sensitive post, a promotion, retirement, a deputation or a passport NOC; plan the rotation of sensitive posts",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "MAP, EC"
+  },
+  {
+   "id": "F07.member_report",
+   "flow": "F07",
+   "actor": "member",
+   "does": "Report suspicious activity; account recovery; view sessions",
+   "next": [
+    "F07.vig_referral"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "init.md Journey D"
+  },
+  {
+   "id": "F08.member_file",
+   "flow": "F08",
+   "actor": "member",
+   "does": "Register, track, reopen, remind and give feedback on grievances",
+   "next": [
+    "F08.triage"
+   ],
+   "status": "BUILT",
+   "endpoints": 9,
+   "src": "WEB"
+  },
+  {
+   "id": "F08.public_file",
+   "flow": "F08",
+   "actor": "complainant",
+   "does": "Register grievance without login (pensioner, employer, others); check status",
+   "next": [
+    "F08.triage"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "WEB"
+  },
+  {
+   "id": "F08.pensioner_file",
+   "flow": "F08",
+   "actor": "pensioner",
+   "does": "Register pension grievance",
+   "next": [
+    "F08.triage"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "PEN"
+  },
+  {
+   "id": "F08.cpgrams",
+   "flow": "F08",
+   "actor": "ext.cpgrams",
+   "does": "Route CPGRAMS grievances to EPFO",
+   "next": [
+    "F08.triage"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "EC"
+  },
+  {
+   "id": "F08.triage",
+   "flow": "F08",
+   "actor": "fo.pro",
+   "does": "Triage, assign, reply with evidence, lodge local grievances, transfer between offices, resolve",
+   "next": [
+    "F08.escalate"
+   ],
+   "status": "BUILT",
+   "endpoints": 11,
+   "src": "EC, MAP"
+  },
+  {
+   "id": "F08.escalate",
+   "flow": "F08",
+   "actor": "zo.acc",
+   "does": "Handle grievances escalated to the zone",
+   "next": [
+    "F08.ho"
+   ],
+   "status": "FUTURE",
+   "endpoints": 6,
+   "src": "EC, REF"
+  },
+  {
+   "id": "F08.ho",
+   "flow": "F08",
+   "actor": "ho.customer_service",
+   "does": "Monitor grievance pendency and root causes",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "EC, REF"
+  },
+  {
+   "id": "F08.rti",
+   "flow": "F08",
+   "actor": "rti_applicant",
+   "does": "File RTI request (handled through the RTI portal; answered by the office)",
+   "next": [
+    "F08.rti_reply"
+   ],
+   "status": "EXTERNAL",
+   "endpoints": 0,
+   "src": "PEN, EC"
+  },
+  {
+   "id": "F08.rti_reply",
+   "flow": "F08",
+   "actor": "fo.pro",
+   "does": "Register RTI applications and reply within the period",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "PEN, EC"
+  },
+  {
+   "id": "F09.returns",
+   "flow": "F09",
+   "actor": "exempted.trust",
+   "does": "File monthly return of exempted establishment (Parts A-F); view trust profile",
+   "next": [
+    "F09.supervise"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "EXM"
+  },
+  {
+   "id": "F09.annexure_k",
+   "flow": "F09",
+   "actor": "exempted.trust",
+   "does": "Exchange Annexure K for transfers in / out",
+   "next": [
+    "F09.annexure_k_reconcile"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "EXM"
+  },
+  {
+   "id": "F09.annexure_k_reconcile",
+   "flow": "F09",
+   "actor": "fo.da_accounts",
+   "does": "Reconcile Annexure K with receipts and member records",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 5,
+   "src": "EXM"
+  },
+  {
+   "id": "F09.audit",
+   "flow": "F09",
+   "actor": "exempted.trust",
+   "does": "File the annual report with the trust's audited accounts (by 30 September)",
+   "next": [
+    "F09.supervise"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "EXM"
+  },
+  {
+   "id": "F09.surrender",
+   "flow": "F09",
+   "actor": "exempted.trust",
+   "does": "Surrender exemption (Form SE-1); follow the proceeding; reply to a show-cause notice",
+   "next": [
+    "F09.permit",
+    "F09.trust_handover",
+    "F09.past_accum"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "EXM"
+  },
+  {
+   "id": "F09.cancel",
+   "flow": "F09",
+   "actor": "fo.exemption",
+   "does": "Open cancellation with a show-cause notice (CE-1); drop it on the reply or send the draft agenda to the zone; gazette notification after cancellation",
+   "next": [
+    "F09.zo_forward"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "EXM"
+  },
+  {
+   "id": "F09.permit",
+   "flow": "F09",
+   "actor": "fo.oic",
+   "does": "RPFC-I permits compliance as an un-exempted establishment (SE-5)",
+   "next": [
+    "F09.ingest"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "EXM"
+  },
+  {
+   "id": "F09.zo_forward",
+   "flow": "F09",
+   "actor": "zo.acc",
+   "does": "Zonal ACC forwards the draft agenda to HO with recommendations (SE-3 / CE-4) or remands it",
+   "next": [
+    "F09.ho"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "EXM"
+  },
+  {
+   "id": "F09.trust_handover",
+   "flow": "F09",
+   "actor": "exempted.trust_liquidator",
+   "does": "Hand over member ledgers and past accumulations of the surrendered trust",
+   "next": [
+    "F09.ingest"
+   ],
+   "status": "OFFLINE",
+   "endpoints": 0,
+   "src": "EXM, SS"
+  },
+  {
+   "id": "F09.ingest",
+   "flow": "F09",
+   "actor": "fo.exemption",
+   "does": "Bulk-ingest the surrendered trust's member ledgers and past accumulations",
+   "next": [
+    "F09.past_accum"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "EXM, SS"
+  },
+  {
+   "id": "F09.past_accum",
+   "flow": "F09",
+   "actor": "fo.exemption",
+   "does": "Transfer past accumulations after surrender / cancellation",
+   "next": [],
+   "status": "PLANNED",
+   "endpoints": 3,
+   "src": "EXM"
+  },
+  {
+   "id": "F09.supervise",
+   "flow": "F09",
+   "actor": "fo.exemption",
+   "does": "Supervise PF trusts: monthly returns, the performance evaluator and its ranking, priority-matrix flags and the action taken, audit reports",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 5,
+   "src": "EXM"
+  },
+  {
+   "id": "F09.ho",
+   "flow": "F09",
+   "actor": "ho.exemption",
+   "does": "Record the EEC's recommendation, the CBT's ratification, the reference to the appropriate Government and its notification",
+   "next": [
+    "F09.cancel"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "EXM"
+  },
+  {
+   "id": "F09.ho_monitor",
+   "flow": "F09",
+   "actor": "ho.exemption",
+   "does": "Monitor the zones' exempted establishments on the online performance evaluator (ranking of 600)",
+   "next": [
+    "F09.ho"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "EXM"
+  },
+  {
+   "id": "F10.apply",
+   "flow": "F10",
+   "actor": "employer.signatory",
+   "does": "Apply for / extend CoC for a posted worker (IWU portal EMPLOYER login); upload signed application; download CoC",
+   "next": [
+    "F10.decide"
+   ],
+   "status": "BUILT",
+   "endpoints": 7,
+   "src": "IWU"
+  },
+  {
+   "id": "F10.worker",
+   "flow": "F10",
+   "actor": "member",
+   "does": "An international worker is a member: views their coverage under the international-worker rules (P2.9a)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "IWU"
+  },
+  {
+   "id": "F10.decide",
+   "flow": "F10",
+   "actor": "fo.iw",
+   "does": "Verify and issue Certificate of Coverage",
+   "next": [
+    "F10.foreign"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "IWU"
+  },
+  {
+   "id": "F10.foreign",
+   "flow": "F10",
+   "actor": "ext.foreign_ss",
+   "does": "Foreign social-security agency verifies CoC (FOREIGN AGENCIES login)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "IWU"
+  },
+  {
+   "id": "F10.ho",
+   "flow": "F10",
+   "actor": "ho.iwu",
+   "does": "Maintain social-security agreements; route totalisation claims",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "EC, MAP"
+  },
+  {
+   "id": "F11.public_search",
+   "flow": "F11",
+   "actor": "public",
+   "does": "Search an inoperative account with a demo CAPTCHA and verify an OTP before viewing the balance",
+   "next": [
+    "F11.verify"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "WSU"
+  },
+  {
+   "id": "F11.search",
+   "flow": "F11",
+   "actor": "member.exited",
+   "does": "Request reactivation / settlement (online, at FO or NAN camp)",
+   "next": [
+    "F11.verify"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "WSU"
+  },
+  {
+   "id": "F11.nan",
+   "flow": "F11",
+   "actor": "fo.nan",
+   "does": "Help members at Nidhi Aapke Nikat camps",
+   "next": [
+    "F11.verify"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "WSU, PEN"
+  },
+  {
+   "id": "F11.verify",
+   "flow": "F11",
+   "actor": "fo.da_accounts",
+   "does": "Verify inoperative account (digital records, crowdsourcing through co-workers' logins)",
+   "next": [
+    "F11.approve"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "WSU"
+  },
+  {
+   "id": "F11.approve",
+   "flow": "F11",
+   "actor": "fo.ao",
+   "does": "Approve reactivation / settlement in the AO band; forward higher bands",
+   "next": [
+    "F11.approve_apfc"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "WSU"
+  },
+  {
+   "id": "F11.approve_apfc",
+   "flow": "F11",
+   "actor": "fo.apfc",
+   "does": "Approve inoperative-account settlement in higher amount bands",
+   "next": [
+    "F11.oic_monitor"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "WSU"
+  },
+  {
+   "id": "F11.oic_monitor",
+   "flow": "F11",
+   "actor": "fo.oic",
+   "does": "Trigger verification of suspicious inoperative-account requests and monitor unblocking daily",
+   "next": [
+    "F07.block"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "WSU"
+  },
+  {
+   "id": "F12.concurrent",
+   "flow": "F12",
+   "actor": "zo.rpfc1_audit",
+   "does": "Download daily functionality data from the Audit Portal; flag suspicious cases; alert ROs; review replies",
+   "next": [
+    "F12.reply"
+   ],
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "AUD"
+  },
+  {
+   "id": "F12.reply",
+   "flow": "F12",
+   "actor": "fo.oic",
+   "does": "Reply to concurrent-audit alerts within 3 days",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "AUD"
+  },
+  {
+   "id": "F12.internal",
+   "flow": "F12",
+   "actor": "zo.internal_audit",
+   "does": "Internal audit of an RO; raise audit paras",
+   "next": [
+    "F12.para_reply"
+   ],
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "AUD"
+  },
+  {
+   "id": "F12.para_reply",
+   "flow": "F12",
+   "actor": "fo.oic",
+   "does": "Comply with audit paras; request dropping",
+   "next": [
+    "F12.ho"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "AUD"
+  },
+  {
+   "id": "F12.ho",
+   "flow": "F12",
+   "actor": "ho.audit",
+   "does": "Audit Division: plan audits, IT audit, pre-audit, drop paras, oversee CAG audit",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 6,
+   "src": "AUD"
+  },
+  {
+   "id": "F12.claim_trail",
+   "flow": "F12",
+   "actor": "zo.rpfc1_audit",
+   "does": "Inspect a claim's full audit trail (transitions, approval levels, rule and CAD versions, lock events)",
+   "next": [
+    "F12.reply"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "SS, AUD"
+  },
+  {
+   "id": "F12.cag",
+   "flow": "F12",
+   "actor": "gov.cag",
+   "does": "External audit with read-only access",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "AUD"
+  },
+  {
+   "id": "F12.statutory",
+   "flow": "F12",
+   "actor": "gov.statutory_auditor",
+   "does": "Attest audit of accounts (read-only)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "AUD"
+  },
+  {
+   "id": "F13.public",
+   "flow": "F13",
+   "actor": "public",
+   "does": "Browse schemes, offices, statistics, circulars; search establishments; calculators; TRRN status",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 14,
+   "src": "WEB"
+  },
+  {
+   "id": "F13.do",
+   "flow": "F13",
+   "actor": "do.incharge",
+   "does": "District dashboard and jurisdiction-scoped queue",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CMP, EC"
+  },
+  {
+   "id": "F13.ro",
+   "flow": "F13",
+   "actor": "fo.rpfc1",
+   "does": "RO-level monitoring (claims, grievances, compliance)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "JD, PEN"
+  },
+  {
+   "id": "F13.oic",
+   "flow": "F13",
+   "actor": "fo.oic",
+   "does": "Office-level pendency and daily unblocking monitoring",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "FIA, WSU"
+  },
+  {
+   "id": "F13.zo",
+   "flow": "F13",
+   "actor": "zo.acc",
+   "does": "Zone dashboards; approvals above RO limits",
+   "next": [],
+   "status": "FUTURE",
+   "endpoints": 3,
+   "src": "EC, SOP-B"
+  },
+  {
+   "id": "F13.cpfc",
+   "flow": "F13",
+   "actor": "ho.cpfc",
+   "does": "National dashboards and policy approvals",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 7,
+   "src": "MAP, EC"
+  },
+  {
+   "id": "F13.acc_hq",
+   "flow": "F13",
+   "actor": "ho.acc_hq",
+   "does": "Division-level oversight; draft rule-set changes (ceilings, rates, claim types, approval matrix) for CPFC approval",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 6,
+   "src": "EC, SOP-B"
+  },
+  {
+   "id": "F13.divisions",
+   "flow": "F13",
+   "actor": "ho.edli",
+   "does": "EDLI policy and monitoring",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "EDLI"
+  },
+  {
+   "id": "F13.investment",
+   "flow": "F13",
+   "actor": "ho.investment",
+   "does": "Fund and investment reporting",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "EC"
+  },
+  {
+   "id": "F13.accounts",
+   "flow": "F13",
+   "actor": "ho.fa_cao",
+   "does": "Prepare the annual accounts: balance sheet of the funds and investment position",
+   "next": [
+    "F12.statutory"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "EC"
+  },
+  {
+   "id": "F13.fund_feed",
+   "flow": "F13",
+   "actor": "ext.fund_manager",
+   "does": "Send portfolio / custody positions",
+   "next": [
+    "F13.investment"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "EC"
+  },
+  {
+   "id": "F13.publicity",
+   "flow": "F13",
+   "actor": "ho.publicity",
+   "does": "Publish circulars and awareness content",
+   "next": [
+    "F13.public"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "EC"
+  },
+  {
+   "id": "F13.mole",
+   "flow": "F13",
+   "actor": "gov.mole",
+   "does": "Aggregate dashboards (no PII)",
+   "next": [
+    "F13.parliament"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "EC, REF"
+  },
+  {
+   "id": "F13.pmvbry",
+   "flow": "F13",
+   "actor": "gov.pmvbry_admin",
+   "does": "Reconcile employment-linked incentives (PMVBRY, earlier PMRPY / ABRY) computed from ECR data",
+   "next": [],
+   "status": "EXTERNAL",
+   "endpoints": 0,
+   "src": "SS, WEB"
+  },
+  {
+   "id": "F13.pmvbry_employer",
+   "flow": "F13",
+   "actor": "employer.owner",
+   "does": "PMVBRY Part B: exercise the option; see baseline, eligibility, net additional employment and incentive cycles",
+   "next": [
+    "F13.pmvbry_run"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "PMV"
+  },
+  {
+   "id": "F13.pmvbry_member",
+   "flow": "F13",
+   "actor": "member",
+   "does": "PMVBRY Part A: first-timer incentive in two instalments; complete the financial literacy course",
+   "next": [
+    "F13.pmvbry_run"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "PMV"
+  },
+  {
+   "id": "F13.pmvbry_run",
+   "flow": "F13",
+   "actor": "ho.fa_cao",
+   "does": "PMVBRY disbursement run: employees by Aadhaar-bridge DBT, employers to the PAN-linked account; scheme dashboard",
+   "next": [
+    "F13.pmvbry_monitor"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "PMV"
+  },
+  {
+   "id": "F13.pmvbry_monitor",
+   "flow": "F13",
+   "actor": "ho.cpfc",
+   "does": "Executive Committee chair: monitor PMVBRY beneficiaries, expenditure and pendency",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "PMV"
+  },
+  {
+   "id": "F13.notify_member",
+   "flow": "F13",
+   "actor": "member",
+   "does": "Choose SMS / e-mail and the language of messages; see each notice's delivery",
+   "next": [
+    "F13.notify_desk"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "EC"
+  },
+  {
+   "id": "F13.notify_desk",
+   "flow": "F13",
+   "actor": "fo.pro",
+   "does": "Follow up SMS / e-mail that could not be delivered to the office's members; send again",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "EC"
+  },
+  {
+   "id": "F13.notify_gateway",
+   "flow": "F13",
+   "actor": "ho.is",
+   "does": "Watch the SMS and e-mail gateway: deliveries, failures, retries",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "EC"
+  },
+  {
+   "id": "F13.parliament",
+   "flow": "F13",
+   "actor": "gov.parliament",
+   "does": "Receive answers to questions through the Ministry",
+   "next": [],
+   "status": "OFFLINE",
+   "endpoints": 0,
+   "src": "MAP, REF"
+  },
+  {
+   "id": "F13.cbt",
+   "flow": "F13",
+   "actor": "gov.cbt",
+   "does": "Board dashboards; approve accounts, interest rate, policies",
+   "next": [
+    "F03.interest"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "EC"
+  },
+  {
+   "id": "F13.ec",
+   "flow": "F13",
+   "actor": "gov.ec",
+   "does": "Executive Committee papers and decisions",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "EC"
+  },
+  {
+   "id": "F13.fiac",
+   "flow": "F13",
+   "actor": "gov.fiac",
+   "does": "Finance, investment and audit review",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "EC"
+  },
+  {
+   "id": "F13.insurer",
+   "flow": "F13",
+   "actor": "ext.insurer",
+   "does": "Provide EDLI / insurance history data",
+   "next": [],
+   "status": "EXTERNAL",
+   "endpoints": 0,
+   "src": "MAP"
+  },
+  {
+   "id": "F13.hr",
+   "flow": "F13",
+   "actor": "ho.hr",
+   "does": "Staff profiles, postings and delegation of roles to offices",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "OUL, EC"
+  },
+  {
+   "id": "F13.admin",
+   "flow": "F13",
+   "actor": "fo.admin",
+   "does": "Office administration: staff postings and role assignment in the office",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "OUL"
+  },
+  {
+   "id": "F14.ndc",
+   "flow": "F14",
+   "actor": "tech.ndc",
+   "does": "Run production, batch jobs and health / event monitoring",
+   "next": [
+    "F14.adc"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "AUD, PEN"
+  },
+  {
+   "id": "F14.adc",
+   "flow": "F14",
+   "actor": "tech.adc",
+   "does": "Disaster-recovery site: replication status and failover drills",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "MAP, AUD, WEB"
+  },
+  {
+   "id": "F14.security",
+   "flow": "F14",
+   "actor": "ho.security",
+   "does": "Inspect recent request rates and redacted activity; session inspection and revocation; security events; incident reporting",
+   "next": [
+    "F14.cert_in"
+   ],
+   "status": "FUTURE",
+   "endpoints": 10,
+   "src": "init.md §6"
+  },
+  {
+   "id": "F14.cert_in",
+   "flow": "F14",
+   "actor": "ext.cert_in",
+   "does": "Receive cyber-incident reports",
+   "next": [],
+   "status": "EXTERNAL",
+   "endpoints": 0,
+   "src": "WEB"
+  },
+  {
+   "id": "F14.step_up",
+   "flow": "F14",
+   "actor": "member",
+   "does": "Complete step-up confirmation for sensitive actions",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "init.md §6.3"
+  },
+  {
+   "id": "F14.privacy_request",
+   "flow": "F14",
+   "actor": "member",
+   "does": "Ask EPFO about my personal data: access, correction, erasure or a grievance (DPDP Act)",
+   "next": [
+    "F14.privacy"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "WEB"
+  },
+  {
+   "id": "F14.privacy",
+   "flow": "F14",
+   "actor": "ho.data_protection",
+   "does": "Handle data-principal requests and breach records (DPDP Act)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "WEB"
+  },
+  {
+   "id": "F14.ai",
+   "flow": "F14",
+   "actor": "tech.ai_service",
+   "does": "Advisory AI: knowledge search, claim analysis, grievance classification (no privileged writes)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 5,
+   "src": "init.md §8"
+  },
+  {
+   "id": "F14.training",
+   "flow": "F14",
+   "actor": "train.pdnasa",
+   "does": "Run training on a synthetic-data sandbox",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "EC"
+  },
+  {
+   "id": "F14.zti",
+   "flow": "F14",
+   "actor": "train.zti",
+   "does": "Zonal training on the sandbox",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "EC"
+  },
+  {
+   "id": "F14.zti_zo",
+   "flow": "F14",
+   "actor": "zo.zti",
+   "does": "Zonal Training Institute uses the training sandbox",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "EC"
+  },
+  {
+   "id": "F14.npci",
+   "flow": "F14",
+   "actor": "ext.npci",
+   "does": "Validate bank accounts (penny drop / name match)",
+   "next": [],
+   "status": "EXTERNAL",
+   "endpoints": 0,
+   "src": "WEB"
+  },
+  {
+   "id": "F14.digilocker",
+   "flow": "F14",
+   "actor": "ext.digilocker",
+   "does": "Issue documents (UAN card, PPO) to DigiLocker",
+   "next": [],
+   "status": "FUTURE",
+   "endpoints": 0,
+   "src": "WEB"
+  },
+  {
+   "id": "F14.umang",
+   "flow": "F14",
+   "actor": "ext.umang",
+   "does": "Mobile channel calling the same member / pensioner APIs",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "EC, REF"
+  }
+ ]
 }

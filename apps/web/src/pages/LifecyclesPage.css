@@ -1,0 +1,24 @@
+.life-layout { display: grid; grid-template-columns: minmax(0, 1fr) 22rem; gap: 1.25rem; align-items: start; }
+.life-canvas h2 { font-family: Georgia, "Times New Roman", serif; color: #0b2e59; margin-top: 0; }
+.life-scroll { overflow: auto; max-height: 70vh; border: 1px solid #e4e7ec; border-radius: 6px; background: #fbfbfa; }
+.life-node { cursor: pointer; }
+.life-node rect:first-child { fill: #fff; stroke: #98a2b3; stroke-width: 1.2; }
+.life-node .life-band { fill: #98a2b3; }
+.life-node.life-built .life-band { fill: #1b6b3a; }
+.life-node.life-partly .life-band { fill: #b8860b; }
+.life-node.life-planned .life-band { fill: #b42318; }
+.life-node.life-planned rect:first-child { stroke-dasharray: 4 3; }
+.life-node:hover rect:first-child, .life-node:focus-visible rect:first-child { stroke: #b8860b; stroke-width: 2.5; }
+.life-node:focus { outline: none; }
+.life-node.life-selected rect:first-child { stroke: #0b2e59; stroke-width: 3; }
+.life-actor { font: 700 12px "Trebuchet MS", "Segoe UI", sans-serif; fill: #0b2e59; }
+.life-does { font: 11.5px "Trebuchet MS", "Segoe UI", sans-serif; fill: #344054; }
+.life-edge { fill: none; stroke: #98a2b3; stroke-width: 1.4; }
+.life-edge.life-loop { stroke-dasharray: 5 4; }
+.life-edge.life-lit { stroke: #b8860b; stroke-width: 2.4; }
+.life-steps { padding-left: 1.4rem; display: grid; gap: 0.35rem; }
+.life-steps li { display: flex; gap: 0.5rem; align-items: baseline; flex-wrap: wrap; }
+.life-step { font: inherit; background: none; border: 0; padding: 0; text-align: left; color: inherit; cursor: pointer; }
+.life-step[aria-pressed="true"] { text-decoration: underline; text-decoration-color: #b8860b; text-decoration-thickness: 2px; }
+.life-step:focus-visible { outline: 3px solid #b8860b; outline-offset: 2px; }
+@media (max-width: 900px) { .life-layout { grid-template-columns: 1fr; } }

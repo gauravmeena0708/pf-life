@@ -648,6 +648,13 @@ with a one-time code). *Effect, with worked examples* shows each change before i
 If a version is already scheduled for a later date, today's change must first be carried into it (a same-day
 correction of that version); otherwise it would undo the change from its date, and publishing is refused.
 
+## Explore: stakeholders, lifecycles, manuals
+From the home page (no login): **Stakeholders** — the hierarchy from the Central Board to the district office, and
+everyone outside EPFO; choose *Enforcement Officer* for his login and what he does. **Lifecycles** — choose *F06
+Compliance*: the chain from a CAIU signal through the inspection, the file, the inquiry and the order to recovery,
+planned steps dashed in red; choose a step for who does it and what follows. **User manuals** — the manuals the UI
+tests produced, by role (after `python3 scripts/publish_manuals.py`).
+
 ## What the tests cover
 
 ```bash

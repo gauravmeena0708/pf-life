@@ -65,6 +65,9 @@ import { GrievanceMetricsPage } from "./features/oversight/GrievanceMetricsPage"
 import { RiskSignalsPage } from "./features/oversight/RiskSignalsPage";
 import { SessionsRecoveryPage } from "./features/oversight/SessionsRecoveryPage";
 import { SystemMapPage } from "./pages/SystemMapPage";
+import { StakeholdersPage } from "./pages/StakeholdersPage";
+import { LifecyclesPage } from "./pages/LifecyclesPage";
+import { ManualsPage } from "./pages/ManualsPage";
 import { Home } from "./pages/Home";
 import { InterfacePage } from "./pages/InterfacePage";
 import { CircularsPage } from "./features/ho/CircularsPage";
@@ -143,6 +146,9 @@ export function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/system-map" element={<SystemMapPage />} />
+            <Route path="/stakeholders" element={<StakeholdersPage />} />
+            <Route path="/lifecycles" element={<LifecyclesPage />} />
+            <Route path="/manuals" element={<ManualsPage />} />
             <Route path="/i/:slug" element={<InterfacePage />} />
             <Route path="/employer" element={<EmployerHome />} />
             <Route path="/employer/ecr" element={<EcrPage />} />

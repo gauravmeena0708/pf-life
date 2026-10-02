@@ -623,10 +623,24 @@ def main():
     for s, label in names.items():
         eps = grants.get(s, {})
         web_map["stakeholders"][s] = {
-            "name": label, "group": group_of.get(s, ""),
+            "name": label.replace("**", ""), "group": group_of.get(s, ""),          # the register's Markdown bold is not for the portal
             "endpoints": {k: sum(ops[e]["status"] == k for e in eps) for k in "WMP?"},
             "activities": [{"id": a["id"], "does": a["does"]} for a in acts if a["actor"] == s],
             "personas": sorted(personas.get(s, []))}
+    # lifecycles: each flow's activities, who does them, what follows, and how far each is built
+    def built(a):
+        if a.get("fut"):
+            return "FUTURE"
+        states = [ops[ep]["status"] for ep in a.get("api", []) if ep in ops]
+        if not states:
+            return "EXTERNAL" if a.get("adapter") else "OFFLINE"
+        if all(st in ("W", "M") for st in states):
+            return "BUILT"
+        return "PARTLY" if any(st in ("W", "M") for st in states) else "PLANNED"
+    web_map["flows"] = {fid: f["name"] for fid, f in data.get("flows", {}).items()}
+    web_map["activities"] = [{"id": a["id"], "flow": a["id"].split(".")[0], "actor": a["actor"], "does": a["does"],
+                              "next": list(a.get("next") or []), "status": built(a), "endpoints": len(a.get("api", [])),
+                              "src": str(a.get("src", ""))} for a in acts]
     (ROOT / "apps" / "web" / "src" / "data" / "system-map.generated.json").write_text(
         json.dumps(web_map, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 

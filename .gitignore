@@ -33,6 +33,7 @@ minio-data/
 postgres-data/
 tests/e2e/screenshots/
 artifacts/ui-manuals/
+apps/web/public/manuals/
 artifacts/cto-handbook/
 ci-results/
 *.egg-info/

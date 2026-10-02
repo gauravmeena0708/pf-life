@@ -98,6 +98,15 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 12h: explore pages (2 October 2026)
+
+Web 260 (new `pages/ExplorePages.test.tsx`: the home page's four links; the hierarchy's tiers and a role's login and
+activities, no Markdown in names; the lifecycle layout — a lone start placed before its successor, a loop found; the
+compliance network with a step's detail; the manuals listed, or the instructions when none are published); end to end
+11 (walking skeleton, member home); UI smoke 2, its manuals published. Found on the way: stakeholder names carried the
+register's Markdown bold; every activity nothing pointed to was drawn in the first column; the new compliance steps were
+not linked in the manual's order.
+
 ## Update — Phase 2, slice 11a: inspections and 7A inquiries (2 October 2026)
 
 Unit: every suite (`make test`) — compliance-service 10 (new `test_proceedings.py`: the report through DA / SS / circle

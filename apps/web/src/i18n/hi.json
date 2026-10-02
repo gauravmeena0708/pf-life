@@ -100,7 +100,8 @@
         "title": "Oversight: concurrent audit and the Issue Tracker",
         "description": "Raise an audit alert, reply from the regional office and execute an approved Issue Tracker request."
       }
-    }
+    },
+    "exploreMore": "साथ ही: ईपीएफओ में और उसके साथ कौन काम करता है और वे कैसे जुड़े हैं, हर जीवनचक्र चरण-दर-चरण, और परखी गई स्क्रीनों से बनी भूमिका-वार पुस्तिकाएँ।"
   },
   "interface": {
     "unknown": "अज्ञात इंटरफ़ेस।",
@@ -148,7 +149,10 @@
     "notInPocShort": "उपलब्ध नहीं",
     "systemMap": "System map",
     "publicLookups": "Public lookups",
-    "plannedShort": "नियोजित"
+    "plannedShort": "नियोजित",
+    "stakeholders": "हितधारक",
+    "lifecycles": "जीवनचक्र",
+    "manuals": "उपयोगकर्ता पुस्तिकाएँ"
   },
   "passbook": {
     "eyebrow": "सदस्य सेवाएँ · अंशदान",

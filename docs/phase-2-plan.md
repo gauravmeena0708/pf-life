@@ -35,6 +35,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | P2.11b | 7B review (after the next-higher officer's view), 7C escaped amounts (within 5 years), ex-parte set-aside, administrative scrutiny of orders; the 14B damages and 7Q interest proceedings and waiver | Planned |
 | P2.11c | Appeals (7-I) with the 7-O pre-deposit, the legal-case register and court orders, 26B membership disputes, prosecution | Planned |
 | P2.11d | Recovery (Recovery Manual, 08/12/2023): recovery certificates (8B–8E), 8F garnishee, attachment, sale, receiver, arrest (records only); HO reports on proceedings and recovery; PMVBRY exclusions from open inquiries | Planned |
+| **P2.12h** | Explore pages: the stakeholder chart by EPFO's hierarchy, each lifecycle as a network of stakeholders and steps with how far it is built, and the user manuals published into the portal — all linked from the home page | Done |
 | **P2.12a** | Member and tax: Form 16A, the office's TDS computation; UAN allotment and activation (mock Aadhaar face / OTP); inoperative accounts — the public helpdesk search, verification through co-workers, reactivation in the AO / APFC bands | **Done** (1 Oct 2026) |
 | **P2.12b** | Employer lifecycle: voluntary coverage, closure, transfer to another office; contractors tagging ECR members to a principal employer and the principal's view of contractor compliance; MCA and Shram Suvidha registration feeds (mock) | **Done** (1 Oct 2026) |
 | **P2.12c** | Pension office: deciding a validated higher-pension option and the PF → pension fund transfer after the dues; Special 10D; bank-wise disbursement lists; the actuarial extract | **Done** (1 Oct 2026) |
@@ -932,6 +933,23 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 
 With P2.12f every endpoint the catalogue planned outside compliance (P2.11) and the exempted establishments
 (P2.9b / P2.9d) is built.
+
+## P2.12h — how it is built
+
+- **Data**: `docs/tools/build_gate0.py` now also writes each flow and each activity (who does it, what follows, and how
+  far it is built — every endpoint working, some, none, outside the POC, on paper, future) into the portal's
+  `system-map.generated.json`, and drops the register's Markdown from the stakeholder names. Nothing is maintained by
+  hand.
+- **Stakeholders** (`/stakeholders`): the governance bodies over Head Office (with the technology and training units),
+  the zones, the regional and the district offices; outside EPFO, members, employers and institutions. A role opens
+  its demo login, its endpoints and its activities, each linked to its lifecycle.
+- **Lifecycles** (`/lifecycles?flow=…`): the flow's activities as an SVG network, left to right by the chain of
+  "next" steps (a step nothing leads to sits just before its first successor; a loop is dashed), coloured by how far
+  each is built; the steps also as an ordered list; a step opens who does it and what follows, across flows. The
+  compliance chain was re-linked in the order the manual sets: DA → SS → circle officer → allocation.
+- **User manuals** (`/manuals`): `scripts/publish_manuals.py` copies the newest verified run of `scripts/ui_manuals.py`
+  into `apps/web/public/manuals/` (not committed); the page lists each scenario's manuals by role (HTML and Word) and
+  the lifecycle case report, or says how to publish them.
 
 ## P2.11a — how it is built
 

@@ -33,6 +33,7 @@ export function SystemMapPage() {
   return <div className="stack system-map-page">
     <PageHeader eyebrow="Interfaces and roles" title="System map" description="Explore the interfaces, roles and activities recorded for this demonstration." />
     <SystemTotals />
+    <p className="actions"><Link to="/stakeholders">Stakeholders by hierarchy</Link> <Link to="/lifecycles">Lifecycles as networks</Link> <Link to="/manuals">User manuals</Link></p>
     <section className="card map-filters" aria-label="System map filters">
       <label>Search interfaces and roles<input type="search" value={search} onChange={(event) => setSearch(event.target.value)} /></label>
       <label>Coverage status<select value={coverage} onChange={(event) => setCoverage(event.target.value as Coverage | "")}>

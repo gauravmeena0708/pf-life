@@ -1789,8 +1789,8 @@ flowchart LR
   F06_inspect --> F06_report_process
   F06_inspect_legacy --> F06_report_process
   F06_decide_report --> F06_allocate
-  F06_report_process --> F06_proceed
-  F06_ss_note --> F06_allocate
+  F06_report_process --> F06_ss_note
+  F06_ss_note --> F06_decide_report
   F06_allocate --> F06_proceed
   F06_proceed --> F06_employer_reply
   F06_proceed_large --> F06_employer_reply

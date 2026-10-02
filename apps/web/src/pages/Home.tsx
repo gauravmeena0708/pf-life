@@ -65,7 +65,11 @@ export function Home() {
     <section className="card stack" aria-labelledby="explore-heading">
       <h2 id="explore-heading">{t("home.exploreTitle")}</h2>
       <p className="muted">{t("home.exploreDescription")}</p>
+      <p className="muted">{t("home.exploreMore")}</p>
       <div className="actions"><Link to="/system-map" className="button primary">{t("navigation.systemMap")}</Link>
+        <Link to="/stakeholders" className="button secondary">{t("navigation.stakeholders")}</Link>
+        <Link to="/lifecycles" className="button secondary">{t("navigation.lifecycles")}</Link>
+        <Link to="/manuals" className="button secondary">{t("navigation.manuals")}</Link>
         {authenticated ? <Link to={homeFor(session.data?.stakeholder)} className="button secondary">{t("home.workspace")}</Link>
           : <button type="button" className="secondary" onClick={() => window.dispatchEvent(new Event("open-demo-account"))}>{t("home.signIn")}</button>}
       </div>
