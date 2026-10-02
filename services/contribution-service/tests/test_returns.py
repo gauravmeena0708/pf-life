@@ -162,3 +162,50 @@ def test_a_7a_order_raises_dues_paid_into_their_accounts(ctx):
                      "WHERE j.business_key='PAY-7A-1'"))
     assert lines == [("AC01_EPF", "credit", 2820000), ("AC02_ADMIN", "credit", 90000), ("AC10_EPS", "credit", 1500000),
                      ("AC21_EDLI", "credit", 90000), ("BANK_COLLECTION", "debit", 4500000)]
+
+
+def test_interest_7q_demand_replaces_auto_calculated_demand(ctx):
+    """A 7Q interest order (DemandRaised.v1, INTEREST_7Q) replaces an open auto-calculated 7Q interest demand."""
+    client, q = ctx
+    regular_posted(client)
+    from app.infra.demands import on_demand_raised
+    d7q_id = dict(q("SELECT kind, demand_id FROM demands WHERE state='OPEN'"))["INTEREST_7Q"]
+    _deliver(on_demand_raised, {"demand_id": "DEM-7Q-ORD-1", "establishment_id": EST, "demand_type": "INTEREST_7Q", "amount_paise": 250000,
+                                "supersedes_demand_ids": [d7q_id], "working": "7Q order: interest revised", "rule_version": "r"},
+             "DemandRaised.v1")
+    demands = {row[0]: row for row in q("SELECT demand_id, kind, state, settled_by, amount_paise FROM demands")}
+    assert demands["DEM-7Q-ORD-1"][1] == "INTEREST_7Q"
+    assert demands["DEM-7Q-ORD-1"][2] == "OPEN"
+    assert demands["DEM-7Q-ORD-1"][4] == 250000
+    assert demands[d7q_id][2] == "WAIVED"
+    assert demands[d7q_id][3] == "DEM-7Q-ORD-1"
+
+
+def test_amount_zero_withdraws_dues_7a_demand(ctx):
+    """An order set aside with amount 0 (or withdraw true) marks superseded OPEN demands WITHDRAWN without creating a new row."""
+    client, q = ctx
+    import json as _json
+    from app.infra.demands import on_demand_raised
+    dues = [{"wage_month": "2025-04", "ac1_employee_paise": 2160000, "ac1_employer_paise": 660000, "ac10_pension_paise": 1500000,
+             "ac21_edli_paise": 90000, "ac2_admin_paise": 90000}]
+    _deliver(on_demand_raised, {"demand_id": "D7A-CMP-1", "establishment_id": EST, "demand_type": "DUES_7A", "amount_paise": 4500000,
+                                "supersedes_demand_ids": [], "working": _json.dumps(dues), "rule_version": "r"}, "DemandRaised.v1")
+    assert dict(q("SELECT demand_id, state FROM demands"))["D7A-CMP-1"] == "OPEN"
+    _deliver(on_demand_raised, {"demand_id": "D7A-WITHDRAW-1", "establishment_id": EST, "demand_type": "DUES_7A", "amount_paise": 0,
+                                "supersedes_demand_ids": ["D7A-CMP-1"], "working": "Order set aside", "rule_version": "r"}, "DemandRaised.v1")
+    demands = dict(q("SELECT demand_id, state FROM demands"))
+    assert "D7A-WITHDRAW-1" not in demands
+    assert demands["D7A-CMP-1"] == "WITHDRAWN"
+    assert dict(q("SELECT demand_id, settled_by FROM demands"))["D7A-CMP-1"] == "D7A-WITHDRAW-1"
+    published = [_json.loads(p)["envelope"]["payload"] for (p,) in q("SELECT payload FROM outbox WHERE event_type='DemandStateChanged.v1'")]
+    assert "D7A-WITHDRAW-1" not in {p["demand_id"] for p in published}
+    withdrawn = next(p for p in published if p["demand_id"] == "D7A-CMP-1" and p["state"] == "WITHDRAWN")
+    assert withdrawn["kind"] == "DUES_7A"
+    _deliver(on_demand_raised, {"demand_id": "D7A-CMP-2", "establishment_id": EST, "demand_type": "DUES_7A", "amount_paise": 100000,
+                                "supersedes_demand_ids": [], "working": "[]", "rule_version": "r"}, "DemandRaised.v1")
+    _deliver(on_demand_raised, {"demand_id": "D7A-WITHDRAW-2", "establishment_id": EST, "demand_type": "DUES_7A", "amount_paise": 100000,
+                                "supersedes_demand_ids": ["D7A-CMP-2"], "withdraw": True}, "DemandRaised.v1")
+    demands2 = dict(q("SELECT demand_id, state FROM demands"))
+    assert "D7A-WITHDRAW-2" not in demands2
+    assert demands2["D7A-CMP-2"] == "WITHDRAWN"
+

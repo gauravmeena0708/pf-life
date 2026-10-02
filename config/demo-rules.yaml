@@ -284,3 +284,7 @@ compliance_proceedings:
   order_working_days: 15            # the final order within 15 working days of the last hearing (para 2.3.3 xiv)
   set_aside_months: 3               # an ex-parte order may be set aside on an application within 3 months (para 2.6.5)
   escaped_assessment_years: 5       # 7C within 5 years of the 7A / 7B order (para 2.8.1)
+  # P2.11b
+  damages_ss_days: 3                # the 14B notice: DA (T+1) -> SS endorses by T+3 (para 3.3.2)
+  damages_approval_days: 5          # -> the circle officer approves by T+5, then it is filed on e-Proceedings
+  review_days: 45                   # a 7B review is applied for within this many days of the order (ILLUSTRATIVE: the Scheme sets it)

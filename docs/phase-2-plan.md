@@ -32,7 +32,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.10a** | Vigilance cases: a CAIU-confirmed risk signal (or a complaint) referred to vigilance; the CVO assigns a preliminary inquiry to a zone (90 days); zonal vigilance reports findings; the CVO decides; restricted, access-logged, the complainant masked | **Done** (30 Sep 2026) |
 | **P2.10b** | Preventive vigilance: sensitive posts and 3-year rotation alerts; vigilance clearance for HR postings, promotions and retirement against open cases and penalties | **Done** (1 Oct 2026) |
 | **P2.11a** | Inspections and 7A inquiries: the Enforcement Officer's report through DA / SS / circle officer, registration with a diary number, random allocation by size, summons, hearings and daily orders, the employer's replies, the 7A order (ex parte only after due service) raising the demand | Done |
-| P2.11b | 7B review (after the next-higher officer's view), 7C escaped amounts (within 5 years), ex-parte set-aside, administrative scrutiny of orders; the 14B damages and 7Q interest proceedings and waiver | Planned |
+| **P2.11b** | 7B review (after the next-higher officer's view), 7C escaped amounts (within 5 years), ex-parte set-aside, administrative scrutiny of orders; the 14B damages and 7Q interest proceedings | Done (the CBT's waiver for sick companies stays planned) |
 | P2.11c | Appeals (7-I) with the 7-O pre-deposit, the legal-case register and court orders, 26B membership disputes, prosecution | Planned |
 | P2.11d | Recovery (Recovery Manual, 08/12/2023): recovery certificates (8B–8E), 8F garnishee, attachment, sale, receiver, arrest (records only); HO reports on proceedings and recovery; PMVBRY exclusions from open inquiries | Planned |
 | **P2.12h** | Explore pages: the stakeholder chart by EPFO's hierarchy, each lifecycle as a network of stakeholders and steps with how far it is built, and the user manuals published into the portal — all linked from the home page | Done |
@@ -933,6 +933,31 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 
 With P2.12f every endpoint the catalogue planned outside compliance (P2.11) and the exempted establishments
 (P2.9b / P2.9d) is built.
+
+## P2.11b — how it is built
+
+Source: the Compliance Manual — 14B (3.2–3.3), review (2.7), escaped amounts (2.8), ex-parte orders (2.6), scrutiny (2.11).
+
+- **14B / 7Q proceeding**: the DA drafts the notice in a periodic desk review — it covers every open auto-calculated
+  14B damages and 7Q interest demand of the establishment not yet noticed (or those named); the SS endorses (T+3), the
+  circle officer approves (T+5) and it is filed with a diary number and allotted by size, as a 7A inquiry. The notice
+  serves as the summons; hearings as in 7A. The **14B order** levies up to the amount worked out for each demand, with
+  reasons for a reduction; the **7Q order** is at the statutory rate and cannot be varied. Each replaces the
+  auto-calculated demands with one demand (`DemandRaised.v1`, DAMAGES_14B / INTEREST_7Q).
+- **Review (7B)**: the employer applies within 45 days (illustrative — the Scheme sets the time) on new evidence, an
+  error apparent or another sufficient reason, or the officer reviews of his own motion; the officer first records the
+  view of the officer next above (APFC → RPFC-II → RPFC-I → Zonal ACC). Granted, the parties are given notice and heard
+  again; the order passed under review replaces the earlier demand.
+- **Set-aside (7A(4))**: on an ex-parte order, within 3 months, for a notice not duly served or a sufficient cause; set
+  aside, the demand is withdrawn and the case is heard afresh.
+- **7C**: within 5 years of the order, a linked inquiry before the same officer on an omission by the employer or
+  information now in possession; its order adds a demand.
+- **Scrutiny**: orders listed for the officer next above by the 15th of the following month; observations recorded on
+  the standard proforma, optionally directing a 7C. The Zonal ACC scrutinises the RPFC-I's orders (`zo-acc`).
+- contribution-service: a 7Q order's demand is kind INTEREST_7Q; an amount of 0 (or `withdraw`) withdraws the demands it
+  names (written by agy, reviewed). Screens: on `/office/inquiries` the DA's notice, the approvals, the 14B / 7Q orders,
+  review, set-aside and 7C after an order, the scrutiny list; on `/employer/proceedings` the employer's applications
+  (written by agy, reviewed).
 
 ## P2.12h — how it is built
 

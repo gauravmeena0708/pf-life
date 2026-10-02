@@ -4,11 +4,11 @@
   "interfaces": 21,
   "stakeholders": 114,
   "stakeholders_with_access": 94,
-  "activities": 259,
+  "activities": 261,
   "endpoints": {
-   "W": 412,
+   "W": 419,
    "M": 21,
-   "P": 22,
+   "P": 20,
    "?": 5
   },
   "personas": 75
@@ -39,7 +39,7 @@
    "coverage": "Working",
    "purpose": "Employers: registration, members and KYC, monthly returns and challans, demands, attestations, exits.",
    "endpoints": {
-    "W": 97,
+    "W": 98,
     "M": 5,
     "P": 1,
     "?": 0
@@ -84,7 +84,7 @@
    "coverage": "Working",
    "purpose": "Field-office sections: claim scrutiny and payment, compliance, pension, EDLI, exemption, PRO counter.",
    "endpoints": {
-    "W": 106,
+    "W": 107,
     "M": 0,
     "P": 15,
     "?": 4
@@ -171,9 +171,9 @@
    "coverage": "Working",
    "purpose": "Regional office officers: approvals above the dealing level, freezes, ledger decisions.",
    "endpoints": {
-    "W": 51,
+    "W": 57,
     "M": 0,
-    "P": 4,
+    "P": 2,
     "?": 1
    },
    "stakeholders": [
@@ -189,7 +189,7 @@
    "coverage": "Working",
    "purpose": "Zonal offices: grievances escalated to the zone, fraud-risk review, concurrent audit.",
    "endpoints": {
-    "W": 15,
+    "W": 17,
     "M": 0,
     "P": 0,
     "?": 0
@@ -732,7 +732,7 @@
    "name": "Establishment owner / employer (legal entity)",
    "group": "B. Employers and intermediaries",
    "endpoints": {
-    "W": 34,
+    "W": 35,
     "M": 4,
     "P": 0,
     "?": 0
@@ -777,7 +777,7 @@
    "name": "Authorised signatory (registered DSC / e-sign)",
    "group": "B. Employers and intermediaries",
    "endpoints": {
-    "W": 50,
+    "W": 51,
     "M": 2,
     "P": 0,
     "?": 0
@@ -1140,6 +1140,10 @@
      "does": "Identify non-filers / short payers; open compliance case"
     },
     {
+     "id": "F06.damages_notice",
+     "does": "Periodic desk review: draft the 14B / 7Q notice from the auto-calculated demands of delayed remittances (T+1)"
+    },
+    {
      "id": "F06.report_process",
      "does": "Process the inspection report (DA T+3, SS T+5); register the inquiry the circle officer decides on"
     },
@@ -1156,7 +1160,7 @@
    "name": "Section Supervisor (Accounts / Compliance)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 14,
+    "W": 15,
     "M": 0,
     "P": 0,
     "?": 0
@@ -1253,9 +1257,9 @@
    "name": "APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 34,
+    "W": 40,
     "M": 0,
-    "P": 4,
+    "P": 2,
     "?": 1
    },
    "activities": [
@@ -1366,7 +1370,7 @@
    "name": "Officer-in-Charge of the office",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 27,
+    "W": 32,
     "M": 0,
     "P": 0,
     "?": 0
@@ -1858,12 +1862,16 @@
    "name": "Additional Central PF Commissioner (Zone head)",
    "group": "E. Zonal Office (ZO)",
    "endpoints": {
-    "W": 11,
+    "W": 13,
     "M": 0,
     "P": 0,
     "?": 0
    },
    "activities": [
+    {
+     "id": "F06.zo_scrutiny",
+     "does": "Zonal ACC scrutinises the orders the RPFC-I passes (by the 15th of the following month); may direct a 7C"
+    },
     {
      "id": "F08.escalate",
      "does": "Handle grievances escalated to the zone"
@@ -4538,6 +4546,18 @@
    "src": "CMP"
   },
   {
+   "id": "F06.damages_notice",
+   "flow": "F06",
+   "actor": "fo.da_compliance",
+   "does": "Periodic desk review: draft the 14B / 7Q notice from the auto-calculated demands of delayed remittances (T+1)",
+   "next": [
+    "F06.ss_note"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CMP"
+  },
+  {
    "id": "F06.schedule",
    "flow": "F06",
    "actor": "fo.apfc",
@@ -4582,7 +4602,7 @@
     "F06.allocate"
    ],
    "status": "BUILT",
-   "endpoints": 2,
+   "endpoints": 3,
    "src": "CMP"
   },
   {
@@ -4606,7 +4626,7 @@
     "F06.decide_report"
    ],
    "status": "BUILT",
-   "endpoints": 5,
+   "endpoints": 6,
    "src": "CMP"
   },
   {
@@ -4617,6 +4637,16 @@
    "next": [
     "F06.proceed"
    ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CMP"
+  },
+  {
+   "id": "F06.zo_scrutiny",
+   "flow": "F06",
+   "actor": "zo.acc",
+   "does": "Zonal ACC scrutinises the orders the RPFC-I passes (by the 15th of the following month); may direct a 7C",
+   "next": [],
    "status": "BUILT",
    "endpoints": 2,
    "src": "CMP"
@@ -4642,7 +4672,7 @@
     "F06.employer_reply"
    ],
    "status": "BUILT",
-   "endpoints": 4,
+   "endpoints": 9,
    "src": "CMP"
   },
   {
@@ -4656,7 +4686,7 @@
     "F06.recovery"
    ],
    "status": "PARTLY",
-   "endpoints": 4,
+   "endpoints": 7,
    "src": "CMP, EP"
   },
   {
@@ -4668,7 +4698,7 @@
     "F06.order"
    ],
    "status": "BUILT",
-   "endpoints": 2,
+   "endpoints": 3,
    "src": "CMP"
   },
   {
@@ -4680,7 +4710,7 @@
     "F06.order"
    ],
    "status": "BUILT",
-   "endpoints": 2,
+   "endpoints": 3,
    "src": "CMP"
   },
   {

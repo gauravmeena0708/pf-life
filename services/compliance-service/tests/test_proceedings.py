@@ -122,7 +122,7 @@ def test_summons_hearings_submissions_and_the_7a_order(ctx):
 
     step = {"action": "pass-order", "resource_id": case, "amount_paise": 4500000}       # the code is bound to the amount
     assert client.post(f"{BASE}/cases/{case}/orders", json={**order, "ex_parte": True}, headers=as_(APFC, step)).status_code == 422   # employer was present
-    assert client.post(f"{BASE}/cases/{case}/orders", json={**order, "kind": "14B"}, headers=as_(APFC, step)).status_code == 501
+    assert client.post(f"{BASE}/cases/{case}/orders", json={**order, "kind": "14B"}, headers=as_(APFC, step)).status_code == 422   # a 7A case takes a 7A order
     outside = [{**dues[0], "wage_month": "2026-01"}]
     assert client.post(f"{BASE}/cases/{case}/orders", json={**order, "dues": outside}, headers=as_(APFC, step)).status_code == 422
     passed = client.post(f"{BASE}/cases/{case}/orders", json=order, headers=as_(APFC, step))

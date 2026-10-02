@@ -7,6 +7,7 @@ import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 import "./InquiriesPage.css";
+import { AfterOrder, DamagesNoticeForm, LevyForm, NoticeApproval, ScrutinyList } from "./ProceedingTools";
 
 /** Inspections and 7A inquiries (Compliance Manual ch. 2): EO report → DA (T+3) → SS (T+5) → circle officer (T+7) → registration with a
  *  diary number → the officer allotted by size → summons → hearings → the 7A order. */
@@ -20,13 +21,14 @@ export interface Inspection {
 interface Action { kind: string; at: string; detail: Record<string, unknown> }
 export interface InquiryCase {
   case_id: string; establishment_id: string; legal_name: string | null; kind: string; state: string;
-  inquiry?: { diary_no: string; officer_rank: string; officer_subject: string; state: string; period_from: string; period_to: string;
+  inquiry?: { diary_no: string; officer_rank: string; officer_subject: string; state: string; period_from: string; period_to: string; section?: string; parent_case_id?: string | null;
     contributory_uans: number; order_due_at: string | null; actions: Action[] };
 }
 const STATE_TEXT: Record<string, string> = {
   SCHEDULED: "Scheduled — EO to inspect", REPORTED: "Reported — DA to note", DA_NOTED: "DA noted — SS to note", SS_NOTED: "SS noted — circle officer to decide",
   DECIDED_INITIATE: "Inquiry to be registered", CLOSED: "Closed — no action", REGISTERED: "Registered", SUMMONED: "Summons issued",
   HEARING: "Hearing in progress", CONCLUDED: "Concluded — order due", ORDERED: "Order passed",
+  NOTICE_DRAFTED: "Notice drafted — SS to endorse", SS_ENDORSED: "Endorsed — circle officer to approve", PART_ORDERED: "One order passed — the other due",
 };
 const when = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "—");
 const field = (f: FormData, name: string) => String(f.get(name) ?? "").trim();
@@ -37,10 +39,11 @@ export function InquiriesPage() {
   const [open, setOpen] = useState<string | null>(null);
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
   const role = session.data?.stakeholder ?? "";
-  const inspections = useQuery({ queryKey: ["inspections"], enabled: !!role, retry: false,
+  const inspections = useQuery({ queryKey: ["inspections"], enabled: ["fo.apfc", "fo.eo", "fo.da_compliance", "fo.ss", "fo.oic"].includes(role), retry: false,
     queryFn: () => api<Envelope<Inspection[]>>(`${base}/inspections`) });
   const inquiries = useQuery({ queryKey: ["inquiries"], enabled: ["fo.apfc", "fo.oic", "fo.ss", "fo.da_compliance"].includes(role), retry: false,
-    queryFn: () => api<Envelope<InquiryCase[]>>(`${base}/cases?type=INQUIRY_7A`) });
+    queryFn: () => api<Envelope<InquiryCase[]>>(`${base}/cases`) });
+  const inquiryCases = (inquiries.data?.data ?? []).filter((c) => c.kind.startsWith("INQUIRY_"));
   const detail = useQuery({ queryKey: ["inquiry", open], enabled: !!open, retry: false,
     queryFn: () => api<Envelope<InquiryCase>>(`${base}/cases/${encodeURIComponent(open ?? "")}`) });
 
@@ -98,11 +101,11 @@ export function InquiriesPage() {
   }
 
   const inq = detail.data?.data.inquiry;
-  const summonsActions = inq?.actions.filter((a) => a.kind === "SUMMONS") ?? [];
   return <section className="stack" aria-labelledby="inquiries-heading">
     <PageHeader id="inquiries-heading" eyebrow="Compliance" title="Inspections and 7A inquiries" current="Inspections and inquiries"
       description="From the Enforcement Officer's report to the order under section 7A, with each stage's time limit (Compliance Manual, chapter 2)." />
     <ProblemMessage error={error} />{notice ? <p role="status" className="ok">{notice}</p> : null}
+    {role === "fo.da_compliance" ? <DamagesNoticeForm busy={busy} run={(w, ok, f) => void run(w, ok, f)} /> : null}
     {role === "fo.apfc" ? <form className="card stack" aria-labelledby="schedule-heading" onSubmit={schedule}>
       <h2 id="schedule-heading">Schedule an inspection</h2>
       <div className="form-row"><label>Establishment ID<input name="establishment_id" required defaultValue="EST-DEMO-0001" /></label>
@@ -145,9 +148,9 @@ export function InquiriesPage() {
     </section>
 
     {inquiries.data ? <section className="card stack" aria-labelledby="inquiry-list-heading"><h2 id="inquiry-list-heading">Inquiries</h2>
-      {!inquiries.data.data?.length ? <p className="muted">No inquiries.</p> : <div className="table-scroll"><table><thead><tr>
+      {!inquiryCases.length ? <p className="muted">No inquiries.</p> : <div className="table-scroll"><table><thead><tr>
         <th scope="col">Case</th><th scope="col">Establishment</th><th scope="col">State</th><th scope="col" /></tr></thead>
-        <tbody>{inquiries.data.data.map((c) => <tr key={c.case_id}><th scope="row">{c.case_id}</th><td>{c.legal_name ?? c.establishment_id}</td><td>{c.state}</td>
+        <tbody>{inquiryCases.map((c) => <tr key={c.case_id}><th scope="row">{c.case_id} <span className="muted small">{c.kind.replace("INQUIRY_", "")}</span></th><td>{c.legal_name ?? c.establishment_id}</td><td>{c.state}</td>
           <td><button type="button" onClick={() => setOpen(c.case_id)}>Open</button></td></tr>)}</tbody></table></div>}
     </section> : null}
 
@@ -160,7 +163,8 @@ export function InquiriesPage() {
         {a.kind === "HEARING" ? ` — ${String(a.detail.proceedings)}${a.detail.employer_present ? "" : " (employer absent)"}` : null}
         {a.kind === "SUBMISSION" ? ` — employer: ${String(a.detail.text)}` : null}
         {a.kind === "ORDER" ? <pre className="inquiry-order">{String(a.detail.text)}</pre> : null}</li>)}</ol>
-      {["fo.apfc", "fo.oic"].includes(role) && ["REGISTERED", "SUMMONED", "HEARING"].includes(inq.state) && summonsActions.length === 0
+      <NoticeApproval caseId={open} role={role} state={inq.state} busy={busy} run={(w, ok, f) => void run(w, ok, f)} />
+      {["fo.apfc", "fo.oic"].includes(role) && inq.state === "REGISTERED"
         ? <form className="stack" aria-label="Issue summons" onSubmit={(e) => void summons(e, open)}>
           <div className="form-row"><label>Hearing (virtual)<input name="hearing_at" type="datetime-local" required /></label>
             <label>Scope<input name="scope" required /></label><label>Period<input name="period" required defaultValue={`${inq.period_from} to ${inq.period_to}`} /></label></div>
@@ -173,7 +177,11 @@ export function InquiriesPage() {
           <label><input type="checkbox" name="concluded" /> Hearing concluded (reserved for orders)</label>
           <label>Daily order<textarea name="proceedings" required /></label>
           <div className="actions"><button className="primary" disabled={busy} type="submit">Record daily order</button></div></form> : null}
-      {["fo.apfc", "fo.oic"].includes(role) && inq.state === "CONCLUDED"
+      {["fo.apfc", "fo.oic"].includes(role) && ["CONCLUDED", "PART_ORDERED"].includes(inq.state) && inq.section === "14B"
+        ? <LevyForm caseId={open} actions={inq.actions} busy={busy} run={(w, ok, f) => void run(w, ok, f)} ask={stepUp.ask} /> : null}
+      {["fo.apfc", "fo.oic"].includes(role) && inq.state === "ORDERED"
+        ? <AfterOrder caseId={open} rank={inq.officer_rank} section={inq.section ?? "7A"} actions={inq.actions} busy={busy} run={(w, ok, f) => void run(w, ok, f)} ask={stepUp.ask} /> : null}
+      {["fo.apfc", "fo.oic"].includes(role) && inq.state === "CONCLUDED" && inq.section !== "14B"
         ? <form className="stack" aria-label="Pass 7A order" onSubmit={(e) => void order(e, open)}>
           <div className="form-row"><label>Wage month<input name="wage_month" type="month" required /></label>
             <label>A/c 1 employee (₹)<input name="ac1_employee" type="number" min="0" step="0.01" defaultValue="0" /></label>
@@ -185,6 +193,7 @@ export function InquiriesPage() {
           <label><input type="checkbox" name="ex_parte" /> Ex parte (only after due service, the employer absent)</label>
           <div className="actions"><button className="primary" disabled={busy} type="submit">Pass order</button></div></form> : null}
     </section> : null}
+    {["fo.apfc", "fo.oic", "zo.acc"].includes(role) ? <ScrutinyList busy={busy} run={(w, ok, f) => void run(w, ok, f)} /> : null}
     <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
   </section>;
 }

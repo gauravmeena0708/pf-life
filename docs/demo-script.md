@@ -533,6 +533,20 @@ contribution- and platform-service*
 5. **`ro-apfc`**: pass the 7A order — dues by account and month, a one-time code for the amount. The order appears to
    the employer, and the dues as a demand payable by a direct challan.
 
+## Damages, interest, review and scrutiny
+*Tests: `tests/e2e/test_proceedings_b.py`, `services/compliance-service/tests/test_proceedings_b.py`*
+
+1. Pay a return late (as in *Compliance*): 14B damages and 7Q interest are worked out automatically.
+2. **`ro-da-compliance` → Inspections and 7A inquiries › Damages notice**: draft it for EST-DEMO-0001 — it covers the open
+   14B / 7Q demands. **`ro-ss`** endorses, **`ro-apfc`** approves: a diary number, allotted by size.
+3. **`ro-apfc`**: notice and hearing as for 7A; pass the 14B order (reduce it, giving the reasons) and the 7Q order (the
+   statutory amount). The employer's demands show the ordered amounts in place of the automatic ones.
+4. After a 7A order: **`emp-owner` → Inquiries** applies for a review on new evidence. **`ro-apfc`** records the RPFC-II's
+   view, grants it, hears again and passes the order under review — the demand is replaced. On an ex-parte order the
+   employer can apply to set it aside instead; the officer can also reopen a case under 7C.
+5. **`ro-rpfc2` → Scrutiny of orders**: the APFC's order of this month, due by the 15th of next month; record the
+   observations. **`zo-acc`** scrutinises the RPFC-I's orders.
+
 ## Disaster recovery, training, camps, totalisation, the foreign agency, the composite death claim
 *Tests: `tests/e2e/test_small_rest.py`*
 

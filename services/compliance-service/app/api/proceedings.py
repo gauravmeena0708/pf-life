@@ -10,7 +10,7 @@ from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import _office, db
-from app.infra.tables import (compliance_cases, compliance_officers, establishments, inquiry_actions, inquiries,
+from app.infra.tables import (compliance_cases, compliance_officers, demands, establishments, inquiry_actions, inquiries,
                               inspection_steps, inspections, office_staff)
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
@@ -239,6 +239,29 @@ class InquiryInput(BaseModel):
     oic_approval: str | None = None        # without an inspection: the OIC's approval on credible information (para 2.3.1 iii)
 
 
+async def allocate(session: AsyncSession, office: str, uans: int, exclude: set[str] = frozenset()) -> tuple[str, str]:
+    """The rank the size calls for (para 2.5.1 / 3.3.7) and an officer of it at random, never one barred from a sensitive
+    charge nor one excluded (the inspecting EO, an officer earlier in the case); the OIC when there is none."""
+    _, limits = await rules(session)
+    rank = next(t["rank"] for t in limits["allocation_tiers"] if t["up_to_uans"] is None or uans <= t["up_to_uans"])
+    officers = (await session.execute(select(compliance_officers).where(compliance_officers.c.office_id == office,
+                compliance_officers.c.rank == rank, compliance_officers.c.barred.is_(False)))).mappings().all()
+    eligible = [r["subject"] for r in officers if r["subject"] not in exclude]
+    if eligible:
+        return rank, secrets.choice(eligible)
+    oic = (await session.execute(select(office_staff.c.subject).where(office_staff.c.office_id == office,
+           office_staff.c.stakeholder == "fo.oic"))).scalar_one_or_none()
+    if not oic:
+        raise Problem(422, "/problems/no-officer", "No eligible officer or OIC is posted")
+    return rank, oic
+
+
+async def next_diary(session: AsyncSession, office: str) -> str:
+    prefix = f"EPR/{office}/{now().year}/"
+    prior = (await session.execute(select(inquiries.c.diary_no).where(inquiries.c.diary_no.like(prefix + "%")))).scalars().all()
+    return prefix + f"{max((int(s.rsplit('/', 1)[-1]) for s in prior), default=0) + 1:04d}"
+
+
 async def register(body: InquiryInput, actor: Actor, session: AsyncSession) -> dict:
     period(body.period_from, body.period_to)
     office = await _office(session, actor)
@@ -252,26 +275,12 @@ async def register(body: InquiryInput, actor: Actor, session: AsyncSession) -> d
     elif not (body.oic_approval or "").strip():
         raise Problem(422, "/problems/validation", "Without an inspection report, record the OIC's approval of the inquiry on credible information",
                       "Compliance Manual para 2.3.1 (iii).")
-    document, limits = await rules(session)
-    rank = next(t["rank"] for t in limits["allocation_tiers"] if t["up_to_uans"] is None or body.contributory_uans <= t["up_to_uans"])
-    officers = (await session.execute(select(compliance_officers).where(compliance_officers.c.office_id == office,
-                compliance_officers.c.rank == rank, compliance_officers.c.barred.is_(False)))).mappings().all()
-    eligible = [r["subject"] for r in officers if not source or r["subject"] != source["eo_subject"]]
-    if eligible:
-        assigned = secrets.choice(eligible)
-    else:
-        assigned = (await session.execute(select(office_staff.c.subject).where(office_staff.c.office_id == office,
-                    office_staff.c.stakeholder == "fo.oic"))).scalar_one_or_none()
-        if not assigned:
-            raise Problem(422, "/problems/no-officer", "No eligible officer or OIC is posted")
-    year = now().year
-    prefix = f"EPR/{office}/{year}/"
-    prior = (await session.execute(select(inquiries.c.diary_no).where(inquiries.c.diary_no.like(prefix + "%")))).scalars().all()
-    sequence = max((int(s.rsplit("/", 1)[-1]) for s in prior), default=0) + 1
+    rank, assigned = await allocate(session, office, body.contributory_uans, exclude={source["eo_subject"]} if source else set())
+    diary = await next_diary(session, office)
     case_id = f"CMP-{secrets.token_hex(5).upper()}"
     at = now()
     registration_due = dt(source["due_at"]) if source else None
-    row = dict(case_id=case_id, diary_no=prefix + f"{sequence:04d}", office_id=office,
+    row = dict(case_id=case_id, diary_no=diary, office_id=office, section="7A",
                establishment_id=body.establishment_id, dispute=body.dispute, period_from=body.period_from,
                period_to=body.period_to, inspection_id=body.inspection_id, contributory_uans=body.contributory_uans,
                officer_rank=rank, officer_subject=assigned, registered_at=at, registration_due_at=registration_due,
@@ -435,7 +444,9 @@ async def employer_proceedings(actor: Actor = Depends(require_stakeholder("emplo
                        "hearings": [a for a in actions if a["kind"] == "HEARING"],
                        "daily_orders": [a for a in actions if a["kind"] == "HEARING"],
                        "submissions": [a for a in actions if a["kind"] == "SUBMISSION"],
-                       "order": next((a for a in actions if a["kind"] == "ORDER"), None)})
+                       "applications": [a for a in actions if a["kind"] == "APPLICATION"],
+                       "order": next((a for a in reversed(actions) if a["kind"] == "ORDER" and not a["detail"].get("superseded")), None),
+                       "orders": [a for a in actions if a["kind"] == "ORDER"]})
     return envelope(result)
 
 
@@ -463,24 +474,32 @@ class DuesRow(BaseModel):
     ac2_admin_paise: int = Field(ge=0)
 
 
+class LevyItem(BaseModel):
+    demand_id: str
+    amount_paise: int = Field(ge=0)
+
+
 class OrderInput(BaseModel):
-    kind: str
-    dues: list[DuesRow] = Field(min_length=1)
+    kind: Literal["7A", "14B", "7Q"]
+    dues: list[DuesRow] = Field(default_factory=list)          # 7A / 7C: month-wise dues by account
+    levies: list[LevyItem] = Field(default_factory=list)       # 14B / 7Q: the amount levied for each auto-calculated demand
     lump_sum_reason: str | None = None
     reasoning: str = Field(min_length=1)
     ex_parte: bool
 
 
+DEMAND_KIND = {"14B": "DAMAGES_14B", "7Q": "INTEREST_7Q"}
+
+
 @router.post(BASE + "/cases/{case_id}/orders")
 async def order(case_id: str, body: OrderInput, actor: Actor = Depends(require_stakeholder("fo.apfc", "fo.oic")),
                 session: AsyncSession = Depends(db)):
-    if body.kind in ("14B", "7Q"):
-        raise Problem(501, "/problems/not-implemented", "P2.11b")
-    if body.kind != "7A":
-        raise Problem(422, "/problems/validation", "Order kind must be 7A")
     async with session.begin():
         row = await assigned(session, case_id, actor)
-        if row["state"] != "CONCLUDED":
+        section = row.get("section") or "7A"
+        if (section in ("7A", "7C")) != (body.kind == "7A"):
+            raise Problem(422, "/problems/validation", f"A section {section} case takes a {'7A' if section != '14B' else '14B or 7Q'} order")
+        if row["state"] not in ("CONCLUDED", "PART_ORDERED"):
             raise Problem(422, "/problems/validation", "A served summons and a concluded hearing are required")
         actions = await case_actions(session, case_id)
         summons = [a for a in actions if a["kind"] == "SUMMONS"]
@@ -489,41 +508,86 @@ async def order(case_id: str, body: OrderInput, actor: Actor = Depends(require_s
             raise Problem(422, "/problems/validation", "A served summons and a concluded hearing are required")
         if body.ex_parte and (not summons[-1]["detail"]["served"] or hearings[-1]["detail"]["employer_present"]):
             raise Problem(422, "/problems/ex-parte", "Para 2.6.2 requires due service and employer absence at the last hearing")
-        months = [d.wage_month for d in body.dues]
-        if (len(set(months)) != len(months) or any(not month(m) and m != "LUMP_SUM" for m in months)
-            or ("LUMP_SUM" in months and (len(months) != 1 or not body.lump_sum_reason))):
-            raise Problem(422, "/problems/validation", "Use distinct wage months or give a lump sum reason")
-        if any(m != "LUMP_SUM" and not row["period_from"] <= m <= row["period_to"] for m in months):
-            raise Problem(422, "/problems/validation", "Dues month falls outside inquiry period")
-        dues = [d.model_dump() for d in body.dues]
-        total = sum(sum(v for k, v in d.items() if k.endswith("_paise")) for d in dues)
-        require_step_up(actor, "pass-order", case_id, None, total)
         document, _ = await rules(session)
         name = (await session.execute(select(establishments.c.legal_name).where(
             establishments.c.establishment_id == row["establishment_id"]))).scalar_one()
-        table = "\n".join(f"{d['wage_month']}: A/c 1 employee {rupees(d['ac1_employee_paise'])}, A/c 1 employer "
-                          f"{rupees(d['ac1_employer_paise'])}, A/c 10 {rupees(d['ac10_pension_paise'])}, A/c 21 "
-                          f"{rupees(d['ac21_edli_paise'])}, A/c 2 {rupees(d['ac2_admin_paise'])}" for d in dues)
-        text = (f"ORDER UNDER SECTION 7A — {row['diary_no']}\nParties: EPFO and {name} ({row['establishment_id']}).\n"
-                f"Period: {row['period_from']} to {row['period_to']}.\nSummons served by e-mail and speed post; "
+        earlier = [a for a in actions if a["kind"] == "ORDER"]
+        if section == "14B":
+            kind = DEMAND_KIND[body.kind]
+            if any(a["detail"]["kind"] == body.kind for a in earlier if not a["detail"].get("superseded")):
+                raise Problem(409, "/problems/already-ordered", f"The {body.kind} order is already passed")
+            covered = (await session.execute(select(demands).where(demands.c.demand_id.in_(row["demand_ids"] or []),
+                       demands.c.kind == kind))).mappings().all()
+            given = {item.demand_id: item.amount_paise for item in body.levies}
+            if not covered or set(given) != {d["demand_id"] for d in covered}:
+                raise Problem(422, "/problems/validation", f"Levy an amount for each {body.kind} demand the notice covers, and only those")
+            for d in covered:
+                if given[d["demand_id"]] > int(d["amount_paise"]):
+                    raise Problem(422, "/problems/validation", "No more than the amount the notice worked out")
+                if body.kind == "7Q" and given[d["demand_id"]] != int(d["amount_paise"]):
+                    raise Problem(422, "/problems/validation", "Interest under 7Q is at the statutory rate; it cannot be varied")
+            total = sum(given.values())
+            lines = [{"demand_id": d["demand_id"], "wage_month": d["wage_month"], "days_late": int(d["days_late"]),
+                      "auto_paise": int(d["amount_paise"]), "levied_paise": given[d["demand_id"]]} for d in covered]
+            table = "\n".join(f"{x['wage_month']} ({x['days_late']} days late): worked out {rupees(x['auto_paise'])}, levied {rupees(x['levied_paise'])}"
+                              for x in lines)
+            demand_id, demand_type, supersedes = f"D{body.kind}-{case_id}", kind, [d["demand_id"] for d in covered]
+            heading = "DAMAGES UNDER SECTION 14B" if body.kind == "14B" else "INTEREST UNDER SECTION 7Q"
+            working = json.dumps(lines)
+        else:
+            dues = [d.model_dump() for d in body.dues]
+            if not dues:
+                raise Problem(422, "/problems/validation", "Give the dues month by month")
+            months = [d["wage_month"] for d in dues]
+            if (len(set(months)) != len(months) or any(not month(m) and m != "LUMP_SUM" for m in months)
+                    or ("LUMP_SUM" in months and (len(months) != 1 or not body.lump_sum_reason))):
+                raise Problem(422, "/problems/validation", "Use distinct wage months or give a lump sum reason")
+            if any(m != "LUMP_SUM" and not row["period_from"] <= m <= row["period_to"] for m in months):
+                raise Problem(422, "/problems/validation", "Dues month falls outside inquiry period")
+            total = sum(sum(v for k, v in d.items() if k.endswith("_paise")) for d in dues)
+            table = "\n".join(f"{d['wage_month']}: A/c 1 employee {rupees(d['ac1_employee_paise'])}, A/c 1 employer "
+                              f"{rupees(d['ac1_employer_paise'])}, A/c 10 {rupees(d['ac10_pension_paise'])}, A/c 21 "
+                              f"{rupees(d['ac21_edli_paise'])}, A/c 2 {rupees(d['ac2_admin_paise'])}" for d in dues)
+            tag = "D7C" if section == "7C" else "D7A"
+            demand_id = f"{tag}-{case_id}" + (f"-R{len(earlier)}" if earlier else "")       # after a review: a fresh demand
+            demand_type = "DUES_7A"
+            supersedes = list(row.get("order_demand_ids") or []) if earlier else []           # the order under review is replaced
+            heading = "ORDER UNDER SECTION 7C (ESCAPED AMOUNT)" if section == "7C" else "ORDER UNDER SECTION 7A"
+            lines, working = dues, json.dumps(dues)
+        require_step_up(actor, "pass-order", case_id, None, total)
+        review = " (order passed under review, section 7B)" if earlier and section != "14B" else ""
+        text = (f"{heading}{review} — {row['diary_no']}\nParties: EPFO and {name} ({row['establishment_id']}).\n"
+                f"Period: {row['period_from']} to {row['period_to']}.\nNotice served by e-mail and speed post; "
                 f"hearings: {', '.join(a['detail']['held_at'] for a in hearings)}.\nFindings and reasons: {body.reasoning}\n"
-                f"Dues by account and month:\n{table}\nTotal dues assessed: {rupees(total)}. "
-                "The establishment is directed to pay within 15 days.")
+                f"{'Dues by account and month' if section != '14B' else 'Delayed remittances'}:\n{table}\n"
+                f"Total: {rupees(total)}. The establishment is directed to pay within 15 days.")
         late = now() > dt(row["order_due_at"])
-        demand_id = f"D7A-{case_id}"
-        detail = {"kind": "7A", "diary_no": row["diary_no"], "dues": dues, "total_paise": total,
-                  "reasoning": body.reasoning, "ex_parte": body.ex_parte, "late": late,
-                  "order_due_at": iso(row["order_due_at"]), "text": text, "demand_id": demand_id}
+        detail = {"kind": body.kind, "diary_no": row["diary_no"], "dues": lines, "total_paise": total, "reasoning": body.reasoning,
+                  "ex_parte": body.ex_parte, "late": late, "order_due_at": iso(row["order_due_at"]), "text": text, "demand_id": demand_id}
+        for a in earlier:                                                                     # a 7A order replaced under review
+            if section != "14B" and not a["detail"].get("superseded"):
+                await session.execute(update(inquiry_actions).where(inquiry_actions.c.case_id == case_id,
+                    inquiry_actions.c.kind == "ORDER").values(detail={**a["detail"], "superseded": True}))
         await action(session, case_id, "ORDER", actor.subject, detail)
-        await session.execute(update(inquiries).where(inquiries.c.case_id == case_id).values(state="ORDERED"))
+        ordered = list(row.get("order_demand_ids") or []) if section == "14B" else []
+        ordered.append(demand_id)
+        kinds_due = set()
+        if section == "14B":
+            kinds_due = {k for k, v in DEMAND_KIND.items() if (await session.execute(select(demands.c.demand_id).where(
+                demands.c.demand_id.in_(row["demand_ids"] or []), demands.c.kind == v))).first()}
+            done = {a["detail"]["kind"] for a in earlier} | {body.kind}
+        state = "PART_ORDERED" if section == "14B" and not kinds_due <= done else "ORDERED"
+        await session.execute(update(inquiries).where(inquiries.c.case_id == case_id).values(
+            state=state, ordered_at=now(), ex_parte=body.ex_parte, order_demand_ids=ordered))
         await session.execute(update(compliance_cases).where(compliance_cases.c.case_id == case_id).values(
-            state="CLOSED", amount_paise=total))
+            state="CLOSED" if state == "ORDERED" else "OPEN", amount_paise=total))
         await event(session, actor, "DemandRaised.v1", "demand", demand_id,
-                    {"demand_id": demand_id, "establishment_id": row["establishment_id"], "demand_type": "DUES_7A",
-                     "amount_paise": total, "supersedes_demand_ids": [], "working": json.dumps(dues),
+                    {"demand_id": demand_id, "establishment_id": row["establishment_id"], "demand_type": demand_type,
+                     "amount_paise": total, "supersedes_demand_ids": supersedes, "working": working,
                      "rule_version": document["rule_version"]})
         await event(session, actor, "InquiryOrderPassed.v1", "compliance_case", case_id,
                     {"case_id": case_id, "diary_no": row["diary_no"], "establishment_id": row["establishment_id"],
-                     "section": "7A", "ex_parte": body.ex_parte, "total_paise": total, "demand_id": demand_id})
+                     "section": body.kind if section == "14B" else section, "ex_parte": body.ex_parte, "total_paise": total,
+                     "demand_id": demand_id})
         await record(session, actor, "inquiry.order_passed", "inquiry", case_id, body.reasoning)
     return envelope(detail)

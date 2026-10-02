@@ -98,6 +98,21 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 11b: damages, interest, review, set-aside, 7C, scrutiny (2 October 2026)
+
+Unit: every suite (`make test`) — compliance-service 16 (new `test_proceedings_b.py`: the notice from every open demand or
+those named, the DA alone drafts it, demands already noticed refused, SS then circle officer; 14B up to the amount worked
+out, 7Q not varied, both orders replacing the auto demands; review refused without the next-higher view, granted, heard
+again and the demand replaced; set-aside only of an ex-parte order, the demand withdrawn; 7C as a linked inquiry adding a
+demand; scrutiny only by the officer next above, once), contribution-service 98 (a 7Q order's demand; a withdrawal —
+both written by agy), common-persistence 25; web 270 (new `P211b.office.test.tsx` and `P211b.employer.test.tsx`, the
+latter by agy); end to end 98 of 98 (new `test_proceedings_b.py`, repeatable); must-deny 18; UI smoke 2. Found on the way, fixed:
+the case view showed the inquiry only for 7A cases; the summons form did not come back after a review or a set-aside;
+the new rule-set keys were made mandatory, so a rule set drafted from an earlier published one could not be published
+(they are optional; `section()` already falls back); a returns test took the first open demand, which can now be an
+order's; a reduced levy must be in whole rupees to be paid by challan. Codex was out (usage limit); agy, in its
+edit mode, did two small parts well but runs the test suites very slowly — its work was verified here.
+
 ## Update — Phase 2, slice 12h: explore pages (2 October 2026)
 
 Web 260 (new `pages/ExplorePages.test.tsx`: the home page's four links; the hierarchy's tiers and a role's login and

@@ -53,7 +53,7 @@ def _case(c: Any, names: dict[str, str]) -> dict[str, Any]:
 
 class CaseInput(BaseModel):
     establishment_id: str = Field(min_length=3, max_length=40)
-    kind: str = Field(pattern="^(NON_FILING|NON_PAYMENT|LATE_PAYMENT_DAMAGES|OTHER|INQUIRY_7A)$")
+    kind: str = Field(pattern="^(NON_FILING|NON_PAYMENT|LATE_PAYMENT_DAMAGES|OTHER|INQUIRY_7A|INQUIRY_14B)$")
     wage_months: list[str] = Field(default_factory=list, max_length=60)
     amount_paise: int = Field(default=0, ge=0)
     note: str = Field(min_length=10, max_length=1000)
@@ -63,11 +63,17 @@ class CaseInput(BaseModel):
     inspection_id: str | None = None
     contributory_uans: int | None = None
     oic_approval: str | None = None
+    demand_ids: list[str] | None = None        # INQUIRY_14B: the auto-calculated demands the notice covers
 
 
 @router.post("/api/v1/office/compliance/cases", status_code=201)
 async def open_case(body: CaseInput, actor: Actor = Depends(require_stakeholder("fo.da_compliance", "fo.ss")), session: AsyncSession = Depends(db)) -> dict:
     async with session.begin():
+        if body.kind == "INQUIRY_14B":
+            if actor.stakeholder != "fo.da_compliance" or body.contributory_uans is None:
+                raise Problem(422, "/problems/validation", "The DA drafts the 14B notice with the contributory UANs of the last month of default")
+            from app.api.proceedings_b import register_14b
+            return envelope(await register_14b(body.establishment_id, body.demand_ids or [], body.contributory_uans, body.note, actor, session))
         if body.kind == "INQUIRY_7A":
             from app.api.proceedings import InquiryInput, register
             if body.dispute is None or body.period_from is None or body.period_to is None or body.contributory_uans is None:
@@ -120,7 +126,7 @@ async def get_case(caseId: str, actor: Actor = Depends(CASE_OFFICERS), session: 
     open_demands = (await session.execute(select(demands).where(demands.c.establishment_id == c["establishment_id"],
                                                                 demands.c.state == "OPEN"))).mappings().all()
     detail = {**_case(c, names), "open_demands": [dict(d) for d in open_demands]}
-    if c["kind"] == "INQUIRY_7A":                                  # P2.11a: the inquiry behind the case, with its history
+    if c["kind"].startswith("INQUIRY_"):                           # the inquiry behind the case (7A, 7C, 14B), with its history
         from app.api.proceedings import case_actions, inquiry, inquiry_view
         detail["inquiry"] = {**inquiry_view(await inquiry(session, caseId)), "actions": await case_actions(session, caseId)}
     return envelope(detail)

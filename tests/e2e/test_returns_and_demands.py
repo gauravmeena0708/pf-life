@@ -37,7 +37,8 @@ def test_arrear_return_cancelled_and_demands_knocked_off(persona):
     assert status == 200 and r["data"]["state"] == "CANCELLED", r
 
     demands = call(signatory, "GET", "/api/v1/employers/me/demands")[1]["data"]
-    open_items = [d for d in demands["items"] if d["state"] == "OPEN"]
+    open_items = [d for d in demands["items"] if d["state"] == "OPEN" and d["kind"] in ("DAMAGES_14B", "INTEREST_7Q")
+                  and d["trrn"] not in (None, "-") and not d["demand_id"].startswith(("D14B-", "D7Q-"))]   # auto-calculated, not an order's
     assert open_items, "a late payment raises 14B / 7Q demands"
     by_trrn = open_items[0]["trrn"]
     chosen = [d for d in open_items if d["trrn"] == by_trrn]

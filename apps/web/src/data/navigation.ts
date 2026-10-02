@@ -140,6 +140,7 @@ function poc(role: string): NavGroup[] {
   if (role === "ho.fa_cao" || role === "ho.cpfc") out.push({ label: "PMVBRY", to: "/ho/pmvbry" });
   if (role === "zo.acc" || role === "zo.rpfc1") out.push({ labelKey: "navigation.workQueue", to: "/office/work-queue" });
   if (role === "zo.acc") out.push({ label: "Exemption proceedings", to: "/exemption-proceedings" });
+  if (role === "zo.acc") out.push({ label: "Scrutiny of orders", to: "/office/inquiries#scrutiny-heading" });
   if (role === "zo.acc" || role === "ho.cpfc") out.push({ labelKey: "navigation.grievanceMetrics", to: "/monitoring/grievances" });
   if (["zo.acc", "ho.cpfc", "gov.mole"].includes(role)) out.push({ labelKey: "navigation.dashboards", to: "/dashboards" });
   if (["ho.acc_hq", "ho.cpfc", "ho.pension", "ho.audit"].includes(role)) out.push({ labelKey: "navigation.policy", to: "/policy" });

@@ -97,6 +97,10 @@ inquiries = Table(
     Column("officer_subject", String(80), nullable=False), Column("registered_at", DateTime(timezone=True), nullable=False),
     Column("registration_due_at", DateTime(timezone=True)), Column("concluded_on", DateTime(timezone=True)),
     Column("order_due_at", DateTime(timezone=True)), Column("state", String(20), nullable=False),
+    # P2.11b: 7A / 7C / 14B; the case a 7C reopens; the auto-calculated 14B / 7Q demands a 14B case covers; the order
+    Column("section", String(4), nullable=False, server_default="7A"), Column("parent_case_id", String(40)),
+    Column("demand_ids", JSON), Column("ordered_at", DateTime(timezone=True)), Column("ex_parte", Boolean),
+    Column("order_demand_ids", JSON),
 )
 
 inquiry_actions = Table(

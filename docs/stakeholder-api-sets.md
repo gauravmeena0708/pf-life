@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 259 |
+| Activities | 261 |
 | Stakeholders with at least one API | 94 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 3 |
@@ -250,6 +250,7 @@ Activities: **F01.register** Register establishment online and submit verificati
 | `POST /employers/me/operators/invitations` | W |
 | `POST /employers/me/operators/{operatorId}/revocations` | W |
 | `POST /employers/me/pmvbry/options` | W |
+| `POST /employers/me/proceedings/{caseId}/applications` | W |
 | `POST /employers/me/proceedings/{caseId}/submissions` | W |
 | `POST /employers/me/signatories/authorisations` | W |
 | `POST /employers/me/signatories/{signatoryId}/request-letters` | W |
@@ -310,6 +311,7 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `POST /employers/me/joint-declarations/{jdId}/decisions` | W |
 | `POST /employers/me/kyc-approvals/{requestId}/decisions` | W |
 | `POST /employers/me/office-transfer-requests` | W |
+| `POST /employers/me/proceedings/{caseId}/applications` | W |
 | `POST /employers/me/proceedings/{caseId}/submissions` | W |
 | `POST /employers/me/transfer-requests/{transferId}/decisions` | W |
 | `POST /employers/me/vishwas-applications` | W |
@@ -479,7 +481,7 @@ Integration adapters: `income_tax`
 
 #### `fo.da_compliance` — Dealing Assistant (Compliance) — establishment files, inspections, 14B/7Q knock-off
 
-Activities: **F01.olre_scrutiny** Scrutinise documents of a newly registered establishment (FO-interface >> OLRE >> View Documents) and open the compliance e-file; **F03.knock_off** Knock off auto-calculated 14B / 7Q against a miscellaneous challan (FO INTERFACE >> 14B/7Q Knock Off); **F06.defaulters** Identify non-filers / short payers; open compliance case; **F06.report_process** Process the inspection report (DA T+3, SS T+5); register the inquiry the circle officer decides on; **F07.verify_est** Verify the frozen establishment
+Activities: **F01.olre_scrutiny** Scrutinise documents of a newly registered establishment (FO-interface >> OLRE >> View Documents) and open the compliance e-file; **F03.knock_off** Knock off auto-calculated 14B / 7Q against a miscellaneous challan (FO INTERFACE >> 14B/7Q Knock Off); **F06.defaulters** Identify non-filers / short payers; open compliance case; **F06.damages_notice** Periodic desk review: draft the 14B / 7Q notice from the auto-calculated demands of delayed remittances (T+1); **F06.report_process** Process the inspection report (DA T+3, SS T+5); register the inquiry the circle officer decides on; **F07.verify_est** Verify the frozen establishment
 
 | Endpoint | Status |
 |---|---|
@@ -512,6 +514,7 @@ Activities: **F02.jd_verify** Verifier (SS route): cross-check and recommend; **
 | `POST /office/cases/{caseId}/decisions` | W |
 | `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/compliance/cases` | W |
+| `POST /office/compliance/cases/{caseId}/approvals` | W |
 | `POST /office/compliance/inspections/{inspectionId}/processing-notes` | W |
 | `POST /office/damages-knock-offs/{knockOffId}/approvals` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
@@ -560,6 +563,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `GET /office/compliance/cases` | W |
 | `GET /office/compliance/cases/{caseId}` | W |
 | `GET /office/compliance/inspections` | W |
+| `GET /office/compliance/scrutinies` | W |
 | `GET /office/compliance/vishwas-applications` | W |
 | `GET /office/death-claims/{claimId}/shares-summary` | W |
 | `GET /office/ecr-filings` | W |
@@ -573,9 +577,14 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/cases/{caseId}/second-approvals` | W |
 | `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/claims/{claimId}/re-disbursement-approvals` | W |
+| `POST /office/compliance/cases/{caseId}/approvals` | W |
+| `POST /office/compliance/cases/{caseId}/escaped-assessments-7c` | W |
 | `POST /office/compliance/cases/{caseId}/hearings` | W |
 | `POST /office/compliance/cases/{caseId}/notices` | W |
 | `POST /office/compliance/cases/{caseId}/orders` | W |
+| `POST /office/compliance/cases/{caseId}/reviews-7b` | W |
+| `POST /office/compliance/cases/{caseId}/scrutinies` | W |
+| `POST /office/compliance/cases/{caseId}/set-asides` | W |
 | `POST /office/compliance/inspections` | W |
 | `POST /office/compliance/inspections/{inspectionId}/processing-notes` | W |
 | `POST /office/compliance/vishwas-applications/{applicationId}/decisions` | W |
@@ -588,9 +597,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/member-change-requests/{requestId}/decisions` | W |
 | `POST /office/members/{uan}/freezes` | W |
 | `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | W |
-| `POST /office/compliance/cases/{caseId}/escaped-assessments-7c` | P |
 | `POST /office/compliance/cases/{caseId}/prosecutions` | P |
-| `POST /office/compliance/cases/{caseId}/reviews-7b` | P |
 | `POST /office/compliance/membership-disputes` | P |
 | `POST /office/ecr-filings/{filingId}/approvals` | ? |
 
@@ -620,6 +627,7 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/compliance/cases` | W |
 | `GET /office/compliance/cases/{caseId}` | W |
+| `GET /office/compliance/scrutinies` | W |
 | `GET /office/exempted/proceedings` | W |
 | `GET /office/members/{uan}/locks` | W |
 | `GET /office/work-queue` | W |
@@ -629,9 +637,13 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | `POST /office/cases/{caseId}/second-approvals` | W |
 | `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/compliance/cases/{caseId}/allocations` | W |
+| `POST /office/compliance/cases/{caseId}/escaped-assessments-7c` | W |
 | `POST /office/compliance/cases/{caseId}/hearings` | W |
 | `POST /office/compliance/cases/{caseId}/notices` | W |
 | `POST /office/compliance/cases/{caseId}/orders` | W |
+| `POST /office/compliance/cases/{caseId}/reviews-7b` | W |
+| `POST /office/compliance/cases/{caseId}/scrutinies` | W |
+| `POST /office/compliance/cases/{caseId}/set-asides` | W |
 | `POST /office/establishments/{estId}/defreezes` | W |
 | `POST /office/establishments/{estId}/freezes` | W |
 | `POST /office/exempted/proceedings/{proceedingId}/steps` | W |
@@ -881,7 +893,7 @@ Activities: **F06.district** District-level compliance follow-up and facilitatio
 
 #### `zo.acc` — Additional Central PF Commissioner (Zone head)
 
-Activities: **F08.escalate** Handle grievances escalated to the zone; **F09.zo_forward** Zonal ACC forwards the draft agenda to HO with recommendations (SE-3 / CE-4) or remands it; **F13.zo** Zone dashboards; approvals above RO limits
+Activities: **F06.zo_scrutiny** Zonal ACC scrutinises the orders the RPFC-I passes (by the 15th of the following month); may direct a 7C; **F08.escalate** Handle grievances escalated to the zone; **F09.zo_forward** Zonal ACC forwards the draft agenda to HO with recommendations (SE-3 / CE-4) or remands it; **F13.zo** Zone dashboards; approvals above RO limits
 
 | Endpoint | Status |
 |---|---|
@@ -889,12 +901,14 @@ Activities: **F08.escalate** Handle grievances escalated to the zone; **F09.zo_f
 | `GET /monitoring/claims` | W |
 | `GET /monitoring/grievances` | W |
 | `GET /office/cases/{caseId}` | W |
+| `GET /office/compliance/scrutinies` | W |
 | `GET /office/exempted/proceedings` | W |
 | `GET /office/work-queue` | W |
 | `GET /zo/dashboards` | W |
 | `POST /grievances/{grievanceId}/escalations` | W |
 | `POST /grievances/{grievanceId}/messages` | W |
 | `POST /grievances/{grievanceId}/resolution` | W |
+| `POST /office/compliance/cases/{caseId}/scrutinies` | W |
 | `POST /office/exempted/proceedings/{proceedingId}/steps` | W |
 
 #### `zo.rpfc1` — RPFC-I at the Zonal Office (zonal authority for freezing categories B and C; zone-level monitoring)
@@ -1753,6 +1767,7 @@ flowchart LR
 flowchart LR
   F06_detect["ho.caiu<br/>Analyse data and allocate risk-based inspections / risk sign"]
   F06_defaulters["fo.da_compliance<br/>Identify non-filers / short payers; open compliance case"]
+  F06_damages_notice["fo.da_compliance<br/>Periodic desk review: draft the 14B / 7Q notice from the aut"]
   F06_schedule["fo.apfc<br/>Circle officer schedules inspection (incl. CAIU-allocated)"]
   F06_inspect["fo.icf<br/>Conduct inspection; upload report on Unified Portal and Shra"]
   style F06_inspect stroke-dasharray: 5 5
@@ -1761,6 +1776,7 @@ flowchart LR
   F06_report_process["fo.da_compliance<br/>Process the inspection report (DA T+3, SS T+5); register the"]
   F06_ss_note["fo.ss<br/>Section Supervisor puts the report up to the circle officer "]
   F06_allocate["fo.oic<br/>Officer in charge: inquiries allocated at random by size; re"]
+  F06_zo_scrutiny["zo.acc<br/>Zonal ACC scrutinises the orders the RPFC-I passes (by the 1"]
   F06_proceed["fo.apfc<br/>Quasi-judicial authority: issue notice / summons, hold heari"]
   F06_proceed_large["fo.oic<br/>RPFC-I / officer in charge conducts inquiries of establishme"]
   F06_order["fo.apfc<br/>Pass 7A / 14B / 7Q order (e-Proceedings Final Order); 7B rev"]
@@ -1785,6 +1801,7 @@ flowchart LR
   F06_ho_legal["ho.legal<br/>Legal policy; monitoring of court cases"]
   F06_detect --> F06_schedule
   F06_defaulters --> F06_schedule
+  F06_damages_notice --> F06_ss_note
   F06_schedule --> F06_inspect
   F06_inspect --> F06_report_process
   F06_inspect_legacy --> F06_report_process

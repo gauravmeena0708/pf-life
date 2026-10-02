@@ -43,6 +43,52 @@ paths:
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []
+  /employers/me/proceedings/{caseId}/applications:
+    post:
+      operationId: postEmployersProceedingsCaseIdApplications
+      summary: Employer applies for a 7B review (new evidence, error apparent, other sufficient reason) or to set aside an
+        ex-parte ord
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/EstablishmentId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - employer.owner
+      - employer.signatory
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
+      description: Employer applies for a 7B review (new evidence, error apparent, other sufficient reason) or to set aside
+        an ex-parte order
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /employers/me/proceedings/{caseId}/submissions:
     post:
       operationId: postEmployersProceedingsCaseIdSubmissions
@@ -432,10 +478,56 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/compliance/cases/{caseId}/approvals:
+    post:
+      operationId: postOfficeComplianceCasesCaseIdApprovals
+      summary: 'The 14B / 7Q notice through the file: SS endorses (T+3), the circle officer approves (T+5) — then filed with
+        a diary num'
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - fo.apfc
+      - fo.ss
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'The 14B / 7Q notice through the file: SS endorses (T+3), the circle officer approves (T+5) — then filed
+        with a diary number and allotted by size'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/compliance/cases/{caseId}/escaped-assessments-7c:
     post:
       operationId: postOfficeComplianceCasesCaseIdEscapedAssessments7c
-      summary: 7C escaped-assessment proceeding
+      summary: '7C escaped amount within 5 years of the order: a linked inquiry before the same officer; its order adds a
+        demand'
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -447,17 +539,24 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
       - fo.apfc
+      - fo.oic
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
@@ -598,17 +697,17 @@ paths:
         days of the last hearing → DemandRaised.v1
 
 
-        Variants by `kind`: `7A` (W, phase 1); `14B` (P, phase 3); `7Q` (P, phase 3)'
+        Variants by `kind`: `7A` (W, phase 1); `14B` (W, phase 1); `7Q` (W, phase 1)'
       x-variants:
       - kind: 7A
         status: W
         phase: 1
       - kind: 14B
-        status: P
-        phase: 3
+        status: W
+        phase: 1
       - kind: 7Q
-        status: P
-        phase: 3
+        status: W
+        phase: 1
       requestBody:
         required: false
         content:
@@ -727,7 +826,8 @@ paths:
   /office/compliance/cases/{caseId}/reviews-7b:
     post:
       operationId: postOfficeComplianceCasesCaseIdReviews7b
-      summary: 7B review of an order
+      summary: '7B review on the employer''s application or of the officer''s own motion, after the next-higher officer''s
+        view; granted: h'
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -739,22 +839,120 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
       - fo.apfc
+      - fo.oic
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: '7B review on the employer''s application or of the officer''s own motion, after the next-higher officer''s
+        view; granted: heard again, the new order replaces the old demand'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/compliance/cases/{caseId}/scrutinies:
+    post:
+      operationId: postOfficeComplianceCasesCaseIdScrutinies
+      summary: Record the scrutiny of an order (standard proforma), optionally directing a 7C
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - fo.apfc
+      - fo.oic
+      - zo.acc
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
       requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/compliance/cases/{caseId}/set-asides:
+    post:
+      operationId: postOfficeComplianceCasesCaseIdSetAsides
+      summary: 'Decide an application to set aside an ex-parte order (s.7A(4)): set aside — the demand withdrawn and heard
+        afresh — or r'
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
         required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - fo.apfc
+      - fo.oic
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Decide an application to set aside an ex-parte order (s.7A(4)): set aside — the demand withdrawn and heard
+        afresh — or rejected'
+      requestBody:
+        required: false
         content:
           application/json:
             schema:
@@ -955,6 +1153,45 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/compliance/scrutinies:
+    get:
+      operationId: getOfficeComplianceScrutinies
+      summary: Orders due for administrative scrutiny by the officer next above the one who passed them, by the 15th of the
+        following m
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: month
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - fo.apfc
+      - fo.oic
+      - zo.acc
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: Orders due for administrative scrutiny by the officer next above the one who passed them, by the 15th of
+        the following month
   /office/compliance/vishwas-applications:
     get:
       operationId: getOfficeComplianceVishwasApplications

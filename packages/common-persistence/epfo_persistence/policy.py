@@ -364,8 +364,9 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
         cp = document["compliance_proceedings"] or {}
         days = ("inspection_report_days", "da_note_days", "ss_note_days", "decision_days", "registration_days", "adjournment_max_days",
                 "order_working_days", "set_aside_months", "escaped_assessment_years")
+        later = ("damages_ss_days", "damages_approval_days", "review_days")   # P2.11b: a rule set drafted from an earlier one may lack them
         tiers = cp.get("allocation_tiers")
-        if not all(_whole(cp.get(k), 1, 365) for k in days) or not (isinstance(tiers, list) and tiers and tiers[-1].get("up_to_uans") is None
+        if not all(_whole(cp.get(k), 1, 365) for k in days) or not all(_whole(cp[k], 1, 365) for k in later if k in cp) or not (isinstance(tiers, list) and tiers and tiers[-1].get("up_to_uans") is None
                                                                     and all(t.get("rank") in ("APFC", "RPFC-II", "RPFC-I") for t in tiers)):
             problems.append("compliance_proceedings needs its day limits (1-365) and allocation tiers ending with an open tier")
     if "notifications" in document:

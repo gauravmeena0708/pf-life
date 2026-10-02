@@ -33,11 +33,18 @@ async def on_demand_raised(session, event: dict[str, Any]) -> None:
     if (await session.execute(text("SELECT 1 FROM demands WHERE demand_id=:d"), {"d": p["demand_id"]})).first():
         return
     covered = list(p.get("supersedes_demand_ids") or [])
+    if p.get("withdraw") or int(p.get("amount_paise", 0)) == 0:
+        if covered:
+            await session.execute(text("UPDATE demands SET state='WITHDRAWN', settled_by=:by WHERE demand_id IN :ids AND state='OPEN'")
+                                  .bindparams(bindparam("ids", expanding=True)), {"by": p["demand_id"], "ids": covered})
+        await publish(session, covered, event.get("correlation_id"))
+        return
     first = (await session.execute(text("SELECT * FROM demands WHERE demand_id IN :ids").bindparams(bindparam("ids", expanding=True)),
                                    {"ids": covered or ["-"]})).mappings().first()
+    kind = "DUES_7A" if p.get("demand_type") == "DUES_7A" else ("INTEREST_7Q" if p.get("demand_type") == "INTEREST_7Q" else "DAMAGES_14B")
     await session.execute(text("INSERT INTO demands (demand_id,establishment_id,kind,trrn,wage_month,amount_paise,days_late,working,rule_version,state,created_at) "
                                "VALUES (:d,:e,:k,:t,:m,:a,:days,:w,:r,'OPEN',:at)"),
-                          {"d": p["demand_id"], "e": p["establishment_id"], "k": "DUES_7A" if p.get("demand_type") == "DUES_7A" else "DAMAGES_14B", "t": first["trrn"] if first else "-",
+                          {"d": p["demand_id"], "e": p["establishment_id"], "k": kind, "t": first["trrn"] if first else "-",
                            "m": first["wage_month"] if first else "-", "a": int(p["amount_paise"]), "days": first["days_late"] if first else 0,
                            "w": p.get("working") or "Revised under VISHWAS", "r": p.get("rule_version") or "-", "at": datetime.now(UTC)})
     if covered:

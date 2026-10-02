@@ -83,8 +83,8 @@ def test_member_cannot_call_office_endpoint(page):
 
 
 def test_planned_endpoint_answers_501_planned(page):
-    login(page, "ro-apfc")                             # 7C escaped assessments: planned until P2.11b (the gateway
-    status, body = api(page, "POST", "/api/v1/office/compliance/cases/CMP-1/escaped-assessments-7c")   # says so before any code)
+    login(page, "ro-apfc")                             # prosecution: planned until P2.11c (the gateway
+    status, body = api(page, "POST", "/api/v1/office/compliance/cases/CMP-1/prosecutions")   # says so before any code)
     assert status == 501 and body["type"] == "/problems/planned"
 
 

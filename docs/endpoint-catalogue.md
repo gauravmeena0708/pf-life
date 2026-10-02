@@ -489,10 +489,15 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | `POST /office/compliance/cases/{caseId}/hearings` | Daily order sheet of a hearing: who attended, what happened, documents received, the next date (≤ 7 days) or the hearing concluded | W | 1 | compliance |
 | `POST /employers/me/proceedings/{caseId}/submissions` | Employer's reply and evidence in an inquiry | W | 1 | compliance |
 | `POST /office/compliance/cases/{caseId}/orders` 🔐 (`kind=7A`) | **7A** dues-determination order: month-wise dues by account, ex parte only after due service, within 15 working days of the last hearing → `DemandRaised.v1` | W | 1 | compliance |
-| `POST /office/compliance/cases/{caseId}/orders` 🔐 (`kind=14B`) | **14B damages** order (illustrative formula) | P | 3 | compliance |
-| `POST /office/compliance/cases/{caseId}/orders` 🔐 (`kind=7Q`) | **7Q interest** order | P | 3 | compliance |
-| `POST /office/compliance/cases/{caseId}/reviews-7b` 🔐 | **7B** review of an order | P | 3 | compliance |
-| `POST /office/compliance/cases/{caseId}/escaped-assessments-7c` 🔐 | **7C** escaped-assessment proceeding | P | 3 | compliance |
+| `POST /office/compliance/cases/{caseId}/orders` 🔐 (`kind=14B`) | **14B damages** order on the notice's auto-calculated demands: up to the amount worked out, with reasons; replaces them (P2.11b) | W | 1 | compliance |
+| `POST /office/compliance/cases/{caseId}/orders` 🔐 (`kind=7Q`) | **7Q interest** order: at the statutory rate, not varied; replaces the auto-calculated demands | W | 1 | compliance |
+| `POST /office/compliance/cases/{caseId}/approvals` | The 14B / 7Q notice through the file: SS endorses (T+3), the circle officer approves (T+5) — then filed with a diary number and allotted by size | W | 1 | compliance |
+| `POST /office/compliance/cases/{caseId}/set-asides` 🔐 | Decide an application to set aside an ex-parte order (s.7A(4)): set aside — the demand withdrawn and heard afresh — or rejected | W | 1 | compliance |
+| `GET /office/compliance/scrutinies?month=` | Orders due for administrative scrutiny by the officer next above the one who passed them, by the 15th of the following month | W | 1 | compliance |
+| `POST /office/compliance/cases/{caseId}/scrutinies` | Record the scrutiny of an order (standard proforma), optionally directing a 7C | W | 1 | compliance |
+| `POST /employers/me/proceedings/{caseId}/applications` | Employer applies for a 7B review (new evidence, error apparent, other sufficient reason) or to set aside an ex-parte order | W | 1 | compliance |
+| `POST /office/compliance/cases/{caseId}/reviews-7b` 🔐 | **7B** review on the employer's application or of the officer's own motion, after the next-higher officer's view; granted: heard again, the new order replaces the old demand | W | 1 | compliance |
+| `POST /office/compliance/cases/{caseId}/escaped-assessments-7c` 🔐 | **7C** escaped amount within 5 years of the order: a linked inquiry before the same officer; its order adds a demand | W | 1 | compliance |
 | `POST /office/compliance/membership-disputes` 🔐 | **26B** coverage / membership dispute | P | 3 | compliance |
 | `POST /office/compliance/cases/{caseId}/appeals` | **7-I** appeal record (filed before the tribunal) | P | 3 | compliance |
 | `POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposits` 💰 | **7-O** pre-deposit evidence | P | 3 | compliance |

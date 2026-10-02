@@ -40,7 +40,7 @@ it("lets the circle officer schedule an inspection and the EO report", async () 
 });
 
 it("routes the report through DA, SS and the circle officer's decision, then the SS registers the inquiry", async () => {
-  as("fo.da_compliance"); responses["/api/v1/office/compliance/inspections"] = [inspection("REPORTED", { report })]; responses["/api/v1/office/compliance/cases?type=INQUIRY_7A"] = [];
+  as("fo.da_compliance"); responses["/api/v1/office/compliance/inspections"] = [inspection("REPORTED", { report })]; responses["/api/v1/office/compliance/cases"] = [];
   show(<InquiriesPage />);
   expect(await screen.findByText(/estimated dues ₹50,000/)).toBeTruthy();
   const da = screen.getByRole("form", { name: "Process INS-1" });
@@ -62,7 +62,7 @@ it("routes the report through DA, SS and the circle officer's decision, then the
 
 it("lets the allotted officer pass the 7A order with a one-time code bound to the amount", async () => {
   as("fo.apfc"); responses["/api/v1/office/compliance/inspections"] = [];
-  responses["/api/v1/office/compliance/cases?type=INQUIRY_7A"] = [{ case_id: "CMP-1", establishment_id: "EST-1", legal_name: "Synthetic Textiles", kind: "INQUIRY_7A", state: "OPEN" }];
+  responses["/api/v1/office/compliance/cases"] = [{ case_id: "CMP-1", establishment_id: "EST-1", legal_name: "Synthetic Textiles", kind: "INQUIRY_7A", state: "OPEN" }];
   responses["/api/v1/office/compliance/cases/CMP-1"] = { case_id: "CMP-1", establishment_id: "EST-1", legal_name: "Synthetic Textiles", kind: "INQUIRY_7A", state: "OPEN",
     inquiry: { diary_no: "EPR/RO-DEMO-01/2026/0001", officer_rank: "APFC", officer_subject: "x", state: "CONCLUDED", period_from: "2025-04", period_to: "2025-09", contributory_uans: 40,
       order_due_at: "2026-10-23T10:00:00Z", actions: [{ kind: "SUMMONS", at: "2026-10-01T10:00:00Z", detail: { hearing_at: "2026-10-02T10:00:00Z" } },

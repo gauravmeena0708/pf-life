@@ -453,16 +453,17 @@
     "method": "POST",
     "path_template": "/office/compliance/cases/{caseId}/escaped-assessments-7c",
     "regex": "^/office/compliance/cases/[^/]+/escaped\\-assessments\\-7c$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "compliance",
     "upstream": "http://compliance-service:8000",
     "money": false,
     "step_up": true,
     "callers": [
-      "fo.apfc"
+      "fo.apfc",
+      "fo.oic"
     ],
-    "summary": "7C escaped-assessment proceeding",
+    "summary": "7C escaped amount within 5 years of the order: a linked inquiry before the same officer; its order adds a demand",
     "revocation": false
   },
   {
@@ -1276,6 +1277,23 @@
   },
   {
     "method": "POST",
+    "path_template": "/employers/me/proceedings/{caseId}/applications",
+    "regex": "^/employers/me/proceedings/[^/]+/applications$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.owner",
+      "employer.signatory"
+    ],
+    "summary": "Employer applies for a 7B review (new evidence, error apparent, other sufficient reason) or to set aside an ex-parte order",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/exempted/me/proceedings/{proceedingId}/replies",
     "regex": "^/exempted/me/proceedings/[^/]+/replies$",
     "status": "W",
@@ -1762,16 +1780,52 @@
     "method": "POST",
     "path_template": "/office/compliance/cases/{caseId}/reviews-7b",
     "regex": "^/office/compliance/cases/[^/]+/reviews\\-7b$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "compliance",
     "upstream": "http://compliance-service:8000",
     "money": false,
     "step_up": true,
     "callers": [
-      "fo.apfc"
+      "fo.apfc",
+      "fo.oic"
     ],
-    "summary": "7B review of an order",
+    "summary": "7B review on the employer's application or of the officer's own motion, after the next-higher officer's view; granted: heard again, the new order replaces the old demand",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/cases/{caseId}/scrutinies",
+    "regex": "^/office/compliance/cases/[^/]+/scrutinies$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc",
+      "fo.oic",
+      "zo.acc"
+    ],
+    "summary": "Record the scrutiny of an order (standard proforma), optionally directing a 7C",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/cases/{caseId}/set-asides",
+    "regex": "^/office/compliance/cases/[^/]+/set\\-asides$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc",
+      "fo.oic"
+    ],
+    "summary": "Decide an application to set aside an ex-parte order (s.7A(4)): set aside — the demand withdrawn and heard afresh — or rejected",
     "revocation": false
   },
   {
@@ -1853,6 +1907,23 @@
       "ext.shram_suvidha"
     ],
     "summary": "Shram Suvidha common-registration feed (signed)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/cases/{caseId}/approvals",
+    "regex": "^/office/compliance/cases/[^/]+/approvals$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc",
+      "fo.ss"
+    ],
+    "summary": "The 14B / 7Q notice through the file: SS endorses (T+3), the circle officer approves (T+5) — then filed with a diary number and allotted by size",
     "revocation": false
   },
   {
@@ -4526,6 +4597,24 @@
       "fo.da_compliance"
     ],
     "summary": "Non-filing / short-payment detection",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/compliance/scrutinies",
+    "regex": "^/office/compliance/scrutinies$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc",
+      "fo.oic",
+      "zo.acc"
+    ],
+    "summary": "Orders due for administrative scrutiny by the officer next above the one who passed them, by the 15th of the following month",
     "revocation": false
   },
   {
