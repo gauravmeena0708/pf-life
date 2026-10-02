@@ -693,6 +693,15 @@ Compliance*: the chain from a CAIU signal through the inspection, the file, the 
 planned steps dashed in red; choose a step for who does it and what follows. **User manuals** — the manuals the UI
 tests produced, by role (after `python3 scripts/publish_manuals.py`).
 
+## Finding your way: side or top menu, Find a screen
+
+1. Log in as `ro-apfc`. The menu is down the side: the group holding the page is open, the item marked. Type
+   *recovery* in *Filter the menu*; only matching items stay. Tick *Show items not built* to see the menus EPFO has
+   that the POC does not build.
+2. Press Ctrl+K (or *Find a screen*), type *legal*, press Enter: the legal cases open.
+3. Choose *Top menu* in the header: the familiar bar returns, and the choice stays for this browser. Log in as
+   `member-a`: the top bar is the default for members.
+
 ## What the tests cover
 
 ```bash

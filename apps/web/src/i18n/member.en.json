@@ -79,7 +79,16 @@
   },
   "nav": {
     "menu": "Menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "searchMenus": "Find a screen",
+    "searchPlaceholder": "Type to find a screen…",
+    "searchResults": "Matching screens",
+    "noMatch": "No screen matches",
+    "filter": "Filter the menu",
+    "layoutLabel": "Menu layout",
+    "layoutTop": "Top menu",
+    "layoutSide": "Side menu",
+    "showIdle": "Show items not built"
   },
   "iw": {
     "title": "International worker coverage",

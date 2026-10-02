@@ -98,6 +98,17 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 20: side or top menu, Find a screen (2 October 2026)
+
+Web 289 (new `P220.test.tsx`: the side menu by default for office roles and the top bar for members, the choice kept;
+the side tree opening the current page's group, folding the others, filtering across all and hiding items not built
+unless asked; Ctrl+K finding a screen and Enter opening it; the empty headings given a destination or a reason); end to
+end 103 of 103; UI smoke 2. Checked in a browser at desktop and phone width. Found on the way, fixed: the two new header
+controls pushed the account menu off a phone screen (they wrap now, and the layout switch is hidden on a phone, where
+both menus are the same drawer); the search button, first named *Search menus*, was confused with the *Menu* and
+*Search* buttons of the pages — by two end-to-end tests and, as likely, by a screen reader user — so it is *Find a
+screen*.
+
 ## Update — Phase 2, slice 11d: recovery; PMVBRY exclusions from inquiries (2 October 2026)
 
 Unit: every suite — compliance-service 24 (new `test_recovery.py`: no certificate before the order's 15 days, one per

@@ -51,6 +51,11 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | P2.17 | Insolvency: a watchlist from EPFO's own signals (ECR stopping, defaults, MCA status), IBBI announcements matched to the establishment, claim deadlines, dues frozen (7A; damages and interest kept apart), the resolution plan checked for PF dues in full, liquidation claims outside the estate (IBC s.36(4)(a)(iii)), recovery measured | Planned (links to P2.11) |
 | P2.18 | EPF to NPS: the PF leg paid to the member's NPS Tier I (PRAN, KYC match, the trustee bank through the CRA — mock); the EPS leg cannot move — a Scheme Certificate or the withdrawal benefit | Planned (needs PFRDA's circular) |
 | P2.19 | Edge cases as tests first, then the fixes: death during a transfer or claim; minor nominee or no nomination; two UANs to merge; court-ordered back wages after exit; 58 in service; a re-employed pensioner; family pension to a dependent parent or a disabled child; attachment orders refused; mergers without a break; a vanished contractor (s.8A); partial payment; exemption cancelled mid-transfer; returned payments after a bank merger; one bank account for many members; identity mismatches; members abroad without Aadhaar; unclaimed balances | Planned |
+| P2.20 | Navigation and findability: side or top menu (per user, by role), menu search (Ctrl+K), the empty menu headings wired to existing screens; later task-based member and employer menus with the legacy ones behind a toggle | Done (task-based menus later) |
+| P2.21 | Data held, not asked: pre-filled claims, automatic transfer when a new member ID appears, the pension case opened at 58 and on death, settlement by default for low risk with sampled audits | Planned |
+| P2.22 | Real-time contributions: a per-pay-run contribution API and a conformance sandbox for payroll vendors (the ECR kept as a format); a due-date option to model contributions paid with wages | Planned |
+| P2.23 | Retirement view: one forecast across PF and pension with VPF what-if and replacement rate; every rejection saying what fixes it | Planned |
+| P2.24 | Trust and governance: authorised representatives (guardian, agent) with consented scope; published service standards with live performance; an independent review tier; rule-change simulation; interest-sustainability model | Planned |
 
 ## P2.9 — plan
 
@@ -310,6 +315,17 @@ Pramaan, UMANG, CSC, B2B payroll, CERT-In):
 - **Not planned** (needs EPFO first): the seven "?" office functions — VDR Special, VDR member beneficiary, VDR vs ECR
   reconciliation, EO certification, the APFC's ECR approval queue, bank-counter payment — until a domain owner defines
   them; the menus say so.
+
+## P2.20 – P2.24 — plan (what a mature social-security system does)
+
+A comparison with systems abroad (Australia's Single Touch Payroll, SuperStream and stapled funds; the UK's Real Time
+Information, State Pension forecast and Pensions Dashboards; Singapore's CPF; the US Social Security statement; Estonia's
+and the Netherlands' once-only and proactive services — from general knowledge, to be checked before a slice relies on
+a detail) shows the gap is less in screens than in how the system works: real-time, data already held, proactive,
+explained. The slices: P2.20 navigation (side / top, search); P2.21 pre-filled and proactive claims; P2.22 per-pay-run
+contributions; P2.23 a retirement forecast and decisions that say how to fix them; P2.24 representatives, service
+standards, independent review, rule simulation. Alongside: a cross-service consistency checker, event contract tests and
+accessibility checks in CI.
 
 ## P2.16 – P2.19 — plan (gig workers, insolvency, EPF to NPS, edge cases)
 
@@ -1185,3 +1201,23 @@ Inspector-cum-Facilitator* to `../manuals/compliance/`. Time limits in the rule 
   EPS service went; the service adds up across all of them (first step of this slice).
 - **Seed and test**: PRIYA DEMO (`member-p`) moves an EPFO member ID into the trust; RAVI DEMO (`member-r`) moves his PF
   out of the trust — `tests/e2e/test_exempted_members.py`. The balance sheet names `PAYABLE_TO_TRUSTS`.
+
+## P2.20 — how it is built
+
+- **Side or top.** The same menu definitions (`src/data/navigation.ts`) draw either the bar across the top or a tree
+  down the side. Office, zone, head office and other staff roles get the side menu by default (their bar wrapped onto
+  two lines); members, employers and the public keep the top bar. Each user can switch in the header; the choice is
+  kept in the browser (`navLayout.ts`, with the role's default if storage is blocked). On a phone both are the same
+  drawer, so the switch is hidden there.
+- **The side tree.** The group holding the current page opens, the others fold; the current item is marked
+  (`aria-current`); a filter narrows every group at once. Items the POC does not build are hidden unless *Show items
+  not built* is ticked — the top bar still shows them greyed, as before.
+- **Find a screen.** Ctrl+K (⌘K) or the header button searches every working menu item of the role; the arrows choose,
+  Enter opens, Escape closes (`MenuSearch.tsx`, a dialog with a combobox and a listbox).
+- **Empty headings.** The employer's *Admin* opens users and change requests; *EEC-2026/VISHWAS* links VISHWAS and
+  marks EEC-2026 planned until its notification is read; the office *Dashboard* opens the role's home, *Services* the
+  PRO counter for PRO roles, *Admin* says postings come from HR; the pension office's *Services* opens enquiries and
+  overdue life certificates.
+- Left for later: task-based member and employer menus (with the legacy ones behind a toggle), keeping the choice in
+  the user's profile rather than the browser.
+

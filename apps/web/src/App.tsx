@@ -7,6 +7,8 @@ import { getSession } from "./api/client";
 import { DemoBanner } from "./components/DemoBanner";
 import { PersonaSwitcher } from "./components/PersonaSwitcher";
 import { RoleNav } from "./components/RoleNav";
+import { MenuSearch } from "./components/MenuSearch";
+import { useNavLayout } from "./data/navLayout";
 import { EcrPage } from "./features/employer/EcrPage";
 import { EmployerHome } from "./features/employer/EmployerHome";
 import { PmvbryPage as EmployerPmvbryPage } from "./features/employer/PmvbryPage";
@@ -117,6 +119,7 @@ export function App() {
   const { t, i18n } = useTranslation();
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
   const role = session.data?.stakeholder;
+  const [navLayout, setNavLayout] = useNavLayout(role);
   function setLanguage(lng: string) {
     void i18n.changeLanguage(lng);
     document.documentElement.lang = lng;
@@ -139,12 +142,18 @@ export function App() {
               <button type="button" onClick={() => setLanguage("en")} aria-pressed={i18n.language === "en"}>English</button>
               <button type="button" onClick={() => setLanguage("hi")} aria-pressed={i18n.language === "hi"}>हिन्दी</button>
             </nav>
+            <MenuSearch role={role} />
+            <div className="nav-layout-toggle" role="group" aria-label={t("nav.layoutLabel")}>
+              <button type="button" aria-pressed={navLayout === "top"} onClick={() => setNavLayout("top")}>{t("nav.layoutTop")}</button>
+              <button type="button" aria-pressed={navLayout === "side"} onClick={() => setNavLayout("side")}>{t("nav.layoutSide")}</button>
+            </div>
             <PersonaSwitcher />
           </div>
         </div>
       </header>
-      <nav className="primary-nav" aria-label={t("navigation.primary")}><RoleNav role={role} /></nav>
-      <div className="shell-width layout">
+      {navLayout === "top" ? <nav className="primary-nav" aria-label={t("navigation.primary")}><RoleNav role={role} /></nav> : null}
+      <div className={`shell-width layout ${navLayout === "side" ? "layout-side" : ""}`}>
+        {navLayout === "side" ? <nav className="side-nav" aria-label={t("navigation.primary")}><RoleNav role={role} layout="side" /></nav> : null}
         <main id="main">
           <Routes>
             <Route path="/" element={<Home />} />

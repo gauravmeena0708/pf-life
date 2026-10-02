@@ -61,11 +61,12 @@ const EMPLOYER: NavGroup[] = [
     link("Direct Challan", "/employer/returns#direct-challan-heading"), link("Demands (14B / 7Q)", "/employer/returns#demands-heading"), link("Inquiries (e-Proceedings)", "/employer/proceedings"), link("VISHWAS: settle damages", "/employer/returns#vishwas-heading"), link("Monthly Return for Exempted Establishment", undefined, "Filed by the establishment's PF trust (the trust's login)"), link("TRRN query / challan status", "/employer/ecr#ecr-challans")] },
   { label: "Dashboards", items: [link("Employer dashboard", "/employer#employer-dashboard-heading"), link("Compliance summary", "/employer/returns#compliance-summary-heading"), link("Active Members details", "/employer/registration#active-heading"), link("Missing details", "/employer/registration#active-heading")] },
   { label: "User", items: [link("Sub-users (payroll operators)", "/employer#people-operator")] },
-  { label: "Admin" },
+  { label: "Admin", items: [link("Users and their rights", "/employer#people-operator"), link("Profile and contact change requests", "/employer/establishment#config-change-heading")] },
   { label: "Online Services", items: [link("Transfer Claims", "/employer/members#transfers-heading"), link("Claim attestations", "/employer/members#claim-attestations-heading"),
     link("Higher-pension joint-option validation", "/employer/members#higher-pension-validations-heading"), link("International workers (CoC)", "/employer/international")] },
   { label: "PMVBRY", to: "/employer/pmvbry" },
-  { label: "EEC-2026/VISHWAS" },
+  { label: "EEC-2026/VISHWAS", items: [link("VISHWAS: settle damages", "/employer/returns#vishwas-heading"),
+    link("EEC-2026 (Employees' Enrolment Campaign)", undefined, "Planned: needs the scheme's notification before it is built")] },
 ];
 
 /** Field Office Interface: the top-level menus seen on live screens, grouped (the real bar wraps onto 2–3 rows). */
@@ -104,13 +105,16 @@ function fieldOffice(role: string): NavGroup[] {
     { label: "Accounts", items: [link("Annual Accounting", undefined, "Interest is credited at head office by F&A (Finance › Interest)"),
       ...(["fo.da_accounts", "fo.apfc"].includes(role) ? [link("Appendix E", "/office/ledger#appendix-e-heading")] : []),
       ...(role === "fo.da_accounts" ? [link("Reverse a journal / recredit a transfer", "/office/ledger#reversal-heading")] : [])] },
-    { label: "Office", items: [...(role === "fo.oic" ? [link("Audit alerts", "/audit/concurrent#audit-alerts-heading"), link("Audit paras", "/audit/concurrent#audit-paras-heading"), link("Issue Tracker requests", "/audit/concurrent#issue-tracker-raise-heading")] : []), ...(role === "fo.pro" ? [link("RTI applications", "/office/grievances#rti-applications-heading")] : []), link("SMS / e-mail deliveries", role === "fo.pro" ? "/office/notification-deliveries" : undefined), link("Dashboard", role === "fo.oic" ? "/dashboards" : undefined), link("Admin"), link("Services")] },
+    { label: "Office", items: [...(role === "fo.oic" ? [link("Audit alerts", "/audit/concurrent#audit-alerts-heading"), link("Audit paras", "/audit/concurrent#audit-paras-heading"), link("Issue Tracker requests", "/audit/concurrent#issue-tracker-raise-heading")] : []), ...(role === "fo.pro" ? [link("RTI applications", "/office/grievances#rti-applications-heading")] : []), link("SMS / e-mail deliveries", role === "fo.pro" ? "/office/notification-deliveries" : undefined), link("Dashboard", role === "fo.oic" ? "/dashboards" : homeFor(role)),
+      link("Admin", undefined, "Officers' postings and roles come from HR (Head Office HR); there is no office user-administration screen"),
+      link("Services", ["fo.pro", "fo.pro_intake"].includes(role) ? "/office/pro-counter" : undefined, ["fo.pro", "fo.pro_intake"].includes(role) ? undefined : "Facilitation services are at the PRO counter (PRO roles)")] },
   ];
 }
 
 /** The DA (Pension) login shows a short bar: Services · NPPS · Pension · CLAIMS. */
 const PENSION_OFFICE: NavGroup[] = [
-  { label: "Services" }, { label: "NPPS" },
+  { label: "Services", items: [link("Pension enquiries", "/office/pensions#enquiry-heading"), link("Life certificates overdue", "/office/pensions#overdue-heading")] },
+  { label: "NPPS", items: [link("NPPS", undefined, "Not in this POC: the menu's meaning is not documented")] },
   { label: "Pension", items: [link("Pension claims (Form 10D)", "/office/pension-claims"), link("Pension revisions", "/office/pension-revisions"),
     link("Pension Enquiry Details", "/office/pensions#enquiry-heading"), link("CPPS runs and BRS", "/cpps"),
     link("Track Pension Claims Updation Activities", "/office/pensions#updation-heading"), link("Life certificates overdue", "/office/pensions#overdue-heading")] },
