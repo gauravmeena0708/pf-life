@@ -12,7 +12,7 @@ from app.domain.claims import HOLDABLE, route
 from app.infra.tables import (accounts, annexure_k_files, annexure_k_requests, auto_transfers, claim_beneficiaries, claims, exempted_establishments, member_bank_accounts,
                               nominations, risk_flags)
 from epfo_observability import Problem, get_logger
-from epfo_persistence.policy import on_policy_published, rules_by_version
+from epfo_persistence.policy import on_policy_published, rules_by_version, rules_on
 
 log = get_logger("claim-service")
 
@@ -63,6 +63,12 @@ async def _claim_or_none(session: AsyncSession, claim_id: str) -> dict[str, Any]
 
 async def on_contribution_posted(session: AsyncSession, event: dict[str, Any]) -> None:
     await _member_lines(session, event["payload"]["postings"], +1)
+    # P2.21: a contribution on a new primary member ID moves the member's exited member IDs into it, unasked (rule switch)
+    rules = await rules_on(session, date.today())
+    if (rules.get("claims") or {}).get("auto_transfer_automatic"):
+        from app.api.mobility_routes import auto_transfer_on_contribution
+        links = {p["account_link_id"] for p in event["payload"]["postings"] if p.get("account_link_id")}
+        await auto_transfer_on_contribution(session, links, event.get("correlation_id"))
 
 
 async def on_interest_credited(session: AsyncSession, event: dict[str, Any]) -> None:

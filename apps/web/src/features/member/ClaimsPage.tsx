@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { api, command, newIdempotencyKey, rupees, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
@@ -24,8 +24,11 @@ export function ClaimsPage() {
   const qc = useQueryClient();
   const stepUp = useStepUp();
   const createKey = useRef<string | null>(null);
-  const [choice, setChoice] = useState<{ accountId: string; claimType: string } | null>(null);
-  const [amount, setAmount] = useState("");
+  // P2.21: an offer from the home page arrives with the account, the type and the amount filled in — the member confirms
+  const [params] = useSearchParams();
+  const offered = params.get("account") && params.get("type") ? { accountId: params.get("account")!, claimType: params.get("type")! } : null;
+  const [choice, setChoice] = useState<{ accountId: string; claimType: string } | null>(offered);
+  const [amount, setAmount] = useState(offered && /^\d+$/.test(params.get("amount") ?? "") ? params.get("amount")! : "");
   const [created, setCreated] = useState<CreatedClaim | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);

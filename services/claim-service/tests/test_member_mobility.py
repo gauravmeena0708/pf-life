@@ -104,3 +104,23 @@ def test_an_e_nomination_replaces_the_nominees_on_record(ctx):
                                                       "guardian_name": None}]}, "member-service")
     rows = q("SELECT name, share_bp, subject FROM nominations WHERE uan='100000000901'")
     assert [(r[0], r[1]) for r in rows] == [("LAKSHMI DEMO", 10000)] and rows[0][2] == SUBJECTS["claimant-a"]   # her login is kept
+
+
+def test_a_contribution_on_the_new_member_id_moves_the_old_balance_unasked(ctx):
+    """P2.21: GIRISH's first contribution on his new primary ID (AL-0906) moves his exited ID's balance (AL-0905) — no request;
+    he is told. A contribution on a non-primary ID moves nothing."""
+    client, q, deliver = ctx
+    posting = lambda link: {"journal_id": f"J-{link}", "payment_id": f"P-{link}", "filing_id": "F", "establishment_id": "EST-DEMO-0001",  # noqa: E731
+                            "wage_month": "2026-09", "postings": [{"account_code": "AC01_EPF", "side": "credit", "amount_paise": 180000,
+                                                                   "account_link_id": link, "share": "employee"}]}
+    deliver("ContributionPosted.v1", posting("AL-0905"), "contribution-service")              # the old ID: nothing moves
+    assert events(q, "AutoTransferConfirmed.v1") == []
+    deliver("ContributionPosted.v1", posting("AL-0906"), "contribution-service")
+    [event] = events(q, "AutoTransferConfirmed.v1")
+    assert (event["from_account_link_id"], event["to_account_link_id"]) == ("AL-0905", "AL-0906")
+    told = [n for n in events(q, "NotificationRequested.v1") if n["template"] == "AUTO_TRANSFER_STARTED"]
+    assert told and told[0]["recipient_subject"] == MEMBER_G
+    status = client.get("/api/v1/members/me/transfers/auto", headers=member(MEMBER_G)).json()["data"]
+    assert status["eligible"] == [] and status["history"][0]["state"] == "CONFIRMED"
+    deliver("ContributionPosted.v1", {**posting("AL-0906"), "journal_id": "J-2"}, "contribution-service")
+    assert len(events(q, "AutoTransferConfirmed.v1")) == 1                                    # once

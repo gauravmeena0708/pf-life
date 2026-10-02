@@ -36,7 +36,11 @@
       "exitTitle": "Mark your exit from {{establishment}}",
       "exitDetail": "The last contribution for member ID {{memberId}} was {{month}}.",
       "passbookTitle": "{{count}} contribution(s) not yet in your passbook",
-      "passbookDetail": "{{message}}"
+      "passbookDetail": "{{message}}",
+      "readyTitle": "Ready for you: {{label}} — {{amount}}",
+      "readyDetail": "Member ID {{memberId}}: the amount and your bank account are filled in; review and confirm.",
+      "pensionDueTitle": "Your monthly pension is due: about {{amount}} a month",
+      "pensionDueDetail": "You are 58 with enough service. Apply in one step (Form 10D) — your service and wages are already on record."
     },
     "events": {
       "changedJobs": {

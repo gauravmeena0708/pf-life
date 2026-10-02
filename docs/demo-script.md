@@ -713,6 +713,14 @@ tests produced, by role (after `python3 scripts/publish_manuals.py`).
 6. As `ro-oic`, grant instalments on a recovery certificate: a bank guarantee of one instalment is required; 40
    instalments are refused (Head Office only). As `ro-recovery`, record a missed instalment: recovery resumes.
 
+## Data held, not asked (P2.21a)
+
+1. `member-g` (GIRISH DEMO) changed jobs: when his new employer's first return is paid, his old member ID's balance moves
+   to the new one by itself, and he gets a message — no Form 13, no confirmation.
+2. A member who left more than two months ago sees, on the home page, *Ready for you: Final settlement — ₹…*: the claim
+   form opens with the member ID and the full amount filled in; review and confirm.
+3. A member of 58 who has left with ten years' service is offered the monthly pension (Form 10D) the same way.
+
 ## Edge cases (P2.19a)
 
 1. An ECR row with pension wages for a re-employed pensioner (UAN `100000000901`, PPO-DEMO-0001) is refused with

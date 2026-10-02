@@ -98,6 +98,16 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 21a: transfer unasked; claims and pension offered filled in (2 October 2026)
+
+Unit: claim-service 76 (new: a contribution on the new primary member ID moves the old ID's balance once, unasked, and
+tells the member; a contribution on the old ID moves nothing), member-service 60 (the new notice, English and Hindi). Web
+302 (new: an eligible final settlement offered with its link, none while one is in progress, the pension at 58 offered
+once and not in service or before 58; the claim form opened from an offer, filled in). End to end 107 of 107 on a freshly
+reset stack, then the consistency check: every copy agrees. Must-deny 18; UI smoke 2. Also: on the fresh stack, the
+pension migrations of P2.13a and P2.19a failed (a fresh database already has their columns) — guarded; CI's stack
+verification had failed on them since P2.13.
+
 ## Update — Phase 2, slice 27: contracts and copies (2 October 2026)
 
 Every service's unit tests are now contract tests: each event written to an outbox is checked against its contract. They

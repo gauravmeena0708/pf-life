@@ -36,7 +36,11 @@
       "exitTitle": "{{establishment}} से अपना निकास दर्ज करें",
       "exitDetail": "सदस्य आईडी {{memberId}} के लिए अंतिम अंशदान {{month}} में हुआ था।",
       "passbookTitle": "{{count}} अंशदान अभी आपकी पासबुक में दर्ज नहीं हैं",
-      "passbookDetail": "{{message}}"
+      "passbookDetail": "{{message}}",
+      "readyTitle": "आपके लिए तैयार: {{label}} — {{amount}}",
+      "readyDetail": "सदस्य आईडी {{memberId}}: राशि और आपका बैंक खाता भरे हुए हैं; देखें और पुष्टि करें।",
+      "pensionDueTitle": "आपकी मासिक पेंशन देय है: लगभग {{amount}} प्रति माह",
+      "pensionDueDetail": "आप 58 वर्ष के हैं और सेवा पर्याप्त है। एक चरण में आवेदन करें (फॉर्म 10D) — आपकी सेवा और वेतन पहले से दर्ज हैं।"
     },
     "events": {
       "changedJobs": {

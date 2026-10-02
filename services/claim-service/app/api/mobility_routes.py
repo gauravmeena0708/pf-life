@@ -157,6 +157,45 @@ def _transfer_id(frm: str, to: str) -> str:
     return f"AUTO-{frm}-{to}"
 
 
+async def start_auto_transfer(session: AsyncSession, subject: str, primary: dict[str, Any], a: dict[str, Any],
+                              correlation_id: str | None, by_system: bool = False) -> str:
+    """Record the transfer of an exited member ID's balance into the primary one and ask the ledger to post it."""
+    transfer_id = _transfer_id(a["account_link_id"], primary["account_link_id"])
+    amount = a["employee_paise"] + a["employer_paise"]
+    await session.execute(insert(auto_transfers).values(transfer_id=transfer_id, member_subject=subject, uan=a["uan"],
+                                                        from_account_link_id=a["account_link_id"],
+                                                        to_account_link_id=primary["account_link_id"], amount_paise=amount,
+                                                        state="CONFIRMED"))
+    await add_event(session, producer=PRODUCER, event_type="AutoTransferConfirmed.v1", aggregate_type="auto_transfer",
+                    aggregate_id=transfer_id, correlation_id=correlation_id, payload={
+                        "transfer_id": transfer_id, "uan": a["uan"], "from_account_link_id": a["account_link_id"],
+                        "to_account_link_id": primary["account_link_id"]})
+    if by_system:
+        await audit(session, actor_subject="system", actor_stakeholder="system", action="transfer.auto_started",
+                    target_type="auto_transfer", target_id=transfer_id, detail=rupees(amount))
+    return transfer_id
+
+
+async def auto_transfer_on_contribution(session: AsyncSession, account_link_ids: set[str], correlation_id: str | None) -> list[str]:
+    """P2.21: the first contribution on a primary member ID moves the member's exited member IDs into it — no request. The
+    member is told (CLAIM-style notification); anything that blocks it (no verified Aadhaar, a claim running) leaves it
+    for the member to see and confirm later as before."""
+    started = []
+    for link in account_link_ids:
+        acct = (await session.execute(select(accounts).where(accounts.c.account_link_id == link))).mappings().first()
+        if not acct or not acct["is_primary"] or not acct["member_subject"]:
+            continue
+        primary, candidates, _ = await auto_candidates(session, acct["member_subject"])
+        for a in candidates:
+            started.append(await start_auto_transfer(session, acct["member_subject"], primary, a, correlation_id, by_system=True))
+            await add_event(session, producer=PRODUCER, event_type="NotificationRequested.v1", aggregate_type="notification",
+                            aggregate_id=a["account_link_id"], correlation_id=correlation_id, payload={
+                                "recipient_subject": acct["member_subject"], "template": "AUTO_TRANSFER_STARTED",
+                                "reference_id": _transfer_id(a["account_link_id"], primary["account_link_id"]),
+                                "params": {"amount_paise": a["employee_paise"] + a["employer_paise"]}})
+    return started
+
+
 @router.get("/api/v1/members/me/transfers/auto")
 async def auto_status(actor: Actor = Depends(MEMBER), session: AsyncSession = Depends(db)) -> dict:
     primary, candidates, reasons = await auto_candidates(session, actor.subject)
@@ -186,14 +225,7 @@ async def confirm_auto(transferId: str, actor: Actor = Depends(MEMBER), session:
                           " ".join(reasons) or "The member ID is already transferred, has a claim in progress, or has no balance.")
         amount = a["employee_paise"] + a["employer_paise"]
         require_step_up(actor, "confirm-auto-transfer", transferId, None, amount)
-        await session.execute(insert(auto_transfers).values(transfer_id=transferId, member_subject=actor.subject, uan=a["uan"],
-                                                            from_account_link_id=a["account_link_id"],
-                                                            to_account_link_id=primary["account_link_id"], amount_paise=amount,
-                                                            state="CONFIRMED"))
-        await add_event(session, producer=PRODUCER, event_type="AutoTransferConfirmed.v1", aggregate_type="auto_transfer",
-                        aggregate_id=transferId, correlation_id=actor.correlation_id, payload={
-                            "transfer_id": transferId, "uan": a["uan"], "from_account_link_id": a["account_link_id"],
-                            "to_account_link_id": primary["account_link_id"]})
+        await start_auto_transfer(session, actor.subject, primary, a, actor.correlation_id)
         await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="transfer.auto_confirm",
                     target_type="auto_transfer", target_id=transferId, detail=rupees(amount))
     return envelope({"transfer_id": transferId, "state": "CONFIRMED", "from_account_link_id": a["account_link_id"],

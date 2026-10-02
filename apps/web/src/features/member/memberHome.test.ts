@@ -86,3 +86,30 @@ describe("pendingItems", () => {
     expect(pendingItems(withInput({ eligibility: undefined, claims: [claims[0]] }))[0].title).toBe("Form 31");
   });
 });
+
+describe("P2.21: what the member may claim now is offered, filled in", () => {
+  const eligibleFinal = { accounts: [
+    { account_link_id: "OLD", balance: { total_paise: 120050 }, types: [{ claim_type: "FINAL_SETTLEMENT", label: "Final settlement", eligible: true, max_amount_paise: 120050 }] },
+    { account_link_id: "NEW", primary: true, balance: { total_paise: 300000 }, types: [{ claim_type: "FINAL_SETTLEMENT", label: "Final settlement", eligible: false, max_amount_paise: 0 }] },
+  ] };
+
+  it("offers an eligible final settlement with the account and amount in the link", () => {
+    const offer = nudges(withInput({ eligibility: eligibleFinal }), today).find((n) => n.id === "ready:OLD:FINAL_SETTLEMENT");
+    expect(offer?.to).toBe("/member/claims?account=OLD&type=FINAL_SETTLEMENT&amount=1200");
+    expect(nudges(withInput({ eligibility: eligibleFinal }), today).some((n) => n.id === "ready:NEW:FINAL_SETTLEMENT")).toBe(false);
+  });
+
+  it("does not offer a claim of a type already in progress", () => {
+    const claims = [{ claim_id: "C1", claim_type: "FINAL_SETTLEMENT", form_type: "19", amount_paise: 1, state: "UNDER_REVIEW", next_step: "", created_at: "" }];
+    expect(nudges(withInput({ eligibility: eligibleFinal, claims }), today).some((n) => n.id.startsWith("ready:"))).toBe(false);
+  });
+
+  it("offers the monthly pension at 58 with enough service, once, and not while in service", () => {
+    const pension = { scenarios: [{ label: "If you leave now", eligible: true, monthly_paise: 321400 }], note: "", age_years: 58 };
+    const out = { member_ids: [old], total_service_months: 180 };
+    expect(nudges(withInput({ service: out, pension, pensionApplications: [] }), today).some((n) => n.id === "pension-due")).toBe(true);
+    expect(nudges(withInput({ service: out, pension, pensionApplications: [{ claim_id: "PC-1", state: "SUBMITTED" }] }), today).some((n) => n.id === "pension-due")).toBe(false);
+    expect(nudges(withInput({ pension, pensionApplications: [] }), today).some((n) => n.id === "pension-due")).toBe(false);        // still in service
+    expect(nudges(withInput({ service: out, pension: { ...pension, age_years: 52 }, pensionApplications: [] }), today).some((n) => n.id === "pension-due")).toBe(false);
+  });
+});

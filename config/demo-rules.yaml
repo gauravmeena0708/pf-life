@@ -21,6 +21,8 @@ validation:
   headcount_change_warning_pct: 20
 claims:
   auto_settlement_limit_paise: 10000000        # default for types that do not set their own
+  auto_transfer_automatic: true                # P2.21: an exited member ID's balance moves to the new primary ID when its first
+                                               # contribution is posted — no request (Aadhaar-verified UAN, no claim in progress)
   settlement_sla_days: 20
   # Conditions a claim type may use (all optional): requires_active_employment, requires_exit_months,
   # min_service_months, once_every_months, max_from (employee_share | total_balance), max_pct_bp, cap_paise.

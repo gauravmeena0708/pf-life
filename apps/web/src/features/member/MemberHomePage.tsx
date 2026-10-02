@@ -23,10 +23,11 @@ export function MemberHomePage() {
   const applications = useQuery({ queryKey: ["applications"], queryFn: () => load<"applications">("/applications"), retry: false });
   const nominations = useQuery({ queryKey: ["member-nominations"], queryFn: () => load<"nominations">("/nominations"), retry: false });
   const pension = useQuery({ queryKey: ["pension-estimate"], queryFn: () => load<"pension">("/pension-eligibility-preview"), retry: false });
+  const pensionApplications = useQuery({ queryKey: ["pension-applications"], queryFn: () => load<"pensionApplications">("/pension-applications"), retry: false });
   const passbook = useQuery({ queryKey: ["member-passbook"], queryFn: () => load<"passbook">("/passbook"), retry: false });
   const input: MemberHomeInput = { profile: profile.data?.data, service: service.data?.data, eligibility: eligibility.data?.data,
     claims: claims.data?.data, applications: applications.data?.data, nominations: nominations.data?.data,
-    pension: pension.data?.data, passbook: passbook.data?.data };
+    pension: pension.data?.data, passbook: passbook.data?.data, pensionApplications: pensionApplications.data?.data };
   const savings = balances(input);
   const pending = pendingItems(input, t);
   const tasks = nudges(input, new Date());
