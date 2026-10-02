@@ -9,10 +9,15 @@ branch_labels = None
 depends_on = None
 
 
+def _add(table, column):
+    if column.name not in {c["name"] for c in sa.inspect(op.get_bind()).get_columns(table)}:   # an earlier migration builds
+        op.add_column(table, column)                                     # from the current definitions: a fresh database has it
+
+
 def upgrade():
-    op.add_column("eps_accounts", sa.Column("exit_reason", sa.String(40)))
-    op.add_column("pension_claims", sa.Column("disablement", sa.JSON))
-    op.add_column("pensioners", sa.Column("pension_kind", sa.String(12), nullable=False, server_default="MEMBER"))
+    _add("eps_accounts", sa.Column("exit_reason", sa.String(40)))
+    _add("pension_claims", sa.Column("disablement", sa.JSON))
+    _add("pensioners", sa.Column("pension_kind", sa.String(12), nullable=False, server_default="MEMBER"))
 
 
 def downgrade():

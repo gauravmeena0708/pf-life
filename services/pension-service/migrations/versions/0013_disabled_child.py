@@ -9,7 +9,8 @@ depends_on = None
 
 
 def upgrade():
-    op.add_column("family_members", sa.Column("disabled", sa.Boolean, nullable=False, server_default=sa.false()))
+    if "disabled" not in {c["name"] for c in sa.inspect(op.get_bind()).get_columns("family_members")}:   # fresh: built already
+        op.add_column("family_members", sa.Column("disabled", sa.Boolean, nullable=False, server_default=sa.false()))
 
 
 def downgrade():
