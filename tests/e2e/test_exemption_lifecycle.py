@@ -114,6 +114,32 @@ def test_surrender(persona):
     assert profile["status"] == "SURRENDERED" and profile["ended_on"] == on
 
 
+def test_past_accumulations_reconciled(persona):
+    """PAST ACCUM VDR RECO: the surrendered trust's demand draft (a VDR entry) against what its members were credited and
+    the Form SE-6 statement; DA (Accounts) proposes, the APFC approves; nothing is left outstanding. Repeatable."""
+    da, apfc, cashier = persona("do-caseworker", "/office/ledger"), persona("ro-apfc", "/office/ledger"), persona("ro-cashier", "/office/ledger")
+    url = "/api/v1/office/exempted/past-accumulation-vdr-reconciliations"
+    [pos] = call(da, "GET", f"{url}?establishment_id={TEXTILE}")[1]["data"] or [None]
+    assert pos and pos["credited_paise"] > 0, "the surrender test credits the members first"
+    if pos["outstanding_paise"] == 0:
+        assert pos["reconciliations"][0]["state"] == "RECONCILED"
+        return
+    amount, ref = pos["outstanding_paise"], f"DD-{secrets.token_hex(3).upper()}"
+    status, v = call(cashier, "POST", "/api/v1/office/vdr-entries", {"establishment_id": TEXTILE, "instrument": "DD", "instrument_ref": ref,
+                                                                    "amount_paise": amount, "received_on": date.today().isoformat()},
+                     {"X-Step-Up-Token": step_up(cashier, "record-vdr", ref, None, amount)})
+    assert status == 201, v
+    status, r = call(da, "POST", f"/api/v1/office/exempted/{TEXTILE}/past-accumulation-vdr-reconciliations",
+                     {"statement_total_paise": pos["credited_paise"], "receipts": [{"component": "CASH", "vdr_id": v["data"]["vdr_id"]}]})
+    assert status == 201 and r["data"]["summary"]["outstanding_after_paise"] == 0, r
+    reco = r["data"]["reco_id"]
+    status, r = call(apfc, "POST", f"{url}/{reco}/approvals", {"decision": "APPROVE", "note": "Demand draft matches the SE-6 statement"},
+                     {"X-Step-Up-Token": step_up(apfc, "approve-pa-reco", reco, None, amount)})
+    assert status == 200 and r["data"]["state"] == "RECONCILED", r
+    [pos] = call(apfc, "GET", f"{url}?establishment_id={TEXTILE}")[1]["data"]
+    assert pos["outstanding_paise"] == 0
+
+
 def test_cancellation_with_relinquishment(persona):
     trust = persona("chemicals-trust", "/exempted")
     proceeding = latest(trust, "CANCELLATION")

@@ -1869,6 +1869,18 @@ stakeholders:
     step_up: true
     via:
     - F09.annexure_k_reconcile
+  - endpoint: GET /office/exempted/past-accumulation-vdr-reconciliations
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F09.past_accum
+  - endpoint: POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F09.past_accum
   - endpoint: GET /office/accounts/inoperative
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2443,6 +2455,18 @@ stakeholders:
     step_up: true
     via:
     - F07.defreeze_est_maker
+  - endpoint: GET /office/exempted/past-accumulation-vdr-reconciliations
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F09.past_accum_approve
+  - endpoint: POST /office/exempted/past-accumulation-vdr-reconciliations/{recoId}/approvals
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F09.past_accum_approve
   - endpoint: GET /office/accounts/inoperative
     status: W
     scope: office jurisdiction of the caller's posting
@@ -3139,24 +3163,6 @@ stakeholders:
     step_up: true
     via:
     - F09.ingest
-  - endpoint: POST /office/exempted/{estId}/past-accumulation-transfers
-    status: P
-    scope: office jurisdiction of the caller's posting
-    step_up: true
-    via:
-    - F09.past_accum
-  - endpoint: POST /office/exempted/past-accumulation-bulk-transfers
-    status: P
-    scope: office jurisdiction of the caller's posting
-    step_up: true
-    via:
-    - F09.past_accum
-  - endpoint: POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations
-    status: P
-    scope: office jurisdiction of the caller's posting
-    step_up: true
-    via:
-    - F09.past_accum
   - endpoint: GET /office/exempted/{estId}/returns
     status: W
     scope: office jurisdiction of the caller's posting

@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 268 |
+| Activities | 269 |
 | Stakeholders with at least one API | 94 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 3 |
@@ -437,7 +437,7 @@ Activities: **F09.trust_handover** Hand over member ledgers and past accumulatio
 
 #### `fo.da_accounts` — Dealing Assistant / SSA (Accounts) — claims, IDS, member records, VDR, Appendix-E
 
-Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; **F03.vdr_reconcile** Reconcile VDR entries with ECRs; TRRN adjustment; Member VDR deposits; **F03.ledger_exception** Appendix-E adjustment (e.g. PF → EPS) or VDR (Special) credit — exceptional; **F03.ecr_reject** Reject an ECR before posting; reverse a posted journal; **F04.physical_validate** UAN allocation / Aadhaar validation of a physical claim; **F04.process** Scrutinise and process the claim (Claims > Transaction); recommend; **F04.attestation_view** Open the employer-signed PDF / DSC document before the approve action is enabled; **F04.tds** Compute TDS on withdrawals and file with Income Tax; **F04.transfer_process** Verify a transfer between member IDs / offices (service at both establishments); **F04.transfer_recredit** Recredit a rejected transfer-in to the member ledger; **F05.ids** Prepare Input Data Sheet (Claims > Transaction > Form-10D/10C); update service history in FO Interface; **F05.higher_deposit** Book dues deposit through Member VDR ('Pension on Higher Wages'); Appendix-E code for PF → EPS diversion; **F07.verify_member** Open e-file and verify the frozen MID / UAN (member ledger, crowdsourcing); **F09.annexure_k_reconcile** Reconcile Annexure K with receipts and member records; **F11.verify** Verify inoperative account (digital records, crowdsourcing through co-workers' logins)
+Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; **F03.vdr_reconcile** Reconcile VDR entries with ECRs; TRRN adjustment; Member VDR deposits; **F03.ledger_exception** Appendix-E adjustment (e.g. PF → EPS) or VDR (Special) credit — exceptional; **F03.ecr_reject** Reject an ECR before posting; reverse a posted journal; **F04.physical_validate** UAN allocation / Aadhaar validation of a physical claim; **F04.process** Scrutinise and process the claim (Claims > Transaction); recommend; **F04.attestation_view** Open the employer-signed PDF / DSC document before the approve action is enabled; **F04.tds** Compute TDS on withdrawals and file with Income Tax; **F04.transfer_process** Verify a transfer between member IDs / offices (service at both establishments); **F04.transfer_recredit** Recredit a rejected transfer-in to the member ledger; **F05.ids** Prepare Input Data Sheet (Claims > Transaction > Form-10D/10C); update service history in FO Interface; **F05.higher_deposit** Book dues deposit through Member VDR ('Pension on Higher Wages'); Appendix-E code for PF → EPS diversion; **F07.verify_member** Open e-file and verify the frozen MID / UAN (member ledger, crowdsourcing); **F09.annexure_k_reconcile** Reconcile Annexure K with receipts and member records; **F09.past_accum** Reconcile the receipts of a trust's past accumulations (demand draft via VDR, SDS, securities with HO's reference) with the members credited and the Form SE-6 statement; **F11.verify** Verify inoperative account (digital records, crowdsourcing through co-workers' logins)
 
 | Endpoint | Status |
 |---|---|
@@ -449,6 +449,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/ecr-filings` | W |
 | `GET /office/exempted/annexure-k` | W |
+| `GET /office/exempted/past-accumulation-vdr-reconciliations` | W |
 | `GET /office/ledger-adjustments` | W |
 | `GET /office/member-change-requests` | W |
 | `GET /office/members/{uan}` | W |
@@ -470,6 +471,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/ecr-filings/{filingId}/rejections` | W |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | W |
+| `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/ledger-adjustments` | W |
 | `POST /office/ledger-journals/{journalId}/reversals` | W |
@@ -564,7 +566,7 @@ Activities: **F04.cad** View the Claim Approval Docket each level generated (int
 
 #### `fo.apfc` — APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)
 
-Activities: **F01.circle_review** Circle officer reviews coverage of the new establishment; **F01.dsc_approve** Approve the DSC / e-sign registration at the PF office; **F01.change_decide** Decide establishment change, closure or transfer requests; **F02.jd_approve** Approver for major changes (APFC / RPFC-II / RPFC-I per JD Table 3): approve / reject / return; **F03.ledger_exception_approve** Approve an exceptional ledger adjustment (RPFC-II F&A); **F03.ecr_office_approval** Approve ECRs held for office approval (ECR Approval menu on the APFC login; scope to be confirmed); **F04.approve_apfc** Approve claims in the APFC / RPFC-II band; **F04.redisburse_approve** Authorise a new payment after a return without reopening adjudication; **F04.shares** Amend beneficiary shares (legacy-settled share, deceased nominee, court order) and check the share summary; **F06.schedule** Circle officer schedules inspection (incl. CAIU-allocated); **F06.decide_report** Circle officer decides on the inspection report (T+7): initiate a 7A inquiry or no action; **F06.proceed** Quasi-judicial authority: issue notice / summons, hold hearings (e-Proceedings Cause List, Daily Order); **F06.order** Pass 7A / 14B / 7Q order (e-Proceedings Final Order); 7B review; 7C; 26B disputes; **F06.vishwas_decide** Recalculate damages under VISHWAS and decide; revised demand is paid through a direct challan; **F06.garnishee** 8F notice to a bank or debtor of the employer to pay EPFO (the CPFC's authorised officer); **F06.prosecution** Initiate prosecution; **F07.freeze_ro_member** Order freezing of MID / UAN (Categories B / C); **F07.verify_apfc** Validate verification; **F07.defreeze_est_maker** Recommend de-freezing an establishment (maker); the OIC orders it (checker); **F11.approve_apfc** Approve inoperative-account settlement in higher amount bands
+Activities: **F01.circle_review** Circle officer reviews coverage of the new establishment; **F01.dsc_approve** Approve the DSC / e-sign registration at the PF office; **F01.change_decide** Decide establishment change, closure or transfer requests; **F02.jd_approve** Approver for major changes (APFC / RPFC-II / RPFC-I per JD Table 3): approve / reject / return; **F03.ledger_exception_approve** Approve an exceptional ledger adjustment (RPFC-II F&A); **F03.ecr_office_approval** Approve ECRs held for office approval (ECR Approval menu on the APFC login; scope to be confirmed); **F04.approve_apfc** Approve claims in the APFC / RPFC-II band; **F04.redisburse_approve** Authorise a new payment after a return without reopening adjudication; **F04.shares** Amend beneficiary shares (legacy-settled share, deceased nominee, court order) and check the share summary; **F06.schedule** Circle officer schedules inspection (incl. CAIU-allocated); **F06.decide_report** Circle officer decides on the inspection report (T+7): initiate a 7A inquiry or no action; **F06.proceed** Quasi-judicial authority: issue notice / summons, hold hearings (e-Proceedings Cause List, Daily Order); **F06.order** Pass 7A / 14B / 7Q order (e-Proceedings Final Order); 7B review; 7C; 26B disputes; **F06.vishwas_decide** Recalculate damages under VISHWAS and decide; revised demand is paid through a direct challan; **F06.garnishee** 8F notice to a bank or debtor of the employer to pay EPFO (the CPFC's authorised officer); **F06.prosecution** Initiate prosecution; **F07.freeze_ro_member** Order freezing of MID / UAN (Categories B / C); **F07.verify_apfc** Validate verification; **F07.defreeze_est_maker** Recommend de-freezing an establishment (maker); the OIC orders it (checker); **F09.past_accum_approve** APFC approves the past-accumulation reconciliation: each receipt clears the trust transfer receivable; **F11.approve_apfc** Approve inoperative-account settlement in higher amount bands
 
 | Endpoint | Status |
 |---|---|
@@ -582,6 +584,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `GET /office/establishment-change-requests` | W |
 | `GET /office/establishment-registrations` | W |
 | `GET /office/establishment-registrations/{reqId}/documents` | W |
+| `GET /office/exempted/past-accumulation-vdr-reconciliations` | W |
 | `GET /office/ledger-adjustments` | W |
 | `GET /office/legal/cases` | W |
 | `GET /office/recovery/cases` | W |
@@ -611,6 +614,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | W |
 | `POST /office/establishments/{estId}/defreezes` | W |
 | `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` | W |
+| `POST /office/exempted/past-accumulation-vdr-reconciliations/{recoId}/approvals` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/ledger-adjustments/{adjustmentId}/approvals` | W |
 | `POST /office/member-change-requests/{requestId}/decisions` | W |
@@ -822,7 +826,7 @@ Activities: **F06.legal** Record 7-I appeals, 7-O pre-deposits / waivers and cou
 
 #### `fo.exemption` — Exemption cell (supervising PF trusts)
 
-Activities: **F09.cancel** Open cancellation with a show-cause notice (CE-1); drop it on the reply or send the draft agenda to the zone; gazette notification after cancellation; **F09.ingest** Bulk-ingest the surrendered trust's member ledgers and past accumulations; **F09.past_accum** Transfer past accumulations after surrender / cancellation; **F09.supervise** Supervise PF trusts: monthly returns, the performance evaluator and its ranking, priority-matrix flags and the action taken, audit reports
+Activities: **F09.cancel** Open cancellation with a show-cause notice (CE-1); drop it on the reply or send the draft agenda to the zone; gazette notification after cancellation; **F09.ingest** Bulk-ingest the surrendered trust's member ledgers and past accumulations; **F09.supervise** Supervise PF trusts: monthly returns, the performance evaluator and its ranking, priority-matrix flags and the action taken, audit reports
 
 | Endpoint | Status |
 |---|---|
@@ -834,9 +838,6 @@ Activities: **F09.cancel** Open cancellation with a show-cause notice (CE-1); dr
 | `POST /office/exempted/{estId}/cancellation-proceedings` | W |
 | `POST /office/exempted/{estId}/flags/{flagId}/actions` | W |
 | `POST /office/exempted/{estId}/past-accumulation-ingestions` | W |
-| `POST /office/exempted/past-accumulation-bulk-transfers` | P |
-| `POST /office/exempted/{estId}/past-accumulation-transfers` | P |
-| `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` | P |
 
 #### `fo.edli` — EDLI claims handling
 
@@ -1959,7 +1960,8 @@ flowchart LR
   F09_zo_forward["zo.acc<br/>Zonal ACC forwards the draft agenda to HO with recommendatio"]
   F09_trust_handover["exempted.trust_liquidator<br/>Hand over member ledgers and past accumulations of the surre"]
   F09_ingest["fo.exemption<br/>Bulk-ingest the surrendered trust's member ledgers and past "]
-  F09_past_accum["fo.exemption<br/>Transfer past accumulations after surrender / cancellation"]
+  F09_past_accum["fo.da_accounts<br/>Reconcile the receipts of a trust's past accumulations (dema"]
+  F09_past_accum_approve["fo.apfc<br/>APFC approves the past-accumulation reconciliation: each rec"]
   F09_supervise["fo.exemption<br/>Supervise PF trusts: monthly returns, the performance evalua"]
   F09_ho["ho.exemption<br/>Record the EEC's recommendation, the CBT's ratification, the"]
   F09_ho_monitor["ho.exemption<br/>Monitor the zones' exempted establishments on the online per"]
@@ -1974,6 +1976,7 @@ flowchart LR
   F09_zo_forward --> F09_ho
   F09_trust_handover --> F09_ingest
   F09_ingest --> F09_past_accum
+  F09_past_accum --> F09_past_accum_approve
   F09_ho --> F09_cancel
   F09_ho_monitor --> F09_ho
 ```

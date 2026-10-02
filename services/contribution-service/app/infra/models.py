@@ -504,3 +504,21 @@ class EecDeclaration(Base):
     declared_by: Mapped[str] = mapped_column(String(80))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
+
+class PastAccumulationReconciliation(Base):
+    """PAST ACCUM VDR RECO (SOP on surrender, Dec 2023, (xi)-(xxiv)): the receipts of a trust's past accumulations — the cash
+    component by demand draft (a VDR entry), the SDS balance and the securities (HO Investment Division's reference) —
+    matched with the members credited and the Form SE-6 statement. DA (Accounts) proposes, the APFC approves."""
+    __tablename__ = "past_accumulation_reconciliations"
+    reco_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    establishment_id: Mapped[str] = mapped_column(String(80), index=True)
+    statement_total_paise: Mapped[int] = mapped_column(BigInteger)          # Form SE-6
+    receipts: Mapped[list] = mapped_column(JSON)
+    receipts_paise: Mapped[int] = mapped_column(BigInteger)
+    state: Mapped[str] = mapped_column(String(12))                            # PROPOSED | RECONCILED | SHORT | REJECTED
+    summary: Mapped[dict] = mapped_column(JSON)
+    proposed_by: Mapped[str] = mapped_column(String(80))
+    decided_by: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+

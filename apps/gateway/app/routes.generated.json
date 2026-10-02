@@ -1,6 +1,22 @@
 [
   {
     "method": "POST",
+    "path_template": "/office/exempted/past-accumulation-vdr-reconciliations/{recoId}/approvals",
+    "regex": "^/office/exempted/past\\-accumulation\\-vdr\\-reconciliations/[^/]+/approvals$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "The APFC approves (or rejects) a past-accumulation reconciliation; each receipt clears the trust transfer receivable — reconciled, or short by what is still to come",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposit-waivers",
     "regex": "^/office/compliance/cases/[^/]+/appeals/[^/]+/pre\\-deposit\\-waivers$",
     "status": "W",
@@ -197,16 +213,16 @@
     "method": "POST",
     "path_template": "/office/exempted/{estId}/past-accumulation-vdr-reconciliations",
     "regex": "^/office/exempted/[^/]+/past\\-accumulation\\-vdr\\-reconciliations$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "contribution",
     "upstream": "http://contribution-service:8000",
     "money": false,
-    "step_up": true,
+    "step_up": false,
     "callers": [
-      "fo.exemption"
+      "fo.da_accounts"
     ],
-    "summary": "PAST ACCUM VDR RECO — match past-accumulation receipts with VDR entries",
+    "summary": "PAST ACCUM VDR RECO — DA (Accounts) proposes the receipts of a trust's past accumulations (the demand draft's VDR entry, the SDS balance and the securities with HO Investment Division's reference) against the members credited and the Form SE-6 statement",
     "revocation": false
   },
   {
@@ -483,6 +499,23 @@
     "revocation": false
   },
   {
+    "method": "GET",
+    "path_template": "/office/exempted/past-accumulation-vdr-reconciliations",
+    "regex": "^/office/exempted/past\\-accumulation\\-vdr\\-reconciliations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc",
+      "fo.da_accounts"
+    ],
+    "summary": "Per de-exempted trust: credited to members, received, outstanding, its unreconciled receipts and reconciliations",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/office/member-change-requests/{requestId}/verifications",
     "regex": "^/office/member\\-change\\-requests/[^/]+/verifications$",
@@ -747,22 +780,6 @@
   },
   {
     "method": "POST",
-    "path_template": "/office/exempted/{estId}/past-accumulation-transfers",
-    "regex": "^/office/exempted/[^/]+/past\\-accumulation\\-transfers$",
-    "status": "P",
-    "phase": 3,
-    "owner": "contribution",
-    "upstream": "http://contribution-service:8000",
-    "money": true,
-    "step_up": true,
-    "callers": [
-      "fo.exemption"
-    ],
-    "summary": "Transfer past accumulations to EPFO after surrender / cancellation",
-    "revocation": false
-  },
-  {
-    "method": "POST",
     "path_template": "/office/member-change-requests/{requestId}/decisions",
     "regex": "^/office/member\\-change\\-requests/[^/]+/decisions$",
     "status": "W",
@@ -857,22 +874,6 @@
       "member"
     ],
     "summary": "Record the financial literacy course as completed (mock module)",
-    "revocation": false
-  },
-  {
-    "method": "POST",
-    "path_template": "/office/exempted/past-accumulation-bulk-transfers",
-    "regex": "^/office/exempted/past\\-accumulation\\-bulk\\-transfers$",
-    "status": "P",
-    "phase": 3,
-    "owner": "contribution",
-    "upstream": "http://contribution-service:8000",
-    "money": true,
-    "step_up": true,
-    "callers": [
-      "fo.exemption"
-    ],
-    "summary": "PAST ACCUM BULK TRANSFER — transfer past accumulations of many members in one batch",
     "revocation": false
   },
   {

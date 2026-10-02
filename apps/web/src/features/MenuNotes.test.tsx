@@ -16,13 +16,13 @@ it("links menu items whose screens are built", () => {
 
 it("says why an item has no screen: planned, awaiting EPFO's definition, or not in the POC", () => {
   const oic = items("fo.oic");
-  expect(oic.find((i) => i.label === "PAST ACCUM BULK TRANSFER")?.note).toMatch(/^Planned/);
+  expect(oic.find((i) => i.label === "PAST ACCUM BULK TRANSFER")?.note).toMatch(/exemption cell/);     // built (P2.14): another role's screen
   expect(oic.find((i) => i.label === "Reco - ECR Vs VDR")?.note).toMatch(/EPFO's definition/);
   render(<QueryClientProvider client={new QueryClient()}><MemoryRouter><RoleNav role="fo.oic" /></MemoryRouter></QueryClientProvider>);
   fireEvent.click(screen.getByRole("button", { name: /Establishments & compliance/ }));
-  const planned = screen.getByText("PAST ACCUM BULK TRANSFER").closest(".nav-unavailable") as HTMLElement;
-  expect(planned.getAttribute("title")).toMatch(/^Planned/);
-  expect(within(planned).getByText("Planned")).toBeTruthy();
+  const elsewhere = screen.getByText("PAST ACCUM BULK TRANSFER").closest(".nav-unavailable") as HTMLElement;
+  expect(elsewhere.getAttribute("title")).toMatch(/exemption cell/);
+  expect(within(elsewhere).getByText("Not in POC")).toBeTruthy();
   fireEvent.click(screen.getByRole("button", { name: /Receipts & reconciliation/ }));
   const undefinedItem = screen.getByText("Reco - ECR Vs VDR").closest(".nav-unavailable") as HTMLElement;
   expect(undefinedItem.getAttribute("title")).toMatch(/EPFO's definition/);

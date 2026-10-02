@@ -710,6 +710,15 @@ tests produced, by role (after `python3 scripts/publish_manuals.py`).
 5. As `ro-oic`, grant instalments on a recovery certificate: a bank guarantee of one instalment is required; 40
    instalments are refused (Head Office only). As `ro-recovery`, record a missed instalment: recovery resumes.
 
+## A trust's past accumulations reconciled (PAST ACCUM VDR RECO)
+
+1. After the surrender (above), `ro-exemption` has credited the trust's members (Past accumulation ingestion).
+2. As `ro-cashier`, record the trust's demand draft (Office › Ledger › VDR) for the amount.
+3. As `do-caseworker` (DA Accounts), Office › Ledger › *Past accumulations — receipts reconciliation*: credited,
+   received, outstanding; tick the demand draft, add an SDS or securities receipt with HO's reference if any, enter the
+   Form SE-6 total, propose.
+4. As `ro-apfc`, approve (step-up): *Reconciled*, nothing outstanding — or *still short* with the amount to come.
+
 ## Finding your way: side or top menu, Find a screen
 
 1. Log in as `ro-apfc`. The menu is down the side: the group holding the page is open, the item marked. Type

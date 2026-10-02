@@ -83,8 +83,8 @@ def test_member_cannot_call_office_endpoint(page):
 
 
 def test_planned_endpoint_answers_501_planned(page):
-    login(page, "ro-exemption")                        # PAST ACCUM VDR RECO: planned (the gateway
-    status, body = api(page, "POST", "/api/v1/office/exempted/EST-DEMO-0003/past-accumulation-vdr-reconciliations")   # says so before any code)
+    login(page, "do-caseworker")                       # VDR Member Beneficiary: awaiting EPFO's definition (the gateway
+    status, body = api(page, "POST", "/api/v1/office/vdr-entries/VDR-X/member-beneficiaries")   # says so before any code)
     assert status == 501 and body["type"] == "/problems/planned"
 
 

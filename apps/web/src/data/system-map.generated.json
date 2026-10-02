@@ -4,11 +4,11 @@
   "interfaces": 21,
   "stakeholders": 114,
   "stakeholders_with_access": 94,
-  "activities": 268,
+  "activities": 269,
   "endpoints": {
-   "W": 448,
+   "W": 451,
    "M": 21,
-   "P": 4,
+   "P": 1,
    "?": 5
   },
   "personas": 79
@@ -84,9 +84,9 @@
    "coverage": "Working",
    "purpose": "Field-office sections: claim scrutiny and payment, compliance, pension, EDLI, exemption, PRO counter.",
    "endpoints": {
-    "W": 124,
+    "W": 126,
     "M": 0,
-    "P": 3,
+    "P": 0,
     "?": 4
    },
    "stakeholders": [
@@ -171,7 +171,7 @@
    "coverage": "Working",
    "purpose": "Regional office officers: approvals above the dealing level, freezes, ledger decisions.",
    "endpoints": {
-    "W": 66,
+    "W": 68,
     "M": 0,
     "P": 0,
     "?": 1
@@ -1058,7 +1058,7 @@
    "name": "Dealing Assistant / SSA (Accounts) — claims, IDS, member records, VDR, Appendix-E",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 42,
+    "W": 44,
     "M": 0,
     "P": 0,
     "?": 3
@@ -1119,6 +1119,10 @@
     {
      "id": "F09.annexure_k_reconcile",
      "does": "Reconcile Annexure K with receipts and member records"
+    },
+    {
+     "id": "F09.past_accum",
+     "does": "Reconcile the receipts of a trust's past accumulations (demand draft via VDR, SDS, securities with HO's reference) with the members credited and the Form SE-6 statement"
     },
     {
      "id": "F11.verify",
@@ -1269,7 +1273,7 @@
    "name": "APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 48,
+    "W": 50,
     "M": 0,
     "P": 0,
     "?": 1
@@ -1350,6 +1354,10 @@
     {
      "id": "F07.defreeze_est_maker",
      "does": "Recommend de-freezing an establishment (maker); the OIC orders it (checker)"
+    },
+    {
+     "id": "F09.past_accum_approve",
+     "does": "APFC approves the past-accumulation reconciliation: each receipt clears the trust transfer receivable"
     },
     {
      "id": "F11.approve_apfc",
@@ -1720,7 +1728,7 @@
    "endpoints": {
     "W": 8,
     "M": 0,
-    "P": 3,
+    "P": 0,
     "?": 0
    },
    "activities": [
@@ -1731,10 +1739,6 @@
     {
      "id": "F09.ingest",
      "does": "Bulk-ingest the surrendered trust's member ledgers and past accumulations"
-    },
-    {
-     "id": "F09.past_accum",
-     "does": "Transfer past accumulations after surrender / cancellation"
     },
     {
      "id": "F09.supervise",
@@ -5473,12 +5477,24 @@
   {
    "id": "F09.past_accum",
    "flow": "F09",
-   "actor": "fo.exemption",
-   "does": "Transfer past accumulations after surrender / cancellation",
+   "actor": "fo.da_accounts",
+   "does": "Reconcile the receipts of a trust's past accumulations (demand draft via VDR, SDS, securities with HO's reference) with the members credited and the Form SE-6 statement",
+   "next": [
+    "F09.past_accum_approve"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "EXM, SOP-S"
+  },
+  {
+   "id": "F09.past_accum_approve",
+   "flow": "F09",
+   "actor": "fo.apfc",
+   "does": "APFC approves the past-accumulation reconciliation: each receipt clears the trust transfer receivable",
    "next": [],
-   "status": "PLANNED",
-   "endpoints": 3,
-   "src": "EXM"
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "EXM, SOP-S"
   },
   {
    "id": "F09.supervise",

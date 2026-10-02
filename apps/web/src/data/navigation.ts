@@ -10,7 +10,6 @@ export interface NavGroup { label?: string; labelKey?: string; to?: string; item
 
 const link = (label: string, to?: string, note?: string): NavItem => ({ label, to, ...(note ? { note } : {}) });
 const UNDEFINED_BY_EPFO = "Awaiting EPFO's definition of this function before it is built";
-const PLANNED_TRUST = "Planned: the exempted-trust lifecycle (P2.14)";
 
 export const PUBLIC_SERVICES: NavItem[] = [
   link("Grievance (without login)", "/public/grievances#public-grievance-heading"),
@@ -99,7 +98,10 @@ function fieldOffice(role: string): NavGroup[] {
       link("Establishment", ["fo.oic", "fo.apfc"].includes(role) ? "/office/work-queue" : undefined),
       link("OLRE", ["fo.da_compliance", "fo.apfc"].includes(role) ? "/office/olre" : undefined),
       ...(role === "fo.apfc" ? [link("Establishment change requests", "/office/olre#est-changes-heading"), link("DSC / e-sign approvals", "/office/olre#sig-heading")] : []), link("Exempted-Unexempted", role === "fo.exemption" ? "/office/exempted" : undefined), link("Exemption proceedings", ["fo.exemption", "fo.oic"].includes(role) ? "/exemption-proceedings" : undefined), link("Monthly Return for Exempted Establishment", role === "fo.exemption" ? "/office/exempted#exempted-rankings-heading" : undefined), link("Past Accum. File Upload", role === "fo.exemption" ? "/office/exempted#past-accumulation-heading" : undefined),
-      link("PAST ACCUM BULK TRANSFER", undefined, PLANNED_TRUST), link("PAST ACCUM VDR RECO", undefined, PLANNED_TRUST)] },
+      link("PAST ACCUM BULK TRANSFER", role === "fo.exemption" ? "/office/exempted#past-accumulation-heading" : undefined,
+        role === "fo.exemption" ? undefined : "The exemption cell takes in a trust's past accumulations in bulk"),
+      link("PAST ACCUM VDR RECO", ["fo.da_accounts", "fo.apfc"].includes(role) ? "/office/ledger#pa-reco-heading" : undefined,
+        ["fo.da_accounts", "fo.apfc"].includes(role) ? undefined : "DA (Accounts) proposes, the APFC approves")] },
     { label: "Pension", items: [link("Pension", ["fo.apfc_pension", "fo.da_pension", "fo.ss_pension"].includes(role) ? "/office/pensions" : undefined),
       link("NPPS", undefined, "Not in this POC: the menu's meaning is not documented")] },
     { label: "Accounts", items: [link("Annual Accounting", undefined, "Interest is credited at head office by F&A (Finance › Interest)"),

@@ -46,7 +46,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | P2.25 | Sources checked: the *to verify* rule values, and the Code on Social Security — which turned up the 2026 Schemes and the ₹25,000 ceiling (findings below) | Done (findings) |
 | P2.26 | The Code's transition. **a**: ₹25,000 wage ceiling from 17 Sep 2026 (a second rule-set version; September split by days in one ECR; pension membership flagged; Form 10C at the ceiling of the exit date); VISHWAS, 2026's real terms; instalments by the circulars (powers, guarantee, Head Office beyond 36, withdrawn on default). **b**: EEC, 2026. **c**: the 2026 Schemes' withdrawal, EPS withdrawal-benefit and EDLI rules (needs the gazette text) | a, b: Done; c: Planned |
 | P2.13 | Small gaps: disablement pension (EPS para 15); zonal freezing (categories B and C) and zonal ACC decisions above the RO's limits; district office queues; PPO and UAN card issued to DigiLocker (mock) | Planned |
-| P2.14 | The exempted trust's lifecycle: annual audit filing and the exemption cell's review; surrender and cancellation (RPFC report → ZO → HO → the Exempted Establishments Committee → the appropriate Government); HO's decision; past accumulations transferred in bulk and reconciled with the receipts | Done (bulk transfer and VDR reconciliation stay planned) |
+| P2.14 | The exempted trust's lifecycle: annual audit filing and the exemption cell's review; surrender and cancellation (RPFC report → ZO → HO → the Exempted Establishments Committee → the appropriate Government); HO's decision; past accumulations transferred in bulk and reconciled with the receipts | Done |
 | P2.15a | PMVBRY (Pradhan Mantri Viksit Bharat Rozgar Yojana): Part A for first timers, Part B for employers adding jobs, the disbursement run and the dashboard — from the scheme guidelines and EPFO's SOP for calculating incentives | Done |
 | P2.15b | SMS and e-mail for in-app notices through a mock gateway — preferences and language, essential messages, retries, delivery evidence, the PRO desk's follow-up | Done |
 | P2.16 | Gig and platform workers (Code on Social Security, 2020): aggregators registered, a turnover-based contribution return (1–2% of turnover, capped at 5% of payments to the workers, in the rule set), workers linked by e-Shram number to a UAN, reconciliation | Planned — design only until the scheme is notified |
@@ -1346,4 +1346,21 @@ enrol employees left out of EPF between 1 April 2009 and 31 March 2026 who still
   the dues before declaring.
 - Simplified: one monthly wage for the whole period (the real declaration is month-wise ECRs); the 2026 Scheme's other
   conditions for the campaign are not read yet (only the PIB release).
+
+## P2.14 completed — past accumulations: bulk transfer and receipts reconciliation
+
+From the SOP on surrender of exemption (Dec 2023, (ix)–(xxiv)) and the SOP on cancellation ((h)).
+- **PAST ACCUM BULK TRANSFER** is the ingestion built in P2.12: the cancellation SOP's "bulk transfer in" of a trust's past
+  accumulations, every member credited in one batch against the trust transfer receivable. The menu item opens it for the
+  exemption cell; the two planned endpoints that duplicated it (`…/past-accumulation-transfers`,
+  `…/past-accumulation-bulk-transfers`) are dropped from the catalogue.
+- **PAST ACCUM VDR RECO** (contribution-service `pa_reco_routes.py`, Office › Ledger): the money arrives in parts — the
+  cash component by demand draft (the cashier's VDR entry), the SDS balance and the permitted securities (HO's Investment
+  Division confirms each with a reference). DA (Accounts) proposes the receipts with the trust's Form SE-6 total; the APFC
+  approves with step-up (not the proposer). Each receipt is a journal clearing the receivable (bank collection, SDS or
+  securities received); the demand draft's VDR entry is marked reconciled. The trust is *reconciled* when what was received
+  equals what was credited and the SE-6 total, otherwise *short* by what is still to come. A receipt or a reference is used
+  once; receipts cannot exceed what was credited (the remaining members are ingested first).
+- Simplified: one approval (the SOP has DA → APFC (Cash) → RPFC-II (FA) with OTP); the 14B / 7Q on accumulations received
+  after the 30 days are noted on ingestion, not yet raised as demands.
 

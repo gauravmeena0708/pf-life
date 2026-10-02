@@ -12352,32 +12352,76 @@ paths:
             schema:
               type: object
               description: Defined when implemented
-  /office/exempted/past-accumulation-bulk-transfers:
-    post:
-      operationId: postOfficeExemptedPastAccumulationBulkTransfers
-      summary: PAST ACCUM BULK TRANSFER — transfer past accumulations of many members in one batch
+  /office/exempted/past-accumulation-vdr-reconciliations:
+    get:
+      operationId: getOfficeExemptedPastAccumulationVdrReconciliations
+      summary: 'Per de-exempted trust: credited to members, received, outstanding, its unreconciled receipts and reconciliations'
       tags:
       - Exempted establishments (PF trusts)
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
-      - $ref: '#/components/parameters/IdempotencyKey'
-      - $ref: '#/components/parameters/IfMatch'
-      - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: contribution
       x-callers:
-      - fo.exemption
+      - fo.apfc
+      - fo.da_accounts
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+  /office/exempted/past-accumulation-vdr-reconciliations/{recoId}/approvals:
+    post:
+      operationId: postOfficeExemptedPastAccumulationVdrReconciliationsRecoIdApprovals
+      summary: The APFC approves (or rejects) a past-accumulation reconciliation; each receipt clears the trust transfer receivable
+        — r
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: recoId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - fo.apfc
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: The APFC approves (or rejects) a past-accumulation reconciliation; each receipt clears the trust transfer
+        receivable — reconciled, or short by what is still to come
       requestBody:
         required: false
         content:
@@ -12677,48 +12721,11 @@ paths:
             schema:
               type: object
               description: Defined when implemented
-  /office/exempted/{estId}/past-accumulation-transfers:
-    post:
-      operationId: postOfficeExemptedEstIdPastAccumulationTransfers
-      summary: Transfer past accumulations to EPFO after surrender / cancellation
-      tags:
-      - Exempted establishments (PF trusts)
-      parameters:
-      - $ref: '#/components/parameters/CorrelationId'
-      - name: estId
-        in: path
-        required: true
-        schema:
-          type: string
-      - $ref: '#/components/parameters/IdempotencyKey'
-      - $ref: '#/components/parameters/IfMatch'
-      - $ref: '#/components/parameters/StepUpToken'
-      responses:
-        '501':
-          $ref: '#/components/responses/Planned'
-        '401':
-          $ref: '#/components/responses/Problem'
-        '403':
-          $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
-      x-owner-service: contribution
-      x-callers:
-      - fo.exemption
-      x-scope: office jurisdiction of the caller's posting
-      security:
-      - bffSession: []
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              type: object
-              description: Defined when implemented
   /office/exempted/{estId}/past-accumulation-vdr-reconciliations:
     post:
       operationId: postOfficeExemptedEstIdPastAccumulationVdrReconciliations
-      summary: PAST ACCUM VDR RECO — match past-accumulation receipts with VDR entries
+      summary: PAST ACCUM VDR RECO — DA (Accounts) proposes the receipts of a trust's past accumulations (the demand draft's
+        VDR entry,
       tags:
       - Exempted establishments (PF trusts)
       parameters:
@@ -12728,22 +12735,30 @@ paths:
         required: true
         schema:
           type: string
-      - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: contribution
       x-callers:
-      - fo.exemption
+      - fo.da_accounts
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+      description: PAST ACCUM VDR RECO — DA (Accounts) proposes the receipts of a trust's past accumulations (the demand draft's
+        VDR entry, the SDS balance and the securities with HO Investment Division's reference) against the members credited
+        and the Form SE-6 statement
       requestBody:
         required: false
         content:

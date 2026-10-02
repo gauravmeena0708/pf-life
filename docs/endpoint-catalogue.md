@@ -562,9 +562,9 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` 🔐 | Match Annexure K to receipt / member records | W | 1 | claim |
 | `POST /exempted/me/audits` | The annual report with the trust's audited accounts for a year (due by 30 September): auditor, corpus movement, opinion and observations (P2.14) | W | 1 | employer |
 | `POST /exempted/me/surrender-requests` 🔐 | **Surrender** of exemption (Form SE-1): the date, the Board of Trustees' resolution, the employer's undertaking, the corpus (P2.14) | W | 1 | employer |
-| `POST /office/exempted/{estId}/past-accumulation-transfers` 💰🔐 | Transfer past accumulations to EPFO after surrender / cancellation | P | 3 | contribution |
-| `POST /office/exempted/past-accumulation-bulk-transfers` 💰🔐 | **PAST ACCUM BULK TRANSFER** — transfer past accumulations of many members in one batch | P | 3 | contribution |
-| `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` 🔐 | **PAST ACCUM VDR RECO** — match past-accumulation receipts with VDR entries | P | 3 | contribution |
+| `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` | **PAST ACCUM VDR RECO** — DA (Accounts) proposes the receipts of a trust's past accumulations (the demand draft's VDR entry, the SDS balance and the securities with HO Investment Division's reference) against the members credited and the Form SE-6 statement | W | 1 | contribution |
+| `POST /office/exempted/past-accumulation-vdr-reconciliations/{recoId}/approvals` 💰🔐 | The APFC approves (or rejects) a past-accumulation reconciliation; each receipt clears the trust transfer receivable — reconciled, or short by what is still to come | W | 1 | contribution |
+| `GET /office/exempted/past-accumulation-vdr-reconciliations` | Per de-exempted trust: credited to members, received, outstanding, its unreconciled receipts and reconciliations | W | 1 | contribution |
 
 
 **Added from the stakeholder activity map** (`docs/stakeholder-activities.yaml`)

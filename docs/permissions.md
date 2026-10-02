@@ -468,6 +468,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/ecr-filings` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/exempted/annexure-k` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/exempted/past-accumulation-vdr-reconciliations` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/ledger-adjustments` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/member-change-requests` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/members/{uan}` | W | office jurisdiction of the caller's posting |  |
@@ -489,6 +490,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/ecr-filings/{filingId}/rejections` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/ledger-adjustments` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/ledger-journals/{journalId}/reversals` | W | office jurisdiction of the caller's posting | yes |
@@ -589,6 +591,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/establishment-change-requests` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/establishment-registrations` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/establishment-registrations/{reqId}/documents` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/exempted/past-accumulation-vdr-reconciliations` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/ledger-adjustments` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/legal/cases` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/recovery/cases` | W | office jurisdiction of the caller's posting |  |
@@ -618,6 +621,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/defreezes` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/signature-registrations/{regId}/decisions` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/exempted/past-accumulation-vdr-reconciliations/{recoId}/approvals` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/ledger-adjustments/{adjustmentId}/approvals` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/member-change-requests/{requestId}/decisions` | W | office jurisdiction of the caller's posting | yes |
@@ -809,9 +813,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/exempted/{estId}/cancellation-proceedings` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/{estId}/flags/{flagId}/actions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/{estId}/past-accumulation-ingestions` | W | office jurisdiction of the caller's posting | yes |
-| `POST /office/exempted/past-accumulation-bulk-transfers` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/exempted/{estId}/past-accumulation-transfers` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` | P | office jurisdiction of the caller's posting | yes |
 
 **`fo.edli`** — EDLI claims handling
 

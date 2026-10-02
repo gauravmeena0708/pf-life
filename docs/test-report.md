@@ -98,6 +98,18 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — P2.14 completed: past accumulations reconciled; the ceiling test after ₹25,000 (2 October 2026)
+
+Unit: contribution-service 107 (new `test_pa_reco.py`: nothing to reconcile before members are credited; a demand draft and
+an SDS balance received, ₹700 short; a receipt or a reference used once; receipts not above what was credited; the APFC,
+not the proposer, approves; the securities complete it — the receivable cleared to nil; an SE-6 statement that differs
+stays short), gateway 23; web 295 (new `P214c.test.tsx`). End to end, on a freshly reset stack: 105 of 105 (new: the
+surrendered trust's demand draft reconciled, repeatable); must-deny 18; UI smoke 2. Found on the way, fixed: CI's fresh
+stack failed the policy test that raised the ceiling to ₹25,000 from next month — it is in force already — so it now
+raises it, illustratively, to ₹30,000 and reuses only its own version; the walking-skeleton test used PAST ACCUM VDR RECO
+as its planned endpoint, and now uses *VDR Member Beneficiary* (awaiting EPFO's definition); the DA's proposal was marked
+as needing step-up — only the APFC's approval moves money.
+
 ## Update — Phase 2, slice 26b: EEC, 2026 (2 October 2026)
 
 Unit: contribution-service 105 (new `test_eec.py`: refused outside the window, for a member contributed for, above the

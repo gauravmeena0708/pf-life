@@ -131,12 +131,14 @@ def test_new_claim_type_with_its_own_chain_reaches_members_and_officers(persona)
 def test_wage_ceiling_raised_from_next_month(persona):
     drafter, approver = persona("ho-policy", "/policy"), persona("ho-analyst", "/policy")
     effective = first_of_next_month()
-    scheduled = next((i for i in rule_sets(drafter) if i["status"] in ("SCHEDULED", "IN_FORCE") and i["effective_from"] == effective.isoformat()), None)
+    scheduled = next((i for i in rule_sets(drafter) if i["status"] in ("SCHEDULED", "IN_FORCE") and i["effective_from"] == effective.isoformat()
+                      and "₹30,000" in (i.get("change_note") or "")), None)
     if scheduled is None:
-        published = publish(drafter, approver, lambda d: d["contribution"].update(eps_wage_ceiling_paise=2500000, edli_wage_ceiling_paise=2500000),
-                            effective, "Wage ceiling raised from ₹15,000 to ₹25,000 (illustrative notification)")
-        row = next(x for x in published["preview"]["contribution"] if x["monthly_wages"] == "₹20,000")
-        assert row["before"]["employer_eps"] == "₹1,250" and row["after"]["employer_eps"] == "₹1,666"
+        # ₹25,000 is in force from 17 Sep 2026 (S.O. 5109(E)); a further, illustrative rise shows how a change is made
+        published = publish(drafter, approver, lambda d: d["contribution"].update(eps_wage_ceiling_paise=3000000, edli_wage_ceiling_paise=3000000),
+                            effective, "Wage ceiling raised from ₹25,000 to ₹30,000 (illustrative)")
+        row = next(x for x in published["preview"]["contribution"] if x["monthly_wages"] == "₹30,000")
+        assert row["before"]["employer_eps"] == "₹2,083" and row["after"]["employer_eps"] == "₹2,499"
         vid = published["version_id"]
     else:
         vid = scheduled["version_id"]
@@ -148,8 +150,8 @@ def test_wage_ceiling_raised_from_next_month(persona):
     ensure_verified_and_granted(persona("emp-owner", "/employer"))
     operator = persona("emp-preparer", "/employer/ecr")
     member = {"uan": "100000000001", "name": "ASHA DEMO"}
-    ee, eps = 2400, round(20000 * 0.0833)
-    line = "#~#".join(map(str, [member["uan"], member["name"], 20000, 20000, 20000, 20000, ee, eps, ee - eps, 0, 0]))
+    ee, eps = 3600, round(30000 * 0.0833)
+    line = "#~#".join(map(str, [member["uan"], member["name"], 30000, 30000, 30000, 30000, ee, eps, ee - eps, 0, 0]))
 
     def file_for(years: tuple[int, int]) -> dict:
         for _ in range(20):                       # a random month; another one if an earlier run already filed it
