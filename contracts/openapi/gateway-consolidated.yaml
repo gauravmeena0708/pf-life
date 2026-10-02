@@ -3595,6 +3595,80 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /employers/me/prosecutions:
+    get:
+      operationId: getEmployersProsecutions
+      summary: The establishment's prosecution show-cause notices
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/EstablishmentId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - employer.owner
+      - employer.signatory
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
+  /employers/me/prosecutions/{prosecutionId}/replies:
+    post:
+      operationId: postEmployersProsecutionsProsecutionIdReplies
+      summary: Reply to a prosecution show-cause notice
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: prosecutionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/EstablishmentId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - employer.owner
+      - employer.signatory
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /employers/me/returns/dashboard:
     get:
       operationId: getEmployersReturnsDashboard
@@ -10147,7 +10221,8 @@ paths:
   /office/compliance/cases/{caseId}/appeals:
     post:
       operationId: postOfficeComplianceCasesCaseIdAppeals
-      summary: 7-I appeal record (filed before the tribunal)
+      summary: 7-I appeal against a 7A / 7B / 7C / 14B order on the register (not 7Q interest); within the time, or with delay
+        condonat
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -10158,20 +10233,28 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
       - fo.legal
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+      description: 7-I appeal against a 7A / 7B / 7C / 14B order on the register (not 7Q interest); within the time, or with
+        delay condonation; bars a 7B review
       requestBody:
         required: false
         content:
@@ -10182,7 +10265,7 @@ paths:
   /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposit-waivers:
     post:
       operationId: postOfficeComplianceCasesCaseIdAppealsAppealIdPreDepositWaivers
-      summary: 7-O waiver / reduction decision record
+      summary: The Tribunal's order reducing or waiving the 7-O pre-deposit
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -10199,14 +10282,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
       - fo.legal
@@ -10223,7 +10312,7 @@ paths:
   /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposits:
     post:
       operationId: postOfficeComplianceCasesCaseIdAppealsAppealIdPreDeposits
-      summary: 7-O pre-deposit evidence
+      summary: '7-O pre-deposit: recorded once per reference; the appeal is heard when the deposit reaches the required share'
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -10241,14 +10330,20 @@ paths:
       - $ref: '#/components/parameters/IdempotencyKey'
       - $ref: '#/components/parameters/IfMatch'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
       - fo.legal
@@ -10481,12 +10576,15 @@ paths:
         days of the last hearing → DemandRaised.v1
 
 
-        Variants by `kind`: `7A` (W, phase 1); `14B` (W, phase 1); `7Q` (W, phase 1)'
+        Variants by `kind`: `7A` (W, phase 1); `14B` (W, phase 1); `26B` (W, phase 1); `7Q` (W, phase 1)'
       x-variants:
       - kind: 7A
         status: W
         phase: 1
       - kind: 14B
+        status: W
+        phase: 1
+      - kind: 26B
         status: W
         phase: 1
       - kind: 7Q
@@ -10502,7 +10600,8 @@ paths:
   /office/compliance/cases/{caseId}/prosecutions:
     post:
       operationId: postOfficeComplianceCasesCaseIdProsecutions
-      summary: Prosecution / legal referral record
+      summary: Prosecution show-cause notice (at least 7 working days to reply); for non-payment only after a 7A order left
+        unpaid
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -10514,14 +10613,20 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
       - fo.apfc
@@ -10938,27 +11043,115 @@ paths:
   /office/compliance/membership-disputes:
     post:
       operationId: postOfficeComplianceMembershipDisputes
-      summary: 26B coverage / membership dispute
+      summary: '26B membership dispute: the trigger and the employees in dispute; heard by an RPFC-II or above like a 7A inquiry;
+        the or'
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
       - fo.apfc
+      - fo.ss
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+      description: '26B membership dispute: the trigger and the employees in dispute; heard by an RPFC-II or above like a
+        7A inquiry; the order decides each employee''s membership (P2.11c)'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/compliance/prosecutions:
+    get:
+      operationId: getOfficeComplianceProsecutions
+      summary: 'Prosecutions of the office: show-cause, reply, sanction, complaint, outcome'
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - fo.apfc
+      - fo.eo
+      - fo.legal
+      - fo.oic
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+  /office/compliance/prosecutions/{prosecutionId}/steps:
+    post:
+      operationId: postOfficeComplianceProsecutionsProsecutionIdSteps
+      summary: Sanction by the RPFC (OIC), the complaint by the Enforcement Officer within 7 days (s.14AC), or dropped when
+        the default
+      tags:
+      - Compliance, e-proceedings and enforcement
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: prosecutionId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - fo.apfc
+      - fo.eo
+      - fo.oic
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: Sanction by the RPFC (OIC), the complaint by the Enforcement Officer within 7 days (s.14AC), or dropped
+        when the default is set right
       requestBody:
         required: false
         content:
@@ -12709,43 +12902,57 @@ paths:
   /office/legal/cases:
     get:
       operationId: getOfficeLegalCases
-      summary: Legal case register
+      summary: 'Legal case register: appeals with their pre-deposit, writs, prosecutions in court, their orders and stays'
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
+      - fo.apfc
       - fo.legal
+      - fo.oic
       - ho.legal
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
     post:
       operationId: postOfficeLegalCases
-      summary: Register a court / tribunal case
+      summary: Register a writ, an NCLT matter or another court case, optionally linked to an inquiry
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
       - fo.legal
@@ -12762,7 +12969,8 @@ paths:
   /office/legal/cases/{caseId}/orders:
     post:
       operationId: postOfficeLegalCasesCaseIdOrders
-      summary: Record a court / tribunal order
+      summary: 'Record a court / tribunal order: stay, dismissed, allowed (demand withdrawn), partly allowed (demand revised),
+        remanded '
       tags:
       - Compliance, e-proceedings and enforcement
       parameters:
@@ -12773,20 +12981,28 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: compliance
       x-callers:
       - fo.legal
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+      description: 'Record a court / tribunal order: stay, dismissed, allowed (demand withdrawn), partly allowed (demand revised),
+        remanded (heard by an officer one level higher), conviction or acquittal'
       requestBody:
         required: false
         content:

@@ -3,8 +3,8 @@
     "method": "POST",
     "path_template": "/office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposit-waivers",
     "regex": "^/office/compliance/cases/[^/]+/appeals/[^/]+/pre\\-deposit\\-waivers$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "compliance",
     "upstream": "http://compliance-service:8000",
     "money": false,
@@ -12,7 +12,7 @@
     "callers": [
       "fo.legal"
     ],
-    "summary": "7-O waiver / reduction decision record",
+    "summary": "The Tribunal's order reducing or waiving the 7-O pre-deposit",
     "revocation": false
   },
   {
@@ -131,8 +131,8 @@
     "method": "POST",
     "path_template": "/office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposits",
     "regex": "^/office/compliance/cases/[^/]+/appeals/[^/]+/pre\\-deposits$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "compliance",
     "upstream": "http://compliance-service:8000",
     "money": true,
@@ -140,7 +140,7 @@
     "callers": [
       "fo.legal"
     ],
-    "summary": "7-O pre-deposit evidence",
+    "summary": "7-O pre-deposit: recorded once per reference; the appeal is heard when the deposit reaches the required share",
     "revocation": false
   },
   {
@@ -662,6 +662,24 @@
     "revocation": false
   },
   {
+    "method": "POST",
+    "path_template": "/office/compliance/prosecutions/{prosecutionId}/steps",
+    "regex": "^/office/compliance/prosecutions/[^/]+/steps$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc",
+      "fo.eo",
+      "fo.oic"
+    ],
+    "summary": "Sanction by the RPFC (OIC), the complaint by the Enforcement Officer within 7 days (s.14AC), or dropped when the default is set right",
+    "revocation": false
+  },
+  {
     "method": "GET",
     "path_template": "/office/establishment-registrations/{reqId}/documents",
     "regex": "^/office/establishment\\-registrations/[^/]+/documents$",
@@ -902,6 +920,23 @@
       "employer.signatory"
     ],
     "summary": "Cancel an unpaid TRRN and release the wage-month lock",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/prosecutions/{prosecutionId}/replies",
+    "regex": "^/employers/me/prosecutions/[^/]+/replies$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.owner",
+      "employer.signatory"
+    ],
+    "summary": "Reply to a prosecution show-cause notice",
     "revocation": false
   },
   {
@@ -1442,8 +1477,8 @@
     "method": "POST",
     "path_template": "/office/compliance/cases/{caseId}/prosecutions",
     "regex": "^/office/compliance/cases/[^/]+/prosecutions$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "compliance",
     "upstream": "http://compliance-service:8000",
     "money": false,
@@ -1451,7 +1486,7 @@
     "callers": [
       "fo.apfc"
     ],
-    "summary": "Prosecution / legal referral record",
+    "summary": "Prosecution show-cause notice (at least 7 working days to reply); for non-payment only after a 7A order left unpaid",
     "revocation": false
   },
   {
@@ -2288,8 +2323,8 @@
     "method": "POST",
     "path_template": "/office/compliance/cases/{caseId}/appeals",
     "regex": "^/office/compliance/cases/[^/]+/appeals$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "compliance",
     "upstream": "http://compliance-service:8000",
     "money": false,
@@ -2297,7 +2332,7 @@
     "callers": [
       "fo.legal"
     ],
-    "summary": "7-I appeal record (filed before the tribunal)",
+    "summary": "7-I appeal against a 7A / 7B / 7C / 14B order on the register (not 7Q interest); within the time, or with delay condonation; bars a 7B review",
     "revocation": false
   },
   {
@@ -2612,16 +2647,17 @@
     "method": "POST",
     "path_template": "/office/compliance/membership-disputes",
     "regex": "^/office/compliance/membership\\-disputes$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "compliance",
     "upstream": "http://compliance-service:8000",
     "money": false,
     "step_up": true,
     "callers": [
-      "fo.apfc"
+      "fo.apfc",
+      "fo.ss"
     ],
-    "summary": "26B coverage / membership dispute",
+    "summary": "26B membership dispute: the trigger and the employees in dispute; heard by an RPFC-II or above like a 7A inquiry; the order decides each employee's membership (P2.11c)",
     "revocation": false
   },
   {
@@ -3639,8 +3675,8 @@
     "method": "POST",
     "path_template": "/office/legal/cases/{caseId}/orders",
     "regex": "^/office/legal/cases/[^/]+/orders$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "compliance",
     "upstream": "http://compliance-service:8000",
     "money": false,
@@ -3648,7 +3684,7 @@
     "callers": [
       "fo.legal"
     ],
-    "summary": "Record a court / tribunal order",
+    "summary": "Record a court / tribunal order: stay, dismissed, allowed (demand withdrawn), partly allowed (demand revised), remanded (heard by an officer one level higher), conviction or acquittal",
     "revocation": false
   },
   {
@@ -4220,6 +4256,25 @@
       "fo.ss"
     ],
     "summary": "Case detail with full proceeding history",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/compliance/prosecutions",
+    "regex": "^/office/compliance/prosecutions$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc",
+      "fo.eo",
+      "fo.legal",
+      "fo.oic"
+    ],
+    "summary": "Prosecutions of the office: show-cause, reply, sanction, complaint, outcome",
     "revocation": false
   },
   {
@@ -5188,6 +5243,23 @@
       "zo.rpfc1_audit"
     ],
     "summary": "Concurrent Audit Cell daily functionality extract (Audit Portal)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/prosecutions",
+    "regex": "^/employers/me/prosecutions$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.owner",
+      "employer.signatory"
+    ],
+    "summary": "The establishment's prosecution show-cause notices",
     "revocation": false
   },
   {
@@ -6976,25 +7048,27 @@
     "method": "GET",
     "path_template": "/office/legal/cases",
     "regex": "^/office/legal/cases$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "compliance",
     "upstream": "http://compliance-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
+      "fo.apfc",
       "fo.legal",
+      "fo.oic",
       "ho.legal"
     ],
-    "summary": "Legal case register",
+    "summary": "Legal case register: appeals with their pre-deposit, writs, prosecutions in court, their orders and stays",
     "revocation": false
   },
   {
     "method": "POST",
     "path_template": "/office/legal/cases",
     "regex": "^/office/legal/cases$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "compliance",
     "upstream": "http://compliance-service:8000",
     "money": false,
@@ -7002,7 +7076,7 @@
     "callers": [
       "fo.legal"
     ],
-    "summary": "Register a court / tribunal case",
+    "summary": "Register a writ, an NCLT matter or another court case, optionally linked to an inquiry",
     "revocation": false
   },
   {

@@ -72,6 +72,9 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `InquiryRegistered.v1` | compliance | audit | compliance_case | 1 |
 | `SummonsIssued.v1` | compliance | audit | compliance_case | 1 |
 | `InquiryOrderPassed.v1` | compliance | audit | compliance_case | 1 |
+| `LegalCaseRegistered.v1` | compliance | audit | legal_case | 1 |
+| `LegalOrderRecorded.v1` | compliance | audit | legal_case | 1 |
+| `ProsecutionStepTaken.v1` | compliance | audit | prosecution | 1 |
 | `NotificationDeliveryFailed.v1` | member | audit | notification_delivery | 1 |
 | `PmvbryOptionExercised.v1` | contribution | audit | establishment | 1 |
 | `PmvbryIncentiveDisbursed.v1` | contribution | audit, reporting | pmvbry_run | 1 |

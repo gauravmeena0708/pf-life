@@ -490,6 +490,7 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | `POST /employers/me/proceedings/{caseId}/submissions` | Employer's reply and evidence in an inquiry | W | 1 | compliance |
 | `POST /office/compliance/cases/{caseId}/orders` 🔐 (`kind=7A`) | **7A** dues-determination order: month-wise dues by account, ex parte only after due service, within 15 working days of the last hearing → `DemandRaised.v1` | W | 1 | compliance |
 | `POST /office/compliance/cases/{caseId}/orders` 🔐 (`kind=14B`) | **14B damages** order on the notice's auto-calculated demands: up to the amount worked out, with reasons; replaces them (P2.11b) | W | 1 | compliance |
+| `POST /office/compliance/cases/{caseId}/orders` 🔐 (`kind=26B`) | **26B** order: each disputed employee a member from a date, or not eligible; no demand (P2.11c) | W | 1 | compliance |
 | `POST /office/compliance/cases/{caseId}/orders` 🔐 (`kind=7Q`) | **7Q interest** order: at the statutory rate, not varied; replaces the auto-calculated demands | W | 1 | compliance |
 | `POST /office/compliance/cases/{caseId}/approvals` | The 14B / 7Q notice through the file: SS endorses (T+3), the circle officer approves (T+5) — then filed with a diary number and allotted by size | W | 1 | compliance |
 | `POST /office/compliance/cases/{caseId}/set-asides` 🔐 | Decide an application to set aside an ex-parte order (s.7A(4)): set aside — the demand withdrawn and heard afresh — or rejected | W | 1 | compliance |
@@ -498,13 +499,17 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | `POST /employers/me/proceedings/{caseId}/applications` | Employer applies for a 7B review (new evidence, error apparent, other sufficient reason) or to set aside an ex-parte order | W | 1 | compliance |
 | `POST /office/compliance/cases/{caseId}/reviews-7b` 🔐 | **7B** review on the employer's application or of the officer's own motion, after the next-higher officer's view; granted: heard again, the new order replaces the old demand | W | 1 | compliance |
 | `POST /office/compliance/cases/{caseId}/escaped-assessments-7c` 🔐 | **7C** escaped amount within 5 years of the order: a linked inquiry before the same officer; its order adds a demand | W | 1 | compliance |
-| `POST /office/compliance/membership-disputes` 🔐 | **26B** coverage / membership dispute | P | 3 | compliance |
-| `POST /office/compliance/cases/{caseId}/appeals` | **7-I** appeal record (filed before the tribunal) | P | 3 | compliance |
-| `POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposits` 💰 | **7-O** pre-deposit evidence | P | 3 | compliance |
-| `POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposit-waivers` 🔐 | 7-O waiver / reduction decision record | P | 3 | compliance |
+| `POST /office/compliance/membership-disputes` 🔐 | **26B** membership dispute: the trigger and the employees in dispute; heard by an RPFC-II or above like a 7A inquiry; the order decides each employee's membership (P2.11c) | W | 1 | compliance |
+| `POST /office/compliance/cases/{caseId}/appeals` | **7-I** appeal against a 7A / 7B / 7C / 14B order on the register (not 7Q interest); within the time, or with delay condonation; bars a 7B review | W | 1 | compliance |
+| `POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposits` 💰 | **7-O** pre-deposit: recorded once per reference; the appeal is heard when the deposit reaches the required share | W | 1 | compliance |
+| `POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposit-waivers` 🔐 | The Tribunal's order reducing or waiving the 7-O pre-deposit | W | 1 | compliance |
 | `POST /office/compliance/cases/{caseId}/recovery-8f` 🔐 | **8F** recovery / attachment (demo record only) | P | 3 | compliance |
 | `POST /office/compliance/cases/{caseId}/recovery-certificates` 🔐 | **8B–8E** recovery certificate execution (demo record only) | P | 3 | compliance |
-| `POST /office/compliance/cases/{caseId}/prosecutions` 🔐 | Prosecution / legal referral record | P | 3 | compliance |
+| `GET /office/compliance/prosecutions` | Prosecutions of the office: show-cause, reply, sanction, complaint, outcome | W | 1 | compliance |
+| `POST /office/compliance/prosecutions/{prosecutionId}/steps` | Sanction by the RPFC (OIC), the complaint by the Enforcement Officer within 7 days (s.14AC), or dropped when the default is set right | W | 1 | compliance |
+| `GET /employers/me/prosecutions` | The establishment's prosecution show-cause notices | W | 1 | compliance |
+| `POST /employers/me/prosecutions/{prosecutionId}/replies` | Reply to a prosecution show-cause notice | W | 1 | compliance |
+| `POST /office/compliance/cases/{caseId}/prosecutions` 🔐 | Prosecution show-cause notice (at least 7 working days to reply); for non-payment only after a 7A order left unpaid | W | 1 | compliance |
 | `POST /office/compliance/inspections` | Circle officer schedules an inspection for an Enforcement Officer: purpose (complaint, CAIU allocation, defaulter, survey), period, due date (P2.11a) | W | 1 | compliance |
 | `POST /office/compliance/inspections/{inspectionId}/reports` | Enforcement Officer's inspection report: findings, employees found and not enrolled, period, dues estimated, recommendation | W | 1 | compliance |
 
@@ -518,9 +523,9 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | `POST /office/recovery/{caseId}/sales` 🔐 | Sale of attached property (demo record only) | P | 3 | compliance |
 | `POST /office/recovery/{caseId}/receivers` 🔐 | Appointment of receiver (demo record only) | P | 3 | compliance |
 | `POST /office/recovery/{caseId}/arrest-warrants` 🔐 | Arrest and detention of defaulter (demo record only) | P | 3 | compliance |
-| `POST /office/legal/cases` | Register a court / tribunal case | P | 3 | compliance |
-| `GET /office/legal/cases` | Legal case register | P | 3 | compliance |
-| `POST /office/legal/cases/{caseId}/orders` | Record a court / tribunal order | P | 3 | compliance |
+| `POST /office/legal/cases` | Register a writ, an NCLT matter or another court case, optionally linked to an inquiry | W | 1 | compliance |
+| `GET /office/legal/cases` | Legal case register: appeals with their pre-deposit, writs, prosecutions in court, their orders and stays | W | 1 | compliance |
+| `POST /office/legal/cases/{caseId}/orders` | Record a court / tribunal order: stay, dismissed, allowed (demand withdrawn), partly allowed (demand revised), remanded (heard by an officer one level higher), conviction or acquittal | W | 1 | compliance |
 | `GET /ho/reports/proceedings` | HO view of e-Proceedings (7A, 14B & 7Q, virtual hearings) | P | 3 | reporting |
 | `GET /ho/reports/recovery` | HO recovery monitoring | P | 3 | reporting |
 

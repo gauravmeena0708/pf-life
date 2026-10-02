@@ -4,14 +4,14 @@
   "interfaces": 21,
   "stakeholders": 114,
   "stakeholders_with_access": 94,
-  "activities": 261,
+  "activities": 265,
   "endpoints": {
-   "W": 419,
+   "W": 431,
    "M": 21,
-   "P": 20,
+   "P": 12,
    "?": 5
   },
-  "personas": 75
+  "personas": 76
  },
  "interfaces": [
   {
@@ -39,7 +39,7 @@
    "coverage": "Working",
    "purpose": "Employers: registration, members and KYC, monthly returns and challans, demands, attestations, exits.",
    "endpoints": {
-    "W": 98,
+    "W": 100,
     "M": 5,
     "P": 1,
     "?": 0
@@ -84,9 +84,9 @@
    "coverage": "Working",
    "purpose": "Field-office sections: claim scrutiny and payment, compliance, pension, EDLI, exemption, PRO counter.",
    "endpoints": {
-    "W": 107,
+    "W": 116,
     "M": 0,
-    "P": 15,
+    "P": 9,
     "?": 4
    },
    "stakeholders": [
@@ -171,9 +171,9 @@
    "coverage": "Working",
    "purpose": "Regional office officers: approvals above the dealing level, freezes, ledger decisions.",
    "endpoints": {
-    "W": 57,
+    "W": 62,
     "M": 0,
-    "P": 2,
+    "P": 0,
     "?": 1
    },
    "stakeholders": [
@@ -208,9 +208,9 @@
    "coverage": "Working",
    "purpose": "Head office: policy rules (maker-checker), interest, circulars, the IS Division.",
    "endpoints": {
-    "W": 28,
+    "W": 29,
     "M": 0,
-    "P": 3,
+    "P": 2,
     "?": 0
    },
    "stakeholders": [
@@ -732,7 +732,7 @@
    "name": "Establishment owner / employer (legal entity)",
    "group": "B. Employers and intermediaries",
    "endpoints": {
-    "W": 35,
+    "W": 37,
     "M": 4,
     "P": 0,
     "?": 0
@@ -763,6 +763,10 @@
      "does": "Follow the establishment's inquiries (diary number, summons, daily orders, the order) and reply"
     },
     {
+     "id": "F06.employer_scn",
+     "does": "Reply to a prosecution show-cause notice"
+    },
+    {
      "id": "F13.pmvbry_employer",
      "does": "PMVBRY Part B: exercise the option; see baseline, eligibility, net additional employment and incentive cycles"
     }
@@ -777,7 +781,7 @@
    "name": "Authorised signatory (registered DSC / e-sign)",
    "group": "B. Employers and intermediaries",
    "endpoints": {
-    "W": 51,
+    "W": 53,
     "M": 2,
     "P": 0,
     "?": 0
@@ -838,6 +842,10 @@
     {
      "id": "F06.vishwas_apply",
      "does": "Apply under VISHWAS to settle a 14B damages / penalty dispute at reduced rates"
+    },
+    {
+     "id": "F06.signatory_scn",
+     "does": "Reply to a prosecution show-cause notice"
     },
     {
      "id": "F10.apply",
@@ -1160,7 +1168,7 @@
    "name": "Section Supervisor (Accounts / Compliance)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 15,
+    "W": 16,
     "M": 0,
     "P": 0,
     "?": 0
@@ -1257,9 +1265,9 @@
    "name": "APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 40,
+    "W": 45,
     "M": 0,
-    "P": 2,
+    "P": 0,
     "?": 1
    },
    "activities": [
@@ -1370,7 +1378,7 @@
    "name": "Officer-in-Charge of the office",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 32,
+    "W": 35,
     "M": 0,
     "P": 0,
     "?": 0
@@ -1391,6 +1399,10 @@
     {
      "id": "F06.proceed_large",
      "does": "RPFC-I / officer in charge conducts inquiries of establishments above 1,000 contributory members: summons, hearings, the 7A order"
+    },
+    {
+     "id": "F06.sanction",
+     "does": "RPFC sanctions a prosecution after the employer's reply to the show-cause notice"
     },
     {
      "id": "F07.freeze_ro_est",
@@ -1600,7 +1612,7 @@
    "name": "Enforcement Officer",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 2,
+    "W": 4,
     "M": 0,
     "P": 0,
     "?": 1
@@ -1613,6 +1625,10 @@
     {
      "id": "F06.inspect_legacy",
      "does": "Enforcement Officer inspection (legacy role before ICF)"
+    },
+    {
+     "id": "F06.complaint",
+     "does": "Enforcement Officer (an Inspector, s.14AC) files the complaint in court within 7 days of the sanction"
     }
    ],
    "personas": [
@@ -1677,9 +1693,9 @@
    "name": "Legal Cell (court cases, CGIT appeals)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 0,
+    "W": 7,
     "M": 0,
-    "P": 6,
+    "P": 0,
     "?": 0
    },
    "activities": [
@@ -1688,7 +1704,9 @@
      "does": "Record 7-I appeals, 7-O pre-deposits / waivers and court / tribunal orders; track compliance"
     }
    ],
-   "personas": []
+   "personas": [
+    "ro-legal"
+   ]
   },
   "fo.exemption": {
    "name": "Exemption cell (supervising PF trusts)",
@@ -2116,9 +2134,9 @@
    "name": "Legal Division",
    "group": "F. Head Office (HO) — leadership and divisions",
    "endpoints": {
-    "W": 0,
+    "W": 1,
     "M": 0,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
    "activities": [
@@ -4626,7 +4644,7 @@
     "F06.decide_report"
    ],
    "status": "BUILT",
-   "endpoints": 6,
+   "endpoints": 7,
    "src": "CMP"
   },
   {
@@ -4638,7 +4656,7 @@
     "F06.proceed"
    ],
    "status": "BUILT",
-   "endpoints": 2,
+   "endpoints": 3,
    "src": "CMP"
   },
   {
@@ -4685,7 +4703,7 @@
     "F06.appeal",
     "F06.recovery"
    ],
-   "status": "PARTLY",
+   "status": "BUILT",
    "endpoints": 7,
    "src": "CMP, EP"
   },
@@ -4767,8 +4785,8 @@
    "actor": "fo.legal",
    "does": "Record 7-I appeals, 7-O pre-deposits / waivers and court / tribunal orders; track compliance",
    "next": [],
-   "status": "PLANNED",
-   "endpoints": 6,
+   "status": "BUILT",
+   "endpoints": 7,
    "src": "SOP-B, CMP"
   },
   {
@@ -4847,8 +4865,56 @@
    "next": [
     "F06.legal"
    ],
-   "status": "PLANNED",
-   "endpoints": 1,
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "CMP"
+  },
+  {
+   "id": "F06.sanction",
+   "flow": "F06",
+   "actor": "fo.oic",
+   "does": "RPFC sanctions a prosecution after the employer's reply to the show-cause notice",
+   "next": [
+    "F06.complaint"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CMP"
+  },
+  {
+   "id": "F06.complaint",
+   "flow": "F06",
+   "actor": "fo.eo",
+   "does": "Enforcement Officer (an Inspector, s.14AC) files the complaint in court within 7 days of the sanction",
+   "next": [
+    "F06.legal"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CMP"
+  },
+  {
+   "id": "F06.employer_scn",
+   "flow": "F06",
+   "actor": "employer.owner",
+   "does": "Reply to a prosecution show-cause notice",
+   "next": [
+    "F06.sanction"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CMP"
+  },
+  {
+   "id": "F06.signatory_scn",
+   "flow": "F06",
+   "actor": "employer.signatory",
+   "does": "Reply to a prosecution show-cause notice",
+   "next": [
+    "F06.sanction"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
    "src": "CMP"
   },
   {
@@ -4889,7 +4955,7 @@
    "actor": "ho.legal",
    "does": "Legal policy; monitoring of court cases",
    "next": [],
-   "status": "PLANNED",
+   "status": "BUILT",
    "endpoints": 1,
    "src": "SOP-B"
   },

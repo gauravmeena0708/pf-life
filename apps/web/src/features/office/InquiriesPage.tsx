@@ -8,6 +8,7 @@ import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 import "./InquiriesPage.css";
 import { AfterOrder, DamagesNoticeForm, LevyForm, NoticeApproval, ScrutinyList } from "./ProceedingTools";
+import { MembershipDisputeForm, MembershipOrderForm, ProsecutionPanel } from "./ProsecutionTools";
 
 /** Inspections and 7A inquiries (Compliance Manual ch. 2): EO report → DA (T+3) → SS (T+5) → circle officer (T+7) → registration with a
  *  diary number → the officer allotted by size → summons → hearings → the 7A order. */
@@ -28,7 +29,7 @@ const STATE_TEXT: Record<string, string> = {
   SCHEDULED: "Scheduled — EO to inspect", REPORTED: "Reported — DA to note", DA_NOTED: "DA noted — SS to note", SS_NOTED: "SS noted — circle officer to decide",
   DECIDED_INITIATE: "Inquiry to be registered", CLOSED: "Closed — no action", REGISTERED: "Registered", SUMMONED: "Summons issued",
   HEARING: "Hearing in progress", CONCLUDED: "Concluded — order due", ORDERED: "Order passed",
-  NOTICE_DRAFTED: "Notice drafted — SS to endorse", SS_ENDORSED: "Endorsed — circle officer to approve", PART_ORDERED: "One order passed — the other due",
+  CLOSED_ON_APPEAL: "Order set aside on appeal", NOTICE_DRAFTED: "Notice drafted — SS to endorse", SS_ENDORSED: "Endorsed — circle officer to approve", PART_ORDERED: "One order passed — the other due",
 };
 const when = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "—");
 const field = (f: FormData, name: string) => String(f.get(name) ?? "").trim();
@@ -105,6 +106,7 @@ export function InquiriesPage() {
     <PageHeader id="inquiries-heading" eyebrow="Compliance" title="Inspections and 7A inquiries" current="Inspections and inquiries"
       description="From the Enforcement Officer's report to the order under section 7A, with each stage's time limit (Compliance Manual, chapter 2)." />
     <ProblemMessage error={error} />{notice ? <p role="status" className="ok">{notice}</p> : null}
+    {role === "fo.ss" ? <MembershipDisputeForm busy={busy} run={(w, ok, f) => void run(w, ok, f)} ask={stepUp.ask} /> : null}
     {role === "fo.da_compliance" ? <DamagesNoticeForm busy={busy} run={(w, ok, f) => void run(w, ok, f)} /> : null}
     {role === "fo.apfc" ? <form className="card stack" aria-labelledby="schedule-heading" onSubmit={schedule}>
       <h2 id="schedule-heading">Schedule an inspection</h2>
@@ -181,7 +183,9 @@ export function InquiriesPage() {
         ? <LevyForm caseId={open} actions={inq.actions} busy={busy} run={(w, ok, f) => void run(w, ok, f)} ask={stepUp.ask} /> : null}
       {["fo.apfc", "fo.oic"].includes(role) && inq.state === "ORDERED"
         ? <AfterOrder caseId={open} rank={inq.officer_rank} section={inq.section ?? "7A"} actions={inq.actions} busy={busy} run={(w, ok, f) => void run(w, ok, f)} ask={stepUp.ask} /> : null}
-      {["fo.apfc", "fo.oic"].includes(role) && inq.state === "CONCLUDED" && inq.section !== "14B"
+      {["fo.apfc", "fo.oic"].includes(role) && inq.state === "CONCLUDED" && inq.section === "26B"
+        ? <MembershipOrderForm caseId={open} actions={inq.actions} busy={busy} run={(w, ok, f) => void run(w, ok, f)} ask={stepUp.ask} /> : null}
+      {["fo.apfc", "fo.oic"].includes(role) && inq.state === "CONCLUDED" && !["14B", "26B"].includes(inq.section ?? "7A")
         ? <form className="stack" aria-label="Pass 7A order" onSubmit={(e) => void order(e, open)}>
           <div className="form-row"><label>Wage month<input name="wage_month" type="month" required /></label>
             <label>A/c 1 employee (₹)<input name="ac1_employee" type="number" min="0" step="0.01" defaultValue="0" /></label>
@@ -193,6 +197,7 @@ export function InquiriesPage() {
           <label><input type="checkbox" name="ex_parte" /> Ex parte (only after due service, the employer absent)</label>
           <div className="actions"><button className="primary" disabled={busy} type="submit">Pass order</button></div></form> : null}
     </section> : null}
+    {["fo.apfc", "fo.oic", "fo.eo"].includes(role) ? <ProsecutionPanel role={role} busy={busy} run={(w, ok, f) => void run(w, ok, f)} ask={stepUp.ask} /> : null}
     {["fo.apfc", "fo.oic", "zo.acc"].includes(role) ? <ScrutinyList busy={busy} run={(w, ok, f) => void run(w, ok, f)} /> : null}
     <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
   </section>;

@@ -288,3 +288,9 @@ compliance_proceedings:
   damages_ss_days: 3                # the 14B notice: DA (T+1) -> SS endorses by T+3 (para 3.3.2)
   damages_approval_days: 5          # -> the circle officer approves by T+5, then it is filed on e-Proceedings
   review_days: 45                   # a 7B review is applied for within this many days of the order (ILLUSTRATIVE: the Scheme sets it)
+  # P2.11c: appeals, 26B, prosecution (the Act; the Compliance Manual ch. 4-5). TO VERIFY against the Tribunal (Procedure) Rules.
+  appeal_days: 60                   # an appeal under s.7-I is filed within this many days of the order ...
+  appeal_condonable_days: 60        # ... or later by this many with the delay condoned by the Tribunal
+  pre_deposit_percent: 75           # s.7-O: the appeal is heard after this share of the amount is deposited (the Tribunal may reduce or waive it)
+  scn_reply_working_days: 7         # a prosecution show-cause notice allows at least 7 working days (para 5.2.2 ii)
+  complaint_days: 7                 # the Enforcement Officer files the complaint within 7 days of the sanction (para 5.2.2 v)

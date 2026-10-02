@@ -109,3 +109,26 @@ inquiry_actions = Table(
     Column("kind", String(30), nullable=False), Column("actor_subject", String(80), nullable=False),
     Column("detail", JSON, nullable=False), Column("occurred_at", DateTime(timezone=True), nullable=False),
 )
+
+# P2.11c: the legal case register (appeals under 7-I with the 7-O pre-deposit, writs, prosecutions in court) and prosecutions
+legal_cases = Table(
+    "legal_cases", metadata,
+    Column("legal_case_id", String(40), primary_key=True), Column("office_id", String(40), nullable=False),
+    Column("establishment_id", String(40), nullable=False), Column("kind", String(30), nullable=False),      # APPEAL_7I | WRIT | PROSECUTION | NCLT | OTHER
+    Column("forum", String(120), nullable=False), Column("case_no", String(80)), Column("filed_on", String(10), nullable=False),
+    Column("inquiry_case_id", String(40)), Column("impugned_demand_ids", JSON), Column("amount_paise", BigInteger),
+    Column("pre_deposit_percent", Integer), Column("pre_deposits", JSON), Column("delay_condonation", Boolean),
+    Column("stayed", Boolean, nullable=False, server_default="0"), Column("state", String(20), nullable=False),     # PENDING | DECIDED
+    Column("orders", JSON, nullable=False), Column("note", Text), Column("created_by", String(80), nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+)
+
+prosecutions = Table(
+    "prosecutions", metadata,
+    Column("prosecution_id", String(40), primary_key=True), Column("office_id", String(40), nullable=False),
+    Column("establishment_id", String(40), nullable=False), Column("inquiry_case_id", String(40)),
+    Column("offence", String(30), nullable=False), Column("particulars", Text, nullable=False),
+    Column("state", String(20), nullable=False),      # SCN_ISSUED | REPLIED | SANCTIONED | COMPLAINT_FILED | DROPPED
+    Column("scn_at", DateTime(timezone=True), nullable=False), Column("reply_due", DateTime(timezone=True), nullable=False),
+    Column("history", JSON, nullable=False), Column("legal_case_id", String(40)), Column("created_by", String(80), nullable=False),
+)

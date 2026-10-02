@@ -92,6 +92,7 @@ function fieldOffice(role: string): NavGroup[] {
     { label: "Establishments & compliance", items: [
       ...(["fo.da_compliance", "fo.apfc", "fo.oic"].includes(role) ? [link("Defaulters, cases and VISHWAS", "/office/compliance")] : []),
       ...(["fo.da_compliance", "fo.ss", "fo.apfc", "fo.oic", "fo.eo"].includes(role) ? [link("Inspections and 7A inquiries", "/office/inquiries")] : []),
+      ...(["fo.legal", "fo.oic", "fo.apfc"].includes(role) ? [link("Legal cases (appeals, writs, prosecutions)", "/office/legal")] : []),
       link("7Q & 14B", ["fo.da_compliance", "fo.ss"].includes(role) ? "/office/returns#knock-off-heading" : undefined),
       link("Establishment", ["fo.oic", "fo.apfc"].includes(role) ? "/office/work-queue" : undefined),
       link("OLRE", ["fo.da_compliance", "fo.apfc"].includes(role) ? "/office/olre" : undefined),
@@ -230,6 +231,7 @@ export function homeFor(role: string | undefined): string {
   if (role === "tech.cpps") return "/cpps";
   if (role === "fo.da_compliance") return "/office/olre";
   if (role === "fo.eo") return "/office/inquiries";
+  if (role === "fo.legal") return "/office/legal";
   if (role?.startsWith("fo.")) return "/office/work-queue";
   return "/";
 }

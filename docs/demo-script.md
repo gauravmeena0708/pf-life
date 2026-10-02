@@ -56,6 +56,7 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `textile-trust`, `chemicals-trust` | PF trusts of Demo Textile Mills (surrenders) and Demo Chemicals (cancelled) | The trust's lifecycle |
 | `auto-owner`, `member-ft`, `ho-finance` | Owner of Demo Auto Components; ARJUN DEMO, a first timer; FA & CAO | PMVBRY |
 | `ro-eo`, `ro-rpfc2` | Enforcement Officer; RPFC-II (inquiries of 251–1,000 members) | An inspection and a 7A inquiry |
+| `ro-legal` | Legal Cell (appeals, writs, prosecutions) | Appeals, membership disputes and prosecution |
 | `zo-audit`, `ndc-is`, `zo-fraud`, `do-oic` | Concurrent Audit Cell; NDC IS Division; zonal fraud-risk committee; District Office in charge | Oversight and administration |
 
 ---
@@ -546,6 +547,17 @@ contribution- and platform-service*
    employer can apply to set it aside instead; the officer can also reopen a case under 7C.
 5. **`ro-rpfc2` → Scrutiny of orders**: the APFC's order of this month, due by the 15th of next month; record the
    observations. **`zo-acc`** scrutinises the RPFC-I's orders.
+
+## Appeals, membership disputes and prosecution
+*Tests: `tests/e2e/test_proceedings_c.py`, `services/compliance-service/tests/test_proceedings_c.py`*
+
+1. **`ro-ss` → Membership dispute (Para 26B)**: two employees, one-time code — allotted to the RPFC-II. **`ro-rpfc2`**:
+   notice, hearing, the order — one a member from January 2025, the other not eligible.
+2. After a 7A order: **`ro-legal` → Legal cases › Register an appeal**: the Tribunal case number; the pre-deposit due is
+   75% of the dues. Record the deposit — now it can be heard. Record the Tribunal's order *remanded*: the case goes back,
+   to the RPFC-II this time. The employer can no longer seek a 7B review of that order.
+3. **`ro-apfc` → Prosecutions**: a show-cause notice for returns not filed. **`emp-owner` → Inquiries** replies. **`ro-oic`**
+   sanctions; **`ro-eo`** records the complaint filed in court; **`ro-legal`** records the conviction.
 
 ## Disaster recovery, training, camps, totalisation, the foreign agency, the composite death claim
 *Tests: `tests/e2e/test_small_rest.py`*

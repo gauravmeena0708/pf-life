@@ -33,7 +33,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.10b** | Preventive vigilance: sensitive posts and 3-year rotation alerts; vigilance clearance for HR postings, promotions and retirement against open cases and penalties | **Done** (1 Oct 2026) |
 | **P2.11a** | Inspections and 7A inquiries: the Enforcement Officer's report through DA / SS / circle officer, registration with a diary number, random allocation by size, summons, hearings and daily orders, the employer's replies, the 7A order (ex parte only after due service) raising the demand | Done |
 | **P2.11b** | 7B review (after the next-higher officer's view), 7C escaped amounts (within 5 years), ex-parte set-aside, administrative scrutiny of orders; the 14B damages and 7Q interest proceedings | Done (the CBT's waiver for sick companies stays planned) |
-| P2.11c | Appeals (7-I) with the 7-O pre-deposit, the legal-case register and court orders, 26B membership disputes, prosecution | Planned |
+| **P2.11c** | Appeals (7-I) with the 7-O pre-deposit, the legal-case register and court orders, 26B membership disputes, prosecution | Done |
 | P2.11d | Recovery (Recovery Manual, 08/12/2023): recovery certificates (8B–8E), 8F garnishee, attachment, sale, receiver, arrest (records only); HO reports on proceedings and recovery; PMVBRY exclusions from open inquiries | Planned |
 | **P2.12h** | Explore pages: the stakeholder chart by EPFO's hierarchy, each lifecycle as a network of stakeholders and steps with how far it is built, and the user manuals published into the portal — all linked from the home page | Done |
 | **P2.12a** | Member and tax: Form 16A, the office's TDS computation; UAN allotment and activation (mock Aadhaar face / OTP); inoperative accounts — the public helpdesk search, verification through co-workers, reactivation in the AO / APFC bands | **Done** (1 Oct 2026) |
@@ -933,6 +933,30 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 
 With P2.12f every endpoint the catalogue planned outside compliance (P2.11) and the exempted establishments
 (P2.9b / P2.9d) is built.
+
+## P2.11c — how it is built
+
+Sources: the Compliance Manual (ch. 4 — 26B; ch. 5 — prosecution; 2.9 — remanded cases) and the Act for appeals (s.7-I,
+s.7-O). The appeal period (60 days, 60 more condonable) and the 75% pre-deposit are in the rule set marked *to verify*.
+
+- **26B membership disputes** (`/office/compliance/membership-disputes`, the SS, one-time code): the trigger (an
+  employee's or a union's complaint, an inspector's observation, a 7A inquiry) and the employees in dispute; allotted
+  to an RPFC-II or above whatever the size; notice and hearings as for 7A; the order decides each employee — a member
+  from a date, or not eligible — and raises no demand (non-compliance leads to a 7A inquiry, para 4.6.3).
+- **Appeals** (Legal Cell, new persona `ro-legal`, role `fo.legal`): an appeal under s.7-I against a 7A / 7B / 7C / 14B
+  order (7Q interest is not appealable there) goes on the register — within the period or with delay condonation; it
+  bars a 7B review (s.7B(1)). The s.7-O pre-deposit (75% of the amount) is recorded once per reference; the Tribunal's
+  reduction or waiver lowers the share; the appeal is heard only when it is met.
+- **The legal register** (`/office/legal`): appeals, writs, NCLT matters, prosecutions in court, with every order. An
+  order's effect: an interim stay (recovery held) or its vacation; *allowed* — the demand withdrawn and the case closed
+  on appeal; *partly allowed* — the demand replaced by the amount left; *remanded* — the order withdrawn and the case
+  heard again by an officer one level higher (para 2.9); conviction or acquittal for a prosecution.
+- **Prosecution**: the circle officer's show-cause notice (at least 7 working days; for unpaid dues only after a 7A
+  order whose dues stay unpaid 15 days on — para 5.2.2 iii); the employer replies (`/employer/proceedings`); the RPFC
+  (OIC) sanctions after the reply or once its time has run; the Enforcement Officer — an Inspector, s.14AC — files the
+  complaint within 7 days, which enters the legal register; or the circle officer drops it when the default is set right.
+- Events: `LegalCaseRegistered.v1`, `LegalOrderRecorded.v1`, `ProsecutionStepTaken.v1`. The Legal Cell's screen was
+  written by agy and reviewed; the rest here.
 
 ## P2.11b — how it is built
 

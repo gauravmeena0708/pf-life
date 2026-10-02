@@ -944,6 +944,18 @@ stakeholders:
     step_up: false
     via:
     - F06.employer_owner_reply
+  - endpoint: GET /employers/me/prosecutions
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.employer_scn
+  - endpoint: POST /employers/me/prosecutions/{prosecutionId}/replies
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.employer_scn
   - endpoint: POST /employers/me/pmvbry/options
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
@@ -1233,6 +1245,18 @@ stakeholders:
     step_up: false
     via:
     - F06.vishwas_apply
+  - endpoint: GET /employers/me/prosecutions
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.signatory_scn
+  - endpoint: POST /employers/me/prosecutions/{prosecutionId}/replies
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.signatory_scn
   - endpoint: GET /international/agreements
     status: W
     scope: own application (employer) or IWU role
@@ -1982,6 +2006,12 @@ stakeholders:
     step_up: false
     via:
     - F06.ss_note
+  - endpoint: POST /office/compliance/membership-disputes
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F06.ss_note
   - endpoint: POST /office/freeze-cases/{caseId}/verifications
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2281,7 +2311,7 @@ stakeholders:
     via:
     - F06.order
   - endpoint: POST /office/compliance/membership-disputes
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
@@ -2317,9 +2347,27 @@ stakeholders:
     via:
     - F06.vishwas_decide
   - endpoint: POST /office/compliance/cases/{caseId}/prosecutions
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
+    via:
+    - F06.prosecution
+  - endpoint: GET /office/compliance/prosecutions
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.prosecution
+  - endpoint: POST /office/compliance/prosecutions/{prosecutionId}/steps
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.prosecution
+  - endpoint: GET /office/legal/cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
     via:
     - F06.prosecution
   - endpoint: POST /office/members/{uan}/freezes
@@ -2433,6 +2481,12 @@ stakeholders:
     step_up: true
     via:
     - F06.allocate
+  - endpoint: GET /office/legal/cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.allocate
   - endpoint: GET /office/compliance/cases/{caseId}
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2487,6 +2541,18 @@ stakeholders:
     step_up: false
     via:
     - F06.proceed_large
+  - endpoint: GET /office/compliance/prosecutions
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.sanction
+  - endpoint: POST /office/compliance/prosecutions/{prosecutionId}/steps
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.sanction
   - endpoint: POST /office/establishments/{estId}/freezes
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2857,6 +2923,18 @@ stakeholders:
     step_up: false
     via:
     - F06.inspect_legacy
+  - endpoint: GET /office/compliance/prosecutions
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.complaint
+  - endpoint: POST /office/compliance/prosecutions/{prosecutionId}/steps
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.complaint
   fo.icf:
   - endpoint: POST /office/compliance/inspections/{inspectionId}/reports
     status: W
@@ -2903,37 +2981,43 @@ stakeholders:
     - F06.arrest
   fo.legal:
   - endpoint: POST /office/compliance/cases/{caseId}/appeals
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F06.legal
   - endpoint: POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposits
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F06.legal
   - endpoint: POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposit-waivers
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: true
     via:
     - F06.legal
   - endpoint: POST /office/legal/cases
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F06.legal
   - endpoint: GET /office/legal/cases
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
     - F06.legal
   - endpoint: POST /office/legal/cases/{caseId}/orders
-    status: P
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.legal
+  - endpoint: GET /office/compliance/prosecutions
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -3549,7 +3633,7 @@ stakeholders:
     - F06.ho_recovery
   ho.legal:
   - endpoint: GET /office/legal/cases
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:

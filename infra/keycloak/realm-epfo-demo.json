@@ -257,6 +257,10 @@
       {
         "name": "fo.eo",
         "description": "Enforcement Officer — inspects establishments and reports; Departmental Representative in inquiries"
+      },
+      {
+        "name": "fo.legal",
+        "description": "Legal Cell of the regional office — appeals before the Tribunal, court cases, prosecutions"
       }
     ]
   },
@@ -1771,6 +1775,25 @@
         "fo.apfc"
       ],
       "id": "00000000-0000-4000-8000-000000000075"
+    },
+    {
+      "username": "ro-legal",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Legal Cell",
+      "lastName": "Demo",
+      "email": "ro-legal@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "fo.legal"
+      ],
+      "id": "00000000-0000-4000-8000-000000000076"
     }
   ]
 }

@@ -98,6 +98,19 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 11c: appeals, membership disputes, prosecution (2 October 2026)
+
+Unit: every suite (`make test`) — compliance-service 21 (new `test_proceedings_c.py`: 26B registered with a one-time code
+and allotted to an RPFC-II whatever the size, each employee decided, no demand; an appeal registered by the Legal Cell
+only, once, barring a review, not heard before the pre-deposit, the deposit recorded once, the Tribunal's reduction, the
+remand to the next rank with the demand withdrawn; a late appeal only with delay condonation, a stay, partial allowance
+replacing the demand, a decided case closed; a writ registered, conviction refused on a writ; prosecution — non-payment
+refused before a 7A order, sanction refused before the reply, by the RPFC only, the complaint by the EO with the court,
+conviction recorded, the steps as events), common-persistence 25; web 281 (new `P211c.office.test.tsx`, and
+`P211c.legal.test.tsx` with the Legal Cell's page by agy); end to end 101 of 101 (new `test_proceedings_c.py`,
+repeatable); must-deny 18; UI smoke 2. The walking skeleton's "planned" example had been built again (now the past
+accumulation VDR reconciliation, still planned).
+
 ## Update — Phase 2, slice 11b: damages, interest, review, set-aside, 7C, scrutiny (2 October 2026)
 
 Unit: every suite (`make test`) — compliance-service 16 (new `test_proceedings_b.py`: the notice from every open demand or

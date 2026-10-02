@@ -283,6 +283,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /employers/me/ownership-declaration` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/pmvbry` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/proceedings` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/prosecutions` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/returns/dashboard` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/signatories` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/signature-registrations` | W | own establishment (X-Establishment-Id validated against grants) |  |
@@ -297,6 +298,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /employers/me/pmvbry/options` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/proceedings/{caseId}/applications` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/proceedings/{caseId}/submissions` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `POST /employers/me/prosecutions/{prosecutionId}/replies` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/signatories/authorisations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/signatories/{signatoryId}/request-letters` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/signatories/{signatoryId}/revocations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
@@ -329,6 +331,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /employers/me/ownership-declaration` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/pending-approvals` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/proceedings` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/prosecutions` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/returns/dashboard` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/signature-registrations` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/transfer-requests` | W | own establishment (X-Establishment-Id validated against grants) |  |
@@ -356,6 +359,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /employers/me/office-transfer-requests` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/proceedings/{caseId}/applications` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/proceedings/{caseId}/submissions` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `POST /employers/me/prosecutions/{prosecutionId}/replies` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/transfer-requests/{transferId}/decisions` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/vishwas-applications` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/voluntary-coverage-requests` | W | own registration request | yes |
@@ -529,6 +533,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/compliance/cases` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/compliance/cases/{caseId}/approvals` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/compliance/inspections/{inspectionId}/processing-notes` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/compliance/membership-disputes` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/damages-knock-offs/{knockOffId}/approvals` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/member-change-requests/{requestId}/verifications` | W | office jurisdiction of the caller's posting |  |
@@ -570,6 +575,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/compliance/cases` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/compliance/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/compliance/inspections` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/compliance/prosecutions` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/compliance/scrutinies` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/compliance/vishwas-applications` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/death-claims/{claimId}/shares-summary` | W | office jurisdiction of the caller's posting |  |
@@ -578,6 +584,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/establishment-registrations` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/establishment-registrations/{reqId}/documents` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/ledger-adjustments` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/legal/cases` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/signature-registrations` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/accounts/{accountLinkId}/reactivations` | W | office jurisdiction of the caller's posting | yes |
@@ -589,11 +596,14 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/compliance/cases/{caseId}/hearings` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/compliance/cases/{caseId}/notices` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/cases/{caseId}/orders` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/compliance/cases/{caseId}/prosecutions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/cases/{caseId}/reviews-7b` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/cases/{caseId}/scrutinies` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/compliance/cases/{caseId}/set-asides` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/inspections` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/compliance/inspections/{inspectionId}/processing-notes` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/compliance/membership-disputes` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/compliance/prosecutions/{prosecutionId}/steps` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/compliance/vishwas-applications/{applicationId}/decisions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishment-registrations/{reqId}/coverage-decisions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | W | office jurisdiction of the caller's posting | yes |
@@ -604,8 +614,6 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/member-change-requests/{requestId}/decisions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/members/{uan}/freezes` | W | office jurisdiction of the caller's posting | yes |
 | `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | W | office jurisdiction of the caller's posting | yes |
-| `POST /office/compliance/cases/{caseId}/prosecutions` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/compliance/membership-disputes` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/ecr-filings/{filingId}/approvals` | ? | office jurisdiction of the caller's posting | yes |
 
 **`fo.rpfc1`** — RPFC-I — regional head of wings
@@ -630,8 +638,10 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/compliance/cases` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/compliance/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/compliance/prosecutions` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/compliance/scrutinies` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/exempted/proceedings` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/legal/cases` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/members/{uan}/locks` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /audit/concurrent/alerts/{alertId}/replies` | W | read-only for auditors; audit writes by audit roles only |  |
@@ -647,6 +657,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/compliance/cases/{caseId}/reviews-7b` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/cases/{caseId}/scrutinies` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/compliance/cases/{caseId}/set-asides` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/compliance/prosecutions/{prosecutionId}/steps` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/establishments/{estId}/defreezes` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/freezes` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/proceedings/{proceedingId}/steps` | W | office jurisdiction of the caller's posting | yes |
@@ -737,7 +748,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /office/compliance/inspections` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/compliance/prosecutions` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/compliance/inspections/{inspectionId}/reports` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/compliance/prosecutions/{prosecutionId}/steps` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/vdr-entries/{vdrId}/eo-certifications` | ? | office jurisdiction of the caller's posting | yes |
 
 **`fo.icf`** — **Inspector-cum-Facilitator** (replaces EO under the Labour Codes; web-based inspection scheme)
@@ -761,12 +774,13 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /office/legal/cases` | P | office jurisdiction of the caller's posting |  |
-| `POST /office/compliance/cases/{caseId}/appeals` | P | office jurisdiction of the caller's posting |  |
-| `POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposit-waivers` | P | office jurisdiction of the caller's posting | yes |
-| `POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposits` | P | office jurisdiction of the caller's posting |  |
-| `POST /office/legal/cases` | P | office jurisdiction of the caller's posting |  |
-| `POST /office/legal/cases/{caseId}/orders` | P | office jurisdiction of the caller's posting |  |
+| `GET /office/compliance/prosecutions` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/legal/cases` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/compliance/cases/{caseId}/appeals` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposit-waivers` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposits` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/legal/cases` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/legal/cases/{caseId}/orders` | W | office jurisdiction of the caller's posting |  |
 
 **`fo.exemption`** — Exemption cell (supervising PF trusts)
 
@@ -979,7 +993,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
-| `GET /office/legal/cases` | P | office jurisdiction of the caller's posting |  |
+| `GET /office/legal/cases` | W | office jurisdiction of the caller's posting |  |
 
 **`ho.exemption`** — Exemption Division
 

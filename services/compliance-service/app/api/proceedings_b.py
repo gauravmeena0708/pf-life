@@ -116,6 +116,10 @@ async def apply(case_id: str, body: ApplicationInput, actor: Actor = Depends(req
             raise Problem(404, "/problems/not-found", "Inquiry not found")
         if row["state"] != "ORDERED" or (row.get("section") or "7A") == "14B" and body.kind == "REVIEW_7B":
             raise Problem(409, "/problems/invalid-state", "An application lies against a passed order (review: a 7A / 7C order)")
+        from app.infra.tables import legal_cases
+        if body.kind == "REVIEW_7B" and (await session.execute(select(legal_cases.c.legal_case_id).where(
+                legal_cases.c.inquiry_case_id == case_id, legal_cases.c.kind == "APPEAL_7I"))).first():
+            raise Problem(409, "/problems/appealed", "No review once an appeal has been preferred against the order (s.7B(1))")
         if await open_application(session, case_id):
             raise Problem(409, "/problems/application-pending", "An application is already pending")
         _, limits = await rules(session)

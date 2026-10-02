@@ -91,7 +91,7 @@ export function AfterOrder({ caseId, rank, section, actions, busy, run, ask }:
     run(() => command("POST", `${base}/cases/${caseId}/escaped-assessments-7c`, { reason_type: field(f, "reason_type"), reason: field(f, "reason") },
       { stepUpToken: token }), "Reopened under 7C: a linked inquiry is registered.", form);
   }
-  if (section === "14B") return null;
+  if (section === "14B" || section === "26B") return null;
   return <div className="stack">
     {pending?.detail.kind === "SET_ASIDE" ? <form className="stack" aria-label="Decide set-aside" onSubmit={(e) => void setAside(e)}>
       <h3>Application to set aside the ex-parte order</h3><p>{String(pending.detail.grounds)}: {String(pending.detail.text)}</p>

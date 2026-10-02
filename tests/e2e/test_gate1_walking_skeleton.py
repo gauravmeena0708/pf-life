@@ -83,8 +83,8 @@ def test_member_cannot_call_office_endpoint(page):
 
 
 def test_planned_endpoint_answers_501_planned(page):
-    login(page, "ro-apfc")                             # prosecution: planned until P2.11c (the gateway
-    status, body = api(page, "POST", "/api/v1/office/compliance/cases/CMP-1/prosecutions")   # says so before any code)
+    login(page, "ro-exemption")                        # PAST ACCUM VDR RECO: planned (the gateway
+    status, body = api(page, "POST", "/api/v1/office/exempted/EST-DEMO-0003/past-accumulation-vdr-reconciliations")   # says so before any code)
     assert status == 501 and body["type"] == "/problems/planned"
 
 

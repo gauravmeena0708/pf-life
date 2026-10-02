@@ -479,8 +479,16 @@ class LevyItem(BaseModel):
     amount_paise: int = Field(ge=0)
 
 
+class MemberDecision(BaseModel):
+    name: str
+    uan: str | None = None
+    eligible: bool
+    from_date: date | None = None                  # membership from this date when eligible
+
+
 class OrderInput(BaseModel):
-    kind: Literal["7A", "14B", "7Q"]
+    kind: Literal["7A", "14B", "7Q", "26B"]
+    decisions: list[MemberDecision] = Field(default_factory=list)   # 26B: each disputed employee's membership
     dues: list[DuesRow] = Field(default_factory=list)          # 7A / 7C: month-wise dues by account
     levies: list[LevyItem] = Field(default_factory=list)       # 14B / 7Q: the amount levied for each auto-calculated demand
     lump_sum_reason: str | None = None
@@ -497,8 +505,9 @@ async def order(case_id: str, body: OrderInput, actor: Actor = Depends(require_s
     async with session.begin():
         row = await assigned(session, case_id, actor)
         section = row.get("section") or "7A"
-        if (section in ("7A", "7C")) != (body.kind == "7A"):
-            raise Problem(422, "/problems/validation", f"A section {section} case takes a {'7A' if section != '14B' else '14B or 7Q'} order")
+        takes = {"7A": {"7A"}, "7C": {"7A"}, "14B": {"14B", "7Q"}, "26B": {"26B"}}[section]
+        if body.kind not in takes:
+            raise Problem(422, "/problems/validation", f"A section {section} case takes a {' or '.join(sorted(takes))} order")
         if row["state"] not in ("CONCLUDED", "PART_ORDERED"):
             raise Problem(422, "/problems/validation", "A served summons and a concluded hearing are required")
         actions = await case_actions(session, case_id)
@@ -509,6 +518,25 @@ async def order(case_id: str, body: OrderInput, actor: Actor = Depends(require_s
         if body.ex_parte and (not summons[-1]["detail"]["served"] or hearings[-1]["detail"]["employer_present"]):
             raise Problem(422, "/problems/ex-parte", "Para 2.6.2 requires due service and employer absence at the last hearing")
         document, _ = await rules(session)
+        if section == "26B":                            # whether each disputed employee is a member, and from when (ch. 4)
+            disputed = next(a for a in actions if a["kind"] == "DISPUTE")["detail"]["employees"]
+            given = {d.name: d for d in body.decisions}
+            if set(given) != {e["name"] for e in disputed} or any(d.eligible and not d.from_date for d in body.decisions):
+                raise Problem(422, "/problems/validation", "Decide each disputed employee; an eligible one needs the date membership starts")
+            text = (f"ORDER UNDER PARA 26B OF THE EPF SCHEME — {row['diary_no']}\nFindings and reasons: {body.reasoning}\n" + "\n".join(
+                f"{d.name}{f' (UAN {d.uan})' if d.uan else ''}: {'a member from ' + d.from_date.isoformat() if d.eligible else 'not eligible'}"
+                for d in body.decisions) + "\nThe employer is directed to enrol the eligible employees; if not, the dues are determined under 7A (para 4.6.3).")
+            detail = {"kind": "26B", "diary_no": row["diary_no"], "decisions": [d.model_dump(mode="json") for d in body.decisions], "total_paise": 0,
+                      "reasoning": body.reasoning, "ex_parte": body.ex_parte, "late": now() > dt(row["order_due_at"]), "text": text, "demand_id": ""}
+            require_step_up(actor, "pass-order", case_id, None, 0)
+            await action(session, case_id, "ORDER", actor.subject, detail)
+            await session.execute(update(inquiries).where(inquiries.c.case_id == case_id).values(state="ORDERED", ordered_at=now(), ex_parte=body.ex_parte))
+            await session.execute(update(compliance_cases).where(compliance_cases.c.case_id == case_id).values(state="CLOSED"))
+            await event(session, actor, "InquiryOrderPassed.v1", "compliance_case", case_id,
+                        {"case_id": case_id, "diary_no": row["diary_no"], "establishment_id": row["establishment_id"], "section": "26B",
+                         "ex_parte": body.ex_parte, "total_paise": 0, "demand_id": ""})
+            await record(session, actor, "inquiry.order_passed", "inquiry", case_id, body.reasoning)
+            return envelope(detail)
         name = (await session.execute(select(establishments.c.legal_name).where(
             establishments.c.establishment_id == row["establishment_id"]))).scalar_one()
         earlier = [a for a in actions if a["kind"] == "ORDER"]

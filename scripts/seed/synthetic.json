@@ -801,7 +801,8 @@
     "member-ft": "00000000-0000-4000-8000-000000000072",
     "auto-owner": "00000000-0000-4000-8000-000000000073",
     "ro-eo": "00000000-0000-4000-8000-000000000074",
-    "ro-rpfc2": "00000000-0000-4000-8000-000000000075"
+    "ro-rpfc2": "00000000-0000-4000-8000-000000000075",
+    "ro-legal": "00000000-0000-4000-8000-000000000076"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -1035,6 +1036,12 @@
       "username": "ro-rpfc2",
       "subject": "00000000-0000-4000-8000-000000000075",
       "stakeholder": "fo.apfc",
+      "office_id": "RO-DEMO-01"
+    },
+    {
+      "username": "ro-legal",
+      "subject": "00000000-0000-4000-8000-000000000076",
+      "stakeholder": "fo.legal",
       "office_id": "RO-DEMO-01"
     }
   ],

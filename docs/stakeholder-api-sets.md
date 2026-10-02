@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 261 |
+| Activities | 265 |
 | Stakeholders with at least one API | 94 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 3 |
@@ -219,7 +219,7 @@ Integration adapters: `rti_portal`
 
 #### `employer.owner` — Establishment owner / employer (legal entity)
 
-Activities: **F01.register** Register establishment online and submit verification evidence; **F01.dsc_register** Register DSC or e-sign of an authorised signatory and submit the request letter; **F01.signatories** View the establishment; authorise or revoke signatories; **F01.operators** Invite, scope and revoke employer sub-users (User / Admin menus); **F01.establishment_owner** Keep the establishment record: KYC, branches (Form 2A), Form 5A, contractors; ask the office for profile or configuration changes; **F06.employer_owner_reply** Follow the establishment's inquiries (diary number, summons, daily orders, the order) and reply; **F13.pmvbry_employer** PMVBRY Part B: exercise the option; see baseline, eligibility, net additional employment and incentive cycles
+Activities: **F01.register** Register establishment online and submit verification evidence; **F01.dsc_register** Register DSC or e-sign of an authorised signatory and submit the request letter; **F01.signatories** View the establishment; authorise or revoke signatories; **F01.operators** Invite, scope and revoke employer sub-users (User / Admin menus); **F01.establishment_owner** Keep the establishment record: KYC, branches (Form 2A), Form 5A, contractors; ask the office for profile or configuration changes; **F06.employer_owner_reply** Follow the establishment's inquiries (diary number, summons, daily orders, the order) and reply; **F06.employer_scn** Reply to a prosecution show-cause notice; **F13.pmvbry_employer** PMVBRY Part B: exercise the option; see baseline, eligibility, net additional employment and incentive cycles
 
 | Endpoint | Status |
 |---|---|
@@ -238,6 +238,7 @@ Activities: **F01.register** Register establishment online and submit verificati
 | `GET /employers/me/ownership-declaration` | W |
 | `GET /employers/me/pmvbry` | W |
 | `GET /employers/me/proceedings` | W |
+| `GET /employers/me/prosecutions` | W |
 | `GET /employers/me/returns/dashboard` | W |
 | `GET /employers/me/signatories` | W |
 | `GET /employers/me/signature-registrations` | W |
@@ -252,6 +253,7 @@ Activities: **F01.register** Register establishment online and submit verificati
 | `POST /employers/me/pmvbry/options` | W |
 | `POST /employers/me/proceedings/{caseId}/applications` | W |
 | `POST /employers/me/proceedings/{caseId}/submissions` | W |
+| `POST /employers/me/prosecutions/{prosecutionId}/replies` | W |
 | `POST /employers/me/signatories/authorisations` | W |
 | `POST /employers/me/signatories/{signatoryId}/request-letters` | W |
 | `POST /employers/me/signatories/{signatoryId}/revocations` | W |
@@ -265,7 +267,7 @@ Activities: **F01.register** Register establishment online and submit verificati
 
 #### `employer.signatory` — Authorised signatory (registered DSC / e-sign)
 
-Activities: **F01.form5a** File / update Form 5A ownership return and branches (Form 2A), signed with DSC / e-sign; **F01.signatory_profile** View the establishment and what waits for its signature before approving returns and payments; **F01.change_request** Request configuration change, closure / deregistration or office transfer; **F02.kyc_approve** Approve KYC seeded by member / pending for digital signature, with DSC or e-sign; **F02.employer_approvals** Approve queued member changes (Member > Approvals); **F02.jd_attest** Attest, return or reject the Joint Declaration; employer-initiated JD; **F03.ecr_approve** Review, approve and submit ECR (generates TRRN); cancel an unpaid TRRN; **F03.pay** Pay challan online (or via bank counter where allowed) and download the payment receipt; **F03.direct_challan** Create a Direct Challan: administrative / inspection charges, or miscellaneous challan for 14B damages and 7Q interest; pay demands; **F04.attest** Attest claims that need employer attestation; **F04.transfer_attest** Attest pending transfer claims (Online Services > Transfer Claims); **F05.higher_employer** Validate joint options and upload wage details; **F06.employer_reply** Reply and submit evidence in proceedings; **F06.vishwas_apply** Apply under VISHWAS to settle a 14B damages / penalty dispute at reduced rates; **F10.apply** Apply for / extend CoC for a posted worker (IWU portal EMPLOYER login); upload signed application; download CoC
+Activities: **F01.form5a** File / update Form 5A ownership return and branches (Form 2A), signed with DSC / e-sign; **F01.signatory_profile** View the establishment and what waits for its signature before approving returns and payments; **F01.change_request** Request configuration change, closure / deregistration or office transfer; **F02.kyc_approve** Approve KYC seeded by member / pending for digital signature, with DSC or e-sign; **F02.employer_approvals** Approve queued member changes (Member > Approvals); **F02.jd_attest** Attest, return or reject the Joint Declaration; employer-initiated JD; **F03.ecr_approve** Review, approve and submit ECR (generates TRRN); cancel an unpaid TRRN; **F03.pay** Pay challan online (or via bank counter where allowed) and download the payment receipt; **F03.direct_challan** Create a Direct Challan: administrative / inspection charges, or miscellaneous challan for 14B damages and 7Q interest; pay demands; **F04.attest** Attest claims that need employer attestation; **F04.transfer_attest** Attest pending transfer claims (Online Services > Transfer Claims); **F05.higher_employer** Validate joint options and upload wage details; **F06.employer_reply** Reply and submit evidence in proceedings; **F06.vishwas_apply** Apply under VISHWAS to settle a 14B damages / penalty dispute at reduced rates; **F06.signatory_scn** Reply to a prosecution show-cause notice; **F10.apply** Apply for / extend CoC for a posted worker (IWU portal EMPLOYER login); upload signed application; download CoC
 
 | Endpoint | Status |
 |---|---|
@@ -286,6 +288,7 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `GET /employers/me/ownership-declaration` | W |
 | `GET /employers/me/pending-approvals` | W |
 | `GET /employers/me/proceedings` | W |
+| `GET /employers/me/prosecutions` | W |
 | `GET /employers/me/returns/dashboard` | W |
 | `GET /employers/me/signature-registrations` | W |
 | `GET /employers/me/transfer-requests` | W |
@@ -313,6 +316,7 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `POST /employers/me/office-transfer-requests` | W |
 | `POST /employers/me/proceedings/{caseId}/applications` | W |
 | `POST /employers/me/proceedings/{caseId}/submissions` | W |
+| `POST /employers/me/prosecutions/{prosecutionId}/replies` | W |
 | `POST /employers/me/transfer-requests/{transferId}/decisions` | W |
 | `POST /employers/me/vishwas-applications` | W |
 | `POST /employers/voluntary-coverage-requests` | W |
@@ -516,6 +520,7 @@ Activities: **F02.jd_verify** Verifier (SS route): cross-check and recommend; **
 | `POST /office/compliance/cases` | W |
 | `POST /office/compliance/cases/{caseId}/approvals` | W |
 | `POST /office/compliance/inspections/{inspectionId}/processing-notes` | W |
+| `POST /office/compliance/membership-disputes` | W |
 | `POST /office/damages-knock-offs/{knockOffId}/approvals` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/member-change-requests/{requestId}/verifications` | W |
@@ -563,6 +568,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `GET /office/compliance/cases` | W |
 | `GET /office/compliance/cases/{caseId}` | W |
 | `GET /office/compliance/inspections` | W |
+| `GET /office/compliance/prosecutions` | W |
 | `GET /office/compliance/scrutinies` | W |
 | `GET /office/compliance/vishwas-applications` | W |
 | `GET /office/death-claims/{claimId}/shares-summary` | W |
@@ -571,6 +577,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `GET /office/establishment-registrations` | W |
 | `GET /office/establishment-registrations/{reqId}/documents` | W |
 | `GET /office/ledger-adjustments` | W |
+| `GET /office/legal/cases` | W |
 | `GET /office/signature-registrations` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/accounts/{accountLinkId}/reactivations` | W |
@@ -582,11 +589,14 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/compliance/cases/{caseId}/hearings` | W |
 | `POST /office/compliance/cases/{caseId}/notices` | W |
 | `POST /office/compliance/cases/{caseId}/orders` | W |
+| `POST /office/compliance/cases/{caseId}/prosecutions` | W |
 | `POST /office/compliance/cases/{caseId}/reviews-7b` | W |
 | `POST /office/compliance/cases/{caseId}/scrutinies` | W |
 | `POST /office/compliance/cases/{caseId}/set-asides` | W |
 | `POST /office/compliance/inspections` | W |
 | `POST /office/compliance/inspections/{inspectionId}/processing-notes` | W |
+| `POST /office/compliance/membership-disputes` | W |
+| `POST /office/compliance/prosecutions/{prosecutionId}/steps` | W |
 | `POST /office/compliance/vishwas-applications/{applicationId}/decisions` | W |
 | `POST /office/establishment-registrations/{reqId}/coverage-decisions` | W |
 | `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | W |
@@ -597,8 +607,6 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/member-change-requests/{requestId}/decisions` | W |
 | `POST /office/members/{uan}/freezes` | W |
 | `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | W |
-| `POST /office/compliance/cases/{caseId}/prosecutions` | P |
-| `POST /office/compliance/membership-disputes` | P |
 | `POST /office/ecr-filings/{filingId}/approvals` | ? |
 
 #### `fo.rpfc1` — RPFC-I — regional head of wings
@@ -614,7 +622,7 @@ Activities: **F02.jd_monitor** Monitor JD pendency across the RO; **F13.ro** RO-
 
 #### `fo.oic` — Officer-in-Charge of the office
 
-Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lock_admin** Inspect member-ledger locks and release an orphaned one with a recorded reason; **F06.allocate** Officer in charge: inquiries allocated at random by size; reassign on transfer, a sensitive-post bar or an officer earlier in the case; **F06.proceed_large** RPFC-I / officer in charge conducts inquiries of establishments above 1,000 contributory members: summons, hearings, the 7A order; **F07.freeze_ro_est** Order freezing of an establishment (Category B); report to fraud committee; **F07.issue_raise** Raise an Issue Tracker request (freeze / de-freeze a member account, or a login notice) with the order; **F07.defreeze** Recommend / order de-freezing; post-defreeze claims use the higher chain; **F09.permit** RPFC-I permits compliance as an un-exempted establishment (SE-5); **F11.oic_monitor** Trigger verification of suspicious inoperative-account requests and monitor unblocking daily; **F12.reply** Reply to concurrent-audit alerts within 3 days; **F12.para_reply** Comply with audit paras; request dropping; **F13.oic** Office-level pendency and daily unblocking monitoring
+Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lock_admin** Inspect member-ledger locks and release an orphaned one with a recorded reason; **F06.allocate** Officer in charge: inquiries allocated at random by size; reassign on transfer, a sensitive-post bar or an officer earlier in the case; **F06.proceed_large** RPFC-I / officer in charge conducts inquiries of establishments above 1,000 contributory members: summons, hearings, the 7A order; **F06.sanction** RPFC sanctions a prosecution after the employer's reply to the show-cause notice; **F07.freeze_ro_est** Order freezing of an establishment (Category B); report to fraud committee; **F07.issue_raise** Raise an Issue Tracker request (freeze / de-freeze a member account, or a login notice) with the order; **F07.defreeze** Recommend / order de-freezing; post-defreeze claims use the higher chain; **F09.permit** RPFC-I permits compliance as an un-exempted establishment (SE-5); **F11.oic_monitor** Trigger verification of suspicious inoperative-account requests and monitor unblocking daily; **F12.reply** Reply to concurrent-audit alerts within 3 days; **F12.para_reply** Comply with audit paras; request dropping; **F13.oic** Office-level pendency and daily unblocking monitoring
 
 | Endpoint | Status |
 |---|---|
@@ -627,8 +635,10 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/compliance/cases` | W |
 | `GET /office/compliance/cases/{caseId}` | W |
+| `GET /office/compliance/prosecutions` | W |
 | `GET /office/compliance/scrutinies` | W |
 | `GET /office/exempted/proceedings` | W |
+| `GET /office/legal/cases` | W |
 | `GET /office/members/{uan}/locks` | W |
 | `GET /office/work-queue` | W |
 | `POST /audit/concurrent/alerts/{alertId}/replies` | W |
@@ -644,6 +654,7 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | `POST /office/compliance/cases/{caseId}/reviews-7b` | W |
 | `POST /office/compliance/cases/{caseId}/scrutinies` | W |
 | `POST /office/compliance/cases/{caseId}/set-asides` | W |
+| `POST /office/compliance/prosecutions/{prosecutionId}/steps` | W |
 | `POST /office/establishments/{estId}/defreezes` | W |
 | `POST /office/establishments/{estId}/freezes` | W |
 | `POST /office/exempted/proceedings/{proceedingId}/steps` | W |
@@ -747,12 +758,14 @@ Activities: **F05.disbursement_section** Legacy bank-wise disbursement tasks unt
 
 #### `fo.eo` — Enforcement Officer
 
-Activities: **F03.eo_certify** Certify an employer's revised ECR for major corrections (VDR-ECR process); **F06.inspect_legacy** Enforcement Officer inspection (legacy role before ICF)
+Activities: **F03.eo_certify** Certify an employer's revised ECR for major corrections (VDR-ECR process); **F06.inspect_legacy** Enforcement Officer inspection (legacy role before ICF); **F06.complaint** Enforcement Officer (an Inspector, s.14AC) files the complaint in court within 7 days of the sanction
 
 | Endpoint | Status |
 |---|---|
 | `GET /office/compliance/inspections` | W |
+| `GET /office/compliance/prosecutions` | W |
 | `POST /office/compliance/inspections/{inspectionId}/reports` | W |
+| `POST /office/compliance/prosecutions/{prosecutionId}/steps` | W |
 | `POST /office/vdr-entries/{vdrId}/eo-certifications` | ? |
 
 #### `fo.icf` — **Inspector-cum-Facilitator** (replaces EO under the Labour Codes; web-based inspection scheme)
@@ -784,12 +797,13 @@ Activities: **F06.legal** Record 7-I appeals, 7-O pre-deposits / waivers and cou
 
 | Endpoint | Status |
 |---|---|
-| `GET /office/legal/cases` | P |
-| `POST /office/compliance/cases/{caseId}/appeals` | P |
-| `POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposit-waivers` | P |
-| `POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposits` | P |
-| `POST /office/legal/cases` | P |
-| `POST /office/legal/cases/{caseId}/orders` | P |
+| `GET /office/compliance/prosecutions` | W |
+| `GET /office/legal/cases` | W |
+| `POST /office/compliance/cases/{caseId}/appeals` | W |
+| `POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposit-waivers` | W |
+| `POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposits` | W |
+| `POST /office/legal/cases` | W |
+| `POST /office/legal/cases/{caseId}/orders` | W |
 
 #### `fo.exemption` — Exemption cell (supervising PF trusts)
 
@@ -1041,7 +1055,7 @@ Activities: **F06.ho_legal** Legal policy; monitoring of court cases
 
 | Endpoint | Status |
 |---|---|
-| `GET /office/legal/cases` | P |
+| `GET /office/legal/cases` | W |
 
 #### `ho.exemption` — Exemption Division
 
@@ -1794,6 +1808,10 @@ flowchart LR
   F06_receiver["fo.recovery_officer<br/>Appoint receiver for business / property (demo record only)"]
   F06_arrest["fo.recovery_officer<br/>Arrest and detention of defaulter as last resort (demo recor"]
   F06_prosecution["fo.apfc<br/>Initiate prosecution"]
+  F06_sanction["fo.oic<br/>RPFC sanctions a prosecution after the employer's reply to t"]
+  F06_complaint["fo.eo<br/>Enforcement Officer (an Inspector, s.14AC) files the complai"]
+  F06_employer_scn["employer.owner<br/>Reply to a prosecution show-cause notice"]
+  F06_signatory_scn["employer.signatory<br/>Reply to a prosecution show-cause notice"]
   F06_district["do.staff<br/>District-level compliance follow-up and facilitation"]
   style F06_district stroke-dasharray: 5 5
   F06_ho_policy["ho.compliance<br/>Compliance policy and e-Proceedings oversight"]
@@ -1827,6 +1845,10 @@ flowchart LR
   F06_attach --> F06_receiver
   F06_receiver --> F06_arrest
   F06_prosecution --> F06_legal
+  F06_sanction --> F06_complaint
+  F06_complaint --> F06_legal
+  F06_employer_scn --> F06_sanction
+  F06_signatory_scn --> F06_sanction
   F06_district --> F06_schedule
 ```
 
