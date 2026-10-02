@@ -39,7 +39,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | **P2.12f** | The rest: DR replication status and failover drill, training sandboxes, Nidhi Aapke Nikat camp requests, totalisation claims and the foreign agency's CoC check, the composite death claim | **Done** (1 Oct 2026) |
 | **P2.12g** | Menu clean-up: screens already built linked from their menus (Composite claim, Know Your Pension Payee Bank, Change Password); every other item without a screen says why — planned (with the slice), awaiting EPFO's definition, or not in the POC | **Done** (1 Oct 2026) |
 | P2.13 | Small gaps: disablement pension (EPS para 15); zonal freezing (categories B and C) and zonal ACC decisions above the RO's limits; district office queues; PPO and UAN card issued to DigiLocker (mock) | Planned |
-| P2.14 | The exempted trust's lifecycle: annual audit filing and the exemption cell's review; surrender and cancellation (RPFC report → ZO → HO → the Exempted Establishments Committee → the appropriate Government); HO's decision; past accumulations transferred in bulk and reconciled with the receipts | Planned (sources on disk: the SOPs on surrender and cancellation, Dec 2023) |
+| P2.14 | The exempted trust's lifecycle: annual audit filing and the exemption cell's review; surrender and cancellation (RPFC report → ZO → HO → the Exempted Establishments Committee → the appropriate Government); HO's decision; past accumulations transferred in bulk and reconciled with the receipts | Done (bulk transfer and VDR reconciliation stay planned) |
 | P2.15 | Larger pieces: the employment-linked incentive (PMVBRY / ELI; earlier PMRPY and ABRY) — eligibility from the ECR, the incentive claim, the central share; SMS and e-mail notifications (a mock gateway with delivery evidence, preferences and retries) | Planned (PMVBRY needs the scheme guidelines) |
 | P2.16 | Gig and platform workers (Code on Social Security, 2020): aggregators registered, a turnover-based contribution return (1–2% of turnover, capped at 5% of payments to the workers, in the rule set), workers linked by e-Shram number to a UAN, reconciliation | Planned — design only until the scheme is notified |
 | P2.17 | Insolvency: a watchlist from EPFO's own signals (ECR stopping, defaults, MCA status), IBBI announcements matched to the establishment, claim deadlines, dues frozen (7A; damages and interest kept apart), the resolution plan checked for PF dues in full, liquidation claims outside the estate (IBC s.36(4)(a)(iii)), recovery measured | Planned (links to P2.11) |
@@ -247,12 +247,25 @@ Pramaan, UMANG, CSC, B2B payroll, CERT-In):
   nothing handles it. *Zonal freezing* (categories B and C, `F07.freeze_zo`) and *zonal ACC decisions* above an RO's
   limits (`F08.escalate`, `F13.zo`), both marked future in the activity map. *District office* queues (`F06.district`).
   *DigiLocker*: the PPO and the UAN card pushed to the member's DigiLocker (a mock issuer; `F14.digilocker`).
-- **P2.14 — the exempted trust's lifecycle** (after P2.9d): the trust's annual audited statements and the exemption
-  cell's review; surrender (voluntary) and cancellation (on the priority matrix's category A) as recorded proceedings —
-  the RPFC's report, the zone, head office, the Exempted Establishments Committee and the appropriate Government's
-  notification; then the past accumulations transferred in bulk (`PAST ACCUM BULK TRANSFER`) and reconciled with the
-  receipts (`PAST ACCUM VDR RECO`), building on the ingestion of P2.8d. Sources: the SOPs on surrender and on
-  cancellation (Dec 2023) in `../manuals/exemption/`.
+- **P2.14 — the exempted trust's lifecycle** (after P2.9d; sources: the SOPs on surrender and on cancellation, Dec 2023,
+  in `../manuals/exemption/`):
+  - *Annual audit*: the trust files the annual report with its audited accounts by 30 September (corpus movement that
+    must add up, the auditor's opinion and observations); the exemption cell sees late and qualified ones.
+  - *Surrender*: the trust applies (SE-1) at least 30 days ahead with the trustees' resolution, the employer's
+    undertaking and the employees' consent; the cell returns an incomplete one (7 days); the RPFC-I (`ro-oic`) permits
+    compliance as un-exempted (SE-5) from the date — ECRs then carry the EPF share, the trust's returns stop, and the past
+    accumulations are due within 30 days (later ones attract 14B / 7Q); the draft agenda goes RO (SE-2) → ZO (SE-3,
+    `zo-acc`) → HO (`ho-exemption`: EEC, CBT, the appropriate Government, its notification) → the RO's gazette
+    notification under Para 28(5). Each stage shows who acts and by when (the SOPs' timelines).
+  - *Cancellation*: the cell issues a show-cause notice (CE-1) on category A flags, Condition 25 or 29, audit findings
+    or a complaint; the trust replies in 7 days — the cell drops it, or sends the agenda (CE-2) up the same route; a
+    trust that admits and relinquishes is taken over at once as a special surrender.
+  - *Every service follows the end date* (`ExemptionStatusChanged.v1`): the ECR, the passbook, transfers, claims and
+    the pension's per-spell PF holder.
+  - Demo: two new trusts — Demo Textile Mills surrenders (`textile-trust`, member NEHA DEMO), Demo Chemicals' exemption
+    is cancelled (`chemicals-trust`); Demo Steel Works keeps its exemption and files its audit.
+  - Left planned: *PAST ACCUM BULK TRANSFER* and *PAST ACCUM VDR RECO* (they need the VDR entries, still planned), the
+    third-party audit's report, the securities and Special Deposit Scheme transfers, the Para 79 relaxations.
 - **P2.15 — larger pieces.** *The employment-linked incentive* (PMVBRY / ELI, and the earlier PMRPY and ABRY): which new
   employees qualify from the ECR, the employer's incentive, the central share and its reconciliation; the member and
   employer PMVBRY menus lead nowhere today. Needs the scheme guidelines (from EPFO's PMVBRY site) before design.
@@ -884,6 +897,34 @@ screens (*Primary UAN*, *Primary Member ID*, "(P)", "Part of AADHAAR verified se
 
 With P2.12f every endpoint the catalogue planned outside compliance (P2.11) and the exempted establishments
 (P2.9b / P2.9d) is built.
+
+## P2.14 — how it is built
+
+- **Annual audited accounts** (employer-service; `POST /exempted/me/audits`): the year's corpus movement must add up
+  (opening + contributions + interest − claims ± other = closing); the auditor and the opinion (qualified or adverse
+  needs observations); due by 30 September; a revision supersedes. The exemption cell sees late and qualified ones
+  (`GET /office/exempted/{estId}/audits`). `TrustAuditFiled.v1`.
+- **One proceeding at a time** per establishment (`exemption_proceedings` with its step history); every view says
+  which stage it is at, who acts next and by when (the SOPs' timelines, rule set `exempted_establishments.proceeding_days`),
+  and whether that is overdue.
+  - *Surrender*: the trust applies (SE-1, a one-time code; the date at least 30 days ahead, the undertaking and the
+    consent) → the cell may return it as incomplete → the RPFC-I (`fo.oic`) permits compliance as un-exempted from that
+    date (SE-5) → the cell's draft agenda (SE-2) → the Zonal ACC forwards it (SE-3) or remands it → HO Exemption: EEC,
+    CBT, sent to the appropriate Government, its notification → the cell's gazette notification (Para 28(5)) → closed.
+  - *Cancellation*: the cell's show-cause notice (CE-1) with its grounds (category A flags, Condition 25 or 29, audit
+    findings, a complaint) → the trust replies within 7 days, or relinquishes → the cell drops it, or sends the agenda
+    (CE-2) — also once the reply is overdue; a relinquished one is taken over at once by the RPFC-I's permission → the
+    same route up. A remand goes back to the RO's stage, also after HO has returned it to the zone.
+- **The end date travels** (`ExemptionStatusChanged.v1`, consumed by contribution-, claim- and pension-service): each
+  copy holds the status and the date from which the establishment complies as un-exempted; every check asks "was the
+  exemption in force on that date" — the ECR's EPF share, the passbook, transfers, the trust's claim refusal and the
+  pension's per-spell PF holder. From that date the trust's monthly returns stop, the past accumulations are accepted
+  (late ones carry the 14B / 7Q note) and the member's passbook says where the PF is until they are credited.
+- **Demo**: Demo Textile Mills (`textile-trust`, member NEHA DEMO) surrenders; Demo Chemicals (`chemicals-trust`)
+  relinquishes on a show-cause notice; the queue at `/exemption-proceedings` for `ro-exemption`, `ro-oic`, `zo-acc` and
+  `ho-exemption`. `tests/e2e/test_exemption_lifecycle.py` resumes a proceeding an earlier run left half-way.
+- **Left planned**: *PAST ACCUM BULK TRANSFER* and *PAST ACCUM VDR RECO* (they need the VDR entries), the third-party
+  audit's report, the transfer of securities and Special Deposit Scheme funds, Para 79 relaxations.
 
 ## P2.9d — how it is built
 

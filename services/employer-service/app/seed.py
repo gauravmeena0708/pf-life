@@ -66,8 +66,8 @@ async def main() -> None:
                     if missing:
                         await s.execute(update(establishments).where(
                             establishments.c.establishment_id == public_est["establishment_id"]).values(**missing))
-            exemption = seed.get("exempted_establishment")
-            if exemption and not (await s.execute(select(establishment_exemptions.c.establishment_id).where(
+            for exemption in ([seed["exempted_establishment"]] if seed.get("exempted_establishment") else []) + seed.get("more_exempted_establishments", {}).get("establishments", []):
+              if not (await s.execute(select(establishment_exemptions.c.establishment_id).where(
                     establishment_exemptions.c.establishment_id == exemption["establishment_id"]))).first():
                 await s.execute(establishment_exemptions.insert().values(
                     establishment_id=exemption["establishment_id"], kind=exemption["kind"],
@@ -85,11 +85,12 @@ async def main() -> None:
             for st in seed.get("office_staff", []):
                 if not (await s.execute(select(office_staff.c.subject).where(office_staff.c.subject == st["subject"]))).first():
                     await s.execute(office_staff.insert().values(subject=st["subject"], stakeholder=st["stakeholder"], office_id=st["office_id"]))
-            known_offices = {est["office_id"]: est["office_id"]}
-            known_offices.update({o["office_id"]: o.get("name", o["office_id"]) for o in seed.get("other_offices", [])})
-            for office_id, name in known_offices.items():
-                if not (await s.execute(select(offices.c.office_id).where(offices.c.office_id == office_id))).first():
-                    await s.execute(offices.insert().values(office_id=office_id, name=name))
+            for office in [seed["office"], *seed.get("other_offices", [])]:
+                existing_office = (await s.execute(select(offices).where(offices.c.office_id == office["office_id"]))).mappings().first()
+                if not existing_office:
+                    await s.execute(offices.insert().values(office_id=office["office_id"], name=office["name"], zone_id=office.get("zone_id")))
+                elif not existing_office["zone_id"] and office.get("zone_id"):
+                    await s.execute(update(offices).where(offices.c.office_id == office["office_id"]).values(zone_id=office["zone_id"]))
             principal = seed.get("principal_employer")
             if principal and (await s.execute(select(establishments.c.establishment_id).where(
                     establishments.c.establishment_id == principal["establishment_id"]))).first():
@@ -131,7 +132,9 @@ async def main() -> None:
             for username, subject in seed["keycloak_subjects"].items():
                 if not (await s.execute(select(directory.c.username).where(directory.c.username == username))).first():
                     role = next((u["role"] for u in [*seed["employer_users"], *seed.get("extra_employer_grants", [])]
-                                 if u["username"] == username), "other")
+                                 if u["username"] == username), "exempted.trust" if any(
+                                     u["username"] == username for ex in [seed.get("exempted_establishment"), *seed.get("more_exempted_establishments", {}).get("establishments", [])]
+                                     if ex for u in ex["trust_users"]) else "other")
                     await s.execute(directory.insert().values(username=username, subject=subject, role=role))
     print(f"employer-service seeded: {est['establishment_id']} ({est['status']}), owner grant, user directory")
 

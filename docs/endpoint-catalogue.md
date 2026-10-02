@@ -536,8 +536,8 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | `POST /exempted/me/annexure-k-submissions` 💰 | Submit Annexure K with the transfer amount | W | 1 | claim |
 | `GET /office/exempted/annexure-k?state=` | The trusts' Annexure K for transfers into the office's member IDs, awaiting reconciliation | W | 1 | claim |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` 🔐 | Match Annexure K to receipt / member records | W | 1 | claim |
-| `POST /exempted/me/audits` | Annual trust audit filing | P | 3 | employer |
-| `POST /exempted/me/surrender-requests` 🔐 | Surrender / cancellation of exemption | P | 3 | employer |
+| `POST /exempted/me/audits` | The annual report with the trust's audited accounts for a year (due by 30 September): auditor, corpus movement, opinion and observations (P2.14) | W | 1 | employer |
+| `POST /exempted/me/surrender-requests` 🔐 | **Surrender** of exemption (Form SE-1): the date, the Board of Trustees' resolution, the employer's undertaking, the corpus (P2.14) | W | 1 | employer |
 | `POST /office/exempted/{estId}/past-accumulation-transfers` 💰🔐 | Transfer past accumulations to EPFO after surrender / cancellation | P | 3 | contribution |
 | `POST /office/exempted/past-accumulation-bulk-transfers` 💰🔐 | **PAST ACCUM BULK TRANSFER** — transfer past accumulations of many members in one batch | P | 3 | contribution |
 | `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` 🔐 | **PAST ACCUM VDR RECO** — match past-accumulation receipts with VDR entries | P | 3 | contribution |
@@ -551,8 +551,14 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | `GET /office/exempted/rankings?month=` | The online performance evaluator: every exempted establishment's score of 600 for a month, ranked | W | 1 | contribution |
 | `POST /office/exempted/{estId}/flags/{flagId}/actions` 🔐 | The exemption cell records its action on a priority-matrix flag (direction, advice, show-cause notice, referral for cancellation) | W | 1 | contribution |
 | `GET /office/exempted/{estId}/returns` | Exemption cell reviews trust returns | W | 1 | contribution |
-| `GET /office/exempted/{estId}/audits` | Exemption cell reviews trust audit reports | P | 3 | employer |
-| `POST /ho/exemptions/{estId}/decisions` 🔐 | HO grants / cancels exemption | P | 3 | employer |
+| `GET /exempted/me/audits` | The trust's annual audited accounts filed | W | 1 | employer |
+| `GET /exempted/me/proceedings` | The trust's surrender or cancellation proceedings: stage, history, what is due and by when | W | 1 | employer |
+| `POST /exempted/me/proceedings/{proceedingId}/replies` 🔐 | The trust's reply to a show-cause notice (Form CE-1), optionally relinquishing the exemption | W | 1 | employer |
+| `POST /office/exempted/{estId}/cancellation-proceedings` 🔐 | Exemption cell opens cancellation with a show-cause notice (Form CE-1): the grounds — priority-matrix flags, Condition 25 or 29 | W | 1 | employer |
+| `GET /office/exempted/proceedings?stage=` | Surrender and cancellation proceedings of the office (RO), zone (ZO) or all (HO), with the stage's due date | W | 1 | employer |
+| `POST /office/exempted/proceedings/{proceedingId}/steps` 🔐 | A step by the RO or ZO: return as incomplete, permit compliance as un-exempted (SE-5), drop on the reply, draft agenda to ZO, forward to HO or remand, gazette notification (Para 28(5)) | W | 1 | employer |
+| `GET /office/exempted/{estId}/audits` | Exemption cell reviews the trust's annual audited accounts (late and qualified ones marked) | W | 1 | employer |
+| `POST /ho/exemptions/{estId}/decisions` 🔐 | HO Exemption Division records the EEC's recommendation, the CBT's ratification, the reference to the appropriate Government and its notification | W | 1 | employer |
 
 
 **Added from the Samadhan Setu integration spec** (`../samadhan-setu files/PF_LIFE_INTEGRATION_SPECIFICATION.md`, checked against the tracker issues)

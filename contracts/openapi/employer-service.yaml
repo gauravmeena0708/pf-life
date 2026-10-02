@@ -1182,25 +1182,133 @@ paths:
               type: object
               description: Defined when implemented
   /exempted/me/audits:
-    post:
-      operationId: postExemptedAudits
-      summary: Annual trust audit filing
+    get:
+      operationId: getExemptedAudits
+      summary: The trust's annual audited accounts filed
       tags:
       - Exempted establishments (PF trusts)
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
-      - trust_auditor
+      - exempted.trust
+      x-scope: own exempted establishment
+      security:
+      - bffSession: []
+    post:
+      operationId: postExemptedAudits
+      summary: 'The annual report with the trust''s audited accounts for a year (due by 30 September): auditor, corpus movement,
+        opinion '
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: employer
+      x-callers:
+      - exempted.trust
+      x-scope: own exempted establishment
+      security:
+      - bffSession: []
+      description: 'The annual report with the trust''s audited accounts for a year (due by 30 September): auditor, corpus
+        movement, opinion and observations (P2.14)'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /exempted/me/proceedings:
+    get:
+      operationId: getExemptedProceedings
+      summary: 'The trust''s surrender or cancellation proceedings: stage, history, what is due and by when'
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: employer
+      x-callers:
+      - exempted.trust
+      x-scope: own exempted establishment
+      security:
+      - bffSession: []
+  /exempted/me/proceedings/{proceedingId}/replies:
+    post:
+      operationId: postExemptedProceedingsProceedingIdReplies
+      summary: The trust's reply to a show-cause notice (Form CE-1), optionally relinquishing the exemption
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: proceedingId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: employer
+      x-callers:
+      - exempted.trust
       x-scope: own exempted establishment
       security:
       - bffSession: []
@@ -1243,27 +1351,36 @@ paths:
   /exempted/me/surrender-requests:
     post:
       operationId: postExemptedSurrenderRequests
-      summary: Surrender / cancellation of exemption
+      summary: 'Surrender of exemption (Form SE-1): the date, the Board of Trustees'' resolution, the employer''s undertaking,
+        the corpus '
       tags:
       - Exempted establishments (PF trusts)
       parameters:
       - $ref: '#/components/parameters/CorrelationId'
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
       - exempted.trust
       x-scope: own exempted establishment
       security:
       - bffSession: []
+      description: 'Surrender of exemption (Form SE-1): the date, the Board of Trustees'' resolution, the employer''s undertaking,
+        the corpus (P2.14)'
       requestBody:
         required: false
         content:
@@ -1274,7 +1391,8 @@ paths:
   /ho/exemptions/{estId}/decisions:
     post:
       operationId: postHoExemptionsEstIdDecisions
-      summary: HO grants / cancels exemption
+      summary: HO Exemption Division records the EEC's recommendation, the CBT's ratification, the reference to the appropriate
+        Governm
       tags:
       - Exempted establishments (PF trusts)
       parameters:
@@ -1286,20 +1404,28 @@ paths:
           type: string
       - $ref: '#/components/parameters/StepUpToken'
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
       - ho.exemption
       x-scope: national (Head Office role)
       security:
       - bffSession: []
+      description: HO Exemption Division records the EEC's recommendation, the CBT's ratification, the reference to the appropriate
+        Government and its notification
       requestBody:
         required: false
         content:
@@ -1737,10 +1863,94 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/exempted/proceedings:
+    get:
+      operationId: getOfficeExemptedProceedings
+      summary: Surrender and cancellation proceedings of the office (RO), zone (ZO) or all (HO), with the stage's due date
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: stage
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: employer
+      x-callers:
+      - fo.exemption
+      - fo.oic
+      - ho.exemption
+      - zo.acc
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+  /office/exempted/proceedings/{proceedingId}/steps:
+    post:
+      operationId: postOfficeExemptedProceedingsProceedingIdSteps
+      summary: 'A step by the RO or ZO: return as incomplete, permit compliance as un-exempted (SE-5), drop on the reply,
+        draft agenda t'
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: proceedingId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: employer
+      x-callers:
+      - fo.exemption
+      - fo.oic
+      - zo.acc
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'A step by the RO or ZO: return as incomplete, permit compliance as un-exempted (SE-5), drop on the reply,
+        draft agenda to ZO, forward to HO or remand, gazette notification (Para 28(5))'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/exempted/{estId}/audits:
     get:
       operationId: getOfficeExemptedEstIdAudits
-      summary: Exemption cell reviews trust audit reports
+      summary: Exemption cell reviews the trust's annual audited accounts (late and qualified ones marked)
       tags:
       - Exempted establishments (PF trusts)
       parameters:
@@ -1751,20 +1961,71 @@ paths:
         schema:
           type: string
       responses:
-        '501':
-          $ref: '#/components/responses/Planned'
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
         '401':
           $ref: '#/components/responses/Problem'
         '403':
           $ref: '#/components/responses/Problem'
-      x-status: planned
-      x-phase: 3
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
       x-owner-service: employer
       x-callers:
       - fo.exemption
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+  /office/exempted/{estId}/cancellation-proceedings:
+    post:
+      operationId: postOfficeExemptedEstIdCancellationProceedings
+      summary: 'Exemption cell opens cancellation with a show-cause notice (Form CE-1): the grounds — priority-matrix flags,
+        Condition 2'
+      tags:
+      - Exempted establishments (PF trusts)
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: estId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: employer
+      x-callers:
+      - fo.exemption
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Exemption cell opens cancellation with a show-cause notice (Form CE-1): the grounds — priority-matrix
+        flags, Condition 25 or 29'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/signature-registrations:
     get:
       operationId: getOfficeSignatureRegistrations

@@ -402,17 +402,16 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
 | `GET /exempted/me/annexure-k-requests` | W | own exempted establishment |  |
+| `GET /exempted/me/audits` | W | own exempted establishment |  |
+| `GET /exempted/me/proceedings` | W | own exempted establishment |  |
 | `GET /exempted/me/profile` | W | own exempted establishment |  |
 | `GET /exempted/me/returns` | W | own exempted establishment |  |
 | `POST /exempted/me/annexure-k-submissions` | W | own exempted establishment |  |
+| `POST /exempted/me/audits` | W | own exempted establishment |  |
+| `POST /exempted/me/proceedings/{proceedingId}/replies` | W | own exempted establishment | yes |
 | `POST /exempted/me/returns` | W | own exempted establishment |  |
-| `POST /exempted/me/surrender-requests` | P | own exempted establishment | yes |
-
-**`trust_auditor`** — Chartered accountant auditing an exempted trust
-
-| Endpoint | Status | Scope | Step-up |
-|---|---|---|---|
-| `POST /exempted/me/audits` | P | own exempted establishment |  |
+| `POST /exempted/me/surrender-requests` | W | own exempted establishment | yes |
+- `trust_auditor` — Chartered accountant auditing an exempted trust: *no endpoints (acts through an adapter or through another role)*
 
 **`payroll_provider`** — Payroll software / HRMS vendor acting for employers
 
@@ -603,6 +602,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/accounts/inoperative` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/exempted/proceedings` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/members/{uan}/locks` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /audit/concurrent/alerts/{alertId}/replies` | W | read-only for auditors; audit writes by audit roles only |  |
@@ -612,6 +612,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/establishments/{estId}/defreezes` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/freezes` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/exempted/proceedings/{proceedingId}/steps` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/members/{uan}/defreezes` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/system/locks/{lockId}/release` | W | office jurisdiction of the caller's posting | yes |
@@ -733,11 +734,14 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /office/exempted/proceedings` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/exempted/rankings` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/exempted/{estId}/audits` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/exempted/{estId}/returns` | W | office jurisdiction of the caller's posting |  |
+| `POST /office/exempted/proceedings/{proceedingId}/steps` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/exempted/{estId}/cancellation-proceedings` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/{estId}/flags/{flagId}/actions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/{estId}/past-accumulation-ingestions` | W | office jurisdiction of the caller's posting | yes |
-| `GET /office/exempted/{estId}/audits` | P | office jurisdiction of the caller's posting |  |
 | `POST /office/exempted/past-accumulation-bulk-transfers` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/{estId}/past-accumulation-transfers` | P | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` | P | office jurisdiction of the caller's posting | yes |
@@ -818,11 +822,13 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /monitoring/claims` | W | role jurisdiction; aggregates with small-group suppression |  |
 | `GET /monitoring/grievances` | W | role jurisdiction; aggregates with small-group suppression |  |
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/exempted/proceedings` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `GET /zo/dashboards` | W | zone jurisdiction |  |
 | `POST /grievances/{grievanceId}/escalations` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/messages` | W | complainant or the assigned office |  |
 | `POST /grievances/{grievanceId}/resolution` | W | complainant or the assigned office | yes |
+| `POST /office/exempted/proceedings/{proceedingId}/steps` | W | office jurisdiction of the caller's posting | yes |
 
 **`zo.rpfc1`** — RPFC-I at the Zonal Office (zonal authority for freezing categories B and C; zone-level monitoring)
 
@@ -933,8 +939,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /office/exempted/proceedings` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/exempted/rankings` | W | office jurisdiction of the caller's posting |  |
-| `POST /ho/exemptions/{estId}/decisions` | P | national (Head Office role) | yes |
+| `POST /ho/exemptions/{estId}/decisions` | W | national (Head Office role) | yes |
 
 **`ho.pension`** — Pension Division (verticals: policy, EPS implementation, grievances, pension finance / audit / actuarial, EDLI)
 

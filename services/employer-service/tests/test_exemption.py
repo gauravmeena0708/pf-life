@@ -60,4 +60,4 @@ def test_exemption_seed_is_idempotent(api):
         async with engine().connect() as connection:
             return (await connection.execute(text("SELECT COUNT(*) FROM establishment_exemptions"))).scalar_one()
 
-    assert int(asyncio.run(count())) == 1
+    assert int(asyncio.run(count())) == 3

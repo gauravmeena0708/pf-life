@@ -53,6 +53,7 @@ simulation; point out that the dialog says exactly what is being authorised (act
 | `ro-edli` | EDLI section officer | EDLI decision |
 | `ho-publicity`, `ro-exemption` | HO Public Relations (circulars); exemption cell (trusts' monthly returns, surrendered trusts) | Public services, trusts |
 | `exempted-trust`, `ho-exemption` | Demo Steel Works' PF trust; HO Exemption Division (ranking of all trusts) | Regulating the trust |
+| `textile-trust`, `chemicals-trust` | PF trusts of Demo Textile Mills (surrenders) and Demo Chemicals (cancelled) | The trust's lifecycle |
 | `zo-audit`, `ndc-is`, `zo-fraud`, `do-oic` | Concurrent Audit Cell; NDC IS Division; zonal fraud-risk committee; District Office in charge | Oversight and administration |
 
 ---
@@ -477,6 +478,23 @@ contribution- and platform-service*
 2. **`ro-exemption` → Exempted establishments**: the ranking for July; open Demo Steel Works, its returns and flags; on
    the late-claims flag, record a *show-cause notice* with a one-time code (advice is not offered for category A).
 3. **`ho-exemption`**: the ranking across all offices, read-only.
+
+## The trust's lifecycle: annual audit, surrender, cancellation
+*Tests: `tests/e2e/test_exemption_lifecycle.py`, `services/employer-service/tests/test_exemption_lifecycle.py`,
+`services/*/tests/test_exemption_end.py`*
+
+1. **`exempted-trust` → Trust › Annual audited accounts**: 2025-26, the corpus movement adds up as you type; a qualified
+   opinion needs observations. **`ro-exemption`**: the trust's audits, the qualified one marked.
+2. **`textile-trust` → Surrender the exemption (Form SE-1)**: a date at least 30 days ahead, the trustees' resolution, the
+   undertaking and consent; one-time code. The proceeding shows who acts next and by when.
+3. **`ro-oic` → Exemption proceedings**: permit compliance as un-exempted (SE-5). The trust's profile now shows the end
+   date; **`ro-exemption` → Past accumulation ingestion** credits NEHA DEMO's PF (AL-0921).
+4. **`ro-exemption`** sends the agenda (SE-2); **`zo-acc`** forwards it to HO (SE-3); **`ho-exemption`** records the EEC,
+   the CBT, the reference to the Government and its notification; **`ro-exemption`** records the gazette notification.
+   The exemption reads *surrendered*.
+5. **`ro-exemption` → Exempted establishments**: on Demo Chemicals, open cancellation — a show-cause notice (CE-1) on
+   Condition 25. **`chemicals-trust`** replies, admitting and relinquishing; **`ro-oic`** takes it over at once; the
+   same route up ends in *cancelled*, and the trust's monthly returns are refused from then.
 
 ## Disaster recovery, training, camps, totalisation, the foreign agency, the composite death claim
 *Tests: `tests/e2e/test_small_rest.py`*

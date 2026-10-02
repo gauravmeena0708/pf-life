@@ -151,12 +151,15 @@ def test_wage_ceiling_raised_from_next_month(persona):
     ee, eps = 2400, round(20000 * 0.0833)
     line = "#~#".join(map(str, [member["uan"], member["name"], 20000, 20000, 20000, 20000, ee, eps, ee - eps, 0, 0]))
 
-    def file_for(month: str) -> dict:
-        status, body = call(operator, "POST", "/api/v1/employers/me/ecr-filings", {"wage_month": month, "format": "ECR_TXT", "content": line})
-        assert status == 201, body
-        return body["data"]
-    old = file_for(f"{random.randint(2001, 2019)}-{random.randint(1, 12):02d}")          # before the change
-    new = wait_for(lambda: (lambda d: d if d["validation_report"]["valid"] else None)(
-        file_for(f"{random.randint(2031, 2039)}-{random.randint(1, 12):02d}")), timeout=30, every=2)   # after it
+    def file_for(years: tuple[int, int]) -> dict:
+        for _ in range(20):                       # a random month; another one if an earlier run already filed it
+            month = f"{random.randint(*years)}-{random.randint(1, 12):02d}"
+            status, body = call(operator, "POST", "/api/v1/employers/me/ecr-filings", {"wage_month": month, "format": "ECR_TXT", "content": line})
+            if status != 409:
+                assert status == 201, body
+                return body["data"]
+        raise AssertionError("no free wage month left to file")
+    old = file_for((2001, 2019))                                                          # before the change
+    new = wait_for(lambda: (lambda d: d if d["validation_report"]["valid"] else None)(file_for((2031, 2039))), timeout=30, every=2)   # after it
     assert not old["validation_report"]["valid"] and any(i["code"] == "E-EPS-CEILING" for i in old["validation_report"]["issues"])
     assert new["filing"]["rule_version"] != old["filing"]["rule_version"]

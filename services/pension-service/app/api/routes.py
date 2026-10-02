@@ -173,7 +173,10 @@ async def my_estimate(actor: Actor = Depends(MEMBER), session: AsyncSession = De
                    "date_of_exit": m["date_of_exit"], "breaks_months": 0}]
     for sp in spells:
         exemption = exemptions.get(sp.get("establishment_id"))
-        if exemption and exemption["pf_exempt"] and exemption["status"] == "ACTIVE" and (sp["date_of_exit"] or day) >= exemption["effective_from"]:
+        spell_end = sp["date_of_exit"] or day
+        if (exemption and exemption["pf_exempt"] and
+                (exemption["status"] == "ACTIVE" or exemption["ended_on"] is not None and exemption["ended_on"] > spell_end)
+                and spell_end >= exemption["effective_from"]):
             sp["pf_with"] = "TRUST " + exemption["trust_name"]
     served, by_id = eps_service(spells, day)
     in_service = any(sp["date_of_exit"] is None for sp in spells)

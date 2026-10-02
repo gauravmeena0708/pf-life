@@ -76,13 +76,14 @@ async def main() -> None:
         for s in seed.get("office_staff", []):
             await session.execute(insert(office_staff).values(subject=s["subject"], stakeholder=s["stakeholder"],
                                                               office_id=s["office_id"]).on_conflict_do_nothing())
-        if e := seed.get("exempted_establishment"):
+        exemptions = ([seed["exempted_establishment"]] if seed.get("exempted_establishment") else []) + seed.get("more_exempted_establishments", {}).get("establishments", [])
+        for e in exemptions:
             values = {k: e[k] for k in ("establishment_id", "kind", "pf_exempt", "pension_exempt", "edli_exempt",
                                         "notification_no", "status", "trust_id", "trust_name", "trust_users")}
             values.update(notification_date=date.fromisoformat(e["notification_date"]),
                           effective_from=date.fromisoformat(e["effective_from"]))
             await session.execute(insert(exempted_establishments).values(**values).on_conflict_do_update(
-                index_elements=["establishment_id"], set_=values))
+                index_elements=["establishment_id"], set_={k: v for k, v in values.items() if k != "status"}))
     print(f"claim-service seeded: {len(seed['members'])} accounts, {len(seed.get('office_staff', []))} office staff")
 
 

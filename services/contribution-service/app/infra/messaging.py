@@ -52,6 +52,20 @@ async def handle_establishment_office_transferred(session, event):
                           {"office": p["to_office_id"], "id": p["establishment_id"]})
 
 
+async def on_exemption_status_changed(session, event):
+    p = event["payload"]
+    status = p["status"]
+    if status not in ("ACTIVE", "UNEXEMPTED_COMPLIANCE", "SURRENDERED", "CANCELLED"):
+        raise ValueError(f"Unknown exemption status: {status}")
+    ended = date.fromisoformat(p["ended_on"]) if p.get("ended_on") else None
+    due = date.fromisoformat(p["past_accumulations_due"]) if p.get("past_accumulations_due") else None
+    await session.execute(text("""UPDATE exempted_establishments SET status=:status,ended_on=:ended,
+        past_accumulations_due=:due WHERE establishment_id=:id"""),
+        {"status": status, "ended": ended, "due": due, "id": p["establishment_id"]})
+    await session.execute(text("UPDATE establishments SET exemption_status=:status WHERE id=:id"),
+                          {"status": status, "id": p["establishment_id"]})
+
+
 async def handle_payment_confirmed(session, event):
     p=event["payload"]
     if p.get("purpose") != "CHALLAN": return

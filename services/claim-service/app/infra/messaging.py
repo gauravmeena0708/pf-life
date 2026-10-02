@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import load_claim, notify, record_decision, transition
 from app.domain.claims import HOLDABLE, route
-from app.infra.tables import (accounts, annexure_k_files, annexure_k_requests, auto_transfers, claim_beneficiaries, claims, member_bank_accounts,
+from app.infra.tables import (accounts, annexure_k_files, annexure_k_requests, auto_transfers, claim_beneficiaries, claims, exempted_establishments, member_bank_accounts,
                               nominations, risk_flags)
 from epfo_observability import Problem, get_logger
 from epfo_persistence.policy import on_policy_published, rules_by_version
@@ -17,6 +17,7 @@ from epfo_persistence.policy import on_policy_published, rules_by_version
 log = get_logger("claim-service")
 
 BINDINGS = [
+    "employer-service.ExemptionStatusChanged.v1",
     "contribution-service.ContributionPosted.v1",
     "contribution-service.ClaimDebitPosted.v1",
     "workflow-service.CaseDecisionSubmitted.v1",
@@ -322,7 +323,17 @@ async def on_international_status(session: AsyncSession, event: dict[str, Any]) 
         international_worker=bool(p["international_worker"]), nationality=p.get("nationality") or None))
 
 
+async def on_exemption_status_changed(session: AsyncSession, event: dict[str, Any]) -> None:
+    p = event["payload"]
+    if p["status"] not in ("ACTIVE", "UNEXEMPTED_COMPLIANCE", "SURRENDERED", "CANCELLED"):
+        raise ValueError(f"Unknown exemption status: {p['status']}")
+    await session.execute(update(exempted_establishments).where(
+        exempted_establishments.c.establishment_id == p["establishment_id"]).values(
+            status=p["status"], ended_on=date.fromisoformat(p["ended_on"]) if p.get("ended_on") else None))
+
+
 HANDLERS = {
+    "ExemptionStatusChanged.v1": on_exemption_status_changed,
     "EstablishmentOfficeTransferred.v1": on_establishment_office_transferred,
     "StaffPostingChanged.v1": _posting,
     "PrimaryMemberIdChanged.v1": on_primary_changed,

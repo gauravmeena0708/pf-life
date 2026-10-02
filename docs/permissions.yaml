@@ -1429,19 +1429,37 @@ stakeholders:
     step_up: false
     via:
     - F09.annexure_k
-  - endpoint: POST /exempted/me/surrender-requests
-    status: P
-    scope: own exempted establishment
-    step_up: true
-    via:
-    - F09.surrender
-  trust_auditor:
   - endpoint: POST /exempted/me/audits
-    status: P
+    status: W
     scope: own exempted establishment
     step_up: false
     via:
     - F09.audit
+  - endpoint: GET /exempted/me/audits
+    status: W
+    scope: own exempted establishment
+    step_up: false
+    via:
+    - F09.audit
+  - endpoint: POST /exempted/me/surrender-requests
+    status: W
+    scope: own exempted establishment
+    step_up: true
+    via:
+    - F09.surrender
+  - endpoint: GET /exempted/me/proceedings
+    status: W
+    scope: own exempted establishment
+    step_up: false
+    via:
+    - F09.surrender
+  - endpoint: POST /exempted/me/proceedings/{proceedingId}/replies
+    status: W
+    scope: own exempted establishment
+    step_up: true
+    via:
+    - F09.surrender
+  trust_auditor: []
   payroll_provider:
   - endpoint: POST /partners/sandbox/payroll/ecr-filings
     status: M
@@ -2278,6 +2296,18 @@ stakeholders:
     step_up: true
     via:
     - F07.defreeze
+  - endpoint: GET /office/exempted/proceedings
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F09.permit
+  - endpoint: POST /office/exempted/proceedings/{proceedingId}/steps
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F09.permit
   - endpoint: GET /office/accounts/inoperative
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2676,6 +2706,25 @@ stakeholders:
     via:
     - F06.legal
   fo.exemption:
+  - endpoint: POST /office/exempted/{estId}/cancellation-proceedings
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F09.cancel
+  - endpoint: GET /office/exempted/proceedings
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F09.cancel
+    - F09.supervise
+  - endpoint: POST /office/exempted/proceedings/{proceedingId}/steps
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F09.cancel
   - endpoint: POST /office/exempted/{estId}/past-accumulation-ingestions
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2719,7 +2768,7 @@ stakeholders:
     via:
     - F09.supervise
   - endpoint: GET /office/exempted/{estId}/audits
-    status: P
+    status: W
     scope: office jurisdiction of the caller's posting
     step_up: false
     via:
@@ -2930,6 +2979,18 @@ stakeholders:
     step_up: true
     via:
     - F08.escalate
+  - endpoint: GET /office/exempted/proceedings
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F09.zo_forward
+  - endpoint: POST /office/exempted/proceedings/{proceedingId}/steps
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F09.zo_forward
   - endpoint: GET /zo/dashboards
     status: W
     scope: zone jurisdiction
@@ -3213,8 +3274,14 @@ stakeholders:
     via:
     - F06.ho_legal
   ho.exemption:
+  - endpoint: GET /office/exempted/proceedings
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F09.ho
   - endpoint: POST /ho/exemptions/{estId}/decisions
-    status: P
+    status: W
     scope: national (Head Office role)
     step_up: true
     via:

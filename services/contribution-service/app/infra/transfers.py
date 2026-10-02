@@ -62,7 +62,8 @@ async def post_transfer(session: AsyncSession, transfer_id: str, uan: str, frm: 
         return
     accounts = (await session.execute(text("""SELECT m.account_link_id,m.uan,m.date_of_joining,m.date_of_exit,e.establishment_id,e.trust_id,e.trust_name
         FROM establishment_members m LEFT JOIN exempted_establishments e ON e.establishment_id=m.establishment_id
-        AND e.pf_exempt=true AND e.status='ACTIVE' AND e.effective_from<=COALESCE(m.date_of_exit,CURRENT_DATE)
+        AND e.pf_exempt=true AND (e.status='ACTIVE' OR e.ended_on>COALESCE(m.date_of_exit,CURRENT_DATE))
+        AND e.effective_from<=COALESCE(m.date_of_exit,CURRENT_DATE)
         WHERE m.account_link_id IN (:f,:to)"""), {"f": frm, "to": to})).mappings().all()
     by_id = {r["account_link_id"]: r for r in accounts}
     if frm not in by_id or to not in by_id or by_id[frm]["uan"] != uan or by_id[to]["uan"] != uan:

@@ -7,11 +7,12 @@ from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.pension import propose_revisions
-from app.infra.tables import eps_accounts, eps_transfers, higher_pension_options, pensioners, updation_activities
+from app.infra.tables import eps_accounts, eps_transfers, exempted_establishments, higher_pension_options, pensioners, updation_activities
 from epfo_persistence import add_event
 from epfo_persistence.policy import on_policy_published
 
 BINDINGS = ["platform-service.PolicyPublished.v1", "claim-service.PhysicalClaimInwarded.v1", "workflow-service.StaffPostingChanged.v1",
+            "employer-service.ExemptionStatusChanged.v1",
             "contribution-service.HigherPensionTransferPosted.v1", "member-service.MemberRegistered.v1",
             "member-service.MemberExitMarked.v1", "member-service.PrimaryMemberIdChanged.v1",
             "contribution-service.TransferPosted.v1"]
@@ -102,7 +103,17 @@ async def on_transfer_posted(session: AsyncSession, event: dict[str, Any]) -> No
                         "service_months": service_months, "breaks_months": breaks_months})
 
 
-HANDLERS = {"HigherPensionTransferPosted.v1": on_higher_pension_transfer, "MemberRegistered.v1": on_member_registered,
+async def on_exemption_status_changed(session: AsyncSession, event: dict[str, Any]) -> None:
+    p = event["payload"]
+    if p["status"] not in ("ACTIVE", "UNEXEMPTED_COMPLIANCE", "SURRENDERED", "CANCELLED"):
+        raise ValueError(f"Unknown exemption status: {p['status']}")
+    await session.execute(update(exempted_establishments).where(
+        exempted_establishments.c.establishment_id == p["establishment_id"]).values(
+            status=p["status"], ended_on=date.fromisoformat(p["ended_on"]) if p.get("ended_on") else None))
+
+
+HANDLERS = {"ExemptionStatusChanged.v1": on_exemption_status_changed,
+            "HigherPensionTransferPosted.v1": on_higher_pension_transfer, "MemberRegistered.v1": on_member_registered,
             "MemberExitMarked.v1": on_member_exit, "PrimaryMemberIdChanged.v1": on_primary_changed,
             "TransferPosted.v1": on_transfer_posted}
 

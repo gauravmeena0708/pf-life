@@ -219,3 +219,15 @@ exempted_establishments:
   investment_threshold_pct: 70  # full points for investing at least 70% of the investible corpus
   min_score: 300                # of 600; below it for consecutive_months running is category A
   consecutive_months: 3         # also: no return for this many months running is category A
+  # P2.14: the annual report with the trust's audited accounts, and the surrender / cancellation proceedings
+  # (SOP on surrender and SOP on cancellation, Dec 2023; days are calendar days in the POC)
+  audit_due: "09-30"            # the annual report for a year ending 31 March is due by 30 September
+  proceeding_days:
+    surrender_notice: 30        # the application at least 30 days before the date of surrender (SE-1)
+    return_incomplete: 7        # an incomplete application is returned within 7 working days
+    show_cause_reply: 7         # the reply to the show-cause notice (CE-1)
+    past_accumulations: 30      # past accumulations within 30 days of complying as un-exempted (Para 28)
+    ro_agenda: 30               # RO's draft agenda (SE-2 / CE-2)
+    zo_forward: 30              # ZO forwards to HO (SE-3 / CE-4)
+    ho_placement: 30            # HO places it before the EEC
+    to_government: 15           # sent to the appropriate Government after the CBT's minutes

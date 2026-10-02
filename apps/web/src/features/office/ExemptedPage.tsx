@@ -10,6 +10,8 @@ import { RankingsTable, type Ranking } from "../exempted/RankingsPage";
 import { ReturnsView, type TrustReturn, type TrustFlag } from "../exempted/ReturnsView";
 import { useTranslation } from "react-i18next";
 import { statusLabel } from "../statusLabel";
+import { AuditsSection } from "../exempted/AuditsSection";
+import { ProceedingsQueue } from "../exempted/ProceedingsPage";
 
 interface IngestionResult {
   batch_id: string; establishment_id: string; legal_name: string; transfer_reference: string; members: number; total_paise: number;
@@ -51,6 +53,7 @@ export function ExemptedPage() {
   const [content, setContent] = useState(header);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
+  const [grounds, setGrounds] = useState<string[]>([]);
   const [result, setResult] = useState<IngestionResult | null>(null);
   const preview = accumulation(content);
 
@@ -85,6 +88,21 @@ export function ExemptedPage() {
       await qc.invalidateQueries({ queryKey: ["office-trust-returns", selected.establishment_id] });
     } catch (cause) { setError(cause); } finally { setBusy(false); }
   }
+  const flagGrounds = (selectedReturns.data?.data.returns ?? []).filter((item) => item.state !== "SUPERSEDED").flatMap((item) => item.flags.filter((flag) => flag.category === "A" && !flag.action));
+  const candidates = [...flagGrounds.map((flag) => ({ id: flag.flag_id, code: flag.code, label: `${statusLabel(flag.code, t)} · ${flag.flag_id}` })),
+    ...["CONDITION_25", "CONDITION_29", "AUDIT_FINDINGS", "COMPLAINT"].map((code) => ({ id: code, code, label: statusLabel(code, t) }))];
+  async function cancel(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); if (!selected || !grounds.length) { setError(new Error("Select at least one ground.")); return; }
+    const f = new FormData(event.currentTarget);
+    const body = { grounds: candidates.filter((item) => grounds.includes(item.id)).map((item) => ({ code: item.code, text: String(f.get(`ground-${item.id}`) || "").trim() })),
+      flag_ids: flagGrounds.filter((flag) => grounds.includes(flag.flag_id)).map((flag) => flag.flag_id), note: String(f.get("note") || "").trim() };
+    if (body.grounds.some((item) => !item.text)) { setError(new Error("Describe every selected ground.")); return; }
+    setBusy(true); setError(null);
+    try { const token = await stepUp.ask({ action: "show-cause-exemption", resourceId: selected.establishment_id, summary: `Open cancellation show-cause for ${selected.legal_name}.` });
+      if (!token) return; await command("POST", `/api/v1/office/exempted/${encodeURIComponent(selected.establishment_id)}/cancellation-proceedings`, body, { stepUpToken: token });
+      setGrounds([]); await qc.invalidateQueries({ queryKey: ["exemption-proceedings"] });
+    } catch (cause) { setError(cause); } finally { setBusy(false); }
+  }
   const actions = ["DIRECTION_TO_RECTIFY", "ADVICE", "SHOW_CAUSE_NOTICE", "REFERRED_FOR_CANCELLATION", "CLOSED_RECTIFIED"];
   return <section className="stack" aria-labelledby="exempted-heading">
     <PageHeader id="exempted-heading" eyebrow="Exemption cell" title="Exempted establishments"
@@ -100,6 +118,14 @@ export function ExemptedPage() {
           <label>{statusLabel(flag.code, t)} · Action<select name="action">{actions.filter((action) => flag.category !== "A" || action !== "ADVICE").map((action) => <option key={action} value={action}>{statusLabel(action, t)}</option>)}</select></label>
           <label>Note<textarea name="note" minLength={1} maxLength={2000} required /></label><button type="submit" className="primary" disabled={busy}>Record action</button></form>)}</ReturnsView>
       </section> : null}
+      {selected ? <><AuditsSection estId={selected.establishment_id} />
+        <form className="card stack" aria-label="Open cancellation (show-cause notice, Form CE-1)" onSubmit={(e) => void cancel(e)}>
+          <h2>Open cancellation (show-cause notice, Form CE-1)</h2><fieldset className="stack"><legend>Grounds</legend>
+            {candidates.map((item) => <div key={item.id} className="form-row"><label><input type="checkbox" checked={grounds.includes(item.id)} onChange={(e) => setGrounds((old) => e.target.checked ? [...old, item.id] : old.filter((id) => id !== item.id))} /> {item.label}</label>
+              {grounds.includes(item.id) ? <label>Ground details · {item.label}<input name={`ground-${item.id}`} required /></label> : null}</div>)}
+          </fieldset><label>Note<textarea name="note" required /></label><button className="primary" type="submit" disabled={busy || !!stepUp.request}>Issue show-cause notice</button>
+        </form></> : null}
+      <ProceedingsQueue />
       <form className="card stack" aria-labelledby="past-accumulation-heading" onSubmit={(e) => void ingest(e)}>
         <h2 id="past-accumulation-heading">Past accumulation ingestion</h2>
         <p className="muted small">Record member balances transferred from an exempted trust. Review the total before confirming with a one-time code.</p>

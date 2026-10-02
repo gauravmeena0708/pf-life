@@ -75,15 +75,15 @@ async def main() -> None:
                     establishment_id=job.get("establishment_id", seed["establishment"]["establishment_id"]),
                     date_of_joining=date.fromisoformat(job["date_of_joining"]),
                     date_of_exit=date.fromisoformat(job["date_of_exit"]) if job.get("date_of_exit") else None))
-        exemption = seed.get("exempted_establishment")
-        if exemption:
+        exemptions = ([seed["exempted_establishment"]] if seed.get("exempted_establishment") else []) + seed.get("more_exempted_establishments", {}).get("establishments", [])
+        for exemption in exemptions:
             await session.execute(insert(exempted_establishments).values(
                 establishment_id=exemption["establishment_id"], trust_name=exemption["trust_name"],
                 pf_exempt=int(exemption["pf_exempt"]), status=exemption["status"],
                 effective_from=date.fromisoformat(exemption["effective_from"]))
                                   .on_conflict_do_update(index_elements=["establishment_id"], set_={
                                       "trust_name": exemption["trust_name"], "pf_exempt": int(exemption["pf_exempt"]),
-                                      "status": exemption["status"], "effective_from": date.fromisoformat(exemption["effective_from"])}))
+                                      "effective_from": date.fromisoformat(exemption["effective_from"])}))
         for s in seed.get("office_staff", []):
             await session.execute(insert(office_staff).values(subject=s["subject"], stakeholder=s["stakeholder"],
                                                               office_id=s["office_id"]).on_conflict_do_nothing())

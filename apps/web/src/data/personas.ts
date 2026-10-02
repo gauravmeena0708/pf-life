@@ -34,6 +34,8 @@ export const PERSONAS: Persona[] = [
   { username: "emp-signatory", label: "Authorised signatory", role: "employer.signatory", group: "Employers", description: "Approve and submit returns, pay challans and attest member requests." },
   { username: "principal-owner", label: "Principal employer", role: "employer.owner", group: "Employers", description: "Demo Engineering Works: watch the demo establishment's remittances as its contractor." },
   { username: "exempted-trust", label: "PF trust (Demo Steel Works)", role: "exempted.trust", group: "Employers", description: "The Board of Trustees of an exempted establishment: profile, Annexure K requests and submissions." },
+  { username: "textile-trust", label: "PF trust (Demo Textile Mills)", role: "exempted.trust", group: "Employers", description: "A trust that surrenders its exemption: the application, then the past accumulations to EPFO." },
+  { username: "chemicals-trust", label: "PF trust (Demo Chemicals)", role: "exempted.trust", group: "Employers", description: "A trust facing cancellation: the show-cause notice and its reply." },
   { username: "steel-signatory", label: "Steel Works signatory", role: "employer.signatory", group: "Employers", description: "Signatory of Demo Steel Works (PF with its trust): attests its members' Form 13." },
   { username: "do-caseworker", label: "District caseworker (DA)", role: "fo.da_accounts", group: "Field office", description: "Scrutinise claims, generate dockets and recommend decisions." },
   { username: "ro-ss", label: "Section supervisor", role: "fo.ss", group: "Field office", description: "Check claim recommendations and approve demand adjustments." },

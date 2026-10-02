@@ -1,0 +1,6 @@
+.proceeding-timeline { margin: 0; padding-left: 1.5rem; border-left: 2px solid #b28734; }
+.proceeding-timeline li { padding: .35rem 0 .35rem .6rem; }
+.proceeding-timeline p { margin: .2rem 0; }
+.proceeding-next { margin: 0; padding-left: 1.5rem; }
+.proceeding-next li + li { margin-top: .4rem; }
+.proceeding-overdue { display: inline-block; padding: .1rem .4rem; color: #8b1e1e; border: 1px solid #8b1e1e; background: #fff4f4; }

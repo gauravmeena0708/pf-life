@@ -254,5 +254,6 @@ exempted_establishments = Table(
     Column("trust_name", String(160), nullable=False),
     Column("pf_exempt", Integer, nullable=False),
     Column("status", String(20), nullable=False),
+    Column("ended_on", Date),
     Column("effective_from", Date, nullable=False),
 )

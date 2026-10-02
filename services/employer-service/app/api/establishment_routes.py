@@ -150,7 +150,8 @@ def _exemption_view(record: Any) -> dict[str, Any]:
             "pf_exempt": record["pf_exempt"], "pension_exempt": record["pension_exempt"],
             "edli_exempt": record["edli_exempt"], "notification_no": record["notification_no"],
             "notification_date": _iso(record["notification_date"]), "effective_from": _iso(record["effective_from"]),
-            "status": record["status"], "trust_id": record["trust_id"], "trust_name": record["trust_name"]}
+            "status": record["status"], "ended_on": _iso(record["ended_on"]),
+            "trust_id": record["trust_id"], "trust_name": record["trust_name"]}
 
 
 @router.get("/api/v1/exempted/me/profile")

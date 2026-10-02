@@ -24,7 +24,7 @@ def _view(row: dict[str, Any]) -> dict[str, Any]:
 
 async def _trust(session: AsyncSession, actor: Actor) -> dict[str, Any]:
     rows = (await session.execute(select(exempted_establishments))).mappings().all()
-    match = next((dict(r) for r in rows if r["status"] == "ACTIVE" and
+    match = next((dict(r) for r in rows if (r["status"] == "ACTIVE" or r["ended_on"] is not None and r["ended_on"] > date.today()) and
                   any(u.get("subject") == actor.subject for u in r["trust_users"])), None)
     if not match:
         raise Problem(403, "/problems/forbidden", "No active exempted establishment is mapped to this trust user")

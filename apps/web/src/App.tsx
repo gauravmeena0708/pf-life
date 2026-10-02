@@ -65,6 +65,7 @@ import { InterfacePage } from "./pages/InterfacePage";
 import { CircularsPage } from "./features/ho/CircularsPage";
 import { ExemptedPage } from "./features/office/ExemptedPage";
 import { TrustPage } from "./features/exempted/TrustPage";
+import { ProceedingsPage } from "./features/exempted/ProceedingsPage";
 import { RankingsPage } from "./features/exempted/RankingsPage";
 import { PublicGrievancesPage, PublicClaimStatusPage } from "./features/public/PublicGrievancesPage";
 import { PublicCircularsPage } from "./features/public/CircularsList";
@@ -183,6 +184,7 @@ export function App() {
             <Route path="/ho/circulars" element={<CircularsPage />} />
             <Route path="/office/exempted" element={<ExemptedPage />} />
             <Route path="/exempted" element={<TrustPage />} />
+            <Route path="/exemption-proceedings" element={<ProceedingsPage />} />
             <Route path="/ho/exempted-rankings" element={<RankingsPage />} />
             <Route path="/security/activity" element={<SecurityActivity />} />
             <Route path="/audit/concurrent" element={<ConcurrentAuditPage />} />

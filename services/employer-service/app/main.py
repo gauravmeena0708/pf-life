@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 import epfo_auth
-from app.api import catalogue_routes, establishment_routes, integration_routes, routes, signature_routes
+from app.api import catalogue_routes, establishment_routes, exemption_routes, integration_routes, routes, signature_routes
 from app.config import settings
 from app.infra.db import database_ready, engine
 from epfo_observability import health_router, install
@@ -34,6 +34,7 @@ def create_app() -> FastAPI:
     app.include_router(health_router(database_ready))
     app.include_router(routes.router)
     app.include_router(establishment_routes.router)
+    app.include_router(exemption_routes.router)
     app.include_router(signature_routes.router)
     app.include_router(integration_routes.router)
     handled = {(m, r.path) for r in app.router.routes for m in getattr(r, "methods", set())}

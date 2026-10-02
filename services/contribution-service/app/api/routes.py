@@ -86,7 +86,7 @@ async def _validation(session, filing: dict[str, Any]):
     # submitted, re-validating picks up a newly published version for that month.
     rules = await rules_on(session, wage_month_start(filing["wage_month"]))
     exemption = (await session.execute(text("SELECT trust_name FROM exempted_establishments WHERE establishment_id=:e "
-                                            "AND pf_exempt=true AND status='ACTIVE' AND effective_from<=:d"),
+                                            "AND pf_exempt=true AND (status='ACTIVE' OR ended_on>:d) AND effective_from<=:d"),
                                        {"e": filing["establishment_id"], "d": wage_month_start(filing["wage_month"])})).scalar_one_or_none()
     report = validate(filing["content"], filing["format"], filing["wage_month"], members, rules, comparison, exemption)
     report.update({"filing_id": filing["id"], "version": filing["version"],
@@ -403,13 +403,27 @@ async def _passbook(subject: str, account_link_id: str | None):
                 balance += ent["employee_share_paise"] + ent["employer_share_paise"]
                 entries.append({**ent, "running_balance_paise": balance})
             account_data = {"account_link_id": a["account_link_id"], "entries": entries}
-            exemption = (await session.execute(text("""SELECT e.trust_id,e.trust_name FROM exempted_establishments e
+            exemption = (await session.execute(text("""SELECT e.trust_id,e.trust_name,e.ended_on,e.past_accumulations_due,e.status FROM exempted_establishments e
                 JOIN establishment_members m ON m.establishment_id=e.establishment_id
-                WHERE m.account_link_id=:a AND e.pf_exempt=true AND e.status='ACTIVE'
+                WHERE m.account_link_id=:a AND e.pf_exempt=true AND (e.status='ACTIVE' OR e.ended_on>COALESCE(m.date_of_exit,CURRENT_DATE))
                 AND e.effective_from<=COALESCE(m.date_of_exit,CURRENT_DATE)"""),
                 {"a": a["account_link_id"]})).mappings().first()
             if exemption:
                 account_data["trust"] = await trust_section(session, a["account_link_id"], exemption)
+            else:
+                ended = (await session.execute(text("""SELECT e.ended_on,e.past_accumulations_due,e.trust_name
+                    FROM exempted_establishments e JOIN establishment_members m ON m.establishment_id=e.establishment_id
+                    WHERE m.account_link_id=:a AND e.pf_exempt=true AND e.ended_on IS NOT NULL
+                    AND e.ended_on<=COALESCE(m.date_of_exit,CURRENT_DATE)"""),
+                    {"a": a["account_link_id"]})).mappings().first()
+                if ended:
+                    credited = (await session.execute(text("""SELECT 1 FROM journal_lines jl JOIN journals j ON j.id=jl.journal_id
+                        WHERE jl.account_link_id=:a AND j.kind='PAST_ACCUMULATION' LIMIT 1"""),
+                        {"a": a["account_link_id"]})).first()
+                    if not credited:
+                        due = ended["past_accumulations_due"]
+                        account_data["note"] = (f"Your PF is with EPFO from {ended['ended_on']}; past accumulations "
+                                                f"from {ended['trust_name']} due by {due}")
             out.append(account_data)
         pending_rows=(await session.execute(text("SELECT f.wage_month,f.state,f.content,f.format,c.trrn,m.uan,m.account_link_id FROM ecr_filings f LEFT JOIN challans c ON c.filing_id=f.id JOIN establishment_members m ON m.establishment_id=f.establishment_id WHERE m.member_subject=:s AND (CAST(:a AS TEXT) IS NULL OR m.account_link_id=:a) AND f.state IN ('SUBMITTED','PAYMENT_PENDING')"), {"s":subject,"a":account_link_id})).mappings().all()
         for x in pending_rows:

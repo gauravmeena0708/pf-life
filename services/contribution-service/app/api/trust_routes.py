@@ -107,9 +107,16 @@ async def ingest(estId: str, body: Ingestion, actor: Actor = Depends(require_sta
         est = (await session.execute(text("SELECT id, legal_name, exemption_status FROM establishments WHERE id=:e"), {"e": estId})).mappings().first()
         if not est:
             raise Problem(404, "/problems/not-found", "Establishment not found")
-        if est["exemption_status"] not in ("SURRENDERED", "CANCELLED"):
-            raise Problem(409, "/problems/not-surrendered", "Only a trust whose exemption was surrendered or cancelled is taken over",
+        if est["exemption_status"] not in ("UNEXEMPTED_COMPLIANCE", "SURRENDERED", "CANCELLED"):
+            raise Problem(409, "/problems/not-surrendered", "Only a trust whose exemption has ended is taken over",
                           f"{est['legal_name']}: exemption status {est['exemption_status'] or 'not exempted'}.")
+        due = (await session.execute(text("SELECT past_accumulations_due FROM exempted_establishments WHERE establishment_id=:e"),
+                                     {"e": estId})).scalar_one_or_none()
+        if isinstance(due, str):
+            due = date.fromisoformat(due)
+        late_days = max(0, (date.today() - due).days) if due else 0
+        late_note = (f"Past accumulations received {late_days} days late: damages (s.14B) and interest (s.7Q) apply"
+                     if late_days else None)
         if (await session.execute(text("SELECT 1 FROM past_accumulation_ingestions WHERE transfer_reference=:r"),
                                   {"r": body.transfer_reference})).first():
             raise Problem(409, "/problems/already-ingested", "This transfer reference was already ingested")
@@ -147,8 +154,10 @@ async def ingest(estId: str, body: Ingestion, actor: Actor = Depends(require_sta
                             "batch_id": batch_id, "establishment_id": estId, "transfer_reference": body.transfer_reference,
                             "members": len(posted), "total_paise": total})
         await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="exempted.past_accumulation_ingestion",
-                    target_type="establishment", target_id=estId, detail=f"{batch_id} {len(posted)} members {total}")
+                    target_type="establishment", target_id=estId,
+                    detail=f"{batch_id} {len(posted)} members {total}" + (f"; late_days={late_days}; {late_note}" if late_note else ""))
     return envelope({"batch_id": batch_id, "establishment_id": estId, "legal_name": est["legal_name"],
                      "transfer_reference": body.transfer_reference, "members": len(posted), "total_paise": total,
+                     "late_days": late_days, "note": late_note,
                      "lines": [{k: p[k] for k in ("line", "uan", "account_link_id", "employee_paise", "employer_paise", "pension_paise", "journal_id")}
                                for p in posted]})

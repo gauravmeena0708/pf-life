@@ -1,5 +1,5 @@
 """Tables owned by employer-service (created by migration 0002)."""
-from sqlalchemy import JSON, Boolean, Column, Date, DateTime, Integer, MetaData, String, Table, Text, func
+from sqlalchemy import JSON, BigInteger, Boolean, Column, Date, DateTime, Index, Integer, MetaData, String, Table, Text, func
 
 metadata = MetaData()
 
@@ -44,7 +44,63 @@ establishment_exemptions = Table(
     Column("trust_id", String(40), nullable=False),
     Column("trust_name", String(200), nullable=False),
     Column("trust_users", JSON, nullable=False),
+    Column("ended_on", Date),
 )
+
+trust_audits = Table(
+    "trust_audits", metadata,
+    Column("audit_id", String(40), primary_key=True),
+    Column("establishment_id", String(40), nullable=False, index=True),
+    Column("financial_year", String(7), nullable=False),
+    Column("auditor_name", String(200), nullable=False),
+    Column("auditor_registration", String(100), nullable=False),
+    Column("opening_corpus_paise", BigInteger, nullable=False),
+    Column("contributions_paise", BigInteger, nullable=False),
+    Column("interest_credited_paise", BigInteger, nullable=False),
+    Column("claims_paid_paise", BigInteger, nullable=False),
+    Column("other_paise", BigInteger, nullable=False),
+    Column("closing_corpus_paise", BigInteger, nullable=False),
+    Column("opinion", String(20), nullable=False),
+    Column("observations", Text),
+    Column("status", String(20), nullable=False),
+    Column("due_on", Date, nullable=False),
+    Column("late_days", Integer, nullable=False),
+    Column("filed_at", DateTime(timezone=True), nullable=False),
+    Column("filed_by", String(80), nullable=False),
+)
+
+exemption_proceedings = Table(
+    "exemption_proceedings", metadata,
+    Column("proceeding_id", String(40), primary_key=True),
+    Column("establishment_id", String(40), nullable=False, index=True),
+    Column("kind", String(20), nullable=False),
+    Column("stage", String(40), nullable=False),
+    Column("open", Boolean, nullable=False),
+    Column("details", JSON, nullable=False),
+    Column("surrender_date", Date),
+    Column("reply_due", Date),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+)
+
+exemption_proceeding_steps = Table(
+    "exemption_proceeding_steps", metadata,
+    Column("step_id", String(40), primary_key=True),
+    Column("proceeding_id", String(40), nullable=False, index=True),
+    Column("step", String(40), nullable=False),
+    Column("stage_after", String(40), nullable=False),
+    Column("actor_subject", String(80), nullable=False),
+    Column("actor_stakeholder", String(60), nullable=False),
+    Column("note", Text, nullable=False),
+    Column("reference", String(200)),
+    Column("at", DateTime(timezone=True), nullable=False),
+)
+
+Index("uq_trust_audit_current_year", trust_audits.c.establishment_id, trust_audits.c.financial_year,
+      unique=True, sqlite_where=trust_audits.c.status == "CURRENT",
+      postgresql_where=trust_audits.c.status == "CURRENT")
+Index("uq_exemption_proceeding_open", exemption_proceedings.c.establishment_id, unique=True,
+      sqlite_where=exemption_proceedings.c.open.is_(True),
+      postgresql_where=exemption_proceedings.c.open.is_(True))
 
 registration_requests = Table(
     "registration_requests", metadata,
@@ -65,6 +121,7 @@ offices = Table(
     "offices", metadata,
     Column("office_id", String(40), primary_key=True),
     Column("name", String(200), nullable=False),
+    Column("zone_id", String(40)),
 )
 
 grants = Table(

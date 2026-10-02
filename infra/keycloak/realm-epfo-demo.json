@@ -1653,6 +1653,44 @@
         "ho.exemption"
       ],
       "id": "00000000-0000-4000-8000-000000000069"
+    },
+    {
+      "username": "textile-trust",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo Textile Mills PF Trust",
+      "lastName": "Demo",
+      "email": "textile-trust@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "exempted.trust"
+      ],
+      "id": "00000000-0000-4000-8000-000000000070"
+    },
+    {
+      "username": "chemicals-trust",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo Chemicals PF Trust",
+      "lastName": "Demo",
+      "email": "chemicals-trust@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "exempted.trust"
+      ],
+      "id": "00000000-0000-4000-8000-000000000071"
     }
   ]
 }

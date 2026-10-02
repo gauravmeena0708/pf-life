@@ -65,7 +65,7 @@ it("shows office rankings and posts a step-up flag action without advice for A",
 it("shows read-only HO ranking and routes both roles", async () => {
   responses[`/api/v1/office/exempted/rankings?month=${month}`] = { rankings: [ranking] }; show(<RankingsPage />);
   expect(await screen.findByText("Demo Trust")).toBeTruthy(); expect(screen.queryByRole("button", { name: "Demo Trust" })).toBeNull();
-  expect(menusFor("ho.exemption")).toEqual([{ label: "Exempted establishments ranking", to: "/ho/exempted-rankings" }]);
+  expect(menusFor("ho.exemption")).toEqual([{ label: "Exempted establishments ranking", to: "/ho/exempted-rankings" }, { label: "Exemption proceedings", to: "/exemption-proceedings" }]);
   expect(homeFor("ho.exemption")).toBe("/ho/exempted-rankings"); expect(homeFor("fo.exemption")).toBe("/office/exempted");
   expect(menusFor("fo.exemption").flatMap((group) => group.items ?? [])).toContainEqual(expect.objectContaining({ label: "Monthly Return for Exempted Establishment", to: "/office/exempted#exempted-rankings-heading" }));
 });

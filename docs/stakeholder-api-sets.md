@@ -9,10 +9,10 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 114 |
-| Activities | 244 |
-| Stakeholders with at least one API | 95 |
+| Activities | 247 |
+| Stakeholders with at least one API | 94 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
-| Stakeholders with no activity yet | 2 |
+| Stakeholders with no activity yet | 3 |
 | **NEW endpoints to add to the catalogue** | **0** |
 | Catalogue endpoints no stakeholder calls | 0 |
 
@@ -365,24 +365,24 @@ Activities: **F01.contractors** Link contractors, upload work orders, watch cont
 
 #### `exempted.trust` — Exempted establishment — PF trust and its Board of Trustees
 
-Activities: **F09.returns** File monthly return of exempted establishment (Parts A-F); view trust profile; **F09.annexure_k** Exchange Annexure K for transfers in / out; **F09.surrender** Surrender exemption
+Activities: **F09.returns** File monthly return of exempted establishment (Parts A-F); view trust profile; **F09.annexure_k** Exchange Annexure K for transfers in / out; **F09.audit** File the annual report with the trust's audited accounts (by 30 September); **F09.surrender** Surrender exemption (Form SE-1); follow the proceeding; reply to a show-cause notice
 
 | Endpoint | Status |
 |---|---|
 | `GET /exempted/me/annexure-k-requests` | W |
+| `GET /exempted/me/audits` | W |
+| `GET /exempted/me/proceedings` | W |
 | `GET /exempted/me/profile` | W |
 | `GET /exempted/me/returns` | W |
 | `POST /exempted/me/annexure-k-submissions` | W |
+| `POST /exempted/me/audits` | W |
+| `POST /exempted/me/proceedings/{proceedingId}/replies` | W |
 | `POST /exempted/me/returns` | W |
-| `POST /exempted/me/surrender-requests` | P |
+| `POST /exempted/me/surrender-requests` | W |
 
 #### `trust_auditor` — Chartered accountant auditing an exempted trust
 
-Activities: **F09.audit** Audit the PF trust and submit the audited statements
-
-| Endpoint | Status |
-|---|---|
-| `POST /exempted/me/audits` | P |
+*No activity mapped yet.*
 
 #### `payroll_provider` — Payroll software / HRMS vendor acting for employers
 
@@ -588,7 +588,7 @@ Activities: **F02.jd_monitor** Monitor JD pendency across the RO; **F13.ro** RO-
 
 #### `fo.oic` — Officer-in-Charge of the office
 
-Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lock_admin** Inspect member-ledger locks and release an orphaned one with a recorded reason; **F07.freeze_ro_est** Order freezing of an establishment (Category B); report to fraud committee; **F07.issue_raise** Raise an Issue Tracker request (freeze / de-freeze a member account, or a login notice) with the order; **F07.defreeze** Recommend / order de-freezing; post-defreeze claims use the higher chain; **F11.oic_monitor** Trigger verification of suspicious inoperative-account requests and monitor unblocking daily; **F12.reply** Reply to concurrent-audit alerts within 3 days; **F12.para_reply** Comply with audit paras; request dropping; **F13.oic** Office-level pendency and daily unblocking monitoring
+Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lock_admin** Inspect member-ledger locks and release an orphaned one with a recorded reason; **F07.freeze_ro_est** Order freezing of an establishment (Category B); report to fraud committee; **F07.issue_raise** Raise an Issue Tracker request (freeze / de-freeze a member account, or a login notice) with the order; **F07.defreeze** Recommend / order de-freezing; post-defreeze claims use the higher chain; **F09.permit** RPFC-I permits compliance as an un-exempted establishment (SE-5); **F11.oic_monitor** Trigger verification of suspicious inoperative-account requests and monitor unblocking daily; **F12.reply** Reply to concurrent-audit alerts within 3 days; **F12.para_reply** Comply with audit paras; request dropping; **F13.oic** Office-level pendency and daily unblocking monitoring
 
 | Endpoint | Status |
 |---|---|
@@ -599,6 +599,7 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | `GET /office/accounts/inoperative` | W |
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/claims/{claimId}/cad` | W |
+| `GET /office/exempted/proceedings` | W |
 | `GET /office/members/{uan}/locks` | W |
 | `GET /office/work-queue` | W |
 | `POST /audit/concurrent/alerts/{alertId}/replies` | W |
@@ -608,6 +609,7 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 | `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/establishments/{estId}/defreezes` | W |
 | `POST /office/establishments/{estId}/freezes` | W |
+| `POST /office/exempted/proceedings/{proceedingId}/steps` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
 | `POST /office/members/{uan}/defreezes` | W |
 | `POST /office/system/locks/{lockId}/release` | W |
@@ -753,15 +755,18 @@ Activities: **F06.legal** Record 7-I appeals, 7-O pre-deposits / waivers and cou
 
 #### `fo.exemption` — Exemption cell (supervising PF trusts)
 
-Activities: **F09.ingest** Bulk-ingest the surrendered trust's member ledgers and past accumulations; **F09.past_accum** Transfer past accumulations after surrender / cancellation; **F09.supervise** Supervise PF trusts: monthly returns, the performance evaluator and its ranking, priority-matrix flags and the action taken, audit reports
+Activities: **F09.cancel** Open cancellation with a show-cause notice (CE-1); drop it on the reply or send the draft agenda to the zone; gazette notification after cancellation; **F09.ingest** Bulk-ingest the surrendered trust's member ledgers and past accumulations; **F09.past_accum** Transfer past accumulations after surrender / cancellation; **F09.supervise** Supervise PF trusts: monthly returns, the performance evaluator and its ranking, priority-matrix flags and the action taken, audit reports
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/exempted/proceedings` | W |
 | `GET /office/exempted/rankings` | W |
+| `GET /office/exempted/{estId}/audits` | W |
 | `GET /office/exempted/{estId}/returns` | W |
+| `POST /office/exempted/proceedings/{proceedingId}/steps` | W |
+| `POST /office/exempted/{estId}/cancellation-proceedings` | W |
 | `POST /office/exempted/{estId}/flags/{flagId}/actions` | W |
 | `POST /office/exempted/{estId}/past-accumulation-ingestions` | W |
-| `GET /office/exempted/{estId}/audits` | P |
 | `POST /office/exempted/past-accumulation-bulk-transfers` | P |
 | `POST /office/exempted/{estId}/past-accumulation-transfers` | P |
 | `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` | P |
@@ -848,7 +853,7 @@ Activities: **F06.district** District-level compliance follow-up and facilitatio
 
 #### `zo.acc` — Additional Central PF Commissioner (Zone head)
 
-Activities: **F08.escalate** Handle grievances escalated to the zone; **F13.zo** Zone dashboards; approvals above RO limits
+Activities: **F08.escalate** Handle grievances escalated to the zone; **F09.zo_forward** Zonal ACC forwards the draft agenda to HO with recommendations (SE-3 / CE-4) or remands it; **F13.zo** Zone dashboards; approvals above RO limits
 
 | Endpoint | Status |
 |---|---|
@@ -856,11 +861,13 @@ Activities: **F08.escalate** Handle grievances escalated to the zone; **F13.zo**
 | `GET /monitoring/claims` | W |
 | `GET /monitoring/grievances` | W |
 | `GET /office/cases/{caseId}` | W |
+| `GET /office/exempted/proceedings` | W |
 | `GET /office/work-queue` | W |
 | `GET /zo/dashboards` | W |
 | `POST /grievances/{grievanceId}/escalations` | W |
 | `POST /grievances/{grievanceId}/messages` | W |
 | `POST /grievances/{grievanceId}/resolution` | W |
+| `POST /office/exempted/proceedings/{proceedingId}/steps` | W |
 
 #### `zo.rpfc1` — RPFC-I at the Zonal Office (zonal authority for freezing categories B and C; zone-level monitoring)
 
@@ -992,12 +999,13 @@ Activities: **F06.ho_legal** Legal policy; monitoring of court cases
 
 #### `ho.exemption` — Exemption Division
 
-Activities: **F09.ho** Grant / cancel exemption policy decisions; **F09.ho_monitor** Monitor the zones' exempted establishments on the online performance evaluator (ranking of 600)
+Activities: **F09.ho** Record the EEC's recommendation, the CBT's ratification, the reference to the appropriate Government and its notification; **F09.ho_monitor** Monitor the zones' exempted establishments on the online performance evaluator (ranking of 600)
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/exempted/proceedings` | W |
 | `GET /office/exempted/rankings` | W |
-| `POST /ho/exemptions/{estId}/decisions` | P |
+| `POST /ho/exemptions/{estId}/decisions` | W |
 
 #### `ho.pension` — Pension Division (verticals: policy, EPS implementation, grievances, pension finance / audit / actuarial, EDLI)
 
@@ -1441,6 +1449,7 @@ Either an activity is missing from the map, or the endpoint is not needed.
 
 - `intl_worker` — International worker (inbound or outbound, CoC holder) — since P2.9a a member attribute (`members.international`), signs in with the `member` role
 - `contractor` — Contractor establishment (tags its workers to a principal employer) — since P2.12b its own employer users (`employer.operator`) do this
+- `trust_auditor` — Chartered accountant auditing an exempted trust
 
 ## Flow diagrams
 
@@ -1839,22 +1848,29 @@ flowchart LR
   F09_returns["exempted.trust<br/>File monthly return of exempted establishment (Parts A-F); v"]
   F09_annexure_k["exempted.trust<br/>Exchange Annexure K for transfers in / out"]
   F09_annexure_k_reconcile["fo.da_accounts<br/>Reconcile Annexure K with receipts and member records"]
-  F09_audit["trust_auditor<br/>Audit the PF trust and submit the audited statements"]
-  style F09_audit stroke-dasharray: 5 5
-  F09_surrender["exempted.trust<br/>Surrender exemption"]
+  F09_audit["exempted.trust<br/>File the annual report with the trust's audited accounts (by"]
+  F09_surrender["exempted.trust<br/>Surrender exemption (Form SE-1); follow the proceeding; repl"]
+  F09_cancel["fo.exemption<br/>Open cancellation with a show-cause notice (CE-1); drop it o"]
+  F09_permit["fo.oic<br/>RPFC-I permits compliance as an un-exempted establishment (S"]
+  F09_zo_forward["zo.acc<br/>Zonal ACC forwards the draft agenda to HO with recommendatio"]
   F09_trust_handover["exempted.trust_liquidator<br/>Hand over member ledgers and past accumulations of the surre"]
   F09_ingest["fo.exemption<br/>Bulk-ingest the surrendered trust's member ledgers and past "]
   F09_past_accum["fo.exemption<br/>Transfer past accumulations after surrender / cancellation"]
   F09_supervise["fo.exemption<br/>Supervise PF trusts: monthly returns, the performance evalua"]
-  F09_ho["ho.exemption<br/>Grant / cancel exemption policy decisions"]
+  F09_ho["ho.exemption<br/>Record the EEC's recommendation, the CBT's ratification, the"]
   F09_ho_monitor["ho.exemption<br/>Monitor the zones' exempted establishments on the online per"]
   F09_returns --> F09_supervise
   F09_annexure_k --> F09_annexure_k_reconcile
   F09_audit --> F09_supervise
+  F09_surrender --> F09_permit
   F09_surrender --> F09_trust_handover
   F09_surrender --> F09_past_accum
+  F09_cancel --> F09_zo_forward
+  F09_permit --> F09_ingest
+  F09_zo_forward --> F09_ho
   F09_trust_handover --> F09_ingest
   F09_ingest --> F09_past_accum
+  F09_ho --> F09_cancel
   F09_ho_monitor --> F09_ho
 ```
 

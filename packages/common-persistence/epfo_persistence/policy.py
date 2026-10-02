@@ -350,6 +350,12 @@ def _money_sections_problems(document: dict[str, Any]) -> list[str]:
             problems.append("exempted_establishments.trust_claim_types must list claim types of the rule set")
         if not _whole(ee.get("trust_claim_days"), 1, 90) or not _whole(ee.get("passbook_cache_minutes"), 0, 1440):
             problems.append("exempted_establishments needs trust_claim_days (1-90) and passbook_cache_minutes (0-1440)")
+        days = ee.get("proceeding_days")
+        if days is not None and not (isinstance(days, dict) and set(days) == {"surrender_notice", "return_incomplete", "show_cause_reply",
+                "past_accumulations", "ro_agenda", "zo_forward", "ho_placement", "to_government"} and all(_whole(v, 1, 365) for v in days.values())):
+            problems.append("exempted_establishments.proceeding_days needs the eight stages, each 1-365 days")
+        if "audit_due" in ee and not (isinstance(ee["audit_due"], str) and len(ee["audit_due"]) == 5 and ee["audit_due"][2] == "-"):
+            problems.append("exempted_establishments.audit_due is MM-DD")
         if "return_due_day" in ee and not (_whole(ee.get("return_due_day"), 1, 28) and _whole(ee.get("evaluator_claim_days"), 1, 90)
                                            and _whole(ee.get("investment_threshold_pct"), 1, 100) and _whole(ee.get("min_score"), 0, 600)
                                            and _whole(ee.get("consecutive_months"), 1, 12)):

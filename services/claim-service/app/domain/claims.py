@@ -110,7 +110,10 @@ def eligibility(account: dict[str, Any], claim_type: str, rules: dict[str, Any],
     exemption = account.get("exemption") or {}
     trust_rules = section(rules, "exempted_establishments")
     effective = exemption.get("effective_from")
-    if (exemption.get("pf_exempt") and exemption.get("status") == "ACTIVE"
+    ended_on = exemption.get("ended_on")
+    if isinstance(ended_on, str):
+        ended_on = date.fromisoformat(ended_on)
+    if (exemption.get("pf_exempt") and (exemption.get("status") == "ACTIVE" or ended_on is not None and ended_on > today)
             and claim_type in trust_rules["trust_claim_types"] and effective
             and joined and joined <= today and (exited is None or exited >= effective) and effective <= today):
         reasons.append(f"Your PF for this member ID is with {exemption['trust_name']}; the trust settles it within "

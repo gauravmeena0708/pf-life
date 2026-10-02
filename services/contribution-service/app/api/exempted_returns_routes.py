@@ -197,6 +197,11 @@ async def file_return(session, est_id: str, effective: date, exemption: dict, bo
                       actor_subject: str, correlation_id: str, *, seeded: bool = False):
     if isinstance(effective, str):
         effective = date.fromisoformat(effective)
+    ended = exemption.get("ended_on")
+    if isinstance(ended, str):
+        ended = date.fromisoformat(ended)
+    if ended and month_start(body.wage_month) >= ended:
+        raise Problem(409, "/problems/exemption-ended", "The exemption ended on " + ended.isoformat() + "; returns stop (link removed)")
     validate(body, effective)
     prior = (await session.execute(text("SELECT * FROM trust_returns WHERE establishment_id=:e AND wage_month=:m AND state='FILED'"), {"e": est_id, "m": body.wage_month})).mappings().first()
     if prior and (not body.revised or seeded):
@@ -307,7 +312,7 @@ async def rankings(month: str, actor: Actor = Depends(RANKING)):
         office = await officer_office(session, actor) if actor.stakeholder == "fo.exemption" else None
         if actor.stakeholder == "fo.exemption" and not office:
             raise Problem(403, "/problems/forbidden", "Your office is not assigned")
-        rows = (await session.execute(text("""SELECT e.id,e.legal_name,e.office_id,x.effective_from,r.score
+        rows = (await session.execute(text("""SELECT e.id,e.legal_name,e.office_id,x.effective_from,x.ended_on,x.status,r.score
             FROM exempted_establishments x JOIN establishments e ON e.id=x.establishment_id
             LEFT JOIN trust_returns r ON r.establishment_id=e.id AND r.wage_month=:m AND r.state='FILED'
             WHERE (:all_offices=1 OR e.office_id=:office) ORDER BY e.id"""),
@@ -316,6 +321,11 @@ async def rankings(month: str, actor: Actor = Depends(RANKING)):
         for row in rows:
             effective = row["effective_from"] if isinstance(row["effective_from"], date) else date.fromisoformat(row["effective_from"])
             if start < effective.replace(day=1):
+                continue
+            ended = row["ended_on"]
+            if isinstance(ended, str):
+                ended = date.fromisoformat(ended)
+            if row["status"] != "ACTIVE" and (ended is None or start >= ended):
                 continue
             flags = [f["code"] for f in await flags_for(session, row["id"], month)]
             if row["score"] is None:

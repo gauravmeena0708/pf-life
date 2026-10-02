@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /employers/me', 'PATCH /employers/me', 'POST /employers/registration-requests', 'POST /employers/voluntary-coverage-requests', 'GET /office/establishment-change-requests', 'GET /office/establishment-registrations', 'GET /office/signature-registrations', 'GET /public/establishments', 'GET /employers/me/bank-accounts', 'GET /employers/me/branches', 'POST /employers/me/branches', 'GET /employers/me/change-requests', 'POST /employers/me/closure-requests', 'GET /employers/me/configuration', 'GET /employers/me/contractors', 'POST /employers/me/contractors', 'GET /employers/me/exemption', 'GET /employers/me/kyc', 'POST /employers/me/office-transfer-requests', 'GET /employers/me/operators', 'GET /employers/me/ownership-declaration', 'PUT /employers/me/ownership-declaration', 'GET /employers/me/signatories', 'GET /employers/me/signature-registrations', 'GET /exempted/me/profile', 'POST /integrations/mca/registrations', 'POST /integrations/shram-suvidha/registrations', 'POST /employers/me/configuration/change-requests', 'POST /employers/me/operators/invitations', 'POST /employers/me/signatories/authorisations', 'POST /employers/me/kyc/{kycType}', 'POST /employers/me/operators/{operatorId}/revocations', 'POST /employers/me/signatories/{signatoryId}/dsc-registrations', 'POST /employers/me/signatories/{signatoryId}/esign-registrations', 'POST /employers/me/signatories/{signatoryId}/request-letters', 'POST /employers/me/signatories/{signatoryId}/revocations', 'POST /employers/me/signatories/{signatoryId}/revoke-letters', 'GET /employers/registration-requests/{reqId}', 'GET /public/establishments/{estId}', 'POST /employers/registration-requests/{reqId}/verification-evidence', 'POST /office/establishment-registrations/{reqId}/coverage-decisions', 'GET /office/establishment-registrations/{reqId}/documents', 'POST /office/establishment-registrations/{reqId}/scrutiny-notes', 'POST /office/establishments/{estId}/defreezes', 'POST /office/establishments/{estId}/freezes', 'POST /office/establishments/{estId}/change-requests/{requestId}/decisions', 'POST /office/establishments/{estId}/signature-registrations/{regId}/decisions']
+OPERATIONS = ['GET /employers/me', 'PATCH /employers/me', 'POST /employers/registration-requests', 'POST /employers/voluntary-coverage-requests', 'GET /office/establishment-change-requests', 'GET /office/establishment-registrations', 'GET /office/signature-registrations', 'GET /public/establishments', 'GET /employers/me/bank-accounts', 'GET /employers/me/branches', 'POST /employers/me/branches', 'GET /employers/me/change-requests', 'POST /employers/me/closure-requests', 'GET /employers/me/configuration', 'GET /employers/me/contractors', 'POST /employers/me/contractors', 'GET /employers/me/exemption', 'GET /employers/me/kyc', 'POST /employers/me/office-transfer-requests', 'GET /employers/me/operators', 'GET /employers/me/ownership-declaration', 'PUT /employers/me/ownership-declaration', 'GET /employers/me/signatories', 'GET /employers/me/signature-registrations', 'GET /exempted/me/audits', 'POST /exempted/me/audits', 'GET /exempted/me/proceedings', 'GET /exempted/me/profile', 'POST /exempted/me/surrender-requests', 'POST /integrations/mca/registrations', 'POST /integrations/shram-suvidha/registrations', 'GET /office/exempted/proceedings', 'POST /employers/me/configuration/change-requests', 'POST /employers/me/operators/invitations', 'POST /employers/me/signatories/authorisations', 'POST /employers/me/kyc/{kycType}', 'POST /employers/me/operators/{operatorId}/revocations', 'POST /employers/me/signatories/{signatoryId}/dsc-registrations', 'POST /employers/me/signatories/{signatoryId}/esign-registrations', 'POST /employers/me/signatories/{signatoryId}/request-letters', 'POST /employers/me/signatories/{signatoryId}/revocations', 'POST /employers/me/signatories/{signatoryId}/revoke-letters', 'POST /exempted/me/proceedings/{proceedingId}/replies', 'POST /office/exempted/proceedings/{proceedingId}/steps', 'GET /employers/registration-requests/{reqId}', 'GET /public/establishments/{estId}', 'POST /employers/registration-requests/{reqId}/verification-evidence', 'POST /ho/exemptions/{estId}/decisions', 'POST /office/establishment-registrations/{reqId}/coverage-decisions', 'GET /office/establishment-registrations/{reqId}/documents', 'POST /office/establishment-registrations/{reqId}/scrutiny-notes', 'POST /office/establishments/{estId}/defreezes', 'POST /office/establishments/{estId}/freezes', 'GET /office/exempted/{estId}/audits', 'POST /office/exempted/{estId}/cancellation-proceedings', 'POST /office/establishments/{estId}/change-requests/{requestId}/decisions', 'POST /office/establishments/{estId}/signature-registrations/{regId}/decisions']
 
 @router.api_route("/api/v1/employers/me", methods=["GET"], include_in_schema=False)
 async def get_employers_me(actor: Actor = Depends(require_actor)) -> None:
@@ -132,9 +132,29 @@ async def get_employers_me_signature_registrations(actor: Actor = Depends(requir
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Authorized eSign List: each signatory's DSC / e-sign registration and revoke requests with their sta")
 
 
+@router.api_route("/api/v1/exempted/me/audits", methods=["GET"], include_in_schema=False)
+async def get_exempted_me_audits(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The trust's annual audited accounts filed")
+
+
+@router.api_route("/api/v1/exempted/me/audits", methods=["POST"], include_in_schema=False)
+async def post_exempted_me_audits(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The annual report with the trust's audited accounts for a year (due by 30 September): auditor, corpu")
+
+
+@router.api_route("/api/v1/exempted/me/proceedings", methods=["GET"], include_in_schema=False)
+async def get_exempted_me_proceedings(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The trust's surrender or cancellation proceedings: stage, history, what is due and by when")
+
+
 @router.api_route("/api/v1/exempted/me/profile", methods=["GET"], include_in_schema=False)
 async def get_exempted_me_profile(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Trust profile and exemption conditions")
+
+
+@router.api_route("/api/v1/exempted/me/surrender-requests", methods=["POST"], include_in_schema=False)
+async def post_exempted_me_surrender_requests(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Surrender of exemption (Form SE-1): the date, the Board of Trustees' resolution, the employer's unde")
 
 
 @router.api_route("/api/v1/integrations/mca/registrations", methods=["POST"], include_in_schema=False)
@@ -145,6 +165,11 @@ async def post_integrations_mca_registrations(actor: Actor = Depends(require_act
 @router.api_route("/api/v1/integrations/shram-suvidha/registrations", methods=["POST"], include_in_schema=False)
 async def post_integrations_shram_suvidha_registrations(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Shram Suvidha common-registration feed (signed)")
+
+
+@router.api_route("/api/v1/office/exempted/proceedings", methods=["GET"], include_in_schema=False)
+async def get_office_exempted_proceedings(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Surrender and cancellation proceedings of the office (RO), zone (ZO) or all (HO), with the stage's d")
 
 
 @router.api_route("/api/v1/employers/me/configuration/change-requests", methods=["POST"], include_in_schema=False)
@@ -197,6 +222,16 @@ async def post_employers_me_signatories_signatoryId_revoke_letters(actor: Actor 
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Upload the signed signatory revoke letter that backs a revocation, with its own status (*Authorized ")
 
 
+@router.api_route("/api/v1/exempted/me/proceedings/{proceedingId}/replies", methods=["POST"], include_in_schema=False)
+async def post_exempted_me_proceedings_proceedingId_replies(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The trust's reply to a show-cause notice (Form CE-1), optionally relinquishing the exemption")
+
+
+@router.api_route("/api/v1/office/exempted/proceedings/{proceedingId}/steps", methods=["POST"], include_in_schema=False)
+async def post_office_exempted_proceedings_proceedingId_steps(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "A step by the RO or ZO: return as incomplete, permit compliance as un-exempted (SE-5), drop on the r")
+
+
 @router.api_route("/api/v1/employers/registration-requests/{reqId}", methods=["GET"], include_in_schema=False)
 async def get_employers_registration_requests_reqId(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Registration status")
@@ -210,6 +245,11 @@ async def get_public_establishments_estId(actor: Actor = Depends(require_actor))
 @router.api_route("/api/v1/employers/registration-requests/{reqId}/verification-evidence", methods=["POST"], include_in_schema=False)
 async def post_employers_registration_requests_reqId_verification_evidence(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Submit demo verification evidence (PAN/CIN/GSTIN/LIN) to mock registry adapter (Journey A1)")
+
+
+@router.api_route("/api/v1/ho/exemptions/{estId}/decisions", methods=["POST"], include_in_schema=False)
+async def post_ho_exemptions_estId_decisions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "HO Exemption Division records the EEC's recommendation, the CBT's ratification, the reference to the")
 
 
 @router.api_route("/api/v1/office/establishment-registrations/{reqId}/coverage-decisions", methods=["POST"], include_in_schema=False)
@@ -235,6 +275,16 @@ async def post_office_establishments_estId_defreezes(actor: Actor = Depends(requ
 @router.api_route("/api/v1/office/establishments/{estId}/freezes", methods=["POST"], include_in_schema=False)
 async def post_office_establishments_estId_freezes(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Freeze an establishment")
+
+
+@router.api_route("/api/v1/office/exempted/{estId}/audits", methods=["GET"], include_in_schema=False)
+async def get_office_exempted_estId_audits(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Exemption cell reviews the trust's annual audited accounts (late and qualified ones marked)")
+
+
+@router.api_route("/api/v1/office/exempted/{estId}/cancellation-proceedings", methods=["POST"], include_in_schema=False)
+async def post_office_exempted_estId_cancellation_proceedings(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Exemption cell opens cancellation with a show-cause notice (Form CE-1): the grounds — priority-matri")
 
 
 @router.api_route("/api/v1/office/establishments/{estId}/change-requests/{requestId}/decisions", methods=["POST"], include_in_schema=False)

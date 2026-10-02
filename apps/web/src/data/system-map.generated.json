@@ -3,15 +3,15 @@
  "totals": {
   "interfaces": 21,
   "stakeholders": 114,
-  "stakeholders_with_access": 95,
-  "activities": 244,
+  "stakeholders_with_access": 94,
+  "activities": 247,
   "endpoints": {
-   "W": 381,
+   "W": 391,
    "M": 21,
-   "P": 33,
+   "P": 29,
    "?": 5
   },
-  "personas": 69
+  "personas": 71
  },
  "interfaces": [
   {
@@ -39,9 +39,9 @@
    "coverage": "Working",
    "purpose": "Employers: registration, members and KYC, monthly returns and challans, demands, attestations, exits.",
    "endpoints": {
-    "W": 88,
+    "W": 93,
     "M": 5,
-    "P": 4,
+    "P": 2,
     "?": 0
    },
    "stakeholders": [
@@ -84,9 +84,9 @@
    "coverage": "Working",
    "purpose": "Field-office sections: claim scrutiny and payment, compliance, pension, EDLI, exemption, PRO counter.",
    "endpoints": {
-    "W": 99,
+    "W": 103,
     "M": 0,
-    "P": 18,
+    "P": 17,
     "?": 4
    },
    "stakeholders": [
@@ -171,7 +171,7 @@
    "coverage": "Working",
    "purpose": "Regional office officers: approvals above the dealing level, freezes, ledger decisions.",
    "endpoints": {
-    "W": 40,
+    "W": 42,
     "M": 0,
     "P": 8,
     "?": 1
@@ -189,7 +189,7 @@
    "coverage": "Working",
    "purpose": "Zonal offices: grievances escalated to the zone, fraud-risk review, concurrent audit.",
    "endpoints": {
-    "W": 13,
+    "W": 15,
     "M": 0,
     "P": 0,
     "?": 0
@@ -208,9 +208,9 @@
    "coverage": "Working",
    "purpose": "Head office: policy rules (maker-checker), interest, circulars, the IS Division.",
    "endpoints": {
-    "W": 22,
+    "W": 24,
     "M": 0,
-    "P": 4,
+    "P": 3,
     "?": 0
    },
    "stakeholders": [
@@ -911,9 +911,9 @@
    "name": "Exempted establishment — PF trust and its Board of Trustees",
    "group": "B. Employers and intermediaries",
    "endpoints": {
-    "W": 5,
+    "W": 10,
     "M": 0,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
    "activities": [
@@ -926,12 +926,18 @@
      "does": "Exchange Annexure K for transfers in / out"
     },
     {
+     "id": "F09.audit",
+     "does": "File the annual report with the trust's audited accounts (by 30 September)"
+    },
+    {
      "id": "F09.surrender",
-     "does": "Surrender exemption"
+     "does": "Surrender exemption (Form SE-1); follow the proceeding; reply to a show-cause notice"
     }
    ],
    "personas": [
-    "exempted-trust"
+    "chemicals-trust",
+    "exempted-trust",
+    "textile-trust"
    ]
   },
   "trust_auditor": {
@@ -940,15 +946,10 @@
    "endpoints": {
     "W": 0,
     "M": 0,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
-   "activities": [
-    {
-     "id": "F09.audit",
-     "does": "Audit the PF trust and submit the audited statements"
-    }
-   ],
+   "activities": [],
    "personas": []
   },
   "payroll_provider": {
@@ -1338,7 +1339,7 @@
    "name": "Officer-in-Charge of the office",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 19,
+    "W": 21,
     "M": 0,
     "P": 0,
     "?": 0
@@ -1363,6 +1364,10 @@
     {
      "id": "F07.defreeze",
      "does": "Recommend / order de-freezing; post-defreeze claims use the higher chain"
+    },
+    {
+     "id": "F09.permit",
+     "does": "RPFC-I permits compliance as an un-exempted establishment (SE-5)"
     },
     {
      "id": "F11.oic_monitor",
@@ -1648,12 +1653,16 @@
    "name": "Exemption cell (supervising PF trusts)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 4,
+    "W": 8,
     "M": 0,
-    "P": 4,
+    "P": 3,
     "?": 0
    },
    "activities": [
+    {
+     "id": "F09.cancel",
+     "does": "Open cancellation with a show-cause notice (CE-1); drop it on the reply or send the draft agenda to the zone; gazette notification after cancellation"
+    },
     {
      "id": "F09.ingest",
      "does": "Bulk-ingest the surrendered trust's member ledgers and past accumulations"
@@ -1808,7 +1817,7 @@
    "name": "Additional Central PF Commissioner (Zone head)",
    "group": "E. Zonal Office (ZO)",
    "endpoints": {
-    "W": 9,
+    "W": 11,
     "M": 0,
     "P": 0,
     "?": 0
@@ -1817,6 +1826,10 @@
     {
      "id": "F08.escalate",
      "does": "Handle grievances escalated to the zone"
+    },
+    {
+     "id": "F09.zo_forward",
+     "does": "Zonal ACC forwards the draft agenda to HO with recommendations (SE-3 / CE-4) or remands it"
     },
     {
      "id": "F13.zo",
@@ -2063,15 +2076,15 @@
    "name": "Exemption Division",
    "group": "F. Head Office (HO) — leadership and divisions",
    "endpoints": {
-    "W": 1,
+    "W": 3,
     "M": 0,
-    "P": 1,
+    "P": 0,
     "?": 0
    },
    "activities": [
     {
      "id": "F09.ho",
-     "does": "Grant / cancel exemption policy decisions"
+     "does": "Record the EEC's recommendation, the CBT's ratification, the reference to the appropriate Government and its notification"
     },
     {
      "id": "F09.ho_monitor",

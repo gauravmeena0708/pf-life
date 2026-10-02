@@ -108,6 +108,38 @@
       "status": "VERIFIED",
       "verified_at": "2026-04-15T10:00:00+00:00",
       "pan": "AAAAD0004A"
+    },
+    {
+      "establishment_id": "EST-DEMO-0005",
+      "registration_number": "DEMO/-0005/000",
+      "legal_name": "Demo Textile Mills",
+      "office_id": "RO-DEMO-01",
+      "pincode": "110003",
+      "city": "New Delhi",
+      "district": "Central Delhi",
+      "coverage_date": "2008-04-01",
+      "establishment_type": "PUBLIC_LIMITED",
+      "industry_group": "TEXTILES",
+      "exemption_status": "EXEMPTED",
+      "status": "VERIFIED",
+      "verified_at": "2026-04-15T10:00:00+00:00",
+      "pan": "AAAAD0005A"
+    },
+    {
+      "establishment_id": "EST-DEMO-0006",
+      "registration_number": "DEMO/-0006/000",
+      "legal_name": "Demo Chemicals",
+      "office_id": "RO-DEMO-01",
+      "pincode": "110003",
+      "city": "New Delhi",
+      "district": "Central Delhi",
+      "coverage_date": "2008-04-01",
+      "establishment_type": "PUBLIC_LIMITED",
+      "industry_group": "CHEMICALS",
+      "exemption_status": "EXEMPTED",
+      "status": "VERIFIED",
+      "verified_at": "2026-04-15T10:00:00+00:00",
+      "pan": "AAAAD0006A"
     }
   ],
   "public_lookup_challan": {
@@ -627,6 +659,30 @@
         }
       ],
       "_comment": "P2.9b: left Demo Steel Works (PF with its trust) in June 2026; now at the demo establishment — he moves his PF out of the trust."
+    },
+    {
+      "uan": "100000000913",
+      "name": "NEHA DEMO",
+      "date_of_birth": "1990-02-14",
+      "subject": null,
+      "account_link_id": "AL-0921",
+      "member_id": "DEMO00005000000000921",
+      "date_of_joining": "2018-06-01",
+      "gender": "FEMALE",
+      "mobile_masked": "******0913",
+      "email_masked": "n***@demo.invalid",
+      "bank_ifsc": "DEMO0000913",
+      "bank_account_last4": "0913",
+      "kyc": {
+        "aadhaar": "VERIFIED",
+        "pan": "VERIFIED",
+        "bank": "VERIFIED"
+      },
+      "last_contribution_month": "2026-09",
+      "aadhaar_ref": "DEMO-AADHAAR-NEHA",
+      "date_of_exit": null,
+      "establishment_id": "EST-DEMO-0005",
+      "_comment": "P2.14: at Demo Textile Mills, whose trust surrenders; her PF comes to EPFO as past accumulations"
     }
   ],
   "demo_wage_month": "2026-08",
@@ -699,7 +755,9 @@
     "member-p": "00000000-0000-4000-8000-000000000066",
     "member-r": "00000000-0000-4000-8000-000000000067",
     "steel-signatory": "00000000-0000-4000-8000-000000000068",
-    "ho-exemption": "00000000-0000-4000-8000-000000000069"
+    "ho-exemption": "00000000-0000-4000-8000-000000000069",
+    "textile-trust": "00000000-0000-4000-8000-000000000070",
+    "chemicals-trust": "00000000-0000-4000-8000-000000000071"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -1266,6 +1324,49 @@
         "invested_paise": 648000000000,
         "accounts_audited": true,
         "member_balances_total_paise": null
+      }
+    ]
+  },
+  "more_exempted_establishments": {
+    "_comment": "P2.14: two more PF trusts — Demo Textile Mills surrenders its exemption, Demo Chemicals' is cancelled (synthetic)",
+    "establishments": [
+      {
+        "establishment_id": "EST-DEMO-0005",
+        "kind": "S17_1A",
+        "pf_exempt": true,
+        "pension_exempt": false,
+        "edli_exempt": false,
+        "notification_no": "S.O. 2345(E) (synthetic)",
+        "notification_date": "2008-03-10",
+        "effective_from": "2008-04-01",
+        "status": "ACTIVE",
+        "trust_id": "TRUST-DEMO-0005",
+        "trust_name": "Demo Textile Mills Employees' Provident Fund Trust",
+        "trust_users": [
+          {
+            "username": "textile-trust",
+            "subject": "00000000-0000-4000-8000-000000000070"
+          }
+        ]
+      },
+      {
+        "establishment_id": "EST-DEMO-0006",
+        "kind": "S17_1A",
+        "pf_exempt": true,
+        "pension_exempt": false,
+        "edli_exempt": false,
+        "notification_no": "S.O. 3456(E) (synthetic)",
+        "notification_date": "2008-03-10",
+        "effective_from": "2008-04-01",
+        "status": "ACTIVE",
+        "trust_id": "TRUST-DEMO-0006",
+        "trust_name": "Demo Chemicals Employees' Provident Fund Trust",
+        "trust_users": [
+          {
+            "username": "chemicals-trust",
+            "subject": "00000000-0000-4000-8000-000000000071"
+          }
+        ]
       }
     ]
   }

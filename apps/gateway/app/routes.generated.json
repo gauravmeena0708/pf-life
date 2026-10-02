@@ -1015,6 +1015,40 @@
   },
   {
     "method": "POST",
+    "path_template": "/office/exempted/proceedings/{proceedingId}/steps",
+    "regex": "^/office/exempted/proceedings/[^/]+/steps$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.exemption",
+      "fo.oic",
+      "zo.acc"
+    ],
+    "summary": "A step by the RO or ZO: return as incomplete, permit compliance as un-exempted (SE-5), drop on the reply, draft agenda to ZO, forward to HO or remand, gazette notification (Para 28(5))",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/exempted/{estId}/cancellation-proceedings",
+    "regex": "^/office/exempted/[^/]+/cancellation\\-proceedings$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.exemption"
+    ],
+    "summary": "Exemption cell opens cancellation with a show-cause notice (Form CE-1): the grounds — priority-matrix flags, Condition 25 or 29",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/office/outreach-camps/{campId}/assisted-requests",
     "regex": "^/office/outreach\\-camps/[^/]+/assisted\\-requests$",
     "status": "W",
@@ -1204,6 +1238,22 @@
       "employer.operator"
     ],
     "summary": "Wage and contribution ledger for own employee",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/exempted/me/proceedings/{proceedingId}/replies",
+    "regex": "^/exempted/me/proceedings/[^/]+/replies$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "exempted.trust"
+    ],
+    "summary": "The trust's reply to a show-cause notice (Form CE-1), optionally relinquishing the exemption",
     "revocation": false
   },
   {
@@ -3904,8 +3954,8 @@
     "method": "POST",
     "path_template": "/exempted/me/surrender-requests",
     "regex": "^/exempted/me/surrender\\-requests$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
@@ -3913,7 +3963,7 @@
     "callers": [
       "exempted.trust"
     ],
-    "summary": "Surrender / cancellation of exemption",
+    "summary": "Surrender of exemption (Form SE-1): the date, the Board of Trustees' resolution, the employer's undertaking, the corpus (P2.14)",
     "revocation": false
   },
   {
@@ -4099,8 +4149,8 @@
     "method": "POST",
     "path_template": "/ho/exemptions/{estId}/decisions",
     "regex": "^/ho/exemptions/[^/]+/decisions$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
@@ -4108,7 +4158,7 @@
     "callers": [
       "ho.exemption"
     ],
-    "summary": "HO grants / cancels exemption",
+    "summary": "HO Exemption Division records the EEC's recommendation, the CBT's ratification, the reference to the appropriate Government and its notification",
     "revocation": false
   },
   {
@@ -4341,8 +4391,8 @@
     "method": "GET",
     "path_template": "/office/exempted/{estId}/audits",
     "regex": "^/office/exempted/[^/]+/audits$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
@@ -4350,7 +4400,7 @@
     "callers": [
       "fo.exemption"
     ],
-    "summary": "Exemption cell reviews trust audit reports",
+    "summary": "Exemption cell reviews the trust's annual audited accounts (late and qualified ones marked)",
     "revocation": false
   },
   {
@@ -4563,6 +4613,25 @@
       "fo.oic"
     ],
     "summary": "Inoperative account identification",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/exempted/proceedings",
+    "regex": "^/office/exempted/proceedings$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.exemption",
+      "fo.oic",
+      "ho.exemption",
+      "zo.acc"
+    ],
+    "summary": "Surrender and cancellation proceedings of the office (RO), zone (ZO) or all (HO), with the stage's due date",
     "revocation": false
   },
   {
@@ -5391,6 +5460,22 @@
       "zo.rpfc1_audit"
     ],
     "summary": "Concurrent audit alert to an RO",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/exempted/me/proceedings",
+    "regex": "^/exempted/me/proceedings$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "exempted.trust"
+    ],
+    "summary": "The trust's surrender or cancellation proceedings: stage, history, what is due and by when",
     "revocation": false
   },
   {
@@ -6490,19 +6575,35 @@
     "revocation": false
   },
   {
-    "method": "POST",
+    "method": "GET",
     "path_template": "/exempted/me/audits",
     "regex": "^/exempted/me/audits$",
-    "status": "P",
-    "phase": 3,
+    "status": "W",
+    "phase": 1,
     "owner": "employer",
     "upstream": "http://employer-service:8000",
     "money": false,
     "step_up": false,
     "callers": [
-      "trust_auditor"
+      "exempted.trust"
     ],
-    "summary": "Annual trust audit filing",
+    "summary": "The trust's annual audited accounts filed",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/exempted/me/audits",
+    "regex": "^/exempted/me/audits$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "exempted.trust"
+    ],
+    "summary": "The annual report with the trust's audited accounts for a year (due by 30 September): auditor, corpus movement, opinion and observations (P2.14)",
     "revocation": false
   },
   {

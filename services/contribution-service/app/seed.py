@@ -20,21 +20,27 @@ async def seed() -> None:
                                "status": establishment["status"], "office": establishment.get("office_id")})
         for e in data.get("public_establishments", []):   # earlier employers of members (other member IDs)
             await session.execute(text("INSERT INTO establishments (id,legal_name,status,exemption_status,office_id) VALUES (:id,:name,'REGISTERED',:ex,:office) "
-                                       "ON CONFLICT (id) DO UPDATE SET exemption_status=excluded.exemption_status,office_id=COALESCE(establishments.office_id,excluded.office_id)"),
+                                       "ON CONFLICT (id) DO UPDATE SET office_id=COALESCE(establishments.office_id,excluded.office_id)"),
                                   {"id": e["establishment_id"], "name": e["legal_name"], "ex": e.get("exemption_status"), "office": e.get("office_id")})
         ex = data.get("exempted_establishment")
-        if ex:
+        exemptions = ([ex] if ex else []) + data.get("more_exempted_establishments", {}).get("establishments", [])
+        for exemption in exemptions:
+            await session.execute(text("""INSERT INTO establishments (id,legal_name,status,exemption_status,office_id)
+                VALUES (:id,:name,'REGISTERED',:status,:office)
+                ON CONFLICT (id) DO NOTHING"""),
+                {"id": exemption["establishment_id"], "name": exemption.get("legal_name", exemption["trust_name"]),
+                 "status": exemption["status"], "office": exemption.get("office_id", establishment.get("office_id"))})
             await session.execute(text("""INSERT INTO exempted_establishments
                 (establishment_id,kind,pf_exempt,pension_exempt,edli_exempt,notification_no,notification_date,
                  effective_from,status,trust_id,trust_name,trust_users)
                 VALUES (:id,:kind,:pf,:pension,:edli,:notification,:notified,:effective,:status,:trust,:name,:users)
-                ON CONFLICT (establishment_id) DO UPDATE SET status=excluded.status,trust_name=excluded.trust_name,
+                ON CONFLICT (establishment_id) DO UPDATE SET trust_name=excluded.trust_name,
                 trust_users=excluded.trust_users"""),
-                {"id": ex["establishment_id"], "kind": ex["kind"], "pf": ex["pf_exempt"],
-                 "pension": ex["pension_exempt"], "edli": ex["edli_exempt"], "notification": ex["notification_no"],
-                 "notified": date.fromisoformat(ex["notification_date"]), "effective": date.fromisoformat(ex["effective_from"]),
-                 "status": ex["status"], "trust": ex["trust_id"], "name": ex["trust_name"],
-                 "users": json.dumps(ex.get("trust_users", []))})
+                {"id": exemption["establishment_id"], "kind": exemption["kind"], "pf": exemption["pf_exempt"],
+                 "pension": exemption["pension_exempt"], "edli": exemption["edli_exempt"], "notification": exemption["notification_no"],
+                 "notified": date.fromisoformat(exemption["notification_date"]), "effective": date.fromisoformat(exemption["effective_from"]),
+                 "status": exemption["status"], "trust": exemption["trust_id"], "name": exemption["trust_name"],
+                 "users": json.dumps(exemption.get("trust_users", []))})
         for m in data["members"]:
             for job in [{"establishment_id": establishment["establishment_id"], **m}, *m.get("previous_employments", [])]:
                 exited = date.fromisoformat(job["date_of_exit"]) if job.get("date_of_exit") else None

@@ -98,6 +98,19 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 14: the exempted trust's lifecycle (2 October 2026)
+
+Unit: employer-service 32 (new `test_exemption_lifecycle.py`: the audit's arithmetic, due date and revision; surrender
+and cancellation through every stage, each wrong role and wrong stage refused, the surrender date too early, the
+overdue reply, relinquishment, remand — also after HO returned it — the status events, office and zone scope, one open
+proceeding, step-up), contribution-service 87, claim-service 70, pension-service 42 (new `test_exemption_end.py` in
+each: the end date before and after, ingestion while complying as un-exempted and late, returns refused, the passbook
+note), common-persistence 25, platform-service 31, gateway 23; web 240 (new `P214.test.tsx`); end to end 93 of 93 (new
+`test_exemption_lifecycle.py`, resumable and repeatable); must-deny 18; UI smoke 2. Found on the way, fixed: a remand
+after HO had returned the agenda went back up to HO; the e2e compared dates with the local clock while the stack runs
+on UTC; the timeline showed role codes; the wage-ceiling test could pick a month an earlier run had filed (it now picks
+another).
+
 ## Update — Phase 2, slice 9d: regulating the trust (1 October 2026)
 
 Unit: contribution-service 85 (new `test_exempted_returns.py`: the return's checks, each part of the evaluator with no

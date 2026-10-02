@@ -94,7 +94,7 @@ function fieldOffice(role: string): NavGroup[] {
       link("7Q & 14B", ["fo.da_compliance", "fo.ss"].includes(role) ? "/office/returns#knock-off-heading" : undefined),
       link("Establishment", ["fo.oic", "fo.apfc"].includes(role) ? "/office/work-queue" : undefined),
       link("OLRE", ["fo.da_compliance", "fo.apfc"].includes(role) ? "/office/olre" : undefined),
-      ...(role === "fo.apfc" ? [link("Establishment change requests", "/office/olre#est-changes-heading"), link("DSC / e-sign approvals", "/office/olre#sig-heading")] : []), link("Exempted-Unexempted", role === "fo.exemption" ? "/office/exempted" : undefined), link("Monthly Return for Exempted Establishment", role === "fo.exemption" ? "/office/exempted#exempted-rankings-heading" : undefined), link("Past Accum. File Upload", role === "fo.exemption" ? "/office/exempted#past-accumulation-heading" : undefined),
+      ...(role === "fo.apfc" ? [link("Establishment change requests", "/office/olre#est-changes-heading"), link("DSC / e-sign approvals", "/office/olre#sig-heading")] : []), link("Exempted-Unexempted", role === "fo.exemption" ? "/office/exempted" : undefined), link("Exemption proceedings", ["fo.exemption", "fo.oic"].includes(role) ? "/exemption-proceedings" : undefined), link("Monthly Return for Exempted Establishment", role === "fo.exemption" ? "/office/exempted#exempted-rankings-heading" : undefined), link("Past Accum. File Upload", role === "fo.exemption" ? "/office/exempted#past-accumulation-heading" : undefined),
       link("PAST ACCUM BULK TRANSFER", undefined, PLANNED_TRUST), link("PAST ACCUM VDR RECO", undefined, PLANNED_TRUST)] },
     { label: "Pension", items: [link("Pension", ["fo.apfc_pension", "fo.da_pension", "fo.ss_pension"].includes(role) ? "/office/pensions" : undefined),
       link("NPPS", undefined, "Not in this POC: the menu's meaning is not documented")] },
@@ -137,6 +137,7 @@ const CLAIMANT: NavGroup[] = [
 function poc(role: string): NavGroup[] {
   const out: NavGroup[] = [];
   if (role === "zo.acc" || role === "zo.rpfc1") out.push({ labelKey: "navigation.workQueue", to: "/office/work-queue" });
+  if (role === "zo.acc") out.push({ label: "Exemption proceedings", to: "/exemption-proceedings" });
   if (role === "zo.acc" || role === "ho.cpfc") out.push({ labelKey: "navigation.grievanceMetrics", to: "/monitoring/grievances" });
   if (["zo.acc", "ho.cpfc", "gov.mole"].includes(role)) out.push({ labelKey: "navigation.dashboards", to: "/dashboards" });
   if (["ho.acc_hq", "ho.cpfc", "ho.pension", "ho.audit"].includes(role)) out.push({ labelKey: "navigation.policy", to: "/policy" });
@@ -164,7 +165,7 @@ export function menusFor(role: string | undefined): NavGroup[] {
   if (!role || role === "public") return [{ labelKey: "navigation.publicLookups", items: PUBLIC_SERVICES }];
   if (role === "member") return MEMBER;
   if (role === "exempted.trust") return [{ label: "Trust", to: "/exempted" }];
-  if (role === "ho.exemption") return [{ label: "Exempted establishments ranking", to: "/ho/exempted-rankings" }];
+  if (role === "ho.exemption") return [{ label: "Exempted establishments ranking", to: "/ho/exempted-rankings" }, { label: "Exemption proceedings", to: "/exemption-proceedings" }];
   if (role.startsWith("employer.")) return EMPLOYER;
   if (role === "pensioner") return PENSIONER;
   if (role === "claimant") return CLAIMANT;

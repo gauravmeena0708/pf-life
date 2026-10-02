@@ -13,7 +13,8 @@ from app.infra.claims_ledger import on_claim_decision, on_claim_paid, on_tax_ded
 from app.infra.transfers import on_member_exit, on_member_registered, on_process_transitioned as on_transfer_step
 from app.infra.messaging import (handle_employer_verified, handle_establishment_closed,
                                  handle_establishment_office_transferred, handle_inoperative_verified,
-                                 handle_member_change, handle_payment_confirmed, handle_payment_returned)
+                                 handle_member_change, handle_payment_confirmed, handle_payment_returned,
+                                 on_exemption_status_changed)
 from app.infra.messaging import BINDINGS, dispatch
 from epfo_persistence import Consumer, OutboxRelay
 from epfo_persistence.policy import on_policy_published
@@ -31,7 +32,8 @@ def create_app() -> FastAPI:
                           "compliance-service.DemandRaised.v1"], _payment_router),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.employers",
                          ["employer-service.EmployerVerified.v1", "employer-service.EstablishmentClosed.v1",
-                          "employer-service.EstablishmentOfficeTransferred.v1"], _employers_router),
+                          "employer-service.EstablishmentOfficeTransferred.v1",
+                          "employer-service.ExemptionStatusChanged.v1"], _employers_router),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.claims",
                          ["claim-service.ClaimDecisionRecorded.v1", "claim-service.TaxDeducted.v1",
                           "claim-service.AutoTransferConfirmed.v1"], _claims_router),
@@ -95,7 +97,9 @@ app = create_app()
 
 
 async def _employers_router(session, event):
-    if event.get("event_type") == "EstablishmentClosed.v1":
+    if event.get("event_type") == "ExemptionStatusChanged.v1":
+        await on_exemption_status_changed(session, event)
+    elif event.get("event_type") == "EstablishmentClosed.v1":
         await handle_establishment_closed(session, event)
     elif event.get("event_type") == "EstablishmentOfficeTransferred.v1":
         await handle_establishment_office_transferred(session, event)
