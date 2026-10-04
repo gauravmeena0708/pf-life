@@ -1183,6 +1183,43 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /members/me/retirement-forecast:
+    get:
+      operationId: getMembersRetirementForecast
+      summary: 'Retirement view, PF half: the corpus at the normal pension age from today''s balance and wages, with a VPF
+        what-if, its m'
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: vpf_pct
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+      description: 'Retirement view, PF half: the corpus at the normal pension age from today''s balance and wages, with a
+        VPF what-if, its monthly income and the years its interest becomes taxable (P2.23, illustrative)'
   /members/me/tax/taxable-interest:
     get:
       operationId: getMembersTaxTaxableInterest

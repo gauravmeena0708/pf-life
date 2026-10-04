@@ -98,6 +98,16 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 23a: the retirement view and a VPF what-if (4 October 2026)
+
+Unit: contribution-service 116 (new: a year to go worked by hand — the 12%, the employer's EPF share after EPS, the April
+rise, interest credited at retirement; VPF adds only the member's money and its interest, the employer's share unchanged,
+and the years it makes interest taxable; out of service only interest; at or past 58 nothing to project; VPF above the
+limit refused; the forecast from member A's ledger), shared package 29, platform-service 31 (the new `retirement` rule
+section). Web 307 (new: the PF income and the pension added and set against the wages at 58; the VPF what-if on the page).
+End to end 110 of 110 (new `test_retirement_view.py`), then the consistency check: every copy agrees. Must-deny 18; UI
+smoke 2.
+
 ## Update — Phase 2, slice 21b: death from the civil registry, claims offered, sampled audit, DigiLocker (4 October 2026)
 
 Unit: member-service 66 (new: a registered death matched by Aadhaar closes the open member ID and is announced once; a

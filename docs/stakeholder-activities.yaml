@@ -388,5 +388,6 @@ activities:
   - {id: F14.zti_zo, actor: zo.zti, does: "Zonal Training Institute uses the training sandbox", api: ["POST /training/sandboxes"], next: [], src: EC, ev: U}
   - {id: F14.npci, actor: ext.npci, does: "Validate bank accounts (penny drop / name match)", adapter: npci, next: [], src: WEB, ev: U}
   - {id: F14.digilocker, actor: ext.digilocker, does: "Issue documents (UAN card, PPO) to DigiLocker", adapter: digilocker, next: [], src: WEB, ev: U, fut: true}
+  - {id: F05.retirement_view, actor: member, does: "See my retirement in one view: PF corpus and pension at 58, the income they give against my wages, and what VPF would add", api: ["GET /members/me/retirement-forecast", "GET /members/me/pension-eligibility-preview"], next: [], src: WEB, ev: U}
   - {id: F14.digilocker_member, actor: member, does: "See the e-UAN card and e-PPO issued to my DigiLocker; ask for the e-UAN card", api: ["GET /members/me/digilocker-documents", "POST /members/me/digilocker-documents"], adapter: digilocker, next: [], src: WEB, ev: U}
   - {id: F14.umang, actor: ext.umang, does: "Mobile channel calling the same member / pensioner APIs", api: ["GET /members/me/passbook", "POST /members/me/claims", "GET /members/me/claims"], next: [], src: "EC, REF", ev: D}

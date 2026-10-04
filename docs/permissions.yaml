@@ -400,6 +400,7 @@ stakeholders:
     step_up: false
     via:
     - F05.preview
+    - F05.retirement_view
   - endpoint: POST /members/me/pension-scheme-certificates/{certId}/surrenders
     status: W
     scope: self — caller's own member record only
@@ -550,6 +551,12 @@ stakeholders:
     step_up: false
     via:
     - F14.privacy_request
+  - endpoint: GET /members/me/retirement-forecast
+    status: W
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F05.retirement_view
   - endpoint: GET /members/me/digilocker-documents
     status: M
     scope: self — caller's own member record only

@@ -4,9 +4,9 @@
   "interfaces": 21,
   "stakeholders": 115,
   "stakeholders_with_access": 95,
-  "activities": 274,
+  "activities": 275,
   "endpoints": {
-   "W": 456,
+   "W": 457,
    "M": 24,
    "P": 1,
    "?": 5
@@ -62,7 +62,7 @@
    "coverage": "Working",
    "purpose": "Members, pensioners and claimants: passbook, claims, transfers, nomination, pension and death claims.",
    "endpoints": {
-    "W": 90,
+    "W": 91,
     "M": 7,
     "P": 0,
     "?": 0
@@ -450,7 +450,7 @@
    "name": "Member — active contributor (UAN holder)",
    "group": "A. Members, beneficiaries and the public",
    "endpoints": {
-    "W": 74,
+    "W": 75,
     "M": 4,
     "P": 0,
     "?": 0
@@ -543,6 +543,10 @@
     {
      "id": "F14.privacy_request",
      "does": "Ask EPFO about my personal data: access, correction, erasure or a grievance (DPDP Act)"
+    },
+    {
+     "id": "F05.retirement_view",
+     "does": "See my retirement in one view: PF corpus and pension at 58, the income they give against my wages, and what VPF would add"
     },
     {
      "id": "F14.digilocker_member",
@@ -6268,6 +6272,16 @@
    "next": [],
    "status": "FUTURE",
    "endpoints": 0,
+   "src": "WEB"
+  },
+  {
+   "id": "F05.retirement_view",
+   "flow": "F05",
+   "actor": "member",
+   "does": "See my retirement in one view: PF corpus and pension at 58, the income they give against my wages, and what VPF would add",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
    "src": "WEB"
   },
   {

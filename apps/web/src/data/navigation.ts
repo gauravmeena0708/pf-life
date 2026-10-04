@@ -22,7 +22,7 @@ export const PUBLIC_SERVICES: NavItem[] = [
 const MEMBER: NavGroup[] = [
   { label: "View", items: [
     link("Profile", "/member/profile#member-profile-heading"), link("Service History", "/member/service#service-heading"),
-    link("UAN Card", "/member/uan-card"), link("Passbook", "/member/passbook"), link("Annual statement and taxable interest", "/member/passbook#annual-statement-heading"), link("Pension estimate", "/member/profile#pension-estimate-heading")] },
+    link("UAN Card", "/member/uan-card"), link("Passbook", "/member/passbook"), link("Annual statement and taxable interest", "/member/passbook#annual-statement-heading"), link("Pension estimate", "/member/profile#pension-estimate-heading"), link("Retirement view (PF and pension at 58)", "/member/retirement")] },
   { label: "Manage", items: [
     link("Basic Details (Joint Declaration)", "/member/profile#correction-heading"), link("Contact Details", "/member/security#contact-heading"),
     link("KYC", "/member/kyc"), link("e-Nomination", "/member/nomination#nomination-heading"), link("Know your UAN", "/member/nomination#uan-lookup-heading"), link("Mark Exit", "/member/service#exit-heading")] },

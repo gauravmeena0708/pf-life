@@ -470,6 +470,7 @@ Pensioner grievances use the grievance endpoints in §13 with `category=PENSION`
 | Method & path | Function | Status | Phase | Owner |
 |---|---|---|---|---|
 | `GET /members/me/pension-eligibility-preview` | Pre-check pension eligibility across all member IDs under the UAN; flags untransferred service (threshold from illustrative config) | W | 1 | pension |
+| `GET /members/me/retirement-forecast?vpf_pct=` | Retirement view, PF half: the corpus at the normal pension age from today's balance and wages, with a VPF what-if, its monthly income and the years its interest becomes taxable (P2.23, illustrative) | W | 1 | contribution |
 | `POST /office/pensions/service-aggregations` 🔐 | DA (Pension) aggregates untransferred past service into the calculation sheet | W | 1 | pension |
 | `POST /members/me/pension-scheme-certificates/{certId}/surrenders` 💰🔐 | Surrender a Scheme Certificate to convert it to monthly pension (Form 10D) or withdrawal benefit (Form 10C) | W | 1 | pension |
 | `POST /office/pensions/scheme-certificates/{certId}/surrender-adjudications` 🔐 | DA (Pension) validates and cancels a surrendered Scheme Certificate | W | 1 | pension |

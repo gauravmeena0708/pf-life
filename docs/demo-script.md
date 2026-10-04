@@ -736,6 +736,13 @@ tests produced, by role (after `python3 scripts/publish_manuals.py`).
 5. As `zo-audit`, the daily audit extract: *Claims settled automatically* and how many are in the post-audit sample; the
    sampled ones are flagged `AUTO_SETTLEMENT_SAMPLE`, ready for an alert to the office.
 
+## Retirement view (P2.23a)
+
+1. As `member-a`, View › *Retirement view*: the PF balance today, the wages, and at 58 the PF, its monthly income, the
+   pension and the total — as a share of the wages then.
+2. Enter 10 in *Voluntary PF (VPF)* and *Show with VPF*: a second row — what VPF costs a month now, the larger PF at 58,
+   and, when the member's own contributions pass ₹2,50,000 a year, the note that the interest on the part above is taxable.
+
 ## Edge cases (P2.19a)
 
 1. An ECR row with pension wages for a re-employed pensioner (UAN `100000000901`, PPO-DEMO-0001) is refused with

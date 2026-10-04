@@ -53,11 +53,11 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | P2.16 | Gig and platform workers (Code on Social Security, 2020): aggregators registered, a turnover-based contribution return (1–2% of turnover, capped at 5% of payments to the workers, in the rule set), workers linked by e-Shram number to a UAN, reconciliation | Planned — design only until the scheme is notified |
 | P2.17 | Insolvency: a watchlist from EPFO's own signals (ECR stopping, defaults, MCA status), IBBI announcements matched to the establishment, claim deadlines, dues frozen (7A; damages and interest kept apart), the resolution plan checked for PF dues in full, liquidation claims outside the estate (IBC s.36(4)(a)(iii)), recovery measured | Planned (links to P2.11) |
 | P2.18 | EPF to NPS: the PF leg paid to the member's NPS Tier I (PRAN, KYC match, the trustee bank through the CRA — mock); the EPS leg cannot move — a Scheme Certificate or the withdrawal benefit | Planned (needs PFRDA's circular) |
-| P2.19 | Edge cases as tests first, then the fixes: death during a transfer or claim; minor nominee or no nomination; two UANs to merge; court-ordered back wages after exit; 58 in service; a re-employed pensioner; family pension to a dependent parent or a disabled child; attachment orders refused; mergers without a break; a vanished contractor (s.8A); partial payment; exemption cancelled mid-transfer; returned payments after a bank merger; one bank account for many members; identity mismatches; members abroad without Aadhaar; unclaimed balances | a (money at risk: death, short cheque, re-employed pensioner, child pension to 25, back wages): Done; the rest planned |
+| P2.19 | Edge cases as tests first, then the fixes: death during a transfer or claim; minor nominee or no nomination; two UANs to merge; court-ordered back wages after exit; 58 in service; a re-employed pensioner; family pension to a dependent parent or a disabled child; attachment orders refused; mergers without a break; a vanished contractor (s.8A); partial payment; exemption cancelled mid-transfer; returned payments after a bank merger; one bank account for many members; identity mismatches; members abroad without Aadhaar; unclaimed balances | a (money at risk: death, short cheque, re-employed pensioner, child pension to 25, back wages): Done; c (erroneous EPS contributions rectified, circular WSU/2025/E-961539 of 19 Dec 2025): next after P2.23; the rest planned |
 | P2.20 | Navigation and findability: side or top menu (per user, by role), menu search (Ctrl+K), the empty menu headings wired to existing screens; a text-size control (to 150%) for senior citizens; later task-based member and employer menus with the legacy ones behind a toggle | Done (task-based menus later) |
 | P2.21 | Data held, not asked: pre-filled claims, automatic transfer when a new member ID appears, the pension case opened at 58 and on death, settlement by default for low risk with sampled audits | a (transfer unasked; claims and pension offered filled in): Done; b (death from the civil registry, claims offered to the nominee, sampled audit of automatic settlements, DigiLocker): Done |
 | P2.22 | Real-time contributions: a per-pay-run contribution API and a conformance sandbox for payroll vendors (the ECR kept as a format); a due-date option to model contributions paid with wages | Planned |
-| P2.23 | Retirement view: one forecast across PF and pension with VPF what-if and replacement rate; every rejection saying what fixes it | Planned |
+| P2.23 | Retirement view: one forecast across PF and pension with VPF what-if and replacement rate; every rejection saying what fixes it | a (retirement view, VPF what-if): Done; b (every rejection and refusal saying what fixes it) planned |
 | P2.24 | Trust and governance: authorised representatives (guardian, agent) with consented scope; published service standards with live performance; an independent review tier; rule-change simulation; interest-sustainability model | Planned |
 
 ## P2.9 — plan
@@ -1493,3 +1493,42 @@ notification); EPFO's notice that the UAN card, the PPO and the scheme certifica
   not pushed; a nominee without a login is not told (nominations hold no contact details); the sampling rate is a
   constant in audit-service, not in the published rules.
 
+
+## P2.19c — planned: erroneous EPS contributions rectified
+
+Source: EPFO Head Office circular No. WSU/2025/E-961539/Refund of erroneous contribution/42, 19 Dec 2025 (saved in
+`../manuals/`). Employers have remitted pension (EPS) contributions for members not eligible for EPS, or none for members
+who are; the circular fixes one rectification for each case, for unexempted and exempted establishments:
+
+| Scenario | Establishment | Rectification | Money moved |
+|---|---|---|---|
+| I — EPS allowed to an ineligible member | Unexempted | EPFO works out the EPS remitted with interest at the declared rate; moves it A/c 10 → A/c 1; deletes the pension service | Within EPFO |
+| I | Exempted (PF with a trust) | The same, worked out by EPFO; moved A/c 10 → the trust | EPFO → trust |
+| II — EPS denied to an eligible member | Unexempted | EPFO works out the EPS due with interest at the declared rate; moves it A/c 1 → A/c 10; credits the pension service, with any non-contributory period | Within EPFO |
+| II | Exempted | The trust works out the dues with interest at the trust's declared rate and moves them trust → A/c 10; EPFO credits the pension service | Trust → EPFO |
+
+To build: the EPS eligibility test on returns (a member joining on or after 1 Sep 2014 on wages above the ceiling is not
+eligible) so errors are found; an office rectification case per member ID (worked out month by month with interest,
+approved maker-checker) that posts the transfer between the accounts or raises the trust leg, and tells pension-service
+to delete or credit the service; the member's passbook and pension estimate follow; the consistency check covers it.
+
+## P2.23a — how it is built (retirement view, VPF what-if)
+
+Sources: EPF Scheme — a member may contribute above 12% (VPF), which the employer need not match; the Income-tax rule
+since the Finance Act, 2021 (Rule 9D) — interest on the employee's own contributions above ₹2,50,000 a year is taxable,
+VPF included (the rule set already holds the threshold).
+
+- **One view of retirement** (*View › Retirement view*): the PF balance today across the member's IDs and the wages of the
+  latest contribution (contribution-service, `GET /members/me/retirement-forecast`), and the EPS pension at 58 from
+  pension-service's estimate, read together: the PF at 58, the PF read as a monthly income, the pension, the total a
+  month and the share of the final wages it replaces.
+- **How the PF is projected.** Month by month to the 58th birthday: the member's 12% and the employer's EPF share (none to
+  EPS from 58), wages rising each April, interest at the latest declared rate on monthly closing balances credited each
+  March; today's year counts the months already gone. A member out of service earns interest only.
+- **VPF what-if.** VPF up to 88% of wages more: the extra the member pays now, the larger PF and income at 58 — the
+  employer's share is unchanged — and the years in which the member's own contributions pass ₹2,50,000, so that part of
+  the interest is taxable.
+- **Assumptions are rules** (`retirement:` in the rule set — wage growth 5%, the PF read as 6% a year, VPF up to 88%;
+  illustrative), shown on the page with the rule version; HO can change them like any rule.
+- Not built: deferring the pension to 60 (EPS gives 4% more a year), wages over the ceiling for the pension (higher
+  pension), a survivor's view; the replacement rate is on gross wages.

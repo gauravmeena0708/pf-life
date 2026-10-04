@@ -47,6 +47,7 @@ import { LegalPage } from "./features/office/LegalPage";
 import { RecoveryPage } from "./features/office/RecoveryPage";
 import { InstalmentReferralsPage } from "./features/office/InstalmentReferralsPage";
 import { RegistryDeathsPage } from "./features/office/RegistryDeathsPage";
+import { RetirementPage } from "./features/member/RetirementPage";
 import { ComplianceReportsPage } from "./features/ho/ComplianceReportsPage";
 import { EmployerProceedingsPage } from "./features/employer/ProceedingsPage";
 import { ClaimantPage, ProCounterPage } from "./features/claimant/DeathClaimPages";
@@ -180,6 +181,7 @@ export function App() {
             <Route path="/member/nomination" element={<NominationPage />} />
             <Route path="/member/kyc" element={<KycPage />} />
             <Route path="/member/pension" element={<PensionApplicationPage />} />
+            <Route path="/member/retirement" element={<RetirementPage />} />
             <Route path="/member/higher-pension" element={<HigherPensionPage />} />
             <Route path="/international-worker" element={<InternationalWorkerPage />} />
             <Route path="/employer/international" element={<InternationalPage />} />

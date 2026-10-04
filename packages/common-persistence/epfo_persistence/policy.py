@@ -618,6 +618,11 @@ def validate(document: dict[str, Any]) -> list[str]:
         problems.append("grievances.sla_days needs RO, ZO and HO, each at least 1 day")
     if not isinstance(g.get("reopen_window_days"), int) or g["reopen_window_days"] < 0:
         problems.append("grievances.reopen_window_days must be a non-negative whole number")
+    r = document.get("retirement")
+    if r is not None:                                            # P2.23: the forecast's assumptions
+        for key, high in (("wage_growth_bp", 3000), ("drawdown_rate_bp", 2000), ("vpf_max_bp", 8800)):
+            if not _whole(r.get(key), 0, high):
+                problems.append(f"retirement.{key} must be a whole number of basis points between 0 and {high}")
     return problems
 
 

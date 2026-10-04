@@ -108,6 +108,13 @@ pension:
     child_minimum_paise: 25000
     max_children: 2
     child_until_age: 25          # children's pension ends at 25 (Pension Manual 2.10.5) — for life for a disabled child (2.13.10)
+retirement:
+  # P2.23: assumptions of the member's retirement forecast (ILLUSTRATIVE, not advice). Interest is the latest rate declared
+  # (interest.rates_bp), assumed to hold; wages rise each April; the PF corpus is shown as a monthly income at the drawdown
+  # rate. VPF: the member may pay more than 12% (up to 100% of basic wages and DA), the employer does not match it.
+  wage_growth_bp: 500                     # wages rise 5% a year
+  drawdown_rate_bp: 600                   # the corpus read as an income of 6% a year
+  vpf_max_bp: 8800                        # VPF on top of the 12%: up to 88% more of wages
 death_claims:
   # Claims on a member's death, filed by a nominee or legal heir (ILLUSTRATIVE). Form 20 pays the PF balance to the
   # beneficiaries in their shares; Form 5IF pays the EDLI assurance benefit from the EDLI fund:

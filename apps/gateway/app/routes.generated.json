@@ -4423,6 +4423,22 @@
     "revocation": false
   },
   {
+    "method": "GET",
+    "path_template": "/members/me/retirement-forecast",
+    "regex": "^/members/me/retirement\\-forecast$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Retirement view, PF half: the corpus at the normal pension age from today's balance and wages, with a VPF what-if, its monthly income and the years its interest becomes taxable (P2.23, illustrative)",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/office/claims/{claimId}/reissues",
     "regex": "^/office/claims/[^/]+/reissues$",

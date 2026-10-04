@@ -148,6 +148,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/pension-scheme-certificate` | W | self — caller's own member record only |  |
 | `GET /members/me/pmvbry` | W | self — caller's own member record only |  |
 | `GET /members/me/privacy-requests` | W | self — caller's own member record only |  |
+| `GET /members/me/retirement-forecast` | W | self — caller's own member record only |  |
 | `GET /members/me/service-history` | W | self — caller's own member record only |  |
 | `GET /members/me/sessions` | W | self — caller's own member record only |  |
 | `GET /members/me/tax/form-16a` | W | self — caller's own member record only |  |

@@ -106,7 +106,7 @@ async def load(session: AsyncSession, version_id: str) -> dict[str, Any]:
     return dict(row)
 
 
-SECTIONS = ("interest", "tds", "pension", "death_claims", "late_payment", "vishwas", "higher_pension", "international_workers", "vigilance", "inoperative_accounts", "voluntary_coverage", "oversight_periods", "investment_pattern", "dr_and_training", "exempted_establishments", "pmvbry", "notifications", "compliance_proceedings")
+SECTIONS = ("interest", "tds", "pension", "death_claims", "late_payment", "vishwas", "higher_pension", "international_workers", "vigilance", "inoperative_accounts", "voluntary_coverage", "oversight_periods", "investment_pattern", "dr_and_training", "exempted_establishments", "pmvbry", "notifications", "compliance_proceedings", "retirement")
 
 
 def complete(document: dict[str, Any]) -> dict[str, Any]:
