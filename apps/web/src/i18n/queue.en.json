@@ -1,1 +1,36 @@
-{"queueUx": {}}
+{
+  "queueUx": {
+    "metricsSummary": "Queue summary",
+    "countOverdue": "Overdue",
+    "countDueToday": "Due today",
+    "countDueThisWeek": "Due this week",
+    "countTotal": "Total",
+    "filterQueueAria": "Filter the queue",
+    "searchLabel": "Search",
+    "searchPlaceholder": "Case ID, claim ID or subject",
+    "kindFilterLabel": "Kind",
+    "kindAll": "All",
+    "kindClaims": "Claims",
+    "kindGrievances": "Grievances",
+    "kindOther": "Other processes",
+    "overdueOnly": "Overdue only",
+    "sortLabel": "Sort by",
+    "sortDeadline": "Deadline (soonest first)",
+    "sortAmount": "Amount (high to low)",
+    "sortOldest": "Oldest first",
+    "timeLeftCol": "Time left",
+    "dueToday": "Due today",
+    "daysLeft": "{{count}} days left",
+    "daysLeft_one": "1 day left",
+    "daysLeft_other": "{{count}} days left",
+    "overdueDays": "Overdue by {{count}} days",
+    "overdueDays_one": "Overdue by 1 day",
+    "overdueDays_other": "Overdue by {{count}} days",
+    "noDeadline": "—",
+    "showing": "Showing {{start}}–{{end}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next",
+    "noMatches": "No cases match these filters",
+    "clearFilters": "Clear filters"
+  }
+}

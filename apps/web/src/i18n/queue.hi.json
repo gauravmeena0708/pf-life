@@ -1,1 +1,36 @@
-{"queueUx": {}}
+{
+  "queueUx": {
+    "metricsSummary": "कतार सारांश",
+    "countOverdue": "अतिदेय",
+    "countDueToday": "आज देय",
+    "countDueThisWeek": "इस सप्ताह देय",
+    "countTotal": "कुल",
+    "filterQueueAria": "कतार फ़िल्टर करें",
+    "searchLabel": "खोजें",
+    "searchPlaceholder": "मामला आईडी, दावा आईडी या विषय",
+    "kindFilterLabel": "प्रकार",
+    "kindAll": "सभी",
+    "kindClaims": "दावे",
+    "kindGrievances": "शिकायतें",
+    "kindOther": "अन्य प्रक्रियाएं",
+    "overdueOnly": "केवल अतिदेय",
+    "sortLabel": "क्रमबद्ध करें",
+    "sortDeadline": "अंतिम तिथि (निकटतम पहले)",
+    "sortAmount": "राशि (उच्च से निम्न)",
+    "sortOldest": "सबसे पुराने पहले",
+    "timeLeftCol": "शेष समय",
+    "dueToday": "आज देय",
+    "daysLeft": "{{count}} दिन शेष",
+    "daysLeft_one": "1 दिन शेष",
+    "daysLeft_other": "{{count}} दिन शेष",
+    "overdueDays": "{{count}} दिन अतिदेय",
+    "overdueDays_one": "1 दिन अतिदेय",
+    "overdueDays_other": "{{count}} दिन अतिदेय",
+    "noDeadline": "—",
+    "showing": "{{total}} में से {{start}}–{{end}}",
+    "previous": "पिछला",
+    "next": "अगला",
+    "noMatches": "इन फ़िल्टरों से कोई मामला मेल नहीं खाता",
+    "clearFilters": "फ़िल्टर हटाएं"
+  }
+}

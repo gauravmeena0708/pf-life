@@ -418,3 +418,77 @@ code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9em; }
     color: #000000 !important;
   }
 }
+
+/* P2.28d work queue */
+.queue-metrics {
+  margin-bottom: 0.5rem;
+}
+.queue-metric-overdue {
+  color: #b71c1c;
+}
+.queue-filter-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+.queue-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 140px;
+}
+.queue-filter-field:first-child {
+  flex: 1 1 200px;
+}
+.queue-filter-field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #003366;
+}
+.queue-filter-field input[type="search"],
+.queue-filter-field select {
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font: inherit;
+  background: #ffffff;
+}
+.queue-filter-checkbox {
+  flex-direction: row;
+  align-items: center;
+  align-self: center;
+  padding-bottom: 2px;
+}
+.queue-filter-checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.queue-overdue {
+  color: #b71c1c;
+  font-weight: 700;
+}
+.queue-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.pagination-summary {
+  font-size: 0.9rem;
+  color: var(--muted, #555555);
+}
+.pagination-buttons {
+  display: flex;
+  gap: 8px;
+}
