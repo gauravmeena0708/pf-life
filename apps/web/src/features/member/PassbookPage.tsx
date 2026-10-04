@@ -62,8 +62,8 @@ export function PassbookPage() {
             <strong className="trust-passbook-balance">{rupees((trust.balance?.employee_paise ?? 0) + (trust.balance?.employer_paise ?? 0))}</strong>
             <p className="muted small">{trust.stale ? t("trustPf.stale", { time: fetched }) : t("trustPf.fetched", { time: fetched })}</p>
             <p>{t("trustPf.servicePeriod")}: {trust.service_from ?? "—"} – {trust.service_to ?? t("trustPf.inService")}</p>
-            {trust.entries?.length ? <div className="table-scroll"><table><thead><tr><th scope="col">{t("trustPf.date")}</th><th scope="col">{t("trustPf.entry")}</th><th scope="col" className="numeric">{t("trustPf.amount")}</th></tr></thead><tbody>
-              {trust.entries.map((entry, index) => <tr key={`${entry.date}-${index}`}><td>{entry.date}</td><td>{entry.note || statusLabel(entry.kind, t)}</td><td className="numeric">{rupees(entry.amount_paise)}</td></tr>)}
+            {trust.entries?.length ? <div className="table-scroll"><table className="responsive-table"><thead><tr><th scope="col">{t("trustPf.date")}</th><th scope="col">{t("trustPf.entry")}</th><th scope="col" className="numeric">{t("trustPf.amount")}</th></tr></thead><tbody>
+              {trust.entries.map((entry, index) => <tr key={`${entry.date}-${index}`}><td data-label={t("trustPf.date")}>{entry.date}</td><td data-label={t("trustPf.entry")}>{entry.note || statusLabel(entry.kind, t)}</td><td data-label={t("trustPf.amount")} className="numeric">{rupees(entry.amount_paise)}</td></tr>)}
             </tbody></table></div> : <p className="muted small">{t("trustPf.noEntries")}</p>}
           </>}
           <p className="muted small">{t("trustPf.epsWithEpfo")}</p>
@@ -71,10 +71,10 @@ export function PassbookPage() {
       })}
       {accounts.filter((account) => account.entries.length > 0).map((account) => <section key={account.account_link_id} className="card stack" aria-labelledby={`account-${account.account_link_id}`}>
         <div className="section-heading"><div><p className="eyebrow">{t("passbook.account")}</p><h2 id={`account-${account.account_link_id}`}>{account.account_link_id}</h2></div></div>
-        <div className="table-scroll"><table className="passbook-table">
+        <div className="table-scroll"><table className="passbook-table responsive-table">
           <thead><tr><th scope="col">{t("passbook.wageMonth")}</th><th scope="col">{t("passbook.establishment")}</th><th scope="col" className="numeric">{t("passbook.employeeShare")}</th><th scope="col" className="numeric">{t("passbook.employerShare")}</th><th scope="col" className="numeric">{t("passbook.runningBalance")}</th><th scope="col">{t("passbook.trrn")}</th></tr></thead>
           <tbody>{account.entries.map((entry, index) => <tr key={`${entry.trrn}-${entry.wage_month}-${index}`}>
-            <td>{entry.wage_month}</td><td>{entry.establishment_name}</td><td className="numeric">{rupees(entry.employee_share_paise)}</td><td className="numeric">{rupees(entry.employer_share_paise)}</td><td className="numeric"><strong>{rupees(entry.running_balance_paise)}</strong></td><td><code>{entry.trrn}</code></td>
+            <td data-label={t("passbook.wageMonth")}>{entry.wage_month}</td><td data-label={t("passbook.establishment")}>{entry.establishment_name}</td><td data-label={t("passbook.employeeShare")} className="numeric">{rupees(entry.employee_share_paise)}</td><td data-label={t("passbook.employerShare")} className="numeric">{rupees(entry.employer_share_paise)}</td><td data-label={t("passbook.runningBalance")} className="numeric"><strong>{rupees(entry.running_balance_paise)}</strong></td><td data-label={t("passbook.trrn")}><code>{entry.trrn}</code></td>
           </tr>)}</tbody>
         </table></div>
     </section>)}

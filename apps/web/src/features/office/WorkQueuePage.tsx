@@ -228,7 +228,7 @@ export function WorkQueuePage() {
       {totalFiltered > 0 ? (
         <>
           <div className="table-scroll">
-            <table>
+            <table className="responsive-table">
               <thead>
                 <tr>
                   <th scope="col">{t("office.caseId")}</th>
@@ -246,12 +246,12 @@ export function WorkQueuePage() {
                   const tl = timeLeft(item.sla_due_at, undefined, t);
                   return (
                     <tr key={item.case_id}>
-                      <td>
+                      <td data-label={t("office.caseId")}>
                         <Link to={item.grievance_id ? `/office/grievances/${item.grievance_id}` : `/office/cases/${item.case_id}`}>
                           <code>{item.case_id}</code>
                         </Link>
                       </td>
-                      <td>
+                      <td data-label={t("claims.claimId")}>
                         <code>{item.claim_id ?? item.grievance_id ?? item.subject_ref}</code>
                         {item.advisory_signal_id ? (
                           <>
@@ -260,26 +260,26 @@ export function WorkQueuePage() {
                           </>
                         ) : null}
                       </td>
-                      <td>
+                      <td data-label={t("claims.form")}>
                         {item.grievance_id
                           ? t("office.grievanceKind")
                           : item.process
                             ? `${item.kind.replaceAll("_", " ").toLowerCase()} · ${item.subject_ref}`
                             : item.form_type}
                       </td>
-                      <td className="numeric">{item.grievance_id || item.process ? "—" : rupees(item.amount_paise)}</td>
-                      <td>
+                      <td data-label={t("claims.amount")} className="numeric">{item.grievance_id || item.process ? "—" : rupees(item.amount_paise)}</td>
+                      <td data-label={t("office.chainProgress")}>
                         {item.chain.length
                           ? t("office.stepOf", { step: Math.min(item.step + 1, item.chain.length), total: item.chain.length })
                           : "—"}
                       </td>
-                      <td>{dateTime(item.sla_due_at, i18n.language)}</td>
-                      <td>
+                      <td data-label={t("office.slaDue")}>{dateTime(item.sla_due_at, i18n.language)}</td>
+                      <td data-label={t("office.nextAction")}>
                         {item.next_action ? (
                           <span className="state-pill">{t(`office.actions.${item.next_action}`, { defaultValue: item.next_action })}</span>
                         ) : "—"}
                       </td>
-                      <td>
+                      <td data-label={t("queueUx.timeLeftCol")}>
                         <span className={tl.overdue ? "queue-overdue" : undefined}>{tl.text}</span>
                       </td>
                     </tr>
