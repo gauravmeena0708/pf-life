@@ -1,1 +1,24 @@
-{"caseUx": {}}
+{
+  "caseUx": {
+    "atAGlance": "At a glance",
+    "amount": "Amount",
+    "form": "Form",
+    "deadline": "Deadline",
+    "step": "Step",
+    "stepOf": "Step {{step}} of {{total}}",
+    "daysLeft": "{{count}} days left",
+    "daysLeft_one": "{{count}} day left",
+    "daysLeft_other": "{{count}} days left",
+    "dayLeft": "1 day left",
+    "overdueBy": "Overdue by {{count}} days",
+    "overdueBy_one": "Overdue by {{count}} day",
+    "overdueBy_other": "Overdue by {{count}} days",
+    "overdueByOne": "Overdue by 1 day",
+    "dueToday": "Due today",
+    "noDeadline": "—",
+    "advisory": "Signal",
+    "advisoryMarker": "Advisory",
+    "decisionArea": "Your decision",
+    "jumpToDecision": "Jump to your decision"
+  }
+}
