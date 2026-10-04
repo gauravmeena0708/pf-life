@@ -686,3 +686,161 @@ code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9em; }
     align-self: center;
   }
 }
+
+/* P2.28h receipt */
+.receipt-container {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.receipt-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-top: 5px solid var(--navy);
+  border-bottom: 3px solid var(--gold);
+  border-radius: 4px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.receipt-header {
+  text-align: center;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+
+.receipt-emblem {
+  display: inline-block;
+  background: var(--navy);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 4px 12px;
+  border-radius: 2px;
+  margin-bottom: 8px;
+  letter-spacing: 0.05em;
+}
+
+.receipt-org-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 4px 0;
+}
+
+.receipt-demo-notice {
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+}
+
+.receipt-title {
+  font: 700 1.6rem Georgia, serif;
+  color: var(--navy);
+  margin: 8px 0 0 0;
+}
+
+.receipt-body {
+  display: grid;
+  gap: 24px;
+}
+
+.receipt-dl {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 10px 16px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.receipt-dl dt {
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.receipt-dl dd {
+  margin: 0;
+  color: #222222;
+}
+
+.receipt-verification-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  border-top: 1px dashed var(--line);
+  padding-top: 20px;
+  margin-top: 8px;
+}
+
+.receipt-code-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.receipt-code-label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.receipt-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--navy);
+  background: #f7f9fa;
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.receipt-qr-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.receipt-qr {
+  width: 140px;
+  height: 140px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 4px;
+  background: #ffffff;
+}
+
+@media print {
+  body:has(.receipt-card) * {
+    visibility: hidden;
+  }
+  body .receipt-card,
+  body .receipt-card * {
+    visibility: visible;
+  }
+  .receipt-card {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    max-width: 100%;
+    border: 1px solid #333333 !important;
+    border-top: 6px solid #003366 !important;
+    border-bottom: 3px solid #b8860b !important;
+    box-shadow: none !important;
+    padding: 24px !important;
+    margin: 0 !important;
+  }
+  .receipt-card .no-print {
+    display: none !important;
+  }
+}
+

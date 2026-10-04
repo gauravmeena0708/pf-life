@@ -320,6 +320,9 @@ export function ClaimJourneyPage() {
               <Link to="/member/claims" className="button">
                 {t("claimJourney.confirmation.backToClaims")}
               </Link>
+              <Link to={`/member/claims/${confirmedClaim.claim_id}/receipt`} className="button">
+                {t("receipt.viewAndPrint", "View and print receipt")}
+              </Link>
               <button type="button" className="button" onClick={() => window.print()}>
                 {t("claimJourney.confirmation.printReceipt")}
               </button>

@@ -86,7 +86,14 @@ export function ClaimDetailPage() {
   return <section className="stack" aria-labelledby="claim-detail-heading">
     <PageHeader id="claim-detail-heading" eyebrow={t("claimDetail.eyebrow")} title={t("claimDetail.title")} description={item ? `${rupees(item.amount_paise)} · ${item.form_type}` : t("claimDetail.description")}
       current={t("claimDetail.title")} parent={{ label: t("navigation.claims"), to: "/member/claims" }}>
-      {item ? <span className="state-pill">{stateLabel(item.state, t)}</span> : null}
+      <div className="actions">
+        {item ? <span className="state-pill">{stateLabel(item.state, t)}</span> : null}
+        {item && item.state !== "AWAITING_CONFIRMATION" ? (
+          <Link to={`/member/claims/${item.claim_id}/receipt`} className="button">
+            {t("receipt.title", "Receipt")}
+          </Link>
+        ) : null}
+      </div>
     </PageHeader>
     <ProblemMessage error={claim.error} />
     <ProblemMessage error={error} />
