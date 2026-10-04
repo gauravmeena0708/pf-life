@@ -17,5 +17,5 @@ export default defineConfig({
       "/auth": { target: gateway, changeOrigin: false },
     },
   },
-  test: { environment: "jsdom", globals: true },
+  test: { environment: "jsdom", globals: true, setupFiles: ["./src/setupTests.ts"] },
 });
