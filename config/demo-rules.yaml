@@ -24,6 +24,19 @@ claims:
   auto_transfer_automatic: true                # P2.21: an exited member ID's balance moves to the new primary ID when its first
                                                # contribution is posted — no request (Aadhaar-verified UAN, no claim in progress)
   settlement_sla_days: 20
+  # P2.23b: why an officer rejects a claim, and what the member does about it. The officer picks a reason (and adds a
+  # note); the member's claim shows the fix and where to make it. Common grounds from EPFO's claim rejections; reasons
+  # must be substantial — a deficiency the member can cure is said so, with the way to cure it (illustrative wording).
+  rejection_reasons:
+    BANK_DETAILS: {label: "The bank account does not match the records", fix: "Seed your correct bank account under KYC (your employer approves it), then claim again.", link: "/member/kyc"}
+    CHEQUE_UNCLEAR: {label: "The cheque or passbook image is not legible", fix: "Claim again with a clear image of a cancelled cheque or the passbook page showing your name, account number and IFSC.", link: "/member/claims"}
+    NAME_DOB_MISMATCH: {label: "Your name, date of birth or father's name differs from the records", fix: "Correct it by a Joint Declaration with your employer, then claim again.", link: "/member/profile#correction-heading"}
+    KYC_INCOMPLETE: {label: "Aadhaar or PAN is not verified", fix: "Complete your KYC under Manage › KYC, then claim again.", link: "/member/kyc"}
+    EXIT_NOT_MARKED: {label: "The date of exit is not marked", fix: "Ask your employer to mark it, or mark it yourself two months after the last contribution; then claim again.", link: "/member/service#exit-heading"}
+    SERVICE_NOT_TRANSFERRED: {label: "Earlier member IDs are not transferred", fix: "Transfer them to your current member ID (Form 13); then claim the whole balance.", link: "/member/service#transfer-heading"}
+    DOCUMENT_MISSING: {label: "A document the claim needs is missing", fix: "Claim again with the document the officer's note names.", link: "/member/claims"}
+    NOT_ELIGIBLE: {label: "Not eligible for this claim under the scheme", fix: "The claim page shows what you may claim now, and when this claim opens.", link: "/member/claims"}
+    OTHER: {label: "Other", fix: "The officer's note says what to do.", link: null}
   # Conditions a claim type may use (all optional): requires_active_employment, requires_exit_months,
   # min_service_months, once_every_months, max_from (employee_share | total_balance), max_pct_bp, cap_paise.
   # auto_settle_up_to_paise: null = always reviewed by an officer. approval_bands: overrides the default chain.

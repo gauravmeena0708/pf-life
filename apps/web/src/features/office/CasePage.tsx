@@ -33,6 +33,7 @@ export function CasePage() {
   const [note, setNote] = useState("");
   const [decision, setDecision] = useState<Decision>("APPROVE");
   const [reason, setReason] = useState("");
+  const [reasonCode, setReasonCode] = useState<string | null>(null);
   const [scenario, setScenario] = useState<Scenario>("SUCCESS");
   const [recommendation, setRecommendation] = useState<"APPROVE" | "REJECT">("APPROVE");
   const [accountStatus, setAccountStatus] = useState("OPERATIVE");
@@ -59,6 +60,10 @@ export function CasePage() {
   const optionLabel = (value: Decision) => value === "RETURN" ? "Send back to first level / initiator"
     : value === "APPROVE" ? (finalLevel ? "Approve" : "Recommend to Approve (forward)")
     : finalLevel ? "Reject" : rec === "REJECT" ? "Recommend to Reject (forward)" : "Recommend to Reject (returns to the initiator)";
+  // P2.23b: a claim is rejected for one of the rule set's reasons; the member is shown what fixes it
+  const rejecting = !!item?.claim_id && (action === "recommend" ? recommendation === "REJECT" : (action === "decide" || action === "second-approve") && chosen === "REJECT");
+  const code = reasonCode ?? String(item?.data?.rejection_code ?? "");
+  const picked = item?.rejection_reasons?.find((r) => r.code === code);
   const reviewing = !!item?.claim_id && (action === "recommend" || action === "decide" || action === "second-approve") && allowed;
 
   async function run(work: () => Promise<unknown>) {
@@ -80,7 +85,7 @@ export function CasePage() {
         summary: `Recommend to ${recommendation === "APPROVE" ? "approve" : "reject"} claim ${item.claim_id ?? item.case_id}.` });
       if (!token) return;
       await run(() => command("POST", `/api/v1/office/cases/${item.case_id}/recommendations`, { checks: checks.map((key) => CHECK_VALUES[key]),
-        note: note.trim(), recommendation, account_status: accountStatus }, { stepUpToken: token }));
+        note: note.trim(), recommendation, account_status: accountStatus, ...(rejecting ? { reason_code: code } : {}) }, { stepUpToken: token }));
       return;
     }
     if (action === "decide" || action === "second-approve") {
@@ -89,7 +94,7 @@ export function CasePage() {
         amountPaise: item.amount_paise, summary: `${optionLabel(chosen)} — case ${item.case_id}.` });
       if (!token) return;
       await run(() => command("POST", `/api/v1/office/cases/${item.case_id}/${action === "decide" ? "decisions" : "second-approvals"}`,
-        { decision: chosen, reason: reason.trim() || null }, { stepUpToken: token }));
+        { decision: chosen, reason: reason.trim() || null, ...(rejecting ? { reason_code: code } : {}) }, { stepUpToken: token }));
       return;
     }
     if (action === "approve-redisbursement") {
@@ -185,6 +190,10 @@ export function CasePage() {
           {action === "instruct-payment" || action === "reissue" ? <><p className="demo-tip">{t("office.demoPaymentNotice")}</p>
             <label>{t("office.demoScenario")}<select value={scenario} onChange={(event) => { setScenario(event.target.value as Scenario); retryKey.current = null; }}>
               <option value="SUCCESS">{t("office.scenarios.SUCCESS")}</option><option value="RETURN">{t("office.scenarios.RETURN")}</option></select></label></> : null}
+          {rejecting && item.rejection_reasons?.length ? <><label>Reason for rejection (the member is told what fixes it)
+            <select required value={code} onChange={(event) => setReasonCode(event.target.value)}><option value="">Choose…</option>
+              {item.rejection_reasons.map((r) => <option key={r.code} value={r.code}>{r.label}</option>)}</select></label>
+            {picked ? <p className="muted small">The member will read: {picked.fix}</p> : null}</> : null}
           <div className="actions"><button type="submit" className="primary" disabled={busy || (reviewing && !item.docket_ready)}>{t("office.submitAction")}</button></div>
         </form>
       </section> : null}

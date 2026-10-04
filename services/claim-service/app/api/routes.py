@@ -89,6 +89,15 @@ async def load_claim(session: AsyncSession, claim_id: str, *, member: str | None
     return dict(row)
 
 
+async def rejection_fix(session: AsyncSession, code: str | None) -> dict[str, Any] | None:
+    """P2.23b: a rejection reason of the rules in force, with what the member does about it."""
+    if not code:
+        return None
+    from epfo_persistence.policy import section
+    r = (section(await rules_on(session, date.today()), "claims").get("rejection_reasons") or {}).get(code)
+    return {"code": code, "label": r["label"], "fix": r["fix"], "link": r.get("link")} if r else None
+
+
 async def claim_view(session: AsyncSession, claim: dict[str, Any]) -> dict[str, Any]:
     timeline = (await session.execute(select(claim_timeline).where(claim_timeline.c.claim_id == claim["claim_id"])
                                       .order_by(claim_timeline.c.id))).mappings().all()
@@ -97,6 +106,7 @@ async def claim_view(session: AsyncSession, claim: dict[str, Any]) -> dict[str, 
         "form_type": claim["form_type"], "amount_paise": claim["amount_paise"], "state": claim["state"],
         "version": claim["version"], "rule_version": claim["rule_version"], "summary": claim["summary"],
         "decision_reason": claim["decision_reason"], "payment_id": claim["payment_id"],
+        "decision_fix": await rejection_fix(session, claim.get("decision_reason_code")) if claim["state"] == "REJECTED_WITH_REASON" else None,
         "next_step": NEXT_STEP.get(claim["state"], ""), "tax": claim.get("tax"),
         "timeline": [{"at": t["at"].isoformat() if t["at"] else None, "state": t["state"],
                       "by": ROLE_LABELS.get(t["actor_role"], t["actor_role"]), "note": t["note"]} for t in timeline],
@@ -159,7 +169,10 @@ async def evaluate(session: AsyncSession, account: dict[str, Any], claim_type: s
         ceiling = (await rules_on(session, exited))["contribution"]["eps_wage_ceiling_paise"]
     e = eligibility(account, claim_type, rules, today, await previous_claims(session, account["account_link_id"], claim_type), ceiling)
     extra = await member_id_reasons(session, account, claim_type)
-    return {**e, "eligible": False, "max_amount_paise": 0, "reasons": [*e["reasons"], *extra]} if extra else e
+    fixes = [{"reason": r, "fix": "Transfer them to the primary member ID (Form 13), then claim." if "transferred" in r
+              else "Claim against your primary member ID.", "link": "/member/service#transfer-heading" if "transferred" in r else "/member/claims"}
+             for r in extra]
+    return {**e, "eligible": False, "max_amount_paise": 0, "reasons": [*e["reasons"], *extra], "fixes": [*e["fixes"], *fixes]} if extra else e
 
 
 # ── member routes ───────────────────────────────────────────────────────────────────────────────
@@ -212,7 +225,7 @@ async def create_claim(body: ClaimInput, request: Request, actor: Actor = Depend
         evaluation = await evaluate(session, account, body.claim_type, rules, date.today())
         if not evaluation["eligible"]:
             raise Problem(422, "/problems/not-eligible", "You are not eligible for this claim today",
-                          " ".join(evaluation["reasons"]), reasons=evaluation["reasons"])
+                          " ".join(evaluation["reasons"]), reasons=evaluation["reasons"], fixes=evaluation["fixes"])
         if body.amount_paise > evaluation["max_amount_paise"]:
             raise Problem(422, "/problems/amount-above-limit", "The amount is above your limit",
                           f"Enter at most {evaluation['max_amount_paise'] // 100} rupees.",

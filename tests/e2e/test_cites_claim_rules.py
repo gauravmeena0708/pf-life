@@ -1,6 +1,7 @@
 """P2.5d on the running stack — claim scrutiny as the CITES manuals set it: the initiator stops and restarts a
 claim; the final level cannot reject a claim recommended for approval (only send it back); the initiator
-re-forwards it as "Recommend to Reject" and the final level rejects it. Each level generates its docket first."""
+re-forwards it as "Recommend to Reject" and the final level rejects it. Each level generates its docket first. The member is
+told the reason and what fixes it (P2.23b)."""
 from tests.e2e.officers import decide, recommend
 from tests.e2e.test_claim_lifecycle import file_claim
 from tests.e2e.test_journey_a_ecr import call, wait_for
@@ -31,10 +32,14 @@ def test_stop_restart_and_rejection_only_at_the_final_level(persona):
     assert decide(ao, case, "decisions", "RETURN", "Recommend rejection: estimate not from a listed hospital")[0] == 200
 
     case = wait_for(lambda: mine(da), timeout=30)
-    assert recommend(da, case, "Agree: not a listed hospital", recommendation="REJECT")[0] == 200
+    assert recommend(da, case, "Agree: not a listed hospital", recommendation="REJECT", reason_code="DOCUMENT_MISSING")[0] == 200
     case = wait_for(lambda: mine(ao), timeout=30)
     status, r = decide(ao, case, "decisions", "REJECT", "Estimate not from a listed hospital")
     assert status == 200 and r["data"]["state"] == "REJECTED", r
     wait_for(lambda: call(member, "GET", f"/api/v1/members/me/claims/{c['claim_id']}")[1]["data"]["state"] == "REJECTED_WITH_REASON", timeout=30)
     timeline = [t["note"] for t in call(member, "GET", f"/api/v1/members/me/claims/{c['claim_id']}")[1]["data"]["timeline"]]
     assert "Reviewed; recommended for rejection." in timeline
+    # P2.23b: the member is told the reason from the rule set and what fixes it
+    claim = call(member, "GET", f"/api/v1/members/me/claims/{c['claim_id']}")[1]["data"]
+    assert claim["decision_fix"]["code"] == "DOCUMENT_MISSING" and claim["decision_fix"]["link"] == "/member/claims", claim
+    assert claim["decision_reason"].startswith("A document the claim needs is missing.")

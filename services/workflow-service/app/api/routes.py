@@ -42,6 +42,7 @@ class Recommendation(BaseModel):
     note: str = Field(min_length=3, max_length=1000)
     recommendation: str = Field(default="APPROVE", pattern="^(APPROVE|REJECT)$")   # "Recommend to Approve / to Reject"
     account_status: str = Field(pattern="^(OPERATIVE|INOPERATIVE|DORMANT)$")     # set by the initiator (CITES manuals)
+    reason_code: str | None = Field(default=None, max_length=40)                 # P2.23b: why rejection is recommended
 
 
 class StopInput(BaseModel):
@@ -51,6 +52,7 @@ class StopInput(BaseModel):
 class Decision(BaseModel):
     decision: str                                      # APPROVE | REJECT | RETURN
     reason: str | None = Field(default=None, max_length=1000)
+    reason_code: str | None = Field(default=None, max_length=40)       # P2.23b: the rule set's rejection reason
 
 
 class Assignment(BaseModel):
@@ -121,12 +123,25 @@ async def act(session: AsyncSession, case: dict[str, Any], actor: Actor, action:
 
 
 async def emit_decision(session: AsyncSession, case: dict[str, Any], actor: Actor, decision: str, level: int,
-                        final: bool, next_role: str | None, reason: str | None, recommendation: str | None = None) -> None:
+                        final: bool, next_role: str | None, reason: str | None, recommendation: str | None = None,
+                        reason_code: str | None = None) -> None:
     await add_event(session, producer=PRODUCER, event_type="CaseDecisionSubmitted.v1", aggregate_type="case",
                     aggregate_id=case["case_id"], correlation_id=actor.correlation_id, payload={
                         "case_id": case["case_id"], "claim_id": case["claim_id"], "decision": decision,
                         "officer_subject": actor.subject, "officer_role": actor.stakeholder, "approval_level": level,
-                        "final": final, "next_role": next_role, "reason": reason, "recommendation": recommendation})
+                        "final": final, "next_role": next_role, "reason": reason, "recommendation": recommendation,
+                        **({"reason_code": reason_code} if reason_code else {})})
+
+
+async def rejection_code(session: AsyncSession, *codes: str | None) -> str:
+    """P2.23b: a claim is rejected for one of the rule set's reasons, each with what the member does about it. The first
+    code given is used; none given is OTHER (the officer's note then says what to do)."""
+    from epfo_persistence.policy import section
+    known = section(await rules_on(session, datetime.now(UTC).date()), "claims").get("rejection_reasons") or {"OTHER": {}}
+    code = next((c for c in codes if c), "OTHER")
+    if code not in known:
+        raise Problem(422, "/problems/validation", "Unknown rejection reason", "Choose one of: " + ", ".join(known))
+    return code
 
 
 DECISIONS = ("RECOMMEND", "APPROVE", "REJECT", "RETURN", "RECOMMEND_REJECT")
@@ -207,16 +222,18 @@ async def decide(case_id: str, body: Decision, actor: Actor, session: AsyncSessi
                           f"{'Rejection' if rec == 'REJECT' else 'Approval'} was recommended",
                           f"You may {'reject' if rec == 'REJECT' else 'approve'} it or send it back to the first level.")
         elif final and rec == "REJECT":
+            code = await rejection_code(session, body.reason_code, (case.get("data") or {}).get("rejection_code"))
             case = await act(session, case, actor, "REJECT", level, body.reason, None, state="REJECTED", current_role=None, assignee_subject=None)
-            await emit_decision(session, case, actor, "REJECT", level, True, None, body.reason, rec)
+            await emit_decision(session, case, actor, "REJECT", level, True, None, body.reason, rec, code)
         elif final:
             case = await act(session, case, actor, "APPROVE", level, body.reason, None, state="AWAITING_PAYMENT",
                              current_role="fo.cash", assignee_subject=None)
             await emit_decision(session, case, actor, "APPROVE", level, True, "fo.cash", body.reason, rec)
         elif body.decision == "REJECT" and rec == "APPROVE":        # disagrees: back to the initiator's worklist
             note = f"Rejection recommended by {actor.stakeholder}: {body.reason}"
+            code = await rejection_code(session, body.reason_code)
             case = await act(session, case, actor, "RECOMMEND_REJECT", level, body.reason, None,
-                             data={**(case.get("data") or {}), "returned_for_rejection": note}, **back)
+                             data={**(case.get("data") or {}), "returned_for_rejection": note, "rejection_code": code}, **back)
             await emit_decision(session, case, actor, "RETURN", level, False, case["chain"][0], note, rec)
         elif body.decision == "APPROVE" and rec == "REJECT":
             raise Problem(409, "/problems/decision-not-offered", "Rejection was recommended",
@@ -257,7 +274,15 @@ async def get_case(case_id: str, actor: Actor = Depends(OFFICERS), session: Asyn
                      "documents": await documents_of(session, case_id, actor.subject),
                      "docket_ready": bool(case["claim_id"]) and await _has_docket(session, case, actor),
                      "your_turn": actor.stakeholder in (case["current_role"] or "").split("|"),
-                     "operation": next_operation(case) if case.get("process") else None})
+                     "operation": next_operation(case) if case.get("process") else None,
+                     "rejection_reasons": await _rejection_reasons(session) if case["claim_id"] else []})
+
+
+async def _rejection_reasons(session: AsyncSession) -> list[dict]:
+    """P2.23b: the reasons an officer may reject a claim for, with what the member is told to do."""
+    from epfo_persistence.policy import section
+    known = section(await rules_on(session, datetime.now(UTC).date()), "claims").get("rejection_reasons") or {}
+    return [{"code": code, "label": r["label"], "fix": r["fix"]} for code, r in known.items()]
 
 
 @router.post("/api/v1/office/cases/{case_id}/recommendations")
@@ -277,6 +302,10 @@ async def recommend(case_id: str, body: Recommendation, actor: Actor = Depends(r
         nxt = case["chain"][1]
         data = {**(case.get("data") or {}), "recommendation": body.recommendation, "account_status": body.account_status}
         data.pop("returned_for_rejection", None)
+        if body.recommendation == "REJECT":
+            data["rejection_code"] = await rejection_code(session, body.reason_code, data.get("rejection_code"))
+        else:
+            data.pop("rejection_code", None)
         case = await act(session, case, actor, "RECOMMEND", 0, body.note, body.checks, step=1, current_role=nxt,
                          assignee_subject=None, data=data)
         await emit_decision(session, case, actor, "RECOMMEND", 0, False, nxt, body.note, body.recommendation)

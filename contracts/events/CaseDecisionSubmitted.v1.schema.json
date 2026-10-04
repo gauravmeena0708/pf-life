@@ -110,6 +110,10 @@
             "REJECT",
             null
           ]
+        },
+        "reason_code": {
+          "type": "string",
+          "description": "The rule set's rejection reason on a final rejection (P2.23b)"
         }
       }
     }

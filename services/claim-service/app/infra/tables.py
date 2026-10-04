@@ -94,6 +94,7 @@ claims = Table(
     Column("evaluation", JSON, nullable=False),      # input snapshot, limits and trace, for deterministic replay
     Column("summary", Text, nullable=False),
     Column("decision_reason", Text),
+    Column("decision_reason_code", String(40)),          # P2.23b: the rule set's rejection reason (its fix is shown)
     Column("debit_journal_id", String(40)),
     Column("payment_id", String(60)),
     Column("payment_attempt", Integer, nullable=False, server_default="0"),

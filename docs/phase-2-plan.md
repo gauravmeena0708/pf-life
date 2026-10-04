@@ -57,7 +57,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | P2.20 | Navigation and findability: side or top menu (per user, by role), menu search (Ctrl+K), the empty menu headings wired to existing screens; a text-size control (to 150%) for senior citizens; later task-based member and employer menus with the legacy ones behind a toggle | Done (task-based menus later) |
 | P2.21 | Data held, not asked: pre-filled claims, automatic transfer when a new member ID appears, the pension case opened at 58 and on death, settlement by default for low risk with sampled audits | a (transfer unasked; claims and pension offered filled in): Done; b (death from the civil registry, claims offered to the nominee, sampled audit of automatic settlements, DigiLocker): Done |
 | P2.22 | Real-time contributions: a per-pay-run contribution API and a conformance sandbox for payroll vendors (the ECR kept as a format); a due-date option to model contributions paid with wages | Planned |
-| P2.23 | Retirement view: one forecast across PF and pension with VPF what-if and replacement rate; every rejection saying what fixes it | a (retirement view, VPF what-if): Done; b (every rejection and refusal saying what fixes it) planned |
+| P2.23 | Retirement view: one forecast across PF and pension with VPF what-if and replacement rate; every rejection saying what fixes it | a (retirement view, VPF what-if): Done; b (every rejection and refusal saying what fixes it): Done |
 | P2.24 | Trust and governance: authorised representatives (guardian, agent) with consented scope; published service standards with live performance; an independent review tier; rule-change simulation; interest-sustainability model | Planned |
 
 ## P2.9 — plan
@@ -1511,6 +1511,26 @@ To build: the EPS eligibility test on returns (a member joining on or after 1 Se
 eligible) so errors are found; an office rectification case per member ID (worked out month by month with interest,
 approved maker-checker) that posts the transfer between the accounts or raises the trust leg, and tells pension-service
 to delete or credit the service; the member's passbook and pension estimate follow; the consistency check covers it.
+
+## P2.23b — how it is built (every rejection and refusal says what fixes it)
+
+Sources: EPFO's instruction that rejections rest on substantial, justifiable reasons and that a deficiency the member
+can cure is given the chance to be cured (Head Office, May 2025, on higher-pension applications); the common grounds on
+which claims are rejected — bank details, the cheque image, name or date of birth differing, KYC, the date of exit, earlier
+member IDs not transferred, a missing document.
+
+- **A reason, not just a note.** The rule set lists the reasons an officer may reject a claim for (`claims.rejection_reasons`),
+  each with what the member does about it and the page where it is done; HO edits the list like any rule. The initiator
+  recommending rejection picks one (the case keeps it); the final level keeps or changes it; an unknown reason is refused;
+  one not given is *Other* (the officer's note then says what to do). The decision carries it (`CaseDecisionSubmitted.v1`,
+  `reason_code`).
+- **The member is told what to do.** A rejected claim shows the reason, the officer's note and *What to do*, with a link
+  to the page (KYC, Joint Declaration, Mark Exit, transfer, the claim form); the SMS / e-mail says it too.
+- **Refusals on the claim form say what fixes them** — or when they lapse: the date the waiting period after an exit ends,
+  when the service reaches the minimum, when the claim may be made again; where to mark the exit or transfer the earlier
+  member IDs; a pension or scheme certificate instead of a withdrawal. A claim refused when filed carries the same fixes.
+- Not built: the higher-pension and transfer rejections (their own reason lists); returning a claim to the member to cure
+  a minor deficiency in place (the member claims again).
 
 ## P2.23a — how it is built (retirement view, VPF what-if)
 

@@ -66,6 +66,11 @@ def months_between(start: date, end: date) -> int:
     return (end.year - start.year) * 12 + end.month - start.month - (end.day < start.day)
 
 
+def add_months(day: date, n: int) -> date:
+    y, m = divmod(day.month - 1 + n, 12)
+    return date(day.year + y, m + 1, min(day.day, 28))
+
+
 def international_worker_reasons(account: dict[str, Any], claim_type: str, rules: dict[str, Any], today: date) -> list[str]:
     """Why an international worker may not make this claim (empty: they may)."""
     iw = section(rules, "international_workers")
@@ -89,24 +94,38 @@ def eligibility(account: dict[str, Any], claim_type: str, rules: dict[str, Any],
     spec = rules["claims"]["types"][claim_type]
     employee, employer = int(account["employee_paise"]), int(account["employer_paise"])
     reasons: list[str] = []
+    fixes: list[dict[str, Any]] = []                 # P2.23b: each reason with what fixes it (or when it lapses), if anything does
+
+    def refuse(reason: str, fix: str | None = None, link: str | None = None) -> None:
+        reasons.append(reason)
+        fixes.append({"reason": reason, "fix": fix, "link": link})
     exited = account.get("date_of_exit")
     joined = account.get("date_of_joining")
+    if isinstance(exited, str):
+        exited = date.fromisoformat(exited)
     if spec.get("retired"):
-        reasons.append("This claim type is no longer offered.")
+        refuse("This claim type is no longer offered.", "Choose a claim type that is offered.", "/member/claims")
     if spec.get("requires_active_employment") and exited:
-        reasons.append("This advance is only for members who are still employed.")
+        refuse("This advance is only for members who are still employed.",
+               "Having left, you may claim the final settlement instead (after the waiting period).", "/member/claims")
     if spec.get("requires_exit_months") is not None:
         if not exited:
-            reasons.append("This claim is available only after you leave employment.")
+            refuse("This claim is available only after you leave employment.",
+                   "Once you leave, your employer marks the date of exit (or you can, two months after the last contribution).",
+                   "/member/service#exit-heading")
         elif months_between(exited, today) < spec["requires_exit_months"]:
-            reasons.append(f"This claim is available {spec['requires_exit_months']} months after leaving employment.")
+            refuse(f"This claim is available {spec['requires_exit_months']} months after leaving employment.",
+                   f"You can claim it from {add_months(exited, spec['requires_exit_months']).isoformat()}.")
     if spec.get("min_service_months") and joined and months_between(joined, exited or today) < spec["min_service_months"]:
-        reasons.append(f"You need at least {spec['min_service_months'] // 12} years "
-                       f"{'and ' + str(spec['min_service_months'] % 12) + ' months ' if spec['min_service_months'] % 12 else ''}of service.")
+        refuse(f"You need at least {spec['min_service_months'] // 12} years "
+               f"{'and ' + str(spec['min_service_months'] % 12) + ' months ' if spec['min_service_months'] % 12 else ''}of service.",
+               None if exited else f"In service, you reach it on {add_months(joined, spec['min_service_months']).isoformat()}.")
     if spec.get("once_every_months") and any(months_between(d, today) < spec["once_every_months"] for d in previous_claims or []):
-        reasons.append(f"This claim can be made once every {spec['once_every_months']} months.")
+        refuse(f"This claim can be made once every {spec['once_every_months']} months.",
+               f"You can claim it again from {add_months(max(previous_claims or [today]), spec['once_every_months']).isoformat()}.")
     if account.get("international_worker"):                    # P2.9a: the international-worker rules (illustrative)
-        reasons += international_worker_reasons(account, claim_type, rules, today)
+        for reason in international_worker_reasons(account, claim_type, rules, today):
+            refuse(reason)
     exemption = account.get("exemption") or {}
     trust_rules = section(rules, "exempted_establishments")
     effective = exemption.get("effective_from")
@@ -116,16 +135,17 @@ def eligibility(account: dict[str, Any], claim_type: str, rules: dict[str, Any],
     if (exemption.get("pf_exempt") and (exemption.get("status") == "ACTIVE" or ended_on is not None and ended_on > today)
             and claim_type in trust_rules["trust_claim_types"] and effective
             and joined and joined <= today and (exited is None or exited >= effective) and effective <= today):
-        reasons.append(f"Your PF for this member ID is with {exemption['trust_name']}; the trust settles it within "
-                       f"{trust_rules['trust_claim_days']} days (Condition 12).")
+        refuse(f"Your PF for this member ID is with {exemption['trust_name']}; the trust settles it within "
+               f"{trust_rules['trust_claim_days']} days (Condition 12).", f"Claim from {exemption['trust_name']} through your employer.")
     served = months_between(joined, exited or today) if joined else 0
     if spec.get("max_service_months") is not None and served > spec["max_service_months"]:
-        reasons.append("With this much service a monthly pension or a scheme certificate applies instead (Form 10D / 10C).")
+        refuse("With this much service a monthly pension or a scheme certificate applies instead (Form 10D / 10C).",
+               "Apply for the pension or a scheme certificate.", "/member/pension")
     if spec["max_from"] == "eps_table_d":             # pension withdrawal benefit: Table D factor x wages (illustrative)
         years = served // 12 + (1 if served % 12 >= 6 else 0)
         table = spec["table_d_factor_x100"]
         if years < 1:
-            reasons.append("At least six months of pension (EPS) service are needed.")
+            refuse("At least six months of pension (EPS) service are needed.")
         # wages at exit, capped — the ceiling in force when the member left (₹15,000 before 17 Sep 2026, ₹25,000 after)
         wages = ceiling_at_exit_paise or rules["contribution"]["eps_wage_ceiling_paise"]
         base = wages * table[min(years, len(table)) - 1] // 100 if years >= 1 else 0
@@ -135,10 +155,10 @@ def eligibility(account: dict[str, Any], claim_type: str, rules: dict[str, Any],
     if spec.get("cap_paise"):
         maximum = min(maximum, spec["cap_paise"])
     if maximum <= 0:
-        reasons.append("There is no balance available for this claim yet.")
+        refuse("There is no balance available for this claim yet.", "It becomes available once contributions are credited to this member ID.")
     return {
         "claim_type": claim_type, "form_type": spec["form_type"], "label": spec["label"], "plain_rule": spec["plain_rule"],
-        "eligible": not reasons, "max_amount_paise": maximum if not reasons else 0, "reasons": reasons,
+        "eligible": not reasons, "max_amount_paise": maximum if not reasons else 0, "reasons": reasons, "fixes": fixes,
         "trace": {"employee_paise": employee, "employer_paise": employer, "max_from": spec["max_from"],
                   "max_pct_bp": spec.get("max_pct_bp", 10000), "cap_paise": spec.get("cap_paise"),
                   "date_of_exit": exited.isoformat() if exited else None, "evaluated_on": today.isoformat(),

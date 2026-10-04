@@ -12,7 +12,8 @@ import { TaxDeclaration } from "./TaxDeclaration";
 import { Form16A } from "./Form16A";
 import { useStepUp } from "../stepup/useStepUp";
 
-interface ClaimType { claim_type: string; form_type: string; label: string; plain_rule: string; eligible: boolean; max_amount_paise: number; reasons: string[] }
+interface ClaimType { claim_type: string; form_type: string; label: string; plain_rule: string; eligible: boolean; max_amount_paise: number; reasons: string[];
+  fixes?: { reason: string; fix: string | null; link: string | null }[] }
 interface Account { account_link_id: string; primary?: boolean; balance: { employee_paise: number; employer_paise: number; total_paise: number }; types: ClaimType[] }
 interface Eligibility { rule_version: string; illustrative_only: boolean; auto_settlement_limit_paise: number; accounts: Account[] }
 interface ClaimRow { claim_id: string; claim_type: string; form_type: string; amount_paise: number; state: string; next_step: string; created_at: string }
@@ -97,7 +98,9 @@ export function ClaimsPage() {
                 onChange={() => { setChoice({ accountId: account.account_link_id, claimType: type.claim_type }); setAmount(""); createKey.current = null; setError(null); }} />
               <span className="claim-type-content"><strong>{type.label}</strong><span className="muted small">{t("claims.form")} {type.form_type}</span><span>{type.plain_rule}</span>
                 {type.eligible ? <span className="small">{t("claims.maxAmount")}: <strong>{rupees(type.max_amount_paise)}</strong></span>
-                  : <span className="ineligible-reasons">{t("claims.notEligible")}: {type.reasons.join("; ")}</span>}</span>
+                  : <span className="ineligible-reasons">{t("claims.notEligible")}: {type.reasons.join("; ")}</span>}
+                {!type.eligible ? (type.fixes ?? []).filter((f) => f.fix).map((f) => <span key={f.reason} className="small">What to do: {f.fix}
+                  {f.link ? <> <Link to={f.link}>Go there</Link></> : null}</span>) : null}</span>
             </label>;
           })}</div>
         </section>)}

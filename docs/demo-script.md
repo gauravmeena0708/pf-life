@@ -736,6 +736,15 @@ tests produced, by role (after `python3 scripts/publish_manuals.py`).
 5. As `zo-audit`, the daily audit extract: *Claims settled automatically* and how many are in the post-audit sample; the
    sampled ones are flagged `AUTO_SETTLEMENT_SAMPLE`, ready for an alert to the office.
 
+## Every rejection says what fixes it (P2.23b)
+
+1. As `member-a`, file an illness advance of ₹1,50,000 (it goes to DA → AO). As `do-caseworker`, open the case:
+   *Recommend to Reject*, choose *A document the claim needs is missing* — the form shows what the member will read —
+   and confirm. As `ro-ao`, reject it.
+2. As `member-a`, open the claim: the reason, the officer's note, and *What to do* with *Go there* to the claim form.
+3. Claims page: a type not open to the member says why and what to do — e.g. a final settlement while in service links to
+   *Mark Exit*; one too soon after leaving gives the date it opens.
+
 ## Retirement view (P2.23a)
 
 1. As `member-a`, View › *Retirement view*: the PF balance today, the wages, and at 58 the PF, its monthly income, the

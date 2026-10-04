@@ -98,6 +98,17 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 23b: every rejection and refusal says what fixes it (4 October 2026)
+
+Unit: workflow-service 52 (new: the case shows the rule set's rejection reasons with their fixes; an unknown reason is
+refused; the initiator's reason is kept by the final level and carried on the decision; none given is OTHER),
+claim-service 80 (new: each refusal paired with its fix or the date it lapses; a rejected claim shows the reason, the
+note and what to do, and the notice says it), shared package 33 (a reason list without OTHER, a reason without a fix,
+a link off the portal refused), platform-service 31. Web 309 (new: the member's rejected claim with *What to do* and its
+link; the officer choosing the reason and seeing what the member will read). End to end 110 of 110 (the CITES rejection
+test now rejects for a missing document and checks the member is told the fix), then the consistency check: every copy
+agrees. Must-deny 18; UI smoke 2. The claim migration 0020 is guarded (a fresh database already has the column).
+
 ## Update — Phase 2, slice 23a: the retirement view and a VPF what-if (4 October 2026)
 
 Unit: contribution-service 116 (new: a year to go worked by hand — the 12%, the employer's EPF share after EPS, the April

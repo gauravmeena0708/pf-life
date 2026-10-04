@@ -189,9 +189,14 @@ async def on_case_decision(session: AsyncSession, event: dict[str, Any]) -> None
     elif decision == "RETURN":
         await transition(session, claim, "UNDER_REVIEW", role, f"Returned for rework: {reason}")
     elif decision == "REJECT":
-        claim = await transition(session, claim, "REJECTED_WITH_REASON", role, f"Rejected: {reason}", decision_reason=reason)
+        # P2.23b: the officer's reason from the rule set; the member is told what fixes it
+        from app.api.routes import rejection_fix
+        fix = await rejection_fix(session, p.get("reason_code"))
+        told = f"{fix['label']}. {reason}" if fix and fix["code"] != "OTHER" else reason
+        claim = await transition(session, claim, "REJECTED_WITH_REASON", role, f"Rejected: {told}", decision_reason=told,
+                                 decision_reason_code=fix["code"] if fix else None)
         await record_decision(session, claim, "REJECTED", "OFFICER_REJECTED", cid)
-        await notify(session, claim, "CLAIM_REJECTED", cid, reason=reason)
+        await notify(session, claim, "CLAIM_REJECTED", cid, reason=f"{told} What to do: {fix['fix']}" if fix else told)
     elif p["final"] and claim["claim_type"] == "DEATH_EDLI":   # P2.8c: the EDLI section decides the benefit
         await transition(session, claim, "PENDING_EDLI_DECISION", role,
                          "Admitted; sent to the EDLI section to verify the wages and decide the benefit.", decision_reason=reason)

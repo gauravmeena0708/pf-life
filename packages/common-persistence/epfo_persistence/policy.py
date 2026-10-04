@@ -610,6 +610,16 @@ def validate(document: dict[str, Any]) -> list[str]:
         problems.extend(_bands_problems(claims["after_defreeze_bands"], "after-de-freeze bands"))
     if not isinstance(claims.get("settlement_sla_days"), int) or claims["settlement_sla_days"] < 1:
         problems.append("claims.settlement_sla_days must be at least 1")
+    reasons = claims.get("rejection_reasons")
+    if reasons is not None:                                     # P2.23b: every rejection says what fixes it
+        if not isinstance(reasons, dict) or "OTHER" not in reasons:
+            problems.append("claims.rejection_reasons must be a list of codes that includes OTHER")
+        else:
+            for code, r in reasons.items():
+                if not str(code).isupper() or not isinstance(r, dict) or not str(r.get("label") or "").strip() or not str(r.get("fix") or "").strip():
+                    problems.append(f"rejection reason {code}: a capitalised code with a label and a fix is needed")
+                elif r.get("link") is not None and not str(r["link"]).startswith("/"):
+                    problems.append(f"rejection reason {code}: link must be a page of the portal (starting with /)")
     problems.extend(_money_sections_problems(document))
     g = document.get("grievances") or {}
     if not g.get("categories") or "OTHER" not in g["categories"]:

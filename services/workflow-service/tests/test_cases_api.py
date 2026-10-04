@@ -101,20 +101,20 @@ def docket(case, role):
                                       "tds_paise": 0, "rule_version": "r", "static_data_version": "s", "officer_role": role})
 
 
-def recommend(client, case, subject=DA, recommendation="APPROVE", with_docket=True):
+def recommend(client, case, subject=DA, recommendation="APPROVE", with_docket=True, code=None):
     if with_docket:
         docket(case, "fo.da_accounts")
     return client.post(f"/api/v1/office/cases/{case['case_id']}/recommendations",
                        json={"checks": ["KYC verified", "Balance sufficient"], "note": "Documents in order",
-                             "recommendation": recommendation, "account_status": "OPERATIVE"},
+                             "recommendation": recommendation, "account_status": "OPERATIVE", **({"reason_code": code} if code else {})},
                        headers=hdr(subject, "fo.da_accounts", {"action": "recommend-case", "resource_id": case["case_id"],
                                                                "resource_version": case["version"]}))
 
 
-def decide(client, case, subject, role, decision="APPROVE", reason=None, path="decisions", with_docket=True):
+def decide(client, case, subject, role, decision="APPROVE", reason=None, path="decisions", with_docket=True, code=None):
     if with_docket:
         docket(case, role)
-    return client.post(f"/api/v1/office/cases/{case['case_id']}/{path}", json={"decision": decision, "reason": reason},
+    return client.post(f"/api/v1/office/cases/{case['case_id']}/{path}", json={"decision": decision, "reason": reason, **({"reason_code": code} if code else {})},
                        headers=hdr(subject, role, step(case)))
 
 
@@ -199,6 +199,25 @@ def test_reject_and_return_need_a_reason_and_return_restarts_round(ctx):
     r = decide(client, case, APFC, "fo.apfc", "REJECT", "Not eligible under para 68", path="second-approvals")
     assert r.status_code == 200 and r.json()["data"]["state"] == "REJECTED"
     assert outbox(q)[-1]["final"] is True and outbox(q)[-1]["decision"] == "REJECT" and outbox(q)[-1]["recommendation"] == "REJECT"
+    assert outbox(q)[-1]["reason_code"] == "OTHER"                  # no reason chosen: the officer's note says what to do
+
+
+def test_a_rejection_carries_the_rule_sets_reason_and_its_fix(ctx):
+    """P2.23b: the initiator recommends rejection for a reason of the rule set; the final level keeps it (or changes it);
+    the decision carries it, so the member is shown what fixes it."""
+    client, q, deliver = ctx
+    submitted(deliver)
+    [case] = queue(client, DA, "fo.da_accounts")
+    view = client.get(f"/api/v1/office/cases/{case['case_id']}", headers=hdr(DA, "fo.da_accounts")).json()["data"]
+    assert {"BANK_DETAILS", "OTHER"} <= {r["code"] for r in view["rejection_reasons"]} and all(r["fix"] for r in view["rejection_reasons"])
+    assert recommend(client, case, recommendation="REJECT", code="NO_SUCH_REASON").status_code == 422
+    r = recommend(client, case, recommendation="REJECT", code="BANK_DETAILS")
+    assert r.status_code == 200 and r.json()["data"]["data"]["rejection_code"] == "BANK_DETAILS"
+    [case] = queue(client, SS, "fo.ss")
+    decide(client, case, SS, "fo.ss", "REJECT", "Cheque shows another name")
+    [case] = queue(client, APFC, "fo.apfc")
+    r = decide(client, case, APFC, "fo.apfc", "REJECT", "The account is not the member's", path="second-approvals")
+    assert r.status_code == 200 and outbox(q)[-1]["reason_code"] == "BANK_DETAILS"
 
 
 def test_the_initiator_stops_and_restarts_a_claim(ctx):

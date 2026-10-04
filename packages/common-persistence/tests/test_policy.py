@@ -27,6 +27,10 @@ def test_baseline_is_valid():
     (lambda d: d["claims"]["types"]["ADVANCE_ILLNESS"].update(approve_everything=True), "unknown fields"),
     (lambda d: [t.update(retired=True) for t in d["claims"]["types"].values()], "stay open"),
     (lambda d: d["grievances"].update(sla_days={"RO": 15}), "RO, ZO and HO"),
+    (lambda d: d["claims"]["rejection_reasons"].pop("OTHER"), "includes OTHER"),                       # P2.23b
+    (lambda d: d["claims"]["rejection_reasons"]["BANK_DETAILS"].update(fix=""), "a label and a fix"),
+    (lambda d: d["claims"]["rejection_reasons"]["BANK_DETAILS"].update(link="https://example.com"), "a page of the portal"),
+    (lambda d: d["retirement"].update(drawdown_rate_bp=-1), "retirement.drawdown_rate_bp"),          # P2.23a
 ])
 def test_invalid_documents_are_explained(change, message):
     doc = copy.deepcopy(baseline())

@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import { api, command, rupees, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
@@ -11,6 +11,7 @@ import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 
 interface ClaimDetail { claim_id: string; account_link_id: string; claim_type: string; form_type: string; amount_paise: number; state: string; version: number; rule_version: string; summary: string; decision_reason: string | null; payment_id: string | null; next_step: string;
+  decision_fix?: { code: string; label: string; fix: string; link: string | null } | null;
   tax: { gross_paise: number; tds_paise: number; net_paise: number; rate_bp: number; basis: string; rule_version: string; financial_year: string; declaration: string | null } | null; timeline: { at: string; state: string; by: string; note: string }[] }
 interface BankDetails {
   claim_id: string; switchable: boolean; current_account_last4: string | null;
@@ -139,6 +140,8 @@ export function ClaimDetailPage() {
             <dt>{t("claimDetail.tds")}</dt><dd>{item.tax.tds_paise ? rupees(item.tax.tds_paise) : t("claimDetail.noTds")} <span className="muted small">— {item.tax.basis} ({item.tax.rule_version})</span></dd>
             <dt>{t("claimDetail.net")}</dt><dd><strong>{rupees(item.tax.net_paise)}</strong></dd></> : null}</dl>
         {item.decision_reason ? <p className={["REJECTED_WITH_REASON", "REJECTED_BY_EMPLOYER"].includes(item.state) ? "ineligible-reasons" : "muted"}><strong>{t("claimDetail.decisionReason")}:</strong> {item.decision_reason}</p> : null}
+        {item.decision_fix ? <p className="pending-notice"><strong>What to do:</strong> {item.decision_fix.fix}
+          {item.decision_fix.link ? <> <Link to={item.decision_fix.link}>Go there</Link></> : null}</p> : null}
       </section>
       <section className="card stack" aria-labelledby="claim-timeline-heading"><h2 id="claim-timeline-heading">{t("claimDetail.timeline")}</h2>
         <ol className="claim-timeline">{item.timeline.map((event, index) => <li key={`${event.at}-${event.state}-${index}`} className={index === item.timeline.length - 1 ? "current" : ""}>
