@@ -294,6 +294,10 @@
     "WITH_EMPLOYER": "नियोक्ता के पास",
     "WITH_OFFICE": "ईपीएफओ कार्यालय के पास",
     "WORKSHEET_APPROVED": "पेंशन गणना स्वीकृत",
-    "WORKSHEET_PREPARED": "पेंशन गणना तैयार"
+    "WORKSHEET_PREPARED": "पेंशन गणना तैयार",
+    "RECORDED": "दर्ज",
+    "ALREADY_RECORDED": "पहले से दर्ज",
+    "NOT_A_MEMBER": "सदस्य नहीं",
+    "AMBIGUOUS": "अस्पष्ट मिलान"
   }
 }

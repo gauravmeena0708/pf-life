@@ -14,7 +14,7 @@ from epfo_persistence.policy import on_policy_published
 BINDINGS = ["platform-service.PolicyPublished.v1", "claim-service.PhysicalClaimInwarded.v1", "workflow-service.StaffPostingChanged.v1",
             "employer-service.ExemptionStatusChanged.v1",
             "contribution-service.HigherPensionTransferPosted.v1", "member-service.MemberRegistered.v1",
-            "member-service.MemberExitMarked.v1", "member-service.PrimaryMemberIdChanged.v1",
+            "member-service.MemberExitMarked.v1", "member-service.PrimaryMemberIdChanged.v1", "member-service.MemberDeathRecorded.v1",
             "contribution-service.TransferPosted.v1"]
 # PRO counter request → updation activity. PPO amendments are basic-details updations the DA (Pension) takes up.
 INTAKE_ACTIVITIES = {"PHYSICAL_LC_UPDATION": "PHYSICAL_LC", "DEATH_UPDATION": "DEATH", "SPOUSE_REMARRIAGE_UPDATION": "SPOUSE_REMARRIAGE",
@@ -112,7 +112,26 @@ async def on_exemption_status_changed(session: AsyncSession, event: dict[str, An
             status=p["status"], ended_on=date.fromisoformat(p["ended_on"]) if p.get("ended_on") else None))
 
 
-HANDLERS = {"ExemptionStatusChanged.v1": on_exemption_status_changed,
+async def on_member_death(session: AsyncSession, event: dict[str, Any]) -> None:
+    """P2.21b: a death on record (from the employer's exit or the civil registry's feed). A pension in payment to the member
+    stops from the death — not on a missing life certificate months later — and the date of death is kept so the family
+    may apply for the family pension (Form 10D) without waiting for a PRO counter updation."""
+    from app.infra.tables import member_service
+    p = event["payload"]
+    died = date.fromisoformat(p["date_of_death"])
+    await session.execute(update(member_service).where(member_service.c.uan == p["uan"], member_service.c.date_of_exit.is_(None))
+                          .values(date_of_exit=died))
+    source = "the civil registry" + (f" (registration {p['registration_no']})" if p.get("registration_no") else "") \
+        if p["source"] == "CIVIL_REGISTRY" else p["source"].lower()
+    born = (await session.execute(select(member_service.c.date_of_birth).where(member_service.c.uan == p["uan"]))).scalars().first()
+    # the member's own pension only: a family pension on the same UAN is paid to someone born on another day
+    await session.execute(update(pensioners).where(pensioners.c.uan == p["uan"], pensioners.c.date_of_birth == born,
+                                                   pensioners.c.status.in_(("IN_PAYMENT", "SUSPENDED")))
+                          .values(status="STOPPED", status_reason=f"Death on {died.isoformat()} reported by {source}; "
+                                                                  "the family pension is settled on Form 10D, and any pension credited after the death is recovered"))
+
+
+HANDLERS = {"ExemptionStatusChanged.v1": on_exemption_status_changed, "MemberDeathRecorded.v1": on_member_death,
             "HigherPensionTransferPosted.v1": on_higher_pension_transfer, "MemberRegistered.v1": on_member_registered,
             "MemberExitMarked.v1": on_member_exit, "PrimaryMemberIdChanged.v1": on_primary_changed,
             "TransferPosted.v1": on_transfer_posted}

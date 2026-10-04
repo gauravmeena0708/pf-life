@@ -747,6 +747,40 @@
       "exit_reason": "PERMANENT_DISABLEMENT",
       "establishment_id": "EST-DEMO-0002",
       "_comment": "P2.13: left Demo Engineering Works on 20 Aug 2026, permanently and totally disabled in an accident on 12 Aug 2026; 7 years of service — too few for a monthly pension, but a disablement pension (EPS para 15) needs none"
+    },
+    {
+      "uan": "100000000916",
+      "name": "VIJAY DEMO",
+      "date_of_birth": "1982-11-11",
+      "subject": null,
+      "account_link_id": "AL-0960",
+      "member_id": "DEMO00002000000000916",
+      "date_of_joining": "2024-04-01",
+      "date_of_exit": null,
+      "gender": "MALE",
+      "mobile_masked": "******0916",
+      "email_masked": "v***@demo.invalid",
+      "bank_ifsc": "DEMO0000916",
+      "bank_account_last4": "0916",
+      "kyc": {
+        "aadhaar": "VERIFIED",
+        "pan": "VERIFIED",
+        "bank": "VERIFIED"
+      },
+      "last_contribution_month": "2026-08",
+      "establishment_id": "EST-DEMO-0002",
+      "nominations": [
+        {
+          "name": "MEENA DEMO",
+          "relation": "SPOUSE",
+          "share_bp": 10000,
+          "subject": "00000000-0000-4000-8000-000000000081",
+          "bank_ifsc": "DEMO0000916",
+          "bank_account_last4": "1601",
+          "date_of_birth": "1985-01-15"
+        }
+      ],
+      "_comment": "P2.21b: in service at Demo Engineering Works; his death reaches EPFO from the civil registry (mock), not from the employer or the family — his wife MEENA DEMO (claimant-b), his nominee, is then offered the PF, EDLI and family pension claims worked out"
     }
   ],
   "demo_wage_month": "2026-08",
@@ -830,7 +864,8 @@
     "ro-recovery": "00000000-0000-4000-8000-000000000077",
     "ho-compliance": "00000000-0000-4000-8000-000000000078",
     "ho-recovery": "00000000-0000-4000-8000-000000000079",
-    "member-disabled": "00000000-0000-4000-8000-000000000080"
+    "member-disabled": "00000000-0000-4000-8000-000000000080",
+    "claimant-b": "00000000-0000-4000-8000-000000000081"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",
@@ -893,6 +928,11 @@
       "employee_paise": 30000000,
       "employer_paise": 10000000,
       "as_of": "2016-03-31"
+    },
+    "AL-0960": {
+      "employee_paise": 9000000,
+      "employer_paise": 6000000,
+      "as_of": "2025-03-31"
     }
   },
   "office_staff": [

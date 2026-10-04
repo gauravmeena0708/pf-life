@@ -550,6 +550,18 @@ stakeholders:
     step_up: false
     via:
     - F14.privacy_request
+  - endpoint: GET /members/me/digilocker-documents
+    status: M
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F14.digilocker_member
+  - endpoint: POST /members/me/digilocker-documents
+    status: M
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F14.digilocker_member
   member.exited:
   - endpoint: POST /members/me/claims
     status: W
@@ -663,6 +675,12 @@ stakeholders:
     via:
     - F05.family_view
   claimant:
+  - endpoint: GET /claimants/me/death-claim-offers
+    status: W
+    scope: self — claimant's own claims only
+    step_up: false
+    via:
+    - F04.death_offer
   - endpoint: POST /claimants/death-claims
     status: W
     scope: self — claimant's own claims only
@@ -2834,6 +2852,12 @@ stakeholders:
     via:
     - F04.pro_intake
   fo.da_pension:
+  - endpoint: GET /office/civil-registry/deaths
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.death_feed_pension
   - endpoint: POST /office/pensions/worksheets
     status: W
     scope: office jurisdiction of the caller's posting
@@ -3232,6 +3256,12 @@ stakeholders:
     via:
     - F10.decide
   fo.pro:
+  - endpoint: GET /office/civil-registry/deaths
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.death_feed_office
   - endpoint: GET /office/work-queue
     status: W
     scope: office jurisdiction of the caller's posting
@@ -4336,6 +4366,13 @@ stakeholders:
     via:
     - F05.dlc_event
   ext.digilocker: []
+  ext.crs:
+  - endpoint: POST /integrations/crs/death-registrations
+    status: M
+    scope: signed partner callback (signature, event ID, replay window)
+    step_up: false
+    via:
+    - F04.death_feed
   ext.ippb: []
   ext.cpgrams:
   - endpoint: POST /integrations/cpgrams/grievances

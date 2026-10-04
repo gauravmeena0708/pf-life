@@ -1,6 +1,7 @@
 import { statusLabel } from "../statusLabel";
 import { useTranslation } from "react-i18next";
 import { useState, type FormEvent } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api, command, rupees, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
@@ -17,6 +18,33 @@ interface TimelineEntry { at: string | null; state: string; by: string; note: st
 interface DeathClaim { claim_id: string; claim_type: string; form_type: string; amount_paise: number; state: string; summary: string;
   next_step: string; decision_reason: string | null; timeline: TimelineEntry[]; beneficiaries: Share[] }
 interface CompositeClaim { composite_ref: string; claims: DeathClaim[]; next_step: string }
+interface OfferForm { form_type: "FORM_20" | "FORM_5IF"; label: string; amount_paise: number; working: string; filed_claim_id: string | null }
+interface Offer { deceased_uan: string; deceased_name: string; date_of_death: string; relation: string; share_pct: number;
+  forms: OfferForm[]; open: string[]; family_pension: string }
+
+const FORM_NAMES: Record<string, string> = { CCF_DEATH: "composite PF and EDLI", FORM_5IF: "EDLI (Form 5IF)", FORM_20: "PF (Form 20)" };
+
+/** P2.21b: what the nominee may claim, worked out from the record — reviewed and confirmed, not typed in. */
+function OffersCard({ offers, onFile }: { offers: Offer[]; onFile: (uan: string, form: string) => void }) {
+  if (!offers.length) return null;
+  return (
+    <section className="card stack" aria-labelledby="offers-heading"><h2 id="offers-heading">What you can claim</h2>
+      <p className="muted small">Worked out from EPFO's records: the member's death, your nomination, the balance and the service. Check it and confirm.</p>
+      {offers.map((o) => <article key={o.deceased_uan} className="stack" aria-label={`Claims on the death of ${o.deceased_name}`}>
+        <h3>{o.deceased_name} · died {o.date_of_death}</h3>
+        <p>You are the nominee ({o.relation.toLowerCase()}, {o.share_pct}% share). UAN ending {o.deceased_uan.slice(-4)}.</p>
+        <ul className="plain-list">{o.forms.map((f) => <li key={f.form_type}><strong>{f.label}</strong>: {rupees(f.amount_paise)}
+          <span className="muted small"> — {f.working}</span>{f.filed_claim_id ? <> · <span className="state-pill">filed {f.filed_claim_id}</span></> : null}</li>)}</ul>
+        <div className="actions">
+          {o.open.length === 2 ? <button type="button" className="primary" onClick={() => onFile(o.deceased_uan, "CCF_DEATH")}>File PF and EDLI together</button> : null}
+          {o.open.length === 1 ? <button type="button" className="primary" onClick={() => onFile(o.deceased_uan, o.open[0])}>File the {FORM_NAMES[o.open[0]]} claim</button> : null}
+          <a href="#family-pension-heading">Family pension (Form 10D)</a>
+        </div>
+        <p className="muted small">{o.family_pension}</p>
+      </article>)}
+    </section>
+  );
+}
 
 export function SharesTable({ rows }: { rows: Share[] }) {
   return <div className="table-scroll"><table>
@@ -36,23 +64,29 @@ export function ClaimantPage() {
   const [claim, setClaim] = useState<DeathClaim | null>(null);
   const [composite, setComposite] = useState<CompositeClaim | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const offers = useQuery({ queryKey: ["death-claim-offers"], retry: false,
+    queryFn: () => api<Envelope<Offer[]>>("/api/v1/claimants/me/death-claim-offers") });
+  const offered = offers.data?.data ?? [];
+  const firstUan = offered[0]?.deceased_uan ?? "100000000901";
 
   async function run(work: () => Promise<string | null>) {
     setError(null); setNotice(null);
     try { const done = await work(); if (done) setNotice(done); } catch (cause) { setError(cause); }
   }
 
+  const fileClaim = (uan: string, form: string) => void run(async () => {
+    const token = await stepUp.ask({ action: "file-death-claim", resourceId: uan,
+      summary: `File the ${FORM_NAMES[form] ?? form} claim for the member with UAN ending ${uan.slice(-4)}.` });
+    if (!token) return null;
+    const r = await command<Envelope<DeathClaim | CompositeClaim>>("POST", "/api/v1/claimants/death-claims",
+      { form_type: form, deceased_uan: uan, process_as: "E_NOMINATION" }, { stepUpToken: token });
+    void queryClient.invalidateQueries({ queryKey: ["death-claim-offers"] });
+    if ("claims" in r.data) { setComposite(r.data); setClaim(null); return `Composite claim ${r.data.composite_ref} filed.`; }
+    setClaim(r.data); setComposite(null); return `Claim ${r.data.claim_id} filed.`;
+  });
   const file = (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); const f = new FormData(e.currentTarget);
-    const uan = text(f, "uan"), form = text(f, "form");
-    void run(async () => {
-      const token = await stepUp.ask({ action: "file-death-claim", resourceId: uan,
-        summary: `File the ${form === "CCF_DEATH" ? "composite PF and EDLI" : form === "FORM_5IF" ? "EDLI (Form 5IF)" : "PF (Form 20)"} claim for the member with UAN ending ${uan.slice(-4)}.` });
-      if (!token) return null;
-      const r = await command<Envelope<DeathClaim | CompositeClaim>>("POST", "/api/v1/claimants/death-claims",
-        { form_type: form, deceased_uan: uan, process_as: "E_NOMINATION" }, { stepUpToken: token });
-      if ("claims" in r.data) { setComposite(r.data); setClaim(null); return `Composite claim ${r.data.composite_ref} filed.`; }
-      setClaim(r.data); setComposite(null); return `Claim ${r.data.claim_id} filed.`;
-    }); };
+    fileClaim(text(f, "uan"), text(f, "form")); };
   const track = (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); const id = text(new FormData(e.currentTarget), "claim");
     void run(async () => { setClaim((await api<Envelope<DeathClaim>>(`/api/v1/claimants/death-claims/${id}`)).data); setComposite(null); return null; }); };
   const addBeneficiary = (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); const f = new FormData(e.currentTarget); const form = e.currentTarget;
@@ -70,11 +104,12 @@ export function ClaimantPage() {
         description="A nominee files the Provident Fund (Form 20) and EDLI insurance (Form 5IF) claims. Payment is shared among the beneficiaries." />
       <ProblemMessage error={error} />
       {notice ? <p role="status" className="ok">{notice}</p> : null}
+      <OffersCard offers={offered} onFile={fileClaim} />
 
       <form className="card stack" aria-labelledby="file-heading" onSubmit={file}><h2 id="file-heading">File a claim</h2>
         <p className="muted small">The claim uses the member's latest nomination. Synthetic demo: the deceased member's UAN is 100000000901.</p>
         <div className="form-row">
-          <label>Deceased member's UAN<input name="uan" required pattern="[0-9]{12}" inputMode="numeric" defaultValue="100000000901" /></label>
+          <label>Deceased member's UAN<input key={firstUan} name="uan" required pattern="[0-9]{12}" inputMode="numeric" defaultValue={firstUan} /></label>
           <label>Claim<select name="form" defaultValue="FORM_20">
             <option value="FORM_20">Provident Fund — Form 20</option><option value="FORM_5IF">EDLI insurance — Form 5IF</option>
             <option value="CCF_DEATH">Composite claim (PF and EDLI)</option></select></label>
@@ -104,7 +139,7 @@ export function ClaimantPage() {
         <h3>Timeline</h3>
         <ol className="claim-timeline">{claim.timeline.map((entry, i) => <li key={i} className={i === claim.timeline.length - 1 ? "current" : ""}><strong>{statusLabel(entry.state, t)}</strong> — {entry.by}. {entry.note}</li>)}</ol>
       </section> : null}
-      <FamilyPensionSection />
+      <FamilyPensionSection defaultUan={firstUan} />
       <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
     </section>
   );
@@ -115,7 +150,7 @@ interface FamilyClaim { claim_id: string; state: string; kind: string; pension_f
   estimate?: { monthly_paise: number; working: string }; history: { state: string; role: string; note: string }[] }
 
 /** Family pension: the widow / widower or a child of a member who died in service files Form 10D. */
-export function FamilyPensionSection() {
+export function FamilyPensionSection({ defaultUan = "100000000901" }: { defaultUan?: string }) {
   const { t } = useTranslation();
   const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
@@ -141,7 +176,7 @@ export function FamilyPensionSection() {
         as for a member's pension, and issues the PPO in your name.</p>
       <ProblemMessage error={error} />
       <form className="search-input-row" onSubmit={file}><label>Deceased member's UAN<input name="uan" required pattern="[0-9]{12}"
-        inputMode="numeric" defaultValue="100000000901" /></label><button type="submit" className="primary">File Form 10D</button></form>
+        inputMode="numeric" key={defaultUan} defaultValue={defaultUan} /></label><button type="submit" className="primary">File Form 10D</button></form>
       {filed?.estimate ? <p role="status" className="ok">Filed {filed.claim_id}: about {rupees(filed.estimate.monthly_paise)} a month from {filed.pension_from}
         ({filed.estimate.working}; illustrative rules).</p> : null}
       <div className="actions"><button type="button" onClick={() => void load()}>Show my applications</button></div>

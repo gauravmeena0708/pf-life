@@ -98,6 +98,22 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 21b: death from the civil registry, claims offered, sampled audit, DigiLocker (4 October 2026)
+
+Unit: member-service 66 (new: a registered death matched by Aadhaar closes the open member ID and is announced once; a
+repeated or second registration does nothing more; matched by name and birth date across a person's two UANs; no match,
+or two people, kept for the office; signature and caller checked; an employer's death exit announced too; the e-UAN card
+pushed, retried 1-5-15-60 minutes, failed after five attempts, asked for again and issued, never with the full UAN; a
+member's PPO queued once, a family pension's not), claim-service 78 (the nominee offered Form 20 and 5IF worked out,
+filed as one composite claim, then shown as filed; a death after leaving service recorded from the event alone),
+pension-service 48 (the family may apply once the death is recorded; a pension stops on the pensioner's own death, not on
+another death on the same UAN), audit-service 18 (one in five automatic settlements sampled by claim number, the same on
+every download), mock-integrations 11. Web 305 (new: the offers card and its confirmation, DigiLocker documents, the
+office's registry list; one existing test, P2.11d, timed out once under load and passes on its own). End to end 109 of
+109 (new `test_registry_death.py`, run twice: the second run finds the death recorded and the claims filed), then the
+consistency check: every copy agrees. Must-deny 18; UI smoke 2. The realm gains `claimant-b` and the machine client
+`crs-demo`: re-import it (delete the realm, restart Keycloak, `make seed`).
+
 ## Update — Phase 2, slice 21a: transfer unasked; claims and pension offered filled in (2 October 2026)
 
 Unit: claim-service 76 (new: a contribution on the new primary member ID moves the old ID's balance once, unasked, and

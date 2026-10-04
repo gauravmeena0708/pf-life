@@ -194,6 +194,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /security/step-up-challenges/{challengeId}/verifications` | W | self — challenge bound to one action and resource version |  |
 | `PUT /members/me/claims/{claimId}/bank-details` | W | self — caller's own member record only | yes |
 | `PUT /members/me/notification-preferences` | W | self — caller's own member record only |  |
+| `GET /members/me/digilocker-documents` | M | self — caller's own member record only |  |
+| `POST /members/me/digilocker-documents` | M | self — caller's own member record only |  |
 | `POST /members/uan-activations` | M | unauthenticated with OTP / face-auth proof |  |
 | `POST /members/uan-allotments` | M | unauthenticated with OTP / face-auth proof |  |
 
@@ -241,6 +243,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /claimants/death-claims/{claimId}` | W | self — claimant's own claims only |  |
 | `GET /claimants/family-pension-applications` | W | self — claimant's own claims only |  |
+| `GET /claimants/me/death-claim-offers` | W | self — claimant's own claims only |  |
 | `POST /claimants/death-claims` | W | self — claimant's own claims only | yes |
 | `POST /claimants/death-claims/{claimId}/beneficiaries` | W | self — claimant's own claims only |  |
 | `POST /claimants/family-pension-applications` | W | self — claimant's own claims only | yes |
@@ -716,6 +719,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /office/civil-registry/deaths` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/pension-claims` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/pensions/enquiries` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/pensions/life-certificates/overdue` | W | office jurisdiction of the caller's posting |  |
@@ -837,6 +841,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /grievances/{grievanceId}` | W | complainant or the assigned office |  |
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/civil-registry/deaths` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/notification-deliveries` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/rti-requests` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
@@ -1294,6 +1299,12 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `POST /integrations/mock-jeevan-pramaan/dlc-events` | M | signed partner callback (signature, event ID, replay window) |  |
 - `ext.digilocker` — DigiLocker (documents, PPO / UAN card): *no endpoints (acts through an adapter or through another role)*
+
+**`ext.crs`** — Civil Registration System (Registrar General of India) — registered deaths
+
+| Endpoint | Status | Scope | Step-up |
+|---|---|---|---|
+| `POST /integrations/crs/death-registrations` | M | signed partner callback (signature, event ID, replay window) |  |
 - `ext.ippb` — India Post / IPPB (doorstep DLC): *no endpoints (acts through an adapter or through another role)*
 
 **`ext.cpgrams`** — CPGRAMS (DARPG grievance portal)

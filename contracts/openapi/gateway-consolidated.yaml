@@ -882,6 +882,38 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /claimants/me/death-claim-offers:
+    get:
+      operationId: getClaimantsDeathClaimOffers
+      summary: 'What the nominee may claim on a member''s recorded death — Form 20 and Form 5IF worked out from the balance
+        and service, '
+      tags:
+      - Member claims, transfers and pension applications
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: claim
+      x-callers:
+      - claimant
+      x-scope: self — claimant's own claims only
+      security:
+      - bffSession: []
+      description: What the nominee may claim on a member's recorded death — Form 20 and Form 5IF worked out from the balance
+        and service, already-filed forms shown (P2.21b)
   /cpps/disbursement-runs:
     get:
       operationId: getCppsDisbursementRuns
@@ -5944,6 +5976,45 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /integrations/crs/death-registrations:
+    post:
+      operationId: postIntegrationsCrsDeathRegistrations
+      summary: 'Civil Registration System death feed (signed): matched to a member, closes the open member IDs (death while
+        in service) '
+      tags:
+      - Member claims, transfers and pension applications
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: mock
+      x-phase: 1
+      x-owner-service: member
+      x-callers:
+      - ext.crs
+      x-scope: signed partner callback (signature, event ID, replay window)
+      security:
+      - clientCredentials: []
+      description: 'Civil Registration System death feed (signed): matched to a member, closes the open member IDs (death
+        while in service) and announces the death (P2.21b)'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /integrations/fund-managers/positions:
     post:
       operationId: postIntegrationsFundManagersPositions
@@ -7284,6 +7355,70 @@ paths:
       - bffSession: []
       requestBody:
         required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /members/me/digilocker-documents:
+    get:
+      operationId: getMembersDigilockerDocuments
+      summary: 'Documents issued to the member''s DigiLocker (mock): the e-UAN card, the e-PPO (P2.21b)'
+      tags:
+      - Member self-service
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: mock
+      x-phase: 1
+      x-owner-service: member
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+    post:
+      operationId: postMembersDigilockerDocuments
+      summary: Ask for the e-UAN card in DigiLocker (mock) — for a UAN allotted before the push, or a failed push
+      tags:
+      - Member self-service
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: mock
+      x-phase: 1
+      x-owner-service: member
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
         content:
           application/json:
             schema:
@@ -9889,6 +10024,37 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/civil-registry/deaths:
+    get:
+      operationId: getOfficeCivilRegistryDeaths
+      summary: 'Deaths the civil registry reported: the office''s members, and records that matched nobody or more than one
+        person'
+      tags:
+      - Member claims, transfers and pension applications
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: member
+      x-callers:
+      - fo.da_pension
+      - fo.pro
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
   /office/claims/{claimId}/additional-forms:
     get:
       operationId: getOfficeClaimsClaimIdAdditionalForms

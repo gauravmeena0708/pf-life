@@ -11,7 +11,8 @@ interface ExtractItem {
   event_id: string; occurred_at: string; event_type: string; reference: string | null; amount_paise: number | null;
   office_id: string | null; flags: string[]; correlation_id: string; hash: string;
 }
-interface Extract { day: string; items: ExtractItem[]; flag_counts: Record<string, number>; events_scanned: number; note: string }
+interface Extract { day: string; items: ExtractItem[]; flag_counts: Record<string, number>; events_scanned: number; note: string;
+  auto_settlements?: { settled: number; sampled: number; one_in: number } }
 interface Alert {
   alert_id: string; office_id: string; zone_id: string; reference: string; event_id: string | null; flags: string[]; finding: string;
   state: "OPEN" | "REPLIED" | "CLOSED"; due_by: string; raised_at: string; overdue: boolean;
@@ -60,6 +61,8 @@ export function ConcurrentAuditPage() {
       <label>Extract day<input type="date" required value={day} onChange={(e) => setDay(e.target.value)} /></label>
       {extracts.isFetching ? <p role="status">Loading extract…</p> : null}
       {extract ? <><p>{extract.day} · {extract.events_scanned} events scanned</p><p>{extract.note}</p>
+        {extract.auto_settlements ? <p>Claims settled automatically: <strong>{extract.auto_settlements.settled}</strong>; in the post-audit sample
+          (one in {extract.auto_settlements.one_in}, chosen by claim number): <strong>{extract.auto_settlements.sampled}</strong> — flagged AUTO_SETTLEMENT_SAMPLE below.</p> : null}
         <ul aria-label="Flag counts">{Object.entries(extract.flag_counts).map(([flag, count]) => <li key={flag}>{flag}: {count}</li>)}</ul>
         {extract.items.map((item) => <article className="card stack" key={item.event_id}><h3>{item.event_type} · {item.reference ?? item.event_id}</h3>
           <dl className="kv"><dt>Event</dt><dd>{item.event_id}</dd><dt>Occurred at</dt><dd>{item.occurred_at}</dd>

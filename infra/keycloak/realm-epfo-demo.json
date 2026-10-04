@@ -247,6 +247,10 @@
         "description": "Foreign social-security agency (machine) — verifies certificates of coverage"
       },
       {
+        "name": "ext.crs",
+        "description": "Civil Registration System (machine) — reports registered deaths (P2.21b, mock)"
+      },
+      {
         "name": "exempted.trust",
         "description": "Board of Trustees of an exempted establishment's PF trust"
       },
@@ -333,6 +337,15 @@
       "enabled": true,
       "publicClient": false,
       "secret": "change-me-foreign-agency-secret",
+      "standardFlowEnabled": false,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": false
+    },
+    {
+      "clientId": "crs-demo",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "change-me-crs-client-secret",
       "standardFlowEnabled": false,
       "serviceAccountsEnabled": true,
       "directAccessGrantsEnabled": false
@@ -1580,6 +1593,14 @@
       ]
     },
     {
+      "username": "service-account-crs-demo",
+      "enabled": true,
+      "serviceAccountClientId": "crs-demo",
+      "realmRoles": [
+        "ext.crs"
+      ]
+    },
+    {
       "username": "exempted-trust",
       "enabled": true,
       "emailVerified": true,
@@ -1882,6 +1903,25 @@
         "member"
       ],
       "id": "00000000-0000-4000-8000-000000000080"
+    },
+    {
+      "username": "claimant-b",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Claimant B",
+      "lastName": "Demo",
+      "email": "claimant-b@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "claimant"
+      ],
+      "id": "00000000-0000-4000-8000-000000000081"
     }
   ]
 }

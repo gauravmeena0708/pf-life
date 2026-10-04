@@ -721,6 +721,21 @@ tests produced, by role (after `python3 scripts/publish_manuals.py`).
    form opens with the member ID and the full amount filled in; review and confirm.
 3. A member of 58 who has left with ten years' service is offered the monthly pension (Form 10D) the same way.
 
+## A death EPFO learns from the civil registry (P2.21b)
+
+1. Run `python3 scripts/crs_death_feed.py`: the civil registry (mock) reports that VIJAY DEMO (UAN 100000000916) died
+   yesterday. The answer: matched by Aadhaar, his member ID closed as death in service. Run it again with the same
+   `--registration-no`: the same answer, nothing done twice.
+2. Log in as `claimant-b` (MEENA DEMO, his wife and nominee): *What you can claim* shows the PF (Form 20) and EDLI
+   (Form 5IF) amounts with their workings. *File PF and EDLI together*, confirm with the one-time code: a composite claim.
+   Below, Form 10D has his UAN filled in: file the family pension.
+3. As `ro-pro`, Office › *Deaths from the civil registry*: VIJAY's record, and any that matched nobody (try
+   `python3 scripts/crs_death_feed.py --name "NOBODY DEMO" --dob 1950-01-01 --no-aadhaar`).
+4. As `member-a`, View › UAN card › *In your DigiLocker*: *Send my e-UAN card to DigiLocker* — a few seconds later it is
+   issued with a document URI.
+5. As `zo-audit`, the daily audit extract: *Claims settled automatically* and how many are in the post-audit sample; the
+   sampled ones are flagged `AUTO_SETTLEMENT_SAMPLE`, ready for an alert to the office.
+
 ## Edge cases (P2.19a)
 
 1. An ECR row with pension wages for a re-employed pensioner (UAN `100000000901`, PPO-DEMO-0001) is refused with

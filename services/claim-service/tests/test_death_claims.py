@@ -157,3 +157,35 @@ def test_pro_counter_inwards_paper_claims_and_pension_updations(ctx):
     routed = client.post("/api/v1/office/physical-claims", json={**lc, "ppo_id": "PPO-DEMO-1"}, headers=hdr(PRO, "fo.pro_intake")).json()["data"]
     assert routed["state"] == "ROUTED"
     assert [e["form_type"] for e in events(q, "PhysicalClaimInwarded.v1")] == ["FORM_19", "PHYSICAL_LC_UPDATION"]
+
+
+def test_a_death_from_the_registry_is_offered_to_the_nominee_worked_out(ctx):
+    """P2.21b: VIJAY DEMO's death reaches EPFO from the civil registry; his nominee (claimant-b) sees the PF and EDLI
+    claims worked out, files them in one go, and then sees them as filed. Other claimants see nothing of it."""
+    client, q, deliver = ctx
+    meena = SUBJECTS["claimant-b"]
+    offers = "/api/v1/claimants/me/death-claim-offers"
+    assert client.get(offers, headers=hdr(meena, "claimant")).json()["data"] == []          # alive: nothing to offer
+    deliver("MemberExitMarked.v1", {"uan": "100000000916", "account_link_id": "AL-0960", "date_of_exit": "2026-09-30",
+                                    "reason": "DEATH_IN_SERVICE", "marked_by": "CIVIL_REGISTRY"}, "member-service")
+    deliver("MemberDeathRecorded.v1", {"uan": "100000000916", "date_of_death": "2026-09-30", "source": "CIVIL_REGISTRY",
+                                       "registration_no": "D-2026-DL-0001"}, "member-service")
+    [offer] = client.get(offers, headers=hdr(meena, "claimant")).json()["data"]
+    assert (offer["deceased_name"], offer["date_of_death"], offer["relation"], offer["share_pct"]) == ("VIJAY DEMO", "2026-09-30", "SPOUSE", 100)
+    pf, edli = offer["forms"]
+    assert pf["form_type"] == "FORM_20" and pf["amount_paise"] == 15000000 and edli["amount_paise"] > 0 and offer["open"] == ["FORM_20", "FORM_5IF"]
+    assert all(o["deceased_uan"] != "100000000916" for o in client.get(offers, headers=claimant()).json()["data"])
+    r = client.post("/api/v1/claimants/death-claims", json={"form_type": "CCF_DEATH", "deceased_uan": "100000000916"},
+                    headers=hdr(meena, "claimant", {"action": "file-death-claim", "resource_id": "100000000916"}))
+    assert r.status_code == 201, r.text
+    [offer] = client.get(offers, headers=hdr(meena, "claimant")).json()["data"]
+    assert offer["open"] == [] and all(f["filed_claim_id"] for f in offer["forms"])
+
+
+def test_a_death_after_leaving_service_is_recorded_from_the_registry_event(ctx):
+    """A member who had left (no exit for death) dies later: only MemberDeathRecorded.v1 tells claim-service."""
+    client, q, deliver = ctx
+    deliver("MemberDeathRecorded.v1", {"uan": "100000000916", "date_of_death": "2026-10-01", "source": "CIVIL_REGISTRY",
+                                       "registration_no": "D-2026-DL-0009"}, "member-service")
+    [offer] = client.get("/api/v1/claimants/me/death-claim-offers", headers=hdr(SUBJECTS["claimant-b"], "claimant")).json()["data"]
+    assert offer["date_of_death"] == "2026-10-01"

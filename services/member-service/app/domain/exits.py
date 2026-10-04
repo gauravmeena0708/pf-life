@@ -58,6 +58,7 @@ async def track(session: AsyncSession, application_id: str, uan: str, process: s
 
 async def record_exit(session: AsyncSession, job: dict[str, Any], day: date, reason: str, marked_by: str,
                       correlation_id: str | None, corrects: str | None = None) -> None:
+    """marked_by: MEMBER | EMPLOYER | CIVIL_REGISTRY (P2.21b: a death reported by the registry closes the open member IDs)."""
     member = (await session.execute(select(members).where(members.c.member_id == job["member_id"]))).mappings().one()
     await session.execute(update(employments).where(employments.c.account_link_id == job["account_link_id"])
                           .values(date_of_exit=day, exit_reason=reason, exit_marked_by=marked_by))
@@ -65,7 +66,10 @@ async def record_exit(session: AsyncSession, job: dict[str, Any], day: date, rea
                     aggregate_id=job["account_link_id"], correlation_id=correlation_id, payload={
                         "uan": member["uan"], "account_link_id": job["account_link_id"], "date_of_exit": day.isoformat(),
                         "reason": reason, "marked_by": marked_by, **({"corrects": corrects} if corrects else {})})
-    if member["subject"]:
+    if reason == "DEATH_IN_SERVICE" and marked_by != "CIVIL_REGISTRY" and not corrects:
+        from app.domain.life_events import announce_death          # the registry's feed announces the death itself
+        await announce_death(session, member["uan"], day, marked_by, None, correlation_id)
+    if member["subject"] and reason != "DEATH_IN_SERVICE":
         await add_event(session, producer=PRODUCER, event_type="NotificationRequested.v1", aggregate_type="notification",
                         aggregate_id=job["account_link_id"], correlation_id=correlation_id, payload={
                             "recipient_subject": member["subject"], "template": "EXIT_CORRECTED" if corrects else "EXIT_RECORDED",

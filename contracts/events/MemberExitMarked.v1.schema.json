@@ -76,7 +76,8 @@
         "marked_by": {
           "enum": [
             "MEMBER",
-            "EMPLOYER"
+            "EMPLOYER",
+            "CIVIL_REGISTRY"
           ]
         },
         "corrects": {

@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     mock_integrations_url: str = "http://mock-integrations:8000"
     mock_gateway_secret: str = "change-me-mock-gateway-secret"
     notification_worker_seconds: int = 3
+    crs_secret: str = "change-me-crs-secret"             # P2.21b: signs the civil registry's death feed (mock)
 
 
 settings = Settings()

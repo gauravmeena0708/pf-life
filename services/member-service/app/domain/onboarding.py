@@ -104,6 +104,9 @@ async def register(session: AsyncSession, *, establishment_id: str, establishmen
                         "date_of_birth": member["date_of_birth"].isoformat(), "gender": member["gender"],
                         "establishment_id": establishment_id, "date_of_joining": date_of_joining.isoformat(), "new_uan": new_uan,
                         "pan_verified": (member["kyc"] or {}).get("pan") == "VERIFIED"})
+    if new_uan:                                        # P2.21b: the e-UAN card goes to the member's DigiLocker
+        from app.domain.life_events import queue_document
+        await queue_document(session, uan, "UAN_CARD", uan)
     from app.domain.primary import recompute
     await recompute(session, uan, correlation_id)      # after MemberRegistered.v1, so other services have the member ID first
     return {"uan": uan, "account_link_id": link, "new_uan": new_uan, "name": member["name"],

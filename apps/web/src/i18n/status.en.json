@@ -294,6 +294,10 @@
     "WITH_EMPLOYER": "With employer",
     "WITH_OFFICE": "With EPFO office",
     "WORKSHEET_APPROVED": "Pension calculation approved",
-    "WORKSHEET_PREPARED": "Pension calculation prepared"
+    "WORKSHEET_PREPARED": "Pension calculation prepared",
+    "RECORDED": "Recorded",
+    "ALREADY_RECORDED": "Already recorded",
+    "NOT_A_MEMBER": "Not a member",
+    "AMBIGUOUS": "Ambiguous match"
   }
 }

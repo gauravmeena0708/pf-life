@@ -228,3 +228,37 @@ nominations = Table(
     Column("signed_with", String(40), nullable=False),        # MOCK_AADHAAR_ESIGN | SEED
     Column("signed_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
 )
+
+# P2.21b: deaths reported by the civil registry (CRS, mock). One row per registration, kept whether or not it matched a
+# member, so a repeated feed is ignored and an unmatched record can be looked at.
+death_registrations = Table(
+    "death_registrations", metadata,
+    Column("registration_no", String(60), primary_key=True),
+    Column("name", String(200), nullable=False),
+    Column("date_of_birth", Date, nullable=False),
+    Column("date_of_death", Date, nullable=False),
+    Column("aadhaar_ref", String(64)),
+    Column("matched_uan", String(12), index=True),
+    Column("matched_by", String(20)),                          # AADHAAR | NAME_AND_DOB | (none)
+    Column("outcome", String(40), nullable=False),            # RECORDED | ALREADY_RECORDED | NOT_A_MEMBER | AMBIGUOUS
+    Column("exits_marked", JSON, nullable=False),             # the member IDs whose exit the feed marked
+    Column("received_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+)
+
+# P2.21b: documents EPFO issues to the member's DigiLocker (mock) — the UAN card on a new UAN, the PPO on dispatch.
+# Pushed by the delivery worker and retried while DigiLocker is down.
+digilocker_documents = Table(
+    "digilocker_documents", metadata,
+    Column("doc_id", String(40), primary_key=True),
+    Column("uan", String(12), nullable=False, index=True),
+    Column("doc_type", String(20), nullable=False),           # UAN_CARD | PPO
+    Column("reference", String(60), nullable=False, unique=True),   # the UAN for a UAN card, the PPO number for a PPO
+    Column("title", String(200), nullable=False),
+    Column("state", String(20), nullable=False),              # QUEUED | ISSUED | FAILED
+    Column("uri", String(200)),                               # DigiLocker's document URI once issued
+    Column("attempts", Integer, nullable=False, server_default="0"),
+    Column("last_error", String(300)),
+    Column("next_attempt_at", DateTime(timezone=True)),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    Column("updated_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+)

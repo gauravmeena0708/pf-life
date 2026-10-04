@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /members/me', 'POST /members/uan-activations', 'POST /members/uan-allotments', 'POST /members/uan-lookups', 'GET /office/member-change-requests', 'GET /office/notification-deliveries', 'GET /security/account-recovery-requests', 'GET /employers/me/approvals', 'GET /employers/me/joint-declarations', 'POST /employers/me/joint-declarations', 'GET /employers/me/kyc-approvals', 'POST /employers/me/kyc-bulk-uploads', 'GET /employers/me/members', 'POST /employers/me/members', 'POST /members/me/account-recovery-requests', 'GET /members/me/account-status', 'GET /members/me/applications', 'PATCH /members/me/contact-details', 'GET /members/me/employment-history', 'POST /members/me/exits', 'GET /members/me/identity-assurance', 'POST /members/me/joint-declarations', 'GET /members/me/kyc', 'GET /members/me/nominations', 'POST /members/me/nominations', 'GET /members/me/notification-preferences', 'PUT /members/me/notification-preferences', 'GET /members/me/notifications', 'POST /members/me/security-reports', 'GET /members/me/service-history', 'GET /members/me/uan-card', 'GET /office/member-change-requests/pendency', 'GET /employers/me/members/active-export', 'POST /employers/me/members/bulk-registrations', 'POST /employers/me/members/exit-bulk-uploads', 'POST /members/me/kyc/bank-accounts', 'POST /members/me/kyc/{kycType}', 'POST /employers/me/approvals/{approvalId}/decisions', 'POST /employers/me/joint-declarations/{jdId}/decisions', 'POST /employers/me/kyc-approvals/{requestId}/decisions', 'GET /employers/me/kyc-bulk-uploads/{uploadId}/errors', 'POST /employers/me/members/{uan}/declarations', 'POST /employers/me/members/{uan}/exit-corrections', 'POST /employers/me/members/{uan}/exits', 'POST /employers/me/members/{uan}/location-mappings', 'PATCH /employers/me/members/{uan}/profile', 'GET /office/members/{uan}', 'POST /office/accounts/{accountLinkId}/crowdsource-verifications', 'POST /office/member-change-requests/{requestId}/decisions', 'POST /office/member-change-requests/{requestId}/recommendations', 'POST /office/member-change-requests/{requestId}/verifications', 'POST /office/members/{uan}/defreezes', 'POST /office/members/{uan}/freezes', 'POST /office/notification-deliveries/{deliveryId}/retries', 'POST /office/physical-claims/{intakeId}/identity-validations', 'POST /security/account-recovery-requests/{requestId}/decisions']
+OPERATIONS = ['GET /members/me', 'POST /members/uan-activations', 'POST /members/uan-allotments', 'POST /members/uan-lookups', 'GET /office/member-change-requests', 'GET /office/notification-deliveries', 'GET /security/account-recovery-requests', 'GET /employers/me/approvals', 'GET /employers/me/joint-declarations', 'POST /employers/me/joint-declarations', 'GET /employers/me/kyc-approvals', 'POST /employers/me/kyc-bulk-uploads', 'GET /employers/me/members', 'POST /employers/me/members', 'POST /integrations/crs/death-registrations', 'POST /members/me/account-recovery-requests', 'GET /members/me/account-status', 'GET /members/me/applications', 'PATCH /members/me/contact-details', 'GET /members/me/digilocker-documents', 'POST /members/me/digilocker-documents', 'GET /members/me/employment-history', 'POST /members/me/exits', 'GET /members/me/identity-assurance', 'POST /members/me/joint-declarations', 'GET /members/me/kyc', 'GET /members/me/nominations', 'POST /members/me/nominations', 'GET /members/me/notification-preferences', 'PUT /members/me/notification-preferences', 'GET /members/me/notifications', 'POST /members/me/security-reports', 'GET /members/me/service-history', 'GET /members/me/uan-card', 'GET /office/civil-registry/deaths', 'GET /office/member-change-requests/pendency', 'GET /employers/me/members/active-export', 'POST /employers/me/members/bulk-registrations', 'POST /employers/me/members/exit-bulk-uploads', 'POST /members/me/kyc/bank-accounts', 'POST /members/me/kyc/{kycType}', 'POST /employers/me/approvals/{approvalId}/decisions', 'POST /employers/me/joint-declarations/{jdId}/decisions', 'POST /employers/me/kyc-approvals/{requestId}/decisions', 'GET /employers/me/kyc-bulk-uploads/{uploadId}/errors', 'POST /employers/me/members/{uan}/declarations', 'POST /employers/me/members/{uan}/exit-corrections', 'POST /employers/me/members/{uan}/exits', 'POST /employers/me/members/{uan}/location-mappings', 'PATCH /employers/me/members/{uan}/profile', 'GET /office/members/{uan}', 'POST /office/accounts/{accountLinkId}/crowdsource-verifications', 'POST /office/member-change-requests/{requestId}/decisions', 'POST /office/member-change-requests/{requestId}/recommendations', 'POST /office/member-change-requests/{requestId}/verifications', 'POST /office/members/{uan}/defreezes', 'POST /office/members/{uan}/freezes', 'POST /office/notification-deliveries/{deliveryId}/retries', 'POST /office/physical-claims/{intakeId}/identity-validations', 'POST /security/account-recovery-requests/{requestId}/decisions']
 
 @router.api_route("/api/v1/members/me", methods=["GET"], include_in_schema=False)
 async def get_members_me(actor: Actor = Depends(require_actor)) -> None:
@@ -82,6 +82,11 @@ async def post_employers_me_members(actor: Actor = Depends(require_actor)) -> No
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Register new joinee / generate UAN (mock Aadhaar)")
 
 
+@router.api_route("/api/v1/integrations/crs/death-registrations", methods=["POST"], include_in_schema=False)
+async def post_integrations_crs_death_registrations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Civil Registration System death feed (signed): matched to a member, closes the open member IDs (deat")
+
+
 @router.api_route("/api/v1/members/me/account-recovery-requests", methods=["POST"], include_in_schema=False)
 async def post_members_me_account_recovery_requests(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Controlled, reviewed account recovery (Journey D5)")
@@ -100,6 +105,16 @@ async def get_members_me_applications(actor: Actor = Depends(require_actor)) -> 
 @router.api_route("/api/v1/members/me/contact-details", methods=["PATCH"], include_in_schema=False)
 async def patch_members_me_contact_details(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Change mobile / email (Journey D1)")
+
+
+@router.api_route("/api/v1/members/me/digilocker-documents", methods=["GET"], include_in_schema=False)
+async def get_members_me_digilocker_documents(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Documents issued to the member's DigiLocker (mock): the e-UAN card, the e-PPO (P2.21b)")
+
+
+@router.api_route("/api/v1/members/me/digilocker-documents", methods=["POST"], include_in_schema=False)
+async def post_members_me_digilocker_documents(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Ask for the e-UAN card in DigiLocker (mock) — for a UAN allotted before the push, or a failed push")
 
 
 @router.api_route("/api/v1/members/me/employment-history", methods=["GET"], include_in_schema=False)
@@ -165,6 +180,11 @@ async def get_members_me_service_history(actor: Actor = Depends(require_actor)) 
 @router.api_route("/api/v1/members/me/uan-card", methods=["GET"], include_in_schema=False)
 async def get_members_me_uan_card(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "UAN card")
+
+
+@router.api_route("/api/v1/office/civil-registry/deaths", methods=["GET"], include_in_schema=False)
+async def get_office_civil_registry_deaths(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Deaths the civil registry reported: the office's members, and records that matched nobody or more th")
 
 
 @router.api_route("/api/v1/office/member-change-requests/pendency", methods=["GET"], include_in_schema=False)

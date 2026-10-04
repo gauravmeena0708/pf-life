@@ -270,3 +270,31 @@ async def inward(body: IntakeInput, actor: Actor = Depends(require_stakeholder("
                     target_type="physical_intake", target_id=intake["intake_id"], detail=body.form_type)
     return envelope({**intake, "next_step": "Sent to the pension office's updation tracker." if intake["state"] == "ROUTED"
                      else "Validate the member's identity next; then the dealing assistant enters the claim."})
+
+
+@router.get("/api/v1/claimants/me/death-claim-offers")
+async def death_claim_offers(actor: Actor = Depends(CLAIMANT), session: AsyncSession = Depends(db)) -> dict:
+    """P2.21b: what the nominee may claim, worked out from what is on record — the member's death (from the employer or
+    the civil registry), the nomination, the balance and the service — so the claim is reviewed and confirmed, not
+    filled in. A form already on file is shown as filed."""
+    rules = await rules_on(session, date.today())
+    offers = []
+    for n in (await session.execute(select(nominations).where(nominations.c.subject == actor.subject))).mappings().all():
+        account = (await session.execute(select(accounts).where(accounts.c.uan == n["uan"], accounts.c.deceased_on.is_not(None))
+                                         .order_by(accounts.c.is_primary.desc(), accounts.c.date_of_joining.desc()))).mappings().first()
+        if not account:
+            continue
+        balance = account["employee_paise"] + account["employer_paise"]
+        service = months_between(account["date_of_joining"], account["deceased_on"])
+        edli = edli_benefit(SYNTHETIC_AVERAGE_WAGES, balance, service, rules)
+        filed = {r[0]: r[1] for r in (await session.execute(select(claims.c.claim_type, claims.c.claim_id).where(
+            claims.c.death_of_uan == n["uan"], claims.c.state.notin_(("REJECTED_WITH_REASON", "CANCELLED"))))).all()}
+        forms = [{"form_type": "FORM_20", "label": "Provident Fund (Form 20)", "amount_paise": balance, "working": "The PF balance of the member ID",
+                  "filed_claim_id": filed.get("DEATH_PF")},
+                 {"form_type": "FORM_5IF", "label": "EDLI insurance (Form 5IF)", "amount_paise": edli["amount_paise"], "working": edli["working"],
+                  "filed_claim_id": filed.get("DEATH_EDLI")}]
+        offers.append({"deceased_uan": n["uan"], "deceased_name": account["member_name"], "date_of_death": account["deceased_on"].isoformat(),
+                       "relation": n["relation"], "share_pct": n["share_bp"] / 100, "forms": forms,
+                       "open": [f["form_type"] for f in forms if not f["filed_claim_id"] and f["amount_paise"] > 0],
+                       "family_pension": "The spouse or a child under 25 may also apply for the family pension (Form 10D)."})
+    return envelope(offers)

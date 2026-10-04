@@ -8,9 +8,9 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 
 | Measure | Count |
 |---|---|
-| Stakeholders | 114 |
-| Activities | 269 |
-| Stakeholders with at least one API | 94 |
+| Stakeholders | 115 |
+| Activities | 274 |
+| Stakeholders with at least one API | 95 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 3 |
 | **NEW endpoints to add to the catalogue** | **0** |
@@ -44,7 +44,7 @@ Activities: **F11.public_search** Search an inoperative account with a demo CAPT
 
 #### `member` — Member — active contributor (UAN holder)
 
-Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP; **F02.kyc_seed** Seed KYC (Aadhaar, bank, PAN); **F02.self_service** View profile, service history, UAN card; change contact details; e-nomination; self-marked exit; **F02.jd_submit** Submit Joint Declaration to correct one of 12 profile parameters; **F03.passbook** View passbook, annual statement and taxable-interest split; **F04.preflight** Pre-flight before filing: check account readiness (blockers), service history and eligibility for the chosen form; **F04.claim_file** Check eligibility and file a claim (Form 31 / 19 / 10C); confirm intent; upload documents; **F04.post_submission** After filing: follow the claim's audit trail, cancel it before a decision, or switch to another KYC-verified bank account before payment; **F04.redisburse_request** Submit corrected bank details after a payment return; **F04.track** Track claims and notifications; download Form 16A; **F04.transfer** Request Form 13 transfer; confirm auto-transfer; view Annexure K; **F05.apply** Apply for monthly pension (Form 10D) or scheme certificate; **F05.preview** Pre-check pension eligibility across all member IDs; see untransferred service to fix first (Form 13); **F05.sc_surrender** Surrender a Scheme Certificate for monthly pension or withdrawal benefit; **F05.higher_member** Apply for pension on higher wages (joint option); track status; **F07.member_report** Report suspicious activity; account recovery; view sessions; **F08.member_file** Register, track, reopen, remind and give feedback on grievances; **F10.worker** An international worker is a member: views their coverage under the international-worker rules (P2.9a); **F13.pmvbry_member** PMVBRY Part A: first-timer incentive in two instalments; complete the financial literacy course; **F13.notify_member** Choose SMS / e-mail and the language of messages; see each notice's delivery; **F14.step_up** Complete step-up confirmation for sensitive actions; **F14.privacy_request** Ask EPFO about my personal data: access, correction, erasure or a grievance (DPDP Act)
+Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP; **F02.kyc_seed** Seed KYC (Aadhaar, bank, PAN); **F02.self_service** View profile, service history, UAN card; change contact details; e-nomination; self-marked exit; **F02.jd_submit** Submit Joint Declaration to correct one of 12 profile parameters; **F03.passbook** View passbook, annual statement and taxable-interest split; **F04.preflight** Pre-flight before filing: check account readiness (blockers), service history and eligibility for the chosen form; **F04.claim_file** Check eligibility and file a claim (Form 31 / 19 / 10C); confirm intent; upload documents; **F04.post_submission** After filing: follow the claim's audit trail, cancel it before a decision, or switch to another KYC-verified bank account before payment; **F04.redisburse_request** Submit corrected bank details after a payment return; **F04.track** Track claims and notifications; download Form 16A; **F04.transfer** Request Form 13 transfer; confirm auto-transfer; view Annexure K; **F05.apply** Apply for monthly pension (Form 10D) or scheme certificate; **F05.preview** Pre-check pension eligibility across all member IDs; see untransferred service to fix first (Form 13); **F05.sc_surrender** Surrender a Scheme Certificate for monthly pension or withdrawal benefit; **F05.higher_member** Apply for pension on higher wages (joint option); track status; **F07.member_report** Report suspicious activity; account recovery; view sessions; **F08.member_file** Register, track, reopen, remind and give feedback on grievances; **F10.worker** An international worker is a member: views their coverage under the international-worker rules (P2.9a); **F13.pmvbry_member** PMVBRY Part A: first-timer incentive in two instalments; complete the financial literacy course; **F13.notify_member** Choose SMS / e-mail and the language of messages; see each notice's delivery; **F14.step_up** Complete step-up confirmation for sensitive actions; **F14.privacy_request** Ask EPFO about my personal data: access, correction, erasure or a grievance (DPDP Act); **F14.digilocker_member** See the e-UAN card and e-PPO issued to my DigiLocker; ask for the e-UAN card
 
 | Endpoint | Status |
 |---|---|
@@ -122,10 +122,12 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /security/step-up-challenges/{challengeId}/verifications` | W |
 | `PUT /members/me/claims/{claimId}/bank-details` | W |
 | `PUT /members/me/notification-preferences` | W |
+| `GET /members/me/digilocker-documents` | M |
+| `POST /members/me/digilocker-documents` | M |
 | `POST /members/uan-activations` | M |
 | `POST /members/uan-allotments` | M |
 
-Integration adapters: `uidai`
+Integration adapters: `digilocker`, `uidai`
 
 #### `member.exited` — Member — exited / inoperative account holder
 
@@ -177,12 +179,13 @@ Activities: **F05.family_apply** Apply for widow / child / orphan / dependent-pa
 
 #### `claimant` — Nominee / legal heir / guardian claiming PF, EDLI or pension on death
 
-Activities: **F04.death_claim** File PF (Form 20), EDLI (Form 5IF) or composite death claim; **F05.family_apply_claimant** The widow / widower or child of a member who died in service files Form 10D for a family pension and follows it
+Activities: **F04.death_offer** See what can be claimed on a member's recorded death, worked out from the record, and file it; **F04.death_claim** File PF (Form 20), EDLI (Form 5IF) or composite death claim; **F05.family_apply_claimant** The widow / widower or child of a member who died in service files Form 10D for a family pension and follows it
 
 | Endpoint | Status |
 |---|---|
 | `GET /claimants/death-claims/{claimId}` | W |
 | `GET /claimants/family-pension-applications` | W |
+| `GET /claimants/me/death-claim-offers` | W |
 | `POST /claimants/death-claims` | W |
 | `POST /claimants/death-claims/{claimId}/beneficiaries` | W |
 | `POST /claimants/family-pension-applications` | W |
@@ -719,10 +722,11 @@ Activities: **F04.pro_intake** Inward claims at the PRO counter; check death cer
 
 #### `fo.da_pension` — DA (Pension) — worksheet, PPO, transfer-in, Special 10D
 
-Activities: **F05.worksheet** Generate pension worksheet (Pension > Transaction > Pension Worksheet); Special 10D for incomplete data; send errors back; **F05.aggregate** Aggregate untransferred past service into the calculation sheet; **F05.sc_adjudicate** Validate and cancel a surrendered Scheme Certificate; **F05.ppo** Generate PPO; process transfer-in with / without PPO; **F05.dispatch** Dispatch PPO and scroll to the bank; **F05.updation** Pension enquiry (PPO, payments, arrears, recovery, TDS); initiate and track updation activities (basic details, pension start / stop, DLC revalidation, unhold) and PRO-inwarded PPO amendments and death / LC / remarriage updations
+Activities: **F04.death_feed_pension** See the deaths the civil registry reported for the office's members and pensioners; **F05.worksheet** Generate pension worksheet (Pension > Transaction > Pension Worksheet); Special 10D for incomplete data; send errors back; **F05.aggregate** Aggregate untransferred past service into the calculation sheet; **F05.sc_adjudicate** Validate and cancel a surrendered Scheme Certificate; **F05.ppo** Generate PPO; process transfer-in with / without PPO; **F05.dispatch** Dispatch PPO and scroll to the bank; **F05.updation** Pension enquiry (PPO, payments, arrears, recovery, TDS); initiate and track updation activities (basic details, pension start / stop, DLC revalidation, unhold) and PRO-inwarded PPO amendments and death / LC / remarriage updations
 
 | Endpoint | Status |
 |---|---|
+| `GET /office/civil-registry/deaths` | W |
 | `GET /office/pension-claims` | W |
 | `GET /office/pensions/enquiries` | W |
 | `GET /office/pensions/life-certificates/overdue` | W |
@@ -862,12 +866,13 @@ Activities: **F10.decide** Verify and issue Certificate of Coverage
 
 #### `fo.pro` — PRO / Facilitation centre / grievance cell
 
-Activities: **F08.triage** Triage, assign, reply with evidence, lodge local grievances, transfer between offices, resolve; **F08.rti_reply** Register RTI applications and reply within the period; **F13.notify_desk** Follow up SMS / e-mail that could not be delivered to the office's members; send again
+Activities: **F04.death_feed_office** Look at deaths the civil registry reported, including records that matched nobody or more than one person; **F08.triage** Triage, assign, reply with evidence, lodge local grievances, transfer between offices, resolve; **F08.rti_reply** Register RTI applications and reply within the period; **F13.notify_desk** Follow up SMS / e-mail that could not be delivered to the office's members; send again
 
 | Endpoint | Status |
 |---|---|
 | `GET /grievances/{grievanceId}` | W |
 | `GET /office/cases/{caseId}` | W |
+| `GET /office/civil-registry/deaths` | W |
 | `GET /office/notification-deliveries` | W |
 | `GET /office/rti-requests` | W |
 | `GET /office/work-queue` | W |
@@ -1464,6 +1469,14 @@ Activities: **F14.digilocker** Issue documents (UAN card, PPO) to DigiLocker
 
 Integration adapters: `digilocker`
 
+#### `ext.crs` — Civil Registration System (Registrar General of India) — registered deaths
+
+Activities: **F04.death_feed** Report a registered death; the member's open member IDs close (death while in service) and the death is announced
+
+| Endpoint | Status |
+|---|---|
+| `POST /integrations/crs/death-registrations` | M |
+
 #### `ext.ippb` — India Post / IPPB (doorstep DLC)
 
 Activities: **F05.dlc_doorstep** Doorstep DLC through India Post Payments Bank
@@ -1694,6 +1707,11 @@ flowchart LR
   F04_transfer_process["fo.da_accounts<br/>Verify a transfer between member IDs / offices (service at b"]
   F04_transfer_decide["fo.ao<br/>Approve, reject or return a verified Form 13 transfer (the l"]
   F04_transfer_recredit["fo.da_accounts<br/>Recredit a rejected transfer-in to the member ledger"]
+  F04_death_feed["ext.crs<br/>Report a registered death; the member's open member IDs clos"]
+  style F04_death_feed stroke-dasharray: 5 5
+  F04_death_feed_office["fo.pro<br/>Look at deaths the civil registry reported, including record"]
+  F04_death_feed_pension["fo.da_pension<br/>See the deaths the civil registry reported for the office's "]
+  F04_death_offer["claimant<br/>See what can be claimed on a member's recorded death, worked"]
   F04_death_claim["claimant<br/>File PF (Form 20), EDLI (Form 5IF) or composite death claim"]
   F04_co_beneficiary["claimant.nominee<br/>Inward as an additional beneficiary on an open death claim a"]
   F04_shares["fo.apfc<br/>Amend beneficiary shares (legacy-settled share, deceased nom"]
@@ -1727,6 +1745,9 @@ flowchart LR
   F04_transfer --> F04_transfer_attest
   F04_transfer_attest --> F04_transfer_process
   F04_transfer_process --> F04_transfer_decide
+  F04_death_feed --> F04_death_offer
+  F04_death_feed --> F04_death_feed_office
+  F04_death_offer --> F04_death_claim
   F04_death_claim --> F04_edli
   F04_co_beneficiary --> F04_shares
   F04_shares --> F04_edli
@@ -2100,6 +2121,7 @@ flowchart LR
   F14_npci["ext.npci<br/>Validate bank accounts (penny drop / name match)"]
   F14_digilocker["ext.digilocker<br/>Issue documents (UAN card, PPO) to DigiLocker"]
   style F14_digilocker stroke-dasharray: 5 5
+  F14_digilocker_member["member<br/>See the e-UAN card and e-PPO issued to my DigiLocker; ask fo"]
   F14_umang["ext.umang<br/>Mobile channel calling the same member / pensioner APIs"]
   F14_ndc --> F14_adc
   F14_security --> F14_cert_in

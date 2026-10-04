@@ -8,9 +8,9 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 |---|---|---|---|---|---|---|---|
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 15 | 2 | 0 | 0 |
 | 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 104 | 5 | 1 | 0 |
-| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 89 | 5 | 0 | 0 |
-| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 126 | 0 | 0 | 4 |
-| 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 17 | 1 | 0 | 0 |
+| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 90 | 7 | 0 | 0 |
+| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 127 | 0 | 0 | 4 |
+| 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 18 | 1 | 0 | 0 |
 | 6 | International worker | **Working** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 6 | 0 | 0 | 0 |
 | 7 | District office | **Working** | `do.incharge`, `do.staff` | 3 | 0 | 0 | 0 |
 | 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 69 | 0 | 0 | 1 |
@@ -173,6 +173,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 |---|---|---|---|
 | `GET /claimants/death-claims/{claimId}` | W | claim | claimant |
 | `GET /claimants/family-pension-applications` | W | pension | claimant |
+| `GET /claimants/me/death-claim-offers` | W | claim | claimant |
 | `GET /grievances/{grievanceId}` | W | grievance | member |
 | `GET /members/me` | W | member | member |
 | `GET /members/me/account-status` | W | member | member |
@@ -260,7 +261,9 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /security/step-up-challenges/{challengeId}/verifications` | W | gateway | member |
 | `PUT /members/me/claims/{claimId}/bank-details` | W | claim | member |
 | `PUT /members/me/notification-preferences` | W | member | member |
+| `GET /members/me/digilocker-documents` | M | member | member |
 | `GET /pensioners/me/life-certificate` | M | pension | pensioner |
+| `POST /members/me/digilocker-documents` | M | member | member |
 | `POST /members/uan-activations` | M | member | member |
 | `POST /members/uan-allotments` | M | member | csc_operator, member |
 | `POST /pensioners/me/life-certificate/submissions` | M | pension | pensioner |
@@ -275,6 +278,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /office/accounts/inoperative` | W | contribution | fo.ao, fo.da_accounts |
 | `GET /office/annexure-k-files` | W | claim | fo.da_accounts |
 | `GET /office/cases/{caseId}` | W | workflow | fo.ao, fo.cash, fo.da_accounts, fo.ss |
+| `GET /office/civil-registry/deaths` | W | member | fo.da_pension |
 | `GET /office/claims/{claimId}/additional-forms` | W | claim | fo.da_accounts |
 | `GET /office/claims/{claimId}/audit-trail` | W | claim | fo.da_accounts |
 | `GET /office/claims/{claimId}/cad` | W | claim | fo.ao, fo.da_accounts, fo.ss |
@@ -408,6 +412,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /grievances/{grievanceId}` | W | grievance | fo.pro |
 | `GET /monitoring/grievances` | W | reporting | ho.customer_service |
 | `GET /office/cases/{caseId}` | W | workflow | fo.pro |
+| `GET /office/civil-registry/deaths` | W | member | fo.pro |
 | `GET /office/notification-deliveries` | W | member | fo.pro |
 | `GET /office/rti-requests` | W | grievance | fo.pro |
 | `GET /office/work-queue` | W | workflow | fo.pro |

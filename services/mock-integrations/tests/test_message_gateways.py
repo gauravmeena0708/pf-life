@@ -47,3 +47,20 @@ async def test_email_bounce_down_and_list(monkeypatch):
         assert bounce.status_code == 422 and bounce.json() == {"status": "BOUNCED"}
         monkeypatch.setenv("MOCK_EMAIL_DOWN", "1")
         assert (await client.post(path, headers=signed(path), json=body)).status_code == 503
+
+
+@pytest.mark.asyncio
+async def test_digilocker_issue_reissue_and_down(monkeypatch):
+    """P2.21b: a pushed document gets a URI; pushing the same reference again keeps it; the switch makes DigiLocker unavailable."""
+    monkeypatch.delenv("MOCK_DIGILOCKER_DOWN", raising=False)
+    path = "/mock-digilocker/documents"
+    body = {"issuer_id": "in.gov.epfindia.demo", "doc_type": "PPO", "reference": "PPO-DEMO-0099", "title": "e-PPO", "uan_masked": "********0099"}
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+        assert (await client.post(path, json=body)).status_code == 401
+        first = await client.post(path, headers=signed(path), json=body)
+        again = await client.post(path, headers=signed(path), json={**body, "title": "e-PPO (revised)"})
+        assert first.status_code == again.status_code == 201 and first.json()["uri"] == again.json()["uri"]
+        held = [d for d in (await client.get(path, headers=signed(path))).json() if d["reference"] == "PPO-DEMO-0099"]
+        assert len(held) == 1 and held[0]["title"] == "e-PPO (revised)"
+        monkeypatch.setenv("MOCK_DIGILOCKER_DOWN", "1")
+        assert (await client.post(path, headers=signed(path), json=body)).status_code == 503

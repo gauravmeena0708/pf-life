@@ -127,6 +127,38 @@ export function UanCardPage() {
           <div className="actions"><button type="button" onClick={() => window.print()}>Print</button></div>
         </div>
       ) : null}
+      <DigiLockerSection />
+    </section>
+  );
+}
+
+interface LockerDoc { doc_id: string; doc_type: string; title: string; state: string; uri: string | null; attempts: number; last_error: string | null; issued_at: string | null }
+
+/** P2.21b: documents EPFO issued to the member's DigiLocker (mock) — the e-UAN card and the e-PPO. */
+export function DigiLockerSection() {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [error, setError] = useState<unknown>(null);
+  const docs = useQuery({ queryKey: ["digilocker-documents"], retry: false,
+    queryFn: () => api<Envelope<LockerDoc[]>>("/api/v1/members/me/digilocker-documents") });
+  const rows = docs.data?.data ?? [];
+  const card = rows.find((d) => d.doc_type === "UAN_CARD");
+  const ask = async () => {
+    setError(null);
+    try {
+      await command("POST", "/api/v1/members/me/digilocker-documents", { doc_type: "UAN_CARD" });
+      await queryClient.invalidateQueries({ queryKey: ["digilocker-documents"] });
+    } catch (cause) { setError(cause); }
+  };
+  return (
+    <section className="card stack" aria-labelledby="digilocker-heading"><h2 id="digilocker-heading">In your DigiLocker</h2>
+      <p className="muted small">EPFO issues the e-UAN card when a UAN is allotted and the e-PPO when a pension is sanctioned (mock DigiLocker).</p>
+      <ProblemMessage error={error ?? docs.error} />
+      {rows.length ? <ul className="plain-list">{rows.map((d) => <li key={d.doc_id}><strong>{d.title}</strong> · <span className="state-pill">{statusLabel(d.state, t)}</span>
+        {d.uri ? <span className="muted small"> — document {d.uri}{d.issued_at ? `, issued ${d.issued_at.slice(0, 10)}` : ""}</span> : null}
+        {d.state !== "ISSUED" && d.last_error ? <span className="muted small"> — {d.last_error}</span> : null}</li>)}</ul>
+        : docs.isSuccess ? <p className="muted">Nothing issued yet.</p> : null}
+      {!card || card.state === "FAILED" ? <div className="actions"><button type="button" onClick={() => void ask()}>Send my e-UAN card to DigiLocker</button></div> : null}
     </section>
   );
 }

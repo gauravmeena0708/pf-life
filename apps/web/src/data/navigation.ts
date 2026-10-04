@@ -107,7 +107,7 @@ function fieldOffice(role: string): NavGroup[] {
     { label: "Accounts", items: [link("Annual Accounting", undefined, "Interest is credited at head office by F&A (Finance › Interest)"),
       ...(["fo.da_accounts", "fo.apfc"].includes(role) ? [link("Appendix E", "/office/ledger#appendix-e-heading")] : []),
       ...(role === "fo.da_accounts" ? [link("Reverse a journal / recredit a transfer", "/office/ledger#reversal-heading")] : [])] },
-    { label: "Office", items: [...(role === "fo.oic" ? [link("Audit alerts", "/audit/concurrent#audit-alerts-heading"), link("Audit paras", "/audit/concurrent#audit-paras-heading"), link("Issue Tracker requests", "/audit/concurrent#issue-tracker-raise-heading")] : []), ...(role === "fo.pro" ? [link("RTI applications", "/office/grievances#rti-applications-heading")] : []), link("SMS / e-mail deliveries", role === "fo.pro" ? "/office/notification-deliveries" : undefined), link("Dashboard", role === "fo.oic" ? "/dashboards" : homeFor(role)),
+    { label: "Office", items: [...(role === "fo.oic" ? [link("Audit alerts", "/audit/concurrent#audit-alerts-heading"), link("Audit paras", "/audit/concurrent#audit-paras-heading"), link("Issue Tracker requests", "/audit/concurrent#issue-tracker-raise-heading")] : []), ...(role === "fo.pro" ? [link("RTI applications", "/office/grievances#rti-applications-heading"), link("Deaths from the civil registry", "/office/registry-deaths")] : []), link("SMS / e-mail deliveries", role === "fo.pro" ? "/office/notification-deliveries" : undefined), link("Dashboard", role === "fo.oic" ? "/dashboards" : homeFor(role)),
       link("Admin", undefined, "Officers' postings and roles come from HR (Head Office HR); there is no office user-administration screen"),
       link("Services", ["fo.pro", "fo.pro_intake"].includes(role) ? "/office/pro-counter" : undefined, ["fo.pro", "fo.pro_intake"].includes(role) ? undefined : "Facilitation services are at the PRO counter (PRO roles)")] },
   ];
@@ -191,7 +191,8 @@ export function menusFor(role: string | undefined): NavGroup[] {
   if (role === "fo.edli") return [{ label: "EDLI claims", to: "/office/edli-claims" }];
   if (role === "fo.iw") return [{ label: "Certificate of coverage queue", to: "/office/international#coc-queue-heading" }];
   if (role === "ho.iwu") return [{ label: "Social-security agreements", to: "/ho/agreements#agreements-heading" }];
-  if (["fo.apfc_pension", "fo.da_pension", "fo.ss_pension"].includes(role)) return PENSION_OFFICE;
+  if (role === "fo.da_pension") return [...PENSION_OFFICE, { label: "Deaths from the civil registry", to: "/office/registry-deaths" }];
+  if (["fo.apfc_pension", "fo.ss_pension"].includes(role)) return PENSION_OFFICE;
   if (role === "tech.cpps") return [{ label: "CPPS disbursement", to: "/cpps" }];
   if (role.startsWith("fo.")) return fieldOffice(role);
   return poc(role);

@@ -248,6 +248,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /members/me/tax/form-15g-15h` | Upload Form 15G / 15H | W | 1 | claim |
 | `GET /members/me/nominations` | e-Nomination (Form 2) — view | W | 1 | member |
 | `POST /members/me/nominations` 🔐 | e-Nomination — submit with mock e-sign | W | 1 | member |
+| `GET /members/me/digilocker-documents` | Documents issued to the member's DigiLocker (mock): the e-UAN card, the e-PPO (P2.21b) | M | 1 | member |
+| `POST /members/me/digilocker-documents` | Ask for the e-UAN card in DigiLocker (mock) — for a UAN allotted before the push, or a failed push | M | 1 | member |
 | `GET /members/me/sessions` | Session history | W | 1 | gateway |
 | `POST /members/me/security-reports` | Report suspicious activity | W | 1 | member |
 | `POST /members/me/account-recovery-requests` 🔐 | Controlled, reviewed account recovery (Journey D5) | W | 1 | member |
@@ -302,6 +304,9 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /claimants/death-claims/{claimId}` | Status (claimant verified separately; no member PII beyond entitlement) | W | 1 | claim |
 | `POST /claimants/family-pension-applications` 💰 🔐 (`formType=FORM_10D`) | Widow / child / orphan pension | W | 1 | pension |
 | `GET /claimants/family-pension-applications` | Status of the family pension application, desk by desk | W | 1 | pension |
+| `GET /claimants/me/death-claim-offers` | What the nominee may claim on a member's recorded death — Form 20 and Form 5IF worked out from the balance and service, already-filed forms shown (P2.21b) | W | 1 | claim |
+| `POST /integrations/crs/death-registrations` | Civil Registration System death feed (signed): matched to a member, closes the open member IDs (death while in service) and announces the death (P2.21b) | M | 1 | member |
+| `GET /office/civil-registry/deaths` | Deaths the civil registry reported: the office's members, and records that matched nobody or more than one person | W | 1 | member |
 
 
 **Added from the stakeholder activity map** (`docs/stakeholder-activities.yaml`)

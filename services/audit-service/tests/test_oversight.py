@@ -109,6 +109,23 @@ def test_today_extract_flags_decisions_and_movements_but_not_contributions(ctx):
                                    "AUTO_TRANSFER": 1, "HIGH_VALUE_TRANSFER": 1, "IDENTITY_CHANGED": 1}
 
 
+def test_a_fixed_share_of_automatic_settlements_is_sampled_for_post_audit(ctx):
+    """P2.21b: one automatically settled claim in AUTO_SAMPLE_ONE_IN is flagged, chosen by the claim number alone — the
+    same claims on every download, and an officer-approved claim is never part of the sample."""
+    from app.api.oversight_routes import AUTO_SAMPLE_ONE_IN, sampled
+    client, deliver, _ = ctx
+    ids = [f"CLM-{n:08X}" for n in range(40)]
+    picked = [c for c in ids if sampled(c)]
+    assert 0 < len(picked) < len(ids) and picked == [c for c in ids if sampled(c)]
+    for claim_id in ids:
+        deliver("ClaimDecisionRecorded.v1", office_id="RO-DEMO-01", claim_id=claim_id, decision="AUTO_APPROVED", amount_paise=1000000)
+    deliver("ClaimDecisionRecorded.v1", office_id="RO-DEMO-01", claim_id=picked[0] + "-OFFICER", decision="APPROVED", amount_paise=1000000)
+    data = client.get("/api/v1/audit/concurrent/extracts", headers=hdr("zo.rpfc1_audit", S["zo-audit"])).json()["data"]
+    assert data["auto_settlements"] == {"settled": 40, "sampled": len(picked), "one_in": AUTO_SAMPLE_ONE_IN}
+    assert [i["reference"] for i in data["items"] if "AUTO_SETTLEMENT_SAMPLE" in i["flags"]] == picked
+    assert all(i["office_id"] == "RO-DEMO-01" for i in data["items"])
+
+
 def test_alert_reply_tracks_office_jurisdiction_after_reposting(ctx):
     client, deliver, _ = ctx
     auditor = hdr("zo.rpfc1_audit", S["zo-audit"])

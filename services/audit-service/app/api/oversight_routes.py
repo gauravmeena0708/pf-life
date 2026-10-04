@@ -5,7 +5,10 @@
   the report is a mock with an acknowledgement number.
 * Concurrent audit: the zone's Concurrent Audit Cell downloads a day's functionality extract — the day's decisions
   and ledger movements from the audit log, each with red flags — raises alerts to an office, and the office's OIC
-  replies within 3 days."""
+  replies within 3 days. P2.21b: claims settled automatically, with no officer in the loop, are checked after the event:
+  a fixed share of them (one in AUTO_SAMPLE_ONE_IN, chosen from the claim number, so the sample cannot be steered
+  and is the same on every download) is flagged AUTO_SETTLEMENT_SAMPLE for the auditor to look at."""
+import hashlib
 import secrets
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
@@ -29,6 +32,7 @@ AUDIT_CELL = require_stakeholder("zo.rpfc1_audit")
 CATEGORIES = ("UNAUTHORISED_ACCESS", "DATA_BREACH", "MALWARE", "DENIAL_OF_SERVICE", "PHISHING", "IDENTITY_THEFT", "OTHER")
 ALWAYS_REPORTABLE = {"DATA_BREACH", "UNAUTHORISED_ACCESS", "IDENTITY_THEFT"}          # illustrative
 HIGH_VALUE_PAISE = 50_000_00                                                           # ₹5,00,000 (illustrative)
+AUTO_SAMPLE_ONE_IN = 5                                                                 # illustrative
 ZONE_OF = {"RO-DEMO-01": "ZO-DEMO-01", "RO-DEMO-02": "ZO-DEMO-01"}
 
 
@@ -98,6 +102,11 @@ async def list_incidents(actor: Actor = Depends(require_stakeholder("ho.security
 
 # ── concurrent audit ────────────────────────────────────────────────────────────────────────────
 
+def sampled(claim_id: str) -> bool:
+    """Whether an automatically settled claim is in the post-audit sample: decided by the claim number alone."""
+    return int(hashlib.sha256(claim_id.encode()).hexdigest()[:8], 16) % AUTO_SAMPLE_ONE_IN == 0
+
+
 def flags_for(event_type: str, p: dict[str, Any]) -> tuple[list[str], str | None, int | None]:
     """Red flags a concurrent auditor looks at (illustrative), the reference and the amount."""
     flags: list[str] = []
@@ -108,6 +117,8 @@ def flags_for(event_type: str, p: dict[str, Any]) -> tuple[list[str], str | None
             flags.append("HIGH_VALUE_SETTLEMENT")
         if p.get("fund") == "EDLI":
             flags.append("EDLI_SANCTION")
+        if p.get("decision") == "AUTO_APPROVED" and ref and sampled(ref):
+            flags.append("AUTO_SETTLEMENT_SAMPLE")
         return flags, ref, amount
     if event_type == "ClaimStateChanged.v1":
         if p.get("to_state") in ("CORRECTION_PENDING", "REISSUE_APPROVED"):
@@ -147,11 +158,14 @@ async def extract(day: date | None = Query(default=None), actor: Actor = Depends
             items.append({"event_id": r["event_id"], "occurred_at": r["occurred_at"], "event_type": r["event_type"],
                           "reference": ref, "amount_paise": amount, "office_id": (r["payload"] or {}).get("office_id"),
                           "flags": flags, "correlation_id": r["correlation_id"], "hash": r["hash"]})
+    auto = [r for r in rows if r["event_type"] == "ClaimDecisionRecorded.v1" and (r["payload"] or {}).get("decision") == "AUTO_APPROVED"]
     counts: dict[str, int] = {}
     for i in items:
         for f in i["flags"]:
             counts[f] = counts.get(f, 0) + 1
     return envelope({"day": day.isoformat(), "items": items, "flag_counts": counts, "events_scanned": len(rows),
+                     "auto_settlements": {"settled": len(auto), "sampled": counts.get("AUTO_SETTLEMENT_SAMPLE", 0),
+                                          "one_in": AUTO_SAMPLE_ONE_IN},
                      "note": "Illustrative red flags drawn from the hash-chained audit log; the auditor decides what to raise."})
 
 

@@ -33,6 +33,7 @@ BINDINGS = [
     "member-service.PrimaryMemberIdChanged.v1",
     "contribution-service.InterestCredited.v1",
     "member-service.MemberExitMarked.v1",
+    "member-service.MemberDeathRecorded.v1",
     "contribution-service.TransferPosted.v1",
     "contribution-service.TrustTransferRequested.v1",
     "member-service.MemberRegistered.v1",
@@ -238,9 +239,12 @@ async def on_member_death(session: AsyncSession, event: dict[str, Any]) -> None:
     to the nominees through Form 20 instead, and a claim already debited is credited back (ClaimDecided REJECTED). Death
     claims, and claims already with the bank, are left alone."""
     p = event["payload"]
-    if p.get("reason") != "DEATH_IN_SERVICE":
+    if event["event_type"] == "MemberDeathRecorded.v1":          # P2.21b: also a death after leaving service (civil registry)
+        died = date.fromisoformat(p["date_of_death"])
+    elif p.get("reason") == "DEATH_IN_SERVICE":
+        died = date.fromisoformat(p["date_of_exit"])
+    else:
         return
-    died = date.fromisoformat(p["date_of_exit"])
     await session.execute(update(accounts).where(accounts.c.uan == p["uan"]).values(deceased_on=died))
     links = (await session.execute(select(accounts.c.account_link_id).where(accounts.c.uan == p["uan"]))).scalars().all()
     rows = (await session.execute(select(claims).where(claims.c.account_link_id.in_(links), claims.c.state.in_(HOLDABLE | {"ON_HOLD_FROZEN"}),
@@ -365,6 +369,7 @@ HANDLERS = {
     "ContributionPosted.v1": on_contribution_posted,
     "InterestCredited.v1": on_interest_credited,
     "MemberExitMarked.v1": on_member_exit,
+    "MemberDeathRecorded.v1": on_member_death,
     "TransferPosted.v1": on_transfer_posted,
     "TrustTransferRequested.v1": on_trust_transfer_requested,
     "MemberRegistered.v1": on_member_registered,

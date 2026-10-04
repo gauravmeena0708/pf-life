@@ -74,7 +74,7 @@ async def record_decision(session: AsyncSession, claim: dict[str, Any], decision
                     aggregate_id=claim["claim_id"], correlation_id=correlation_id, payload={
                         "claim_id": claim["claim_id"], "decision": decision, "reason_code": reason_code,
                         "rule_version": claim["rule_version"], "amount_paise": claim["amount_paise"],
-                        "account_link_id": claim["account_link_id"],
+                        "account_link_id": claim["account_link_id"], "office_id": claim["office_id"],
                         "fund": {"DEATH_EDLI": "EDLI", "PENSION_WITHDRAWAL": "EPS"}.get(claim["claim_type"], "MEMBER_ACCOUNT")})   # EDLI is paid from the EDLI fund
 
 

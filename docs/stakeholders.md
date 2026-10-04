@@ -174,6 +174,7 @@ EPFO field offices run branches (Accounts, Pension, Cash, Compliance, Recovery, 
 | `ext.umang` | UMANG (NeGD) mobile channel | Member / pensioner channel | Ext | EC, PEN, REF |
 | `ext.jeevan_pramaan` | Jeevan Pramaan (Digital Life Certificate) | Pensioner liveness | Ext | PEN (24) |
 | `ext.digilocker` | DigiLocker (documents, PPO / UAN card) | Documents | Ext | — (no manual mention) |
+| `ext.crs` | Civil Registration System (Registrar General of India) — registered deaths | Deaths reported to EPFO | Ext | — (no manual mention; P2.21b mock) |
 | `ext.ippb` | India Post / IPPB (doorstep DLC) | Pensioner service | Ext | PEN |
 | `ext.cpgrams` | CPGRAMS (DARPG grievance portal) | Grievances routed in | Ext | EC |
 | `ext.foreign_ss` | Foreign social-security liaison agencies (IWU portal "FOREIGN AGENCIES" login) | CoC verification, totalisation | Ext | EC, IWU |

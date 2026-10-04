@@ -55,7 +55,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | P2.18 | EPF to NPS: the PF leg paid to the member's NPS Tier I (PRAN, KYC match, the trustee bank through the CRA — mock); the EPS leg cannot move — a Scheme Certificate or the withdrawal benefit | Planned (needs PFRDA's circular) |
 | P2.19 | Edge cases as tests first, then the fixes: death during a transfer or claim; minor nominee or no nomination; two UANs to merge; court-ordered back wages after exit; 58 in service; a re-employed pensioner; family pension to a dependent parent or a disabled child; attachment orders refused; mergers without a break; a vanished contractor (s.8A); partial payment; exemption cancelled mid-transfer; returned payments after a bank merger; one bank account for many members; identity mismatches; members abroad without Aadhaar; unclaimed balances | a (money at risk: death, short cheque, re-employed pensioner, child pension to 25, back wages): Done; the rest planned |
 | P2.20 | Navigation and findability: side or top menu (per user, by role), menu search (Ctrl+K), the empty menu headings wired to existing screens; a text-size control (to 150%) for senior citizens; later task-based member and employer menus with the legacy ones behind a toggle | Done (task-based menus later) |
-| P2.21 | Data held, not asked: pre-filled claims, automatic transfer when a new member ID appears, the pension case opened at 58 and on death, settlement by default for low risk with sampled audits | a (transfer unasked; claims and pension offered filled in): Done; b (pension case on death from a registry feed, sampled audit of automatic settlements, DigiLocker) planned |
+| P2.21 | Data held, not asked: pre-filled claims, automatic transfer when a new member ID appears, the pension case opened at 58 and on death, settlement by default for low risk with sampled audits | a (transfer unasked; claims and pension offered filled in): Done; b (death from the civil registry, claims offered to the nominee, sampled audit of automatic settlements, DigiLocker): Done |
 | P2.22 | Real-time contributions: a per-pay-run contribution API and a conformance sandbox for payroll vendors (the ECR kept as a format); a due-date option to model contributions paid with wages | Planned |
 | P2.23 | Retirement view: one forecast across PF and pension with VPF what-if and replacement rate; every rejection saying what fixes it | Planned |
 | P2.24 | Trust and governance: authorised representatives (guardian, agent) with consented scope; published service standards with live performance; an independent review tier; rule-change simulation; interest-sustainability model | Planned |
@@ -1456,4 +1456,40 @@ Tests first; each found a gap that is now closed.
   monthly pension is offered too (Form 10D — service and wages are on record), until an application is on file.
 - Planned (P2.21b): the pension case opened on death from a civil-registry feed (mock), a sampled audit of claims settled
   automatically, and the PPO and UAN card pushed to DigiLocker (mock).
+
+## P2.21b — how it is built (death from the registry, claims offered, sampled audit, DigiLocker)
+
+Sources: the Registration of Births and Deaths (Amendment) Act, 2023 — the Registrar General keeps a national database
+of registered deaths, which may be shared, with the Central Government's approval, with authorities keeping the
+databases listed in the Act "and such other databases as may be notified" (EPFO is not named: it would need that
+notification); EPFO's notice that the UAN card, the PPO and the scheme certificate are in DigiLocker.
+
+- **The death comes to EPFO.** The Civil Registration System (mock; a machine login `crs-demo`, role `ext.crs`) sends
+  each registered death, signed (`POST /integrations/crs/death-registrations`). member-service matches it to a member by
+  the Aadhaar reference — every UAN of that person — or, without one, by name and date of birth when they point at one
+  person. The member's open member IDs close as *death while in service*, marked by the civil registry, and the death is
+  announced (`MemberDeathRecorded.v1`). A repeated registration is answered with the first outcome; a second registration
+  of a death already on record changes nothing; a record that matches nobody, or two people, is kept for the PRO and the
+  DA (Pension) (*Deaths from the civil registry*). An employer's death exit announces the death the same way.
+- **The nominee is offered the claims, worked out.** claim-service records the death (also for a member who had left
+  service) and closes the member's own unpaid claims as before (P2.19a). The nominee with a login sees *What you can
+  claim*: Form 20 (the balance) and Form 5IF (the EDLI benefit under the rules in force) with their workings, filed as
+  one composite claim with one confirmation; a form already filed is shown as filed. pension-service records the date of
+  death, so the spouse or child applies for the family pension (Form 10D) at once, and stops a pension the member was
+  drawing from the death (any pension credited after it is recovered) — the member's own PPO only, not a family pension
+  on the same UAN. New persona `claimant-b` (MEENA DEMO), the wife and nominee of VIJAY DEMO (UAN 100000000916, in
+  service at Demo Engineering Works). `scripts/crs_death_feed.py` plays the registry.
+- **Automatic settlements are post-audited by sample.** Claims settled with no officer in the loop are checked after the
+  event: the Concurrent Audit Cell's daily extract flags one in five (illustrative) as `AUTO_SETTLEMENT_SAMPLE`, chosen by
+  the claim number alone — the same claims on every download, and not something a member or officer can steer — and
+  shows how many were settled and sampled; the auditor raises an alert to the office as for any flag. The claim decision
+  now carries the settling office.
+- **DigiLocker.** member-service issues the e-UAN card when a UAN is allotted (or when a member asks: *View › UAN card ›
+  In your DigiLocker*) and the e-PPO when the member's pension is dispatched (`PpoIssued.v1`); a worker pushes them to
+  DigiLocker (mock) and retries for an hour and a half while it is down, then marks the push failed (the member can ask
+  again). The full UAN never leaves EPFO in the push.
+- Not built: the real DigiLocker is a pull — EPFO, as issuer, answers DigiLocker's request for a document by its URI —
+  and holds the scheme certificate too; the family pension's PPO, held by the widow or child (no member record here), is
+  not pushed; a nominee without a login is not told (nominations hold no contact details); the sampling rate is a
+  constant in audit-service, not in the published rules.
 

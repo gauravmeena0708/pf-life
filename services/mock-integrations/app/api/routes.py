@@ -19,6 +19,7 @@ from epfo_observability import Problem
 router = APIRouter()
 _sms_messages: deque[dict] = deque(maxlen=200)
 _email_messages: deque[dict] = deque(maxlen=200)
+_digilocker: dict[str, dict] = {}          # P2.21b: documents issued, by issuer and reference
 
 
 async def _gateway_signature(request: Request, signature: str | None = Header(default=None, alias="X-Signature")) -> None:
@@ -72,6 +73,31 @@ async def list_sms() -> list[dict]:
 @router.get("/mock-email/messages", dependencies=[Depends(_gateway_signature)])
 async def list_email() -> list[dict]:
     return list(_email_messages)
+
+
+class DigiLockerDocument(BaseModel):
+    issuer_id: str
+    doc_type: str
+    reference: str
+    title: str
+    uan_masked: str
+
+
+@router.post("/mock-digilocker/documents", status_code=201, dependencies=[Depends(_gateway_signature)])
+async def issue_document(document: DigiLockerDocument) -> dict:
+    """Synthetic DigiLocker push (P2.21b): the issuer's document lands in the holder's locker. Issuing the same reference
+    again replaces it under the same URI. MOCK_DIGILOCKER_DOWN=1 makes it unavailable."""
+    if os.getenv("MOCK_DIGILOCKER_DOWN") == "1":
+        raise Problem(503, "/problems/gateway-unavailable", "DigiLocker unavailable")
+    key = f"{document.issuer_id}/{document.doc_type}/{document.reference}"
+    uri = _digilocker.get(key, {}).get("uri") or f"{document.issuer_id}-{document.doc_type}-{hashlib.sha256(key.encode()).hexdigest()[:12].upper()}"
+    _digilocker[key] = {**document.model_dump(), "uri": uri, "issued_on": date.today().isoformat()}
+    return {"uri": uri, "status": "ISSUED"}
+
+
+@router.get("/mock-digilocker/documents", dependencies=[Depends(_gateway_signature)])
+async def list_documents() -> list[dict]:
+    return list(_digilocker.values())
 
 
 def _trust_ledgers() -> dict:

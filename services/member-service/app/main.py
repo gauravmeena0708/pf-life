@@ -8,9 +8,10 @@ from fastapi import FastAPI
 from sqlalchemy import update
 
 import epfo_auth
-from app.api import catalogue_routes, inoperative_routes, nomination_routes, onboarding_routes, routes
+from app.api import catalogue_routes, inoperative_routes, life_event_routes, nomination_routes, onboarding_routes, routes
 from app.config import settings
 from app.domain.notifications import handle_notification_requested, deliver_due
+from app.domain.life_events import on_ppo_issued, push_documents_due
 from app.domain.exits import on_contribution_posted, on_ledger_reversed, on_transfer_posted
 from app.domain.processes import on_issue_tracker, on_process_transitioned
 from app.infra.db import database_ready, engine, sessions
@@ -33,7 +34,8 @@ async def lifespan(app: FastAPI):
                              ["workflow-service.ProcessTransitioned.v1", "contribution-service.ContributionPosted.v1",
                               "contribution-service.TransferPosted.v1", "contribution-service.LedgerReversed.v1",
                               "platform-service.IssueTrackerExecuted.v1", "workflow-service.StaffPostingChanged.v1",
-                              "platform-service.PolicyPublished.v1", "employer-service.EstablishmentOfficeTransferred.v1"], _route)
+                              "platform-service.PolicyPublished.v1", "employer-service.EstablishmentOfficeTransferred.v1",
+                              "pension-service.PpoIssued.v1"], _route)
         relay.start()
         consumer.start()
         processes.start()
@@ -59,6 +61,8 @@ async def _notification_loop() -> None:
             async with sessions()() as session:
                 async with session.begin():
                     await deliver_due(session, datetime.now(UTC))
+                async with session.begin():
+                    await push_documents_due(session, datetime.now(UTC))     # P2.21b: DigiLocker (mock)
         except asyncio.CancelledError:
             raise
         except Exception:
@@ -77,6 +81,7 @@ def create_app() -> FastAPI:
     app.include_router(onboarding_routes.router)
     app.include_router(inoperative_routes.router)
     app.include_router(nomination_routes.router)
+    app.include_router(life_event_routes.router)
     handled = {(m, r.path) for r in app.router.routes for m in getattr(r, "methods", set())}
     for route in catalogue_routes.router.routes:
         if not any((m, route.path) in handled for m in route.methods):
@@ -91,7 +96,7 @@ async def _route(session, event):
     handler = {"ProcessTransitioned.v1": on_process_transitioned, "ContributionPosted.v1": on_contribution_posted,
                "TransferPosted.v1": on_transfer_posted, "LedgerReversed.v1": on_ledger_reversed,
                "IssueTrackerExecuted.v1": on_issue_tracker, "StaffPostingChanged.v1": _posting,
-               "EstablishmentOfficeTransferred.v1": _establishment_office_transferred}.get(event["event_type"])
+               "EstablishmentOfficeTransferred.v1": _establishment_office_transferred, "PpoIssued.v1": on_ppo_issued}.get(event["event_type"])
     if event["event_type"] == "PolicyPublished.v1":
         handler = on_policy_published
     if handler:

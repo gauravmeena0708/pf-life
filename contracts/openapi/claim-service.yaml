@@ -162,6 +162,38 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/BeneficiaryInwardRequest'
+  /claimants/me/death-claim-offers:
+    get:
+      operationId: getClaimantsDeathClaimOffers
+      summary: 'What the nominee may claim on a member''s recorded death — Form 20 and Form 5IF worked out from the balance
+        and service, '
+      tags:
+      - Member claims, transfers and pension applications
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: claim
+      x-callers:
+      - claimant
+      x-scope: self — claimant's own claims only
+      security:
+      - bffSession: []
+      description: What the nominee may claim on a member's recorded death — Form 20 and Form 5IF worked out from the balance
+        and service, already-filed forms shown (P2.21b)
   /employers/me/claim-attestations:
     get:
       operationId: getEmployersClaimAttestations

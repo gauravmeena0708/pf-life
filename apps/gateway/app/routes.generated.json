@@ -2860,6 +2860,22 @@
   },
   {
     "method": "POST",
+    "path_template": "/integrations/crs/death-registrations",
+    "regex": "^/integrations/crs/death\\-registrations$",
+    "status": "M",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ext.crs"
+    ],
+    "summary": "Civil Registration System death feed (signed): matched to a member, closes the open member IDs (death while in service) and announces the death (P2.21b)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/integrations/fund-managers/positions",
     "regex": "^/integrations/fund\\-managers/positions$",
     "status": "M",
@@ -3920,6 +3936,22 @@
   },
   {
     "method": "GET",
+    "path_template": "/claimants/me/death-claim-offers",
+    "regex": "^/claimants/me/death\\-claim\\-offers$",
+    "status": "W",
+    "phase": 1,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "claimant"
+    ],
+    "summary": "What the nominee may claim on a member's recorded death — Form 20 and Form 5IF worked out from the balance and service, already-filed forms shown (P2.21b)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/employers/me/claim-attestations",
     "regex": "^/employers/me/claim\\-attestations$",
     "status": "W",
@@ -4063,6 +4095,38 @@
       "ext.cpgrams"
     ],
     "summary": "CPGRAMS grievance feed (signed)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/digilocker-documents",
+    "regex": "^/members/me/digilocker\\-documents$",
+    "status": "M",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Documents issued to the member's DigiLocker (mock): the e-UAN card, the e-PPO (P2.21b)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/digilocker-documents",
+    "regex": "^/members/me/digilocker\\-documents$",
+    "status": "M",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Ask for the e-UAN card in DigiLocker (mock) — for a UAN allotted before the push, or a failed push",
     "revocation": false
   },
   {
@@ -4803,6 +4867,23 @@
       "fo.da_accounts"
     ],
     "summary": "Restart Claim from the stopped-claims list",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/civil-registry/deaths",
+    "regex": "^/office/civil\\-registry/deaths$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.da_pension",
+      "fo.pro"
+    ],
+    "summary": "Deaths the civil registry reported: the office's members, and records that matched nobody or more than one person",
     "revocation": false
   },
   {
