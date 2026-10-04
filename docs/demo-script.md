@@ -752,6 +752,13 @@ tests produced, by role (after `python3 scripts/publish_manuals.py`).
 3. *Submit* with the one-time code: a number ending 0000 is refused by the mock penny-drop with the reason and *Enter
    another account number*; any other is verified and goes to the employer, with the request's reference.
 
+## Move an old account, step by step (P2.28c)
+
+1. As `member-b` (before the exit-and-transfer demo), Service history › *Move an old account step by step*: the old job by
+   its employer — if its exit is not marked yet, the page says so with *Mark your exit*.
+2. Once the exit is marked: choose it, the current account is preselected, *Check your answers*, *Send the request* with the
+   one-time code — the confirmation gives the reference and the three steps that follow.
+
 ## Erroneous EPS contributions rectified (P2.19c, HO circular WSU/2025/E-961539)
 
 1. As `emp-preparer`, register a joinee with date of joining 4 Jan 2016 and file a return for a month of 2016 with wages

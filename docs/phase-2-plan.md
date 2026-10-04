@@ -59,7 +59,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | P2.22 | Real-time contributions: a per-pay-run contribution API and a conformance sandbox for payroll vendors (the ECR kept as a format); a due-date option to model contributions paid with wages | Planned |
 | P2.23 | Retirement view: one forecast across PF and pension with VPF what-if and replacement rate; every rejection saying what fixes it | a (retirement view, VPF what-if): Done; b (every rejection and refusal saying what fixes it): Done |
 | P2.24 | Trust and governance: authorised representatives (guardian, agent) with consented scope; published service standards with live performance; an independent review tier; rule-change simulation; interest-sustainability model | Planned |
-| P2.28 | Production UX foundations: task-based journeys (one task per page, check-your-answers, a confirmation with a reference, a receipt with a QR to verify it); plain language with no internal codes and complete Hindi; forms that check as you type and list errors at the top; officers' queues with sorting, filters, deadlines, bulk actions and the documents beside the decision; risk-based step-up; a component library on UX4G and GIGW 3.0; WCAG 2.1 AA verified (axe in CI, screen reader, 400% zoom); phone layouts and per-page code; loading, empty and error states; usability sessions and privacy-safe analytics. First: the member's claim, KYC and transfer journeys | a (the claim journey, the first shared components): Done; b (changing the bank account): Done; next: the transfer, then the officers' screens |
+| P2.28 | Production UX foundations: task-based journeys (one task per page, check-your-answers, a confirmation with a reference, a receipt with a QR to verify it); plain language with no internal codes and complete Hindi; forms that check as you type and list errors at the top; officers' queues with sorting, filters, deadlines, bulk actions and the documents beside the decision; risk-based step-up; a component library on UX4G and GIGW 3.0; WCAG 2.1 AA verified (axe in CI, screen reader, 400% zoom); phone layouts and per-page code; loading, empty and error states; usability sessions and privacy-safe analytics. First: the member's claim, KYC and transfer journeys | a (the claim journey, the first shared components): Done; b (changing the bank account): Done; c (the transfer): Done; next: the officers' screens |
 | P2.29 | A README for the repository (there is none): says up front that this is a vibe-coded app — written by AI coding agents (Claude Code, Codex, agy) at a person's direction, not hand-written or reviewed as production code — and a synthetic demonstration, not an EPFO system; what it covers (the stakeholders, journeys and the official sources it follows), how to run it (`make up`, `make migrate`, `make seed`, the personas), how it is tested, and a map of `docs/`. With a nod to the name: it should have been *pf-vibe* | Done |
 
 ## P2.9 — plan
@@ -1529,6 +1529,17 @@ Built:
 - Not built: finding the ineligible members automatically (wages on joining are not on record: the office starts the
   case, e.g. from Form 11 or an inspection); the non-contributory period credited separately (the service counts from
   joining to exit).
+
+## P2.28c — how it is built (moving an old account, Form 13)
+
+Built by agy from a brief to copy the two journeys before it; nothing to change on review.
+
+- **The transfer as three steps** (`/member/service/transfer/new`, *Move an old account step by step* on the service
+  history): the old account by its employer and years, with about how much will move — or, when none can move, why for
+  each (the exit not marked, with the way to mark it; already moved); the current account, preselected when there is one;
+  check your answers; the one-time code; a confirmation with the request's reference and the three steps that follow
+  (the employer attests, the regional office approves, the balance appears).
+- With this the member's three most used journeys — a claim, the bank account, a transfer — run step by step.
 
 ## P2.28b — how it is built (changing the bank account)
 

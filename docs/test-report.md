@@ -98,6 +98,13 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 28c: moving an old account, step by step (4 October 2026)
+
+Web 331 (new: old accounts by employer; none available explained with the way to mark the exit; the only current account
+preselected; check your answers; the code and the confirmation with the three steps; a cancelled code keeping the request;
+server errors in the summary). End to end: new `test_transfer_journey.py` (opened from the service history, numbered
+steps, the explanation instead of an empty choice) with the five e2e tests that use the service history — 13 passed.
+
 ## Update — Phase 2, slice 28b: changing the bank account, step by step (4 October 2026)
 
 Web 322 (new: a bad IFSC listed at the top and on the field; mismatched account numbers refused; check your answers shows

@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 import { api, command, rupees, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
@@ -141,6 +142,7 @@ export function ServicePage() {
 
       <form className="card stack" aria-labelledby="transfer-heading" onSubmit={requestTransfer}><h2 id="transfer-heading">One Member – One EPF Account (transfer request)</h2>
         <p className="muted small">Move the balance of a previous member ID into your current one (Form 13). Your present employer attests the request; the regional office verifies and approves it.</p>
+        <p><Link to="/member/service/transfer/new">Move an old account step by step</Link></p>
         {from.length === 0 || to.length === 0 ? <p className="muted">{from.length === 0 ? "No previous member ID with a date of exit is waiting to be transferred." : "You have no current member ID to transfer into."}</p> : <>
           <div className="form-row">
             <label>From (previous member ID)<select name="from" required>{from.map((m) => <option key={m.account_link_id} value={m.account_link_id}>{m.account_link_id} · {m.establishment_name}</option>)}</select></label>

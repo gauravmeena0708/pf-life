@@ -138,5 +138,68 @@
       "verificationFailed": "The bank could not confirm this account: {{reason}}",
       "defaultFailedReason": "Penny-drop failed"
     }
+  },
+  "transferJourney": {
+    "eyebrow": "Member services",
+    "title": "Move an old PF account into your current one",
+    "description": "Transfer your previous EPF service and balance into your present account (Form 13).",
+    "parent": "Service history",
+    "current": "Move an old account",
+    "loading": "Loading service history…",
+    "memberId": "Member ID {{id}}",
+    "primary": "Primary",
+    "now": "now",
+    "serviceDuration": "{{years}} years {{months}} months",
+    "stepUpSummary": "Move the PF of {{oldEmployer}} into your account with {{currentEmployer}}. Your present employer attests it, then your regional office approves it.",
+    "steps": {
+      "oldAccount": "Old account",
+      "currentAccount": "Current account",
+      "checkAnswers": "Check your answers"
+    },
+    "step1": {
+      "heading": "Which old account?",
+      "aboutAmount": "about {{amount}}",
+      "noneAvailable": "No previous member IDs are available to transfer.",
+      "noAccounts": "No member accounts found.",
+      "exitNotMarked": "Your exit from {{employer}} is not marked yet",
+      "markExit": "Mark your exit",
+      "alreadyTransferred": "Already moved to {{target}}",
+      "whyMoveTitle": "Why move it?",
+      "whyMoveBody": "One account keeps your service together for the pension and avoids withdrawing small balances."
+    },
+    "step2": {
+      "heading": "Into which account?",
+      "currentAccountNote": "This is your current account",
+      "noCurrentAccount": "You have no current account to move it into"
+    },
+    "step3": {
+      "heading": "Check your answers",
+      "note": "Your present employer attests the request, then your regional office checks and approves it. Your service and balance move together; you will get a message at each step."
+    },
+    "summary": {
+      "from": "From",
+      "into": "Into",
+      "aboutToMove": "About to move",
+      "aboutToMoveValue": "about {{amount}} will move"
+    },
+    "actions": {
+      "back": "Back",
+      "continue": "Continue",
+      "sendRequest": "Send the request"
+    },
+    "confirmation": {
+      "title": "Transfer requested",
+      "referenceLabel": "Your request",
+      "step1": "Employer attests the request",
+      "step2": "Regional office approves it",
+      "step3": "The balance appears in your current account",
+      "trackTransfer": "Track it on your service history",
+      "backToService": "Back to service history"
+    },
+    "errors": {
+      "chooseOldAccount": "Choose an old account to continue",
+      "chooseCurrentAccount": "Choose a current account to continue"
+    }
   }
 }
+

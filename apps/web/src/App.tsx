@@ -21,6 +21,7 @@ import { ClaimJourneyPage } from "./features/member/ClaimJourneyPage";
 import { ClaimDetailPage } from "./features/member/ClaimDetailPage";
 import { ProfilePage } from "./features/member/ProfilePage";
 import { ServicePage } from "./features/member/ServicePage";
+import { TransferJourneyPage } from "./features/member/TransferJourneyPage";
 import { NominationPage } from "./features/member/NominationPage";
 import { KycPage, UanCardPage } from "./features/member/KycPage";
 import { BankJourneyPage } from "./features/member/BankJourneyPage";
@@ -181,6 +182,7 @@ export function App() {
             <Route path="/member/claims/:claimId" element={<ClaimDetailPage />} />
             <Route path="/member/profile" element={<ProfilePage />} />
             <Route path="/member/service" element={<ServicePage />} />
+            <Route path="/member/service/transfer/new" element={<TransferJourneyPage />} />
             <Route path="/member/nomination" element={<NominationPage />} />
             <Route path="/member/kyc/bank/new" element={<BankJourneyPage />} />
             <Route path="/member/kyc" element={<KycPage />} />
