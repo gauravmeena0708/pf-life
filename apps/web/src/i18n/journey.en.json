@@ -1,0 +1,84 @@
+{
+  "ui": {
+    "progress": "Progress",
+    "stepOf": "Step {{step}} of {{total}}",
+    "thereIsAProblem": "There is a problem",
+    "change": "Change"
+  },
+  "claimJourney": {
+    "startClaim": "Start a claim",
+    "eyebrow": "Member services",
+    "title": "Start a claim",
+    "description": "Submit a claim against your PF account.",
+    "current": "Start a claim",
+    "steps": {
+      "whichJob": "Which job",
+      "whatFor": "What for",
+      "howMuch": "How much",
+      "wherePaid": "Where it is paid",
+      "checkAnswers": "Check your answers"
+    },
+    "step1": {
+      "heading": "Which job do you want to claim from?",
+      "primary": "Primary",
+      "noClaimOpen": "No claim is open on this member ID",
+      "totalBalance": "Total balance"
+    },
+    "step2": {
+      "heading": "What are you claiming for?",
+      "upTo": "Up to {{amount}}",
+      "notAvailableNow": "Not available now ({{count}})",
+      "whatToDo": "What to do: {{fix}}",
+      "goThere": "Go there"
+    },
+    "step3": {
+      "heading": "How much do you want to claim?",
+      "amountLabel": "Amount in whole rupees",
+      "upTo": "Up to {{amount}}"
+    },
+    "step4": {
+      "heading": "Where it is paid",
+      "bankAccountOnRecord": "Bank account on record",
+      "ifsc": "IFSC",
+      "accountEnding": "account ending {{last4}}",
+      "bankNotVerified": "Your bank account is not verified yet",
+      "updateBankKyc": "Update bank details (KYC)"
+    },
+    "step5": {
+      "heading": "Check your answers"
+    },
+    "summary": {
+      "job": "Job",
+      "claim": "Claim",
+      "amount": "Amount",
+      "paidTo": "Paid to"
+    },
+    "actions": {
+      "back": "Back",
+      "continue": "Continue",
+      "submitClaim": "Submit claim"
+    },
+    "confirmation": {
+      "title": "Claim submitted",
+      "referenceLabel": "Your reference",
+      "autoApproved": "It was approved automatically; the money is sent to your bank.",
+      "approvalChain": "It goes to: {{chain}}",
+      "expectBy": "Expect it by {{date}}",
+      "trackClaim": "Track this claim",
+      "backToClaims": "Back to my claims",
+      "printReceipt": "Print or save receipt",
+      "toReview": "It goes to an officer for review."
+    },
+    "errors": {
+      "chooseJob": "Choose a member ID to continue",
+      "chooseClaim": "Choose a claim type to continue",
+      "amountEmpty": "Enter an amount",
+      "notWholeNumber": "Enter a whole number of rupees",
+      "amountZero": "Amount must be greater than zero",
+      "amountAboveMax": "Amount cannot exceed {{max}}"
+    },
+    "now": "now",
+    "memberId": "Member ID {{id}}",
+    "loading": "Loading claim details…"
+  }
+}

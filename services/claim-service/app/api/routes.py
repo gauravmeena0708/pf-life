@@ -254,7 +254,8 @@ async def create_claim(body: ClaimInput, request: Request, actor: Actor = Depend
                   "rules_applied": {"rule_version": rules["rule_version"], "plain_rule": evaluation["plain_rule"],
                                     "max_amount_paise": evaluation["max_amount_paise"],
                                     "route": route(body.amount_paise, rules, body.claim_type),
-                                    "approval_chain": [ROLE_LABELS[r] for r in approval_chain(body.amount_paise, rules, body.claim_type)]},
+                                    "approval_chain": [ROLE_LABELS[r] for r in approval_chain(body.amount_paise, rules, body.claim_type)],
+                                    "settlement_sla_days": rules["claims"]["settlement_sla_days"]},   # P2.28: when to expect it
                   "confirmation": {"action": "confirm-claim", "resource_id": claim_id, "resource_version": 1,
                                    "amount_paise": body.amount_paise}}
         if idempotency_key:

@@ -7,9 +7,14 @@ import memberEn from "./member.en.json";
 import memberHi from "./member.hi.json";
 import statusEn from "./status.en.json";
 import statusHi from "./status.hi.json";
+import journeyEn from "./journey.en.json";
+import journeyHi from "./journey.hi.json";
 
 void i18n.use(initReactI18next).init({
-  resources: { en: { translation: { ...en, ...memberEn, ...statusEn } }, hi: { translation: { ...hi, ...memberHi, ...statusHi } } },
+  resources: {
+    en: { translation: { ...en, ...memberEn, ...statusEn, ...journeyEn } },
+    hi: { translation: { ...hi, ...memberHi, ...statusHi, ...journeyHi } },
+  },
   lng: "en",
   fallbackLng: "en",
   interpolation: { escapeValue: false },

@@ -98,6 +98,18 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 28a: the claim journey and the first shared components (4 October 2026)
+
+Web 316 (new: the journey's steps — employer names not member IDs, the error summary and field error for an amount above
+the maximum, check your answers, the unverified bank blocked with the way to KYC, *Step 3 of 5*; the money and date
+formatting). Unit: claim-service 80. End to end 112 (new `test_claim_journey.py` in a real browser: every step, the
+error summary, the one-time code, the confirmation with reference and date; the claim is then paid by Cash so none is
+left open). The first full run found the new test's automatically approved claim left open, so the CITES and claim
+lifecycle tests picked it up instead of filing their own — it is now settled. The last full run on this long-lived stack
+failed one test only because member C's synthetic balance had been spent by four runs since the reset (`make reset`
+restores it). Consistency check: every copy agrees. Must-deny 18. Also on this day: Journey D's CI failures traced to
+the risk consumer's backlog on the small runner and fixed (CI green on `0ff16ff`).
+
 ## Update — Phase 2, slice 19c: erroneous EPS contributions rectified (4 October 2026)
 
 Unit: contribution-service 119 (new: the working by hand — EPS remitted with 11 months' interest at 8.25%, EPS due on the

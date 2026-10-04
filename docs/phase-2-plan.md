@@ -59,7 +59,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | P2.22 | Real-time contributions: a per-pay-run contribution API and a conformance sandbox for payroll vendors (the ECR kept as a format); a due-date option to model contributions paid with wages | Planned |
 | P2.23 | Retirement view: one forecast across PF and pension with VPF what-if and replacement rate; every rejection saying what fixes it | a (retirement view, VPF what-if): Done; b (every rejection and refusal saying what fixes it): Done |
 | P2.24 | Trust and governance: authorised representatives (guardian, agent) with consented scope; published service standards with live performance; an independent review tier; rule-change simulation; interest-sustainability model | Planned |
-| P2.28 | Production UX foundations: task-based journeys (one task per page, check-your-answers, a confirmation with a reference, a receipt with a QR to verify it); plain language with no internal codes and complete Hindi; forms that check as you type and list errors at the top; officers' queues with sorting, filters, deadlines, bulk actions and the documents beside the decision; risk-based step-up; a component library on UX4G and GIGW 3.0; WCAG 2.1 AA verified (axe in CI, screen reader, 400% zoom); phone layouts and per-page code; loading, empty and error states; usability sessions and privacy-safe analytics. First: the member's claim, KYC and transfer journeys | Planned (after P2.19c) |
+| P2.28 | Production UX foundations: task-based journeys (one task per page, check-your-answers, a confirmation with a reference, a receipt with a QR to verify it); plain language with no internal codes and complete Hindi; forms that check as you type and list errors at the top; officers' queues with sorting, filters, deadlines, bulk actions and the documents beside the decision; risk-based step-up; a component library on UX4G and GIGW 3.0; WCAG 2.1 AA verified (axe in CI, screen reader, 400% zoom); phone layouts and per-page code; loading, empty and error states; usability sessions and privacy-safe analytics. First: the member's claim, KYC and transfer journeys | a (the claim journey, the first shared components): Done; next: KYC and transfer, then the officers' screens |
 | P2.29 | A README for the repository (there is none): says up front that this is a vibe-coded app — written by AI coding agents (Claude Code, Codex, agy) at a person's direction, not hand-written or reviewed as production code — and a synthetic demonstration, not an EPFO system; what it covers (the stakeholders, journeys and the official sources it follows), how to run it (`make up`, `make migrate`, `make seed`, the personas), how it is tested, and a map of `docs/`. With a nod to the name: it should have been *pf-vibe* | Done |
 
 ## P2.9 — plan
@@ -1529,6 +1529,26 @@ Built:
 - Not built: finding the ineligible members automatically (wages on joining are not on record: the office starts the
   case, e.g. from Form 11 or an inspection); the non-contributory period credited separately (the service counts from
   joining to exit).
+
+## P2.28a — how it is built (the claim journey, the first shared components)
+
+Built by agy from a written brief (components, APIs, steps, conventions) and reviewed before it was taken: four fixes on
+review — a cancelled one-time code kept the created claim (no second one on Submit), an untranslated line, focus moved to
+each step's heading, native fieldsets for the choices.
+
+- **One task, one step at a time** (`/member/claims/new`, *Start a claim* on the claims page): which job (by the
+  employer's name and years, not the member ID), what for (the claims open now; the rest folded away with why and what
+  fixes it), how much, where it is paid (the bank account on record — blocked, with the way to KYC, when it is not
+  verified), check your answers (each with *Change*), then the one-time code and a confirmation: the reference, what
+  happens next, the date to expect it (the rule set's settlement days) and a print-ready receipt.
+- **Forms that say what is wrong where it is wrong**: an error summary at the top (taking focus, each item linking to its
+  field) and the same message on the field; ₹ amounts typed with or without Indian commas and shown grouped; dates as
+  dd/mm/yyyy.
+- **Shared components** for the journeys that follow (`apps/web/src/components/ui/`): stepper, error summary, money field,
+  check-your-answers list, confirmation panel, date and label formatting — strings in English and Hindi
+  (`journey.*.json`).
+- The old claim form stays at `/member/claims` until the UI lifecycle suites move to the journey; then it goes.
+- Not yet: the receipt's QR code, axe checks in CI, the phone layout of the claim list.
 
 ## P2.23b — how it is built (every rejection and refusal says what fixes it)
 

@@ -736,6 +736,14 @@ tests produced, by role (after `python3 scripts/publish_manuals.py`).
 5. As `zo-audit`, the daily audit extract: *Claims settled automatically* and how many are in the post-audit sample; the
    sampled ones are flagged `AUTO_SETTLEMENT_SAMPLE`, ready for an alert to the office.
 
+## Start a claim, step by step (P2.28a)
+
+1. As `member-a`, Claims › *Start a claim*: choose the job by its employer's name, then *Illness advance*.
+2. Enter more than the maximum: the problem is listed at the top and on the field. Enter `5,000`; continue to the bank
+   account on record and *Check your answers* (each answer can be changed).
+3. *Submit claim*, enter the one-time code: the confirmation shows the reference, that it was approved automatically and
+   the date to expect it; *Print or save receipt*. Switch to हिंदी to see the same journey in Hindi.
+
 ## Erroneous EPS contributions rectified (P2.19c, HO circular WSU/2025/E-961539)
 
 1. As `emp-preparer`, register a joinee with date of joining 4 Jan 2016 and file a return for a month of 2016 with wages

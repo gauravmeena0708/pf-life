@@ -17,6 +17,7 @@ import { PassbookPage } from "./features/member/PassbookPage";
 import { MemberHomePage } from "./features/member/MemberHomePage";
 import { PmvbryPage as MemberPmvbryPage } from "./features/member/PmvbryPage";
 import { ClaimsPage } from "./features/member/ClaimsPage";
+import { ClaimJourneyPage } from "./features/member/ClaimJourneyPage";
 import { ClaimDetailPage } from "./features/member/ClaimDetailPage";
 import { ProfilePage } from "./features/member/ProfilePage";
 import { ServicePage } from "./features/member/ServicePage";
@@ -175,6 +176,7 @@ export function App() {
             <Route path="/csc" element={<CscPage />} />
             <Route path="/member/passbook" element={<PassbookPage />} />
             <Route path="/member/claims" element={<ClaimsPage />} />
+            <Route path="/member/claims/new" element={<ClaimJourneyPage />} />
             <Route path="/member/claims/:claimId" element={<ClaimDetailPage />} />
             <Route path="/member/profile" element={<ProfilePage />} />
             <Route path="/member/service" element={<ServicePage />} />

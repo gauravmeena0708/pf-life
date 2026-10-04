@@ -78,6 +78,9 @@ export function ClaimsPage() {
 
   return <section className="stack" aria-labelledby="claims-heading">
     <PageHeader id="claims-heading" eyebrow={t("claims.eyebrow")} title={t("claims.title")} description={t("claims.description")} current={t("navigation.claims")} />
+    <div className="actions">
+      <Link to="/member/claims/new" className="button primary">{t("claimJourney.startClaim")}</Link>
+    </div>
     <ProblemMessage error={error} />
     <div className="card stack">
       <div className="section-heading"><div><p className="eyebrow">01 · {t("claims.memberService")}</p><h2>{t("claims.start")}</h2></div></div>
