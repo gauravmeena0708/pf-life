@@ -191,7 +191,8 @@ async def handle_api(request: Request, path: str):
             log.exception("revocation persistence failed", extra={"correlation_id": request.state.correlation_id})
             return problem(request, 503, "revocation-unavailable", "Could not persist revocation")
     if 200 <= upstream.status_code < 300 and route["path_template"] in (
-            "/employers/me/operators/invitations", "/employers/me/signatories/authorisations"):
+            "/employers/me/operators/invitations", "/employers/me/signatories/authorisations",
+            "/employers/me/payroll-providers/authorisations"):
         grant_resolver.forget()  # a new grant: next request re-reads permissions
     response_headers = {k: v for k, v in upstream.headers.items()
                         if k.lower() not in {"content-length", "transfer-encoding", "connection", "set-cookie"}}
