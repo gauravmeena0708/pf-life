@@ -7,7 +7,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | # | Interface | Coverage | Stakeholders | W | M | P | ? |
 |---|---|---|---|---|---|---|---|
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 16 | 2 | 0 | 0 |
-| 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 104 | 5 | 1 | 0 |
+| 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 109 | 5 | 1 | 0 |
 | 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 92 | 7 | 0 | 0 |
 | 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 130 | 0 | 0 | 4 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 18 | 1 | 0 | 0 |
@@ -18,7 +18,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 34 | 0 | 0 | 0 |
 | 11 | NDC | **Working** | `tech.ndc`, `tech.adc`, `tech.cpps`, `tech.epfo3` | 8 | 0 | 0 | 0 |
 | 12 | Ministry | **Working** | `gov.mole`, `gov.parliament` | 3 | 0 | 0 | 0 |
-| 13 | B2B | **Mock** | `payroll_provider`, `ext.collecting_bank`, `ext.pension_bank`, `ext.mca`, `ext.shram_suvidha`, `ext.fund_manager` | 0 | 7 | 0 | 0 |
+| 13 | B2B | **Working** | `payroll_provider`, `ext.collecting_bank`, `ext.pension_bank`, `ext.mca`, `ext.shram_suvidha`, `ext.fund_manager` | 3 | 7 | 0 | 0 |
 | 14 | CAIU | **Working** | `ho.caiu` | 4 | 0 | 0 | 0 |
 | 15 | HRM | **Working** | `ho.hr` | 5 | 0 | 0 | 0 |
 | 16 | Reporting and monitoring | **Working** | `gov.cbt`, `gov.ec`, `gov.fiac`, `gov.peic` | 3 | 0 | 0 | 0 |
@@ -87,6 +87,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /employers/me/members/{uan}/contribution-ledger` | W | contribution | employer.operator |
 | `GET /employers/me/operators` | W | employer | employer.owner |
 | `GET /employers/me/ownership-declaration` | W | employer | employer.owner, employer.signatory |
+| `GET /employers/me/pay-runs` | W | contribution | employer.operator |
+| `GET /employers/me/payroll-providers` | W | employer | employer.owner |
 | `GET /employers/me/pending-approvals` | W | workflow | employer.operator, employer.signatory |
 | `GET /employers/me/pmvbry` | W | contribution | employer.owner |
 | `GET /employers/me/proceedings` | W | compliance | employer.owner, employer.signatory |
@@ -140,6 +142,9 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /employers/me/office-transfer-requests` | W | employer | employer.signatory |
 | `POST /employers/me/operators/invitations` | W | employer | employer.owner |
 | `POST /employers/me/operators/{operatorId}/revocations` | W | employer | employer.owner |
+| `POST /employers/me/pay-runs/{wageMonth}/ecr-drafts` | W | contribution | employer.operator |
+| `POST /employers/me/payroll-providers/authorisations` | W | employer | employer.owner |
+| `POST /employers/me/payroll-providers/authorisations/{grantId}/revocations` | W | employer | employer.owner |
 | `POST /employers/me/pmvbry/options` | W | contribution | employer.owner |
 | `POST /employers/me/proceedings/{caseId}/applications` | W | compliance | employer.owner, employer.signatory |
 | `POST /employers/me/proceedings/{caseId}/submissions` | W | compliance | employer.owner, employer.signatory |
@@ -616,10 +621,13 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /monitoring/contributions` | W | reporting | gov.mole |
 | `GET /public/statistics` | W | reporting | gov.mole |
 
-### 13. B2B — Mock
+### 13. B2B — Working
 
 | Endpoint | Status | Owner | Called by |
 |---|---|---|---|
+| `GET /partners/payroll/pay-runs` | W | contribution | payroll_provider |
+| `POST /partners/payroll/pay-runs` | W | contribution | payroll_provider |
+| `POST /partners/sandbox/payroll/pay-runs/validations` | W | contribution | payroll_provider |
 | `POST /integrations/fund-managers/positions` | M | reporting | ext.fund_manager |
 | `POST /integrations/mca/registrations` | M | employer | ext.mca |
 | `POST /integrations/mock-bank/payment-confirmations` | M | payment-simulator | ext.collecting_bank |

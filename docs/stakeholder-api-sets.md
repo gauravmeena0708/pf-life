@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 115 |
-| Activities | 280 |
+| Activities | 283 |
 | Stakeholders with at least one API | 95 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 3 |
@@ -225,7 +225,7 @@ Integration adapters: `rti_portal`
 
 #### `employer.owner` — Establishment owner / employer (legal entity)
 
-Activities: **F01.register** Register establishment online and submit verification evidence; **F01.dsc_register** Register DSC or e-sign of an authorised signatory and submit the request letter; **F01.signatories** View the establishment; authorise or revoke signatories; **F01.operators** Invite, scope and revoke employer sub-users (User / Admin menus); **F01.establishment_owner** Keep the establishment record: KYC, branches (Form 2A), Form 5A, contractors; ask the office for profile or configuration changes; **F06.employer_owner_reply** Follow the establishment's inquiries (diary number, summons, daily orders, the order) and reply; **F06.employer_scn** Reply to a prosecution show-cause notice; **F13.pmvbry_employer** PMVBRY Part B: exercise the option; see baseline, eligibility, net additional employment and incentive cycles
+Activities: **F01.register** Register establishment online and submit verification evidence; **F01.dsc_register** Register DSC or e-sign of an authorised signatory and submit the request letter; **F01.signatories** View the establishment; authorise or revoke signatories; **F01.operators** Invite, scope and revoke employer sub-users (User / Admin menus); **F01.establishment_owner** Keep the establishment record: KYC, branches (Form 2A), Form 5A, contractors; ask the office for profile or configuration changes; **F01.payroll_providers** Authorise or revoke payroll software that sends pay runs for the establishment; **F06.employer_owner_reply** Follow the establishment's inquiries (diary number, summons, daily orders, the order) and reply; **F06.employer_scn** Reply to a prosecution show-cause notice; **F13.pmvbry_employer** PMVBRY Part B: exercise the option; see baseline, eligibility, net additional employment and incentive cycles
 
 | Endpoint | Status |
 |---|---|
@@ -242,6 +242,7 @@ Activities: **F01.register** Register establishment online and submit verificati
 | `GET /employers/me/kyc` | W |
 | `GET /employers/me/operators` | W |
 | `GET /employers/me/ownership-declaration` | W |
+| `GET /employers/me/payroll-providers` | W |
 | `GET /employers/me/pmvbry` | W |
 | `GET /employers/me/proceedings` | W |
 | `GET /employers/me/prosecutions` | W |
@@ -257,6 +258,8 @@ Activities: **F01.register** Register establishment online and submit verificati
 | `POST /employers/me/contractors` | W |
 | `POST /employers/me/operators/invitations` | W |
 | `POST /employers/me/operators/{operatorId}/revocations` | W |
+| `POST /employers/me/payroll-providers/authorisations` | W |
+| `POST /employers/me/payroll-providers/authorisations/{grantId}/revocations` | W |
 | `POST /employers/me/pmvbry/options` | W |
 | `POST /employers/me/proceedings/{caseId}/applications` | W |
 | `POST /employers/me/proceedings/{caseId}/submissions` | W |
@@ -343,7 +346,7 @@ Integration adapters: `collecting_bank`, `npci`
 
 #### `employer.operator` — Employer sub-user / payroll preparer
 
-Activities: **F01.profile** View establishment profile, configuration, KYC and home-page alerts; **F01.contractor_tag** As a contractor establishment, tag the ECR members who worked for a principal employer; **F02.register** Register a new joinee (create or link UAN), bulk registration, Form 11 declaration; **F02.kyc_bulk** Bulk KYC upload; KYC and PAN verification; **F02.missing_details** Fill missing member details; member location mapping; download active members; **F02.exit** Mark date of exit (single or bulk) and corrections; **F03.ecr_prepare** Prepare regular / arrear / supplementary ECR and validate; **F03.receipt** Download receipt; view return history and compliance summary
+Activities: **F01.profile** View establishment profile, configuration, KYC and home-page alerts; **F01.contractor_tag** As a contractor establishment, tag the ECR members who worked for a principal employer; **F02.register** Register a new joinee (create or link UAN), bulk registration, Form 11 declaration; **F02.kyc_bulk** Bulk KYC upload; KYC and PAN verification; **F02.missing_details** Fill missing member details; member location mapping; download active members; **F02.exit** Mark date of exit (single or bulk) and corrections; **F03.ecr_prepare** Prepare regular / arrear / supplementary ECR and validate; **F03.pay_runs_ecr** See the month's pay runs from payroll software and make the month's ECR from them; **F03.receipt** Download receipt; view return history and compliance summary
 
 | Endpoint | Status |
 |---|---|
@@ -361,6 +364,7 @@ Activities: **F01.profile** View establishment profile, configuration, KYC and h
 | `GET /employers/me/members` | W |
 | `GET /employers/me/members/active-export` | W |
 | `GET /employers/me/members/{uan}/contribution-ledger` | W |
+| `GET /employers/me/pay-runs` | W |
 | `GET /employers/me/pending-approvals` | W |
 | `GET /employers/me/returns/dashboard` | W |
 | `PATCH /employers/me/members/{uan}/profile` | W |
@@ -375,6 +379,7 @@ Activities: **F01.profile** View establishment profile, configuration, KYC and h
 | `POST /employers/me/members/{uan}/exit-corrections` | W |
 | `POST /employers/me/members/{uan}/exits` | W |
 | `POST /employers/me/members/{uan}/location-mappings` | W |
+| `POST /employers/me/pay-runs/{wageMonth}/ecr-drafts` | W |
 
 #### `principal_employer` — Principal employer monitoring contractors
 
@@ -413,10 +418,13 @@ Activities: **F09.returns** File monthly return of exempted establishment (Parts
 
 #### `payroll_provider` — Payroll software / HRMS vendor acting for employers
 
-Activities: **F03.b2b_upload** Upload ECR through the B2B payroll API on behalf of an employer
+Activities: **F03.pay_runs** Send each pay run to EPFO as it happens, for an establishment that authorised it; test payloads in the conformance sandbox; **F03.b2b_upload** Upload ECR through the B2B payroll API on behalf of an employer
 
 | Endpoint | Status |
 |---|---|
+| `GET /partners/payroll/pay-runs` | W |
+| `POST /partners/payroll/pay-runs` | W |
+| `POST /partners/sandbox/payroll/pay-runs/validations` | W |
 | `POST /partners/sandbox/payroll/ecr-filings` | M |
 
 #### `csc_operator` — Common Service Centre / assisted-access operator (e.g. DLC, UAN)
@@ -1587,6 +1595,7 @@ flowchart LR
   F01_contractor_tag["employer.operator<br/>As a contractor establishment, tag the ECR members who worke"]
   F01_liquidation["liquidator<br/>Receive EPFO dues claim for an employer in liquidation / ins"]
   style F01_liquidation stroke-dasharray: 5 5
+  F01_payroll_providers["employer.owner<br/>Authorise or revoke payroll software that sends pay runs for"]
   F01_register --> F01_olre_scrutiny
   F01_mca_autoreg --> F01_olre_scrutiny
   F01_ssp_reg --> F01_olre_scrutiny
@@ -1599,6 +1608,8 @@ flowchart LR
   F01_contractor_tag --> F01_contractors
   F06_recovery["fo.recovery_officer<br/>Execute the recovery certificate: demand notice (EPFCP-1), c"]
   F01_liquidation --> F06_recovery
+  F03_pay_runs["payroll_provider<br/>Send each pay run to EPFO as it happens, for an establishmen"]
+  F01_payroll_providers --> F03_pay_runs
 ```
 
 ### F02 — Member onboarding, KYC and profile correction
@@ -1645,6 +1656,8 @@ flowchart LR
 ```mermaid
 flowchart LR
   F03_ecr_prepare["employer.operator<br/>Prepare regular / arrear / supplementary ECR and validate"]
+  F03_pay_runs["payroll_provider<br/>Send each pay run to EPFO as it happens, for an establishmen"]
+  F03_pay_runs_ecr["employer.operator<br/>See the month's pay runs from payroll software and make the "]
   F03_b2b_upload["payroll_provider<br/>Upload ECR through the B2B payroll API on behalf of an emplo"]
   style F03_b2b_upload stroke-dasharray: 5 5
   F03_ecr_approve["employer.signatory<br/>Review, approve and submit ECR (generates TRRN); cancel an u"]
@@ -1671,6 +1684,7 @@ flowchart LR
   F03_interest["ho.fa_cao<br/>Record the approved annual interest rate and run interest cr"]
   F03_interest_rate["gov.cbt<br/>Recommend the annual interest rate (notified with Ministry c"]
   F03_ecr_prepare --> F03_ecr_approve
+  F03_pay_runs --> F03_pay_runs_ecr
   F03_b2b_upload --> F03_ecr_approve
   F03_ecr_approve --> F03_pay
   F03_pay --> F03_bank_confirm

@@ -287,6 +287,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /employers/me/kyc` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/operators` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/ownership-declaration` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/payroll-providers` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/pmvbry` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/proceedings` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/prosecutions` | W | own establishment (X-Establishment-Id validated against grants) |  |
@@ -302,6 +303,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /employers/me/contractors` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/operators/invitations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/operators/{operatorId}/revocations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
+| `POST /employers/me/payroll-providers/authorisations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
+| `POST /employers/me/payroll-providers/authorisations/{grantId}/revocations` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/pmvbry/options` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/proceedings/{caseId}/applications` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `POST /employers/me/proceedings/{caseId}/submissions` | W | own establishment (X-Establishment-Id validated against grants) |  |
@@ -400,6 +403,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /employers/me/members` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/members/active-export` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/members/{uan}/contribution-ledger` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `GET /employers/me/pay-runs` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/pending-approvals` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `GET /employers/me/returns/dashboard` | W | own establishment (X-Establishment-Id validated against grants) |  |
 | `PATCH /employers/me/members/{uan}/profile` | W | own establishment (X-Establishment-Id validated against grants) | yes |
@@ -414,6 +418,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /employers/me/members/{uan}/exit-corrections` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/members/{uan}/exits` | W | own establishment (X-Establishment-Id validated against grants) | yes |
 | `POST /employers/me/members/{uan}/location-mappings` | W | own establishment (X-Establishment-Id validated against grants) |  |
+| `POST /employers/me/pay-runs/{wageMonth}/ecr-drafts` | W | own establishment (X-Establishment-Id validated against grants) |  |
 
 **`principal_employer`** — Principal employer monitoring contractors
 
@@ -444,6 +449,9 @@ Each row is a required negative or idempotency test in `tests/security/`.
 
 | Endpoint | Status | Scope | Step-up |
 |---|---|---|---|
+| `GET /partners/payroll/pay-runs` | W | authenticated partner client, own records only |  |
+| `POST /partners/payroll/pay-runs` | W | authenticated partner client, own records only |  |
+| `POST /partners/sandbox/payroll/pay-runs/validations` | W | authenticated partner client, own records only |  |
 | `POST /partners/sandbox/payroll/ecr-filings` | M | authenticated partner client, own records only |  |
 
 **`csc_operator`** — Common Service Centre / assisted-access operator (e.g. DLC, UAN)

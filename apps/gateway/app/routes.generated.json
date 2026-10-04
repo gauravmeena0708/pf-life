@@ -65,6 +65,22 @@
   },
   {
     "method": "POST",
+    "path_template": "/employers/me/payroll-providers/authorisations/{grantId}/revocations",
+    "regex": "^/employers/me/payroll\\-providers/authorisations/[^/]+/revocations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.owner"
+    ],
+    "summary": "The owner revokes a payroll provider's authorisation (effective at once)",
+    "revocation": true
+  },
+  {
+    "method": "POST",
     "path_template": "/office/pensions/higher-pension-options/{optionId}/ledger-transfers",
     "regex": "^/office/pensions/higher\\-pension\\-options/[^/]+/ledger\\-transfers$",
     "status": "W",
@@ -1265,6 +1281,22 @@
     "revocation": true
   },
   {
+    "method": "POST",
+    "path_template": "/employers/me/payroll-providers/authorisations",
+    "regex": "^/employers/me/payroll\\-providers/authorisations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "employer.owner"
+    ],
+    "summary": "The owner authorises a payroll provider to send pay runs for the establishment",
+    "revocation": false
+  },
+  {
     "method": "GET",
     "path_template": "/international/coc-applications/{id}/certificate",
     "regex": "^/international/coc\\-applications/[^/]+/certificate$",
@@ -1310,6 +1342,22 @@
       "ext.foreign_ss"
     ],
     "summary": "Foreign agency verifies a CoC (FOREIGN AGENCIES login)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/partners/sandbox/payroll/pay-runs/validations",
+    "regex": "^/partners/sandbox/payroll/pay\\-runs/validations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "payroll_provider"
+    ],
+    "summary": "Conformance sandbox: a pay run checked as it would be, nothing stored",
     "revocation": false
   },
   {
@@ -1619,6 +1667,22 @@
       "employer.operator"
     ],
     "summary": "Member Location Mapping to branches",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/pay-runs/{wageMonth}/ecr-drafts",
+    "regex": "^/employers/me/pay\\-runs/[^/]+/ecr\\-drafts$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "Make the month's ECR from its pay runs (wages summed per member) — then approved, submitted and paid as any ECR",
     "revocation": false
   },
   {
@@ -4357,6 +4421,22 @@
   },
   {
     "method": "GET",
+    "path_template": "/employers/me/payroll-providers",
+    "regex": "^/employers/me/payroll\\-providers$",
+    "status": "W",
+    "phase": 1,
+    "owner": "employer",
+    "upstream": "http://employer-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.owner"
+    ],
+    "summary": "Payroll software the establishment may authorise, and those it has",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/employers/me/pending-approvals",
     "regex": "^/employers/me/pending\\-approvals$",
     "status": "W",
@@ -5862,6 +5942,38 @@
   },
   {
     "method": "GET",
+    "path_template": "/partners/payroll/pay-runs",
+    "regex": "^/partners/payroll/pay\\-runs$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "payroll_provider"
+    ],
+    "summary": "The provider's pay runs for the establishment and month",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/partners/payroll/pay-runs",
+    "regex": "^/partners/payroll/pay\\-runs$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "payroll_provider"
+    ],
+    "summary": "A payroll provider sends one pay run (wages per member) as it happens, for an establishment that authorised it; each row checked as an ECR row would be (P2.22)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/security/request-activity",
     "regex": "^/security/request\\-activity$",
     "status": "W",
@@ -6770,6 +6882,22 @@
       "employer.signatory"
     ],
     "summary": "Challan list",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/pay-runs",
+    "regex": "^/employers/me/pay\\-runs$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.operator"
+    ],
+    "summary": "The month's pay runs from payroll software and each member's month totals",
     "revocation": false
   },
   {

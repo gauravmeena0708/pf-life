@@ -963,6 +963,24 @@ stakeholders:
     step_up: false
     via:
     - F01.establishment_owner
+  - endpoint: GET /employers/me/payroll-providers
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F01.payroll_providers
+  - endpoint: POST /employers/me/payroll-providers/authorisations
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: true
+    via:
+    - F01.payroll_providers
+  - endpoint: POST /employers/me/payroll-providers/authorisations/{grantId}/revocations
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: true
+    via:
+    - F01.payroll_providers
   - endpoint: GET /employers/me/proceedings
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
@@ -1523,6 +1541,18 @@ stakeholders:
     step_up: false
     via:
     - F03.ecr_prepare
+  - endpoint: GET /employers/me/pay-runs
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F03.pay_runs_ecr
+  - endpoint: POST /employers/me/pay-runs/{wageMonth}/ecr-drafts
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F03.pay_runs_ecr
   - endpoint: GET /employers/me/challans/{trrn}/receipt
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
@@ -1625,6 +1655,24 @@ stakeholders:
     - F09.surrender
   trust_auditor: []
   payroll_provider:
+  - endpoint: POST /partners/payroll/pay-runs
+    status: W
+    scope: authenticated partner client, own records only
+    step_up: false
+    via:
+    - F03.pay_runs
+  - endpoint: GET /partners/payroll/pay-runs
+    status: W
+    scope: authenticated partner client, own records only
+    step_up: false
+    via:
+    - F03.pay_runs
+  - endpoint: POST /partners/sandbox/payroll/pay-runs/validations
+    status: W
+    scope: authenticated partner client, own records only
+    step_up: false
+    via:
+    - F03.pay_runs
   - endpoint: POST /partners/sandbox/payroll/ecr-filings
     status: M
     scope: authenticated partner client, own records only

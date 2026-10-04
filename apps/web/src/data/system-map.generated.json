@@ -4,9 +4,9 @@
   "interfaces": 21,
   "stakeholders": 115,
   "stakeholders_with_access": 95,
-  "activities": 280,
+  "activities": 283,
   "endpoints": {
-   "W": 463,
+   "W": 471,
    "M": 24,
    "P": 1,
    "?": 5
@@ -39,7 +39,7 @@
    "coverage": "Working",
    "purpose": "Employers: registration, members and KYC, monthly returns and challans, demands, attestations, exits.",
    "endpoints": {
-    "W": 104,
+    "W": 109,
     "M": 5,
     "P": 1,
     "?": 0
@@ -269,10 +269,10 @@
    "id": 13,
    "slug": "b2b",
    "name": "B2B",
-   "coverage": "Mock",
+   "coverage": "Working",
    "purpose": "Banks, payroll providers and other partners through simulated integrations.",
    "endpoints": {
-    "W": 0,
+    "W": 3,
     "M": 7,
     "P": 0,
     "?": 0
@@ -754,7 +754,7 @@
    "name": "Establishment owner / employer (legal entity)",
    "group": "B. Employers and intermediaries",
    "endpoints": {
-    "W": 38,
+    "W": 41,
     "M": 4,
     "P": 0,
     "?": 0
@@ -779,6 +779,10 @@
     {
      "id": "F01.establishment_owner",
      "does": "Keep the establishment record: KYC, branches (Form 2A), Form 5A, contractors; ask the office for profile or configuration changes"
+    },
+    {
+     "id": "F01.payroll_providers",
+     "does": "Authorise or revoke payroll software that sends pay runs for the establishment"
     },
     {
      "id": "F06.employer_owner_reply",
@@ -887,7 +891,7 @@
    "name": "Employer sub-user / payroll preparer",
    "group": "B. Employers and intermediaries",
    "endpoints": {
-    "W": 28,
+    "W": 30,
     "M": 0,
     "P": 0,
     "?": 0
@@ -920,6 +924,10 @@
     {
      "id": "F03.ecr_prepare",
      "does": "Prepare regular / arrear / supplementary ECR and validate"
+    },
+    {
+     "id": "F03.pay_runs_ecr",
+     "does": "See the month's pay runs from payroll software and make the month's ECR from them"
     },
     {
      "id": "F03.receipt",
@@ -1008,12 +1016,16 @@
    "name": "Payroll software / HRMS vendor acting for employers",
    "group": "B. Employers and intermediaries",
    "endpoints": {
-    "W": 0,
+    "W": 3,
     "M": 1,
     "P": 0,
     "?": 0
    },
    "activities": [
+    {
+     "id": "F03.pay_runs",
+     "does": "Send each pay run to EPFO as it happens, for an establishment that authorised it; test payloads in the conformance sandbox"
+    },
     {
      "id": "F03.b2b_upload",
      "does": "Upload ECR through the B2B payroll API on behalf of an employer"
@@ -3642,6 +3654,40 @@
    "status": "BUILT",
    "endpoints": 5,
    "src": "MAP, WEB"
+  },
+  {
+   "id": "F03.pay_runs",
+   "flow": "F03",
+   "actor": "payroll_provider",
+   "does": "Send each pay run to EPFO as it happens, for an establishment that authorised it; test payloads in the conformance sandbox",
+   "next": [
+    "F03.pay_runs_ecr"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "WEB"
+  },
+  {
+   "id": "F03.pay_runs_ecr",
+   "flow": "F03",
+   "actor": "employer.operator",
+   "does": "See the month's pay runs from payroll software and make the month's ECR from them",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "WEB"
+  },
+  {
+   "id": "F01.payroll_providers",
+   "flow": "F01",
+   "actor": "employer.owner",
+   "does": "Authorise or revoke payroll software that sends pay runs for the establishment",
+   "next": [
+    "F03.pay_runs"
+   ],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "WEB"
   },
   {
    "id": "F03.b2b_upload",

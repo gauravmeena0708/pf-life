@@ -90,6 +90,8 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `TrustReturnFiled.v1` | contribution | audit | trust_return | 1 |
 | `TrustFlagActioned.v1` | contribution | audit | trust_flag | 1 |
 | `StaffPostingChanged.v1` | workflow | member, claim, contribution, grievance, intelligence, compliance, international, pension, employer, reporting, audit | staff_posting | 1 |
+| `PayrollProviderAuthorised.v1` | employer | audit | establishment | 1 |
+| `PayrollProviderRevoked.v1` | employer | audit | establishment | 1 |
 | `AutoTransferConfirmed.v1` | claim | contribution, audit | auto_transfer | 1 |
 | `TransferPosted.v1` | contribution | claim, member, workflow, pension, audit | ledger_journal | 1 |
 | `PolicyPublished.v1` | platform | claim, contribution, compliance, workflow, grievance, intelligence, pension, reporting, audit | rule_set | 1 |

@@ -313,6 +313,8 @@ EVENTS = [
     ("TrustReturnFiled", "contribution", ["audit"], "trust_return", 1, {"return_id": S, "establishment_id": S, "wage_month": S, "score": N, "flags": "array"}),
     ("TrustFlagActioned", "contribution", ["audit"], "trust_flag", 1, {"flag_id": S, "establishment_id": S, "category": {"enum": ["A", "B", "C"]}, "action": S}),
     ("StaffPostingChanged", "workflow", ["member", "claim", "contribution", "grievance", "intelligence", "compliance", "international", "pension", "employer", "reporting", "audit"], "staff_posting", 1, {"subject": S, "username": S, "stakeholder": S, "office_id": S, "previous_stakeholder": S, "previous_office_id": S}),
+    ("PayrollProviderAuthorised", "employer", ["audit"], "establishment", 1, {"establishment_id": S, "provider_subject": S, "grant_id": S, "scopes": "array"}),
+    ("PayrollProviderRevoked", "employer", ["audit"], "establishment", 1, {"establishment_id": S, "provider_subject": S, "grant_id": S, "scope": S, "revoked_by": S}),
     ("AutoTransferConfirmed", "claim", ["contribution", "audit"], "auto_transfer", 1, {"transfer_id": S, "uan": S, "from_account_link_id": S, "to_account_link_id": S}),
     ("TransferPosted", "contribution", ["claim", "member", "workflow", "pension", "audit"], "ledger_journal", 1, {"transfer_id": S, "uan": S, "from_account_link_id": S, "to_account_link_id": S, "employee_paise": N, "employer_paise": N, "journal_id": S, "postings": POSTINGS,
                          # a trust leg (P2.9b-c): which side, the service carried with it, and the breaks in it

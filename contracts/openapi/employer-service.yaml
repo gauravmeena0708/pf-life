@@ -715,6 +715,117 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /employers/me/payroll-providers:
+    get:
+      operationId: getEmployersPayrollProviders
+      summary: Payroll software the establishment may authorise, and those it has
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/EstablishmentId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: employer
+      x-callers:
+      - employer.owner
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
+  /employers/me/payroll-providers/authorisations:
+    post:
+      operationId: postEmployersPayrollProvidersAuthorisations
+      summary: The owner authorises a payroll provider to send pay runs for the establishment
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/EstablishmentId'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: employer
+      x-callers:
+      - employer.owner
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /employers/me/payroll-providers/authorisations/{grantId}/revocations:
+    post:
+      operationId: postEmployersPayrollProvidersAuthorisationsGrantIdRevocations
+      summary: The owner revokes a payroll provider's authorisation (effective at once)
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: grantId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/EstablishmentId'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: employer
+      x-callers:
+      - employer.owner
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /employers/me/signatories:
     get:
       operationId: getEmployersSignatories

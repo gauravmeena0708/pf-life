@@ -669,6 +669,84 @@ paths:
       x-scope: own establishment (X-Establishment-Id validated against grants)
       security:
       - bffSession: []
+  /employers/me/pay-runs:
+    get:
+      operationId: getEmployersPayRuns
+      summary: The month's pay runs from payroll software and each member's month totals
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: wage_month
+        in: query
+        required: false
+        schema:
+          type: string
+      - $ref: '#/components/parameters/EstablishmentId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - employer.operator
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
+  /employers/me/pay-runs/{wageMonth}/ecr-drafts:
+    post:
+      operationId: postEmployersPayRunsWageMonthEcrDrafts
+      summary: Make the month's ECR from its pay runs (wages summed per member) — then approved, submitted and paid as any
+        ECR
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: wageMonth
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/EstablishmentId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - employer.operator
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /employers/me/pmvbry:
     get:
       operationId: getEmployersPmvbry
@@ -2777,6 +2855,78 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /partners/payroll/pay-runs:
+    get:
+      operationId: getPartnersPayrollPayRuns
+      summary: The provider's pay runs for the establishment and month
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: wage_month
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - payroll_provider
+      x-scope: authenticated partner client, own records only
+      security:
+      - clientCredentials: []
+    post:
+      operationId: postPartnersPayrollPayRuns
+      summary: A payroll provider sends one pay run (wages per member) as it happens, for an establishment that authorised
+        it; each row
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - payroll_provider
+      x-scope: authenticated partner client, own records only
+      security:
+      - clientCredentials: []
+      description: A payroll provider sends one pay run (wages per member) as it happens, for an establishment that authorised
+        it; each row checked as an ECR row would be (P2.22)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /partners/sandbox/payroll/ecr-filings:
     post:
       operationId: postPartnersSandboxPayrollEcrFilings
@@ -2801,6 +2951,42 @@ paths:
         '409':
           $ref: '#/components/responses/Problem'
       x-status: mock
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - payroll_provider
+      x-scope: authenticated partner client, own records only
+      security:
+      - clientCredentials: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /partners/sandbox/payroll/pay-runs/validations:
+    post:
+      operationId: postPartnersSandboxPayrollPayRunsValidations
+      summary: 'Conformance sandbox: a pay run checked as it would be, nothing stored'
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
       x-phase: 1
       x-owner-service: contribution
       x-callers:

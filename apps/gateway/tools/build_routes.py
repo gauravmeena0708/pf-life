@@ -64,6 +64,7 @@ def main() -> None:
             "revocation": path in {
                 "/employers/me/operators/{operatorId}/revocations",
                 "/employers/me/signatories/{signatoryId}/revocations",
+                "/employers/me/payroll-providers/authorisations/{grantId}/revocations",   # P2.22: cut a provider off at once
             },
         })
     routes.sort(key=lambda r: (-len(r["path_template"].replace("{", "").replace("}", "")), r["path_template"], r["method"]))

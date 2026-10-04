@@ -179,6 +179,14 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /integrations/mock-bank/payment-confirmations` 💰 | Signed bank confirmation callback | M | 1 | payment-simulator |
 | `POST /integrations/mock-bank/payment-returns` 💰 | Signed bank return / failure callback | M | 1 | payment-simulator |
 | `POST /partners/sandbox/payroll/ecr-filings` 💰 | B2B payroll API ECR upload | M | 1 | contribution |
+| `POST /partners/payroll/pay-runs` | A payroll provider sends one pay run (wages per member) as it happens, for an establishment that authorised it; each row checked as an ECR row would be (P2.22) | W | 1 | contribution |
+| `GET /partners/payroll/pay-runs?wage_month=` | The provider's pay runs for the establishment and month | W | 1 | contribution |
+| `POST /partners/sandbox/payroll/pay-runs/validations` | Conformance sandbox: a pay run checked as it would be, nothing stored | W | 1 | contribution |
+| `GET /employers/me/pay-runs?wage_month=` | The month's pay runs from payroll software and each member's month totals | W | 1 | contribution |
+| `POST /employers/me/pay-runs/{wageMonth}/ecr-drafts` | Make the month's ECR from its pay runs (wages summed per member) — then approved, submitted and paid as any ECR | W | 1 | contribution |
+| `GET /employers/me/payroll-providers` | Payroll software the establishment may authorise, and those it has | W | 1 | employer |
+| `POST /employers/me/payroll-providers/authorisations` 🔐 | The owner authorises a payroll provider to send pay runs for the establishment | W | 1 | employer |
+| `POST /employers/me/payroll-providers/authorisations/{grantId}/revocations` 🔐 | The owner revokes a payroll provider's authorisation (effective at once) | W | 1 | employer |
 
 **Office-side receipts, adjustments and reversals.** These are field-office processes, never employer-facing payment types. Every row is maker-checker, and every ledger effect goes through `contribution-service` as a new journal with a reversal link.
 
