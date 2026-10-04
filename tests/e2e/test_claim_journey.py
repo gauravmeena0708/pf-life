@@ -1,6 +1,7 @@
 """P2.28 on the running stack: member A makes a claim through the step-by-step journey — the job by its employer's name,
 the claim, the amount (checked as typed, with an error summary), the bank account on record, check your answers, the
-one-time code — and gets a confirmation with the reference and when to expect the money. ₹5,000 each run (approved
+one-time code — and gets a confirmation with the reference and when to expect the money, then a receipt whose code
+anyone can check publicly (a forged code is not genuine). ₹5,000 each run (approved
 automatically), then paid by Cash so no claim is left open for the tests that follow."""
 import re
 import uuid
@@ -9,6 +10,7 @@ from playwright.sync_api import expect
 
 from tests.e2e.test_journey_a_ecr import WEB, call, step_up, wait_for
 from tests.e2e.test_policy_admin import browser, persona  # noqa: F401  (fixtures)
+from tests.e2e.test_public_services import ask
 
 
 def settle(persona, member, claim_id):
@@ -66,6 +68,17 @@ def test_member_claims_step_by_step(persona):
     reference = panel.locator(".ui-reference").inner_text()
     assert re.fullmatch(r"CLM-[0-9A-F]+", reference), reference
     expect(panel.get_by_text(re.compile(r"Expect it by \d\d/\d\d/\d{4}"))).to_be_visible()
+    # P2.28h: the receipt, with its code and QR, and the public check anyone can make with them
+    member.get_by_role("link", name="View and print receipt").click()
+    expect(member.get_by_role("heading", name="Claim receipt")).to_be_visible()
+    expect(member.get_by_role("img", name="QR code to verify this receipt")).to_be_visible()
+    receipt = call(member, "GET", f"/api/v1/members/me/claims/{reference}/receipt")[1]["data"]
+    assert re.fullmatch(r"[A-Z2-7]{10}", receipt["code"]) and receipt["verify_path"].endswith(receipt["code"]), receipt
+    status, checked = ask(member, "/api/v1/public/receipts/verifications", {"claim_id": reference, "code": receipt["code"]})
+    assert status == 200 and checked["data"]["genuine"] is True and checked["data"]["amount_paise"] == 500000, checked
+    forged = "A" * 10 if receipt["code"] != "A" * 10 else "B" * 10
+    status, checked = ask(member, "/api/v1/public/receipts/verifications", {"claim_id": reference, "code": forged})
+    assert status == 200 and checked["data"] == {"genuine": False}, checked
     claim = call(member, "GET", f"/api/v1/members/me/claims/{reference}")[1]["data"]
     assert claim["amount_paise"] == 500000 and claim["state"] == "AUTO_APPROVED", claim
     settle(persona, member, reference)

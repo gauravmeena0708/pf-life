@@ -98,6 +98,15 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slices 28g–h: phone tables, a receipt anyone can check (4 October 2026)
+
+Web 368 (new: each of the three tables carries the class and a label on every cell; the receipt page with its fields, code
+and QR image; the public check prefilled from the QR link, genuine and not verified). claim-service 83 (new: the member's
+receipt and code; another member refused; genuine with the right code, not with a wrong one or an unknown claim; the code
+changes with the amount). End to end 114 — the claim journey now opens the receipt (QR shown) and checks it publicly
+(genuine; a forged code not) — with one failure: member C's spent balance on this long-lived stack, as before.
+Consistency: every copy agrees. Must-deny 18.
+
 ## Update — Phase 2, slices 28d–f: the officers' queue and case page, axe checks (4 October 2026)
 
 Three agy runs in parallel worktrees, merged. Web 363 (new: time left in words, sort and filter, paging 30 cases into

@@ -759,6 +759,13 @@ tests produced, by role (after `python3 scripts/publish_manuals.py`).
 2. Once the exit is marked: choose it, the current account is preselected, *Check your answers*, *Send the request* with the
    one-time code — the confirmation gives the reference and the three steps that follow.
 
+## A receipt anyone can check, and phone tables (P2.28g–h)
+
+1. After *Start a claim* (above), *View and print receipt*: the code and the QR code. Scan it on a phone (or open the link):
+   the public check asks the demo question and answers *Genuine receipt*. Change one letter of the code: *could not be
+   verified*.
+2. Narrow the browser below 640px on My claims, the passbook or the work queue: each row becomes a labelled card.
+
 ## The officers' queue and case page (P2.28d–e)
 
 1. As `do-caseworker`, the work queue: the counts by deadline, *Time left* in words, search by a claim ID, *Overdue only*,
