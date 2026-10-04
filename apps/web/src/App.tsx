@@ -12,6 +12,8 @@ import { TextSizeControl } from "./components/TextSizeControl";
 import { useNavLayout } from "./data/navLayout";
 import { EcrPage } from "./features/employer/EcrPage";
 import { EmployerHome } from "./features/employer/EmployerHome";
+import { PayrollProvidersPage } from "./features/employer/PayrollProvidersPage";
+import { PayRunsPage } from "./features/employer/PayRunsPage";
 import { PmvbryPage as EmployerPmvbryPage } from "./features/employer/PmvbryPage";
 import { PassbookPage } from "./features/member/PassbookPage";
 import { MemberHomePage } from "./features/member/MemberHomePage";
@@ -173,6 +175,8 @@ export function App() {
             <Route path="/manuals" element={<ManualsPage />} />
             <Route path="/i/:slug" element={<InterfacePage />} />
             <Route path="/employer" element={<EmployerHome />} />
+            <Route path="/employer/payroll-providers" element={<PayrollProvidersPage />} />
+            <Route path="/employer/pay-runs" element={<PayRunsPage />} />
             <Route path="/employer/ecr" element={<EcrPage />} />
             <Route path="/employer/pmvbry" element={<EmployerPmvbryPage />} />
             <Route path="/member" element={<MemberHomePage />} />
