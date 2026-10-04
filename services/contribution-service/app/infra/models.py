@@ -565,3 +565,22 @@ class EpsIneligibleMember(Base):
     account_link_id: Mapped[str] = mapped_column(String(80), primary_key=True)
     rectification_id: Mapped[str] = mapped_column(String(40))
     since: Mapped[date] = mapped_column(Date)
+
+
+class PayRun(Base):
+    """P2.22: a pay run submitted by an authorised payroll provider machine client."""
+    __tablename__ = "pay_runs"
+    __table_args__ = (UniqueConstraint("establishment_id", "run_ref"),)
+    pay_run_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    establishment_id: Mapped[str] = mapped_column(ForeignKey("establishments.id"), index=True)
+    provider_subject: Mapped[str] = mapped_column(String(80))
+    wage_month: Mapped[str] = mapped_column(String(7), index=True)
+    run_ref: Mapped[str] = mapped_column(String(60))
+    pay_date: Mapped[date] = mapped_column(Date)
+    rows: Mapped[list] = mapped_column(JSON)
+    issues: Mapped[list] = mapped_column(JSON)
+    totals: Mapped[dict] = mapped_column(JSON)
+    state: Mapped[str] = mapped_column(String(20), default="ACCEPTED")
+    filing_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
