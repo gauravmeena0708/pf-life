@@ -6,9 +6,9 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 
 | # | Interface | Coverage | Stakeholders | W | M | P | ? |
 |---|---|---|---|---|---|---|---|
-| 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 15 | 2 | 0 | 0 |
+| 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 16 | 2 | 0 | 0 |
 | 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 104 | 5 | 1 | 0 |
-| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 91 | 7 | 0 | 0 |
+| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 92 | 7 | 0 | 0 |
 | 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 130 | 0 | 0 | 4 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 18 | 1 | 0 | 0 |
 | 6 | International worker | **Working** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 6 | 0 | 0 | 0 |
@@ -49,6 +49,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /public/grievances` | W | grievance | complainant |
 | `POST /public/grievances/status-lookups` | W | grievance | complainant |
 | `POST /public/inoperative-accounts/searches` | W | contribution | public |
+| `POST /public/receipts/verifications` | W | claim | public |
 | `GET /public/demo-challenges` | M | gateway | public |
 | `POST /public/trrn-status-lookups` | M | contribution | public |
 
@@ -186,6 +187,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /members/me/claims/{claimId}` | W | claim | member |
 | `GET /members/me/claims/{claimId}/audit-trail` | W | claim | member |
 | `GET /members/me/claims/{claimId}/bank-details` | W | claim | member |
+| `GET /members/me/claims/{claimId}/receipt` | W | claim | member |
 | `GET /members/me/employment-history` | W | member | member |
 | `GET /members/me/grievances` | W | grievance | member |
 | `GET /members/me/higher-pension-options` | W | pension | member |

@@ -113,6 +113,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /public/demo-calculations/epf` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `POST /public/demo-calculations/pension` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `POST /public/inoperative-accounts/searches` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
+| `POST /public/receipts/verifications` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/demo-challenges` | M | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `POST /public/trrn-status-lookups` | M | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 
@@ -132,6 +133,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/claims/{claimId}` | W | self — caller's own member record only |  |
 | `GET /members/me/claims/{claimId}/audit-trail` | W | self — caller's own member record only |  |
 | `GET /members/me/claims/{claimId}/bank-details` | W | self — caller's own member record only |  |
+| `GET /members/me/claims/{claimId}/receipt` | W | self — caller's own member record only |  |
 | `GET /members/me/employment-history` | W | self — caller's own member record only |  |
 | `GET /members/me/grievances` | W | self — caller's own member record only |  |
 | `GET /members/me/higher-pension-options` | W | self — caller's own member record only |  |

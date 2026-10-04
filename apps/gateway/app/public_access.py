@@ -10,7 +10,7 @@ from .request_activity import lookup_fingerprint, summarize_body
 PROTECTED = {"/public/establishments", "/public/establishments/{estId}",
              "/public/demo-challenges", "/public/trrn-status-lookups", "/public/grievances",
              "/public/grievances/status-lookups", "/public/claims/status-lookups",
-             "/public/inoperative-accounts/searches"}
+             "/public/inoperative-accounts/searches", "/public/receipts/verifications"}
 
 
 def _peer(request: Request) -> str:

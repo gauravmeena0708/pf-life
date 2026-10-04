@@ -3611,6 +3611,22 @@
   },
   {
     "method": "GET",
+    "path_template": "/members/me/claims/{claimId}/receipt",
+    "regex": "^/members/me/claims/[^/]+/receipt$",
+    "status": "W",
+    "phase": 1,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "The claim's receipt: what was claimed, when, and a code (HMAC) that anyone can check — printed with a QR code (P2.28h)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/members/me/higher-pension-options",
     "regex": "^/members/me/higher\\-pension\\-options$",
     "status": "W",
@@ -4850,6 +4866,22 @@
       "fo.fa_accounts"
     ],
     "summary": "Diagnostic view of CAD static reference data (interest tables, bank branch master) and its version (tracker: \"Failed to load CAD static Data\")",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/public/receipts/verifications",
+    "regex": "^/public/receipts/verifications$",
+    "status": "W",
+    "phase": 1,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "public"
+    ],
+    "summary": "Is this receipt genuine? The claim number and the receipt's code, with the demo challenge: genuine (form, amount, filed on, status) or not — never whether the claim exists",
     "revocation": false
   },
   {

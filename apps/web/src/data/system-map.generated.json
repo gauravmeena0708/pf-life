@@ -4,9 +4,9 @@
   "interfaces": 21,
   "stakeholders": 115,
   "stakeholders_with_access": 95,
-  "activities": 278,
+  "activities": 280,
   "endpoints": {
-   "W": 461,
+   "W": 463,
    "M": 24,
    "P": 1,
    "?": 5
@@ -21,7 +21,7 @@
    "coverage": "Working",
    "purpose": "Anyone, without a login: establishment search, e-Report Card, circulars, claim and grievance status, lodging a grievance.",
    "endpoints": {
-    "W": 15,
+    "W": 16,
     "M": 2,
     "P": 0,
     "?": 0
@@ -62,7 +62,7 @@
    "coverage": "Working",
    "purpose": "Members, pensioners and claimants: passbook, claims, transfers, nomination, pension and death claims.",
    "endpoints": {
-    "W": 91,
+    "W": 92,
     "M": 7,
     "P": 0,
     "?": 0
@@ -429,12 +429,16 @@
    "name": "Public visitor (establishment search, calculators, circulars)",
    "group": "A. Members, beneficiaries and the public",
    "endpoints": {
-    "W": 13,
+    "W": 14,
     "M": 2,
     "P": 0,
     "?": 0
    },
    "activities": [
+    {
+     "id": "F04.receipt_check",
+     "does": "Check that a claim receipt is genuine (a bank, an employer, a family member) from its QR code"
+    },
     {
      "id": "F11.public_search",
      "does": "Search an inoperative account with a demo CAPTCHA and verify an OTP before viewing the balance"
@@ -450,7 +454,7 @@
    "name": "Member — active contributor (UAN holder)",
    "group": "A. Members, beneficiaries and the public",
    "endpoints": {
-    "W": 75,
+    "W": 76,
     "M": 4,
     "P": 0,
     "?": 0
@@ -491,6 +495,10 @@
     {
      "id": "F04.redisburse_request",
      "does": "Submit corrected bank details after a payment return"
+    },
+    {
+     "id": "F04.receipt",
+     "does": "View and print my claim's receipt with a QR code anyone can use to check it"
     },
     {
      "id": "F04.track",
@@ -4139,6 +4147,28 @@
    "status": "BUILT",
    "endpoints": 2,
    "src": "SS, PEN"
+  },
+  {
+   "id": "F04.receipt",
+   "flow": "F04",
+   "actor": "member",
+   "does": "View and print my claim's receipt with a QR code anyone can use to check it",
+   "next": [
+    "F04.receipt_check"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "WEB"
+  },
+  {
+   "id": "F04.receipt_check",
+   "flow": "F04",
+   "actor": "public",
+   "does": "Check that a claim receipt is genuine (a bank, an employer, a family member) from its QR code",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "WEB"
   },
   {
    "id": "F04.track",

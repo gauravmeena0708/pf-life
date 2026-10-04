@@ -926,6 +926,41 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ReDisbursementRequest'
+  /members/me/claims/{claimId}/receipt:
+    get:
+      operationId: getMembersClaimsClaimIdReceipt
+      summary: 'The claim''s receipt: what was claimed, when, and a code (HMAC) that anyone can check — printed with a QR
+        code (P2.28h)'
+      tags:
+      - Member claims, transfers and pension applications
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: claimId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: claim
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
   /members/me/tax/form-15g-15h:
     post:
       operationId: postMembersTaxForm15g15h
@@ -2207,6 +2242,44 @@ paths:
       - member
       x-scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
       security: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /public/receipts/verifications:
+    post:
+      operationId: postPublicReceiptsVerifications
+      summary: 'Is this receipt genuine? The claim number and the receipt''s code, with the demo challenge: genuine (form,
+        amount, filed '
+      tags:
+      - Member claims, transfers and pension applications
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: claim
+      x-callers:
+      - public
+      x-scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
+      security: []
+      description: 'Is this receipt genuine? The claim number and the receipt''s code, with the demo challenge: genuine (form,
+        amount, filed on, status) or not — never whether the claim exists'
       requestBody:
         required: false
         content:

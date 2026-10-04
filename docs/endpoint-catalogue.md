@@ -294,6 +294,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /members/me/transfers/{transferId}` | Transfer status | W | 1 | claim |
 | `GET /members/me/claims` | List own claims | W | 1 | claim |
 | `GET /members/me/claims/{claimId}` | Claim detail + timeline (Journey B7) | W | 1 | claim |
+| `GET /members/me/claims/{claimId}/receipt` | The claim's receipt: what was claimed, when, and a code (HMAC) that anyone can check — printed with a QR code (P2.28h) | W | 1 | claim |
+| `POST /public/receipts/verifications` | Is this receipt genuine? The claim number and the receipt's code, with the demo challenge: genuine (form, amount, filed on, status) or not — never whether the claim exists | W | 1 | claim |
 | `POST /members/me/claims/{claimId}/confirmations` 🔐 | Transaction-intent confirmation (Journey B3) | W | 1 | claim |
 | `POST /members/me/claims/{claimId}/cancellations` 🔐 | **Cancel** an unsettled claim (renamed from `…/withdrawals`; allowed only before a checker decision — see `ClaimStateMachine` in `claim-service.yaml`) | W | 1 | claim |
 | `POST /members/me/claims/{claimId}/documents` | Upload supporting document (PDF / JPEG / PNG up to 1 MB, content checked, SHA-256 kept; stored by claim-service in the POC in place of the object store) | W | 1 | claim |
