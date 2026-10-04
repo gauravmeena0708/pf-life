@@ -98,6 +98,16 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Fix — a withdrawn 7A demand left OPEN in compliance-service's copy (4 October 2026)
+
+CI's consistency check found it twice. The first time, a retry for events still in flight was added; the second time the
+difference persisted through the retries: the shared consumer handles up to ten messages at once and re-queues a failed
+one, so the OPEN and WITHDRAWN events of a new demand could both try to insert, and the failed OPEN was applied after the
+WITHDRAWN. compliance-service now keeps the time of the event that set each demand's state and never lets an older one
+overwrite it (migration 0008, guarded); a new test delivering the two events in the wrong order fails without the fix and
+passes with it. compliance-service 28; the 7A e2e tests and the consistency check pass. Other copies are reviewed for the
+same weakness as P2.30.
+
 ## Update — Phase 2, slice 22: pay runs from payroll software (4 October 2026)
 
 Unit: employer-service 34 (new: the directory; authorising needs the owner and a one-time code, twice is refused; the

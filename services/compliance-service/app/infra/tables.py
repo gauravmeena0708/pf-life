@@ -45,6 +45,7 @@ demands = Table(
     Column("days_late", Integer, nullable=False, server_default="0"),
     Column("state", String(20), nullable=False),
     Column("working", Text),
+    Column("source_at", DateTime(timezone=True)),   # when contribution-service changed it: an older event never overwrites a newer state
 )
 
 # VISHWAS: settling disputed 14B damages (illustrative share in the rules).
