@@ -1,8 +1,26 @@
 name: stack verification
 
 on:
+  # Narrative documents cannot change what runs: a push touching only them skips the fresh-stack run. The catalogue,
+  # stakeholder files and every other path still trigger it (they generate routes, permissions and contracts).
   push:
+    paths-ignore:
+      - "README.md"
+      - "init.md"
+      - "docs/phase-2-plan.md"
+      - "docs/demo-script.md"
+      - "docs/test-report.md"
+      - "docs/adr/**"
+      - "docs/reviews/**"
   pull_request:
+    paths-ignore:
+      - "README.md"
+      - "init.md"
+      - "docs/phase-2-plan.md"
+      - "docs/demo-script.md"
+      - "docs/test-report.md"
+      - "docs/adr/**"
+      - "docs/reviews/**"
   workflow_dispatch:
 
 permissions:
