@@ -13,11 +13,13 @@ import queueEn from "./queue.en.json";
 import queueHi from "./queue.hi.json";
 import caseEn from "./case.en.json";
 import caseHi from "./case.hi.json";
+import payrollEn from "./payroll.en.json";
+import payrollHi from "./payroll.hi.json";
 
 void i18n.use(initReactI18next).init({
   resources: {
-    en: { translation: { ...en, ...memberEn, ...statusEn, ...journeyEn, ...queueEn, ...caseEn } },
-    hi: { translation: { ...hi, ...memberHi, ...statusHi, ...journeyHi, ...queueHi, ...caseHi } },
+    en: { translation: { ...en, ...memberEn, ...statusEn, ...journeyEn, ...queueEn, ...caseEn, ...payrollEn } },
+    hi: { translation: { ...hi, ...memberHi, ...statusHi, ...journeyHi, ...queueHi, ...caseHi, ...payrollHi } },
   },
   lng: "en",
   fallbackLng: "en",
