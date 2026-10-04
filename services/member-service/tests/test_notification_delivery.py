@@ -127,3 +127,19 @@ def test_delivered_bounced_and_office_scope(api):
     assert email["delivery_id"] in {d["delivery_id"] for d in ho.json()["data"]}
     assert api.post(f"{path}/{email['delivery_id']}/retries",
                     headers=token("00000000-0000-4000-8000-000000000012", "fo.pro")).status_code == 404
+
+
+def test_a_notice_for_a_member_without_a_login_is_skipped_not_retried(api):
+    """A Joint Declaration notice for a member who has no login names no recipient: it was matched to some other
+    member without a login, failed on insert and was dead-lettered after five tries. It is skipped."""
+    from app.infra.db import sessions
+    from app.infra.tables import notifications
+
+    async def deliver():
+        async with sessions()() as session, session.begin():
+            await handle_notification_requested(session, {"event_id": str(uuid.uuid4()), "event_type": "NotificationRequested.v1",
+                                                          "payload": {"recipient_subject": None, "template": "JD_EMPLOYER_ATTESTED",
+                                                                      "reference_id": "CASE-X", "params": {}}})
+        async with sessions()() as session:
+            return (await session.execute(select(notifications).where(notifications.c.reference_id == "CASE-X"))).all()
+    assert run(deliver()) == []

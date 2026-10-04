@@ -124,6 +124,8 @@ async def handle_notification_requested(session: AsyncSession, event: dict[str, 
             notifications.c.event_id == event["event_id"]))).first():
         return
     payload = event["payload"]
+    if not payload.get("recipient_subject"):         # a member without a login has no inbox (nor channel preferences)
+        return
     params = dict(payload.get("params") or {})
     member = (await session.execute(select(members).where(
         members.c.subject == payload["recipient_subject"]))).mappings().first()

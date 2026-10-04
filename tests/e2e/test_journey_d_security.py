@@ -137,7 +137,9 @@ def test_journey_d_risk_signal_review_recovery_and_revocations(contexts):
 
     # D2: the risk engine raises an advisory signal; the claim then takes the officer route.
     caiu = as_persona(contexts, "caiu-investigator", "/")
-    signal = wait_for(lambda: open_takeover_signal(caiu), timeout=30)
+    # The signal is asynchronous (gateway → audit → intelligence): on a small CI runner the risk consumer can be a
+    # minute behind every sign-in of the suite, so allow for it rather than assume this machine's speed.
+    signal = wait_for(lambda: open_takeover_signal(caiu), timeout=90, every=2)
     assert signal["advisory_only"] is True and len(signal["evidence_refs"]) == 3
     time.sleep(3)   # the signal reaches claim-service asynchronously; no member-facing API may reveal when
     c = claim["confirmation"]

@@ -11,7 +11,7 @@ from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.ai_routes import AI_HANDLERS
-from app.domain.risk import (EXPLANATIONS, MEMBER_REPORT, RULE_VERSION, SHARED_DEVICE_MIN_SUBJECTS, TAKEOVER,
+from app.domain.risk import (EXPLANATIONS, MEMBER_REPORT, RULE_VERSION, SHARED_DEVICE_MIN_SUBJECTS, TAKEOVER, TAKEOVER_STEPS, TAKEOVER_WINDOW,
                              shared_device_context, takeover_evidence)
 from app.infra.db import sessions
 from app.infra.tables import risk_signals, security_events
@@ -59,20 +59,30 @@ async def _raise(session: AsyncSession, subject: str, detection: str, evidence: 
 
 
 async def on_security_event(session: AsyncSession, event: dict[str, Any]) -> None:
+    """Record the event, then look for the takeover pattern in the subject's last 24 hours. Only what the pattern needs
+    is read (the three step types, inside the window); the earlier signals and the device's sharing are looked up only
+    when a pattern is found — the consumer must keep up with every sign-in on the platform."""
     p = event["payload"]
     at = datetime.fromisoformat(event["occurred_at"].replace("Z", "+00:00")) if event.get("occurred_at") else datetime.now(UTC)
     if not (await session.execute(select(security_events.c.id).where(security_events.c.event_id == event["event_id"]))).first():
         await session.execute(insert(security_events).values(event_id=event["event_id"], subject=p["subject"],
                                                              event_type=p["event_type"], device=p["device_fingerprint_hash"], at=at))
-    rows = (await session.execute(select(security_events).where(security_events.c.subject == p["subject"]))).mappings().all()
-    events = [{**dict(r), "at": _utc(r["at"])} for r in rows]
-    context = shared_device_context(await _subjects_on_device(session, p["device_fingerprint_hash"])) or {}
     if p["event_type"] == "MEMBER_SECURITY_REPORT":
+        context = shared_device_context(await _subjects_on_device(session, p["device_fingerprint_hash"])) or {}
         await _raise(session, p["subject"], MEMBER_REPORT, [event["event_id"]], context, event["correlation_id"])
+    if p["event_type"] not in TAKEOVER_STEPS:
+        return
+    rows = (await session.execute(select(security_events).where(
+        security_events.c.subject == p["subject"], security_events.c.event_type.in_(TAKEOVER_STEPS),
+        security_events.c.at >= at - TAKEOVER_WINDOW))).mappings().all()
+    events = [{**dict(r), "at": _utc(r["at"])} for r in rows]
+    if not takeover_evidence(events, at):
+        return
     cited = {ref for (refs,) in (await session.execute(select(risk_signals.c.evidence_refs).where(
         risk_signals.c.subject == p["subject"], risk_signals.c.detection_type == TAKEOVER))).all() for ref in refs}
     evidence = takeover_evidence(events, at, cited)
     if evidence:
+        context = shared_device_context(await _subjects_on_device(session, p["device_fingerprint_hash"])) or {}
         await _raise(session, p["subject"], TAKEOVER, evidence, context, event["correlation_id"])
 
 
