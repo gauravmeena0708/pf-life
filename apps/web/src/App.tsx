@@ -19,6 +19,7 @@ import { PmvbryPage as MemberPmvbryPage } from "./features/member/PmvbryPage";
 import { ClaimsPage } from "./features/member/ClaimsPage";
 import { ClaimJourneyPage } from "./features/member/ClaimJourneyPage";
 import { ClaimDetailPage } from "./features/member/ClaimDetailPage";
+import { ReceiptPage } from "./features/member/ReceiptPage";
 import { ProfilePage } from "./features/member/ProfilePage";
 import { ServicePage } from "./features/member/ServicePage";
 import { TransferJourneyPage } from "./features/member/TransferJourneyPage";
@@ -89,6 +90,7 @@ import { TrustPage } from "./features/exempted/TrustPage";
 import { ProceedingsPage } from "./features/exempted/ProceedingsPage";
 import { RankingsPage } from "./features/exempted/RankingsPage";
 import { PublicGrievancesPage, PublicClaimStatusPage } from "./features/public/PublicGrievancesPage";
+import { VerifyReceiptPage } from "./features/public/VerifyReceiptPage";
 import { PublicCircularsPage } from "./features/public/CircularsList";
 import { EReportCardPage } from "./features/public/EReportCardPage";
 import { PublicLookups } from "./pages/PublicLookups";
@@ -179,6 +181,7 @@ export function App() {
             <Route path="/member/passbook" element={<PassbookPage />} />
             <Route path="/member/claims" element={<ClaimsPage />} />
             <Route path="/member/claims/new" element={<ClaimJourneyPage />} />
+            <Route path="/member/claims/:claimId/receipt" element={<ReceiptPage />} />
             <Route path="/member/claims/:claimId" element={<ClaimDetailPage />} />
             <Route path="/member/profile" element={<ProfilePage />} />
             <Route path="/member/service" element={<ServicePage />} />
@@ -225,6 +228,7 @@ export function App() {
             <Route path="/public/inoperative-accounts" element={<InoperativeSearchPage />} />
             <Route path="/public/grievances" element={<PublicGrievancesPage />} />
             <Route path="/public/claims" element={<PublicClaimStatusPage />} />
+            <Route path="/public/receipts/verify" element={<VerifyReceiptPage />} />
             <Route path="/public/circulars" element={<PublicCircularsPage />} />
             <Route path="/public/establishments/:estId/e-report-card" element={<EReportCardPage />} />
             <Route path="/ho/circulars" element={<CircularsPage />} />

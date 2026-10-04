@@ -200,6 +200,35 @@
       "chooseOldAccount": "Choose an old account to continue",
       "chooseCurrentAccount": "Choose a current account to continue"
     }
+  },
+  "receipt": {
+    "title": "Receipt",
+    "heading": "Claim receipt",
+    "viewAndPrint": "View and print receipt",
+    "printOrSave": "Print or save",
+    "claimId": "Claim ID",
+    "form": "Form",
+    "claimType": "Claim type",
+    "amount": "Amount",
+    "filedOn": "Filed on",
+    "status": "Status",
+    "memberName": "Member name",
+    "uan": "UAN",
+    "employer": "Employer",
+    "code": "Verification code",
+    "qrAlt": "QR code to verify this receipt",
+    "verifyTitle": "Verify claim receipt",
+    "verifyDescription": "Verify the authenticity of an EPFO claim receipt.",
+    "checkReceipt": "Check receipt",
+    "genuine": "Genuine receipt",
+    "notVerified": "This receipt could not be verified",
+    "getQuestion": "Get one-use demo question",
+    "demoQuestionHelp": "The arithmetic question is a one-use demo check. Get a new question after each submission.",
+    "pleaseWait": "Please wait…",
+    "detailsAndVerification": "Details and verification",
+    "answerInteger": "Enter an integer answer to the demo question.",
+    "claimIdPatternError": "Enter a valid claim ID (e.g. CLM-1234ABCD).",
+    "codePatternError": "Enter a 10-character verification code."
   }
 }
 
