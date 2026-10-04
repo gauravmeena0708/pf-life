@@ -759,6 +759,13 @@ tests produced, by role (after `python3 scripts/publish_manuals.py`).
 2. Once the exit is marked: choose it, the current account is preselected, *Check your answers*, *Send the request* with the
    one-time code — the confirmation gives the reference and the three steps that follow.
 
+## The officers' queue and case page (P2.28d–e)
+
+1. As `do-caseworker`, the work queue: the counts by deadline, *Time left* in words, search by a claim ID, *Overdue only*,
+   sort by amount — then copy the address: the same view opens again.
+2. Open a case on a wide screen: the evidence on the left, *Your decision* on the right staying in view as you scroll; the
+   strip at the top gives amount, time left and the step. Press Tab from the top: *Jump to your decision*.
+
 ## Erroneous EPS contributions rectified (P2.19c, HO circular WSU/2025/E-961539)
 
 1. As `emp-preparer`, register a joinee with date of joining 4 Jan 2016 and file a return for a month of 2016 with wages

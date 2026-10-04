@@ -98,6 +98,15 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slices 28d–f: the officers' queue and case page, axe checks (4 October 2026)
+
+Three agy runs in parallel worktrees, merged. Web 363 (new: time left in words, sort and filter, paging 30 cases into
+25 + 5 with the claim link kept; the case page's strip, the decision section and its skip link; axe over the three member
+journeys and the shared components — no violations, and a control that must fail does). UI claims suite on this
+long-lived stack: 29 of 32 — every case driving the work queue and the case page passed (rejections at AO and APFC, return
+and resubmit, stop and restart); the three failures are member C's final settlement and pension withdrawal, refused
+because member C's synthetic balance is spent on this stack (CI runs them on a fresh one).
+
 ## Update — Phase 2, slice 28c: moving an old account, step by step (4 October 2026)
 
 Web 331 (new: old accounts by employer; none available explained with the way to mark the exit; the only current account
