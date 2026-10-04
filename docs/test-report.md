@@ -98,6 +98,14 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 28b: changing the bank account, step by step (4 October 2026)
+
+Web 322 (new: a bad IFSC listed at the top and on the field; mismatched account numbers refused; check your answers shows
+only the last four digits; a verified account's confirmation with the request reference; a refused one's reason and the
+way back). End to end: new `test_bank_journey.py` in a real browser (the IFSC uppercased, both errors, never the full
+number on screen, the one-time code, the penny-drop's refusal and the way back) with the claim journey, and the e2e tests
+that use the KYC page, all pass (6). CI on P2.28a was green on every suite, the UI suite included.
+
 ## Update — Phase 2, slice 28a: the claim journey and the first shared components (4 October 2026)
 
 Web 316 (new: the journey's steps — employer names not member IDs, the error summary and field error for an amount above

@@ -744,6 +744,14 @@ tests produced, by role (after `python3 scripts/publish_manuals.py`).
 3. *Submit claim*, enter the one-time code: the confirmation shows the reference, that it was approved automatically and
    the date to expect it; *Print or save receipt*. Switch to हिंदी to see the same journey in Hindi.
 
+## Change the bank account, step by step (P2.28b)
+
+1. As `member-a`, KYC › *Change your bank account*: the account on record is shown. Enter `sbin123` — the problem is
+   listed; enter `sbin0001234` (it becomes `SBIN0001234`).
+2. Enter an account number twice — try two different numbers first. *Check your answers* shows only *ending …*.
+3. *Submit* with the one-time code: a number ending 0000 is refused by the mock penny-drop with the reason and *Enter
+   another account number*; any other is verified and goes to the employer, with the request's reference.
+
 ## Erroneous EPS contributions rectified (P2.19c, HO circular WSU/2025/E-961539)
 
 1. As `emp-preparer`, register a joinee with date of joining 4 Jan 2016 and file a return for a month of 2016 with wages

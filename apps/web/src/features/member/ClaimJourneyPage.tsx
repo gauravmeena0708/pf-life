@@ -3,10 +3,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
-import { api, command, newIdempotencyKey, rupees, ApiError, type Envelope } from "../../api/client";
+import { api, command, newIdempotencyKey, rupees, type Envelope } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { Stepper } from "../../components/ui/Stepper";
 import { ErrorSummary, type FieldError } from "../../components/ui/ErrorSummary";
+import { extractErrors } from "../../components/ui/problems";
 import { MoneyInput, parseRupees } from "../../components/ui/MoneyInput";
 import { SummaryList, type SummaryRow } from "../../components/ui/SummaryList";
 import { ConfirmationPanel } from "../../components/ui/ConfirmationPanel";
@@ -68,24 +69,6 @@ interface CreatedClaim {
   };
 }
 
-function extractErrors(cause: unknown): FieldError[] {
-  if (!cause) return [];
-  const apiErr = cause as ApiError;
-  if (apiErr.problem) {
-    if (Array.isArray(apiErr.problem.errors) && apiErr.problem.errors.length > 0) {
-      return apiErr.problem.errors.map((e) => {
-        if (typeof e === "string") return { message: e };
-        return { field: e.field, message: e.message || e.msg || apiErr.problem.title };
-      });
-    }
-    const msg = apiErr.problem.detail || apiErr.problem.title;
-    return [{ message: msg }];
-  }
-  if (cause instanceof Error) {
-    return [{ message: cause.message }];
-  }
-  return [{ message: String(cause) }];
-}
 
 export function ClaimJourneyPage() {
   const { t } = useTranslation();

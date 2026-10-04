@@ -80,5 +80,63 @@
     "now": "now",
     "memberId": "Member ID {{id}}",
     "loading": "Loading claim details…"
+  },
+  "kycBankJourney": {
+    "eyebrow": "Member services",
+    "title": "Change your bank account",
+    "description": "Add a new bank account for claim settlements.",
+    "parent": "KYC",
+    "current": "Change bank account",
+    "loading": "Loading bank details…",
+    "stepUpSummary": "Change your bank account to the account ending {{last4}}. It is checked by a penny-drop (mock) and then approved by your employer.",
+    "steps": {
+      "yourBank": "Your bank",
+      "accountNumber": "Account number",
+      "checkAnswers": "Check your answers"
+    },
+    "step1": {
+      "heading": "Your bank",
+      "nowOnRecord": "Now: IFSC {{ifsc}}, account ending {{last4}}",
+      "ifscLabel": "IFSC",
+      "ifscHint": "11 characters, e.g. SBIN0001234 — on your cheque book or passbook"
+    },
+    "step2": {
+      "heading": "Account number",
+      "accountLabel": "Account number",
+      "accountAgainLabel": "Confirm account number",
+      "accountHint": "9 to 18 digits, as on your passbook"
+    },
+    "step3": {
+      "heading": "Check your answers",
+      "note": "We check the account with a ₹1 penny-drop (mock), then your present employer approves it. Claims are paid to it once approved."
+    },
+    "summary": {
+      "ifsc": "Bank IFSC",
+      "account": "Account number",
+      "accountValue": "ending {{last4}}"
+    },
+    "actions": {
+      "back": "Back",
+      "continue": "Continue",
+      "submit": "Submit",
+      "enterAnotherAccount": "Enter another account number"
+    },
+    "confirmation": {
+      "title": "Bank account checked",
+      "referenceLabel": "Your request",
+      "body": "Verified by {{verifier}}. Your employer approves it next; you will get a message. Until then claims are paid to the account now on record.",
+      "backToKyc": "Back to KYC",
+      "startClaim": "Start a claim"
+    },
+    "errors": {
+      "ifscEmpty": "Enter an IFSC",
+      "ifscFormat": "Enter the IFSC as 4 letters, a zero, then 6 letters or numbers",
+      "accountEmpty": "Enter an account number",
+      "accountAgainEmpty": "Confirm your account number",
+      "accountDigits": "Account number must be between 9 and 18 digits",
+      "accountMismatch": "The account numbers do not match",
+      "verificationFailed": "The bank could not confirm this account: {{reason}}",
+      "defaultFailedReason": "Penny-drop failed"
+    }
   }
 }

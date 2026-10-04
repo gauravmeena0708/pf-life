@@ -77,7 +77,10 @@ export function KycPage() {
             <label>Account number<input name="account" required inputMode="numeric" pattern="[0-9]{9,18}" /></label>
           </div>
           <p className="muted small">Demo: numbers ending 0000 fail the penny-drop.</p>
-          <div className="actions"><button type="submit" className="primary">Verify and send for approval</button></div>
+          <div className="actions">
+            <button type="submit" className="primary">Verify and send for approval</button>
+            <Link to="/member/kyc/bank/new" className="button">Change your bank account</Link>
+          </div>
         </form>
       </div>
       {k?.requests.length ? (

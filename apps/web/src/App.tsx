@@ -23,6 +23,7 @@ import { ProfilePage } from "./features/member/ProfilePage";
 import { ServicePage } from "./features/member/ServicePage";
 import { NominationPage } from "./features/member/NominationPage";
 import { KycPage, UanCardPage } from "./features/member/KycPage";
+import { BankJourneyPage } from "./features/member/BankJourneyPage";
 import { PensionApplicationPage } from "./features/member/PensionApplicationPage";
 import { PensionClaimsPage } from "./features/pension/PensionClaimsPage";
 import { CppsPage } from "./features/pension/CppsPage";
@@ -181,6 +182,7 @@ export function App() {
             <Route path="/member/profile" element={<ProfilePage />} />
             <Route path="/member/service" element={<ServicePage />} />
             <Route path="/member/nomination" element={<NominationPage />} />
+            <Route path="/member/kyc/bank/new" element={<BankJourneyPage />} />
             <Route path="/member/kyc" element={<KycPage />} />
             <Route path="/member/pension" element={<PensionApplicationPage />} />
             <Route path="/member/retirement" element={<RetirementPage />} />
