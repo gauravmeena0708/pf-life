@@ -56,7 +56,7 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | P2.19 | Edge cases as tests first, then the fixes: death during a transfer or claim; minor nominee or no nomination; two UANs to merge; court-ordered back wages after exit; 58 in service; a re-employed pensioner; family pension to a dependent parent or a disabled child; attachment orders refused; mergers without a break; a vanished contractor (s.8A); partial payment; exemption cancelled mid-transfer; returned payments after a bank merger; one bank account for many members; identity mismatches; members abroad without Aadhaar; unclaimed balances | a (money at risk: death, short cheque, re-employed pensioner, child pension to 25, back wages): Done; c (erroneous EPS contributions rectified, circular WSU/2025/E-961539 of 19 Dec 2025): Done; the rest planned |
 | P2.20 | Navigation and findability: side or top menu (per user, by role), menu search (Ctrl+K), the empty menu headings wired to existing screens; a text-size control (to 150%) for senior citizens; later task-based member and employer menus with the legacy ones behind a toggle | Done (task-based menus later) |
 | P2.21 | Data held, not asked: pre-filled claims, automatic transfer when a new member ID appears, the pension case opened at 58 and on death, settlement by default for low risk with sampled audits | a (transfer unasked; claims and pension offered filled in): Done; b (death from the civil registry, claims offered to the nominee, sampled audit of automatic settlements, DigiLocker): Done |
-| P2.22 | Real-time contributions: a per-pay-run contribution API and a conformance sandbox for payroll vendors (the ECR kept as a format); a due-date option to model contributions paid with wages | Planned |
+| P2.22 | Real-time contributions: a per-pay-run contribution API and a conformance sandbox for payroll vendors (the ECR kept as a format); a due-date option to model contributions paid with wages | Done (pay runs adding up into the ECR, the sandbox, employer-authorised providers; the payday due date dropped) |
 | P2.23 | Retirement view: one forecast across PF and pension with VPF what-if and replacement rate; every rejection saying what fixes it | a (retirement view, VPF what-if): Done; b (every rejection and refusal saying what fixes it): Done |
 | P2.24 | Trust and governance: authorised representatives (guardian, agent) with consented scope; published service standards with live performance; an independent review tier; rule-change simulation; interest-sustainability model | Planned |
 | P2.28 | Production UX foundations: task-based journeys (one task per page, check-your-answers, a confirmation with a reference, a receipt with a QR to verify it); plain language with no internal codes and complete Hindi; forms that check as you type and list errors at the top; officers' queues with sorting, filters, deadlines, bulk actions and the documents beside the decision; risk-based step-up; a component library on UX4G and GIGW 3.0; WCAG 2.1 AA verified (axe in CI, screen reader, 400% zoom); phone layouts and per-page code; loading, empty and error states; usability sessions and privacy-safe analytics. First: the member's claim, KYC and transfer journeys | a (the claim journey, the first shared components): Done; b (changing the bank account): Done; c (the transfer): Done; d–f (the work queue, the case page, axe checks): Done; g (phone tables), h (a receipt anyone can check): Done; next: risk-based step-up; the old claim form retired once the UI suites use the journey |
@@ -1529,6 +1529,26 @@ Built:
 - Not built: finding the ineligible members automatically (wages on joining are not on record: the office starts the
   case, e.g. from Form 11 or an inspection); the non-contributory period credited separately (the service counts from
   joining to exit).
+
+## P2.22 — how it is built (pay runs from payroll software)
+
+Three agy runs in parallel worktrees to one written API contract (employer-service and the gateway; contribution-service;
+the screens); the catalogue, events, realm and the e2e test done alongside. On review: event-contract checking, which one
+run had switched off for employer-service's tests, switched back on (the contracts were on main); a provider sees only the
+pay runs it sent.
+
+- **The employer authorises the software.** The establishment's owner authorises a payroll provider from a directory
+  (*Payroll software*; one-time code). It becomes a grant like an operator's — `payroll.submit` for that establishment —
+  so the gateway binds the establishment for the provider's machine login exactly as for employer staff; revoking it
+  (one-time code, a reason) cuts the provider off at once. Before this the B2B route could never bind an establishment.
+- **Each pay run as it happens** (`POST /partners/payroll/pay-runs`): wages per member, checked row by row as an ECR row
+  would be — a member of the establishment, wage order, the month's ceilings, no EPS for a pensioner or a member ID found
+  not eligible, NCP days — refused whole when a row is wrong; the same run reference twice is stored once. A conformance
+  sandbox checks a payload and stores nothing.
+- **The ECR stays the one record.** The employer's operator sees the month's runs and each member's totals (*Pay runs*) and
+  makes the ECR from them: each member's wages summed (EPS wages capped at the ceiling though the runs add past it), then
+  approved by the signatory, submitted and paid as any ECR. Nothing reaches the ledger before the ECR is paid.
+- Dropped: a due date on each payday (a foreign practice, not India's); the ECR's due date stands.
 
 ## P2.28g–h — how it is built (phone tables, a receipt anyone can check)
 

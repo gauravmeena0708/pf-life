@@ -168,8 +168,10 @@ async def list_provider_pay_runs(wage_month: str | None = Query(None), actor: Ac
     eid = _establishment(actor)
 
     async with sessions()() as session, session.begin():
-        sql = "SELECT pay_run_id, wage_month, run_ref, pay_date, state, totals, filing_id FROM pay_runs WHERE establishment_id=:e"
-        params: dict[str, Any] = {"e": eid}
+        # a provider sees the runs it sent, not another provider's for the same establishment
+        sql = ("SELECT pay_run_id, wage_month, run_ref, pay_date, state, totals, filing_id FROM pay_runs "
+               "WHERE establishment_id=:e AND provider_subject=:p")
+        params: dict[str, Any] = {"e": eid, "p": actor.subject}
         if wage_month:
             sql += " AND wage_month=:m"
             params["m"] = wage_month

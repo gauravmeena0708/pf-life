@@ -55,7 +55,10 @@ async def main() -> None:
                       "date_of_exit": date.fromisoformat(m["date_of_exit"]) if m.get("date_of_exit") else None,
                       "eps_wages_paise": SYNTHETIC_EPS_WAGES, "office_id": seed["establishment"]["office_id"], "uan": m["uan"],
                       "account_link_id": m["account_link_id"], "establishment_id": m.get("establishment_id", seed["establishment"]["establishment_id"])}
-            if (await session.execute(select(member_service.c.subject).where(member_service.c.subject == values["subject"]))).first():
+            existing = (await session.execute(select(member_service.c.date_of_exit).where(member_service.c.subject == values["subject"]))).first()
+            if existing:
+                if existing[0] and not values["date_of_exit"]:            # an exit or death recorded since: a re-seed keeps it
+                    values.pop("date_of_exit")
                 await session.execute(update(member_service).where(member_service.c.subject == values["subject"]).values(**values))
             else:
                 await session.execute(insert(member_service).values(**values))

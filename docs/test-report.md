@@ -98,6 +98,21 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 22: pay runs from payroll software (4 October 2026)
+
+Unit: employer-service 34 (new: the directory; authorising needs the owner and a one-time code, twice is refused; the
+gateway's grant lookup now gives the provider the establishment with payroll.submit; revoking), contribution-service 123
+(new: two runs accepted, a repeated run stored once; an unknown UAN and EPS above the ceiling refused with their codes,
+nothing stored; the sandbox stores nothing; a member summed over both runs; the ECR made from them validates and the runs
+become INCLUDED; making it again refused; a token without payroll.submit refused), gateway 24 (a payroll provider gets its
+establishment and grants), pension-service 49. Web 374 (new: authorise and revoke with the code; the month's runs and
+totals in a labelled table; the ECR made, and the reason when it cannot be). End to end: new `test_pay_runs.py` through
+the gateway with the provider's own machine login — sandbox, two runs, the ECR with EPS capped at the ceiling though the
+runs add past it, revocation refused at once — run twice. Full suite 112 of 115 on this long-lived stack: member A's and
+member C's synthetic balances are spent (`make reset` restores them), and the registry-death test failed because a
+re-seed had wiped pension-service's recorded date of death — the pension seed now keeps a recorded exit, as the member
+seed does. Consistency: every copy agrees. Must-deny 18; UI smoke 2.
+
 ## Update — Phase 2, slices 28g–h: phone tables, a receipt anyone can check (4 October 2026)
 
 Web 368 (new: each of the three tables carries the class and a label on every cell; the receipt page with its fields, code

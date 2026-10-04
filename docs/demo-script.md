@@ -759,6 +759,16 @@ tests produced, by role (after `python3 scripts/publish_manuals.py`).
 2. Once the exit is marked: choose it, the current account is preselected, *Check your answers*, *Send the request* with the
    one-time code — the confirmation gives the reference and the three steps that follow.
 
+## Pay runs from payroll software (P2.22)
+
+1. As `emp-owner`, Establishment › *Payroll software*: authorise *Demo Payroll Services* (one-time code).
+2. The provider's machine login (`b2b-sandbox`, client credentials; header `X-Establishment-Id: EST-DEMO-0001`) sends a pay
+   run to `POST /api/v1/partners/payroll/pay-runs` — try the sandbox (`…/sandbox/payroll/pay-runs/validations`) with EPS
+   wages above the ceiling first: the problem is listed, nothing stored.
+3. As `emp-preparer`, Returns › *Pay runs*: the month's runs and each member's totals; *Make the ECR from these pay runs* —
+   then `emp-signatory` approves, submits and pays it as usual.
+4. As `emp-owner`, revoke the provider: its next pay run is refused.
+
 ## A receipt anyone can check, and phone tables (P2.28g–h)
 
 1. After *Start a claim* (above), *View and print receipt*: the code and the QR code. Scan it on a phone (or open the link):

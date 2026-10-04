@@ -179,5 +179,7 @@ it("keeps signed-in permission details alongside the shared interface role list"
 it("labels Mock as Simulated without changing its data value", () => {
   mount(<StatusBadge status="Mock" />);
   expect(screen.getByText(/Simulated/)).toBeTruthy();
-  expect(INTERFACES.some((item) => item.coverage === "Mock")).toBe(true);
+  // the data keeps its own values ("Mock" stays "Mock"); which interfaces are mock-only changes as slices land (P2.22 made
+  // the B2B payroll interface working), so only the vocabulary is checked here
+  expect(INTERFACES.every((item) => ["Working", "Mock", "Planned"].includes(item.coverage))).toBe(true);
 });

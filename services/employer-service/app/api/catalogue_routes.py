@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /employers/me', 'PATCH /employers/me', 'POST /employers/registration-requests', 'POST /employers/voluntary-coverage-requests', 'GET /office/establishment-change-requests', 'GET /office/establishment-registrations', 'GET /office/signature-registrations', 'GET /public/establishments', 'GET /employers/me/bank-accounts', 'GET /employers/me/branches', 'POST /employers/me/branches', 'GET /employers/me/change-requests', 'POST /employers/me/closure-requests', 'GET /employers/me/configuration', 'GET /employers/me/contractors', 'POST /employers/me/contractors', 'GET /employers/me/exemption', 'GET /employers/me/kyc', 'POST /employers/me/office-transfer-requests', 'GET /employers/me/operators', 'GET /employers/me/ownership-declaration', 'PUT /employers/me/ownership-declaration', 'GET /employers/me/signatories', 'GET /employers/me/signature-registrations', 'GET /exempted/me/audits', 'POST /exempted/me/audits', 'GET /exempted/me/proceedings', 'GET /exempted/me/profile', 'POST /exempted/me/surrender-requests', 'POST /integrations/mca/registrations', 'POST /integrations/shram-suvidha/registrations', 'GET /office/exempted/proceedings', 'POST /employers/me/configuration/change-requests', 'POST /employers/me/operators/invitations', 'POST /employers/me/signatories/authorisations', 'POST /employers/me/kyc/{kycType}', 'POST /employers/me/operators/{operatorId}/revocations', 'POST /employers/me/signatories/{signatoryId}/dsc-registrations', 'POST /employers/me/signatories/{signatoryId}/esign-registrations', 'POST /employers/me/signatories/{signatoryId}/request-letters', 'POST /employers/me/signatories/{signatoryId}/revocations', 'POST /employers/me/signatories/{signatoryId}/revoke-letters', 'POST /exempted/me/proceedings/{proceedingId}/replies', 'POST /office/exempted/proceedings/{proceedingId}/steps', 'GET /employers/registration-requests/{reqId}', 'GET /public/establishments/{estId}', 'POST /employers/registration-requests/{reqId}/verification-evidence', 'POST /ho/exemptions/{estId}/decisions', 'POST /office/establishment-registrations/{reqId}/coverage-decisions', 'GET /office/establishment-registrations/{reqId}/documents', 'POST /office/establishment-registrations/{reqId}/scrutiny-notes', 'POST /office/establishments/{estId}/defreezes', 'POST /office/establishments/{estId}/freezes', 'GET /office/exempted/{estId}/audits', 'POST /office/exempted/{estId}/cancellation-proceedings', 'POST /office/establishments/{estId}/change-requests/{requestId}/decisions', 'POST /office/establishments/{estId}/signature-registrations/{regId}/decisions']
+OPERATIONS = ['GET /employers/me', 'PATCH /employers/me', 'POST /employers/registration-requests', 'POST /employers/voluntary-coverage-requests', 'GET /office/establishment-change-requests', 'GET /office/establishment-registrations', 'GET /office/signature-registrations', 'GET /public/establishments', 'GET /employers/me/bank-accounts', 'GET /employers/me/branches', 'POST /employers/me/branches', 'GET /employers/me/change-requests', 'POST /employers/me/closure-requests', 'GET /employers/me/configuration', 'GET /employers/me/contractors', 'POST /employers/me/contractors', 'GET /employers/me/exemption', 'GET /employers/me/kyc', 'POST /employers/me/office-transfer-requests', 'GET /employers/me/operators', 'GET /employers/me/ownership-declaration', 'PUT /employers/me/ownership-declaration', 'GET /employers/me/payroll-providers', 'GET /employers/me/signatories', 'GET /employers/me/signature-registrations', 'GET /exempted/me/audits', 'POST /exempted/me/audits', 'GET /exempted/me/proceedings', 'GET /exempted/me/profile', 'POST /exempted/me/surrender-requests', 'POST /integrations/mca/registrations', 'POST /integrations/shram-suvidha/registrations', 'GET /office/exempted/proceedings', 'POST /employers/me/configuration/change-requests', 'POST /employers/me/operators/invitations', 'POST /employers/me/payroll-providers/authorisations', 'POST /employers/me/signatories/authorisations', 'POST /employers/me/payroll-providers/authorisations/{grantId}/revocations', 'POST /employers/me/kyc/{kycType}', 'POST /employers/me/operators/{operatorId}/revocations', 'POST /employers/me/signatories/{signatoryId}/dsc-registrations', 'POST /employers/me/signatories/{signatoryId}/esign-registrations', 'POST /employers/me/signatories/{signatoryId}/request-letters', 'POST /employers/me/signatories/{signatoryId}/revocations', 'POST /employers/me/signatories/{signatoryId}/revoke-letters', 'POST /exempted/me/proceedings/{proceedingId}/replies', 'POST /office/exempted/proceedings/{proceedingId}/steps', 'GET /employers/registration-requests/{reqId}', 'GET /public/establishments/{estId}', 'POST /employers/registration-requests/{reqId}/verification-evidence', 'POST /ho/exemptions/{estId}/decisions', 'POST /office/establishment-registrations/{reqId}/coverage-decisions', 'GET /office/establishment-registrations/{reqId}/documents', 'POST /office/establishment-registrations/{reqId}/scrutiny-notes', 'POST /office/establishments/{estId}/defreezes', 'POST /office/establishments/{estId}/freezes', 'GET /office/exempted/{estId}/audits', 'POST /office/exempted/{estId}/cancellation-proceedings', 'POST /office/establishments/{estId}/change-requests/{requestId}/decisions', 'POST /office/establishments/{estId}/signature-registrations/{regId}/decisions']
 
 @router.api_route("/api/v1/employers/me", methods=["GET"], include_in_schema=False)
 async def get_employers_me(actor: Actor = Depends(require_actor)) -> None:
@@ -122,6 +122,11 @@ async def put_employers_me_ownership_declaration(actor: Actor = Depends(require_
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Form 5A — submit / amend")
 
 
+@router.api_route("/api/v1/employers/me/payroll-providers", methods=["GET"], include_in_schema=False)
+async def get_employers_me_payroll_providers(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Payroll software the establishment may authorise, and those it has")
+
+
 @router.api_route("/api/v1/employers/me/signatories", methods=["GET"], include_in_schema=False)
 async def get_employers_me_signatories(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "List authorised signatories")
@@ -182,9 +187,19 @@ async def post_employers_me_operators_invitations(actor: Actor = Depends(require
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Invite operator with scoped permissions (a privileged grant)")
 
 
+@router.api_route("/api/v1/employers/me/payroll-providers/authorisations", methods=["POST"], include_in_schema=False)
+async def post_employers_me_payroll_providers_authorisations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The owner authorises a payroll provider to send pay runs for the establishment")
+
+
 @router.api_route("/api/v1/employers/me/signatories/authorisations", methods=["POST"], include_in_schema=False)
 async def post_employers_me_signatories_authorisations(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Authorise signatory")
+
+
+@router.api_route("/api/v1/employers/me/payroll-providers/authorisations/{grantId}/revocations", methods=["POST"], include_in_schema=False)
+async def post_employers_me_payroll_providers_authorisations_grantId_revocations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The owner revokes a payroll provider's authorisation (effective at once)")
 
 
 @router.api_route("/api/v1/employers/me/kyc/{kycType}", methods=["POST"], include_in_schema=False)
