@@ -11,6 +11,10 @@ found that way, at run time. This script compares the copies, read-only, and lis
   policy      — the published rule-set versions: platform (owner) vs every service that applies them
   eps         — member IDs found not eligible for EPS (P2.19c): contribution (owner) vs pension's service record
 
+The copies are kept by events, so they agree eventually, not at every instant: a difference is checked again (up to
+RETRIES times, WAIT seconds apart) and only one that persists is reported — run straight after a test suite, the last
+test's events may still be in flight.
+
 Usage: python3 scripts/consistency_check.py [--only exits,balances] — exit status 1 when anything differs. It reads the
 databases through `docker compose exec postgres psql` (PSQL overrides the command)."""
 import argparse
@@ -18,8 +22,10 @@ import os
 import shlex
 import subprocess
 import sys
+import time
 from collections import defaultdict
 
+RETRIES, WAIT = int(os.getenv("CONSISTENCY_RETRIES", "3")), float(os.getenv("CONSISTENCY_WAIT", "5"))
 PSQL = os.getenv("PSQL", "docker compose exec -T postgres psql -U postgres")
 
 
@@ -112,6 +118,11 @@ def main() -> int:
     total, by_check = 0, defaultdict(list)
     for name in args.only.split(","):
         by_check[name] = CHECKS[name]()
+        for _ in range(RETRIES):                         # events still in flight settle within seconds
+            if not by_check[name]:
+                break
+            time.sleep(WAIT)
+            by_check[name] = CHECKS[name]()
         total += len(by_check[name])
         print(f"{name}: {'consistent' if not by_check[name] else f'{len(by_check[name])} difference(s)'}")
         for line in by_check[name][:25]:
