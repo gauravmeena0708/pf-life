@@ -608,3 +608,81 @@ code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9em; }
     overflow-y: auto;
   }
 }
+
+/* P2.28g phone tables */
+@media (max-width: 640px) {
+  .table-scroll table.responsive-table,
+  .table-scroll .responsive-table,
+  .responsive-table {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .responsive-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .responsive-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .responsive-table tr,
+  .responsive-table tbody tr {
+    display: block;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    background: var(--surface);
+  }
+
+  .responsive-table td {
+    display: grid;
+    grid-template-columns: 40% 1fr;
+    gap: 8px;
+    padding: 6px 0;
+    border: 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .responsive-table td > * {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .responsive-table td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+  }
+
+  .responsive-table td.numeric {
+    text-align: left;
+  }
+
+  .responsive-table td:first-child {
+    font-size: 1.05rem;
+    font-weight: 700;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+    color: var(--navy);
+  }
+
+  .responsive-table td:first-child a {
+    color: var(--navy);
+  }
+
+  .responsive-table td:first-child::before {
+    font-size: 0.85rem;
+    align-self: center;
+  }
+}
