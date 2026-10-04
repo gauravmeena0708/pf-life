@@ -418,3 +418,120 @@ code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .9em; }
     color: #000000 !important;
   }
 }
+
+/* P2.28e case page */
+.case-glance-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-top: 3px solid #d4af37;
+  border-left: 4px solid var(--navy);
+  border-radius: 6px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 14px #0033660a;
+}
+
+.case-glance-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.case-glance-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.case-glance-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--navy);
+  overflow-wrap: anywhere;
+}
+
+.case-glance-overdue {
+  color: #cc0000;
+}
+
+.case-glance-advisory {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.case-advisory-pill {
+  display: inline-block;
+  background: #fff8e1;
+  color: #9a6c00;
+  border: 1px solid #d4af37;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 99px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.case-skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 100;
+}
+
+.case-skip-link:focus,
+.case-skip-link:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  display: inline-block;
+  padding: 8px 14px;
+  background: var(--navy);
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: underline;
+  border: 2px solid #d4af37;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.case-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.case-evidence-column {
+  min-width: 0;
+}
+
+.case-decision-column {
+  min-width: 0;
+}
+
+@media (min-width: 1101px) {
+  .case-layout {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+
+  .case-layout:not(.has-decision) {
+    grid-template-columns: 1fr;
+  }
+
+  .case-decision-column {
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+}

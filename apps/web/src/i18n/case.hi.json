@@ -1,1 +1,24 @@
-{"caseUx": {}}
+{
+  "caseUx": {
+    "atAGlance": "एक नज़र में",
+    "amount": "राशि",
+    "form": "फॉर्म",
+    "deadline": "समय सीमा",
+    "step": "चरण",
+    "stepOf": "चरण {{step}} / {{total}}",
+    "daysLeft": "{{count}} दिन शेष",
+    "daysLeft_one": "{{count}} दिन शेष",
+    "daysLeft_other": "{{count}} दिन शेष",
+    "dayLeft": "1 दिन शेष",
+    "overdueBy": "{{count}} दिन अतिदेय",
+    "overdueBy_one": "1 दिन अतिदेय",
+    "overdueBy_other": "{{count}} दिन अतिदेय",
+    "overdueByOne": "1 दिन अतिदेय",
+    "dueToday": "आज देय",
+    "noDeadline": "—",
+    "advisory": "संकेत",
+    "advisoryMarker": "परामर्श",
+    "decisionArea": "आपका निर्णय",
+    "jumpToDecision": "अपने निर्णय पर जाएं"
+  }
+}

@@ -13,6 +13,7 @@ import { SignedDocuments } from "./SignedDocuments";
 import { ClaimDocket } from "./ClaimDocket";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
+import type { TFunction } from "i18next";
 import type { CaseDetail } from "./types";
 import { TransferLegs, type TransferLegsData } from "../TransferLegs";
 
@@ -22,6 +23,33 @@ const CHECK_VALUES: Record<typeof CHECK_KEYS[number], string> = {
 };
 type Decision = "APPROVE" | "RETURN" | "REJECT";
 type Scenario = "SUCCESS" | "RETURN";
+
+function getTimeLeft(slaDueAt: string | null | undefined, t: TFunction): { text: string; overdue: boolean } {
+  if (!slaDueAt) return { text: t("caseUx.noDeadline", { defaultValue: "—" }), overdue: false };
+  const due = new Date(slaDueAt);
+  if (Number.isNaN(due.getTime())) return { text: slaDueAt, overdue: false };
+  const now = new Date();
+  const diffMs = due.getTime() - now.getTime();
+  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays < 0 || (diffMs < 0 && diffDays === 0)) {
+    const count = Math.max(1, Math.abs(diffDays));
+    return {
+      text: count === 1
+        ? t("caseUx.overdueByOne", { count: 1, defaultValue: "Overdue by 1 day" })
+        : t("caseUx.overdueBy", { count, defaultValue: `Overdue by ${count} days` }),
+      overdue: true,
+    };
+  }
+  if (diffDays === 0) {
+    return { text: t("caseUx.dueToday", { defaultValue: "Due today" }), overdue: false };
+  }
+  return {
+    text: diffDays === 1
+      ? t("caseUx.dayLeft", { count: 1, defaultValue: "1 day left" })
+      : t("caseUx.daysLeft", { count: diffDays, defaultValue: `${diffDays} days left` }),
+    overdue: false,
+  };
+}
 
 export function CasePage() {
   const { t, i18n } = useTranslation();
@@ -118,6 +146,11 @@ export function CasePage() {
       { demo_scenario: scenario }, { stepUpToken: token, idempotencyKey: retryKey.current! }));
   }
 
+  const timeLeft = getTimeLeft(item?.sla_due_at, t);
+  const stepNumber = item?.chain?.length ? Math.min(item.step + 1, item.chain.length) : 0;
+  const stepLabel = item?.chain?.length ? t("caseUx.stepOf", { step: stepNumber, total: item.chain.length, defaultValue: `Step ${stepNumber} of ${item.chain.length}` }) : "—";
+  const hasDecision = Boolean(allowed && action);
+
   return <section className="stack" aria-labelledby="office-case-heading"><PageHeader id="office-case-heading" eyebrow={t("office.eyebrow")} title={t("office.caseTitle")}
     description={item ? `${item.case_id} · ${item.office_id}` : t("office.caseDescription")}
     current={t("office.caseTitle")} parent={{ label: t("navigation.workQueue"), to: "/office/work-queue" }}>
@@ -125,79 +158,119 @@ export function CasePage() {
     <ProblemMessage error={detail.error} />{detail.isLoading ? <p role="status">{t("office.loadingCase")}</p> : null}
     {notice ? <p role="status" className="ok">{t("office.actionSaved")}</p> : null}<ProblemMessage error={error} />
     {item ? <>
-      {item.process === "transfer_form13" && (role === "fo.da_accounts" || role === "fo.ao") ? <section className="card stack" aria-labelledby="office-transfer-legs-heading"><h2 id="office-transfer-legs-heading">Transfer status</h2>
-        <ProblemMessage error={transferLegs.error} />{transferLegs.data ? <TransferLegs transfer={transferLegs.data.data} /> : <p className="muted small">{transferLegs.isLoading ? "Loading PF and pension legs…" : "Transfer legs are not available yet."}</p>}
-      </section> : null}
-      {item.process ? <section className="card stack" aria-labelledby="process-heading"><h2 id="process-heading">{item.kind.replaceAll("_", " ").toLowerCase()}</h2>
-        <dl className="kv"><dt>Process</dt><dd><code>{item.process}</code> (tier-2, config/processes)</dd><dt>Subject</dt><dd><code>{item.subject_ref}</code></dd>
-          <dt>State</dt><dd>{item.state}</dd><dt>{t("office.slaDue")}</dt><dd>{dateTime(item.sla_due_at, i18n.language)}</dd></dl>
-        {item.data && Object.keys(item.data).length ? <dl className="kv">{Object.entries(item.data).map(([k, v]) => <Fragment key={k}><dt>{k.replaceAll("_", " ")}</dt><dd>{String(v)}</dd></Fragment>)}</dl> : null}
-        <SignedDocuments caseId={item.case_id} documents={item.documents ?? []} onViewed={() => void qc.invalidateQueries({ queryKey: ["office-case", caseId] })} />
-        {item.your_turn && item.operation ? <ProcessForm operation={item.operation} caseRef={{ id: item.case_id, version: item.version }} onDone={(msg) => { setNotice(true); void msg; void qc.invalidateQueries({ queryKey: ["office-case", caseId] }); }} />
-          : <p className="muted">{item.current_role ? `Waiting for ${roleLabel(item.current_role, t)}.` : "Finished."}</p>}
-      </section> : null}
-      {!item.process ? <section className="card stack" aria-labelledby="case-summary-heading"><h2 id="case-summary-heading">{t("office.caseSummary")}</h2>
-        <dl className="kv"><dt>{t("office.caseId")}</dt><dd><code>{item.case_id}</code></dd><dt>{t("claims.claimId")}</dt><dd><code>{item.claim_id}</code></dd>
-          <dt>{t("claims.account")}</dt><dd><code>{item.account_link_id}</code></dd><dt>{t("claims.form")}</dt><dd>{item.form_type}</dd>
-          <dt>{t("claims.amount")}</dt><dd>{rupees(item.amount_paise)}</dd><dt>{t("office.kind")}</dt><dd>{item.kind}</dd>
-          <dt>{t("claims.ruleVersion")}</dt><dd>{item.rule_version} <span className="state-pill">{t("claims.illustrative")}</span></dd>
-          <dt>{t("office.round")}</dt><dd>{item.round}</dd><dt>{t("office.slaDue")}</dt><dd>{dateTime(item.sla_due_at, i18n.language)}</dd></dl>
-      </section> : null}
-      {item.advisory_signal_id ? <p className="demo-tip"><strong>{t("office.advisory")}:</strong> {t("office.advisoryHelp")} (<code>{item.advisory_signal_id}</code>)</p> : null}
-      {role === "fo.da_accounts" && item.claim_id ? <ClaimAnalysisPanel claimId={item.claim_id} /> : null}
-      <section className="card stack" aria-labelledby="chain-heading"><h2 id="chain-heading">{t("office.approvalChain")}</h2>
-        <ol className="chain-stepper">{item.chain.map((chainRole, index) => {
-          const current = item.state === "IN_REVIEW" && index === item.step;
-          const status = index < item.step || item.state !== "IN_REVIEW" ? "done" : current ? "current" : "pending";
-          return <li key={`${chainRole}-${index}`} className={status} aria-current={current ? "step" : undefined}><span className="chain-number">{index + 1}</span><span><strong>{roleLabel(chainRole, t)}</strong><small>{t(`office.chainStates.${status}`)}</small></span></li>;
-        })}</ol>
-      </section>
-      <section className="card stack" aria-labelledby="case-history-heading"><h2 id="case-history-heading">{t("office.history")}</h2>
-        {item.history.length === 0 ? <p className="muted">{t("office.noHistory")}</p> : <div className="table-scroll"><table><thead><tr><th scope="col">{t("office.when")}</th><th scope="col">{t("office.round")}</th><th scope="col">{t("office.officer")}</th><th scope="col">{t("office.action")}</th><th scope="col">{t("office.reasonChecks")}</th></tr></thead><tbody>{item.history.map((entry, index) => <tr key={`${entry.at}-${index}`}>
-          <td>{dateTime(entry.at, i18n.language)}</td><td>{entry.round}</td><td>{roleLabel(entry.officer_role, t)}<br /><span className="muted small">{entry.officer_subject}</span></td><td>{entry.action} {entry.approval_level ?? ""}</td><td>{entry.reason}{entry.reason && entry.checks?.length ? "; " : ""}{(entry.checks ?? []).join(", ")}</td>
-        </tr>)}</tbody></table></div>}
-      </section>
-      {item.claim_id && (reviewing || role === "fo.fa_accounts") ? <ClaimDocket claimId={item.claim_id} ready={!!item.docket_ready} canGenerate={reviewing}
-        onGenerated={() => void qc.invalidateQueries({ queryKey: ["office-case", caseId] })} /> : null}
-      {item.data?.returned_for_rejection && action === "recommend" ? <p className="pending-notice">{String(item.data.returned_for_rejection)} — re-forward it as
-        "Recommend to Reject" if you agree.</p> : null}
-      {role === "fo.da_accounts" && item.claim_id && (item.state === "IN_REVIEW" || item.state === "STOPPED") ? <section className="card stack" aria-labelledby="stop-heading">
-        <h2 id="stop-heading">{item.state === "STOPPED" ? "Restart claim" : "Stop claim processing"}</h2>
-        {item.state === "STOPPED" ? <><p>Stopped: {String((item.data?.stopped as { reason?: string } | undefined)?.reason ?? "")}</p>
-          <div className="actions"><button type="button" className="primary" disabled={busy} onClick={() => void run(() => command("POST", `/api/v1/office/cases/${item.case_id}/restarts`))}>Restart claim</button></div></>
-          : <form className="stack" onSubmit={(event) => { event.preventDefault(); void run(() => command("POST", `/api/v1/office/cases/${item.case_id}/stops`, { reason: stopReason.trim() })); }}>
-            <p className="muted small">When a parallel activity must finish first. The claim leaves every work queue until restarted.</p>
-            <label>Reason (recorded)<input value={stopReason} onChange={(event) => setStopReason(event.target.value)} required minLength={10} /></label>
-            <div className="actions"><button type="submit" disabled={busy}>Stop claim processing</button></div></form>}
-      </section> : null}
-      {allowed && action ? <section className="card stack" aria-labelledby="case-action-heading"><h2 id="case-action-heading">{t(`office.actions.${action}`)}</h2>
-        <form className="stack" onSubmit={(event) => void submit(event)}>
-          {action === "recommend" ? <><fieldset className="case-options"><legend>{t("office.checksTitle")}</legend>{CHECK_KEYS.map((key) => <label className="check-row" key={key}>
-            <input type="checkbox" checked={checks.includes(key)} onChange={(event) => setChecks(event.target.checked ? [...checks, key] : checks.filter((value) => value !== key))} />{t(`office.checks.${key}`)}</label>)}</fieldset>
-            <label>{t("office.note")}<textarea value={note} onChange={(event) => setNote(event.target.value)} required minLength={3} /></label></> : null}
-          {action === "recommend" ? <><fieldset className="case-options"><legend>Recommendation</legend>{(["APPROVE", "REJECT"] as const).map((value) => <label className="check-row" key={value}>
-            <input type="radio" name="recommendation" value={value} checked={recommendation === value} onChange={() => setRecommendation(value)} />{value === "APPROVE" ? "Recommend to Approve" : "Recommend to Reject"}</label>)}</fieldset>
-            <label>Account status<select value={accountStatus} onChange={(event) => setAccountStatus(event.target.value)}>
-              <option value="OPERATIVE">Operative</option><option value="INOPERATIVE">Inoperative</option><option value="DORMANT">Dormant</option></select></label></> : null}
-          {action === "decide" || action === "second-approve" ? <><p className="muted small">{rec === "REJECT" ? "The initiator recommends rejection." : "The initiator recommends approval."}
-            {finalLevel ? " You are the final level for this amount." : " A higher level decides; only the final level may reject."}</p>
-            <fieldset className="case-options"><legend>{t("office.decision")}</legend>{options.map((value) => <label className="check-row" key={value}>
-            <input type="radio" name="decision" value={value} checked={chosen === value} onChange={() => setDecision(value)} />{optionLabel(value)}</label>)}</fieldset>
-            <label>{t("office.reason")}<textarea value={reason} onChange={(event) => setReason(event.target.value)} required={chosen !== "APPROVE"} /></label></> : null}
-          {action === "approve-redisbursement" ? <><p className="demo-tip">{t("office.redisbursementHelp")}</p>
-            <fieldset className="case-options"><legend>{t("office.decision")}</legend>{(["APPROVE", "REJECT"] as const).map((value) => <label className="check-row" key={value}>
-              <input type="radio" name="decision" value={value} checked={decision === value} onChange={() => setDecision(value)} />{t(`office.decisions.${value}`)}</label>)}</fieldset>
-            <label>{t("office.reason")}<textarea value={reason} onChange={(event) => setReason(event.target.value)} required /></label></> : null}
-          {action === "instruct-payment" || action === "reissue" ? <><p className="demo-tip">{t("office.demoPaymentNotice")}</p>
-            <label>{t("office.demoScenario")}<select value={scenario} onChange={(event) => { setScenario(event.target.value as Scenario); retryKey.current = null; }}>
-              <option value="SUCCESS">{t("office.scenarios.SUCCESS")}</option><option value="RETURN">{t("office.scenarios.RETURN")}</option></select></label></> : null}
-          {rejecting && item.rejection_reasons?.length ? <><label>Ground for rejection (the member is told what fixes it)
-            <select required value={code} onChange={(event) => setReasonCode(event.target.value)}><option value="">Choose…</option>
-              {item.rejection_reasons.map((r) => <option key={r.code} value={r.code}>{r.label}</option>)}</select></label>
-            {picked ? <p className="muted small">The member will read: {picked.fix}</p> : null}</> : null}
-          <div className="actions"><button type="submit" className="primary" disabled={busy || (reviewing && !item.docket_ready)}>{t("office.submitAction")}</button></div>
-        </form>
-      </section> : null}
+      <div className="case-glance-strip" role="region" aria-label={t("caseUx.atAGlance", { defaultValue: "At a glance" })}>
+        <div className="case-glance-item">
+          <span className="case-glance-label">{t("caseUx.amount", { defaultValue: "Amount" })}</span>
+          <strong className="case-glance-value">{rupees(item.amount_paise)}</strong>
+        </div>
+        <div className="case-glance-item">
+          <span className="case-glance-label">{t("caseUx.form", { defaultValue: "Form" })}</span>
+          <strong className="case-glance-value">{item.form_type ? (item.form_type.toLowerCase().startsWith("form") ? item.form_type : `Form ${item.form_type}`) : "—"}</strong>
+        </div>
+        <div className="case-glance-item">
+          <span className="case-glance-label">{t("caseUx.deadline", { defaultValue: "Deadline" })}</span>
+          <strong className={`case-glance-value ${timeLeft.overdue ? "case-glance-overdue" : ""}`}>{timeLeft.text}</strong>
+        </div>
+        <div className="case-glance-item">
+          <span className="case-glance-label">{t("caseUx.step", { defaultValue: "Step" })}</span>
+          <strong className="case-glance-value">{stepLabel}</strong>
+        </div>
+        {item.advisory_signal_id ? (
+          <div className="case-glance-item case-glance-item-advisory">
+            <span className="case-glance-label">{t("caseUx.advisory", { defaultValue: "Advisory" })}</span>
+            <strong className="case-glance-value">
+              <span className="case-advisory-pill">{t("caseUx.advisoryMarker", { defaultValue: "Advisory" })}</span>
+              <span className="muted small"> ({item.advisory_signal_id})</span>
+            </strong>
+          </div>
+        ) : null}
+      </div>
+
+      <div className={`case-layout ${hasDecision ? "has-decision" : ""}`}>
+        <div className="case-evidence-column stack">
+          {hasDecision ? (
+            <a href="#case-action-heading" className="case-skip-link">
+              {t("caseUx.jumpToDecision", { defaultValue: "Jump to your decision" })}
+            </a>
+          ) : null}
+          {item.process === "transfer_form13" && (role === "fo.da_accounts" || role === "fo.ao") ? <section className="card stack" aria-labelledby="office-transfer-legs-heading"><h2 id="office-transfer-legs-heading">Transfer status</h2>
+            <ProblemMessage error={transferLegs.error} />{transferLegs.data ? <TransferLegs transfer={transferLegs.data.data} /> : <p className="muted small">{transferLegs.isLoading ? "Loading PF and pension legs…" : "Transfer legs are not available yet."}</p>}
+          </section> : null}
+          {item.process ? <section className="card stack" aria-labelledby="process-heading"><h2 id="process-heading">{item.kind.replaceAll("_", " ").toLowerCase()}</h2>
+            <dl className="kv"><dt>Process</dt><dd><code>{item.process}</code> (tier-2, config/processes)</dd><dt>Subject</dt><dd><code>{item.subject_ref}</code></dd>
+              <dt>State</dt><dd>{item.state}</dd><dt>{t("office.slaDue")}</dt><dd>{dateTime(item.sla_due_at, i18n.language)}</dd></dl>
+            {item.data && Object.keys(item.data).length ? <dl className="kv">{Object.entries(item.data).map(([k, v]) => <Fragment key={k}><dt>{k.replaceAll("_", " ")}</dt><dd>{String(v)}</dd></Fragment>)}</dl> : null}
+            <SignedDocuments caseId={item.case_id} documents={item.documents ?? []} onViewed={() => void qc.invalidateQueries({ queryKey: ["office-case", caseId] })} />
+            {item.your_turn && item.operation ? <ProcessForm operation={item.operation} caseRef={{ id: item.case_id, version: item.version }} onDone={(msg) => { setNotice(true); void msg; void qc.invalidateQueries({ queryKey: ["office-case", caseId] }); }} />
+              : <p className="muted">{item.current_role ? `Waiting for ${roleLabel(item.current_role, t)}.` : "Finished."}</p>}
+          </section> : null}
+          {!item.process ? <section className="card stack" aria-labelledby="case-summary-heading"><h2 id="case-summary-heading">{t("office.caseSummary")}</h2>
+            <dl className="kv"><dt>{t("office.caseId")}</dt><dd><code>{item.case_id}</code></dd><dt>{t("claims.claimId")}</dt><dd><code>{item.claim_id}</code></dd>
+              <dt>{t("claims.account")}</dt><dd><code>{item.account_link_id}</code></dd><dt>{t("claims.form")}</dt><dd>{item.form_type}</dd>
+              <dt>{t("claims.amount")}</dt><dd>{rupees(item.amount_paise)}</dd><dt>{t("office.kind")}</dt><dd>{item.kind}</dd>
+              <dt>{t("claims.ruleVersion")}</dt><dd>{item.rule_version} <span className="state-pill">{t("claims.illustrative")}</span></dd>
+              <dt>{t("office.round")}</dt><dd>{item.round}</dd><dt>{t("office.slaDue")}</dt><dd>{dateTime(item.sla_due_at, i18n.language)}</dd></dl>
+          </section> : null}
+          {item.advisory_signal_id ? <p className="demo-tip"><strong>{t("office.advisory")}:</strong> {t("office.advisoryHelp")} (<code>{item.advisory_signal_id}</code>)</p> : null}
+          <section className="card stack" aria-labelledby="chain-heading"><h2 id="chain-heading">{t("office.approvalChain")}</h2>
+            <ol className="chain-stepper">{item.chain.map((chainRole, index) => {
+              const current = item.state === "IN_REVIEW" && index === item.step;
+              const status = index < item.step || item.state !== "IN_REVIEW" ? "done" : current ? "current" : "pending";
+              return <li key={`${chainRole}-${index}`} className={status} aria-current={current ? "step" : undefined}><span className="chain-number">{index + 1}</span><span><strong>{roleLabel(chainRole, t)}</strong><small>{t(`office.chainStates.${status}`)}</small></span></li>;
+            })}</ol>
+          </section>
+          {item.claim_id && (reviewing || role === "fo.fa_accounts") ? <ClaimDocket claimId={item.claim_id} ready={!!item.docket_ready} canGenerate={reviewing}
+            onGenerated={() => void qc.invalidateQueries({ queryKey: ["office-case", caseId] })} /> : null}
+          {!item.process ? <SignedDocuments caseId={item.case_id} documents={item.documents ?? []} onViewed={() => void qc.invalidateQueries({ queryKey: ["office-case", caseId] })} /> : null}
+          {role === "fo.da_accounts" && item.claim_id ? <ClaimAnalysisPanel claimId={item.claim_id} /> : null}
+          <section className="card stack" aria-labelledby="case-history-heading"><h2 id="case-history-heading">{t("office.history")}</h2>
+            {item.history.length === 0 ? <p className="muted">{t("office.noHistory")}</p> : <div className="table-scroll"><table><thead><tr><th scope="col">{t("office.when")}</th><th scope="col">{t("office.round")}</th><th scope="col">{t("office.officer")}</th><th scope="col">{t("office.action")}</th><th scope="col">{t("office.reasonChecks")}</th></tr></thead><tbody>{item.history.map((entry, index) => <tr key={`${entry.at}-${index}`}>
+              <td>{dateTime(entry.at, i18n.language)}</td><td>{entry.round}</td><td>{roleLabel(entry.officer_role, t)}<br /><span className="muted small">{entry.officer_subject}</span></td><td>{entry.action} {entry.approval_level ?? ""}</td><td>{entry.reason}{entry.reason && entry.checks?.length ? "; " : ""}{(entry.checks ?? []).join(", ")}</td>
+            </tr>)}</tbody></table></div>}
+          </section>
+          {item.data?.returned_for_rejection && action === "recommend" ? <p className="pending-notice">{String(item.data.returned_for_rejection)} — re-forward it as
+            "Recommend to Reject" if you agree.</p> : null}
+          {role === "fo.da_accounts" && item.claim_id && (item.state === "IN_REVIEW" || item.state === "STOPPED") ? <section className="card stack" aria-labelledby="stop-heading">
+            <h2 id="stop-heading">{item.state === "STOPPED" ? "Restart claim" : "Stop claim processing"}</h2>
+            {item.state === "STOPPED" ? <><p>Stopped: {String((item.data?.stopped as { reason?: string } | undefined)?.reason ?? "")}</p>
+              <div className="actions"><button type="button" className="primary" disabled={busy} onClick={() => void run(() => command("POST", `/api/v1/office/cases/${item.case_id}/restarts`))}>Restart claim</button></div></>
+              : <form className="stack" onSubmit={(event) => { event.preventDefault(); void run(() => command("POST", `/api/v1/office/cases/${item.case_id}/stops`, { reason: stopReason.trim() })); }}>
+                <p className="muted small">When a parallel activity must finish first. The claim leaves every work queue until restarted.</p>
+                <label>Reason (recorded)<input value={stopReason} onChange={(event) => setStopReason(event.target.value)} required minLength={10} /></label>
+                <div className="actions"><button type="submit" disabled={busy}>Stop claim processing</button></div></form>}
+          </section> : null}
+        </div>
+        {hasDecision ? <aside className="case-decision-column">
+          <section className="card stack" aria-labelledby="case-action-heading"><h2 id="case-action-heading">{t(`office.actions.${action}`)}</h2>
+            <form className="stack" onSubmit={(event) => void submit(event)}>
+              {action === "recommend" ? <><fieldset className="case-options"><legend>{t("office.checksTitle")}</legend>{CHECK_KEYS.map((key) => <label className="check-row" key={key}>
+                <input type="checkbox" checked={checks.includes(key)} onChange={(event) => setChecks(event.target.checked ? [...checks, key] : checks.filter((value) => value !== key))} />{t(`office.checks.${key}`)}</label>)}</fieldset>
+                <label>{t("office.note")}<textarea value={note} onChange={(event) => setNote(event.target.value)} required minLength={3} /></label></> : null}
+              {action === "recommend" ? <><fieldset className="case-options"><legend>Recommendation</legend>{(["APPROVE", "REJECT"] as const).map((value) => <label className="check-row" key={value}>
+                <input type="radio" name="recommendation" value={value} checked={recommendation === value} onChange={() => setRecommendation(value)} />{value === "APPROVE" ? "Recommend to Approve" : "Recommend to Reject"}</label>)}</fieldset>
+                <label>Account status<select value={accountStatus} onChange={(event) => setAccountStatus(event.target.value)}>
+                  <option value="OPERATIVE">Operative</option><option value="INOPERATIVE">Inoperative</option><option value="DORMANT">Dormant</option></select></label></> : null}
+              {action === "decide" || action === "second-approve" ? <><p className="muted small">{rec === "REJECT" ? "The initiator recommends rejection." : "The initiator recommends approval."}
+                {finalLevel ? " You are the final level for this amount." : " A higher level decides; only the final level may reject."}</p>
+                <fieldset className="case-options"><legend>{t("office.decision")}</legend>{options.map((value) => <label className="check-row" key={value}>
+                <input type="radio" name="decision" value={value} checked={chosen === value} onChange={() => setDecision(value)} />{optionLabel(value)}</label>)}</fieldset>
+                <label>{t("office.reason")}<textarea value={reason} onChange={(event) => setReason(event.target.value)} required={chosen !== "APPROVE"} /></label></> : null}
+              {action === "approve-redisbursement" ? <><p className="demo-tip">{t("office.redisbursementHelp")}</p>
+                <fieldset className="case-options"><legend>{t("office.decision")}</legend>{(["APPROVE", "REJECT"] as const).map((value) => <label className="check-row" key={value}>
+                  <input type="radio" name="decision" value={value} checked={decision === value} onChange={() => setDecision(value)} />{t(`office.decisions.${value}`)}</label>)}</fieldset>
+                <label>{t("office.reason")}<textarea value={reason} onChange={(event) => setReason(event.target.value)} required /></label></> : null}
+              {action === "instruct-payment" || action === "reissue" ? <><p className="demo-tip">{t("office.demoPaymentNotice")}</p>
+                <label>{t("office.demoScenario")}<select value={scenario} onChange={(event) => { setScenario(event.target.value as Scenario); retryKey.current = null; }}>
+                  <option value="SUCCESS">{t("office.scenarios.SUCCESS")}</option><option value="RETURN">{t("office.scenarios.RETURN")}</option></select></label></> : null}
+              {rejecting && item.rejection_reasons?.length ? <><label>Ground for rejection (the member is told what fixes it)
+                <select required value={code} onChange={(event) => setReasonCode(event.target.value)}><option value="">Choose…</option>
+                  {item.rejection_reasons.map((r) => <option key={r.code} value={r.code}>{r.label}</option>)}</select></label>
+                {picked ? <p className="muted small">The member will read: {picked.fix}</p> : null}</> : null}
+              <div className="actions"><button type="submit" className="primary" disabled={busy || (reviewing && !item.docket_ready)}>{t("office.submitAction")}</button></div>
+            </form>
+          </section>
+        </aside> : null}
+      </div>
     </> : null}
     <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
   </section>;
