@@ -240,3 +240,11 @@ signature_registrations = Table(
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
     Column("decided_at", DateTime(timezone=True)),
 )
+
+payroll_providers = Table(
+    "payroll_providers", metadata,
+    Column("provider_id", String(40), primary_key=True),
+    Column("name", String(200), nullable=False),
+    Column("client_id", String(80), nullable=False),
+    Column("subject", String(80), nullable=False),
+)

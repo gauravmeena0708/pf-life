@@ -8,7 +8,7 @@ from sqlalchemy import select, update
 
 from app.infra.db import sessions
 from app.infra.tables import (contractors, directory, establishment_exemptions, establishments, grants,
-                              office_staff, offices, registration_requests)
+                              office_staff, offices, payroll_providers, registration_requests)
 
 SEED_FILE = os.environ.get("SEED_FILE", "/srv/seed/synthetic.json")
 PUBLIC_FIELDS = ("pincode", "city", "district", "coverage_date", "establishment_type",
@@ -136,6 +136,13 @@ async def main() -> None:
                                      u["username"] == username for ex in [seed.get("exempted_establishment"), *seed.get("more_exempted_establishments", {}).get("establishments", [])]
                                      if ex for u in ex["trust_users"]) else "other")
                     await s.execute(directory.insert().values(username=username, subject=subject, role=role))
+            if not (await s.execute(select(payroll_providers.c.provider_id).where(
+                    payroll_providers.c.provider_id == "PP-DEMO-1"))).first():
+                await s.execute(payroll_providers.insert().values(
+                    provider_id="PP-DEMO-1",
+                    name="Demo Payroll Services",
+                    client_id="b2b-sandbox",
+                    subject="00000000-0000-4000-8000-000000000082"))
     print(f"employer-service seeded: {est['establishment_id']} ({est['status']}), owner grant, user directory")
 
 

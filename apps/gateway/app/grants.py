@@ -8,7 +8,7 @@ import httpx
 
 from .internal_jwt import mint
 
-EMPLOYER_STAKEHOLDERS = {"employer.owner", "employer.operator", "employer.signatory"}
+EMPLOYER_STAKEHOLDERS = {"employer.owner", "employer.operator", "employer.signatory", "payroll_provider"}
 CACHE_SECONDS = 30
 _cache: dict[str, tuple[float, list[dict]]] = {}
 

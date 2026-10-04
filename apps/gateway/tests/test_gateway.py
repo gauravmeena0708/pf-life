@@ -169,6 +169,87 @@ async def test_employer_grants_resolved_into_jwt_and_cache_cleared_on_revocation
 
 
 @pytest.mark.asyncio
+async def test_payroll_provider_gets_establishment_and_grants(client):
+    from types import SimpleNamespace
+    from app import grants as grant_resolver
+
+    grant_resolver.forget()
+    http, app, redis = client
+
+    # 1. Direct employer_context resolution: multiple establishments + header
+    provider_subject = "00000000-0000-4000-8000-000000000082"
+    principal = {"subject": provider_subject, "stakeholder": "payroll_provider"}
+    req = SimpleNamespace(
+        app=app,
+        headers={"x-establishment-id": "EST-2"},
+        state=SimpleNamespace(correlation_id="corr-1"),
+    )
+    with respx.mock() as router:
+        router.get(f"http://employer-service:8000/internal/actors/{provider_subject}/grants").mock(
+            return_value=Response(200, json={"data": {"establishments": [
+                {"establishment_id": "EST-1", "grants": ["payroll.submit"]},
+                {"establishment_id": "EST-2", "grants": ["payroll.submit"]},
+            ]}}))
+        est_id, grants = await grant_resolver.employer_context(req, principal)
+        assert est_id == "EST-2"
+        assert grants == ["payroll.submit"]
+
+    # 2. Direct employer_context resolution: single establishment auto-picked
+    grant_resolver.forget()
+    req_no_header = SimpleNamespace(
+        app=app,
+        headers={},
+        state=SimpleNamespace(correlation_id="corr-2"),
+    )
+    with respx.mock() as router:
+        router.get(f"http://employer-service:8000/internal/actors/{provider_subject}/grants").mock(
+            return_value=Response(200, json={"data": {"establishments": [
+                {"establishment_id": "EST-SINGLE", "grants": ["payroll.submit"]},
+            ]}}))
+        est_id, grants = await grant_resolver.employer_context(req_no_header, principal)
+        assert est_id == "EST-SINGLE"
+        assert grants == ["payroll.submit"]
+
+    # 3. Pipeline forwarding: verifies minted internal JWT has establishment_id and grants
+    grant_resolver.forget()
+    sid, session = await login_as(app, "payroll_provider", subject=provider_subject)
+    cookies = {"__Host-epfo-session": sid}
+    app.state.routes.append({
+        "method": "GET",
+        "path_template": "/employers/payroll-test",
+        "regex": r"^/employers/payroll\-test$",
+        "status": "M",
+        "phase": 1,
+        "owner": "employer",
+        "upstream": "http://employer-service:8000",
+        "money": False,
+        "step_up": False,
+        "callers": ["payroll_provider"],
+        "summary": "test payroll provider route",
+        "revocation": False,
+    })
+    seen = {}
+    with respx.mock() as router:
+        router.get(f"http://employer-service:8000/internal/actors/{provider_subject}/grants").mock(
+            return_value=Response(200, json={"data": {"establishments": [
+                {"establishment_id": "EST-DEMO-1", "grants": ["payroll.submit"]},
+            ]}}))
+
+        def reply(request):
+            seen["jwt"] = request.headers["authorization"].split()[1]
+            return Response(200, json={"data": "ok"})
+
+        router.get("http://employer-service:8000/api/v1/employers/payroll-test").mock(side_effect=reply)
+        res = await http.get("/api/v1/employers/payroll-test", cookies=cookies)
+        assert res.status_code == 200
+
+    claims = jwt.decode(seen["jwt"], options={"verify_signature": False})
+    assert claims["stakeholder"] == "payroll_provider"
+    assert claims["establishment_id"] == "EST-DEMO-1"
+    assert claims["grants"] == ["payroll.submit"]
+
+
+@pytest.mark.asyncio
 async def test_revoked_subject_is_denied(client):
     http, app, redis = client
     sid, _ = await login_as(app, "member")
