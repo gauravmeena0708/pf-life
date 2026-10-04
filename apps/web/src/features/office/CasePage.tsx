@@ -62,7 +62,8 @@ export function CasePage() {
     : finalLevel ? "Reject" : rec === "REJECT" ? "Recommend to Reject (forward)" : "Recommend to Reject (returns to the initiator)";
   // P2.23b: a claim is rejected for one of the rule set's reasons; the member is shown what fixes it
   const rejecting = !!item?.claim_id && (action === "recommend" ? recommendation === "REJECT" : (action === "decide" || action === "second-approve") && chosen === "REJECT");
-  const code = reasonCode ?? String(item?.data?.rejection_code ?? "");
+  // preselected: the reason the case carries, else Other (the officer's note says what to do) — the officer may change it
+  const code = reasonCode ?? String(item?.data?.rejection_code ?? (item?.rejection_reasons?.some((r) => r.code === "OTHER") ? "OTHER" : ""));
   const picked = item?.rejection_reasons?.find((r) => r.code === code);
   const reviewing = !!item?.claim_id && (action === "recommend" || action === "decide" || action === "second-approve") && allowed;
 
@@ -190,7 +191,7 @@ export function CasePage() {
           {action === "instruct-payment" || action === "reissue" ? <><p className="demo-tip">{t("office.demoPaymentNotice")}</p>
             <label>{t("office.demoScenario")}<select value={scenario} onChange={(event) => { setScenario(event.target.value as Scenario); retryKey.current = null; }}>
               <option value="SUCCESS">{t("office.scenarios.SUCCESS")}</option><option value="RETURN">{t("office.scenarios.RETURN")}</option></select></label></> : null}
-          {rejecting && item.rejection_reasons?.length ? <><label>Reason for rejection (the member is told what fixes it)
+          {rejecting && item.rejection_reasons?.length ? <><label>Ground for rejection (the member is told what fixes it)
             <select required value={code} onChange={(event) => setReasonCode(event.target.value)}><option value="">Choose…</option>
               {item.rejection_reasons.map((r) => <option key={r.code} value={r.code}>{r.label}</option>)}</select></label>
             {picked ? <p className="muted small">The member will read: {picked.fix}</p> : null}</> : null}

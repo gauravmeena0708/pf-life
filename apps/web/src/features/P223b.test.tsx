@@ -42,7 +42,7 @@ it("asks the officer recommending rejection for the reason, and shows what the m
   vi.mocked(getSession).mockResolvedValue({ authenticated: true, stakeholder: "fo.da_accounts" });
   at("/office/cases/CASE-R", "/office/cases/:caseId", <CasePage />);
   fireEvent.click(await screen.findByLabelText("Recommend to Reject"));
-  const select = screen.getByLabelText(/Reason for rejection/);
+  const select = screen.getByLabelText(/Ground for rejection/);
   fireEvent.change(select, { target: { value: "BANK_DETAILS" } });
   expect(screen.getByText("The member will read: Seed your correct bank account under KYC.")).toBeTruthy();
 });
