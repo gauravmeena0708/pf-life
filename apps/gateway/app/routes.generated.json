@@ -195,6 +195,22 @@
   },
   {
     "method": "POST",
+    "path_template": "/office/eps-rectifications/{rectificationId}/trust-remittances",
+    "regex": "^/office/eps\\-rectifications/[^/]+/trust\\-remittances$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.cash"
+    ],
+    "summary": "Cash records an exempted trust's remittance of the EPS due (scenario II)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/office/establishment-registrations/{reqId}/coverage-decisions",
     "regex": "^/office/establishment\\-registrations/[^/]+/coverage\\-decisions$",
     "status": "W",
@@ -628,6 +644,22 @@
       "employer.signatory"
     ],
     "summary": "Attest / reject transfer",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/eps-rectifications/{rectificationId}/approvals",
+    "regex": "^/office/eps\\-rectifications/[^/]+/approvals$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc"
+    ],
+    "summary": "The APFC approves (or rejects) an EPS rectification: A/c 10 ↔ A/c 1 or the trust; the pension service deleted or credited",
     "revocation": false
   },
   {
@@ -5695,6 +5727,40 @@
       "fo.ss"
     ],
     "summary": "Knock-offs, open demands and paid miscellaneous challans with a balance",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/eps-rectifications",
+    "regex": "^/office/eps\\-rectifications$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc",
+      "fo.cash",
+      "fo.da_accounts"
+    ],
+    "summary": "EPS rectifications: worked out, approved, awaiting a trust's remittance",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/eps-rectifications",
+    "regex": "^/office/eps\\-rectifications$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.da_accounts"
+    ],
+    "summary": "Rectify erroneous EPS contributions of a member ID (HO circular WSU/2025/E-961539): worked out month by month from the posted returns, with interest, proposed with a notesheet (P2.19c)",
     "revocation": false
   },
   {

@@ -531,3 +531,37 @@ class EpsPensioner(Base):
     ppo_id: Mapped[str] = mapped_column(String(40))
     pension_from: Mapped[date | None] = mapped_column(Date, nullable=True)
 
+
+
+class EpsRectification(Base):
+    """P2.19c: a rectification of erroneous EPS contributions (HO circular WSU/2025/E-961539, 19 Dec 2025) for one member
+    ID: the DA (Accounts) works it out from the posted returns, the APFC approves it, the ledger moves between A/c 1 and
+    A/c 10 (or the trust), and the pension service is deleted or credited."""
+    __tablename__ = "eps_rectifications"
+    rectification_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    account_link_id: Mapped[str] = mapped_column(String(80), index=True)
+    uan: Mapped[str] = mapped_column(String(32))
+    establishment_id: Mapped[str] = mapped_column(String(80))
+    scenario: Mapped[str] = mapped_column(String(20))                 # WRONGLY_ALLOWED | WRONGLY_DENIED
+    exempted_trust: Mapped[str | None] = mapped_column(Text, nullable=True)   # the trust holding the PF, when exempted
+    from_month: Mapped[str] = mapped_column(String(7))
+    to_month: Mapped[str] = mapped_column(String(7))
+    worksheet: Mapped[dict] = mapped_column(JSON)
+    total_paise: Mapped[int] = mapped_column(BigInteger)
+    notesheet_no: Mapped[str] = mapped_column(String(60))
+    remarks: Mapped[str] = mapped_column(Text)
+    state: Mapped[str] = mapped_column(String(30))                    # PROPOSED | APPROVED | AWAITING_TRUST_REMITTANCE | REJECTED
+    proposed_by: Mapped[str] = mapped_column(String(80))
+    decided_by: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    decision_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    journal_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    trust_reference: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class EpsIneligibleMember(Base):
+    """P2.19c: a member ID found not eligible for EPS: its returns carry no pension wages from then on."""
+    __tablename__ = "eps_ineligible_members"
+    account_link_id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    rectification_id: Mapped[str] = mapped_column(String(40))
+    since: Mapped[date] = mapped_column(Date)

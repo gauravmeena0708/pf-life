@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 115 |
-| Activities | 275 |
+| Activities | 278 |
 | Stakeholders with at least one API | 95 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 3 |
@@ -441,7 +441,7 @@ Activities: **F09.trust_handover** Hand over member ledgers and past accumulatio
 
 #### `fo.da_accounts` — Dealing Assistant / SSA (Accounts) — claims, IDS, member records, VDR, Appendix-E
 
-Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; **F03.vdr_reconcile** Reconcile VDR entries with ECRs; TRRN adjustment; Member VDR deposits; **F03.ledger_exception** Appendix-E adjustment (e.g. PF → EPS) or VDR (Special) credit — exceptional; **F03.ecr_reject** Reject an ECR before posting; reverse a posted journal; **F04.physical_validate** UAN allocation / Aadhaar validation of a physical claim; **F04.process** Scrutinise and process the claim (Claims > Transaction); recommend; **F04.attestation_view** Open the employer-signed PDF / DSC document before the approve action is enabled; **F04.tds** Compute TDS on withdrawals and file with Income Tax; **F04.transfer_process** Verify a transfer between member IDs / offices (service at both establishments); **F04.transfer_recredit** Recredit a rejected transfer-in to the member ledger; **F05.ids** Prepare Input Data Sheet (Claims > Transaction > Form-10D/10C); update service history in FO Interface; **F05.higher_deposit** Book dues deposit through Member VDR ('Pension on Higher Wages'); Appendix-E code for PF → EPS diversion; **F07.verify_member** Open e-file and verify the frozen MID / UAN (member ledger, crowdsourcing); **F09.annexure_k_reconcile** Reconcile Annexure K with receipts and member records; **F09.past_accum** Reconcile the receipts of a trust's past accumulations (demand draft via VDR, SDS, securities with HO's reference) with the members credited and the Form SE-6 statement; **F11.verify** Verify inoperative account (digital records, crowdsourcing through co-workers' logins)
+Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; **F03.vdr_reconcile** Reconcile VDR entries with ECRs; TRRN adjustment; Member VDR deposits; **F03.ledger_exception** Appendix-E adjustment (e.g. PF → EPS) or VDR (Special) credit — exceptional; **F03.eps_rectify** Work out the rectification of erroneous EPS contributions of a member ID (HO circular WSU/2025/E-961539) from its posted returns, with interest, and propose it; **F03.ecr_reject** Reject an ECR before posting; reverse a posted journal; **F04.physical_validate** UAN allocation / Aadhaar validation of a physical claim; **F04.process** Scrutinise and process the claim (Claims > Transaction); recommend; **F04.attestation_view** Open the employer-signed PDF / DSC document before the approve action is enabled; **F04.tds** Compute TDS on withdrawals and file with Income Tax; **F04.transfer_process** Verify a transfer between member IDs / offices (service at both establishments); **F04.transfer_recredit** Recredit a rejected transfer-in to the member ledger; **F05.ids** Prepare Input Data Sheet (Claims > Transaction > Form-10D/10C); update service history in FO Interface; **F05.higher_deposit** Book dues deposit through Member VDR ('Pension on Higher Wages'); Appendix-E code for PF → EPS diversion; **F07.verify_member** Open e-file and verify the frozen MID / UAN (member ledger, crowdsourcing); **F09.annexure_k_reconcile** Reconcile Annexure K with receipts and member records; **F09.past_accum** Reconcile the receipts of a trust's past accumulations (demand draft via VDR, SDS, securities with HO's reference) with the members credited and the Form SE-6 statement; **F11.verify** Verify inoperative account (digital records, crowdsourcing through co-workers' logins)
 
 | Endpoint | Status |
 |---|---|
@@ -452,6 +452,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `GET /office/claims/{claimId}/audit-trail` | W |
 | `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/ecr-filings` | W |
+| `GET /office/eps-rectifications` | W |
 | `GET /office/exempted/annexure-k` | W |
 | `GET /office/exempted/past-accumulation-vdr-reconciliations` | W |
 | `GET /office/ledger-adjustments` | W |
@@ -474,6 +475,7 @@ Activities: **F02.jd_initiate** Initiator: examine JD and documents, recommend; 
 | `POST /office/cases/{caseId}/stops` | W |
 | `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/ecr-filings/{filingId}/rejections` | W |
+| `POST /office/eps-rectifications` | W |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | W |
 | `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` | W |
 | `POST /office/freeze-cases/{caseId}/verifications` | W |
@@ -570,7 +572,7 @@ Activities: **F04.cad** View the Claim Approval Docket each level generated (int
 
 #### `fo.apfc` — APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)
 
-Activities: **F01.circle_review** Circle officer reviews coverage of the new establishment; **F01.dsc_approve** Approve the DSC / e-sign registration at the PF office; **F01.change_decide** Decide establishment change, closure or transfer requests; **F02.jd_approve** Approver for major changes (APFC / RPFC-II / RPFC-I per JD Table 3): approve / reject / return; **F03.ledger_exception_approve** Approve an exceptional ledger adjustment (RPFC-II F&A); **F03.ecr_office_approval** Approve ECRs held for office approval (ECR Approval menu on the APFC login; scope to be confirmed); **F04.approve_apfc** Approve claims in the APFC / RPFC-II band; **F04.redisburse_approve** Authorise a new payment after a return without reopening adjudication; **F04.shares** Amend beneficiary shares (legacy-settled share, deceased nominee, court order) and check the share summary; **F06.schedule** Circle officer schedules inspection (incl. CAIU-allocated); **F06.decide_report** Circle officer decides on the inspection report (T+7): initiate a 7A inquiry or no action; **F06.proceed** Quasi-judicial authority: issue notice / summons, hold hearings (e-Proceedings Cause List, Daily Order); **F06.order** Pass 7A / 14B / 7Q order (e-Proceedings Final Order); 7B review; 7C; 26B disputes; **F06.vishwas_decide** Recalculate damages under VISHWAS and decide; revised demand is paid through a direct challan; **F06.garnishee** 8F notice to a bank or debtor of the employer to pay EPFO (the CPFC's authorised officer); **F06.prosecution** Initiate prosecution; **F07.freeze_ro_member** Order freezing of MID / UAN (Categories B / C); **F07.verify_apfc** Validate verification; **F07.defreeze_est_maker** Recommend de-freezing an establishment (maker); the OIC orders it (checker); **F09.past_accum_approve** APFC approves the past-accumulation reconciliation: each receipt clears the trust transfer receivable; **F11.approve_apfc** Approve inoperative-account settlement in higher amount bands
+Activities: **F01.circle_review** Circle officer reviews coverage of the new establishment; **F01.dsc_approve** Approve the DSC / e-sign registration at the PF office; **F01.change_decide** Decide establishment change, closure or transfer requests; **F02.jd_approve** Approver for major changes (APFC / RPFC-II / RPFC-I per JD Table 3): approve / reject / return; **F03.eps_rectify_approve** Approve an EPS rectification: A/c 10 to A/c 1 or the trust (EPS wrongly allowed), A/c 1 to A/c 10 (EPS wrongly denied); **F03.ledger_exception_approve** Approve an exceptional ledger adjustment (RPFC-II F&A); **F03.ecr_office_approval** Approve ECRs held for office approval (ECR Approval menu on the APFC login; scope to be confirmed); **F04.approve_apfc** Approve claims in the APFC / RPFC-II band; **F04.redisburse_approve** Authorise a new payment after a return without reopening adjudication; **F04.shares** Amend beneficiary shares (legacy-settled share, deceased nominee, court order) and check the share summary; **F06.schedule** Circle officer schedules inspection (incl. CAIU-allocated); **F06.decide_report** Circle officer decides on the inspection report (T+7): initiate a 7A inquiry or no action; **F06.proceed** Quasi-judicial authority: issue notice / summons, hold hearings (e-Proceedings Cause List, Daily Order); **F06.order** Pass 7A / 14B / 7Q order (e-Proceedings Final Order); 7B review; 7C; 26B disputes; **F06.vishwas_decide** Recalculate damages under VISHWAS and decide; revised demand is paid through a direct challan; **F06.garnishee** 8F notice to a bank or debtor of the employer to pay EPFO (the CPFC's authorised officer); **F06.prosecution** Initiate prosecution; **F07.freeze_ro_member** Order freezing of MID / UAN (Categories B / C); **F07.verify_apfc** Validate verification; **F07.defreeze_est_maker** Recommend de-freezing an establishment (maker); the OIC orders it (checker); **F09.past_accum_approve** APFC approves the past-accumulation reconciliation: each receipt clears the trust transfer receivable; **F11.approve_apfc** Approve inoperative-account settlement in higher amount bands
 
 | Endpoint | Status |
 |---|---|
@@ -585,6 +587,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `GET /office/compliance/vishwas-applications` | W |
 | `GET /office/death-claims/{claimId}/shares-summary` | W |
 | `GET /office/ecr-filings` | W |
+| `GET /office/eps-rectifications` | W |
 | `GET /office/establishment-change-requests` | W |
 | `GET /office/establishment-registrations` | W |
 | `GET /office/establishment-registrations/{reqId}/documents` | W |
@@ -614,6 +617,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/compliance/membership-disputes` | W |
 | `POST /office/compliance/prosecutions/{prosecutionId}/steps` | W |
 | `POST /office/compliance/vishwas-applications/{applicationId}/decisions` | W |
+| `POST /office/eps-rectifications/{rectificationId}/approvals` | W |
 | `POST /office/establishment-registrations/{reqId}/coverage-decisions` | W |
 | `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | W |
 | `POST /office/establishments/{estId}/defreezes` | W |
@@ -686,18 +690,20 @@ Activities: **F04.approve_oic** Approve claims above the top threshold; **F04.lo
 
 #### `fo.cash` — Cashier / Cash branch
 
-Activities: **F03.receipts** Handle cheques / DDs and receipts outside the online flow; record VDR entries; **F03.payment_reject** Reject an unpaid or erroneous challan stuck in pending bank status; **F04.pay** Issue payment instruction / payment scroll; reconcile returns; re-issue
+Activities: **F03.receipts** Handle cheques / DDs and receipts outside the online flow; record VDR entries; **F03.eps_rectify_trust** Record an exempted trust's remittance of the EPS due to an eligible member, with interest at the trust's rate; **F03.payment_reject** Reject an unpaid or erroneous challan stuck in pending bank status; **F04.pay** Issue payment instruction / payment scroll; reconcile returns; re-issue
 
 | Endpoint | Status |
 |---|---|
 | `GET /office/cases/{caseId}` | W |
 | `GET /office/ecr-filings` | W |
+| `GET /office/eps-rectifications` | W |
 | `GET /office/payment-scrolls/ready` | W |
 | `GET /office/receipts/unreconciled` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/claims/{claimId}/payment-instructions` | W |
 | `POST /office/claims/{claimId}/reissues` | W |
 | `POST /office/ecr-filings/{filingId}/payment-rejections` | W |
+| `POST /office/eps-rectifications/{rectificationId}/trust-remittances` | W |
 | `POST /office/payment-scrolls` | W |
 | `POST /office/payment-scrolls/{scrollId}/return-reconciliations` | W |
 | `POST /office/vdr-entries` | W |
@@ -1652,6 +1658,9 @@ flowchart LR
   F03_vdr_reconcile["fo.da_accounts<br/>Reconcile VDR entries with ECRs; TRRN adjustment; Member VDR"]
   F03_eo_certify["fo.eo<br/>Certify an employer's revised ECR for major corrections (VDR"]
   F03_ledger_exception["fo.da_accounts<br/>Appendix-E adjustment (e.g. PF → EPS) or VDR (Special) credi"]
+  F03_eps_rectify["fo.da_accounts<br/>Work out the rectification of erroneous EPS contributions of"]
+  F03_eps_rectify_approve["fo.apfc<br/>Approve an EPS rectification: A/c 10 to A/c 1 or the trust ("]
+  F03_eps_rectify_trust["fo.cash<br/>Record an exempted trust's remittance of the EPS due to an e"]
   F03_ledger_exception_approve["fo.apfc<br/>Approve an exceptional ledger adjustment (RPFC-II F&A)"]
   F03_ecr_reject["fo.da_accounts<br/>Reject an ECR before posting; reverse a posted journal"]
   F03_ecr_office_approval["fo.apfc<br/>Approve ECRs held for office approval (ECR Approval menu on "]
@@ -1671,6 +1680,8 @@ flowchart LR
   F03_receipts --> F03_vdr_reconcile
   F03_vdr_reconcile --> F03_eo_certify
   F03_ledger_exception --> F03_ledger_exception_approve
+  F03_eps_rectify --> F03_eps_rectify_approve
+  F03_eps_rectify_approve --> F03_eps_rectify_trust
   F03_annual_batch --> F03_passbook
   F04_lock_admin["fo.oic<br/>Inspect member-ledger locks and release an orphaned one with"]
   F03_annual_batch --> F04_lock_admin

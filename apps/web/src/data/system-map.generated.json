@@ -4,9 +4,9 @@
   "interfaces": 21,
   "stakeholders": 115,
   "stakeholders_with_access": 95,
-  "activities": 275,
+  "activities": 278,
   "endpoints": {
-   "W": 457,
+   "W": 461,
    "M": 24,
    "P": 1,
    "?": 5
@@ -84,7 +84,7 @@
    "coverage": "Working",
    "purpose": "Field-office sections: claim scrutiny and payment, compliance, pension, EDLI, exemption, PRO counter.",
    "endpoints": {
-    "W": 127,
+    "W": 130,
     "M": 0,
     "P": 0,
     "?": 4
@@ -171,7 +171,7 @@
    "coverage": "Working",
    "purpose": "Regional office officers: approvals above the dealing level, freezes, ledger decisions.",
    "endpoints": {
-    "W": 69,
+    "W": 71,
     "M": 0,
     "P": 0,
     "?": 1
@@ -1072,7 +1072,7 @@
    "name": "Dealing Assistant / SSA (Accounts) — claims, IDS, member records, VDR, Appendix-E",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 44,
+    "W": 46,
     "M": 0,
     "P": 0,
     "?": 3
@@ -1089,6 +1089,10 @@
     {
      "id": "F03.ledger_exception",
      "does": "Appendix-E adjustment (e.g. PF → EPS) or VDR (Special) credit — exceptional"
+    },
+    {
+     "id": "F03.eps_rectify",
+     "does": "Work out the rectification of erroneous EPS contributions of a member ID (HO circular WSU/2025/E-961539) from its posted returns, with interest, and propose it"
     },
     {
      "id": "F03.ecr_reject",
@@ -1287,7 +1291,7 @@
    "name": "APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 50,
+    "W": 52,
     "M": 0,
     "P": 0,
     "?": 1
@@ -1308,6 +1312,10 @@
     {
      "id": "F02.jd_approve",
      "does": "Approver for major changes (APFC / RPFC-II / RPFC-I per JD Table 3): approve / reject / return"
+    },
+    {
+     "id": "F03.eps_rectify_approve",
+     "does": "Approve an EPS rectification: A/c 10 to A/c 1 or the trust (EPS wrongly allowed), A/c 1 to A/c 10 (EPS wrongly denied)"
     },
     {
      "id": "F03.ledger_exception_approve",
@@ -1475,7 +1483,7 @@
    "name": "Cashier / Cash branch",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 11,
+    "W": 13,
     "M": 0,
     "P": 0,
     "?": 0
@@ -1484,6 +1492,10 @@
     {
      "id": "F03.receipts",
      "does": "Handle cheques / DDs and receipts outside the online flow; record VDR entries"
+    },
+    {
+     "id": "F03.eps_rectify_trust",
+     "does": "Record an exempted trust's remittance of the EPS due to an eligible member, with interest at the trust's rate"
     },
     {
      "id": "F03.payment_reject",
@@ -3783,6 +3795,40 @@
    "status": "PARTLY",
    "endpoints": 3,
    "src": "PEN, FRM, FIA"
+  },
+  {
+   "id": "F03.eps_rectify",
+   "flow": "F03",
+   "actor": "fo.da_accounts",
+   "does": "Work out the rectification of erroneous EPS contributions of a member ID (HO circular WSU/2025/E-961539) from its posted returns, with interest, and propose it",
+   "next": [
+    "F03.eps_rectify_approve"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CIRC"
+  },
+  {
+   "id": "F03.eps_rectify_approve",
+   "flow": "F03",
+   "actor": "fo.apfc",
+   "does": "Approve an EPS rectification: A/c 10 to A/c 1 or the trust (EPS wrongly allowed), A/c 1 to A/c 10 (EPS wrongly denied)",
+   "next": [
+    "F03.eps_rectify_trust"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CIRC"
+  },
+  {
+   "id": "F03.eps_rectify_trust",
+   "flow": "F03",
+   "actor": "fo.cash",
+   "does": "Record an exempted trust's remittance of the EPS due to an eligible member, with interest at the trust's rate",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CIRC"
   },
   {
    "id": "F03.ledger_exception_approve",

@@ -167,17 +167,25 @@ def validate(content: str, fmt: str, wage_month: str, members: list[dict[str, An
                 row["EPS Wages"] = "0"
                 row["EPS Contribution"] = "0"
                 row["EPF-EPS Difference (ER share)"] = str(split(epf, 0, age, rules, edli)["AC01_EPF_EE"] // 100)
+            elif member and member.get("eps_not_eligible") and (eps > 0 or eps_share_input > 0):
+                # P2.19c: found not eligible for EPS (rectification under HO circular WSU/2025/E-961539): EPF member only
+                issue(i, row, "EPS Wages", "E-EPS-NOT-ELIGIBLE", "error",
+                      f"This member ID is not eligible for EPS (rectification {member['eps_not_eligible']}): no pension contribution.",
+                      0, eps // 100, "EPS wages 0; the whole employer share (12%) goes to EPF", auto=True)
+                row["EPS Wages"] = "0"
+                row["EPS Contribution"] = "0"
+                row["EPF-EPS Difference (ER share)"] = str(split(epf, 0, age, rules, edli)["AC01_EPF_EE"] // 100)
             if born and age >= rules["contribution"]["eps_age_limit_years"] and (eps > 0 or eps_share_input > 0 or expected["AC10_EPS"] > 0):
                 issue(i, row, "EPS Wages", "E-AGE-EPS", "error", "This member is at or above the illustrative EPS age limit for the wage month.", 0, eps // 100, "EPS = 0 and the whole employer share goes to EPF")
                 row["EPS Contribution"] = "0"
                 row["EPF-EPS Difference (ER share)"] = str(expected["AC01_EPF_EE"] // 100)
             if (eps == 0 and 0 < epf <= c["eps_wage_ceiling_paise"] and not exempt_trust and not (born and age >= c["eps_age_limit_years"])
-                    and not (member and member.get("international_worker"))):
+                    and not (member and (member.get("international_worker") or member.get("eps_not_eligible")))):
                 issue(i, row, "EPS Wages", "W-EPS-MEMBERSHIP", "warning",
                       "The wages are within the ceiling, so this member belongs to the pension scheme (EPS) — since 17 September 2026 "
                       "that includes wages up to ₹25,000.", 0, 0, fix="Report EPS wages, unless the member is not eligible (for example, joined above the ceiling earlier).")
             if all(k in numeric for k in FIELDS[2:9]):
-                row_total = split(epf, 0 if member and member.get("eps_pensioner") else eps, age, rules, edli)
+                row_total = split(epf, 0 if member and (member.get("eps_pensioner") or member.get("eps_not_eligible")) else eps, age, rules, edli)
                 for account in ("AC01_EPF_EE", "AC01_EPF_ER", "AC10_EPS", "AC21_EDLI"):
                     totals[account] += numeric[FIELDS[6 if account == "AC01_EPF_EE" else 8]] if exempt_trust and account.startswith("AC01") else row_total[account]
             if gross == epf == 0:
@@ -202,7 +210,7 @@ def validate(content: str, fmt: str, wage_month: str, members: list[dict[str, An
             issue(0, {}, "headcount", "W-HEADCOUNT-CHANGE", "warning", "The member count differs from the last posted month by more than the configured threshold.", fix="Review joiners and leavers before submission.")
     issues.sort(key=lambda x: (x["severity"] != "error", x["row"]))
     errors = sum(x["severity"] == "error" for x in issues)
-    can_correct = any(x["code"] in {"E-EPF-EE", "E-EPS-SHARE", "E-DIFF-SHARE", "E-EPS-PENSIONER"} and x["auto_fixable"] for x in issues) and not any(x["code"] == "E-FORMAT-FIELDS" for x in issues)
+    can_correct = any(x["code"] in {"E-EPF-EE", "E-EPS-SHARE", "E-DIFF-SHARE", "E-EPS-PENSIONER", "E-EPS-NOT-ELIGIBLE"} and x["auto_fixable"] for x in issues) and not any(x["code"] == "E-FORMAT-FIELDS" for x in issues)
     return {"summary": {"rows": len(rows), "accepted_rows": accepted, "rows_with_errors": len({x["row"] for x in issues if x["severity"] == "error"}),
             "warnings": sum(x["severity"] == "warning" for x in issues), "totals_paise": totals,
             "comparison_with_last_posted_month": comparison}, "issues": issues,

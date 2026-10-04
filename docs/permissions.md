@@ -471,6 +471,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/claims/{claimId}/audit-trail` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/ecr-filings` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/eps-rectifications` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/exempted/annexure-k` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/exempted/past-accumulation-vdr-reconciliations` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/ledger-adjustments` | W | office jurisdiction of the caller's posting |  |
@@ -493,6 +494,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/cases/{caseId}/stops` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/claims/{claimId}/cad` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/ecr-filings/{filingId}/rejections` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/eps-rectifications` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/exempted/{estId}/past-accumulation-vdr-reconciliations` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/freeze-cases/{caseId}/verifications` | W | office jurisdiction of the caller's posting |  |
@@ -592,6 +594,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/compliance/vishwas-applications` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/death-claims/{claimId}/shares-summary` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/ecr-filings` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/eps-rectifications` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/establishment-change-requests` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/establishment-registrations` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/establishment-registrations/{reqId}/documents` | W | office jurisdiction of the caller's posting |  |
@@ -621,6 +624,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/compliance/membership-disputes` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/compliance/prosecutions/{prosecutionId}/steps` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/compliance/vishwas-applications/{applicationId}/decisions` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/eps-rectifications/{rectificationId}/approvals` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishment-registrations/{reqId}/coverage-decisions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/establishments/{estId}/defreezes` | W | office jurisdiction of the caller's posting | yes |
@@ -693,12 +697,14 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /office/cases/{caseId}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/ecr-filings` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/eps-rectifications` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/payment-scrolls/ready` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/receipts/unreconciled` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/claims/{claimId}/payment-instructions` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/claims/{claimId}/reissues` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/ecr-filings/{filingId}/payment-rejections` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/eps-rectifications/{rectificationId}/trust-remittances` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/payment-scrolls` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/payment-scrolls/{scrollId}/return-reconciliations` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/vdr-entries` | W | office jurisdiction of the caller's posting | yes |

@@ -1,5 +1,5 @@
 """Tables owned by pension-service (created by migration 0002). Synthetic pensioners only."""
-from sqlalchemy import JSON, BigInteger, Boolean, Column, Date, DateTime, Index, Integer, MetaData, String, Table, Text, UniqueConstraint, false, func
+from sqlalchemy import JSON, BigInteger, Boolean, Column, Date, DateTime, Index, Integer, MetaData, String, Table, Text, UniqueConstraint, false, func, true
 
 from app.infra.models import IdType
 
@@ -240,6 +240,7 @@ eps_accounts = Table(
     Column("exit_reason", String(40)),                       # PERMANENT_DISABLEMENT opens a disablement pension (para 15)
     Column("breaks_months", Integer, nullable=False, server_default="0"),    # periods with no contribution (para 9)
     Column("transferred_to", String(40)),
+    Column("eps_member", Boolean, nullable=False, server_default=true()),    # P2.19c: false once found not eligible (service deleted)
 )
 
 eps_transfers = Table(

@@ -53,12 +53,14 @@ its menus in the web app are clickable, and unit, end-to-end and must-deny tests
 | P2.16 | Gig and platform workers (Code on Social Security, 2020): aggregators registered, a turnover-based contribution return (1–2% of turnover, capped at 5% of payments to the workers, in the rule set), workers linked by e-Shram number to a UAN, reconciliation | Planned — design only until the scheme is notified |
 | P2.17 | Insolvency: a watchlist from EPFO's own signals (ECR stopping, defaults, MCA status), IBBI announcements matched to the establishment, claim deadlines, dues frozen (7A; damages and interest kept apart), the resolution plan checked for PF dues in full, liquidation claims outside the estate (IBC s.36(4)(a)(iii)), recovery measured | Planned (links to P2.11) |
 | P2.18 | EPF to NPS: the PF leg paid to the member's NPS Tier I (PRAN, KYC match, the trustee bank through the CRA — mock); the EPS leg cannot move — a Scheme Certificate or the withdrawal benefit | Planned (needs PFRDA's circular) |
-| P2.19 | Edge cases as tests first, then the fixes: death during a transfer or claim; minor nominee or no nomination; two UANs to merge; court-ordered back wages after exit; 58 in service; a re-employed pensioner; family pension to a dependent parent or a disabled child; attachment orders refused; mergers without a break; a vanished contractor (s.8A); partial payment; exemption cancelled mid-transfer; returned payments after a bank merger; one bank account for many members; identity mismatches; members abroad without Aadhaar; unclaimed balances | a (money at risk: death, short cheque, re-employed pensioner, child pension to 25, back wages): Done; c (erroneous EPS contributions rectified, circular WSU/2025/E-961539 of 19 Dec 2025): next after P2.23; the rest planned |
+| P2.19 | Edge cases as tests first, then the fixes: death during a transfer or claim; minor nominee or no nomination; two UANs to merge; court-ordered back wages after exit; 58 in service; a re-employed pensioner; family pension to a dependent parent or a disabled child; attachment orders refused; mergers without a break; a vanished contractor (s.8A); partial payment; exemption cancelled mid-transfer; returned payments after a bank merger; one bank account for many members; identity mismatches; members abroad without Aadhaar; unclaimed balances | a (money at risk: death, short cheque, re-employed pensioner, child pension to 25, back wages): Done; c (erroneous EPS contributions rectified, circular WSU/2025/E-961539 of 19 Dec 2025): Done; the rest planned |
 | P2.20 | Navigation and findability: side or top menu (per user, by role), menu search (Ctrl+K), the empty menu headings wired to existing screens; a text-size control (to 150%) for senior citizens; later task-based member and employer menus with the legacy ones behind a toggle | Done (task-based menus later) |
 | P2.21 | Data held, not asked: pre-filled claims, automatic transfer when a new member ID appears, the pension case opened at 58 and on death, settlement by default for low risk with sampled audits | a (transfer unasked; claims and pension offered filled in): Done; b (death from the civil registry, claims offered to the nominee, sampled audit of automatic settlements, DigiLocker): Done |
 | P2.22 | Real-time contributions: a per-pay-run contribution API and a conformance sandbox for payroll vendors (the ECR kept as a format); a due-date option to model contributions paid with wages | Planned |
 | P2.23 | Retirement view: one forecast across PF and pension with VPF what-if and replacement rate; every rejection saying what fixes it | a (retirement view, VPF what-if): Done; b (every rejection and refusal saying what fixes it): Done |
 | P2.24 | Trust and governance: authorised representatives (guardian, agent) with consented scope; published service standards with live performance; an independent review tier; rule-change simulation; interest-sustainability model | Planned |
+| P2.28 | Production UX foundations: task-based journeys (one task per page, check-your-answers, a confirmation with a reference, a receipt with a QR to verify it); plain language with no internal codes and complete Hindi; forms that check as you type and list errors at the top; officers' queues with sorting, filters, deadlines, bulk actions and the documents beside the decision; risk-based step-up; a component library on UX4G and GIGW 3.0; WCAG 2.1 AA verified (axe in CI, screen reader, 400% zoom); phone layouts and per-page code; loading, empty and error states; usability sessions and privacy-safe analytics. First: the member's claim, KYC and transfer journeys | Planned (after P2.19c) |
+| P2.29 | A README for the repository (there is none): says up front that this is a vibe-coded app — written by AI coding agents (Claude Code, Codex, agy) at a person's direction, not hand-written or reviewed as production code — and a synthetic demonstration, not an EPFO system; what it covers (the stakeholders, journeys and the official sources it follows), how to run it (`make up`, `make migrate`, `make seed`, the personas), how it is tested, and a map of `docs/`. With a nod to the name: it should have been *pf-vibe* | Planned (small; next after P2.19c) |
 
 ## P2.9 — plan
 
@@ -1494,7 +1496,7 @@ notification); EPFO's notice that the UAN card, the PPO and the scheme certifica
   constant in audit-service, not in the published rules.
 
 
-## P2.19c — planned: erroneous EPS contributions rectified
+## P2.19c — how it is built: erroneous EPS contributions rectified
 
 Source: EPFO Head Office circular No. WSU/2025/E-961539/Refund of erroneous contribution/42, 19 Dec 2025 (saved in
 `../manuals/`). Employers have remitted pension (EPS) contributions for members not eligible for EPS, or none for members
@@ -1507,10 +1509,26 @@ who are; the circular fixes one rectification for each case, for unexempted and 
 | II — EPS denied to an eligible member | Unexempted | EPFO works out the EPS due with interest at the declared rate; moves it A/c 1 → A/c 10; credits the pension service, with any non-contributory period | Within EPFO |
 | II | Exempted | The trust works out the dues with interest at the trust's declared rate and moves them trust → A/c 10; EPFO credits the pension service | Trust → EPFO |
 
-To build: the EPS eligibility test on returns (a member joining on or after 1 Sep 2014 on wages above the ceiling is not
-eligible) so errors are found; an office rectification case per member ID (worked out month by month with interest,
-approved maker-checker) that posts the transfer between the accounts or raises the trust leg, and tells pension-service
-to delete or credit the service; the member's passbook and pension estimate follow; the consistency check covers it.
+Built:
+
+- **A rectification per member ID** (Office › Ledger › *EPS rectification*): the DA (Accounts) names the member ID, the
+  scenario and the period, with a notesheet; the system works it out from the posted returns month by month — scenario I
+  the EPS remitted, scenario II 8.33% of the wages up to that month's ceiling (₹15,000, ₹25,000 from 17 Sep 2026, by days
+  in September 2026) — with simple interest from the month after each wage month at the rate declared for its year (the
+  trust's declared rate when an exempted trust owes it). A period with nothing to rectify is refused; scenario II needs
+  the employer share in A/c 1 to hold it.
+- **The APFC approves** (one-time code; not the officer who worked it out): scenario I unexempted moves A/c 10 → the
+  member's A/c 1 (employer share), exempted A/c 10 → the trust (payable); scenario II unexempted A/c 1 → A/c 10; exempted
+  waits for the trust's remittance, which Cash records (the amount must match) before A/c 10 is credited. The member's
+  PF follows (`LedgerAdjusted.v1`, `EPS_RECTIFICATION`); the passbook says what happened and under which circular.
+- **The pension service follows** (`EpsRectified.v1`): scenario I deletes the member ID's pension service (the estimate
+  counts none; Form 10D is refused with the reason and *claim the PF instead*); scenario II credits it.
+- **Later returns follow**: a member ID found not eligible gets no pension wages — the return is refused with
+  `E-EPS-NOT-ELIGIBLE` and corrected automatically, the employer's whole 12% to EPF; scenario II lifts it. The consistency
+  check compares the two services' records of who is not eligible.
+- Not built: finding the ineligible members automatically (wages on joining are not on record: the office starts the
+  case, e.g. from Form 11 or an inspection); the non-contributory period credited separately (the service counts from
+  joining to exit).
 
 ## P2.23b — how it is built (every rejection and refusal says what fixes it)
 

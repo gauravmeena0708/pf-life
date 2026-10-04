@@ -230,6 +230,7 @@ The current POC (`init.md` §6.2) seeds 19 personas. The ➕ rows are the person
 | EC | *Agenda, 98th Executive Committee meeting* — `…/2025/12/EC_meeting_Agenda_98th.pdf` |
 | JD | *SOP JD/2024/1 v3: Member profile correction* — `…/2025/09/Circular_WSU_01082024-1.pdf` |
 | WSU | *SOP 01/2024 v2: Transaction-less and inoperative accounts* — `…/2025/09/Circular_SOP_WSU_02082024-5.pdf` |
+| CIRC | EPFO HO circular No. WSU/2025/E-961539/Refund of erroneous contribution/42, *Rectification of erroneous EPS contributions*, 19 Dec 2025 (`../manuals/CircularWSU_RectificationInErroneousEPSContribution_19122025.pdf`) |
 | FIA | *SOP FIA/2023/1: Freezing / de-freezing* (see `portal-functions-by-login.md`) |
 | OUL | EPFO, *Logins for Office Use* — `pmvbry.epfindia.gov.in/for_office_use/logins-of-office-use/` (EPFiGMS office, FO Interface, CAIU, Compliance e-Proceedings, eSamiksha, HR Soft, e-Office, NIC e-mail) |
 | REF | PIB, *EPFO Reforms*, 12 Feb 2026 — `pmvbry-cdn.epfindia.gov.in/wp-content/uploads/2026/03/EPFO-REFORMS-Posted-On-12-Feb-2026.pdf` |

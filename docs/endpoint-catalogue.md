@@ -191,6 +191,10 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/vdr-entries/{vdrId}/special-credits` 💰🔐 | **VDR Special** — exceptional direct credit to a member account, with evidence and competent-authority approval. EPFO treats it as a high-risk process; semantics unconfirmed | ? | 3 | contribution |
 | `POST /office/ledger-adjustments` 💰🔐 (`type=APPENDIX_E`) | **Appendix E** — field-office adjustment of a member's opening balances (taxable / non-taxable / total), also used for PF→EPS diversion. Not an employer remittance | W | 1 | contribution |
 | `GET /office/ledger-adjustments` | Appendix E adjustments proposed, approved and rejected | W | 1 | contribution |
+| `POST /office/eps-rectifications` 🔐 | Rectify erroneous EPS contributions of a member ID (HO circular WSU/2025/E-961539): worked out month by month from the posted returns, with interest, proposed with a notesheet (P2.19c) | W | 1 | contribution |
+| `GET /office/eps-rectifications` | EPS rectifications: worked out, approved, awaiting a trust's remittance | W | 1 | contribution |
+| `POST /office/eps-rectifications/{rectificationId}/approvals` 🔐 | The APFC approves (or rejects) an EPS rectification: A/c 10 ↔ A/c 1 or the trust; the pension service deleted or credited | W | 1 | contribution |
+| `POST /office/eps-rectifications/{rectificationId}/trust-remittances` | Cash records an exempted trust's remittance of the EPS due (scenario II) | W | 1 | contribution |
 | `POST /office/ledger-adjustments/{adjustmentId}/approvals` 🔐 | Second approval of a ledger adjustment | W | 1 | contribution |
 | `GET /office/ecr-filings` | Returns submitted but not yet paid (to reject, or to reject a stuck payment) | W | 1 | contribution |
 | `POST /office/ecr-filings/{filingId}/rejections` 🔐 | Reject an ECR **before** posting | W | 1 | contribution |

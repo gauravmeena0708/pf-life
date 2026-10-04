@@ -1696,6 +1696,18 @@ stakeholders:
     step_up: true
     via:
     - F03.ledger_exception
+  - endpoint: POST /office/eps-rectifications
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F03.eps_rectify
+  - endpoint: GET /office/eps-rectifications
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F03.eps_rectify
   - endpoint: GET /office/ecr-filings
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2244,6 +2256,18 @@ stakeholders:
     step_up: true
     via:
     - F02.jd_approve
+  - endpoint: GET /office/eps-rectifications
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F03.eps_rectify_approve
+  - endpoint: POST /office/eps-rectifications/{rectificationId}/approvals
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F03.eps_rectify_approve
   - endpoint: GET /office/ledger-adjustments
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2784,6 +2808,18 @@ stakeholders:
     step_up: true
     via:
     - F03.receipts
+  - endpoint: GET /office/eps-rectifications
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F03.eps_rectify_trust
+  - endpoint: POST /office/eps-rectifications/{rectificationId}/trust-remittances
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F03.eps_rectify_trust
   - endpoint: GET /office/ecr-filings
     status: W
     scope: office jurisdiction of the caller's posting

@@ -7,6 +7,7 @@ import { ProblemMessage } from "../../components/ProblemMessage";
 import { StepUpDialog } from "../stepup/StepUpDialog";
 import { useStepUp } from "../stepup/useStepUp";
 import { PastAccumulationReco } from "./PastAccumulationReco";
+import { EpsRectificationSection } from "./EpsRectification";
 
 interface Allocation { trrn: string; amount_paise: number; at: string }
 interface Receipt {
@@ -330,6 +331,7 @@ export function LedgerOfficePage() {
     </section> : null}
 
     {(accounts || apfc) ? <PastAccumulationReco role={role} /> : null}
+    {(accounts || apfc || cash) ? <EpsRectificationSection role={role} /> : null}
     {(accounts || apfc) ? <section className="card stack" aria-labelledby="appendix-e-heading"><h2 id="appendix-e-heading">Appendix E</h2>
       {accounts ? <form className="stack" onSubmit={proposeAppendix}><h3>Propose an adjustment</h3>
         <div className="form-row"><label>Member ID<input name="account_link_id" required minLength={3} maxLength={80} /></label>

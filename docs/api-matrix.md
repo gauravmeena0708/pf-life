@@ -9,11 +9,11 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 15 | 2 | 0 | 0 |
 | 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 104 | 5 | 1 | 0 |
 | 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 91 | 7 | 0 | 0 |
-| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 127 | 0 | 0 | 4 |
+| 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 130 | 0 | 0 | 4 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 18 | 1 | 0 | 0 |
 | 6 | International worker | **Working** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 6 | 0 | 0 | 0 |
 | 7 | District office | **Working** | `do.incharge`, `do.staff` | 3 | 0 | 0 | 0 |
-| 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 69 | 0 | 0 | 1 |
+| 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 71 | 0 | 0 | 1 |
 | 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 20 | 0 | 0 | 0 |
 | 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 34 | 0 | 0 | 0 |
 | 11 | NDC | **Working** | `tech.ndc`, `tech.adc`, `tech.cpps`, `tech.epfo3` | 8 | 0 | 0 | 0 |
@@ -291,6 +291,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /office/damages-knock-offs` | W | contribution | fo.da_compliance, fo.ss |
 | `GET /office/ecr-filings` | W | contribution | fo.cash, fo.da_accounts |
 | `GET /office/edli-claims` | W | claim | fo.edli |
+| `GET /office/eps-rectifications` | W | contribution | fo.cash, fo.da_accounts |
 | `GET /office/establishment-registrations` | W | employer | fo.da_compliance |
 | `GET /office/establishment-registrations/{reqId}/documents` | W | employer | fo.da_compliance |
 | `GET /office/exempted/annexure-k` | W | claim | fo.da_accounts |
@@ -346,6 +347,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/ecr-filings/{filingId}/rejections` | W | contribution | fo.da_accounts |
 | `POST /office/edli-claims/{claimId}/benefit-previews` | W | claim | fo.edli |
 | `POST /office/edli-claims/{claimId}/decisions` | W | claim | fo.edli |
+| `POST /office/eps-rectifications` | W | contribution | fo.da_accounts |
+| `POST /office/eps-rectifications/{rectificationId}/trust-remittances` | W | contribution | fo.cash |
 | `POST /office/establishment-registrations/{reqId}/scrutiny-notes` | W | employer | fo.da_compliance |
 | `POST /office/establishments/{estId}/damages-knock-offs` | W | contribution | fo.da_compliance |
 | `POST /office/exempted/annexure-k/{annexureId}/reconciliations` | W | claim | fo.da_accounts |
@@ -470,6 +473,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /office/compliance/vishwas-applications` | W | compliance | fo.apfc |
 | `GET /office/death-claims/{claimId}/shares-summary` | W | claim | fo.apfc |
 | `GET /office/ecr-filings` | W | contribution | fo.apfc |
+| `GET /office/eps-rectifications` | W | contribution | fo.apfc |
 | `GET /office/establishment-change-requests` | W | employer | fo.apfc |
 | `GET /office/establishment-registrations` | W | employer | fo.apfc |
 | `GET /office/establishment-registrations/{reqId}/documents` | W | employer | fo.apfc |
@@ -506,6 +510,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /office/compliance/membership-disputes` | W | compliance | fo.apfc |
 | `POST /office/compliance/prosecutions/{prosecutionId}/steps` | W | compliance | fo.apfc, fo.oic |
 | `POST /office/compliance/vishwas-applications/{applicationId}/decisions` | W | compliance | fo.apfc |
+| `POST /office/eps-rectifications/{rectificationId}/approvals` | W | contribution | fo.apfc |
 | `POST /office/establishment-registrations/{reqId}/coverage-decisions` | W | employer | fo.apfc |
 | `POST /office/establishments/{estId}/change-requests/{requestId}/decisions` | W | employer | fo.apfc |
 | `POST /office/establishments/{estId}/defreezes` | W | employer | fo.apfc, fo.oic |

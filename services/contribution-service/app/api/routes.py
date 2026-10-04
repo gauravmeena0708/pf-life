@@ -71,8 +71,10 @@ async def _fetch_filing(session, filing_id: str, establishment_id: str):
 
 
 async def _members(session, establishment_id: str):
-    r = await session.execute(text("SELECT m.*, CASE WHEN p.uan IS NULL THEN 0 ELSE 1 END AS eps_pensioner, p.ppo_id AS pensioner_ppo "
-                                   "FROM establishment_members m LEFT JOIN eps_pensioners p ON p.uan=m.uan WHERE m.establishment_id=:e"),
+    r = await session.execute(text("SELECT m.*, CASE WHEN p.uan IS NULL THEN 0 ELSE 1 END AS eps_pensioner, p.ppo_id AS pensioner_ppo, "
+                                   "x.rectification_id AS eps_not_eligible "            # P2.19c: found not eligible for EPS
+                                   "FROM establishment_members m LEFT JOIN eps_pensioners p ON p.uan=m.uan "
+                                   "LEFT JOIN eps_ineligible_members x ON x.account_link_id=m.account_link_id WHERE m.establishment_id=:e"),
                               {"e": establishment_id})
     return [dict(x) for x in r.mappings().all()]
 
@@ -378,7 +380,7 @@ async def _passbook(subject: str, account_link_id: str | None):
                         "TRANSFER": "TRANSFER_OUT" if ln["side"] == "debit" else "TRANSFER_IN",
                         "TRANSFER_RECREDIT": "TRANSFER_RECREDITED" if ln["side"] == "credit" else "TRANSFER_RECREDIT_OUT",
                         "REVERSAL": "REVERSAL", "APPENDIX_E": "ADJUSTMENT",
-                        "HIGHER_PENSION_TRANSFER": "HIGHER_PENSION_TRANSFER"}.get(ln["kind"], ln["kind"])
+                        "HIGHER_PENSION_TRANSFER": "HIGHER_PENSION_TRANSFER", "EPS_RECTIFICATION": "EPS_RECTIFICATION"}.get(ln["kind"], ln["kind"])
                 rate = f"{ln['rate_bp'] / 100:g}%" if ln["rate_bp"] is not None else ""
                 ent = grouped.setdefault(ln["journal_id"], {
                     "kind": kind, "wage_month": ln["wage_month"] or _month(ln["occurred_at"]),
@@ -389,6 +391,9 @@ async def _passbook(subject: str, account_link_id: str | None):
                                     "TRANSFER_IN": f"Transferred in from a previous member ID (Form 13, {ln['business_key'][9:]})",
                                     "ADJUSTMENT": "Adjusted by the PF office (Appendix E)",
                                     "HIGHER_PENSION_TRANSFER": "Higher pension dues transferred from PF to pension fund",
+                                    "EPS_RECTIFICATION": ("Pension contribution not due, returned to your PF with interest" if ln["side"] == "credit"
+                                                          else "Pension contribution due, moved from your PF to the pension fund with interest")
+                                                         + " (HO circular WSU/2025/E-961539)",
                                     "REVERSAL": "Entry reversed by the PF office",
                                     "TRANSFER_RECREDITED": "Transfer rejected by the receiving office: balance recredited",
                                     "TRANSFER_RECREDIT_OUT": "Transfer rejected by the receiving office: taken back",

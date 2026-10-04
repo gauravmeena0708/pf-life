@@ -98,6 +98,20 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — Phase 2, slice 19c: erroneous EPS contributions rectified (4 October 2026)
+
+Unit: contribution-service 119 (new: the working by hand — EPS remitted with 11 months' interest at 8.25%, EPS due on the
+ceiling not the wages; scenario I posted A/c 10 → A/c 1 with both events, the next return refused with
+`E-EPS-NOT-ELIGIBLE` and corrected, the passbook line; scenario II A/c 1 → A/c 10; a period with nothing to rectify, a
+second open case, the same officer approving, all refused), pension-service 49 (the service deleted — the estimate counts
+none, Form 10D refused with the circular — then credited back), claim-service 80. Web 311 (new: the APFC's view of the
+working and the move; the DA's form; Cash recording a trust's remittance). End to end 111 (new `test_rectify_eps.py`: a
+joinee of 2016 on ₹40,000 given EPS on a return, rectified, the next return refused). The first run found the DA's
+one-time code bound to an amount the DA cannot know before the working (now bound to the member ID; the APFC's approval
+stays bound to the amount), and that the new test's months clashed with Journey A's random months (now 2020-2023, with
+member A on the return). Consistency check, now also comparing the member IDs found not eligible: every copy agrees.
+Must-deny 18; UI smoke 2.
+
 ## Update — Phase 2, slice 23b: every rejection and refusal says what fixes it (4 October 2026)
 
 Unit: workflow-service 52 (new: the case shows the rule set's rejection reasons with their fixes; an unknown reason is

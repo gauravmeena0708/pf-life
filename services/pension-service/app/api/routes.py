@@ -140,6 +140,11 @@ def eps_service(spells: list[dict[str, Any]], day: date) -> tuple[int, list[dict
     by_id, merged = [], []
     for sp in sorted(spells, key=lambda x: x["date_of_joining"]):
         start, end = sp["date_of_joining"], min(sp["date_of_exit"] or day, day)
+        if sp.get("eps_member") is False:                   # P2.19c: not eligible for EPS — no pension service here
+            by_id.append({"account_link_id": sp["account_link_id"], "establishment_id": sp.get("establishment_id"), "from": start.isoformat(),
+                          "to": sp["date_of_exit"].isoformat() if sp["date_of_exit"] else None, "months": 0, "breaks_months": 0,
+                          "pf_with": sp.get("pf_with", "EPFO"), "eps_transferred_to": sp.get("transferred_to"), "eps_member": False})
+            continue
         by_id.append({"account_link_id": sp["account_link_id"], "establishment_id": sp.get("establishment_id"), "from": start.isoformat(),
                       "to": sp["date_of_exit"].isoformat() if sp["date_of_exit"] else None, "months": months(start, end),
                       "breaks_months": int(sp.get("breaks_months") or 0), "pf_with": sp.get("pf_with", "EPFO"),

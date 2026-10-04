@@ -77,7 +77,8 @@
             "EPS_DIVERSION",
             "EXCESS_INTEREST_DEBIT",
             "PAST_ACCUMULATION",
-            "EEC_ARREARS"
+            "EEC_ARREARS",
+            "EPS_RECTIFICATION"
           ]
         },
         "postings": {

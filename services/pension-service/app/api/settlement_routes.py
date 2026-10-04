@@ -153,6 +153,12 @@ async def apply(body: PensionApplication, actor: Actor = Depends(MEMBER), sessio
             await _disablement_check(session, m, body.disablement, p["normal_age_years"])
         start = (m["date_of_exit"] + timedelta(days=1) if disabled                 # the day after the disablement and exit
                  else body.pension_from or max(m["date_of_exit"] + timedelta(days=1), at58))
+        member_of_eps = (await session.execute(select(eps_accounts.c.eps_member).where(
+            eps_accounts.c.account_link_id == m["account_link_id"]))).scalar_one_or_none()
+        if member_of_eps is False:                          # P2.19c: found not eligible; the contributions went back to the PF
+            raise Problem(422, "/problems/not-eligible", "Not a member of the pension scheme for this service",
+                          "The pension contributions were returned to your PF with interest (HO circular WSU/2025/E-961539). "
+                          "Claim the PF (Form 19) instead.")
         service = months_between(m["date_of_joining"], m["date_of_exit"])
         check = pension_on(m["eps_wages_paise"], service, age_on(m["date_of_birth"], start), rules, disablement=disabled)
         if not check["eligible"]:

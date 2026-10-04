@@ -101,6 +101,7 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `DemandStateChanged.v1` | contribution | compliance, payment-simulator, reporting, audit | demand | 1 |
 | `LedgerReversed.v1` | contribution | claim, member, workflow, reporting, audit | ledger_journal | 1 |
 | `LedgerAdjusted.v1` | contribution | claim, reporting, audit | ledger_journal | 1 |
+| `EpsRectified.v1` | contribution | pension, audit | member_account | 1 |
 | `InterestCredited.v1` | contribution | claim, reporting, audit | interest_run | 1 |
 | `TaxDeducted.v1` | claim | contribution, reporting, audit | claim | 1 |
 | `PaymentScrollGenerated.v1` | claim | payment-simulator, audit | payment_scroll | 1 |

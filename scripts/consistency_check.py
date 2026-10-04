@@ -9,6 +9,7 @@ found that way, at run time. This script compares the copies, read-only, and lis
   balances    — a member ID's PF balance: the contribution ledger (owner) vs claim's projection
   demands     — a 14B / 7Q / 7A demand's state and amount: contribution (owner) vs compliance
   policy      — the published rule-set versions: platform (owner) vs every service that applies them
+  eps         — member IDs found not eligible for EPS (P2.19c): contribution (owner) vs pension's service record
 
 Usage: python3 scripts/consistency_check.py [--only exits,balances] — exit status 1 when anything differs. It reads the
 databases through `docker compose exec postgres psql` (PSQL overrides the command)."""
@@ -95,7 +96,13 @@ def policy() -> list[str]:
     return found
 
 
-CHECKS = {"exemption": exemption, "exits": exits, "balances": balances, "demands": demands, "policy": policy}
+def eps() -> list[str]:
+    owner = {r[0]: "NOT_ELIGIBLE" for r in rows("contribution_db", "SELECT account_link_id FROM eps_ineligible_members")}
+    copy = {r[0]: "NOT_ELIGIBLE" for r in rows("pension_db", "SELECT account_link_id FROM eps_accounts WHERE NOT eps_member")}
+    return compare("eps", ("contribution", owner), [("pension", copy)], missing_ok=False)
+
+
+CHECKS = {"exemption": exemption, "exits": exits, "balances": balances, "demands": demands, "policy": policy, "eps": eps}
 
 
 def main() -> int:

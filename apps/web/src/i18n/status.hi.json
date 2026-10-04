@@ -298,6 +298,7 @@
     "RECORDED": "दर्ज",
     "ALREADY_RECORDED": "पहले से दर्ज",
     "NOT_A_MEMBER": "सदस्य नहीं",
-    "AMBIGUOUS": "अस्पष्ट मिलान"
+    "AMBIGUOUS": "अस्पष्ट मिलान",
+    "AWAITING_TRUST_REMITTANCE": "ट्रस्ट के प्रेषण की प्रतीक्षा"
   }
 }

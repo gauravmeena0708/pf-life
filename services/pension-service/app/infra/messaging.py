@@ -15,6 +15,7 @@ BINDINGS = ["platform-service.PolicyPublished.v1", "claim-service.PhysicalClaimI
             "employer-service.ExemptionStatusChanged.v1",
             "contribution-service.HigherPensionTransferPosted.v1", "member-service.MemberRegistered.v1",
             "member-service.MemberExitMarked.v1", "member-service.PrimaryMemberIdChanged.v1", "member-service.MemberDeathRecorded.v1",
+            "contribution-service.EpsRectified.v1",
             "contribution-service.TransferPosted.v1"]
 # PRO counter request → updation activity. PPO amendments are basic-details updations the DA (Pension) takes up.
 INTAKE_ACTIVITIES = {"PHYSICAL_LC_UPDATION": "PHYSICAL_LC", "DEATH_UPDATION": "DEATH", "SPOUSE_REMARRIAGE_UPDATION": "SPOUSE_REMARRIAGE",
@@ -131,7 +132,15 @@ async def on_member_death(session: AsyncSession, event: dict[str, Any]) -> None:
                                                                   "the family pension is settled on Form 10D, and any pension credited after the death is recovered"))
 
 
-HANDLERS = {"ExemptionStatusChanged.v1": on_exemption_status_changed, "MemberDeathRecorded.v1": on_member_death,
+async def on_eps_rectified(session: AsyncSession, event: dict[str, Any]) -> None:
+    """P2.19c (HO circular WSU/2025/E-961539): EPS wrongly allowed — the member ID's pension service is deleted; EPS wrongly
+    denied — it is credited (with any non-contributory period: the service counts from joining to exit)."""
+    p = event["payload"]
+    await session.execute(update(eps_accounts).where(eps_accounts.c.account_link_id == p["account_link_id"])
+                          .values(eps_member=p["scenario"] == "WRONGLY_DENIED"))
+
+
+HANDLERS = {"ExemptionStatusChanged.v1": on_exemption_status_changed, "MemberDeathRecorded.v1": on_member_death, "EpsRectified.v1": on_eps_rectified,
             "HigherPensionTransferPosted.v1": on_higher_pension_transfer, "MemberRegistered.v1": on_member_registered,
             "MemberExitMarked.v1": on_member_exit, "PrimaryMemberIdChanged.v1": on_primary_changed,
             "TransferPosted.v1": on_transfer_posted}

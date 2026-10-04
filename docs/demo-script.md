@@ -736,6 +736,18 @@ tests produced, by role (after `python3 scripts/publish_manuals.py`).
 5. As `zo-audit`, the daily audit extract: *Claims settled automatically* and how many are in the post-audit sample; the
    sampled ones are flagged `AUTO_SETTLEMENT_SAMPLE`, ready for an alert to the office.
 
+## Erroneous EPS contributions rectified (P2.19c, HO circular WSU/2025/E-961539)
+
+1. As `emp-preparer`, register a joinee with date of joining 4 Jan 2016 and file a return for a month of 2016 with wages
+   of ₹40,000 and EPS on ₹15,000; `emp-signatory` approves, submits and pays.
+2. As `do-caseworker`, Office › Ledger › *EPS rectification*: the joinee's member ID, *I — EPS allowed to a member not
+   eligible*, that month, a notesheet and the reason (joined after 1 Sep 2014 above the ceiling). The working shows the
+   EPS remitted and the interest.
+3. As `ro-apfc`, approve it (one-time code): A/c 10 → A/c 1. The next return with pension wages for the joinee is
+   refused with `E-EPS-NOT-ELIGIBLE` and corrected — the employer's whole 12% to EPF.
+4. Scenario II is the same in reverse; for an exempted establishment, the trust remits the EPS due and `ro-cashier` records
+   it under *EPS rectification*.
+
 ## Every rejection says what fixes it (P2.23b)
 
 1. As `member-a`, file an illness advance of ₹1,50,000 (it goes to DA → AO). As `do-caseworker`, open the case:

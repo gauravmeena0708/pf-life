@@ -298,6 +298,7 @@
     "RECORDED": "Recorded",
     "ALREADY_RECORDED": "Already recorded",
     "NOT_A_MEMBER": "Not a member",
-    "AMBIGUOUS": "Ambiguous match"
+    "AMBIGUOUS": "Ambiguous match",
+    "AWAITING_TRUST_REMITTANCE": "Awaiting the trust's remittance"
   }
 }

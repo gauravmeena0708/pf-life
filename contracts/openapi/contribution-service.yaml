@@ -1735,6 +1735,162 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/eps-rectifications:
+    get:
+      operationId: getOfficeEpsRectifications
+      summary: 'EPS rectifications: worked out, approved, awaiting a trust''s remittance'
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - fo.apfc
+      - fo.cash
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+    post:
+      operationId: postOfficeEpsRectifications
+      summary: 'Rectify erroneous EPS contributions of a member ID (HO circular WSU/2025/E-961539): worked out month by month
+        from the p'
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Rectify erroneous EPS contributions of a member ID (HO circular WSU/2025/E-961539): worked out month by
+        month from the posted returns, with interest, proposed with a notesheet (P2.19c)'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/eps-rectifications/{rectificationId}/approvals:
+    post:
+      operationId: postOfficeEpsRectificationsRectificationIdApprovals
+      summary: 'The APFC approves (or rejects) an EPS rectification: A/c 10 ↔ A/c 1 or the trust; the pension service deleted
+        or credite'
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: rectificationId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - fo.apfc
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'The APFC approves (or rejects) an EPS rectification: A/c 10 ↔ A/c 1 or the trust; the pension service
+        deleted or credited'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/eps-rectifications/{rectificationId}/trust-remittances:
+    post:
+      operationId: postOfficeEpsRectificationsRectificationIdTrustRemittances
+      summary: Cash records an exempted trust's remittance of the EPS due (scenario II)
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: rectificationId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - fo.cash
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/establishments/{estId}/damages-knock-offs:
     post:
       operationId: postOfficeEstablishmentsEstIdDamagesKnockOffs
