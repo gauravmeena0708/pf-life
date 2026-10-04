@@ -19,6 +19,7 @@
     "advisory": "Signal",
     "advisoryMarker": "Advisory",
     "decisionArea": "Your decision",
-    "jumpToDecision": "Jump to your decision"
+    "jumpToDecision": "Jump to your decision",
+    "sentToBank": "Payment sent to the bank. This case updates when the bank confirms — there is nothing more to do."
   }
 }

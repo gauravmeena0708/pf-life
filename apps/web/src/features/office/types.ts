@@ -23,7 +23,7 @@ export interface OfficeCase {
   next_action: "recommend" | "decide" | "second-approve" | "instruct-payment" | "reissue" | "handle-grievance" | string | null;
 }
 export interface CaseDetail extends OfficeCase { rejection_reasons?: { code: string; label: string; fix: string }[];
-  history: { at: string; round: number; officer_role: string; officer_subject: string; action: string; approval_level: string | null; reason: string | null; checks: string[] | null }[];
+  history: { at: string; round: number; officer_role: string; officer_subject: string; action: string; approval_level: string | null; reason: string | null; checks: string[] | Record<string, unknown> | null }[];
   your_turn: boolean;
   documents?: import("./SignedDocuments").CaseDocument[];
   docket_ready?: boolean;

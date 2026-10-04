@@ -41,3 +41,12 @@ it("keeps the returned case visible when an officer decision has no scrutiny che
   expect(screen.getByText("Checked; KYC verified")).toBeTruthy();
   client.clear();
 });
+
+
+it("shows a process step's recorded form in the history instead of crashing (a Joint Declaration)", async () => {
+  const { historyDetail } = await import("./CasePage");
+  expect(historyDetail(["KYC verified", "Balance sufficient"])).toBe("KYC verified, Balance sufficient");
+  expect(historyDetail({ uan: "100000000026", parameter: "FATHER_NAME", member_consent: true, note: "" }))
+    .toBe("uan: 100000000026, parameter: FATHER_NAME, member consent: true");
+  expect(historyDetail(null)).toBe("");
+});

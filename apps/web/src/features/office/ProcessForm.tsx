@@ -44,7 +44,7 @@ export function ProcessForm({ operation, onDone, askSubject = false, caseRef }: 
     } catch (cause) { setError(cause); } finally { setBusy(false); }
   }
 
-  return (
+  return (<>
     <form className="stack" onSubmit={(e) => void submit(e)}>
       <ProblemMessage error={error} />
       {askSubject ? <label>{operation.subject.toUpperCase()}<input name="__subject" required pattern="[0-9]{12}" inputMode="numeric" /></label> : null}
@@ -57,7 +57,8 @@ export function ProcessForm({ operation, onDone, askSubject = false, caseRef }: 
       ))}
       {operation.step_up ? <p className="muted small">Needs a one-time code bound to this {operation.subject.toUpperCase()}.</p> : null}
       <div className="actions"><button type="submit" className="primary" disabled={busy}>{label(operation.name)}</button></div>
-      <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
     </form>
-  );
+    {/* outside the form: the dialog is a form of its own, and forms must not nest */}
+    <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
+  </>);
 }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { ApiError, command, type Envelope, rupees } from "../../api/client";
 import { ProblemMessage } from "../../components/ProblemMessage";
@@ -67,7 +68,8 @@ export function StepUpDialog({ request, onConfirmed, onCancel }: Props) {
     }
   }
 
-  return (
+  // rendered at the end of the page: the dialog holds a form, and a page may place it inside a form of its own
+  return createPortal(
     <dialog ref={dialog} aria-labelledby="stepup-title" onCancel={onCancel} className="stepup">
       <form onSubmit={verify}>
         <h2 id="stepup-title">Confirm this action</h2>
@@ -102,6 +104,7 @@ export function StepUpDialog({ request, onConfirmed, onCancel }: Props) {
           <button type="submit" className="primary" disabled={!challenge || busy || otp.length !== 6}>Confirm</button>
         </div>
       </form>
-    </dialog>
+    </dialog>,
+    document.body,
   );
 }

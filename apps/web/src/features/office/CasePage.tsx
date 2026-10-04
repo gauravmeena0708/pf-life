@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Fragment, useRef, useState, type FormEvent } from "react";
+import { Fragment, useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 
@@ -51,6 +51,15 @@ function getTimeLeft(slaDueAt: string | null | undefined, t: TFunction): { text:
   };
 }
 
+/** A history entry's detail: an officer's scrutiny checks (a list), or what a process step recorded (the employer's
+ *  submitted form on a Joint Declaration, say — an object), shown as "name: value". */
+export function historyDetail(checks: string[] | Record<string, unknown> | null | undefined): string {
+  if (!checks) return "";
+  if (Array.isArray(checks)) return checks.join(", ");
+  return Object.entries(checks).filter(([, v]) => v !== null && v !== undefined && v !== "")
+    .map(([k, v]) => `${k.replaceAll("_", " ")}: ${typeof v === "object" ? JSON.stringify(v) : String(v)}`).join(", ");
+}
+
 export function CasePage() {
   const { t, i18n } = useTranslation();
   const { caseId } = useParams();
@@ -69,7 +78,10 @@ export function CasePage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [notice, setNotice] = useState(false);
-  const detail = useQuery({ queryKey: ["office-case", caseId], queryFn: () => api<Envelope<CaseDetail>>(`/api/v1/office/cases/${caseId}`), enabled: !!caseId, retry: false });
+  // sent to the bank: the bank's answer arrives a few seconds later — until the case moves on, no second payment is offered
+  const [sentToBank, setSentToBank] = useState(false);
+  const detail = useQuery({ queryKey: ["office-case", caseId], queryFn: () => api<Envelope<CaseDetail>>(`/api/v1/office/cases/${caseId}`), enabled: !!caseId, retry: false,
+    refetchInterval: sentToBank ? 2000 : false });
   const session = useQuery({ queryKey: ["session"], queryFn: getSession, retry: false });
   const item = detail.data?.data;
   const role = session.data?.stakeholder;
@@ -142,14 +154,20 @@ export function CasePage() {
       amountPaise: item.amount_paise, summary: t(isReissue ? "office.reissueSummary" : "office.paymentSummary", { claimId, scenario: t(`office.scenarios.${scenario}`) }) });
     if (!token) return;
     retryKey.current ??= newIdempotencyKey();
-    await run(() => command("POST", `/api/v1/office/claims/${claimId}/${isReissue ? "reissues" : "payment-instructions"}`,
-      { demo_scenario: scenario }, { stepUpToken: token, idempotencyKey: retryKey.current! }));
+    await run(async () => {
+      await command("POST", `/api/v1/office/claims/${claimId}/${isReissue ? "reissues" : "payment-instructions"}`,
+        { demo_scenario: scenario }, { stepUpToken: token, idempotencyKey: retryKey.current! });
+      setSentToBank(true);
+    });
   }
 
   const timeLeft = getTimeLeft(item?.sla_due_at, t);
   const stepNumber = item?.chain?.length ? Math.min(item.step + 1, item.chain.length) : 0;
   const stepLabel = item?.chain?.length ? t("caseUx.stepOf", { step: stepNumber, total: item.chain.length, defaultValue: `Step ${stepNumber} of ${item.chain.length}` }) : "—";
-  const hasDecision = Boolean(allowed && action);
+  const paying = action === "instruct-payment" || action === "reissue";
+  const waitingForBank = sentToBank && paying;
+  useEffect(() => { if (sentToBank && !paying && item) setSentToBank(false); }, [sentToBank, paying, item]);   // the bank has answered
+  const hasDecision = Boolean(allowed && action) && !waitingForBank;
 
   return <section className="stack" aria-labelledby="office-case-heading"><PageHeader id="office-case-heading" eyebrow={t("office.eyebrow")} title={t("office.caseTitle")}
     description={item ? `${item.case_id} · ${item.office_id}` : t("office.caseDescription")}
@@ -225,7 +243,7 @@ export function CasePage() {
           {role === "fo.da_accounts" && item.claim_id ? <ClaimAnalysisPanel claimId={item.claim_id} /> : null}
           <section className="card stack" aria-labelledby="case-history-heading"><h2 id="case-history-heading">{t("office.history")}</h2>
             {item.history.length === 0 ? <p className="muted">{t("office.noHistory")}</p> : <div className="table-scroll"><table><thead><tr><th scope="col">{t("office.when")}</th><th scope="col">{t("office.round")}</th><th scope="col">{t("office.officer")}</th><th scope="col">{t("office.action")}</th><th scope="col">{t("office.reasonChecks")}</th></tr></thead><tbody>{item.history.map((entry, index) => <tr key={`${entry.at}-${index}`}>
-              <td>{dateTime(entry.at, i18n.language)}</td><td>{entry.round}</td><td>{roleLabel(entry.officer_role, t)}<br /><span className="muted small">{entry.officer_subject}</span></td><td>{entry.action} {entry.approval_level ?? ""}</td><td>{entry.reason}{entry.reason && entry.checks?.length ? "; " : ""}{(entry.checks ?? []).join(", ")}</td>
+              <td>{dateTime(entry.at, i18n.language)}</td><td>{entry.round}</td><td>{roleLabel(entry.officer_role, t)}<br /><span className="muted small">{entry.officer_subject}</span></td><td>{entry.action} {entry.approval_level ?? ""}</td><td>{[entry.reason, historyDetail(entry.checks)].filter(Boolean).join("; ")}</td>
             </tr>)}</tbody></table></div>}
           </section>
           {item.data?.returned_for_rejection && action === "recommend" ? <p className="pending-notice">{String(item.data.returned_for_rejection)} — re-forward it as
@@ -240,6 +258,8 @@ export function CasePage() {
                 <div className="actions"><button type="submit" disabled={busy}>Stop claim processing</button></div></form>}
           </section> : null}
         </div>
+        {waitingForBank ? <aside className="case-decision-column"><p role="status" className="pending-notice">{t("caseUx.sentToBank",
+          { defaultValue: "Payment sent to the bank. This case updates when the bank confirms — there is nothing more to do." })}</p></aside> : null}
         {hasDecision ? <aside className="case-decision-column">
           <section className="card stack" aria-labelledby="case-action-heading"><h2 id="case-action-heading">{t(`office.actions.${action}`)}</h2>
             <form className="stack" onSubmit={(event) => void submit(event)}>
