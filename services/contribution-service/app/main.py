@@ -43,7 +43,7 @@ def create_app() -> FastAPI:
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.members",
                          ["member-service.MemberChangeApproved.v1", "member-service.MemberExitMarked.v1",
                           "member-service.MemberRegistered.v1", "member-service.MemberInternationalStatusChanged.v1",
-                          "member-service.InoperativeAccountVerified.v1"], _members_router),
+                          "member-service.InoperativeAccountVerified.v1", "member-service.UanMerged.v1"], _members_router),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.processes",
                          ["workflow-service.ProcessTransitioned.v1"], on_transfer_step),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.pensions", BINDINGS, dispatch),
@@ -144,5 +144,8 @@ async def _members_router(session, event):
                               {"iw": bool(event["payload"]["international_worker"]), "u": event["payload"]["uan"]})
     elif event.get("event_type") == "MemberRegistered.v1":
         await on_member_registered(session, event)
+    elif event.get("event_type") == "UanMerged.v1":
+        from app.infra.transfers import on_uan_merged
+        await on_uan_merged(session, event)
     else:
         await handle_member_change(session, event)

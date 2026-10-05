@@ -207,3 +207,61 @@ async def on_member_registered(session: AsyncSession, event: dict[str, Any]) -> 
         "date_of_joining, date_of_exit, status) VALUES (:u, :n, :dob, :a, :s, :e, :j, NULL, 'ACTIVE') ON CONFLICT (account_link_id) DO NOTHING"),
         {"u": p["uan"], "n": p["name"], "dob": date.fromisoformat(p["date_of_birth"]), "a": p["account_link_id"],
          "s": p.get("member_subject"), "e": p["establishment_id"], "j": date.fromisoformat(p["date_of_joining"])})
+
+
+async def on_uan_merged(session: AsyncSession, event: dict[str, Any]) -> None:
+    """P2.19: When duplicate UAN is merged into active UAN, move PF balances and attach service periods."""
+    p = event["payload"]
+    active_uan = p["active_uan"]
+    duplicate_uan = p["duplicate_uan"]
+    dup_links = list(p.get("account_link_ids") or [])
+
+    if not dup_links:
+        dup_rows = (await session.execute(text(
+            "SELECT account_link_id FROM establishment_members WHERE uan = :du"
+        ), {"du": duplicate_uan})).scalars().all()
+        dup_links = list(dup_rows)
+
+    active_link = (await session.execute(text("""
+        SELECT account_link_id FROM establishment_members
+        WHERE uan = :au
+        ORDER BY (CASE WHEN status = 'ACTIVE' AND date_of_exit IS NULL THEN 0 ELSE 1 END),
+                 date_of_joining DESC, account_link_id DESC
+        LIMIT 1
+    """), {"au": active_uan})).scalar_one_or_none()
+
+    active_subject = (await session.execute(text(
+        "SELECT member_subject FROM establishment_members WHERE uan = :au AND member_subject IS NOT NULL LIMIT 1"
+    ), {"au": active_uan})).scalar_one_or_none()
+
+    for dup_link in dup_links:
+        business_key = f"UANMERGE-{duplicate_uan}-{dup_link}"
+        already_posted = (await session.execute(text(
+            "SELECT 1 FROM journals WHERE business_key = :k"
+        ), {"k": business_key})).first()
+
+        if not already_posted and active_link and active_link != dup_link:
+            shares = await member_shares(session, dup_link)
+            lines = []
+            for share in ("employee", "employer"):
+                if shares[share] > 0:
+                    lines += [
+                        {"account_code": "AC01_EPF", "side": "debit", "amount_paise": shares[share],
+                         "account_link_id": dup_link, "share": share},
+                        {"account_code": "AC01_EPF", "side": "credit", "amount_paise": shares[share],
+                         "account_link_id": active_link, "share": share},
+                    ]
+            await _post(session, business_key, "TRANSFER", None, lines)
+
+        await session.execute(text("""
+            UPDATE establishment_members
+            SET uan = :au,
+                member_subject = COALESCE(:asub, member_subject)
+            WHERE account_link_id = :dup_link
+        """), {"au": active_uan, "asub": active_subject, "dup_link": dup_link})
+
+    await session.execute(text(
+        "UPDATE establishment_members SET uan = :au, member_subject = COALESCE(:asub, member_subject) WHERE uan = :du"
+    ), {"au": active_uan, "asub": active_subject, "du": duplicate_uan})
+    await session.execute(text("UPDATE transfer_postings SET uan = :au WHERE uan = :du"), {"au": active_uan, "du": duplicate_uan})
+    await session.execute(text("UPDATE transfer_legs SET uan = :au WHERE uan = :du"), {"au": active_uan, "du": duplicate_uan})

@@ -30,6 +30,10 @@ async def _member(session: AsyncSession, subject: str) -> dict[str, Any]:
     row = (await session.execute(select(members).where(members.c.subject == subject))).mappings().first()
     if not row:
         raise Problem(404, "/problems/not-found", "Member not found")
+    if row["account_state"] == "MERGED" and row.get("merged_into"):
+        active = (await session.execute(select(members).where(members.c.uan == row["merged_into"]))).mappings().first()
+        if active:
+            return dict(active)
     return dict(row)
 
 
