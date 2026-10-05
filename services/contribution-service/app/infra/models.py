@@ -1,7 +1,7 @@
 """Standard tables present in every service database (docs/architecture.md §2.2)."""
 from datetime import date, datetime
 
-from sqlalchemy import JSON, BigInteger, Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, false, func
+from sqlalchemy import JSON, BigInteger, Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint, false, func, true
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 IdType = BigInteger().with_variant(Integer, "sqlite")  # SQLite only autoincrements INTEGER keys (unit tests)
@@ -606,3 +606,34 @@ class PayRun(Base):
     state: Mapped[str] = mapped_column(String(20), default="ACCEPTED")
     filing_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class FundAssetClass(Base):
+    """P2.24: local copy of fund positions by asset class from reporting-service (EPF only)."""
+    __tablename__ = "fund_asset_classes"
+    __table_args__ = (UniqueConstraint("fund_manager", "fund", "asset_class"),)
+    id: Mapped[int] = mapped_column(IdType, primary_key=True, autoincrement=True)
+    fund_manager: Mapped[str] = mapped_column(String(120), index=True)
+    fund: Mapped[str] = mapped_column(String(20), index=True)
+    asset_class: Mapped[str] = mapped_column(String(60), index=True)
+    book_value_paise: Mapped[int] = mapped_column(BigInteger)
+    as_of: Mapped[date] = mapped_column(Date)
+
+
+class FundPositionSnapshot(Base):
+    """Latest accepted feed date, including a snapshot with no holdings."""
+    __tablename__ = "fund_position_snapshots"
+    fund_manager: Mapped[str] = mapped_column(String(120), primary_key=True)
+    fund: Mapped[str] = mapped_column(String(20), primary_key=True)
+    as_of: Mapped[date] = mapped_column(Date)
+
+
+class YieldAssumption(Base):
+    """P2.24: illustrative expected yield assumptions per asset class (bp) for interest sustainability modeling."""
+    __tablename__ = "yield_assumptions"
+    asset_class: Mapped[str] = mapped_column(String(60), primary_key=True)
+    yield_bp: Mapped[int] = mapped_column(Integer)
+    label: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    illustrative: Mapped[bool] = mapped_column(Boolean, default=True, server_default=true())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_by: Mapped[str | None] = mapped_column(String(80), nullable=True)

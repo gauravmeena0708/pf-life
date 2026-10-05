@@ -285,7 +285,13 @@ EVENTS = [
     ("AuditParaDecided", "audit", [], "audit_para", 1, {"para_id": S, "office_id": S, "decision": {"enum": ["DROPPED", "KEPT"]}}),
     ("PrivacyRequestDecided", "audit", ["member"], "privacy_request", 1, {"request_id": S, "kind": S, "decision": {"enum": ["FULFILLED", "PARTLY_FULFILLED", "REJECTED"]}}),
     ("RtiReplied", "grievance", ["audit"], "rti_request", 1, {"request_id": S, "office_id": S, "outcome": S, "late": B}),
-    ("FundPositionsReceived", "reporting", ["audit"], "fund_positions", 1, {"fund_manager": S, "fund": {"enum": ["EPF", "EPS", "EDLI"]}, "as_of": S, "holdings": N, "market_value_paise": N}),
+    ("FundPositionsReceived", "reporting", ["contribution", "audit"], "fund_positions", 1, {
+        "fund_manager": S, "fund": {"enum": ["EPF", "EPS", "EDLI"]}, "as_of": S, "holdings": N,
+        "market_value_paise": N,
+        "by_asset_class": {"type": "array", "items": {
+            "type": "object", "additionalProperties": False, "required": ["asset_class", "book_value_paise"],
+            "properties": {"asset_class": {"type": "string"}, "book_value_paise": {"type": "integer", "minimum": 0}}}},
+    }),
     ("FailoverDrillRecorded", "platform", ["audit"], "failover_drill", 1, {"drill_id": S, "scenario": S, "rto_minutes": N, "within_target": B}),
     ("TrainingSandboxCreated", "platform", ["audit"], "training_sandbox", 1, {"sandbox_id": S, "course": S, "trainees": N, "expires_on": S}),
     ("CampRequestTaken", "workflow", ["audit"], "camp_request", 1, {"request_id": S, "camp_id": S, "office_id": S, "kind": S}),

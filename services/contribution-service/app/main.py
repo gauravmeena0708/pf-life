@@ -47,6 +47,8 @@ def create_app() -> FastAPI:
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.processes",
                          ["workflow-service.ProcessTransitioned.v1"], on_transfer_step),
                 Consumer(engine(), settings.rabbitmq_url, "contribution-service.pensions", BINDINGS, dispatch),
+                Consumer(engine(), settings.rabbitmq_url, "contribution-service.investments",
+                         ["reporting-service.FundPositionsReceived.v1"], dispatch),
             ]
             relay.start()
             for consumer in consumers: consumer.start()

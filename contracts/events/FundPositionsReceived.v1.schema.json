@@ -58,7 +58,8 @@
         "fund",
         "as_of",
         "holdings",
-        "market_value_paise"
+        "market_value_paise",
+        "by_asset_class"
       ],
       "properties": {
         "fund_manager": {
@@ -81,6 +82,26 @@
           "type": "integer",
           "minimum": 0,
           "description": "Money in paise (integer); never floating point"
+        },
+        "by_asset_class": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "asset_class",
+              "book_value_paise"
+            ],
+            "properties": {
+              "asset_class": {
+                "type": "string"
+              },
+              "book_value_paise": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
         }
       }
     }

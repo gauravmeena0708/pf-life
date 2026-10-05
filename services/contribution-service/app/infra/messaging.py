@@ -21,6 +21,45 @@ HANDLERS = {"HigherPensionDuesTransferRequested.v1": on_higher_pension_transfer,
             "UanMerged.v1": on_uan_merged}
 
 
+async def on_fund_positions_received(session, event):
+    """P2.24: consume EPF fund positions into fund_asset_classes, keeping latest as_of per fund manager."""
+    p = event["payload"]
+    if p.get("fund") != "EPF":
+        return
+    manager = p["fund_manager"]
+    as_of_val = p["as_of"]
+    as_of = date.fromisoformat(as_of_val) if isinstance(as_of_val, str) else as_of_val
+
+    # The watermark remains even when a newer snapshot has no asset classes.
+    accepted = await session.execute(text(
+        "INSERT INTO fund_position_snapshots (fund_manager, fund, as_of) VALUES (:m, 'EPF', :as_of) "
+        "ON CONFLICT (fund_manager, fund) DO UPDATE SET as_of = excluded.as_of "
+        "WHERE fund_position_snapshots.as_of <= excluded.as_of"), {"m": manager, "as_of": as_of})
+    if not accepted.rowcount:
+        return
+
+    await session.execute(
+        text("DELETE FROM fund_asset_classes WHERE fund_manager = :m AND fund = 'EPF'"),
+        {"m": manager}
+    )
+
+    by_asset_class = p.get("by_asset_class", [])
+    agg: dict[str, int] = {}
+    for item in by_asset_class:
+        ac = item["asset_class"]
+        agg[ac] = agg.get(ac, 0) + int(item["book_value_paise"])
+
+    for ac, bv in agg.items():
+        await session.execute(
+            text("INSERT INTO fund_asset_classes (fund_manager, fund, asset_class, book_value_paise, as_of) "
+                 "VALUES (:m, 'EPF', :ac, :bv, :as_of)"),
+            {"m": manager, "ac": ac, "bv": bv, "as_of": as_of}
+        )
+
+
+HANDLERS["FundPositionsReceived.v1"] = on_fund_positions_received
+
+
 async def on_staff_posting(session, event):
     """HR re-posted an officer: office routes follow the new posting (P2.9d)."""
     from app.infra.models import OfficeStaff

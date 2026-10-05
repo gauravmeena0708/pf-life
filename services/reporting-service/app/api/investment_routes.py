@@ -77,13 +77,18 @@ async def receive_positions(body: PositionFeed, response: Response, actor: Actor
     if not hmac.compare_digest(feed_signature(body), body.signature.lower()):
         raise Problem(401, "/problems/bad-signature", "The feed signature does not match")
     holdings = [holding.model_dump() for holding in body.holdings]
+    by_class: dict[str, int] = {}
+    for h in holdings:
+        by_class[h["asset_class"]] = by_class.get(h["asset_class"], 0) + h["book_value_paise"]
+    by_asset_class = [{"asset_class": ac, "book_value_paise": val} for ac, val in sorted(by_class.items())]
     async with session.begin():
         existed = await store_positions(session, body.fund_manager, body.fund, body.as_of, holdings)
         await add_event(session, producer="reporting-service", event_type="FundPositionsReceived.v1",
                         aggregate_type="fund_positions", aggregate_id=f"{body.fund_manager}|{body.fund}|{body.as_of}",
                         payload={"fund_manager": body.fund_manager, "fund": body.fund,
                                  "as_of": body.as_of.isoformat(), "holdings": len(holdings),
-                                 "market_value_paise": sum(h["market_value_paise"] for h in holdings)})
+                                 "market_value_paise": sum(h["market_value_paise"] for h in holdings),
+                                 "by_asset_class": by_asset_class})
     response.status_code = 200 if existed else 201
     return envelope({"fund_manager": body.fund_manager, "fund": body.fund,
                      "as_of": body.as_of.isoformat(), "holdings": len(holdings), "replaced": existed})

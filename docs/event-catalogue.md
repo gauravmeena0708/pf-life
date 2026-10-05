@@ -62,7 +62,7 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `AuditParaDecided.v1` | audit |  | audit_para | 1 |
 | `PrivacyRequestDecided.v1` | audit | member | privacy_request | 1 |
 | `RtiReplied.v1` | grievance | audit | rti_request | 1 |
-| `FundPositionsReceived.v1` | reporting | audit | fund_positions | 1 |
+| `FundPositionsReceived.v1` | reporting | contribution, audit | fund_positions | 1 |
 | `FailoverDrillRecorded.v1` | platform | audit | failover_drill | 1 |
 | `TrainingSandboxCreated.v1` | platform | audit | training_sandbox | 1 |
 | `CampRequestTaken.v1` | workflow | audit | camp_request | 1 |
