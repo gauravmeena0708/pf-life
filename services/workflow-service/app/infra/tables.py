@@ -78,6 +78,7 @@ cases = Table(
     Column("sla_due_at", DateTime(timezone=True)),
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
     Column("updated_at", DateTime(timezone=True), server_default=func.now()),
+    Column("source_at", DateTime(timezone=True)),            # event timestamp guard: older event never overwrites newer state
 )
 
 case_actions = Table(

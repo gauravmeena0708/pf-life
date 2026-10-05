@@ -400,7 +400,7 @@ async def stopped_cases(actor: Actor = Depends(require_stakeholder("fo.da_accoun
     return envelope([case_json(dict(r)) for r in rows])
 
 
-async def open_case(session: AsyncSession, payload: dict[str, Any], state: str) -> None:
+async def open_case(session: AsyncSession, payload: dict[str, Any], state: str, at: datetime | None = None) -> None:
     if (await session.execute(select(cases.c.case_id).where(cases.c.claim_id == payload["claim_id"]))).first():
         return
     # The chain and service level of the rule version the claim was made under (not whatever is in force now).
@@ -416,7 +416,7 @@ async def open_case(session: AsyncSession, payload: dict[str, Any], state: str) 
         amount_paise=payload["amount_paise"], rule_version=payload["rule_version"], chain=chain, step=0, round=1,
         advisory_signal_id=payload.get("advisory_signal_id"),
         state=state, current_role=chain[0] if state == "IN_REVIEW" else None, version=1,
-        sla_due_at=due))
+        sla_due_at=due, source_at=at))
 
 
 async def grievance_case(session: AsyncSession, grievance_id: str, office_id: str, tier: str) -> None:
