@@ -98,6 +98,7 @@ function fieldOffice(role: string): NavGroup[] {
       ...(["fo.da_compliance", "fo.ss", "fo.apfc", "fo.oic", "fo.eo"].includes(role) ? [link("Inspections and 7A inquiries", "/office/inquiries")] : []),
       ...(["fo.legal", "fo.oic", "fo.apfc"].includes(role) ? [link("Legal cases (appeals, writs, prosecutions)", "/office/legal")] : []),
       ...(["fo.recovery_officer", "fo.oic", "fo.apfc"].includes(role) ? [link("Recovery certificates", "/office/recovery")] : []),
+      ...(["fo.legal", "fo.recovery_officer", "fo.ao", "fo.oic", "fo.apfc"].includes(role) ? [link("Attachment orders and held claims", "/office/attachment-orders")] : []),
       link("7Q & 14B", ["fo.da_compliance", "fo.ss"].includes(role) ? "/office/returns#knock-off-heading" : undefined),
       link("Establishment", ["fo.oic", "fo.apfc"].includes(role) ? "/office/work-queue" : undefined),
       link("OLRE", ["fo.da_compliance", "fo.apfc"].includes(role) ? "/office/olre" : undefined),
@@ -151,6 +152,7 @@ function poc(role: string): NavGroup[] {
   const out: NavGroup[] = [];
   if (role === "ho.fa_cao" || role === "ho.cpfc") out.push({ label: "PMVBRY", to: "/ho/pmvbry" });
   if (role === "zo.acc" || role === "zo.rpfc1") out.push({ labelKey: "navigation.workQueue", to: "/office/work-queue" });
+  if (role === "zo.rpfc1") out.push({ label: "Independent reviews of grievances", to: "/office/grievance-reviews" });
   if (role === "zo.acc") out.push({ label: "Exemption proceedings", to: "/exemption-proceedings" });
   if (role === "zo.acc") out.push({ label: "Scrutiny of orders", to: "/office/inquiries#scrutiny-heading" });
   if (role === "zo.acc" || role === "ho.cpfc") out.push({ label: "Instalment referrals", to: "/zo/instalments" });
@@ -158,6 +160,7 @@ function poc(role: string): NavGroup[] {
   if (["zo.acc", "ho.cpfc", "gov.mole"].includes(role)) out.push({ labelKey: "navigation.dashboards", to: "/dashboards" });
   if (["ho.acc_hq", "ho.cpfc", "ho.pension", "ho.audit"].includes(role)) out.push({ labelKey: "navigation.policy", to: "/policy" });
   if (role === "ho.fa_cao") out.push({ labelKey: "navigation.interest", to: "/finance/interest" }, { label: "Record the interest rate", to: "/finance/interest#interest-rate-record-heading" });
+  if (role === "ho.fa_cao") out.push({ label: "Rule-change simulation", to: "/finance/rule-simulation" });
   if (role === "gov.statutory_auditor" || role === "ho.fa_cao") out.push({ label: "Balance sheet", to: "/ho/finance/balance-sheet" });
   if (["gov.cbt", "gov.ec", "gov.fiac", "ho.cpfc"].includes(role)) out.push({ label: "Board packs", to: "/governance/board-packs" });
   if (["ho.investment", "gov.fiac", "ho.fa_cao"].includes(role)) out.push({ label: "Investments", to: "/ho/finance/investments" });

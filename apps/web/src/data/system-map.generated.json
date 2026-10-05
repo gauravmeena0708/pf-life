@@ -4,9 +4,9 @@
   "interfaces": 21,
   "stakeholders": 115,
   "stakeholders_with_access": 95,
-  "activities": 291,
+  "activities": 303,
   "endpoints": {
-   "W": 478,
+   "W": 489,
    "M": 24,
    "P": 1,
    "?": 5
@@ -39,7 +39,7 @@
    "coverage": "Working",
    "purpose": "Employers: registration, members and KYC, monthly returns and challans, demands, attestations, exits.",
    "endpoints": {
-    "W": 109,
+    "W": 111,
     "M": 5,
     "P": 1,
     "?": 0
@@ -62,7 +62,7 @@
    "coverage": "Working",
    "purpose": "Members, pensioners and claimants: passbook, claims, transfers, nomination, pension and death claims.",
    "endpoints": {
-    "W": 93,
+    "W": 95,
     "M": 7,
     "P": 0,
     "?": 0
@@ -84,7 +84,7 @@
    "coverage": "Working",
    "purpose": "Field-office sections: claim scrutiny and payment, compliance, pension, EDLI, exemption, PRO counter.",
    "endpoints": {
-    "W": 134,
+    "W": 138,
     "M": 0,
     "P": 0,
     "?": 4
@@ -171,7 +171,7 @@
    "coverage": "Working",
    "purpose": "Regional office officers: approvals above the dealing level, freezes, ledger decisions.",
    "endpoints": {
-    "W": 75,
+    "W": 79,
     "M": 0,
     "P": 0,
     "?": 1
@@ -189,7 +189,7 @@
    "coverage": "Working",
    "purpose": "Zonal offices: grievances escalated to the zone, fraud-risk review, concurrent audit.",
    "endpoints": {
-    "W": 20,
+    "W": 22,
     "M": 0,
     "P": 0,
     "?": 0
@@ -208,7 +208,7 @@
    "coverage": "Working",
    "purpose": "Head office: policy rules (maker-checker), interest, circulars, the IS Division.",
    "endpoints": {
-    "W": 34,
+    "W": 35,
     "M": 0,
     "P": 0,
     "?": 0
@@ -458,7 +458,7 @@
    "name": "Member — active contributor (UAN holder)",
    "group": "A. Members, beneficiaries and the public",
    "endpoints": {
-    "W": 77,
+    "W": 79,
     "M": 4,
     "P": 0,
     "?": 0
@@ -539,6 +539,10 @@
     {
      "id": "F08.member_file",
      "does": "Register, track, reopen, remind and give feedback on grievances"
+    },
+    {
+     "id": "F08.review_ask",
+     "does": "Ask once, within 30 days of closure, for an independent review of a grievance's resolution, and see its outcome"
     },
     {
      "id": "F10.worker",
@@ -762,7 +766,7 @@
    "name": "Establishment owner / employer (legal entity)",
    "group": "B. Employers and intermediaries",
    "endpoints": {
-    "W": 41,
+    "W": 43,
     "M": 4,
     "P": 0,
     "?": 0
@@ -787,6 +791,10 @@
     {
      "id": "F01.establishment_owner",
      "does": "Keep the establishment record: KYC, branches (Form 2A), Form 5A, contractors; ask the office for profile or configuration changes"
+    },
+    {
+     "id": "F06.contractor_recovery_owner",
+     "does": "Record what the establishment recovered from a contractor whose workers' dues it was assessed for (EPF Act s.8A)"
     },
     {
      "id": "F01.payroll_providers",
@@ -815,7 +823,7 @@
    "name": "Authorised signatory (registered DSC / e-sign)",
    "group": "B. Employers and intermediaries",
    "endpoints": {
-    "W": 58,
+    "W": 60,
     "M": 2,
     "P": 0,
     "?": 0
@@ -832,6 +840,10 @@
     {
      "id": "F01.change_request",
      "does": "Request configuration change, closure / deregistration or office transfer"
+    },
+    {
+     "id": "F06.contractor_recovery_signatory",
+     "does": "Record what the establishment recovered from a contractor whose workers' dues it was assessed for (EPF Act s.8A)"
     },
     {
      "id": "F02.kyc_approve",
@@ -1100,7 +1112,7 @@
    "name": "Dealing Assistant / SSA (Accounts) — claims, IDS, member records, VDR, Appendix-E",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 47,
+    "W": 50,
     "M": 0,
     "P": 0,
     "?": 3
@@ -1137,6 +1149,10 @@
     {
      "id": "F04.attestation_view",
      "does": "Open the employer-signed PDF / DSC document before the approve action is enabled"
+    },
+    {
+     "id": "F04.attachment_da_accounts",
+     "does": "Record a court's attachment order on a member's balance and refuse it (EPF Act s.10)"
     },
     {
      "id": "F04.tds",
@@ -1226,7 +1242,7 @@
    "name": "Section Supervisor (Accounts / Compliance)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 16,
+    "W": 19,
     "M": 0,
     "P": 0,
     "?": 0
@@ -1245,6 +1261,10 @@
      "does": "Approve claims in the SS band"
     },
     {
+     "id": "F04.attachment_ss",
+     "does": "Record a court's attachment order on a member's balance and refuse it (EPF Act s.10)"
+    },
+    {
      "id": "F06.ss_note",
      "does": "Section Supervisor puts the report up to the circle officer (T+5) and registers the inquiry on e-Proceedings within 2 working days of approval"
     },
@@ -1261,7 +1281,7 @@
    "name": "Accounts Officer",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 18,
+    "W": 22,
     "M": 0,
     "P": 0,
     "?": 0
@@ -1278,6 +1298,10 @@
     {
      "id": "F04.approve_ao",
      "does": "Approve claims in the AO band"
+    },
+    {
+     "id": "F04.attachment_ao",
+     "does": "Record a court's attachment order on a member's balance and refuse it (EPF Act s.10), and release a claim held for a shared payee account after checking it"
     },
     {
      "id": "F04.transfer_decide",
@@ -1327,7 +1351,7 @@
    "name": "APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 56,
+    "W": 60,
     "M": 0,
     "P": 0,
     "?": 1
@@ -1372,6 +1396,10 @@
     {
      "id": "F04.redisburse_approve",
      "does": "Authorise a new payment after a return without reopening adjudication"
+    },
+    {
+     "id": "F04.attachment_apfc",
+     "does": "Record a court's attachment order on a member's balance and refuse it (EPF Act s.10), and release a claim held for a shared payee account after checking it"
     },
     {
      "id": "F04.shares",
@@ -1460,7 +1488,7 @@
    "name": "Officer-in-Charge of the office",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 41,
+    "W": 44,
     "M": 0,
     "P": 0,
     "?": 0
@@ -1477,6 +1505,10 @@
     {
      "id": "F04.lock_admin",
      "does": "Inspect member-ledger locks and release an orphaned one with a recorded reason"
+    },
+    {
+     "id": "F04.attachment_oic",
+     "does": "Record a court's attachment order on a member's balance and refuse it (EPF Act s.10)"
     },
     {
      "id": "F06.allocate",
@@ -1754,12 +1786,16 @@
    "name": "Recovery Officer (8B–8G recovery, attachment, arrest warrants)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 8,
+    "W": 11,
     "M": 0,
     "P": 0,
     "?": 0
    },
    "activities": [
+    {
+     "id": "F04.attachment_recovery_officer",
+     "does": "Record a court's attachment order on a member's balance and refuse it (EPF Act s.10)"
+    },
     {
      "id": "F06.recovery",
      "does": "Execute the recovery certificate: demand notice (EPFCP-1), collections, attachment and sale, receiver, arrest"
@@ -1789,12 +1825,16 @@
    "name": "Legal Cell (court cases, CGIT appeals)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 7,
+    "W": 10,
     "M": 0,
     "P": 0,
     "?": 0
    },
    "activities": [
+    {
+     "id": "F04.attachment_legal",
+     "does": "Record a court's attachment order on a member's balance and refuse it (EPF Act s.10)"
+    },
     {
      "id": "F06.legal",
      "does": "Record 7-I appeals, 7-O pre-deposits / waivers and court / tribunal orders; track compliance"
@@ -2011,7 +2051,7 @@
    "name": "RPFC-I at the Zonal Office (zonal authority for freezing categories B and C; zone-level monitoring)",
    "group": "E. Zonal Office (ZO)",
    "endpoints": {
-    "W": 4,
+    "W": 6,
     "M": 0,
     "P": 0,
     "?": 0
@@ -2020,6 +2060,10 @@
     {
      "id": "F07.freeze_zo",
      "does": "Order freezing (Categories B / C) at zone level"
+    },
+    {
+     "id": "F08.review_decide",
+     "does": "Review a closed grievance from another office independently: uphold the resolution or direct a fresh decision with reasons"
     }
    ],
    "personas": [
@@ -2173,7 +2217,7 @@
    "name": "FA & CAO — Finance & Accounts, FIA vertical (freezing category A), Balance Sheet cell",
    "group": "F. Head Office (HO) — leadership and divisions",
    "endpoints": {
-    "W": 10,
+    "W": 11,
     "M": 0,
     "P": 0,
     "?": 0
@@ -2186,6 +2230,10 @@
     {
      "id": "F07.freeze_ho",
      "does": "Order freezing for Category A (FIA vertical)"
+    },
+    {
+     "id": "F13.rule_simulation",
+     "does": "Simulate a proposed interest rate, wage ceiling or contribution split on every member before deciding it; nothing is posted"
     },
     {
      "id": "F13.accounts",
@@ -3439,6 +3487,26 @@
    "src": "CMP"
   },
   {
+   "id": "F06.contractor_recovery_signatory",
+   "flow": "F06",
+   "actor": "employer.signatory",
+   "does": "Record what the establishment recovered from a contractor whose workers' dues it was assessed for (EPF Act s.8A)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CMP"
+  },
+  {
+   "id": "F06.contractor_recovery_owner",
+   "flow": "F06",
+   "actor": "employer.owner",
+   "does": "Record what the establishment recovered from a contractor whose workers' dues it was assessed for (EPF Act s.8A)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "CMP"
+  },
+  {
    "id": "F01.contractors",
    "flow": "F01",
    "actor": "principal_employer",
@@ -4277,6 +4345,76 @@
    "status": "BUILT",
    "endpoints": 1,
    "src": "WEB"
+  },
+  {
+   "id": "F04.attachment_recovery_officer",
+   "flow": "F04",
+   "actor": "fo.recovery_officer",
+   "does": "Record a court's attachment order on a member's balance and refuse it (EPF Act s.10)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "MAP"
+  },
+  {
+   "id": "F04.attachment_legal",
+   "flow": "F04",
+   "actor": "fo.legal",
+   "does": "Record a court's attachment order on a member's balance and refuse it (EPF Act s.10)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "MAP"
+  },
+  {
+   "id": "F04.attachment_oic",
+   "flow": "F04",
+   "actor": "fo.oic",
+   "does": "Record a court's attachment order on a member's balance and refuse it (EPF Act s.10)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "MAP"
+  },
+  {
+   "id": "F04.attachment_apfc",
+   "flow": "F04",
+   "actor": "fo.apfc",
+   "does": "Record a court's attachment order on a member's balance and refuse it (EPF Act s.10), and release a claim held for a shared payee account after checking it",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "MAP"
+  },
+  {
+   "id": "F04.attachment_ao",
+   "flow": "F04",
+   "actor": "fo.ao",
+   "does": "Record a court's attachment order on a member's balance and refuse it (EPF Act s.10), and release a claim held for a shared payee account after checking it",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 4,
+   "src": "MAP"
+  },
+  {
+   "id": "F04.attachment_ss",
+   "flow": "F04",
+   "actor": "fo.ss",
+   "does": "Record a court's attachment order on a member's balance and refuse it (EPF Act s.10)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "MAP"
+  },
+  {
+   "id": "F04.attachment_da_accounts",
+   "flow": "F04",
+   "actor": "fo.da_accounts",
+   "does": "Record a court's attachment order on a member's balance and refuse it (EPF Act s.10)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "MAP"
   },
   {
    "id": "F04.track",
@@ -5541,6 +5679,28 @@
    "src": "WEB"
   },
   {
+   "id": "F08.review_ask",
+   "flow": "F08",
+   "actor": "member",
+   "does": "Ask once, within 30 days of closure, for an independent review of a grievance's resolution, and see its outcome",
+   "next": [
+    "F08.review_decide"
+   ],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "SOP-B"
+  },
+  {
+   "id": "F08.review_decide",
+   "flow": "F08",
+   "actor": "zo.rpfc1",
+   "does": "Review a closed grievance from another office independently: uphold the resolution or direct a fresh decision with reasons",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "SOP-B"
+  },
+  {
    "id": "F08.public_file",
    "flow": "F08",
    "actor": "complainant",
@@ -5987,6 +6147,16 @@
    "status": "BUILT",
    "endpoints": 3,
    "src": "WSU"
+  },
+  {
+   "id": "F13.rule_simulation",
+   "flow": "F13",
+   "actor": "ho.fa_cao",
+   "does": "Simulate a proposed interest rate, wage ceiling or contribution split on every member before deciding it; nothing is posted",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "MAP"
   },
   {
    "id": "F12.concurrent",

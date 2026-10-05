@@ -1256,6 +1256,125 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/attachment-orders:
+    get:
+      operationId: getOfficeAttachmentOrders
+      summary: Attachment orders received and refused
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: claim
+      x-callers:
+      - fo.ao
+      - fo.apfc
+      - fo.da_accounts
+      - fo.legal
+      - fo.oic
+      - fo.recovery_officer
+      - fo.ss
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+    post:
+      operationId: postOfficeAttachmentOrders
+      summary: 'Record a court''s attachment or garnishee order against a member''s balance or claim: refused under EPF Act
+        s.10, the paym'
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: claim
+      x-callers:
+      - fo.ao
+      - fo.apfc
+      - fo.da_accounts
+      - fo.legal
+      - fo.oic
+      - fo.recovery_officer
+      - fo.ss
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Record a court''s attachment or garnishee order against a member''s balance or claim: refused under EPF
+        Act s.10, the payment never diverted (P2.19)'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/attachment-orders/{orderId}:
+    get:
+      operationId: getOfficeAttachmentOrdersOrderId
+      summary: One attachment order and the refusal sent
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: orderId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: claim
+      x-callers:
+      - fo.ao
+      - fo.apfc
+      - fo.da_accounts
+      - fo.legal
+      - fo.oic
+      - fo.recovery_officer
+      - fo.ss
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
   /office/claims/{claimId}/additional-forms:
     get:
       operationId: getOfficeClaimsClaimIdAdditionalForms
@@ -1447,6 +1566,52 @@ paths:
         regenerate it before acting): interest split, TDS and net payable, with the rule and static-data versions used'
       requestBody:
         required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/claims/{claimId}/hold-releases:
+    post:
+      operationId: postOfficeClaimsClaimIdHoldReleases
+      summary: An approver releases a claim held because its payee account is already used by other members' claims, after
+        checking the
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: claimId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: claim
+      x-callers:
+      - fo.ao
+      - fo.apfc
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: An approver releases a claim held because its payee account is already used by other members' claims, after
+        checking the account (P2.19)
+      requestBody:
+        required: false
         content:
           application/json:
             schema:

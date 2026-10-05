@@ -437,7 +437,8 @@
       "EMPLOYER": "Employer not paying",
       "OTHER": "Something else"
     },
-    "resolvedBy": "Resolved by the {{tier}} on {{when}}."
+    "resolvedBy": "Resolved by the {{tier}} on {{when}}.",
+    "askReview": "Not satisfied? Ask for an independent review"
   },
   "security": {
     "eyebrow": "Member services · security",

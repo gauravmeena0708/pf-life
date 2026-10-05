@@ -103,7 +103,7 @@ async def review_queue(actor: Actor = Depends(REVIEWER), session: AsyncSession =
     return envelope([{**review_view(row), "subject": row["subject_line"], "office_id": row["office_id"]} for row in rows])
 
 
-@router.post("/api/v1/office/grievance-reviews/{grievance_id}/decision")
+@router.post("/api/v1/office/grievance-reviews/{grievance_id}/decisions")
 async def decide_review(grievance_id: str, body: ReviewDecision, actor: Actor = Depends(REVIEWER),
                         session: AsyncSession = Depends(db)) -> dict:
     async with session.begin():

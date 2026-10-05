@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 
 import { api, command, rupees, type Envelope } from "../../api/client";
 import { ProblemMessage } from "../../components/ProblemMessage";
+import { StepUpDialog } from "../stepup/StepUpDialog";
+import { useStepUp } from "../stepup/useStepUp";
 import i18n from "../../i18n";
 import enP219 from "../../i18n/p219-claim-service.en.json";
 import hiP219 from "../../i18n/p219-claim-service.hi.json";
@@ -42,6 +44,7 @@ const text = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 export function AttachmentOrdersPage() {
   const { t } = useTranslation();
   const qc = useQueryClient();
+  const stepUp = useStepUp();
   const [error, setError] = useState<unknown>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [lastOrder, setLastOrder] = useState<AttachmentOrder | null>(null);
@@ -97,7 +100,10 @@ export function AttachmentOrdersPage() {
     const note = text(f, "note");
 
     void run(async () => {
-      await command("POST", `/api/v1/office/claims/${claimId}/clear-hold`, { note });
+      // Releasing the hold can lead straight to payment: the approver confirms it (step-up bound to the claim).
+      const token = await stepUp.ask({ action: "release-hold", resourceId: claimId, summary: `Release the shared-account hold on ${claimId}` });
+      if (!token) return null;
+      await command("POST", `/api/v1/office/claims/${claimId}/hold-releases`, { note }, { stepUpToken: token });
       form.reset();
       return `Claim ${claimId}: Hold cleared. Proceeded to settlement processing.`;
     });
@@ -437,6 +443,7 @@ export function AttachmentOrdersPage() {
           <p className="muted">{t("p219.no_orders", "No attachment orders recorded in this office.")}</p>
         ) : null}
       </section>
+      <StepUpDialog request={stepUp.request} onConfirmed={stepUp.onConfirmed} onCancel={stepUp.onCancel} />
     </main>
   );
 }

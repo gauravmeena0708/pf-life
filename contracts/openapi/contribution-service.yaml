@@ -1502,6 +1502,45 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/accounts/rule-change-simulations:
+    post:
+      operationId: postOfficeAccountsRuleChangeSimulations
+      summary: Simulate a proposed interest rate, wage ceiling or contribution split on every member with the real calculations
+        — nothi
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - ho.fa_cao
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: Simulate a proposed interest rate, wage ceiling or contribution split on every member with the real calculations
+        — nothing posted but an audit (P2.24)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/accounts/{accountLinkId}/reactivations:
     post:
       operationId: postOfficeAccountsAccountLinkIdReactivations

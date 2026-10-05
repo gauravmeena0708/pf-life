@@ -1690,6 +1690,77 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /employers/me/contractor-recoveries:
+    get:
+      operationId: getEmployersContractorRecoveries
+      summary: The principal employer's recoveries from contractors
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/EstablishmentId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - employer.owner
+      - employer.signatory
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
+    post:
+      operationId: postEmployersContractorRecoveries
+      summary: A principal employer records what it recovered from a contractor whose dues it was assessed for — by deduction
+        or as a d
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/EstablishmentId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - employer.owner
+      - employer.signatory
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
+      description: A principal employer records what it recovered from a contractor whose dues it was assessed for — by deduction
+        or as a debt (EPF Act s.8A) (P2.19)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /employers/me/contractors:
     get:
       operationId: getEmployersContractors
@@ -7778,6 +7849,82 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /members/me/grievances/{grievanceId}/review:
+    get:
+      operationId: getMembersGrievancesGrievanceIdReview
+      summary: 'The independent review of my closed grievance: the deadline to ask (30 days from closure), its state and outcome
+        (P2.24)'
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: grievanceId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: grievance
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+  /members/me/grievances/{grievanceId}/reviews:
+    post:
+      operationId: postMembersGrievancesGrievanceIdReviews
+      summary: Ask once, within 30 days of closure, for an independent review of a grievance's resolution (P2.24)
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: grievanceId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: grievance
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /members/me/higher-pension-options:
     get:
       operationId: getMembersHigherPensionOptions
@@ -9773,6 +9920,45 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/accounts/rule-change-simulations:
+    post:
+      operationId: postOfficeAccountsRuleChangeSimulations
+      summary: Simulate a proposed interest rate, wage ceiling or contribution split on every member with the real calculations
+        — nothi
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - ho.fa_cao
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: Simulate a proposed interest rate, wage ceiling or contribution split on every member with the real calculations
+        — nothing posted but an audit (P2.24)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/accounts/{accountLinkId}/crowdsource-verifications:
     post:
       operationId: postOfficeAccountsAccountLinkIdCrowdsourceVerifications
@@ -9975,6 +10161,125 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/attachment-orders:
+    get:
+      operationId: getOfficeAttachmentOrders
+      summary: Attachment orders received and refused
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: claim
+      x-callers:
+      - fo.ao
+      - fo.apfc
+      - fo.da_accounts
+      - fo.legal
+      - fo.oic
+      - fo.recovery_officer
+      - fo.ss
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+    post:
+      operationId: postOfficeAttachmentOrders
+      summary: 'Record a court''s attachment or garnishee order against a member''s balance or claim: refused under EPF Act
+        s.10, the paym'
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: claim
+      x-callers:
+      - fo.ao
+      - fo.apfc
+      - fo.da_accounts
+      - fo.legal
+      - fo.oic
+      - fo.recovery_officer
+      - fo.ss
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Record a court''s attachment or garnishee order against a member''s balance or claim: refused under EPF
+        Act s.10, the payment never diverted (P2.19)'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/attachment-orders/{orderId}:
+    get:
+      operationId: getOfficeAttachmentOrdersOrderId
+      summary: One attachment order and the refusal sent
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: orderId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: claim
+      x-callers:
+      - fo.ao
+      - fo.apfc
+      - fo.da_accounts
+      - fo.legal
+      - fo.oic
+      - fo.recovery_officer
+      - fo.ss
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
   /office/cases/{caseId}:
     get:
       operationId: getOfficeCasesCaseId
@@ -10546,6 +10851,52 @@ paths:
         regenerate it before acting): interest split, TDS and net payable, with the rule and static-data versions used'
       requestBody:
         required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/claims/{claimId}/hold-releases:
+    post:
+      operationId: postOfficeClaimsClaimIdHoldReleases
+      summary: An approver releases a claim held because its payee account is already used by other members' claims, after
+        checking the
+      tags:
+      - Returns, challans and payments
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: claimId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: claim
+      x-callers:
+      - fo.ao
+      - fo.apfc
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: An approver releases a claim held because its payee account is already used by other members' claims, after
+        checking the account (P2.19)
+      requestBody:
+        required: false
         content:
           application/json:
             schema:
@@ -13504,6 +13855,76 @@ paths:
       - fo.da_compliance
       - fo.oic
       - fo.ss
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/grievance-reviews:
+    get:
+      operationId: getOfficeGrievanceReviews
+      summary: Independent reviews waiting for a zonal reviewer, never the handling office's own (P2.24)
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: grievance
+      x-callers:
+      - zo.rpfc1
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+  /office/grievance-reviews/{grievanceId}/decisions:
+    post:
+      operationId: postOfficeGrievanceReviewsGrievanceIdDecisions
+      summary: Uphold the resolution, or direct a fresh decision with reasons (P2.24)
+      tags:
+      - Grievances, security, platform, audit and oversight
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: grievanceId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: grievance
+      x-callers:
+      - zo.rpfc1
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []

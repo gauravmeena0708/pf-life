@@ -99,7 +99,8 @@ export function GrievancesPage() {
               <tr key={g.grievance_id}>
                 <td><Link to={`/member/grievances/${g.grievance_id}`}><code>{g.grievance_id}</code></Link></td>
                 <td>{g.subject}</td>
-                <td><span className="state-pill">{stateLabel(g.state, t)}</span></td>
+                <td><span className="state-pill">{stateLabel(g.state, t)}</span>
+                  {g.state === "CLOSED" ? <> <Link to={`/member/grievances/${g.grievance_id}/review`}>{t("grievances.askReview")}</Link></> : null}</td>
                 <td>{t(`grievances.tiers.${g.tier}`)}</td>
                 <td>{dateTime(g.sla_due_at, i18n.language)}</td>
               </tr>

@@ -1186,6 +1186,22 @@
   },
   {
     "method": "POST",
+    "path_template": "/office/grievance-reviews/{grievanceId}/decisions",
+    "regex": "^/office/grievance\\-reviews/[^/]+/decisions$",
+    "status": "W",
+    "phase": 1,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "zo.rpfc1"
+    ],
+    "summary": "Uphold the resolution, or direct a fresh decision with reasons (P2.24)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/office/outreach-camps/{campId}/assisted-requests",
     "regex": "^/office/outreach\\-camps/[^/]+/assisted\\-requests$",
     "status": "W",
@@ -1978,6 +1994,22 @@
   },
   {
     "method": "POST",
+    "path_template": "/members/me/grievances/{grievanceId}/reviews",
+    "regex": "^/members/me/grievances/[^/]+/reviews$",
+    "status": "W",
+    "phase": 1,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Ask once, within 30 days of closure, for an independent review of a grievance's resolution (P2.24)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/office/compliance/cases/{caseId}/reviews-7b",
     "regex": "^/office/compliance/cases/[^/]+/reviews\\-7b$",
     "status": "W",
@@ -2107,6 +2139,22 @@
       "ext.shram_suvidha"
     ],
     "summary": "Shram Suvidha common-registration feed (signed)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/members/me/grievances/{grievanceId}/review",
+    "regex": "^/members/me/grievances/[^/]+/review$",
+    "status": "W",
+    "phase": 1,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "The independent review of my closed grievance: the deadline to ask (30 days from closure), its state and outcome (P2.24)",
     "revocation": false
   },
   {
@@ -2273,6 +2321,22 @@
       "member"
     ],
     "summary": "Transaction-intent confirmation (Journey B3)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/accounts/rule-change-simulations",
+    "regex": "^/office/accounts/rule\\-change\\-simulations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.fa_cao"
+    ],
+    "summary": "Simulate a proposed interest rate, wage ceiling or contribution split on every member with the real calculations — nothing posted but an audit (P2.24)",
     "revocation": false
   },
   {
@@ -3262,6 +3326,23 @@
   },
   {
     "method": "POST",
+    "path_template": "/office/claims/{claimId}/hold-releases",
+    "regex": "^/office/claims/[^/]+/hold\\-releases$",
+    "status": "W",
+    "phase": 1,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.ao",
+      "fo.apfc"
+    ],
+    "summary": "An approver releases a claim held because its payee account is already used by other members' claims, after checking the account (P2.19)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/office/establishments/{estId}/freezes",
     "regex": "^/office/establishments/[^/]+/freezes$",
     "status": "W",
@@ -3357,6 +3438,40 @@
       "employer.signatory"
     ],
     "summary": "Payment receipt / CRN",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/contractor-recoveries",
+    "regex": "^/employers/me/contractor\\-recoveries$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.owner",
+      "employer.signatory"
+    ],
+    "summary": "The principal employer's recoveries from contractors",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/employers/me/contractor-recoveries",
+    "regex": "^/employers/me/contractor\\-recoveries$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.owner",
+      "employer.signatory"
+    ],
+    "summary": "A principal employer records what it recovered from a contractor whose dues it was assessed for — by deduction or as a debt (EPF Act s.8A) (P2.19)",
     "revocation": false
   },
   {
@@ -3932,6 +4047,28 @@
       "member"
     ],
     "summary": "Available claim types with rule version and reasons (Journey B3)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/attachment-orders/{orderId}",
+    "regex": "^/office/attachment\\-orders/[^/]+$",
+    "status": "W",
+    "phase": 1,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.ao",
+      "fo.apfc",
+      "fo.da_accounts",
+      "fo.legal",
+      "fo.oic",
+      "fo.recovery_officer",
+      "fo.ss"
+    ],
+    "summary": "One attachment order and the refusal sent",
     "revocation": false
   },
   {
@@ -6324,6 +6461,50 @@
   },
   {
     "method": "GET",
+    "path_template": "/office/attachment-orders",
+    "regex": "^/office/attachment\\-orders$",
+    "status": "W",
+    "phase": 1,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.ao",
+      "fo.apfc",
+      "fo.da_accounts",
+      "fo.legal",
+      "fo.oic",
+      "fo.recovery_officer",
+      "fo.ss"
+    ],
+    "summary": "Attachment orders received and refused",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/attachment-orders",
+    "regex": "^/office/attachment\\-orders$",
+    "status": "W",
+    "phase": 1,
+    "owner": "claim",
+    "upstream": "http://claim-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.ao",
+      "fo.apfc",
+      "fo.da_accounts",
+      "fo.legal",
+      "fo.oic",
+      "fo.recovery_officer",
+      "fo.ss"
+    ],
+    "summary": "Record a court's attachment or garnishee order against a member's balance or claim: refused under EPF Act s.10, the payment never diverted (P2.19)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/office/exempted/rankings",
     "regex": "^/office/exempted/rankings$",
     "status": "W",
@@ -6337,6 +6518,22 @@
       "ho.exemption"
     ],
     "summary": "The online performance evaluator: every exempted establishment's score of 600 for a month, ranked",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/grievance-reviews",
+    "regex": "^/office/grievance\\-reviews$",
+    "status": "W",
+    "phase": 1,
+    "owner": "grievance",
+    "upstream": "http://grievance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "zo.rpfc1"
+    ],
+    "summary": "Independent reviews waiting for a zonal reviewer, never the handling office's own (P2.24)",
     "revocation": false
   },
   {

@@ -25,7 +25,7 @@ export function IndependentReviewQueuePage() {
     event.preventDefault(); const form = event.currentTarget; const data = new FormData(form);
     setError(null); setNotice("");
     try {
-      await command("POST", `/api/v1/office/grievance-reviews/${grievanceId}/decision`, {
+      await command("POST", `/api/v1/office/grievance-reviews/${grievanceId}/decisions`, {
         outcome: data.get("outcome"), reasons: data.get("reasons"),
       });
       setNotice(words.submitted); await qc.invalidateQueries({ queryKey: ["p224-review-queue"] });

@@ -204,6 +204,10 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /office/eps-rectifications` | EPS rectifications: worked out, approved, awaiting a trust's remittance | W | 1 | contribution |
 | `POST /office/eps-rectifications/{rectificationId}/approvals` 🔐 | The APFC approves (or rejects) an EPS rectification: A/c 10 ↔ A/c 1 or the trust; the pension service deleted or credited | W | 1 | contribution |
 | `POST /office/eps-rectifications/{rectificationId}/trust-remittances` | Cash records an exempted trust's remittance of the EPS due (scenario II) | W | 1 | contribution |
+| `POST /office/attachment-orders` | Record a court's attachment or garnishee order against a member's balance or claim: refused under EPF Act s.10, the payment never diverted (P2.19) | W | 1 | claim |
+| `GET /office/attachment-orders` | Attachment orders received and refused | W | 1 | claim |
+| `GET /office/attachment-orders/{orderId}` | One attachment order and the refusal sent | W | 1 | claim |
+| `POST /office/claims/{claimId}/hold-releases` 🔐 | An approver releases a claim held because its payee account is already used by other members' claims, after checking the account (P2.19) | W | 1 | claim |
 | `POST /office/ledger-adjustments/{adjustmentId}/approvals` 🔐 | Second approval of a ledger adjustment | W | 1 | contribution |
 | `GET /office/ecr-filings` | Returns submitted but not yet paid (to reject, or to reject a stuck payment) | W | 1 | contribution |
 | `POST /office/ecr-filings/{filingId}/rejections` 🔐 | Reject an ECR **before** posting | W | 1 | contribution |
@@ -378,6 +382,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/members/{uan}/freezes` 🔐 | **UAN / member-ID freeze** with reason and evidence (tier-2 process `member_freeze`) | W | 1 | member |
 | `POST /office/members/{uan}/defreezes` 🔐 | De-freeze, maker-checker (tier-2 process `member_freeze`) | W | 1 | member |
 | `POST /office/accounts/interest-postings` 💰🔐 | Annual interest crediting run (illustrative rate) | W | 1 | contribution |
+| `POST /office/accounts/rule-change-simulations` | Simulate a proposed interest rate, wage ceiling or contribution split on every member with the real calculations — nothing posted but an audit (P2.24) | W | 1 | contribution |
 | `GET /office/accounts/interest-postings?financialYear=` | Interest run preview: the rate in the rule set in force, interest due per account (monthly running balance), already credited, the difference to credit, and earlier runs | W | 1 | contribution |
 | `GET /office/accounts/inoperative` | **Inoperative account** identification | W | 1 | contribution |
 | `GET /office/scwf/identifications/{year}` | Accounts unclaimed seven years after becoming inoperative, identified by 30 September for transfer to the Senior Citizens' Welfare Fund — a listing, nothing moved (P2.19) | W | 1 | contribution |
@@ -399,6 +404,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/freeze-cases/{caseId}/verifications` | Freeze-case verification step (DA → SS/AO → APFC/RPFC-II → OIC; tier-2 process `member_freeze`) | W | 1 | workflow |
 | `POST /office/establishments/{estId}/freezes` 🔐 | Freeze an establishment | W | 1 | employer |
 | `POST /office/establishments/mergers` 🔐 | Record an amalgamation: the transferee takes over the transferor's members without a break in service and its dues (P2.19) | W | 1 | contribution |
+| `POST /employers/me/contractor-recoveries` | A principal employer records what it recovered from a contractor whose dues it was assessed for — by deduction or as a debt (EPF Act s.8A) (P2.19) | W | 1 | compliance |
+| `GET /employers/me/contractor-recoveries` | The principal employer's recoveries from contractors | W | 1 | compliance |
 | `POST /office/establishments/{estId}/defreezes` 🔐 | De-freeze an establishment, maker-checker | W | 1 | employer |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | Inoperative-account crowdsourcing verification through co-workers' logins | W | 1 | member |
 | `POST /office/outreach-camps/{campId}/assisted-requests` | Requests taken at Nidhi Aapke Nikat camps | W | 1 | workflow |
@@ -664,6 +671,10 @@ Monitoring (`/monitoring/**`), AI (`/ai/**`), audit (`/audit/**`) and NDC (`/ndc
 |---|---|---|---|---|
 | `POST /members/me/grievances` | Member registers grievance linked to a claim (Journey C1) | W | 1 | grievance |
 | `GET /members/me/grievances` | List own grievances | W | 1 | grievance |
+| `GET /members/me/grievances/{grievanceId}/review` | The independent review of my closed grievance: the deadline to ask (30 days from closure), its state and outcome (P2.24) | W | 1 | grievance |
+| `POST /members/me/grievances/{grievanceId}/reviews` | Ask once, within 30 days of closure, for an independent review of a grievance's resolution (P2.24) | W | 1 | grievance |
+| `GET /office/grievance-reviews` | Independent reviews waiting for a zonal reviewer, never the handling office's own (P2.24) | W | 1 | grievance |
+| `POST /office/grievance-reviews/{grievanceId}/decisions` | Uphold the resolution, or direct a fresh decision with reasons (P2.24) | W | 1 | grievance |
 | `POST /grievances/{grievanceId}/documents` | Attach a synthetic document (object store, malware-scan stub, Journey C1) | W | 1 | grievance |
 | `GET /grievances/{grievanceId}` | Grievance detail (only the assigned office can read the body — Journey C2) | W | 1 | grievance |
 | `POST /grievances/{grievanceId}/messages` | Reply / message | W | 1 | grievance |

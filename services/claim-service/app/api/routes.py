@@ -541,15 +541,19 @@ class ClearHoldInput(BaseModel):
     note: str = Field(min_length=5, max_length=1000)
 
 
-@router.post("/api/v1/office/claims/{claim_id}/clear-hold")
-async def clear_hold(claim_id: str, body: ClearHoldInput,
-                     actor: Actor = Depends(require_stakeholder("fo.apfc", "fo.ao", "fo.ss", "fo.da_accounts", "fo.oic")),
-                     session: AsyncSession = Depends(db)) -> dict:
-    """P2.19b: An officer clears the fraud hold on a claim with a shared bank account."""
+@router.post("/api/v1/office/claims/{claim_id}/hold-releases")
+async def release_shared_account_hold(claim_id: str, body: ClearHoldInput,
+                                      actor: Actor = Depends(require_stakeholder("fo.apfc", "fo.ao")),
+                                      session: AsyncSession = Depends(db)) -> dict:
+    """P2.19: an approver (AO or APFC) who has checked the payee account releases the shared-bank-account hold. Only that
+    hold can be released here, and only from ON_HOLD_OFFICE_REVIEW: a claim already under review keeps its chain."""
     async with session.begin():
         claim = await load_claim(session, claim_id, office=await staff_office(session, actor), lock=True)
-        if claim["state"] not in ("ON_HOLD_OFFICE_REVIEW", "UNDER_REVIEW"):
-            raise Problem(409, "/problems/invalid-state", "This claim is not on hold for office review",
+        last_hold = (await session.execute(select(claim_timeline.c.note).where(
+            claim_timeline.c.claim_id == claim_id, claim_timeline.c.state == "ON_HOLD_OFFICE_REVIEW")
+            .order_by(claim_timeline.c.id.desc()).limit(1))).scalar_one_or_none()
+        if claim["state"] != "ON_HOLD_OFFICE_REVIEW" or not last_hold or "shared with" not in last_hold:
+            raise Problem(409, "/problems/invalid-state", "This claim is not held for a shared bank account",
                           f"Current status: {claim['state']}.")
         rules = await rules_by_version(session, claim["rule_version"])
         note = f"Hold cleared by officer: {body.note}"
@@ -564,7 +568,7 @@ async def clear_hold(claim_id: str, body: ClearHoldInput,
                                      f"{note}. Sent for review: " + " → ".join(ROLE_LABELS[r] for r in chain) + ".")
             await notify(session, claim, "CLAIM_UNDER_REVIEW", actor.correlation_id)
         await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder,
-                    action="claim.clear_hold", target_type="claim", target_id=claim_id, detail=body.note)
+                    action="claim.shared_account_hold_released", target_type="claim", target_id=claim_id, detail=body.note)
         view = await claim_view(session, claim)
     return envelope(view)
 

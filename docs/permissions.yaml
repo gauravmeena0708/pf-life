@@ -521,6 +521,18 @@ stakeholders:
     step_up: false
     via:
     - F08.member_file
+  - endpoint: GET /members/me/grievances/{grievanceId}/review
+    status: W
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F08.review_ask
+  - endpoint: POST /members/me/grievances/{grievanceId}/reviews
+    status: W
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F08.review_ask
   - endpoint: GET /members/me/international
     status: W
     scope: self — caller's own member record only
@@ -975,6 +987,18 @@ stakeholders:
     step_up: false
     via:
     - F01.establishment_owner
+  - endpoint: POST /employers/me/contractor-recoveries
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.contractor_recovery_owner
+  - endpoint: GET /employers/me/contractor-recoveries
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.contractor_recovery_owner
   - endpoint: GET /employers/me/payroll-providers
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
@@ -1126,6 +1150,18 @@ stakeholders:
     step_up: true
     via:
     - F01.change_request
+  - endpoint: POST /employers/me/contractor-recoveries
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.contractor_recovery_signatory
+  - endpoint: GET /employers/me/contractor-recoveries
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.contractor_recovery_signatory
   - endpoint: GET /employers/me/kyc-approvals
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
@@ -1882,6 +1918,24 @@ stakeholders:
     step_up: false
     via:
     - F04.attestation_view
+  - endpoint: POST /office/attachment-orders
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_da_accounts
+  - endpoint: GET /office/attachment-orders
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_da_accounts
+  - endpoint: GET /office/attachment-orders/{orderId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_da_accounts
   - endpoint: POST /office/tds/computations
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2133,6 +2187,24 @@ stakeholders:
     step_up: true
     via:
     - F04.approve_ss
+  - endpoint: POST /office/attachment-orders
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_ss
+  - endpoint: GET /office/attachment-orders
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_ss
+  - endpoint: GET /office/attachment-orders/{orderId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_ss
   - endpoint: GET /office/compliance/inspections
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2224,6 +2296,30 @@ stakeholders:
     step_up: true
     via:
     - F04.approve_ao
+  - endpoint: POST /office/attachment-orders
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_ao
+  - endpoint: GET /office/attachment-orders
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_ao
+  - endpoint: GET /office/attachment-orders/{orderId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_ao
+  - endpoint: POST /office/claims/{claimId}/hold-releases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F04.attachment_ao
   - endpoint: GET /office/transfers
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2430,6 +2526,30 @@ stakeholders:
     step_up: true
     via:
     - F04.redisburse_approve
+  - endpoint: POST /office/attachment-orders
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_apfc
+  - endpoint: GET /office/attachment-orders
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_apfc
+  - endpoint: GET /office/attachment-orders/{orderId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_apfc
+  - endpoint: POST /office/claims/{claimId}/hold-releases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F04.attachment_apfc
   - endpoint: PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2723,6 +2843,24 @@ stakeholders:
     step_up: true
     via:
     - F04.lock_admin
+  - endpoint: POST /office/attachment-orders
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_oic
+  - endpoint: GET /office/attachment-orders
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_oic
+  - endpoint: GET /office/attachment-orders/{orderId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_oic
   - endpoint: GET /office/compliance/cases
     status: W
     scope: office jurisdiction of the caller's posting
@@ -3251,6 +3389,24 @@ stakeholders:
     via:
     - F06.inspect
   fo.recovery_officer:
+  - endpoint: POST /office/attachment-orders
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_recovery_officer
+  - endpoint: GET /office/attachment-orders
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_recovery_officer
+  - endpoint: GET /office/attachment-orders/{orderId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_recovery_officer
   - endpoint: GET /office/recovery/cases
     status: W
     scope: office jurisdiction of the caller's posting
@@ -3300,6 +3456,24 @@ stakeholders:
     via:
     - F06.arrest
   fo.legal:
+  - endpoint: POST /office/attachment-orders
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_legal
+  - endpoint: GET /office/attachment-orders
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_legal
+  - endpoint: GET /office/attachment-orders/{orderId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F04.attachment_legal
   - endpoint: POST /office/compliance/cases/{caseId}/appeals
     status: W
     scope: office jurisdiction of the caller's posting
@@ -3701,6 +3875,18 @@ stakeholders:
     step_up: true
     via:
     - F07.freeze_zo
+  - endpoint: GET /office/grievance-reviews
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F08.review_decide
+  - endpoint: POST /office/grievance-reviews/{grievanceId}/decisions
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F08.review_decide
   zo.rpfc1_audit:
   - endpoint: GET /audit/events
     status: W
@@ -3931,6 +4117,12 @@ stakeholders:
     step_up: true
     via:
     - F07.freeze_ho
+  - endpoint: POST /office/accounts/rule-change-simulations
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F13.rule_simulation
   - endpoint: GET /ho/finance/balance-sheet
     status: W
     scope: national (Head Office role)

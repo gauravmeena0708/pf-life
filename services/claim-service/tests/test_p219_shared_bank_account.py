@@ -62,14 +62,20 @@ def test_shared_bank_account_held_for_office_review_and_cleared_by_officer(ctx):
     timeline_notes = " ".join(t["note"] for t in res_data["timeline"])
     assert "fraud pattern" in timeline_notes or "shared" in timeline_notes.lower()
 
-    # An officer clears the hold
-    clear_res = client.post(f"/api/v1/office/claims/{claim_id}/clear-hold",
+    # A dealing assistant cannot release it: only an approver (AO / APFC) may
+    assert client.post(f"/api/v1/office/claims/{claim_id}/hold-releases", json={"note": "Looks fine to me, release it"},
+                       headers=hdr(SUBJECTS["ro-ss"], "fo.da_accounts")).status_code == 403
+    # An approver releases the hold after checking the account
+    clear_res = client.post(f"/api/v1/office/claims/{claim_id}/hold-releases",
                             json={"note": "Verified member identity and bank account documentation; genuine claimant"},
                             headers=hdr(apfc, "fo.apfc"))
     assert clear_res.status_code == 200, clear_res.text
     cleared_claim = clear_res.json()["data"]
     # Once hold is cleared, the claim auto-settles (within auto-limit)
     assert cleared_claim["state"] == "AUTO_APPROVED"
+    # Nothing left to release: a second release (or one on a claim held for another reason) is refused
+    assert client.post(f"/api/v1/office/claims/{claim_id}/hold-releases", json={"note": "Release it again please"},
+                       headers=hdr(apfc, "fo.apfc")).status_code == 409
 
 
 def test_family_member_nominee_sharing_bank_account_is_allowed(ctx):

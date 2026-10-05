@@ -71,7 +71,7 @@ def test_zonal_office_that_made_the_decision_cannot_review_its_own_case(ctx):
     assert request(client, gid).status_code == 201
     listed = client.get("/api/v1/office/grievance-reviews", headers=hdr(REVIEWER, "zo.rpfc1"))
     assert listed.status_code == 200 and all(r["grievance_id"] != gid for r in listed.json()["data"])
-    decision = client.post(f"/api/v1/office/grievance-reviews/{gid}/decision",
+    decision = client.post(f"/api/v1/office/grievance-reviews/{gid}/decisions",
         json={"outcome": "UPHELD", "reasons": "The zonal office cannot review its own decision."},
         headers=hdr(REVIEWER, "zo.rpfc1"))
     assert decision.status_code == 404
@@ -86,7 +86,7 @@ def test_original_office_refused_both_outcomes_visible(ctx, outcome):
     assert client.get(queue, headers=hdr(PRO, "fo.pro")).status_code == 403
     listed = client.get(queue, headers=hdr(REVIEWER, "zo.rpfc1"))
     assert listed.status_code == 200 and any(r["grievance_id"] == gid for r in listed.json()["data"]), listed.text
-    url = f"{queue}/{gid}/decision"
+    url = f"{queue}/{gid}/decisions"
     body = {"outcome": outcome, "reasons": "The bank evidence warrants this outcome."}
     assert client.post(url, json=body, headers=hdr(PRO, "fo.pro")).status_code == 403
     decided = client.post(url, json=body, headers=hdr(REVIEWER, "zo.rpfc1"))

@@ -94,6 +94,10 @@ import { RankingsPage } from "./features/exempted/RankingsPage";
 import { PublicGrievancesPage, PublicClaimStatusPage } from "./features/public/PublicGrievancesPage";
 import { VerifyReceiptPage } from "./features/public/VerifyReceiptPage";
 import { ServiceStandardsPage } from "./features/p224/ServiceStandardsPage";
+import { IndependentReviewMemberPage } from "./features/p224/IndependentReviewMemberPage";
+import { IndependentReviewQueuePage } from "./features/p224/IndependentReviewQueuePage";
+import { RuleChangeSimulation } from "./features/p224/RuleChangeSimulation";
+import { AttachmentOrdersPage } from "./features/p219/AttachmentOrders";
 import { PublicCircularsPage } from "./features/public/CircularsList";
 import { EReportCardPage } from "./features/public/EReportCardPage";
 import { PublicLookups } from "./pages/PublicLookups";
@@ -235,6 +239,10 @@ export function App() {
             <Route path="/public/claims" element={<PublicClaimStatusPage />} />
             <Route path="/public/receipts/verify" element={<VerifyReceiptPage />} />
             <Route path="/public/service-standards" element={<ServiceStandardsPage />} />
+            <Route path="/member/grievances/:grievanceId/review" element={<IndependentReviewMemberPage />} />
+            <Route path="/office/grievance-reviews" element={<IndependentReviewQueuePage />} />
+            <Route path="/finance/rule-simulation" element={<RuleChangeSimulation />} />
+            <Route path="/office/attachment-orders" element={<AttachmentOrdersPage />} />
             <Route path="/public/circulars" element={<PublicCircularsPage />} />
             <Route path="/public/establishments/:estId/e-report-card" element={<EReportCardPage />} />
             <Route path="/ho/circulars" element={<CircularsPage />} />

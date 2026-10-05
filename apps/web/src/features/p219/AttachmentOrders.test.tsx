@@ -5,6 +5,10 @@ import { MemoryRouter } from "react-router-dom";
 import { api, command } from "../../api/client";
 import { AttachmentOrdersPage, type AttachmentOrder } from "./AttachmentOrders";
 
+// The approver's confirmation: the step-up dialog is answered with a token.
+vi.mock("../stepup/useStepUp", () => ({
+  useStepUp: () => ({ ask: vi.fn().mockResolvedValue("step-token"), request: null, onConfirmed: vi.fn(), onCancel: vi.fn() }),
+}));
 vi.mock("../../api/client", async (original) => ({
   ...await original<typeof import("../../api/client")>(),
   api: vi.fn(),
@@ -143,9 +147,9 @@ describe("AttachmentOrdersPage (P2.19)", () => {
     fireEvent.click(within(holdForm).getByRole("button", { name: /Verify & clear hold/i }));
 
     await waitFor(() => {
-      expect(command).toHaveBeenCalledWith("POST", "/api/v1/office/claims/CLM-M1/clear-hold", {
+      expect(command).toHaveBeenCalledWith("POST", "/api/v1/office/claims/CLM-M1/hold-releases", {
         note: "Verified genuine identity documentation and bank account passbook",
-      });
+      }, { stepUpToken: "step-token" });
     });
 
     expect(await screen.findByText(/Claim CLM-M1: Hold cleared\. Proceeded to settlement processing\./i)).toBeTruthy();

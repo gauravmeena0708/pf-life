@@ -10,7 +10,12 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /office/rti-requests', 'POST /office/rti-requests', 'POST /public/grievances', 'POST /integrations/cpgrams/grievances', 'GET /members/me/grievances', 'POST /members/me/grievances', 'POST /public/grievances/status-lookups', 'POST /office/rti-requests/{requestId}/replies', 'GET /grievances/{grievanceId}', 'POST /grievances/{grievanceId}/documents', 'POST /grievances/{grievanceId}/escalations', 'POST /grievances/{grievanceId}/evidence-links', 'POST /grievances/{grievanceId}/feedback', 'POST /grievances/{grievanceId}/messages', 'POST /grievances/{grievanceId}/office-transfers', 'POST /grievances/{grievanceId}/reminders', 'POST /grievances/{grievanceId}/reopen-requests', 'POST /grievances/{grievanceId}/resolution']
+OPERATIONS = ['GET /office/grievance-reviews', 'GET /office/rti-requests', 'POST /office/rti-requests', 'POST /public/grievances', 'POST /integrations/cpgrams/grievances', 'GET /members/me/grievances', 'POST /members/me/grievances', 'POST /public/grievances/status-lookups', 'GET /members/me/grievances/{grievanceId}/review', 'POST /members/me/grievances/{grievanceId}/reviews', 'POST /office/grievance-reviews/{grievanceId}/decisions', 'POST /office/rti-requests/{requestId}/replies', 'GET /grievances/{grievanceId}', 'POST /grievances/{grievanceId}/documents', 'POST /grievances/{grievanceId}/escalations', 'POST /grievances/{grievanceId}/evidence-links', 'POST /grievances/{grievanceId}/feedback', 'POST /grievances/{grievanceId}/messages', 'POST /grievances/{grievanceId}/office-transfers', 'POST /grievances/{grievanceId}/reminders', 'POST /grievances/{grievanceId}/reopen-requests', 'POST /grievances/{grievanceId}/resolution']
+
+@router.api_route("/api/v1/office/grievance-reviews", methods=["GET"], include_in_schema=False)
+async def get_office_grievance_reviews(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Independent reviews waiting for a zonal reviewer, never the handling office's own (P2.24)")
+
 
 @router.api_route("/api/v1/office/rti-requests", methods=["GET"], include_in_schema=False)
 async def get_office_rti_requests(actor: Actor = Depends(require_actor)) -> None:
@@ -45,6 +50,21 @@ async def post_members_me_grievances(actor: Actor = Depends(require_actor)) -> N
 @router.api_route("/api/v1/public/grievances/status-lookups", methods=["POST"], include_in_schema=False)
 async def post_public_grievances_status_lookups(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Grievance status by registration number (OTP proof)")
+
+
+@router.api_route("/api/v1/members/me/grievances/{grievanceId}/review", methods=["GET"], include_in_schema=False)
+async def get_members_me_grievances_grievanceId_review(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The independent review of my closed grievance: the deadline to ask (30 days from closure), its state")
+
+
+@router.api_route("/api/v1/members/me/grievances/{grievanceId}/reviews", methods=["POST"], include_in_schema=False)
+async def post_members_me_grievances_grievanceId_reviews(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Ask once, within 30 days of closure, for an independent review of a grievance's resolution (P2.24)")
+
+
+@router.api_route("/api/v1/office/grievance-reviews/{grievanceId}/decisions", methods=["POST"], include_in_schema=False)
+async def post_office_grievance_reviews_grievanceId_decisions(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Uphold the resolution, or direct a fresh decision with reasons (P2.24)")
 
 
 @router.api_route("/api/v1/office/rti-requests/{requestId}/replies", methods=["POST"], include_in_schema=False)

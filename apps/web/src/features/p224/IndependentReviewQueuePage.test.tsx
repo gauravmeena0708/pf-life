@@ -22,7 +22,7 @@ describe("independent review queue", () => {
     fireEvent.change(screen.getByLabelText("Review outcome"), { target: { value: "FRESH_DECISION" } });
     fireEvent.change(screen.getByLabelText("Reasons"), { target: { value: "The evidence supports a new decision." } });
     fireEvent.click(screen.getByRole("button", { name: "Record decision" }));
-    await waitFor(() => expect(command).toHaveBeenCalledWith("POST", "/api/v1/office/grievance-reviews/GRV-1/decision", {
+    await waitFor(() => expect(command).toHaveBeenCalledWith("POST", "/api/v1/office/grievance-reviews/GRV-1/decisions", {
       outcome: "FRESH_DECISION", reasons: "The evidence supports a new decision.",
     }));
   });

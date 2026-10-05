@@ -98,7 +98,12 @@ export function InquiriesPage() {
     const total = Object.entries(dues[0]).filter(([k]) => k.endsWith("_paise")).reduce((sum, [, v]) => sum + Number(v), 0);
     const token = await stepUp.ask({ action: "pass-order", resourceId: id, amountPaise: total, summary: `Pass the 7A order for ${rupees(total)}` });
     if (!token) return;
-    void run(() => command("POST", `${base}/cases/${id}/orders`, { kind: "7A", dues, reasoning: field(f, "reasoning"), ex_parte: f.has("ex_parte") },
+    // EPF Act s.8A: dues of an untraceable contractor's workers assessed against the principal employer.
+    const contractor = field(f, "contractor_name") ? { contractor_name: field(f, "contractor_name"),
+      contractor_establishment_id: field(f, "contractor_code") || null, traceable: f.has("contractor_traceable"),
+      work_order_ref: field(f, "work_order_ref") || null } : undefined;
+    void run(() => command("POST", `${base}/cases/${id}/orders`, { kind: "7A", dues, reasoning: field(f, "reasoning"), ex_parte: f.has("ex_parte"),
+      ...(contractor ? { contractor } : {}) },
       { stepUpToken: token }), "Order passed; the demand is raised.", form);
   }
 
@@ -198,6 +203,13 @@ export function InquiriesPage() {
             <label>A/c 2 admin (₹)<input name="ac2" type="number" min="0" step="0.01" defaultValue="0" /></label></div>
           <label>Findings and reasons<textarea name="reasoning" required /></label>
           <label><input type="checkbox" name="ex_parte" /> Ex parte (only after due service, the employer absent)</label>
+          <fieldset><legend>Contract workers (EPF Act s.8A) — only when the dues are a contractor's</legend>
+            <p className="muted small">A contractor who cannot be traced: the dues are assessed against this principal employer, who may
+              recover them from the contractor. A traceable contractor with its own EPF code number stays liable itself.</p>
+            <div className="form-row"><label>Contractor's name<input name="contractor_name" /></label>
+              <label>Contractor's EPF code (if any)<input name="contractor_code" /></label>
+              <label>Work order reference<input name="work_order_ref" /></label></div>
+            <label><input type="checkbox" name="contractor_traceable" /> The contractor was traced (field report)</label></fieldset>
           <div className="actions"><button className="primary" disabled={busy} type="submit">Pass order</button></div></form> : null}
     </section> : null}
     {["fo.apfc", "fo.oic", "fo.eo"].includes(role) ? <ProsecutionPanel role={role} busy={busy} run={(w, ok, f) => void run(w, ok, f)} ask={stepUp.ask} /> : null}
