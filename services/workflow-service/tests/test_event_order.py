@@ -35,6 +35,13 @@ from tests.test_cases_api import (
 )
 
 
+def at(hour, minute, second):
+    """An event time on tomorrow's date: always after the case's own time (set when the test creates it), whenever
+    the suite runs - a fixed date would put every event before the case once that hour has passed."""
+    day = datetime.now(UTC) + timedelta(days=1)
+    return day.replace(hour=hour, minute=minute, second=second, microsecond=0)
+
+
 def deliver_event(event_type, payload, producer="claim-service", occurred_at=None):
     event = {
         "event_id": str(uuid.uuid4()),
@@ -58,7 +65,7 @@ def _auto_approved_case(deliver, claim_id="CLM-LEAD4-01"):
 
 def _paid_case(deliver, claim_id="CLM-LEAD4-01", payment_id="P-01"):
     _auto_approved_case(deliver, claim_id=claim_id)
-    t0 = datetime(2026, 10, 5, 10, 0, 0, tzinfo=UTC)
+    t0 = at(10, 0, 0)
     deliver_event("PaymentInstructed.v1", {
         "claim_id": claim_id, "payment_id": payment_id, "amount_paise": 5000000, "attempt": 1
     }, producer="claim-service", occurred_at=t0)
@@ -86,7 +93,7 @@ def test_lead_4_closed_case_not_reopened_by_late_hold(ctx):
     assert state == "CLOSED" and role is None
 
     # Late ClaimStateChanged.v1 arrives with earlier timestamp
-    t_earlier = datetime(2026, 10, 5, 9, 59, 0, tzinfo=UTC)
+    t_earlier = at(9, 59, 0)
     base = {
         "claim_id": claim_id, "from_state": "RECOMMENDED", "to_state": "ON_HOLD_FROZEN",
         "reason": "ACCOUNT_FROZEN", "claim_type": "ADVANCE_ILLNESS", "amount_paise": 5000000,
@@ -112,7 +119,7 @@ def test_lead_4_closed_case_not_reopened_by_late_defreeze_review(ctx):
     [(state, role)] = q(f"SELECT state, current_role FROM cases WHERE claim_id = '{claim_id}'")
     assert state == "CLOSED"
 
-    t_earlier = datetime(2026, 10, 5, 9, 59, 30, tzinfo=UTC)
+    t_earlier = at(9, 59, 30)
     base = {
         "claim_id": claim_id, "from_state": "ON_HOLD_FROZEN", "to_state": "UNDER_REVIEW",
         "reason": "DEFROZEN_APPROVALS_VOID", "claim_type": "ADVANCE_ILLNESS", "amount_paise": 5000000,
@@ -135,7 +142,7 @@ def test_lead_4_closed_case_not_reopened_by_late_redisbursement(ctx):
     claim_id = "CLM-ORDER-REDISB-1"
     _paid_case(deliver, claim_id=claim_id, payment_id="PAY-03")
 
-    t_earlier = datetime(2026, 10, 5, 9, 58, 0, tzinfo=UTC)
+    t_earlier = at(9, 58, 0)
     base = {
         "claim_id": claim_id, "from_state": "PAYMENT_RETURNED", "to_state": "CORRECTION_PENDING",
         "reason": "", "claim_type": "ADVANCE_ILLNESS", "amount_paise": 5000000,
@@ -162,8 +169,8 @@ def test_lead_4_payment_confirmed_arriving_before_payment_instructed(ctx):
     [(state, role)] = q(f"SELECT state, current_role FROM cases WHERE claim_id = '{claim_id}'")
     assert state == "AWAITING_PAYMENT"
 
-    t1 = datetime(2026, 10, 5, 10, 0, 0, tzinfo=UTC)
-    t2 = datetime(2026, 10, 5, 10, 0, 5, tzinfo=UTC)
+    t1 = at(10, 0, 0)
+    t2 = at(10, 0, 5)
 
     # PaymentConfirmed.v1 (t2) arrives FIRST
     deliver_event("PaymentConfirmed.v1", {
@@ -195,8 +202,8 @@ def test_lead_4_payment_returned_arriving_before_payment_instructed(ctx):
     [(state, role)] = q(f"SELECT state, current_role FROM cases WHERE claim_id = '{claim_id}'")
     assert state == "AWAITING_PAYMENT"
 
-    t1 = datetime(2026, 10, 5, 10, 0, 0, tzinfo=UTC)
-    t2 = datetime(2026, 10, 5, 10, 0, 5, tzinfo=UTC)
+    t1 = at(10, 0, 0)
+    t2 = at(10, 0, 5)
 
     # PaymentReturned.v1 (t2) arrives FIRST
     deliver_event("PaymentReturned.v1", {
@@ -227,7 +234,7 @@ def test_lead_4_interleaved_freeze_and_payment_confirmed(ctx):
     # Subcase A: Hold arrives while PAYMENT_ISSUED, then PaymentConfirmed arrives
     claim_a = "CLM-INTERLEAVE-A"
     _auto_approved_case(deliver, claim_id=claim_a)
-    t0 = datetime(2026, 10, 5, 10, 0, 0, tzinfo=UTC)
+    t0 = at(10, 0, 0)
     deliver_event("PaymentInstructed.v1", {
         "claim_id": claim_a, "payment_id": "P-INT-A", "amount_paise": 5000000, "attempt": 1
     }, producer="claim-service", occurred_at=t0)
@@ -276,7 +283,7 @@ def test_lead_4_stale_payment_confirmation_after_return(ctx):
     claim_id = "CLM-ORDER-STALE-CONFIRM"
     _auto_approved_case(deliver, claim_id=claim_id)
 
-    t0 = datetime(2026, 10, 5, 10, 0, 0, tzinfo=UTC)
+    t0 = at(10, 0, 0)
     deliver_event("PaymentInstructed.v1", {
         "claim_id": claim_id, "payment_id": "P-STALE-1", "amount_paise": 5000000, "attempt": 1
     }, producer="claim-service", occurred_at=t0)
