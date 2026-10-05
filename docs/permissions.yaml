@@ -4362,6 +4362,18 @@ stakeholders:
     step_up: false
     via:
     - F06.instalments_ho
+  - endpoint: POST /ho/finance/interest-sustainability
+    status: W
+    scope: national (Head Office role)
+    step_up: false
+    via:
+    - F13.interest_sustainability_cpfc
+  - endpoint: GET /ho/finance/yield-assumptions
+    status: W
+    scope: national (Head Office role)
+    step_up: false
+    via:
+    - F13.interest_sustainability_cpfc
   - endpoint: GET /monitoring/claims
     status: W
     scope: role jurisdiction; aggregates with small-group suppression
@@ -4484,6 +4496,24 @@ stakeholders:
     step_up: false
     via:
     - F13.rule_simulation
+  - endpoint: POST /ho/finance/interest-sustainability
+    status: W
+    scope: national (Head Office role)
+    step_up: false
+    via:
+    - F13.interest_sustainability
+  - endpoint: GET /ho/finance/yield-assumptions
+    status: W
+    scope: national (Head Office role)
+    step_up: false
+    via:
+    - F13.interest_sustainability
+  - endpoint: PUT /ho/finance/yield-assumptions/{assetClass}
+    status: W
+    scope: national (Head Office role)
+    step_up: false
+    via:
+    - F13.interest_sustainability
   - endpoint: GET /ho/finance/balance-sheet
     status: W
     scope: national (Head Office role)

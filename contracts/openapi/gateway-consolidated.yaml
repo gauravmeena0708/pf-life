@@ -5965,6 +5965,47 @@ paths:
       x-scope: national (Head Office role)
       security:
       - bffSession: []
+  /ho/finance/interest-sustainability:
+    post:
+      operationId: postHoFinanceInterestSustainability
+      summary: Is a proposed interest rate sustainable? The fund's income (book value by asset class at illustrative yields)
+        against th
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - ho.cpfc
+      - ho.fa_cao
+      x-scope: national (Head Office role)
+      security:
+      - bffSession: []
+      description: 'Is a proposed interest rate sustainable? The fund''s income (book value by asset class at illustrative
+        yields) against the interest it would credit (the real calculation on members'' balances): surplus or deficit, the
+        break-even rate, yields 50 bp either way, the declared rate beside it (P2.24)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /ho/finance/investments:
     get:
       operationId: getHoFinanceInvestments
@@ -5996,6 +6037,77 @@ paths:
       x-scope: national (Head Office role)
       security:
       - bffSession: []
+  /ho/finance/yield-assumptions:
+    get:
+      operationId: getHoFinanceYieldAssumptions
+      summary: The illustrative expected yield per asset class used by the sustainability model
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - ho.cpfc
+      - ho.fa_cao
+      x-scope: national (Head Office role)
+      security:
+      - bffSession: []
+  /ho/finance/yield-assumptions/{assetClass}:
+    put:
+      operationId: putHoFinanceYieldAssumptionsAssetClass
+      summary: HO Finance changes an illustrative yield, audited
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: assetClass
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - ho.fa_cao
+      x-scope: national (Head Office role)
+      security:
+      - bffSession: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /ho/pmvbry/dashboard:
     get:
       operationId: getHoPmvbryDashboard

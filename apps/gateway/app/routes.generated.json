@@ -2424,6 +2424,22 @@
     "revocation": false
   },
   {
+    "method": "PUT",
+    "path_template": "/ho/finance/yield-assumptions/{assetClass}",
+    "regex": "^/ho/finance/yield\\-assumptions/[^/]+$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.fa_cao"
+    ],
+    "summary": "HO Finance changes an illustrative yield, audited",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/members/me/claims/{claimId}/cancellations",
     "regex": "^/members/me/claims/[^/]+/cancellations$",
@@ -3762,6 +3778,23 @@
       "zo.acc"
     ],
     "summary": "Escalate to next supervisory tier (Journey C4)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/ho/finance/interest-sustainability",
+    "regex": "^/ho/finance/interest\\-sustainability$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.cpfc",
+      "ho.fa_cao"
+    ],
+    "summary": "Is a proposed interest rate sustainable? The fund's income (book value by asset class at illustrative yields) against the interest it would credit (the real calculation on members' balances): surplus or deficit, the break-even rate, yields 50 bp either way, the declared rate beside it (P2.24)",
     "revocation": false
   },
   {
@@ -5433,6 +5466,23 @@
       "employer.signatory"
     ],
     "summary": "Direct Challan: administrative / inspection charges challan, or miscellaneous challan for 14B damages and 7Q interest (Payments > ECR/Return filing > Direct Challan > Challan Entry)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/ho/finance/yield-assumptions",
+    "regex": "^/ho/finance/yield\\-assumptions$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "ho.cpfc",
+      "ho.fa_cao"
+    ],
+    "summary": "The illustrative expected yield per asset class used by the sustainability model",
     "revocation": false
   },
   {

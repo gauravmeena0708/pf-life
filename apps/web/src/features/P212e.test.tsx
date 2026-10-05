@@ -53,7 +53,7 @@ it.each([
   expect(homeFor(role)).toBe(home);
 });
 it("adds finance and board items without replacing existing HO menus", () => {
-  expect(menusFor("ho.fa_cao").map((item) => item.label ?? item.labelKey)).toEqual(["PMVBRY", "navigation.interest", "Record the interest rate", "Rule-change simulation", "Balance sheet", "Investments"]);
+  expect(menusFor("ho.fa_cao").map((item) => item.label ?? item.labelKey)).toEqual(["PMVBRY", "navigation.interest", "Record the interest rate", "Rule-change simulation", "Interest sustainability", "Balance sheet", "Investments"]);
   expect(menusFor("ho.cpfc").at(-1)?.label).toBe("Board packs");
   expect(homeFor("ho.fa_cao")).toBe("/finance/interest");
   expect(homeFor("ho.cpfc")).toBe("/dashboards");

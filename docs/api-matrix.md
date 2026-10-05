@@ -15,7 +15,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | 7 | District office | **Working** | `do.incharge`, `do.staff` | 9 | 0 | 0 | 0 |
 | 8 | Regional office | **Working** | `fo.apfc`, `fo.rpfc1`, `fo.oic` | 91 | 0 | 0 | 1 |
 | 9 | Zonal office | **Working** | `zo.acc`, `zo.rpfc1`, `zo.fraud_committee`, `zo.zti` | 22 | 0 | 0 | 0 |
-| 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 35 | 0 | 0 | 0 |
+| 10 | Head office | **Working** | `ho.cpfc`, `ho.acc_hq`, `ho.fa_cao`, `ho.compliance`, `ho.recovery`, `ho.legal`, `ho.exemption`, `ho.pension`, `ho.edli`, `ho.investment`, `ho.actuarial`, `ho.publicity`, `ho.is` | 38 | 0 | 0 | 0 |
 | 11 | NDC | **Working** | `tech.ndc`, `tech.adc`, `tech.cpps`, `tech.epfo3` | 8 | 0 | 0 | 0 |
 | 12 | Ministry | **Working** | `gov.mole`, `gov.parliament` | 3 | 0 | 0 | 0 |
 | 13 | B2B | **Working** | `payroll_provider`, `ext.collecting_bank`, `ext.pension_bank`, `ext.mca`, `ext.shram_suvidha`, `ext.fund_manager` | 3 | 7 | 0 | 0 |
@@ -628,6 +628,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /ho/config/rule-sets/{versionId}` | W | platform | ho.acc_hq, ho.cpfc, ho.pension |
 | `GET /ho/finance/balance-sheet` | W | contribution | ho.fa_cao |
 | `GET /ho/finance/investments` | W | reporting | ho.fa_cao, ho.investment |
+| `GET /ho/finance/yield-assumptions` | W | contribution | ho.cpfc, ho.fa_cao |
 | `GET /ho/pmvbry/dashboard` | W | contribution | ho.cpfc, ho.fa_cao |
 | `GET /ho/pmvbry/disbursement-runs/preview` | W | contribution | ho.fa_cao |
 | `GET /ho/reports/proceedings` | W | compliance | ho.compliance, ho.recovery |
@@ -648,6 +649,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /ho/config/rule-sets/{versionId}/decisions` | W | platform | ho.cpfc |
 | `POST /ho/config/rule-sets/{versionId}/submissions` | W | platform | ho.acc_hq |
 | `POST /ho/exemptions/{estId}/decisions` | W | employer | ho.exemption |
+| `POST /ho/finance/interest-sustainability` | W | contribution | ho.cpfc, ho.fa_cao |
 | `POST /ho/pmvbry/disbursement-runs` | W | contribution | ho.fa_cao |
 | `POST /ndc/issue-tracker/requests/{requestId}/executions` | W | platform | ho.is |
 | `POST /office/accounts/interest-postings` | W | contribution | ho.fa_cao |
@@ -658,6 +660,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /zo/recovery/instalment-referrals/{caseId}/refusals` | W | compliance | ho.cpfc |
 | `PUT /ho/config/interest-rates/{financialYear}` | W | contribution | ho.fa_cao |
 | `PUT /ho/config/rule-sets/{versionId}` | W | platform | ho.acc_hq |
+| `PUT /ho/finance/yield-assumptions/{assetClass}` | W | contribution | ho.fa_cao |
 
 ### 11. NDC — Working
 

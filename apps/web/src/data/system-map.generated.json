@@ -4,9 +4,9 @@
   "interfaces": 21,
   "stakeholders": 116,
   "stakeholders_with_access": 96,
-  "activities": 315,
+  "activities": 317,
   "endpoints": {
-   "W": 506,
+   "W": 509,
    "M": 24,
    "P": 1,
    "?": 5
@@ -208,7 +208,7 @@
    "coverage": "Working",
    "purpose": "Head office: policy rules (maker-checker), interest, circulars, the IS Division.",
    "endpoints": {
-    "W": 35,
+    "W": 38,
     "M": 0,
     "P": 0,
     "?": 0
@@ -2234,7 +2234,7 @@
    "name": "Central Provident Fund Commissioner",
    "group": "F. Head Office (HO) — leadership and divisions",
    "endpoints": {
-    "W": 11,
+    "W": 13,
     "M": 0,
     "P": 0,
     "?": 0
@@ -2243,6 +2243,10 @@
     {
      "id": "F06.instalments_ho",
      "does": "The CPFC grants or refuses instalments on arrears above ₹50 lakh, or more than 36 (at most 72), with a guarantee of six"
+    },
+    {
+     "id": "F13.interest_sustainability_cpfc",
+     "does": "See whether a proposed interest rate is sustainable before the CBT decides it"
     },
     {
      "id": "F13.cpfc",
@@ -2280,7 +2284,7 @@
    "name": "FA & CAO — Finance & Accounts, FIA vertical (freezing category A), Balance Sheet cell",
    "group": "F. Head Office (HO) — leadership and divisions",
    "endpoints": {
-    "W": 11,
+    "W": 14,
     "M": 0,
     "P": 0,
     "?": 0
@@ -2297,6 +2301,10 @@
     {
      "id": "F13.rule_simulation",
      "does": "Simulate a proposed interest rate, wage ceiling or contribution split on every member before deciding it; nothing is posted"
+    },
+    {
+     "id": "F13.interest_sustainability",
+     "does": "Test whether a proposed interest rate is sustainable: the fund's income against the interest it would credit, the break-even rate, the sensitivity to yields; keep the yield assumptions"
     },
     {
      "id": "F13.accounts",
@@ -6341,6 +6349,26 @@
    "next": [],
    "status": "BUILT",
    "endpoints": 1,
+   "src": "MAP"
+  },
+  {
+   "id": "F13.interest_sustainability",
+   "flow": "F13",
+   "actor": "ho.fa_cao",
+   "does": "Test whether a proposed interest rate is sustainable: the fund's income against the interest it would credit, the break-even rate, the sensitivity to yields; keep the yield assumptions",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "MAP"
+  },
+  {
+   "id": "F13.interest_sustainability_cpfc",
+   "flow": "F13",
+   "actor": "ho.cpfc",
+   "does": "See whether a proposed interest rate is sustainable before the CBT decides it",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
    "src": "MAP"
   },
   {

@@ -1095,6 +1095,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /ho/config/rule-sets` | W | national (Head Office role) |  |
 | `GET /ho/config/rule-sets/{versionId}` | W | national (Head Office role) |  |
+| `GET /ho/finance/yield-assumptions` | W | national (Head Office role) |  |
 | `GET /ho/pmvbry/dashboard` | W | national (Head Office role) |  |
 | `GET /monitoring/claims` | W | role jurisdiction; aggregates with small-group suppression |  |
 | `GET /monitoring/contributions` | W | role jurisdiction; aggregates with small-group suppression |  |
@@ -1102,6 +1103,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /monitoring/grievances` | W | role jurisdiction; aggregates with small-group suppression |  |
 | `GET /zo/recovery/instalment-referrals` | W | zone jurisdiction |  |
 | `POST /ho/config/rule-sets/{versionId}/decisions` | W | national (Head Office role) | yes |
+| `POST /ho/finance/interest-sustainability` | W | national (Head Office role) |  |
 | `POST /office/recovery/{caseId}/instalments` | W | office jurisdiction of the caller's posting |  |
 | `POST /zo/recovery/instalment-referrals/{caseId}/refusals` | W | zone jurisdiction |  |
 
@@ -1122,15 +1124,18 @@ Each row is a required negative or idempotency test in `tests/security/`.
 |---|---|---|---|
 | `GET /ho/finance/balance-sheet` | W | national (Head Office role) |  |
 | `GET /ho/finance/investments` | W | national (Head Office role) |  |
+| `GET /ho/finance/yield-assumptions` | W | national (Head Office role) |  |
 | `GET /ho/pmvbry/dashboard` | W | national (Head Office role) |  |
 | `GET /ho/pmvbry/disbursement-runs/preview` | W | national (Head Office role) |  |
 | `GET /office/accounts/interest-postings` | W | office jurisdiction of the caller's posting |  |
+| `POST /ho/finance/interest-sustainability` | W | national (Head Office role) |  |
 | `POST /ho/pmvbry/disbursement-runs` | W | national (Head Office role) | yes |
 | `POST /office/accounts/interest-postings` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/accounts/rule-change-simulations` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/establishments/{estId}/freezes` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/members/{uan}/freezes` | W | office jurisdiction of the caller's posting | yes |
 | `PUT /ho/config/interest-rates/{financialYear}` | W | national (Head Office role) | yes |
+| `PUT /ho/finance/yield-assumptions/{assetClass}` | W | national (Head Office role) |  |
 
 **`ho.compliance`** — Compliance Division
 

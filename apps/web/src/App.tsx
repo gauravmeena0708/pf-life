@@ -98,6 +98,8 @@ import { ServiceStandardsPage } from "./features/p224/ServiceStandardsPage";
 import { IndependentReviewMemberPage } from "./features/p224/IndependentReviewMemberPage";
 import { IndependentReviewQueuePage } from "./features/p224/IndependentReviewQueuePage";
 import { RuleChangeSimulation } from "./features/p224/RuleChangeSimulation";
+import { InterestSustainability } from "./features/p224/InterestSustainability";
+import { UanMergesPage } from "./features/p219/UanMergesPage";
 import { AttachmentOrdersPage } from "./features/p219/AttachmentOrders";
 import { InsolvencyManagementPage } from "./features/p217/InsolvencyManagement";
 import { PublicCircularsPage } from "./features/public/CircularsList";
@@ -246,6 +248,8 @@ export function App() {
             <Route path="/member/grievances/:grievanceId/review" element={<IndependentReviewMemberPage />} />
             <Route path="/office/grievance-reviews" element={<IndependentReviewQueuePage />} />
             <Route path="/finance/rule-simulation" element={<RuleChangeSimulation />} />
+            <Route path="/finance/interest-sustainability" element={<InterestSustainability />} />
+            <Route path="/office/uan-merges" element={<UanMergesPage />} />
             <Route path="/office/attachment-orders" element={<AttachmentOrdersPage />} />
             <Route path="/office/compliance/insolvency" element={<InsolvencyManagementPage />} />
             <Route path="/public/circulars" element={<PublicCircularsPage />} />

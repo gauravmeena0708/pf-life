@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 116 |
-| Activities | 315 |
+| Activities | 317 |
 | Stakeholders with at least one API | 96 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 3 |
@@ -1142,12 +1142,13 @@ Activities: **F14.zti_zo** Zonal Training Institute uses the training sandbox
 
 #### `ho.cpfc` — Central Provident Fund Commissioner
 
-Activities: **F06.instalments_ho** The CPFC grants or refuses instalments on arrears above ₹50 lakh, or more than 36 (at most 72), with a guarantee of six; **F13.cpfc** National dashboards and policy approvals; **F13.pmvbry_monitor** Executive Committee chair: monitor PMVBRY beneficiaries, expenditure and pendency
+Activities: **F06.instalments_ho** The CPFC grants or refuses instalments on arrears above ₹50 lakh, or more than 36 (at most 72), with a guarantee of six; **F13.interest_sustainability_cpfc** See whether a proposed interest rate is sustainable before the CBT decides it; **F13.cpfc** National dashboards and policy approvals; **F13.pmvbry_monitor** Executive Committee chair: monitor PMVBRY beneficiaries, expenditure and pendency
 
 | Endpoint | Status |
 |---|---|
 | `GET /ho/config/rule-sets` | W |
 | `GET /ho/config/rule-sets/{versionId}` | W |
+| `GET /ho/finance/yield-assumptions` | W |
 | `GET /ho/pmvbry/dashboard` | W |
 | `GET /monitoring/claims` | W |
 | `GET /monitoring/contributions` | W |
@@ -1155,6 +1156,7 @@ Activities: **F06.instalments_ho** The CPFC grants or refuses instalments on arr
 | `GET /monitoring/grievances` | W |
 | `GET /zo/recovery/instalment-referrals` | W |
 | `POST /ho/config/rule-sets/{versionId}/decisions` | W |
+| `POST /ho/finance/interest-sustainability` | W |
 | `POST /office/recovery/{caseId}/instalments` | W |
 | `POST /zo/recovery/instalment-referrals/{caseId}/refusals` | W |
 
@@ -1173,21 +1175,24 @@ Activities: **F13.acc_hq** Division-level oversight; draft rule-set changes (cei
 
 #### `ho.fa_cao` — FA & CAO — Finance & Accounts, **FIA vertical** (freezing category A), Balance Sheet cell
 
-Activities: **F03.interest** Record the approved annual interest rate and run interest crediting; **F07.freeze_ho** Order freezing for Category A (FIA vertical); **F13.rule_simulation** Simulate a proposed interest rate, wage ceiling or contribution split on every member before deciding it; nothing is posted; **F13.accounts** Prepare the annual accounts: balance sheet of the funds and investment position; **F13.pmvbry_run** PMVBRY disbursement run: employees by Aadhaar-bridge DBT, employers to the PAN-linked account; scheme dashboard
+Activities: **F03.interest** Record the approved annual interest rate and run interest crediting; **F07.freeze_ho** Order freezing for Category A (FIA vertical); **F13.rule_simulation** Simulate a proposed interest rate, wage ceiling or contribution split on every member before deciding it; nothing is posted; **F13.interest_sustainability** Test whether a proposed interest rate is sustainable: the fund's income against the interest it would credit, the break-even rate, the sensitivity to yields; keep the yield assumptions; **F13.accounts** Prepare the annual accounts: balance sheet of the funds and investment position; **F13.pmvbry_run** PMVBRY disbursement run: employees by Aadhaar-bridge DBT, employers to the PAN-linked account; scheme dashboard
 
 | Endpoint | Status |
 |---|---|
 | `GET /ho/finance/balance-sheet` | W |
 | `GET /ho/finance/investments` | W |
+| `GET /ho/finance/yield-assumptions` | W |
 | `GET /ho/pmvbry/dashboard` | W |
 | `GET /ho/pmvbry/disbursement-runs/preview` | W |
 | `GET /office/accounts/interest-postings` | W |
+| `POST /ho/finance/interest-sustainability` | W |
 | `POST /ho/pmvbry/disbursement-runs` | W |
 | `POST /office/accounts/interest-postings` | W |
 | `POST /office/accounts/rule-change-simulations` | W |
 | `POST /office/establishments/{estId}/freezes` | W |
 | `POST /office/members/{uan}/freezes` | W |
 | `PUT /ho/config/interest-rates/{financialYear}` | W |
+| `PUT /ho/finance/yield-assumptions/{assetClass}` | W |
 
 #### `ho.compliance` — Compliance Division
 
@@ -2239,6 +2244,8 @@ flowchart LR
 flowchart LR
   F13_charter["public<br/>See the citizen's charter: each service standard and how eac"]
   F13_rule_simulation["ho.fa_cao<br/>Simulate a proposed interest rate, wage ceiling or contribut"]
+  F13_interest_sustainability["ho.fa_cao<br/>Test whether a proposed interest rate is sustainable: the fu"]
+  F13_interest_sustainability_cpfc["ho.cpfc<br/>See whether a proposed interest rate is sustainable before t"]
   F13_public["public<br/>Browse schemes, offices, statistics, circulars; search estab"]
   F13_do["do.incharge<br/>District dashboard and jurisdiction-scoped queue"]
   F13_ro["fo.rpfc1<br/>RO-level monitoring (claims, grievances, compliance)"]
