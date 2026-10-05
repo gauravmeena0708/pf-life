@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 import epfo_auth
-from app.api import catalogue_routes, eec_routes, eps_rectification_routes, pa_reco_routes, pay_run_routes, retirement_routes, exempted_returns_routes, finance_routes, inoperative_routes, ledger_routes, pmvbry_routes, principal_routes, returns_routes, routes, statement_routes, trust_routes, transfer_legs_routes
+from app.api import catalogue_routes, eec_routes, eps_rectification_routes, pa_reco_routes, pay_run_routes, retirement_routes, exempted_returns_routes, finance_routes, inoperative_routes, ledger_routes, merger_routes, pmvbry_routes, principal_routes, returns_routes, routes, scwf_routes, statement_routes, trust_routes, transfer_legs_routes
 from app.config import settings
 from app.infra.db import database_ready
 from app.infra.db import engine
@@ -65,6 +65,8 @@ def create_app() -> FastAPI:
     app.include_router(routes.router)
     app.include_router(principal_routes.router)
     app.include_router(inoperative_routes.router)
+    app.include_router(scwf_routes.router)
+    app.include_router(merger_routes.router)
     app.include_router(returns_routes.router)
     app.include_router(ledger_routes.router)
     app.include_router(finance_routes.router)

@@ -21,6 +21,7 @@ LIABILITIES = {
     "CLAIMS_PAYABLE": "Claims payable",
     "TDS_PAYABLE": "Income tax deducted, payable",
     "PAYABLE_TO_TRUSTS": "Payable to exempted PF trusts (transfers in)",
+    "SCWF_PAYABLE": "Senior Citizens' Welfare Fund transfers",
     "ADJUSTMENT_SUSPENSE": "Suspense accounts",
     "INTEREST_SUSPENSE": "Suspense accounts",
 }

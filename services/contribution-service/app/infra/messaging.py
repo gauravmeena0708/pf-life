@@ -75,6 +75,9 @@ async def on_exemption_status_changed(session, event):
         {"status": status, "ended": ended, "due": due, "id": p["establishment_id"]})
     await session.execute(text("UPDATE establishments SET exemption_status=:status WHERE id=:id"),
                           {"status": status, "id": p["establishment_id"]})
+    if status == "CANCELLED":
+        from app.infra.transfers import redirect_cancelled_trust_transfers
+        await redirect_cancelled_trust_transfers(session, p["establishment_id"])
 
 
 async def handle_payment_confirmed(session, event):

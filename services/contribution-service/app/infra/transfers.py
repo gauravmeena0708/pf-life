@@ -69,6 +69,14 @@ async def post_transfer(session: AsyncSession, transfer_id: str, uan: str, frm: 
     if frm not in by_id or to not in by_id or by_id[frm]["uan"] != uan or by_id[to]["uan"] != uan:
         raise ValueError("transfer member IDs must belong to the same UAN")
     source, destination = by_id[frm], by_id[to]
+    cancelled_destination = (await session.execute(text("SELECT 1 FROM establishment_members m "
+        "JOIN exempted_establishments e ON e.establishment_id=m.establishment_id "
+        "WHERE m.account_link_id=:to AND e.pf_exempt=true AND e.status='CANCELLED' "
+        "AND (e.ended_on IS NULL OR m.date_of_joining IS NULL OR m.date_of_joining<e.ended_on)"),
+        {"to": to})).first()
+    if cancelled_destination:
+        # A cancelled exemption cannot receive a new PF transfer into its trust.
+        raise ValueError("new transfer into a cancelled trust is refused")
     if source["trust_id"] and destination["trust_id"]:
         raise ValueError("a trust-to-trust PF transfer requires a separate process")
     direction = "TRUST_TO_EPFO" if source["trust_id"] else "EPFO_TO_TRUST" if destination["trust_id"] else "EPFO_TO_EPFO"
@@ -110,6 +118,30 @@ async def post_transfer(session: AsyncSession, transfer_id: str, uan: str, frm: 
                         "source": "EPFO", "destination": "TRUST" if direction == "EPFO_TO_TRUST" else "EPFO",
                         "service_from": str(source["date_of_joining"]) if source["date_of_joining"] else None,
                         "service_to": str(source["date_of_exit"]) if source["date_of_exit"] else None})
+
+
+async def redirect_cancelled_trust_transfers(session: AsyncSession, establishment_id: str) -> None:
+    """Complete PF legs already sent to a trust whose exemption has since been cancelled."""
+    lock = " FOR UPDATE" if session.bind.dialect.name == "postgresql" else ""
+    rows = (await session.execute(text("SELECT l.transfer_id,l.to_account_link_id,p.uan,p.from_account_link_id, "
+        "p.employee_paise,p.employer_paise FROM transfer_legs l "
+        "JOIN transfer_postings p ON p.transfer_id=l.transfer_id "
+        "JOIN establishment_members m ON m.account_link_id=l.to_account_link_id "
+        "WHERE m.establishment_id=:e AND l.direction='EPFO_TO_TRUST' AND l.pf_leg='SENT_TO_TRUST'" + lock),
+        {"e": establishment_id})).mappings().all()
+    for row in rows:
+        amount = int(row["employee_paise"]) + int(row["employer_paise"])
+        if amount <= 0:
+            continue
+        lines = [{"account_code": "PAYABLE_TO_TRUSTS", "side": "debit", "amount_paise": amount}]
+        lines += [{"account_code": "AC01_EPF", "side": "credit", "amount_paise": int(row[key]),
+                   "account_link_id": row["to_account_link_id"], "share": share}
+                  for key, share in (("employee_paise", "employee"), ("employer_paise", "employer")) if row[key]]
+        # Exemption cancellation: clear the trust payable and credit the EPFO member account.
+        await _post(session, f"CANCELLED-TRUST-{row['transfer_id']}", "TRUST_TRANSFER_REDIRECT", None, lines)
+        await session.execute(text("UPDATE transfer_legs SET direction='EPFO_TO_EPFO',pf_leg='COMPLETED',"
+                                   "updated_at=:at WHERE transfer_id=:t"),
+                              {"at": datetime.now(UTC), "t": row["transfer_id"]})
 
 
 async def on_trust_annexure_k(session: AsyncSession, event: dict[str, Any]) -> None:

@@ -1,5 +1,5 @@
 """Shared eligibility calculation for the office and public inoperative-account flows."""
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, time
 
 from sqlalchemy import text
 
@@ -11,15 +11,16 @@ async def months_rule(session) -> int:
     return int(section(rules, "inoperative_accounts").get("months_without_credit", 36))
 
 
-def cutoff_for(months: int) -> date:
-    today = datetime.now(UTC).date()
+def cutoff_for(months: int, as_of: date | None = None) -> date:
+    today = as_of or datetime.now(UTC).date()
     year, month = divmod(today.year * 12 + today.month - 1 - months, 12)
     return date(year, month + 1, 1)
 
 
-async def accounts(session, months: int) -> list[dict]:
+async def accounts(session, months: int, as_of: date | None = None) -> list[dict]:
     """Positive EPF balance and no EPF credit since the rule's month cutoff. Interest is not a transaction: an account
     that only earns interest stays inoperative (SOP on transaction-less and inoperative accounts)."""
+    snapshot = "AND j.occurred_at <= :as_of" if as_of else ""
     rows = (await session.execute(text(
         "SELECT m.account_link_id, m.uan, m.name, m.date_of_birth, m.establishment_id, e.legal_name AS establishment_name, "
         "m.date_of_exit, v.account_link_id AS verified_id, r.account_link_id AS reactivated_id, "
@@ -27,12 +28,13 @@ async def accounts(session, months: int) -> list[dict]:
         "MAX(CASE WHEN jl.side='credit' AND j.kind NOT IN ('INTEREST', 'INTEREST_REVISION') THEN j.occurred_at END) AS last_credit "
         "FROM establishment_members m JOIN establishments e ON e.id=m.establishment_id "
         "JOIN journal_lines jl ON jl.account_link_id=m.account_link_id AND jl.account_code='AC01_EPF' "
-        "JOIN journals j ON j.id=jl.journal_id "
+        "JOIN journals j ON j.id=jl.journal_id " + snapshot + " "
         "LEFT JOIN inoperative_verifications v ON v.account_link_id=m.account_link_id "
         "LEFT JOIN account_reactivations r ON r.account_link_id=m.account_link_id "
         "GROUP BY m.account_link_id, m.uan, m.name, m.date_of_birth, m.establishment_id, e.legal_name, "
-        "m.date_of_exit, v.account_link_id, r.account_link_id"))).mappings().all()
-    cutoff = cutoff_for(months)
+        "m.date_of_exit, v.account_link_id, r.account_link_id"),
+        {"as_of": datetime.combine(as_of, time.max, tzinfo=UTC)} if as_of else {})).mappings().all()
+    cutoff = cutoff_for(months, as_of)
     out = []
     for row in rows:
         item = dict(row)
