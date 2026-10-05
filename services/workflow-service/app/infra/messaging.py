@@ -1,8 +1,8 @@
 """Events workflow-service consumes: claims open cases; payment results move the cash-section task."""
-from datetime import date
+from datetime import UTC, date, datetime
 from typing import Any
 
-from sqlalchemy import insert, select, update
+from sqlalchemy import insert, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import grievance_case, last_decision, open_case
@@ -31,15 +31,39 @@ BINDINGS = [
     "employer-service.EstablishmentOfficeTransferred.v1",
 ]
 
+HOLDABLE_STATES = {"AUTO_PENDING", "IN_REVIEW", "AWAITING_PAYMENT", "PAYMENT_RETURNED"}
 
-async def _move(session: AsyncSession, claim_id: str, from_states: tuple[str, ...], **values: Any) -> None:
-    await session.execute(update(cases).where(cases.c.claim_id == claim_id, cases.c.state.in_(from_states))
-                          .values(version=cases.c.version + 1, **values))
+
+def _event_time(event: dict[str, Any]) -> datetime:
+    if event.get("occurred_at"):
+        try:
+            return datetime.fromisoformat(event["occurred_at"].replace("Z", "+00:00"))
+        except Exception:
+            pass
+    return datetime.now(UTC)
+
+
+def _ensure_utc(dt: datetime | None) -> datetime | None:
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=UTC)
+    return dt.astimezone(UTC)
+
+
+async def _move(session: AsyncSession, claim_id: str, from_states: tuple[str, ...], at: datetime | None = None, **values: Any) -> None:
+    conds = [cases.c.claim_id == claim_id, cases.c.state.in_(from_states), cases.c.state != "CLOSED"]
+    vals = dict(values, version=cases.c.version + 1)
+    if at is not None:
+        conds.append(or_(cases.c.source_at.is_(None), cases.c.source_at <= at))
+        vals["source_at"] = at
+    await session.execute(update(cases).where(*conds).values(**vals))
 
 
 async def on_claim_submitted(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
-    await open_case(session, p, "IN_REVIEW" if p["route"] == "REVIEW" else "AUTO_PENDING")
+    at = _event_time(event)
+    await open_case(session, p, "IN_REVIEW" if p["route"] == "REVIEW" else "AUTO_PENDING", at=at)
 
 
 async def on_claim_decision(session: AsyncSession, event: dict[str, Any]) -> None:
@@ -47,22 +71,28 @@ async def on_claim_decision(session: AsyncSession, event: dict[str, Any]) -> Non
     if p["decision"] == "AUTO_APPROVED":
         if not (await session.execute(select(cases.c.case_id).where(cases.c.claim_id == p["claim_id"]))).first():
             raise LookupError(f"case for {p['claim_id']} not opened yet")   # retried until ClaimSubmitted.v1 is applied
-        await _move(session, p["claim_id"], ("AUTO_PENDING",), state="AWAITING_PAYMENT", current_role="fo.cash")
+        at = _event_time(event)
+        await _move(session, p["claim_id"], ("AUTO_PENDING",), at=at, state="AWAITING_PAYMENT", current_role="fo.cash")
 
 
 async def on_payment_instructed(session: AsyncSession, event: dict[str, Any]) -> None:
+    at = _event_time(event)
     await _move(session, event["payload"]["claim_id"], ("AWAITING_PAYMENT", "PAYMENT_RETURNED"),
-                state="PAYMENT_ISSUED", current_role=None)
+                at=at, state="PAYMENT_ISSUED", current_role=None)
 
 
 async def on_payment_result(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
     if p.get("purpose") != "CLAIM_SETTLEMENT":
         return
+    at = _event_time(event)
+    ref = p.get("reference_id") or p.get("reference")
     if event["event_type"] == "PaymentConfirmed.v1":
-        await _move(session, p["reference_id"], ("PAYMENT_ISSUED",), state="CLOSED", current_role=None)
+        await _move(session, ref, ("PAYMENT_ISSUED", "AWAITING_PAYMENT", "ON_HOLD"),
+                    at=at, state="CLOSED", current_role=None)
     else:                                   # returned: the member corrects the bank details first (nobody's queue)
-        await _move(session, p["reference"], ("PAYMENT_ISSUED",), state="RETURNED_AWAITING_MEMBER", current_role=None)
+        await _move(session, ref, ("PAYMENT_ISSUED", "AWAITING_PAYMENT", "ON_HOLD"),
+                    at=at, state="RETURNED_AWAITING_MEMBER", current_role=None)
 
 
 async def on_claim_state(session: AsyncSession, event: dict[str, Any]) -> None:
@@ -72,34 +102,48 @@ async def on_claim_state(session: AsyncSession, event: dict[str, Any]) -> None:
     if not row:
         return
     case, to, reason = dict(row), p["to_state"], p["reason"]
+    at = _event_time(event)
+    source_at = _ensure_utc(case.get("source_at"))
+    # A closed case is terminal; older events must never supersede a newer state
+    if case["state"] == "CLOSED":
+        return
+    if source_at and source_at > at:
+        return
     if to == "ON_HOLD_FROZEN":
+        if case["state"] not in HOLDABLE_STATES:
+            return
         held = {"state": case["state"], "current_role": case["current_role"]}
-        await _set(session, case, state="ON_HOLD", current_role=None, data={**(case["data"] or {}), "held_from": held})
+        await _set(session, case, at=at, state="ON_HOLD", current_role=None, data={**(case["data"] or {}), "held_from": held})
     elif reason == "DEFROZEN_APPROVALS_VOID":
         rules = await rules_by_version(session, p["rule_version"])
         chain = after_defreeze_chain(rules, int(p["amount_paise"]))
-        await _set(session, case, state="IN_REVIEW", chain=chain, step=0, round=case["round"] + 1, current_role=chain[0])
+        await _set(session, case, at=at, state="IN_REVIEW", chain=chain, step=0, round=case["round"] + 1, current_role=chain[0])
     elif reason == "DEFROZEN_RESUBMITTED":
-        await _set(session, case, state="AUTO_PENDING", current_role=None)
+        await _set(session, case, at=at, state="AUTO_PENDING", current_role=None)
     elif reason == "DEFROZEN_REVIEW":
         rules = await rules_by_version(session, p["rule_version"])
         chain = approval_chain(rules, p["claim_type"], int(p["amount_paise"]))
-        await _set(session, case, state="IN_REVIEW", chain=chain, step=0, round=case["round"] + 1, current_role=chain[0])
+        await _set(session, case, at=at, state="IN_REVIEW", chain=chain, step=0, round=case["round"] + 1, current_role=chain[0])
     elif reason == "DEFROZEN_RESUMED":
         held = (case["data"] or {}).get("held_from") or {}
-        await _set(session, case, state=held.get("state", "IN_REVIEW"), current_role=held.get("current_role"))
+        await _set(session, case, at=at, state=held.get("state", "IN_REVIEW"), current_role=held.get("current_role"))
     elif to == "CORRECTION_PENDING":
-        await _set(session, case, state="REDISBURSEMENT_REVIEW", current_role="fo.apfc")
+        await _set(session, case, at=at, state="REDISBURSEMENT_REVIEW", current_role="fo.apfc")
     elif to == "REISSUE_APPROVED":
-        await _set(session, case, state="PAYMENT_RETURNED", current_role="fo.cash")
+        await _set(session, case, at=at, state="PAYMENT_RETURNED", current_role="fo.cash")
     elif to == "PAYMENT_RETURNED" and p["from_state"] == "CORRECTION_PENDING":
-        await _set(session, case, state="RETURNED_AWAITING_MEMBER", current_role=None)
+        await _set(session, case, at=at, state="RETURNED_AWAITING_MEMBER", current_role=None)
     elif to == "CANCELLED":                                     # the member withdrew it before a checker decided
-        await _set(session, case, state="CLOSED", current_role=None, data={**(case["data"] or {}), "closed": "cancelled by the member"})
+        await _set(session, case, at=at, state="CLOSED", current_role=None, data={**(case["data"] or {}), "closed": "cancelled by the member"})
 
 
-async def _set(session: AsyncSession, case: dict[str, Any], **values: Any) -> None:
-    await session.execute(update(cases).where(cases.c.case_id == case["case_id"]).values(version=case["version"] + 1, **values))
+async def _set(session: AsyncSession, case: dict[str, Any], at: datetime | None = None, **values: Any) -> None:
+    conds = [cases.c.case_id == case["case_id"], cases.c.state != "CLOSED"]
+    vals = dict(values, version=case["version"] + 1)
+    if at is not None:
+        conds.append(or_(cases.c.source_at.is_(None), cases.c.source_at <= at))
+        vals["source_at"] = at
+    await session.execute(update(cases).where(*conds).values(**vals))
 
 
 async def on_grievance_registered(session: AsyncSession, event: dict[str, Any]) -> None:
