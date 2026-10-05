@@ -137,6 +137,12 @@ async def seed_kyc(session: AsyncSession, member: dict[str, Any], kyc_type: str,
     elif kyc_type == "BANK":
         check = mock_penny_drop(fields["ifsc"].upper(), fields["account_number"])
         masked, details = mask(fields["account_number"]), {"ifsc": fields["ifsc"].upper(), "account_last4": fields["account_number"][-4:]}
+    elif kyc_type == "PASSPORT" and member["international"] and (member["kyc"] or {}).get("aadhaar") != "VERIFIED":
+        expiry = date.fromisoformat(fields["expiry"])
+        if expiry <= datetime.now(UTC).date():
+            raise Problem(422, "/problems/passport-expired", "Passport has expired")
+        masked, details = mask(fields["number"]), {"country": fields["country"], "expiry": fields["expiry"]}
+        check = {"verifier": "MOCK passport document check", "verified": True}
     else:
         raise Problem(422, "/problems/validation", "Unsupported KYC type", "PAN or BANK.")
     request = {"request_id": f"KYC-{secrets.token_hex(4).upper()}", "member_id": member["member_id"], "uan": member["uan"],
@@ -159,16 +165,23 @@ async def decide_kyc(session: AsyncSession, request: dict[str, Any], approve: bo
         values: dict[str, Any] = {}
         if request["kyc_type"] == "PAN":
             kyc.update(pan="VERIFIED", pan_masked=request["masked_value"])
+        elif request["kyc_type"] == "PASSPORT":
+            # P2.19: a current passport is the KYC identity for an Aadhaar-less international worker.
+            if date.fromisoformat(request["details"]["expiry"]) <= now.date():
+                raise Problem(422, "/problems/passport-expired", "Passport has expired")
+            kyc.update(passport="VERIFIED", passport_masked=request["masked_value"],
+                       passport_country=request["details"]["country"], passport_expiry=request["details"]["expiry"])
         else:
             kyc["bank"] = "VERIFIED"
             values = {"bank_ifsc": request["details"]["ifsc"], "bank_account_last4": request["details"]["account_last4"]}
         await session.execute(update(members).where(members.c.member_id == member["member_id"]).values(kyc=kyc, **values))
-        await add_event(session, producer=PRODUCER, event_type="MemberKycUpdated.v1", aggregate_type="member",
-                        aggregate_id=member["uan"], correlation_id=correlation_id, payload={
-                            "uan": member["uan"], "kyc_type": request["kyc_type"], "status": "VERIFIED",
-                            "pan_verified": kyc.get("pan") == "VERIFIED",
-                            "bank_ifsc": values.get("bank_ifsc", member["bank_ifsc"]),
-                            "bank_account_last4": values.get("bank_account_last4", member["bank_account_last4"])})
+        if request["kyc_type"] != "PASSPORT":
+            await add_event(session, producer=PRODUCER, event_type="MemberKycUpdated.v1", aggregate_type="member",
+                            aggregate_id=member["uan"], correlation_id=correlation_id, payload={
+                                "uan": member["uan"], "kyc_type": request["kyc_type"], "status": "VERIFIED",
+                                "pan_verified": kyc.get("pan") == "VERIFIED",
+                                "bank_ifsc": values.get("bank_ifsc", member["bank_ifsc"]),
+                                "bank_account_last4": values.get("bank_account_last4", member["bank_account_last4"])})
     if member["subject"]:
         await add_event(session, producer=PRODUCER, event_type="NotificationRequested.v1", aggregate_type="notification",
                         aggregate_id=request["request_id"], correlation_id=correlation_id, payload={

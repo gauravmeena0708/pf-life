@@ -171,6 +171,8 @@ async def my_kyc(actor: Actor = Depends(MEMBER), session: AsyncSession = Depends
     requests = (await session.execute(select(kyc_requests).where(kyc_requests.c.member_id == m["member_id"])
                                       .order_by(kyc_requests.c.created_at.desc()))).mappings().all()
     return envelope({"aadhaar": kyc.get("aadhaar"), "pan": kyc.get("pan"), "bank": kyc.get("bank"),
+                     "passport": kyc.get("passport"), "passport_masked": kyc.get("passport_masked"),
+                     "passport_country": kyc.get("passport_country"), "passport_expiry": kyc.get("passport_expiry"),
                      "pan_masked": kyc.get("pan_masked"), "bank_ifsc": m["bank_ifsc"], "bank_account_last4": m["bank_account_last4"],
                      "requests": [_request_view(r) for r in requests]})
 
@@ -182,6 +184,23 @@ class PanInput(BaseModel):
 class BankInput(BaseModel):
     ifsc: str = Field(pattern=r"^[A-Za-z]{4}0[A-Za-z0-9]{6}$")
     account_number: str = Field(pattern=r"^[0-9]{9,18}$")
+
+
+class PassportInput(BaseModel):
+    number: str = Field(pattern=r"^[A-Za-z0-9]{6,20}$")
+    country: str = Field(min_length=2, max_length=60)
+    expiry: date
+
+
+@router.post("/api/v1/members/me/kyc/passport", status_code=201)
+async def seed_passport(body: PassportInput, actor: Actor = Depends(MEMBER), session: AsyncSession = Depends(db)) -> dict:
+    async with session.begin():
+        m = await _me(session, actor)
+        if not m["international"] or (m["kyc"] or {}).get("aadhaar") == "VERIFIED":
+            raise Problem(403, "/problems/passport-kyc-ineligible", "Passport KYC is for international workers without Aadhaar")
+        require_step_up(actor, "seed-kyc", m["member_id"])
+        r = await seed_kyc(session, m, "PASSPORT", body.model_dump(mode="json"), "MEMBER", actor.subject)
+    return envelope({k: v for k, v in r.items() if k != "member_id"})
 
 
 @router.post("/api/v1/members/me/kyc/bank-accounts", status_code=201)
@@ -382,8 +401,15 @@ async def account_status(actor: Actor = Depends(MEMBER), session: AsyncSession =
     pending = (await session.execute(select(kyc_requests.c.kyc_type).where(kyc_requests.c.member_id == m["member_id"],
                                                                            kyc_requests.c.state == "PENDING_EMPLOYER"))).scalars().all()
     common = []
-    if kyc.get("aadhaar") != "VERIFIED":
-        common.append({"code": "KYC_AADHAAR_MISSING", "blocks": ["ALL_CLAIMS"], "fix": "Aadhaar must be verified and seeded."})
+    passport_ok = bool(m["international"] and kyc.get("passport") == "VERIFIED" and
+                       kyc.get("passport_expiry") and date.fromisoformat(kyc["passport_expiry"]) > datetime.now(UTC).date())
+    if kyc.get("aadhaar") != "VERIFIED" and not passport_ok:
+        if m["international"]:
+            expired = bool(kyc.get("passport_expiry") and date.fromisoformat(kyc["passport_expiry"]) <= datetime.now(UTC).date())
+            common.append({"code": "KYC_PASSPORT_EXPIRED" if expired else "KYC_PASSPORT_MISSING", "blocks": ["ALL_CLAIMS"],
+                           "fix": "Submit a current passport under Manage › KYC; your employer approves it."})
+        else:
+            common.append({"code": "KYC_AADHAAR_MISSING", "blocks": ["ALL_CLAIMS"], "fix": "Aadhaar must be verified and seeded."})
     if kyc.get("bank") != "VERIFIED":
         common.append({"code": "KYC_BANK_MISSING", "blocks": ["ALL_CLAIMS"], "fix": "Add a bank account under Manage › KYC; your employer approves it."})
     if kyc.get("pan") != "VERIFIED":

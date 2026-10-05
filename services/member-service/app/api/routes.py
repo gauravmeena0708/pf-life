@@ -71,10 +71,35 @@ async def identity_assurance(actor: Actor = Depends(require_stakeholder("member"
                              session: AsyncSession = Depends(db)) -> dict:
     member = await _member(session, actor.subject)
     kyc = member["kyc"]
-    pending = [name for name in ("aadhaar", "pan", "bank") if kyc.get(name) != "VERIFIED"]
+    passport_ok = bool(member["international"] and kyc.get("passport") == "VERIFIED" and
+                       kyc.get("passport_expiry") and date.fromisoformat(kyc["passport_expiry"]) > datetime.now(UTC).date())
+    pending = [name for name in ("aadhaar", "pan", "bank") if kyc.get(name) != "VERIFIED" and
+               not (name == "aadhaar" and passport_ok)]
     next_step = ("No further identity action is needed." if not pending else
                  f"Complete verification for {', '.join(pending)} in your member account.")
     return envelope({"kyc": kyc, "level": "PARTIAL" if pending else "FULL", "next_step": next_step})
+
+
+class IdentityEvidence(BaseModel):
+    name: str = Field(min_length=2, max_length=200)
+    date_of_birth: date
+    gender: Literal["MALE", "FEMALE", "TRANSGENDER"]
+
+
+@router.post("/api/v1/members/me/identity-checks")
+async def identity_check(body: IdentityEvidence, actor: Actor = Depends(require_stakeholder("member")),
+                         session: AsyncSession = Depends(db)) -> dict:
+    """Compare the mock e-KYC identity with the member record before a claim is filed."""
+    member = await _member(session, actor.subject)
+    # Joint Declaration SOP: core identity corrections use the existing major-change process.
+    mismatches = [field for field, matches in (
+        ("NAME", " ".join(body.name.upper().split()) == " ".join(member["name"].upper().split())),
+        ("DATE_OF_BIRTH", body.date_of_birth == member["date_of_birth"]),
+        ("GENDER", body.gender == member["gender"])) if not matches]
+    return envelope({"mismatched_fields": mismatches, "claim_ready": not mismatches,
+                     "correction_path": "/members/me/joint-declarations" if mismatches else None,
+                     "next_step": "Submit a Joint Declaration for each differing field before claiming." if mismatches
+                     else "Identity matches the member record."})
 
 
 @router.get("/api/v1/members/me/notifications")
