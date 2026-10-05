@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 115 |
-| Activities | 311 |
+| Activities | 313 |
 | Stakeholders with at least one API | 95 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 3 |
@@ -583,7 +583,7 @@ Activities: **F06.insolvency_ss** Watch for insolvency and act in it (IBC): the 
 
 #### `fo.ao` — Accounts Officer
 
-Activities: **F02.jd_verify_ao** Verifier (AO route): cross-check and recommend; **F02.jd_approve_minor** Approver for minor changes (AO / SS per JD Table 3); **F04.approve_ao** Approve claims in the AO band; **F04.attachment_ao** Record a court's attachment order on a member's balance and refuse it (EPF Act s.10), and release a claim held for a shared payee account after checking it; **F04.transfer_decide** Approve, reject or return a verified Form 13 transfer (the ledger moves the balance); **F05.ids_approve** Approve the Input Data Sheet and send to the Pension section via inter-section diary; **F07.verify_ao** Review verification (AO route, accounts cases); **F11.approve** Approve reactivation / settlement in the AO band; forward higher bands; **F11.scwf_transfer** Transfer the identified balances to the Senior Citizens' Welfare Fund by 1 March; record a member's reclaim within 25 years
+Activities: **F02.uan_merge_ao** Merge a duplicate UAN into the member's active UAN once the identities match; the balance follows and the service stays continuous; **F02.jd_verify_ao** Verifier (AO route): cross-check and recommend; **F02.jd_approve_minor** Approver for minor changes (AO / SS per JD Table 3); **F04.approve_ao** Approve claims in the AO band; **F04.attachment_ao** Record a court's attachment order on a member's balance and refuse it (EPF Act s.10), and release a claim held for a shared payee account after checking it; **F04.transfer_decide** Approve, reject or return a verified Form 13 transfer (the ledger moves the balance); **F05.ids_approve** Approve the Input Data Sheet and send to the Pension section via inter-section diary; **F07.verify_ao** Review verification (AO route, accounts cases); **F11.approve** Approve reactivation / settlement in the AO band; forward higher bands; **F11.scwf_transfer** Transfer the identified balances to the Senior Citizens' Welfare Fund by 1 March; record a member's reclaim within 25 years
 
 | Endpoint | Status |
 |---|---|
@@ -596,6 +596,7 @@ Activities: **F02.jd_verify_ao** Verifier (AO route): cross-check and recommend;
 | `GET /office/scwf/identifications/{year}` | W |
 | `GET /office/transfers` | W |
 | `GET /office/transfers/{transferId}/legs` | W |
+| `GET /office/uan-merges` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/accounts/{accountLinkId}/reactivations` | W |
 | `POST /office/attachment-orders` | W |
@@ -609,6 +610,7 @@ Activities: **F02.jd_verify_ao** Verifier (AO route): cross-check and recommend;
 | `POST /office/scwf/transfers` | W |
 | `POST /office/scwf/transfers/{accountLinkId}/reclaims` | W |
 | `POST /office/transfers/{transferId}/decisions` | W |
+| `POST /office/uan-merges` | W |
 
 #### `fo.fa_accounts` — DA / SS in the F&A (Accounts) wing — ledger debit posting, viewing the **Claim Approval Dockets (CAD)** of each level, reconciliation of rejected / returned payments
 
@@ -621,7 +623,7 @@ Activities: **F04.cad** View the Claim Approval Docket each level generated (int
 
 #### `fo.apfc` — APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)
 
-Activities: **F01.circle_review** Circle officer reviews coverage of the new establishment; **F01.dsc_approve** Approve the DSC / e-sign registration at the PF office; **F01.change_decide** Decide establishment change, closure or transfer requests; **F01.merger_apfc** Record an amalgamation of two establishments (APFC); **F06.insolvency_apfc** Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured; **F02.jd_approve** Approver for major changes (APFC / RPFC-II / RPFC-I per JD Table 3): approve / reject / return; **F03.eps_rectify_approve** Approve an EPS rectification: A/c 10 to A/c 1 or the trust (EPS wrongly allowed), A/c 1 to A/c 10 (EPS wrongly denied); **F03.ledger_exception_approve** Approve an exceptional ledger adjustment (RPFC-II F&A); **F03.ecr_office_approval** Approve ECRs held for office approval (ECR Approval menu on the APFC login; scope to be confirmed); **F04.approve_apfc** Approve claims in the APFC / RPFC-II band; **F04.redisburse_approve** Authorise a new payment after a return without reopening adjudication; **F04.attachment_apfc** Record a court's attachment order on a member's balance and refuse it (EPF Act s.10), and release a claim held for a shared payee account after checking it; **F04.shares** Amend beneficiary shares (legacy-settled share, deceased nominee, court order) and check the share summary; **F06.schedule** Circle officer schedules inspection (incl. CAIU-allocated); **F06.decide_report** Circle officer decides on the inspection report (T+7): initiate a 7A inquiry or no action; **F06.proceed** Quasi-judicial authority: issue notice / summons, hold hearings (e-Proceedings Cause List, Daily Order); **F06.order** Pass 7A / 14B / 7Q order (e-Proceedings Final Order); 7B review; 7C; 26B disputes; **F06.vishwas_decide** Recalculate damages under VISHWAS and decide; revised demand is paid through a direct challan; **F06.garnishee** 8F notice to a bank or debtor of the employer to pay EPFO (the CPFC's authorised officer); **F06.prosecution** Initiate prosecution; **F07.freeze_ro_member** Order freezing of MID / UAN (Categories B / C); **F07.verify_apfc** Validate verification; **F07.defreeze_est_maker** Recommend de-freezing an establishment (maker); the OIC orders it (checker); **F09.past_accum_approve** APFC approves the past-accumulation reconciliation: each receipt clears the trust transfer receivable; **F11.approve_apfc** Approve inoperative-account settlement in higher amount bands; **F11.scwf_transfer_apfc** Transfer balances to the Senior Citizens' Welfare Fund and record reclaims (higher authority)
+Activities: **F01.circle_review** Circle officer reviews coverage of the new establishment; **F01.dsc_approve** Approve the DSC / e-sign registration at the PF office; **F01.change_decide** Decide establishment change, closure or transfer requests; **F01.merger_apfc** Record an amalgamation of two establishments (APFC); **F06.insolvency_apfc** Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured; **F02.uan_merge_apfc** Merge a duplicate UAN into the member's active UAN once the identities match; the balance follows and the service stays continuous; **F02.jd_approve** Approver for major changes (APFC / RPFC-II / RPFC-I per JD Table 3): approve / reject / return; **F03.eps_rectify_approve** Approve an EPS rectification: A/c 10 to A/c 1 or the trust (EPS wrongly allowed), A/c 1 to A/c 10 (EPS wrongly denied); **F03.ledger_exception_approve** Approve an exceptional ledger adjustment (RPFC-II F&A); **F03.ecr_office_approval** Approve ECRs held for office approval (ECR Approval menu on the APFC login; scope to be confirmed); **F04.approve_apfc** Approve claims in the APFC / RPFC-II band; **F04.redisburse_approve** Authorise a new payment after a return without reopening adjudication; **F04.attachment_apfc** Record a court's attachment order on a member's balance and refuse it (EPF Act s.10), and release a claim held for a shared payee account after checking it; **F04.shares** Amend beneficiary shares (legacy-settled share, deceased nominee, court order) and check the share summary; **F06.schedule** Circle officer schedules inspection (incl. CAIU-allocated); **F06.decide_report** Circle officer decides on the inspection report (T+7): initiate a 7A inquiry or no action; **F06.proceed** Quasi-judicial authority: issue notice / summons, hold hearings (e-Proceedings Cause List, Daily Order); **F06.order** Pass 7A / 14B / 7Q order (e-Proceedings Final Order); 7B review; 7C; 26B disputes; **F06.vishwas_decide** Recalculate damages under VISHWAS and decide; revised demand is paid through a direct challan; **F06.garnishee** 8F notice to a bank or debtor of the employer to pay EPFO (the CPFC's authorised officer); **F06.prosecution** Initiate prosecution; **F07.freeze_ro_member** Order freezing of MID / UAN (Categories B / C); **F07.verify_apfc** Validate verification; **F07.defreeze_est_maker** Recommend de-freezing an establishment (maker); the OIC orders it (checker); **F09.past_accum_approve** APFC approves the past-accumulation reconciliation: each receipt clears the trust transfer receivable; **F11.approve_apfc** Approve inoperative-account settlement in higher amount bands; **F11.scwf_transfer_apfc** Transfer balances to the Senior Citizens' Welfare Fund and record reclaims (higher authority)
 
 | Endpoint | Status |
 |---|---|
@@ -653,6 +655,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `GET /office/recovery/cases` | W |
 | `GET /office/scwf/identifications/{year}` | W |
 | `GET /office/signature-registrations` | W |
+| `GET /office/uan-merges` | W |
 | `GET /office/work-queue` | W |
 | `POST /office/accounts/{accountLinkId}/reactivations` | W |
 | `POST /office/attachment-orders` | W |
@@ -694,6 +697,7 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/members/{uan}/freezes` | W |
 | `POST /office/scwf/transfers` | W |
 | `POST /office/scwf/transfers/{accountLinkId}/reclaims` | W |
+| `POST /office/uan-merges` | W |
 | `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | W |
 | `POST /office/ecr-filings/{filingId}/approvals` | ? |
 
@@ -1723,6 +1727,8 @@ flowchart LR
   F02_pan_verify["ext.income_tax<br/>Verify PAN"]
   F02_kyc_bulk["employer.operator<br/>Bulk KYC upload; KYC and PAN verification"]
   F02_identity_check["member<br/>Compare my identity on the e-KYC with my member record; a di"]
+  F02_uan_merge_ao["fo.ao<br/>Merge a duplicate UAN into the member's active UAN once the "]
+  F02_uan_merge_apfc["fo.apfc<br/>Merge a duplicate UAN into the member's active UAN once the "]
   F02_missing_details["employer.operator<br/>Fill missing member details; member location mapping; downlo"]
   F02_exit["employer.operator<br/>Mark date of exit (single or bulk) and corrections"]
   F02_employer_approvals["employer.signatory<br/>Approve queued member changes (Member > Approvals)"]

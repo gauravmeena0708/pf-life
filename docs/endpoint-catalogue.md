@@ -384,6 +384,8 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/accounts/interest-postings` 💰🔐 | Annual interest crediting run (illustrative rate) | W | 1 | contribution |
 | `POST /office/accounts/rule-change-simulations` | Simulate a proposed interest rate, wage ceiling or contribution split on every member with the real calculations — nothing posted but an audit (P2.24) | W | 1 | contribution |
 | `GET /office/accounts/interest-postings?financialYear=` | Interest run preview: the rate in the rule set in force, interest due per account (monthly running balance), already credited, the difference to credit, and earlier runs | W | 1 | contribution |
+| `POST /office/uan-merges` 🔐 | Merge a duplicate UAN into the member's active UAN after the identities match: the duplicate closed, its member IDs linked, its balance moved in one journal (P2.19) | W | 1 | member |
+| `GET /office/uan-merges` | UAN merges done in this office | W | 1 | member |
 | `GET /office/accounts/inoperative` | **Inoperative account** identification | W | 1 | contribution |
 | `GET /office/scwf/identifications/{year}` | Accounts unclaimed seven years after becoming inoperative, identified by 30 September for transfer to the Senior Citizens' Welfare Fund — a listing, nothing moved (P2.19) | W | 1 | contribution |
 | `POST /office/scwf/transfers` 💰🔐 | Transfer the identified balances to the Senior Citizens' Welfare Fund by 1 March, a record per member (P2.19) | W | 1 | contribution |

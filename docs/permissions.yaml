@@ -2356,6 +2356,18 @@ stakeholders:
     via:
     - F07.verify_ss
   fo.ao:
+  - endpoint: POST /office/uan-merges
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F02.uan_merge_ao
+  - endpoint: GET /office/uan-merges
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F02.uan_merge_ao
   - endpoint: POST /office/member-change-requests/{requestId}/verifications
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2610,6 +2622,18 @@ stakeholders:
     step_up: false
     via:
     - F06.insolvency_apfc
+  - endpoint: POST /office/uan-merges
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F02.uan_merge_apfc
+  - endpoint: GET /office/uan-merges
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F02.uan_merge_apfc
   - endpoint: POST /office/member-change-requests/{requestId}/decisions
     status: W
     scope: office jurisdiction of the caller's posting

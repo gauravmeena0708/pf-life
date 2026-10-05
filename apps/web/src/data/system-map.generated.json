@@ -4,9 +4,9 @@
   "interfaces": 21,
   "stakeholders": 115,
   "stakeholders_with_access": 95,
-  "activities": 311,
+  "activities": 313,
   "endpoints": {
-   "W": 500,
+   "W": 502,
    "M": 24,
    "P": 1,
    "?": 5
@@ -84,7 +84,7 @@
    "coverage": "Working",
    "purpose": "Field-office sections: claim scrutiny and payment, compliance, pension, EDLI, exemption, PRO counter.",
    "endpoints": {
-    "W": 148,
+    "W": 150,
     "M": 0,
     "P": 0,
     "?": 4
@@ -171,7 +171,7 @@
    "coverage": "Working",
    "purpose": "Regional office officers: approvals above the dealing level, freezes, ledger decisions.",
    "endpoints": {
-    "W": 89,
+    "W": 91,
     "M": 0,
     "P": 0,
     "?": 1
@@ -1297,12 +1297,16 @@
    "name": "Accounts Officer",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 22,
+    "W": 24,
     "M": 0,
     "P": 0,
     "?": 0
    },
    "activities": [
+    {
+     "id": "F02.uan_merge_ao",
+     "does": "Merge a duplicate UAN into the member's active UAN once the identities match; the balance follows and the service stays continuous"
+    },
     {
      "id": "F02.jd_verify_ao",
      "does": "Verifier (AO route): cross-check and recommend"
@@ -1367,7 +1371,7 @@
    "name": "APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 70,
+    "W": 72,
     "M": 0,
     "P": 0,
     "?": 1
@@ -1392,6 +1396,10 @@
     {
      "id": "F06.insolvency_apfc",
      "does": "Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured"
+    },
+    {
+     "id": "F02.uan_merge_apfc",
+     "does": "Merge a duplicate UAN into the member's active UAN once the identities match; the balance follows and the service stays continuous"
     },
     {
      "id": "F02.jd_approve",
@@ -3748,6 +3756,26 @@
    "next": [],
    "status": "BUILT",
    "endpoints": 1,
+   "src": "JD"
+  },
+  {
+   "id": "F02.uan_merge_ao",
+   "flow": "F02",
+   "actor": "fo.ao",
+   "does": "Merge a duplicate UAN into the member's active UAN once the identities match; the balance follows and the service stays continuous",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
+   "src": "JD"
+  },
+  {
+   "id": "F02.uan_merge_apfc",
+   "flow": "F02",
+   "actor": "fo.apfc",
+   "does": "Merge a duplicate UAN into the member's active UAN once the identities match; the balance follows and the service stays continuous",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 2,
    "src": "JD"
   },
   {

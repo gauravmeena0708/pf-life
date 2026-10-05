@@ -8315,6 +8315,40 @@
   },
   {
     "method": "GET",
+    "path_template": "/office/uan-merges",
+    "regex": "^/office/uan\\-merges$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.ao",
+      "fo.apfc"
+    ],
+    "summary": "UAN merges done in this office",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/uan-merges",
+    "regex": "^/office/uan\\-merges$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.ao",
+      "fo.apfc"
+    ],
+    "summary": "Merge a duplicate UAN into the member's active UAN after the identities match: the duplicate closed, its member IDs linked, its balance moved in one journal (P2.19)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/office/work-queue",
     "regex": "^/office/work\\-queue$",
     "status": "W",

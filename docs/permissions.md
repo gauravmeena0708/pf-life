@@ -607,6 +607,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/scwf/identifications/{year}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/transfers` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/transfers/{transferId}/legs` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/uan-merges` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/accounts/{accountLinkId}/reactivations` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/attachment-orders` | W | office jurisdiction of the caller's posting |  |
@@ -620,6 +621,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/scwf/transfers` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/scwf/transfers/{accountLinkId}/reclaims` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/transfers/{transferId}/decisions` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/uan-merges` | W | office jurisdiction of the caller's posting | yes |
 
 **`fo.fa_accounts`** — DA / SS in the F&A (Accounts) wing — ledger debit posting, viewing the **Claim Approval Dockets (CAD)** of each level, reconciliation of rejected / returned payments
 
@@ -660,6 +662,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /office/recovery/cases` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/scwf/identifications/{year}` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/signature-registrations` | W | office jurisdiction of the caller's posting |  |
+| `GET /office/uan-merges` | W | office jurisdiction of the caller's posting |  |
 | `GET /office/work-queue` | W | office jurisdiction of the caller's posting |  |
 | `POST /office/accounts/{accountLinkId}/reactivations` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/attachment-orders` | W | office jurisdiction of the caller's posting |  |
@@ -701,6 +704,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /office/members/{uan}/freezes` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/scwf/transfers` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/scwf/transfers/{accountLinkId}/reclaims` | W | office jurisdiction of the caller's posting | yes |
+| `POST /office/uan-merges` | W | office jurisdiction of the caller's posting | yes |
 | `PUT /office/death-claims/{claimId}/beneficiaries/{beneficiaryId}/shares` | W | office jurisdiction of the caller's posting | yes |
 | `POST /office/ecr-filings/{filingId}/approvals` | ? | office jurisdiction of the caller's posting | yes |
 
