@@ -50,6 +50,12 @@ def ensure_device_cookie(request: Request, response) -> str:
 
 
 async def _post(request: Request, subject: str, event_type: str, device: str) -> None:
+    if event_type in {"MEMBER_SECURITY_REPORT", "ACCOUNT_RECOVERY_REQUESTED"}:
+        # P2.28: a recent security incident raises the score for sensitive member reads.
+        try:
+            await request.app.state.redis.setex(f"risk:security-event:{subject}", 24 * 3600, "1")
+        except Exception:
+            log.warning("Could not cache recent security event", exc_info=True)
     token = mint(request.app.state.signing_key, "gateway", "system.gateway", "audit-service", request.state.correlation_id)
     try:
         response = await request.app.state.http_client.post(AUDIT_URL, json={

@@ -16,10 +16,34 @@ interface Props {
   request: StepUpRequest | null;
   onConfirmed: (token: string) => void;
   onCancel: () => void;
+  labels?: Partial<StepUpLabels>;
 }
 
+export interface StepUpLabels {
+  title: string;
+  authorising: string;
+  amount: string;
+  rate: string;
+  reference: string;
+  demoCode: string;
+  demoNotice: string;
+  oneTimeCode: string;
+  retry: string;
+  preparing: string;
+  cancel: string;
+  confirm: string;
+}
+
+const defaults: StepUpLabels = {
+  title: "Confirm this action", authorising: "You are authorising", amount: "Amount", rate: "Rate",
+  reference: "Reference", demoCode: "Demo one-time code", demoNotice: "", oneTimeCode: "One-time code",
+  retry: "Close this dialog and try confirmation again.", preparing: "Preparing confirmation…",
+  cancel: "Cancel", confirm: "Confirm",
+};
+
 /** Transaction-intent confirmation (init.md §6.3): says exactly what is authorised; OTP is a labelled simulation. */
-export function StepUpDialog({ request, onConfirmed, onCancel }: Props) {
+export function StepUpDialog({ request, onConfirmed, onCancel, labels }: Props) {
+  const copy = { ...defaults, ...labels };
   const dialog = useRef<HTMLDialogElement>(null);
   const [challenge, setChallenge] = useState<{ challenge_id: string; demo_otp: string; demo_notice: string } | null>(null);
   const [otp, setOtp] = useState("");
@@ -72,36 +96,36 @@ export function StepUpDialog({ request, onConfirmed, onCancel }: Props) {
   return createPortal(
     <dialog ref={dialog} aria-labelledby="stepup-title" onCancel={onCancel} className="stepup">
       <form onSubmit={verify}>
-        <h2 id="stepup-title">Confirm this action</h2>
+        <h2 id="stepup-title">{copy.title}</h2>
         {request ? (
           <dl className="kv">
-            <dt>You are authorising</dt>
+            <dt>{copy.authorising}</dt>
             <dd><strong>{request.summary}</strong></dd>
             {request.amountPaise !== undefined ? request.action === "record-interest-rate"
-              ? <><dt>Rate</dt><dd>{(request.amountPaise / 100).toFixed(2)}%</dd></>
-              : <><dt>Amount</dt><dd>{rupees(request.amountPaise)}</dd></> : null}
-            <dt>Reference</dt>
+              ? <><dt>{copy.rate}</dt><dd>{(request.amountPaise / 100).toFixed(2)}%</dd></>
+              : <><dt>{copy.amount}</dt><dd>{rupees(request.amountPaise)}</dd></> : null}
+            <dt>{copy.reference}</dt>
             <dd><code>{request.resourceId}</code>{request.resourceVersion !== undefined ? ` (version ${request.resourceVersion})` : ""}</dd>
           </dl>
         ) : null}
         {challenge ? (
           <>
-            <p className="demo-otp" role="note">
-              Demo one-time code: <code>{challenge.demo_otp}</code>
+            <p className="demo-otp" role="note" aria-live="polite">
+              {copy.demoCode}: <code>{challenge.demo_otp}</code>
               <br />
-              <span className="muted small">{challenge.demo_notice}</span>
+              <span className="muted small">{copy.demoNotice || challenge.demo_notice}</span>
             </p>
-            <label htmlFor="stepup-otp">One-time code</label>
+            <label htmlFor="stepup-otp">{copy.oneTimeCode}</label>
             <input id="stepup-otp" inputMode="numeric" autoComplete="one-time-code" value={otp}
               onChange={(e) => setOtp(e.target.value.trim())} required pattern="[0-9]{6}" />
           </>
         ) : (
-          <p className="muted">{error ? "Close this dialog and try confirmation again." : "Preparing confirmation…"}</p>
+          <p className="muted" aria-live="polite">{error ? copy.retry : copy.preparing}</p>
         )}
         <ProblemMessage error={error} />
         <div className="actions">
-          <button type="button" onClick={onCancel}>Cancel</button>
-          <button type="submit" className="primary" disabled={!challenge || busy || otp.length !== 6}>Confirm</button>
+          <button type="button" onClick={onCancel}>{copy.cancel}</button>
+          <button type="submit" className="primary" disabled={!challenge || busy || otp.length !== 6}>{copy.confirm}</button>
         </div>
       </form>
     </dialog>,

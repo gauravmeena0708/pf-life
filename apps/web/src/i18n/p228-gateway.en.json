@@ -1,0 +1,18 @@
+{
+  "new-device": "We don't recognise this device.",
+  "unusual-activity": "There have been more sensitive requests than usual.",
+  "recent-security-event": "A recent security event needs an extra check.",
+  "prompt": "Please confirm before continuing.",
+  "confirm": "Confirm",
+  "title": "Confirm this action",
+  "authorising": "You are authorising",
+  "amount": "Amount",
+  "rate": "Rate",
+  "reference": "Reference",
+  "demoCode": "Demo one-time code",
+  "demoNotice": "SIMULATED second factor: in a real system this code is sent to the registered mobile or produced by an authenticator.",
+  "oneTimeCode": "One-time code",
+  "retry": "Close this dialog and try confirmation again.",
+  "preparing": "Preparing confirmation…",
+  "cancel": "Cancel"
+}

@@ -6,6 +6,9 @@ export interface Problem {
   detail?: string;
   errors?: (string | { field?: string; message?: string; msg?: string; loc?: (string | number)[] })[];
   correlation_id?: string;
+  reason_codes?: string[];
+  action?: string;
+  resource_id?: string;
 }
 
 export class ApiError extends Error {
@@ -29,7 +32,21 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     const token = csrfToken();
     if (token) headers.set("X-CSRF-Token", token);
   }
-  const res = await fetch(path, { ...init, method, headers, credentials: "include" });
+  const send = (requestHeaders: Headers) => fetch(path, { ...init, method, headers: requestHeaders, credentials: "include" });
+  let res = await send(headers);
+  if (res.status === 428 && !headers.has("X-Step-Up-Token") && !path.includes("/step-up-challenges")) {
+    const challenge = await res.clone().json().catch(() => null) as Problem | null;
+    // P2.28: only a risk-based challenge (it names its reasons and its exact binding) is confirmed here and retried
+    // once; a route that always needs confirmation keeps its page's own dialog, which knows the action and amount.
+    if (challenge?.type === "/problems/step-up-required" && challenge.reason_codes?.length && challenge.action && challenge.resource_id) {
+      const { confirmRiskStepUp } = await import("../features/p228/Prompt");
+      const token = await confirmRiskStepUp(challenge);
+      if (token) {
+        headers.set("X-Step-Up-Token", token);
+        res = await send(headers);
+      }
+    }
+  }
   const text = await res.text();
   const body = text ? JSON.parse(text) : undefined;
   if (!res.ok) {

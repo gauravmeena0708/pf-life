@@ -18,6 +18,7 @@ CAPTCHA_PATHS = {"/public/trrn-status-lookups", "/public/grievances", "/public/g
                  "/public/pension/payment-enquiries", "/public/pension/status-enquiries",
                  "/public/inoperative-accounts/searches"}
 from .request_activity import get_request_activity, lookup_fingerprint, summarize_body
+from .risk import SENSITIVE_ROUTES, assess as assess_risk, binding as risk_binding
 from .revocation import is_revoked, record_revocation
 from .routing import match_route
 from .security_events import after_action, list_sessions, revoke_session
@@ -107,15 +108,33 @@ async def handle_api(request: Request, path: str):
         if rejected is not None:
             return rejected
     step_up = None
-    if route["step_up"]:
+    risk_reasons = []
+    if principal["stakeholder"] == "member" and not route["step_up"]:
+        try:
+            risk_reasons = await assess_risk(request, principal["subject"], route)
+        except Exception:
+            return problem(request, 503, "risk-unavailable", "Confirmation state unavailable")
+    if route["step_up"] or risk_reasons or (principal["stakeholder"] == "member" and
+                                           request.headers.get("x-step-up-token") and
+                                           (method, route["path_template"]) in SENSITIVE_ROUTES):
         supplied = request.headers.get("x-step-up-token")
         if not supplied:
-            return problem(request, 428, "step-up-required", "Confirm this action first",
-                           "Start a confirmation with POST /api/v1/security/step-up-challenges.")
+            response = problem(request, 428, "step-up-required", "Confirm this action first",
+                               "Start a confirmation with POST /api/v1/security/step-up-challenges.")
+            if risk_reasons:
+                action, resource_id = risk_binding(request, route)
+                return JSONResponse({**json.loads(response.body), "reason_codes": risk_reasons,
+                                     "action": action, "resource_id": resource_id}, status_code=428,
+                                    media_type="application/problem+json")
+            return response
         step_up = await consume_token(request, principal, supplied)
         if not step_up:
             return problem(request, 403, "step-up-invalid", "Confirmation expired, already used or not yours",
                            "Confirm the action again.")
+        if not route["step_up"]:
+            action, resource_id = risk_binding(request, route)
+            if (step_up["action"], step_up["resource_id"]) != (action, resource_id) or step_up["amount_paise"] is not None:
+                return problem(request, 403, "step-up-mismatch", "The confirmation does not match this action")
 
     if route["owner"] == "gateway":
         if route["path_template"] == "/public/demo-challenges" and method == "GET":
