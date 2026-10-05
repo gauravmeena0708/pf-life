@@ -1,0 +1,16 @@
+.p224-standards { background: #fff; color: #102b4e; font-family: "Segoe UI", "Trebuchet MS", sans-serif; }
+.p224-heading { background: #102b4e; color: #fff; border-bottom: 4px solid #b88a28; padding: 1.5rem 2rem; }
+.p224-heading h1 { font-family: Georgia, serif; margin: .25rem 0; }
+.p224-heading p { margin: .25rem 0; }
+.p224-content { padding: 1.5rem 2rem; }
+.p224-content label { font-weight: 700; }
+.p224-content select { border: 1px solid #49617e; padding: .4rem; background: #fff; color: #102b4e; }
+.p224-content h2 { font-family: Georgia, serif; border-bottom: 2px solid #b88a28; padding-bottom: .3rem; margin-top: 2rem; }
+.p224-table-wrap { overflow-x: auto; margin-top: 1rem; }
+.p224-standards table { width: 100%; border-collapse: collapse; }
+.p224-standards caption { text-align: left; font-weight: 700; padding-bottom: .5rem; }
+.p224-standards th, .p224-standards td { border: 1px solid #bdc8d4; padding: .7rem; text-align: left; vertical-align: top; }
+.p224-standards thead { background: #102b4e; color: #fff; }
+.p224-met { color: #102b4e; }
+.p224-unmet { color: #a32222; }
+.p224-note { border-left: 3px solid #b88a28; padding-left: .75rem; margin-top: 1.5rem; }
