@@ -8,10 +8,11 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.infra.tables import demands, establishments
+from app.infra.tables import demands, ecr_filings, establishments
 
 BINDINGS = ["contribution-service.DemandStateChanged.v1", "workflow-service.StaffPostingChanged.v1",
-            "employer-service.EstablishmentOfficeTransferred.v1", "platform-service.PolicyPublished.v1"]
+            "employer-service.EstablishmentOfficeTransferred.v1", "platform-service.PolicyPublished.v1",
+            "contribution-service.ECRValidated.v1", "contribution-service.ECRSubmitted.v1"]
 
 
 async def dispatch(session: AsyncSession, event: dict[str, Any]) -> None:
@@ -29,6 +30,18 @@ async def dispatch(session: AsyncSession, event: dict[str, Any]) -> None:
         from app.infra.tables import office_staff
         from epfo_persistence.postings import apply_posting
         await apply_posting(session, event, office_staff)
+        return
+    if event["event_type"] in ("ECRValidated.v1", "ECRSubmitted.v1"):
+        p = event["payload"]
+        at = datetime.fromisoformat(event["occurred_at"].replace("Z", "+00:00")) if event.get("occurred_at") else datetime.now(UTC)
+        insert = pg_insert if session.bind.dialect.name == "postgresql" else sqlite_insert
+        wage_month = p.get("wage_month") or (at.strftime("%Y-%m"))
+        await session.execute(insert(ecr_filings).values(
+            filing_id=p["filing_id"],
+            establishment_id=p["establishment_id"],
+            wage_month=wage_month,
+            filed_at=at
+        ).on_conflict_do_nothing(index_elements=[ecr_filings.c.filing_id]))
         return
     if event["event_type"] != "DemandStateChanged.v1":
         return

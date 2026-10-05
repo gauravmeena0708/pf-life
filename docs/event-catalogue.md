@@ -9,8 +9,8 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `EmployerVerified.v1` | employer | reporting, audit | establishment | 1 |
 | `EmployerOperatorRevoked.v1` | employer | gateway, audit | establishment | 1 |
 | `SignatoryRevoked.v1` | employer | gateway, audit | establishment | 1 |
-| `ECRValidated.v1` | contribution | reporting | ecr_filing | 1 |
-| `ECRSubmitted.v1` | contribution | payment-simulator, reporting, audit | ecr_filing | 1 |
+| `ECRValidated.v1` | contribution | reporting, compliance | ecr_filing | 1 |
+| `ECRSubmitted.v1` | contribution | payment-simulator, reporting, compliance, audit | ecr_filing | 1 |
 | `ChallanGenerated.v1` | contribution | payment-simulator, reporting, audit | challan | 1 |
 | `ChallanStatusChanged.v1` | contribution | payment-simulator, reporting, audit | challan | 1 |
 | `PaymentConfirmed.v1` | payment-simulator | contribution, claim, workflow, audit | payment | 1 |

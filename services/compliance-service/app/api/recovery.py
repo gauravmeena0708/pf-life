@@ -15,8 +15,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.proceedings import BASE, dt, event, inquiry, iso, now, record, rules
 from app.api.routes import _office, db
-from app.infra.tables import (compliance_officers, demands, establishments, inquiries, legal_cases, office_staff, recovery_actions,
-                              recovery_cases)
+from app.infra.tables import (compliance_officers, demands, establishments, inquiries, insolvency_cases, legal_cases, office_staff,
+                              recovery_actions, recovery_cases)
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 
@@ -39,8 +39,14 @@ async def actions_of(session: AsyncSession, case_id: str) -> list[dict]:
 async def view(session: AsyncSession, row: dict) -> dict:
     stayed = bool(row["inquiry_case_id"]) and bool((await session.execute(select(legal_cases.c.legal_case_id).where(
         legal_cases.c.inquiry_case_id == row["inquiry_case_id"], legal_cases.c.stayed.is_(True)))).first())
+    # IBC s.14: Moratorium stops coercive recovery on that establishment
+    moratorium = bool((await session.execute(select(insolvency_cases.c.case_id).where(
+        insolvency_cases.c.establishment_id == row["establishment_id"],
+        insolvency_cases.c.moratorium_active.is_(True),
+        insolvency_cases.c.state != "CLOSED"))).first())
     return {**row, "issued_at": iso(row["issued_at"]), "pay_by": iso(row["pay_by"]), "closed_at": iso(row["closed_at"]),
             "outstanding_paise": int(row["amount_paise"]) - int(row["realised_paise"]), "stayed": stayed,
+            "moratorium": moratorium,
             "actions": await actions_of(session, row["recovery_case_id"])}
 
 
@@ -52,9 +58,16 @@ async def case_of(session: AsyncSession, case_id: str, office: str) -> dict:
 
 
 async def coercion_allowed(session: AsyncSession, row: dict, kind: str, urgent_reason: str | None = None) -> None:
-    """A step that takes the defaulter's money or property: not while a court stays recovery, not while instalments run, and
-    not before the 15 days of the demand notice unless the officer records why it cannot wait (para 1.5 i)."""
+    """A step that takes the defaulter's money or property: not while a court stays recovery, not while instalments run,
+    not while an IBC s.14 moratorium stands on that establishment, and not before the 15 days of the demand notice
+    unless the officer records why it cannot wait (para 1.5 i)."""
     current = await view(session, row)
+    if current.get("moratorium"):
+        # IBC s.14: Moratorium stops coercive recovery (attachment, sale, receiver, arrest) on that establishment
+        raise Problem(409, "/problems/moratorium-active",
+                      "Coercive recovery is prohibited under IBC s.14 moratorium",
+                      f"Establishment {row['establishment_id']} is subject to IBC s.14 moratorium. "
+                      "Coercive actions are refused while moratorium stands.")
     if current["stayed"]:
         raise Problem(409, "/problems/stayed", "Recovery is stayed by a court or tribunal order")
     if row["state"] == "CLOSED":

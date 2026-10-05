@@ -16,6 +16,7 @@ establishments = Table(
     Column("establishment_id", String(40), primary_key=True),
     Column("legal_name", String(200), nullable=False),
     Column("office_id", String(40), nullable=False),
+    Column("mca_status", String(40)),
 )
 
 # A compliance case: proceedings against an establishment for not filing, not paying, or damages.
@@ -170,4 +171,47 @@ recovery_actions = Table(
     Column("action_id", String(40), primary_key=True), Column("recovery_case_id", String(40), nullable=False, index=True),
     Column("kind", String(30), nullable=False), Column("detail", JSON, nullable=False),
     Column("actor_subject", String(80), nullable=False), Column("occurred_at", DateTime(timezone=True), nullable=False),
+)
+
+# P2.17: ECR filings recorded from contribution-service for non-filing & insolvency watchlist signals
+ecr_filings = Table(
+    "ecr_filings", metadata,
+    Column("filing_id", String(60), primary_key=True),
+    Column("establishment_id", String(40), nullable=False, index=True),
+    Column("wage_month", String(7), nullable=False),
+    Column("filed_at", DateTime(timezone=True), nullable=False),
+)
+
+# P2.17: Insolvency cases under IBC (CIRP and liquidation), moratorium, claims, and resolution plans
+insolvency_cases = Table(
+    "insolvency_cases", metadata,
+    Column("case_id", String(40), primary_key=True),
+    Column("establishment_id", String(40), nullable=False, index=True),
+    Column("office_id", String(40), nullable=False, index=True),
+    Column("stage", String(20), nullable=False),                  # CIRP | LIQUIDATION
+    Column("practitioner_type", String(20), nullable=False),      # IRP | RP | LIQUIDATOR
+    Column("practitioner_name", String(120), nullable=False),
+    Column("practitioner_email", String(120)),
+    Column("announcement_date", String(10), nullable=False),      # YYYY-MM-DD
+    Column("claim_deadline", String(10), nullable=False),         # YYYY-MM-DD
+    Column("claim_period_days", Integer, nullable=False, server_default="14"),
+    Column("nclt_bench", String(100)),
+    Column("order_ref", String(100)),
+    Column("claim_filed", Boolean, nullable=False, server_default="0"),
+    Column("claim_filed_at", DateTime(timezone=True)),
+    Column("claim_reference", String(100)),
+    Column("form_type", String(20)),                              # FORM_B | FORM_C | FORM_F
+    Column("claimed_principal_paise", BigInteger, nullable=False, server_default="0"),
+    Column("claimed_damages_paise", BigInteger, nullable=False, server_default="0"),
+    Column("claimed_interest_paise", BigInteger, nullable=False, server_default="0"),
+    Column("total_claimed_paise", BigInteger, nullable=False, server_default="0"),
+    Column("moratorium_active", Boolean, nullable=False, server_default="1"),
+    Column("outside_liquidation_estate", Boolean, nullable=False, server_default="0"),
+    Column("resolution_plan", JSON),
+    Column("plan_status", String(20)),                            # COMPLIANT | NON_COMPLIANT
+    Column("realised_paise", BigInteger, nullable=False, server_default="0"),
+    Column("state", String(20), nullable=False, server_default="OPEN"), # OPEN | CLAIM_FILED | PLAN_CHECKED | PLAN_APPROVED | CLOSED
+    Column("history", JSON, nullable=False),
+    Column("created_by", String(80), nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
 )

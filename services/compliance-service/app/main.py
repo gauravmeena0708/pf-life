@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 import epfo_auth
-from app.api import catalogue_routes, proceedings, proceedings_b, proceedings_c, recovery, routes
+from app.api import catalogue_routes, insolvency, proceedings, proceedings_b, proceedings_c, recovery, routes
 from app.config import settings
 from app.infra.db import database_ready, engine
 from epfo_observability import health_router, install
@@ -37,6 +37,7 @@ def create_app() -> FastAPI:
     app.include_router(proceedings_b.router)
     app.include_router(proceedings_c.router)
     app.include_router(recovery.router)
+    app.include_router(insolvency.router)
     handled = {(m, r.path) for r in app.router.routes for m in getattr(r, "methods", set())}
     for route in catalogue_routes.router.routes:
         if not any((m, route.path) in handled for m in route.methods):
