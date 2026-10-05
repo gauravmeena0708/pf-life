@@ -1,6 +1,22 @@
 # Event Copies & Projection Inventory
 
-> **Status (5 Oct 2026):** compiled by agy from reading the code; **not yet verified**. Since P2.30 the shared consumer applies the events about one record in the order they arrive and retries a failure in place, which protects every copy fed by a single producer. The eight copies under *Needs per-copy protection* (several producers) are leads: each is to be proved with a test that delivers its events out of order before anything is changed — at least one is overstated (claim-service only holds claims in states that can be held, so a settled claim cannot be put back on hold).
+> **Status (5 Oct 2026):** compiled by agy from reading the code, then **verified**: for each of the eight copies under
+> *Needs per-copy protection* a test delivers its events out of order (`services/<service>/tests/test_event_order.py`).
+> Each claimed bug was proved by running that test on the unchanged code (it failed) before the fix was taken.
+>
+> | Lead | Copy | Verdict | Protection |
+> |---|---|---|---|
+> | 1 | claim-service `claims` | not a bug | state preconditions: only holdable states are held, terminal states never move |
+> | 2 | contribution-service `demands` | not a bug | the updates require the states they move from |
+> | 3 | member-service `members.account_state` | **bug, fixed** | the time of the event that set it; an older freeze no longer undoes a later de-freeze |
+> | 4 | workflow-service `cases` | **bug, fixed** | the time of the event that set the state; a closed case is not reopened by an older event |
+> | 5 | reporting-service `claim_facts` | **bug, fixed** | a stub row from whichever event comes first, completed by the rest |
+> | 6 | reporting-service `contribution_facts` | **bug, fixed** | a challan paid before its return is held and applied when the return arrives |
+> | 7 | contribution-service `transfer_legs` | **bug, fixed** | the pension leg's detail in its own column: two writers no longer overwrite each other |
+> | 8 | intelligence-service `claim_facts` | **bug, fixed** | a decision arriving first is kept on a stub record |
+>
+> The shared consumer (P2.30) applies one record's events in arrival order and retries in place, which protects every copy
+> fed by a single producer; compliance-service's demand copy keeps the event time too.
 
 In an event-driven microservices architecture where each service maintains its own private database, services keep local copies (projections) of facts owned by other services by consuming domain events from RabbitMQ. In this proof-of-concept, the shared consumer implementation ([`Consumer`](file:///mnt/c/Users/gaura/Documents/GitHub/pf-life-wt-p230-inv/packages/common-persistence/epfo_persistence/consumer.py#L35-L93)) sets a prefetch count of 10 (`prefetch_count=10`) and, whenever a handler raises an unhandled exception, re-publishes the failed message to the back of the queue with an incremented `x-attempts` header before acknowledging it. As a result, events relating to the very same aggregate or record can easily be processed concurrently or out of order. A concrete incident in this system demonstrated the hazard: `compliance-service` received an initial demand event followed by a withdrawal, but concurrent processing and retry re-queuing caused an earlier event to be applied after the withdrawal, leaving a withdrawn Section 7A demand stuck in the `OPEN` state. To safeguard integrity across asynchronous delivery, every local copy must be classified and protected against out-of-order writes, especially when events regarding a single aggregate originate from more than one producer service.
 

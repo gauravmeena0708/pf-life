@@ -98,6 +98,18 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — P2.30: order-safe copies (5 October 2026)
+
+The shared consumer now applies the events about one record in arrival order and retries a failure in place (tests: one
+demand's two events handled at once, the first failing once, applied in order while another record's event does not
+wait; an event failing every time dead-lettered). An inventory of every copy (agy) flagged eight fed by several
+producers; each got a test delivering its events out of order, run first on the unchanged code: six failed — member
+freeze state, workflow cases, reporting claim facts and contribution facts, transfer legs, intelligence claim facts — and
+were fixed (event time kept, stub rows, a separate column); two passed (claims, demands: state preconditions). Each
+claimed bug was re-checked by running its test without the fix. Unit: shared package 35, member 72, workflow 59,
+intelligence 29, contribution 129, reporting 73, claim 80+. End to end on the rebuilt stack: 113 of 115 after each batch
+(the two failures are this stack's spent balances); consistency: every copy agrees.
+
 ## Fix — a withdrawn 7A demand left OPEN in compliance-service's copy (4 October 2026)
 
 CI's consistency check found it twice. The first time, a retry for events still in flight was added; the second time the
