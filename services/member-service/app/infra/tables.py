@@ -18,6 +18,7 @@ members = Table(
     Column("bank_account_last4", String(4), nullable=False),
     Column("kyc", JSON, nullable=False),
     Column("account_state", String(20), nullable=False, server_default="ACTIVE"),   # ACTIVE | FROZEN (member_freeze process)
+    Column("account_state_updated_at", DateTime(timezone=True)),                     # monotonic event timestamp guard (P2.30 Lead 3)
     Column("profile_extra", JSON),                           # corrected via Joint Declaration: father's name, etc.
     Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
     Column("aadhaar_ref", String(64), index=True),           # a stand-in for the verified Aadhaar (never the number): UANs sharing it form a set

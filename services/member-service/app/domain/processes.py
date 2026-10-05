@@ -6,10 +6,10 @@ processes (ADR-0005). On each ProcessTransitioned.v1 this service does what the 
                       and publishes MemberChangeApproved.v1 (so, for example, ECR name checks use the new name);
 * employer_exit       on APPROVED records the exit, or its correction, and publishes MemberExitMarked.v1;
 * every process marked visible_to_member is kept as one of the member's applications."""
-from datetime import date
+from datetime import UTC, date, datetime
 from typing import Any
 
-from sqlalchemy import insert, select, update
+from sqlalchemy import insert, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.exits import record_exit, track
@@ -41,13 +41,49 @@ async def on_process_transitioned(session: AsyncSession, event: dict[str, Any]) 
                               corrects=job["date_of_exit"].isoformat())       # a corrected date of exit (P2.8b)
 
 
+def _event_time(event: dict[str, Any]) -> datetime:
+    ts = event.get("occurred_at")
+    if isinstance(ts, str):
+        dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+    elif isinstance(ts, datetime):
+        dt = ts
+    else:
+        dt = datetime.now(UTC)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=UTC)
+    return dt
+
+
 async def _freeze(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
     if p["to_state"] not in ("FROZEN", "ACTIVE"):
         return
     uan, data = p["subject_ref"], p.get("data") or {}
-    await session.execute(update(members).where(members.c.uan == uan).values(account_state=p["to_state"]))
-    if p["to_state"] == "FROZEN":
+    to = p["to_state"]
+    at = _event_time(event)
+    member = (await session.execute(select(members).where(members.c.uan == uan))).mappings().first()
+    if not member:
+        return
+    current_at = member["account_state_updated_at"]
+    if current_at is not None:
+        if current_at.tzinfo is None:
+            current_at = current_at.replace(tzinfo=UTC)
+        if current_at > at:
+            return
+    if member["account_state"] == to:
+        if current_at is None or current_at < at:
+            await session.execute(update(members).where(members.c.uan == uan,
+                                                        or_(members.c.account_state_updated_at.is_(None),
+                                                            members.c.account_state_updated_at <= at))
+                                  .values(account_state_updated_at=at))
+        return
+    res = await session.execute(update(members).where(members.c.uan == uan,
+                                                      or_(members.c.account_state_updated_at.is_(None),
+                                                          members.c.account_state_updated_at <= at))
+                                .values(account_state=to, account_state_updated_at=at))
+    if not res.rowcount:
+        return
+    if to == "FROZEN":
         await add_event(session, producer="member-service", event_type="AccountFrozen.v1", aggregate_type="account",
                         aggregate_id=uan, correlation_id=event["correlation_id"], payload={
                             "target_type": "member", "target_id": uan, "category": data.get("category", ""),
@@ -104,9 +140,26 @@ async def on_issue_tracker(session: AsyncSession, event: dict[str, Any]) -> None
         return
     if p["kind"] in ("FREEZE_MEMBER", "DEFREEZE_MEMBER"):
         to = "FROZEN" if p["kind"] == "FREEZE_MEMBER" else "ACTIVE"
+        at = _event_time(event)
+        current_at = member["account_state_updated_at"]
+        if current_at is not None:
+            if current_at.tzinfo is None:
+                current_at = current_at.replace(tzinfo=UTC)
+            if current_at > at:
+                return
         if member["account_state"] == to:
+            if current_at is None or current_at < at:
+                await session.execute(update(members).where(members.c.uan == p["target_uan"],
+                                                            or_(members.c.account_state_updated_at.is_(None),
+                                                                members.c.account_state_updated_at <= at))
+                                      .values(account_state_updated_at=at))
             return
-        await session.execute(update(members).where(members.c.uan == p["target_uan"]).values(account_state=to))
+        res = await session.execute(update(members).where(members.c.uan == p["target_uan"],
+                                                          or_(members.c.account_state_updated_at.is_(None),
+                                                              members.c.account_state_updated_at <= at))
+                                    .values(account_state=to, account_state_updated_at=at))
+        if not res.rowcount:
+            return
         if to == "FROZEN":
             await add_event(session, producer="member-service", event_type="AccountFrozen.v1", aggregate_type="account",
                             aggregate_id=p["target_uan"], correlation_id=event["correlation_id"], payload={
