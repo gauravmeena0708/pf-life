@@ -294,6 +294,7 @@ class TransferLeg(Base):
     eps_leg: Mapped[str] = mapped_column(String(30))
     direction: Mapped[str] = mapped_column(String(30))
     detail: Mapped[dict] = mapped_column(JSON)
+    eps_detail: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
