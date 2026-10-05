@@ -32,6 +32,9 @@ class Beneficiary(BaseModel):
     relation: str = Field(pattern="^(SPOUSE|SON|DAUGHTER|FATHER|MOTHER|LEGAL_HEIR|GUARDIAN)$")
     share_bp: int = Field(default=0, ge=0, le=10000)
     bank_account_last4: str | None = Field(default=None, pattern=r"^[0-9]{4}$")
+    minor: bool = False
+    guardian_name: str | None = Field(default=None, max_length=120)
+    guardian_account_last4: str | None = Field(default=None, pattern=r"^[0-9]{4}$")
 
 
 class DeathClaimInput(BaseModel):
@@ -53,6 +56,8 @@ def _share_view(claim: dict[str, Any], b: dict[str, Any]) -> dict[str, Any]:
     return {"beneficiary_id": b["beneficiary_id"], "name": b["name"], "relation": b["relation"], "share_pct": b["share_bp"] / 100,
             "source": b["source"], "allocated_paise": allocated, "legacy_settled_paise": b["legacy_settled_paise"],
             "disbursed_paise": b["disbursed_paise"], "pending_paise": max(0, allocated - b["legacy_settled_paise"] - b["disbursed_paise"]),
+            "bank_account_last4": b.get("bank_account_last4"), "minor": bool(b.get("minor")),
+            "guardian_name": b.get("guardian_name"), "guardian_account_last4": b.get("guardian_account_last4"),
             "amendments": b["amendments"]}
 
 
@@ -65,7 +70,7 @@ async def file_death_claim(body: DeathClaimInput, request: Request, actor: Actor
         if idempotency_key and (cached := await find_response(session, actor.subject, operation, idempotency_key, h)):
             return envelope(cached.body)
         noms = [dict(n) for n in (await session.execute(select(nominations).where(nominations.c.uan == body.deceased_uan))).mappings().all()]
-        if not any(n["subject"] == actor.subject for n in noms):
+        if noms and not any(n["subject"] == actor.subject for n in noms):
             raise Problem(404, "/problems/not-found", "No nomination of yours for that UAN",
                           "A legal heir without a nomination files at the PRO counter with a succession certificate.")
         account = (await session.execute(select(accounts).where(accounts.c.uan == body.deceased_uan, accounts.c.deceased_on.is_not(None))
@@ -82,11 +87,33 @@ async def file_death_claim(body: DeathClaimInput, request: Request, actor: Actor
         balance = account["employee_paise"] + account["employer_paise"]
         service = months_between(account["date_of_joining"], account["deceased_on"])
         if body.process_as == "E_NOMINATION":
-            people = [Beneficiary(name=n["name"], relation=n["relation"], share_bp=n["share_bp"], bank_account_last4=n["bank_account_last4"]) for n in noms]
+            people = [Beneficiary(name=n["name"], relation=n["relation"], share_bp=n["share_bp"],
+                                  bank_account_last4=n.get("bank_account_last4"),
+                                  minor=bool(n.get("minor")), guardian_name=n.get("guardian_name"),
+                                  guardian_account_last4=n.get("bank_account_last4")) for n in noms]
         elif not body.beneficiaries:
             raise Problem(422, "/problems/validation", "List the surviving family members / new beneficiaries")
         else:
             people = body.beneficiaries
+            # EPF Scheme para 70: with no nomination the amount goes to the family in equal shares
+            if not noms or all(b.share_bp == 0 for b in people):
+                k = len(people)
+                if k > 0:
+                    base_share = 10_000 // k
+                    rem = 10_000 % k
+                    for idx, b in enumerate(people):
+                        b.share_bp = base_share + (rem if idx == 0 else 0)
+
+        # EPF Scheme para 72: guardian must not be the deceased's employer
+        for p in people:
+            if p.minor:
+                emp_id = (account.get("establishment_id") or "").strip().upper()
+                g_name = (p.guardian_name or "").strip().upper()
+                if g_name and (g_name == emp_id or g_name.startswith("EST-") or g_name == "EMPLOYER"):
+                    raise Problem(422, "/problems/employer-cannot-be-guardian",
+                                  "The deceased member's employer cannot be appointed as guardian of a minor beneficiary",
+                                  "Under EPF Scheme para 72, payment on behalf of a minor nominee must be made to a natural or legal guardian, never the employer.")
+
         composite_ref = f"CCF-{secrets.token_hex(6).upper()}" if body.form_type == "CCF_DEATH" else None
         forms = ("FORM_20", "FORM_5IF") if composite_ref else (body.form_type,)
         views = []
@@ -131,7 +158,10 @@ async def _file_one(session: AsyncSession, form_type: str, body: DeathClaimInput
     for i, p in enumerate(people, start=1):
         await session.execute(insert(claim_beneficiaries).values(
             beneficiary_id=f"{claim_id}-B{i}", claim_id=claim_id, name=p.name.upper(), relation=p.relation, share_bp=p.share_bp,
-            source=body.process_as, bank_account_last4=p.bank_account_last4, amendments=[]))
+            source=body.process_as, bank_account_last4=p.bank_account_last4,
+            minor=p.minor, guardian_name=p.guardian_name,
+            guardian_account_last4=p.guardian_account_last4 or p.bank_account_last4,
+            amendments=[]))
     claim = await load_claim(session, claim_id)
     await add_event(session, producer=PRODUCER, event_type="ClaimSubmitted.v1", aggregate_type="claim", aggregate_id=claim_id,
                     correlation_id=actor.correlation_id, payload={

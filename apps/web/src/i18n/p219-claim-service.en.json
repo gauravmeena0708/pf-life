@@ -1,0 +1,33 @@
+{
+  "p219": {
+    "title": "Attachment Orders & Fraud Prevention",
+    "subtitle": "Record received court decree / garnishee attachment orders under EPF Act s.10 and review fraud hold claims.",
+    "section10_notice": "Under Section 10 of the EPF Act, 1952, member provident fund accumulations, nominee amounts, pension, and EDLI benefits are immune from attachment under any decree or order of any court in respect of any debt or liability. Maintenance orders are not exempt. Only recovery orders under the EPF Act itself are accepted. Payments to members are never diverted.",
+    "record_heading": "Record received attachment order",
+    "order_number": "Order number / Case reference",
+    "court_name": "Court / Issuing authority name",
+    "order_date": "Date of order",
+    "order_type": "Order category",
+    "court_decree": "Civil Court Decree",
+    "maintenance_order": "Maintenance Order",
+    "commercial_debt": "Commercial Debt Attachment",
+    "epf_act_recovery": "EPF Act Recovery (EPFO)",
+    "other_type": "Other Court Order",
+    "amount_rupees": "Attachment amount (₹)",
+    "target_uan": "Target Member UAN",
+    "claim_id": "Claim ID (if specified)",
+    "debtor_name": "Debtor / Member name",
+    "submit_order": "Record order & verify immunity",
+    "recorded_orders": "Recorded attachment orders in this office",
+    "status": "Status",
+    "refusal_reason": "Statutory decision / Reason",
+    "cleared_notice": "Hold cleared successfully. Claim has proceeded to auto-approval.",
+    "recorded_notice": "Order recorded: Status {{status}} under {{section}}.",
+    "no_orders": "No attachment orders recorded in this office.",
+    "clear_hold_heading": "Shared bank account hold review",
+    "clear_hold_desc": "Review claims held due to shared bank account fraud pattern (same payee bank account across multiple members).",
+    "claim_id_label": "Held claim ID",
+    "officer_note": "Officer verification note",
+    "clear_hold_btn": "Verify & clear hold"
+  }
+}

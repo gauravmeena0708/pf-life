@@ -9,12 +9,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes import load_claim, notify, record_decision, transition
 from app.domain.claims import HOLDABLE, route
-from app.infra.tables import (accounts, annexure_k_files, annexure_k_requests, auto_transfers, claim_beneficiaries, claims, exempted_establishments, member_bank_accounts,
+from app.infra.tables import (accounts, annexure_k_files, annexure_k_requests, auto_transfers, bank_ifsc_successors, claim_beneficiaries, claims, exempted_establishments, member_bank_accounts,
                               nominations, risk_flags)
 from epfo_observability import Problem, get_logger
+from epfo_persistence import add_event
 from epfo_persistence.policy import on_policy_published, rules_by_version, rules_on
 
 log = get_logger("claim-service")
+PRODUCER = "claim-service"
 
 BINDINGS = [
     "employer-service.ExemptionStatusChanged.v1",
@@ -226,9 +228,42 @@ async def on_payment_result(session: AsyncSession, event: dict[str, Any]) -> Non
                      **({"bank_account_last4": claim["payee_account_last4"]} if claim.get("payee_account_last4") else {}),
                      **({"amount_paise": claim["tax"]["net_paise"], "tds_paise": claim["tax"]["tds_paise"]} if claim.get("tax") else {}))
     else:
-        claim = await transition(session, claim, "PAYMENT_RETURNED", "bank",
-                                 f"The bank returned the payment ({p.get('return_reason')}).")
-        await notify(session, claim, "CLAIM_PAYMENT_RETURNED", cid, reason=p.get("return_reason"))
+        # P2.19c: Bank merger IFSC successor lookup (e.g. 2019-2020 public-sector bank amalgamations)
+        return_reason = p.get("return_reason") or ""
+        old_ifsc = claim.get("payee_ifsc")
+        if not old_ifsc:
+            acct = (await session.execute(select(accounts.c.uan).where(accounts.c.account_link_id == claim["account_link_id"]))).scalar_one_or_none()
+            if acct:
+                mba = (await session.execute(select(member_bank_accounts.c.bank_ifsc).where(member_bank_accounts.c.uan == acct)
+                                             .order_by(member_bank_accounts.c.verified_at.desc()))).first()
+                if mba:
+                    old_ifsc = mba[0]
+
+        successor = None
+        if not claim.get("ifsc_remapped") and old_ifsc:
+            # Check if reason indicates merged / defunct IFSC
+            if any(k in return_reason.upper() for k in ("MERGED", "IFSC", "DISCONTINUED", "OBSOLETE", "NOT_FOUND", "INVALID")):
+                successor = (await session.execute(select(bank_ifsc_successors).where(bank_ifsc_successors.c.old_ifsc == old_ifsc))).mappings().first()
+
+        if successor:
+            new_ifsc = successor["new_ifsc"]
+            attempt = claim["payment_attempt"] + 1
+            new_payment_id = f"PAY-{claim['claim_id']}-{attempt}"
+            note = f"Payment re-routed once to successor IFSC {new_ifsc} following bank merger ({successor['bank_name']})."
+            claim = await transition(session, claim, "PAYMENT_PENDING", "system", note,
+                                     payee_ifsc=new_ifsc, ifsc_remapped=True,
+                                     payment_id=new_payment_id, payment_attempt=attempt)
+            tax_net = (claim.get("tax") or {}).get("net_paise", claim["amount_paise"])
+            await add_event(session, producer=PRODUCER, event_type="PaymentInstructed.v1", aggregate_type="claim",
+                            aggregate_id=claim["claim_id"], correlation_id=cid, payload={
+                                "claim_id": claim["claim_id"], "payment_id": new_payment_id, "amount_paise": tax_net,
+                                "attempt": attempt, "demo_scenario": "SUCCESS"})
+            await notify(session, claim, "PAYMENT_REROUTED_BANK_MERGER", cid,
+                         old_ifsc=old_ifsc, new_ifsc=new_ifsc, bank_name=successor["bank_name"])
+        else:
+            claim = await transition(session, claim, "PAYMENT_RETURNED", "bank",
+                                     f"The bank returned the payment ({p.get('return_reason')}).")
+            await notify(session, claim, "CLAIM_PAYMENT_RETURNED", cid, reason=p.get("return_reason"))
 
 
 async def record_disbursements(session: AsyncSession, claim: dict[str, Any]) -> None:

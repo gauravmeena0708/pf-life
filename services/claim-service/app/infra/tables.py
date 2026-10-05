@@ -102,6 +102,7 @@ claims = Table(
     Column("recommended", Boolean, nullable=False, server_default=sa_false()),   # a recommendation was recorded
     Column("payee_ifsc", String(11)),                  # corrected bank details for a re-disbursement
     Column("payee_account_last4", String(4)),
+    Column("ifsc_remapped", Boolean, nullable=False, server_default=sa_false()),  # P2.19c: re-routed once after bank merger
     Column("tax", JSON),                               # TDS worked out at the first payment instruction, then fixed
     Column("death_of_uan", String(12)),                # a death claim (Form 20 / 5IF): the deceased member's UAN; member_subject is the claimant
     Column("composite_ref", String(40), index=True),    # shared by Form 20 and Form 5IF filed together
@@ -182,6 +183,8 @@ nominations = Table(
     Column("subject", String(80), index=True),                  # the nominee's login, when there is one
     Column("bank_ifsc", String(11)),
     Column("bank_account_last4", String(4)),
+    Column("minor", Boolean, nullable=False, server_default=sa_false()),
+    Column("guardian_name", String(120)),
 )
 
 # The beneficiaries of a death claim and their shares: from the latest nomination, a list of surviving family
@@ -193,8 +196,11 @@ claim_beneficiaries = Table(
     Column("name", String(120), nullable=False),
     Column("relation", String(30), nullable=False),
     Column("share_bp", Integer, nullable=False),
-    Column("source", String(30), nullable=False),               # E_NOMINATION | LSM | ADDED_BY_CLAIMANT
+    Column("source", String(30), nullable=False),               # E_NOMINATION | LSM | ADDED_BY_CLAIMANT | NO_NOMINATION
     Column("bank_account_last4", String(4)),
+    Column("minor", Boolean, nullable=False, server_default=sa_false()),
+    Column("guardian_name", String(120)),
+    Column("guardian_account_last4", String(4)),
     Column("legacy_settled_paise", BigInteger, nullable=False, server_default="0"),
     Column("disbursed_paise", BigInteger, nullable=False, server_default="0"),
     Column("amendments", JSON, nullable=False),
@@ -285,3 +291,32 @@ tds_filings = Table(
     Column("filed_at", DateTime(timezone=True), server_default=func.now()),
     UniqueConstraint("office_id", "financial_year", "quarter"),
 )
+
+# Attachment orders (EPF Act s.10): received court decree / garnishee orders recorded and refused.
+attachment_orders = Table(
+    "attachment_orders", metadata,
+    Column("order_id", String(40), primary_key=True),
+    Column("order_number", String(100), nullable=False),
+    Column("court_name", String(200), nullable=False),
+    Column("order_date", Date, nullable=False),
+    Column("order_type", String(40), nullable=False),
+    Column("amount_paise", BigInteger, nullable=False),
+    Column("target_uan", String(12), nullable=False, index=True),
+    Column("claim_id", String(40), index=True),
+    Column("debtor_name", String(120)),
+    Column("status", String(20), nullable=False),
+    Column("refusal_reason", Text),
+    Column("office_id", String(40), nullable=False),
+    Column("recorded_by", String(80), nullable=False),
+    Column("created_at", DateTime(timezone=True), server_default=func.now()),
+)
+
+# Bank IFSC successors (e.g. 2019-2020 public-sector bank amalgamations).
+bank_ifsc_successors = Table(
+    "bank_ifsc_successors", metadata,
+    Column("old_ifsc", String(11), primary_key=True),
+    Column("new_ifsc", String(11), nullable=False),
+    Column("bank_name", String(120), nullable=False),
+    Column("effective_from", Date, nullable=False),
+)
+

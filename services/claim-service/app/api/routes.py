@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.claims import NEXT_STEP, OPEN_STATES, ROLE_LABELS, approval_chain, eligibility, months_between, route, rupees, summary
 from app.infra.db import sessions
-from app.infra.tables import accounts, cads, claim_beneficiaries, claim_timeline, claims, exempted_establishments, office_staff, risk_flags, tax_declarations
+from app.infra.tables import accounts, cads, claim_beneficiaries, claim_timeline, claims, exempted_establishments, member_bank_accounts, nominations, office_staff, risk_flags, tax_declarations
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit, find_response, request_hash, store_response
@@ -267,9 +267,50 @@ async def send_on(session: AsyncSession, claim: dict[str, Any], rules: dict[str,
                   correlation_id: str | None) -> tuple[dict[str, Any], str]:
     """A submitted claim goes on: ClaimSubmitted.v1, then settled automatically or sent to the office."""
     claim_id = claim["claim_id"]
+
+    # P2.19b: Check payee bank details for one-bank-account-for-many-members fraud pattern
+    ifsc = claim.get("payee_ifsc")
+    last4 = claim.get("payee_account_last4")
+    if not ifsc or not last4:
+        acct_uan = (await session.execute(select(accounts.c.uan).where(accounts.c.account_link_id == claim["account_link_id"]))).scalar_one_or_none()
+        if acct_uan:
+            mba = (await session.execute(select(member_bank_accounts.c.bank_ifsc, member_bank_accounts.c.bank_account_last4)
+                                         .where(member_bank_accounts.c.uan == acct_uan)
+                                         .order_by(member_bank_accounts.c.verified_at.desc()))).first()
+            if mba:
+                ifsc, last4 = mba[0], mba[1]
+                await session.execute(update(claims).where(claims.c.claim_id == claim_id).values(payee_ifsc=ifsc, payee_account_last4=last4))
+                claim["payee_ifsc"] = ifsc
+                claim["payee_account_last4"] = last4
+
+    is_legitimate_nominee_sharing = False
+    if claim.get("death_of_uan"):
+        nom_exists = (await session.execute(select(nominations.c.nomination_id).where(
+            nominations.c.uan == claim["death_of_uan"],
+            nominations.c.subject == claim["member_subject"]
+        ))).first()
+        if nom_exists:
+            is_legitimate_nominee_sharing = True
+
+    held_shared = False
+    shared_count = 0
+    if not is_legitimate_nominee_sharing and ifsc and last4:
+        # P2.19b: One bank account for many members (known fraud pattern)
+        threshold = (rules.get("claims") or {}).get("shared_bank_account_threshold", 3)
+        q_shared = select(func.count(func.distinct(claims.c.member_subject))).where(
+            claims.c.payee_ifsc == ifsc,
+            claims.c.payee_account_last4 == last4,
+            claims.c.member_subject != claim["member_subject"],
+            claims.c.claim_id != claim_id,
+            claims.c.state.notin_(("REJECTED_WITH_REASON", "CANCELLED", "AWAITING_CONFIRMATION"))
+        )
+        shared_count = (await session.execute(q_shared)).scalar_one()
+        if shared_count >= threshold:
+            held_shared = True
+
     signal = (await session.execute(select(risk_flags.c.signal_id).where(
         risk_flags.c.subject == claim["member_subject"], risk_flags.c.status != "BENIGN"))).scalars().first()
-    path = "REVIEW" if signal else route(claim["amount_paise"], rules, claim["claim_type"])
+    path = "REVIEW" if (signal or held_shared) else route(claim["amount_paise"], rules, claim["claim_type"])
     await add_event(session, producer=PRODUCER, event_type="ClaimSubmitted.v1", aggregate_type="claim",
                     aggregate_id=claim_id, correlation_id=correlation_id, payload={
                         "claim_id": claim_id, "form_type": claim["form_type"], "amount_paise": claim["amount_paise"],
@@ -277,7 +318,13 @@ async def send_on(session: AsyncSession, claim: dict[str, Any], rules: dict[str,
                         "account_link_id": claim["account_link_id"], "route": path, "claim_type": claim["claim_type"],
                         "advisory_signal_id": signal})
     await notify(session, claim, "CLAIM_SUBMITTED", correlation_id)
-    if path == "AUTO":
+    if held_shared:
+        note = (f"Payee bank account ({ifsc} ending {last4}) is shared with {shared_count} other members "
+                "(a known fraud pattern). Held for office review.")
+        claim = await transition(session, claim, "ON_HOLD_OFFICE_REVIEW", "system", note,
+                                 reason="SHARED_BANK_ACCOUNT_FRAUD_PATTERN")
+        await notify(session, claim, "CLAIM_ON_HOLD", correlation_id, reason="Shared bank account fraud pattern")
+    elif path == "AUTO":
         claim = await transition(session, claim, "AUTO_APPROVED", "system",
                                  "Within the automatic settlement limit; approved without an officer.")
         await record_decision(session, claim, "AUTO_APPROVED", "WITHIN_AUTO_LIMIT", correlation_id)
@@ -486,6 +533,38 @@ async def approve_redisbursement(claim_id: str, body: RedisbursementDecision,
             claim = await transition(session, claim, "PAYMENT_RETURNED", actor.stakeholder, f"New bank details not accepted: {body.note}")
         await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder,
                     action=f"claim.redisbursement_{body.decision.lower()}", target_type="claim", target_id=claim_id, detail=body.note)
+        view = await claim_view(session, claim)
+    return envelope(view)
+
+
+class ClearHoldInput(BaseModel):
+    note: str = Field(min_length=5, max_length=1000)
+
+
+@router.post("/api/v1/office/claims/{claim_id}/clear-hold")
+async def clear_hold(claim_id: str, body: ClearHoldInput,
+                     actor: Actor = Depends(require_stakeholder("fo.apfc", "fo.ao", "fo.ss", "fo.da_accounts", "fo.oic")),
+                     session: AsyncSession = Depends(db)) -> dict:
+    """P2.19b: An officer clears the fraud hold on a claim with a shared bank account."""
+    async with session.begin():
+        claim = await load_claim(session, claim_id, office=await staff_office(session, actor), lock=True)
+        if claim["state"] not in ("ON_HOLD_OFFICE_REVIEW", "UNDER_REVIEW"):
+            raise Problem(409, "/problems/invalid-state", "This claim is not on hold for office review",
+                          f"Current status: {claim['state']}.")
+        rules = await rules_by_version(session, claim["rule_version"])
+        note = f"Hold cleared by officer: {body.note}"
+        if route(claim["amount_paise"], rules, claim["claim_type"]) == "AUTO":
+            claim = await transition(session, claim, "AUTO_APPROVED", actor.stakeholder,
+                                     f"{note}. Approved within automatic settlement limit.")
+            await record_decision(session, claim, "AUTO_APPROVED", "HOLD_CLEARED_AUTO", actor.correlation_id)
+            await notify(session, claim, "CLAIM_APPROVED", actor.correlation_id)
+        else:
+            chain = approval_chain(claim["amount_paise"], rules, claim["claim_type"])
+            claim = await transition(session, claim, "UNDER_REVIEW", actor.stakeholder,
+                                     f"{note}. Sent for review: " + " → ".join(ROLE_LABELS[r] for r in chain) + ".")
+            await notify(session, claim, "CLAIM_UNDER_REVIEW", actor.correlation_id)
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder,
+                    action="claim.clear_hold", target_type="claim", target_id=claim_id, detail=body.note)
         view = await claim_view(session, claim)
     return envelope(view)
 

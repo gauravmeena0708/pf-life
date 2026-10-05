@@ -9,7 +9,7 @@ from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.infra.db import sessions
-from app.infra.tables import accounts, exempted_establishments, member_bank_accounts, nominations, office_staff
+from app.infra.tables import accounts, bank_ifsc_successors, exempted_establishments, member_bank_accounts, nominations, office_staff
 
 SEED_FILE = os.getenv("SEED_FILE", "/srv/seed/synthetic.json")
 
@@ -84,6 +84,17 @@ async def main() -> None:
                           effective_from=date.fromisoformat(e["effective_from"]))
             await session.execute(insert(exempted_establishments).values(**values).on_conflict_do_update(
                 index_elements=["establishment_id"], set_={k: v for k, v in values.items() if k != "status"}))
+        # Seed bank IFSC successors (2019-2020 public-sector bank amalgamations, synthetic codes)
+        mergers = [
+            {"old_ifsc": "SYNB0001234", "new_ifsc": "CNRB0001234", "bank_name": "Synthetic Syndicate Bank merged into Synthetic Canara Bank", "effective_from": date(2020, 4, 1)},
+            {"old_ifsc": "ORBC0001234", "new_ifsc": "PUNB0001234", "bank_name": "Synthetic Oriental Bank of Commerce merged into Synthetic Punjab National Bank", "effective_from": date(2020, 4, 1)},
+            {"old_ifsc": "UTBI0001234", "new_ifsc": "PUNB0001234", "bank_name": "Synthetic United Bank of India merged into Synthetic Punjab National Bank", "effective_from": date(2020, 4, 1)},
+            {"old_ifsc": "ALLA0001234", "new_ifsc": "IDIB0001234", "bank_name": "Synthetic Allahabad Bank merged into Synthetic Indian Bank", "effective_from": date(2020, 4, 1)},
+            {"old_ifsc": "CORP0001234", "new_ifsc": "UBIN0001234", "bank_name": "Synthetic Corporation Bank merged into Synthetic Union Bank of India", "effective_from": date(2020, 4, 1)},
+            {"old_ifsc": "ANDB0001234", "new_ifsc": "UBIN0001234", "bank_name": "Synthetic Andhra Bank merged into Synthetic Union Bank of India", "effective_from": date(2020, 4, 1)},
+        ]
+        for m in mergers:
+            await session.execute(insert(bank_ifsc_successors).values(**m).on_conflict_do_nothing())
     print(f"claim-service seeded: {len(seed['members'])} accounts, {len(seed.get('office_staff', []))} office staff")
 
 
