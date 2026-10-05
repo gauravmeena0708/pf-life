@@ -12,7 +12,13 @@ from typing import Any
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy import insert, select, update
+from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.ext.asyncio import AsyncSession
+
+
+def _upsert(table: Any, session: AsyncSession) -> Any:
+    return pg_insert(table) if session.bind.dialect.name == "postgresql" else sqlite_insert(table)
 
 from app.ai import corpus
 from app.ai.corpus import render
@@ -135,7 +141,7 @@ async def analyse_claim(body: ClaimQuestion, actor: Actor = Depends(require_stak
                         session: AsyncSession = Depends(db)) -> dict:
     facts = (await session.execute(select(claim_facts).where(claim_facts.c.claim_id == body.claim_id))).mappings().first()
     staff = (await session.execute(select(office_staff).where(office_staff.c.subject == actor.subject))).mappings().first()
-    if not facts or (actor.stakeholder != "tech.ai_service" and (not staff or staff["office_id"] != facts["office_id"])):
+    if not facts or not facts["office_id"] or (actor.stakeholder != "tech.ai_service" and (not staff or staff["office_id"] != facts["office_id"])):
         raise Problem(404, "/problems/not-found", "Claim not found")               # outside your office looks the same
     facts = dict(facts)
     signal = None
@@ -222,20 +228,43 @@ async def feedback(body: Feedback, actor: Actor = Depends(require_stakeholder(
 
 async def on_claim_submitted(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
-    if (await session.execute(select(claim_facts.c.claim_id).where(claim_facts.c.claim_id == p["claim_id"]))).first():
-        return
-    await session.execute(insert(claim_facts).values(
-        claim_id=p["claim_id"], office_id=p["office_id"], form_type=p["form_type"], amount_paise=p["amount_paise"],
-        account_link_id=p["account_link_id"], route=p["route"], advisory_signal_id=p.get("advisory_signal_id"),
-        rule_version=p["rule_version"], decisions=[]))
+    stmt = _upsert(claim_facts, session).values(
+        claim_id=p["claim_id"], office_id=p["office_id"], form_type=p["form_type"],
+        amount_paise=p["amount_paise"], account_link_id=p["account_link_id"],
+        route=p["route"], advisory_signal_id=p.get("advisory_signal_id"),
+        rule_version=p["rule_version"], decisions=[]
+    ).on_conflict_do_update(
+        index_elements=[claim_facts.c.claim_id],
+        set_={
+            "office_id": p["office_id"],
+            "form_type": p["form_type"],
+            "amount_paise": p["amount_paise"],
+            "account_link_id": p["account_link_id"],
+            "route": p["route"],
+            "advisory_signal_id": p.get("advisory_signal_id"),
+            "rule_version": p["rule_version"],
+        }
+    )
+    await session.execute(stmt)
 
 
 async def on_case_decision(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
+    decision = {"decision": p["decision"], "level": p["approval_level"], "role": p["officer_role"]}
     row = (await session.execute(select(claim_facts.c.decisions).where(claim_facts.c.claim_id == p["claim_id"]))).first()
     if row is not None:
         await session.execute(update(claim_facts).where(claim_facts.c.claim_id == p["claim_id"]).values(
-            decisions=[*row[0], {"decision": p["decision"], "level": p["approval_level"], "role": p["officer_role"]}]))
+            decisions=[*(row[0] or []), decision]))
+    else:
+        stmt = _upsert(claim_facts, session).values(
+            claim_id=p["claim_id"], decisions=[decision]
+        ).on_conflict_do_nothing(index_elements=[claim_facts.c.claim_id])
+        res = await session.execute(stmt)
+        if res.rowcount == 0:
+            row = (await session.execute(select(claim_facts.c.decisions).where(claim_facts.c.claim_id == p["claim_id"]))).first()
+            if row is not None:
+                await session.execute(update(claim_facts).where(claim_facts.c.claim_id == p["claim_id"]).values(
+                    decisions=[*(row[0] or []), decision]))
 
 
 async def on_grievance_registered(session: AsyncSession, event: dict[str, Any]) -> None:

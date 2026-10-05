@@ -38,13 +38,13 @@ risk_signals = Table(
 claim_facts = Table(
     "claim_facts", metadata,
     Column("claim_id", String(40), primary_key=True),
-    Column("office_id", String(40), nullable=False),
-    Column("form_type", String(10), nullable=False),
-    Column("amount_paise", BigInteger, nullable=False),
-    Column("account_link_id", String(40), nullable=False),
-    Column("route", String(10), nullable=False),
+    Column("office_id", String(40)),
+    Column("form_type", String(10)),
+    Column("amount_paise", BigInteger),
+    Column("account_link_id", String(40)),
+    Column("route", String(10)),
     Column("advisory_signal_id", String(40)),
-    Column("rule_version", String(40), nullable=False),
+    Column("rule_version", String(40)),
     Column("decisions", JSON, nullable=False),
 )
 
