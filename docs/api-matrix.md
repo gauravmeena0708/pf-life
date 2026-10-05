@@ -6,7 +6,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 
 | # | Interface | Coverage | Stakeholders | W | M | P | ? |
 |---|---|---|---|---|---|---|---|
-| 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 16 | 2 | 0 | 0 |
+| 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 17 | 2 | 0 | 0 |
 | 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 109 | 5 | 1 | 0 |
 | 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 93 | 7 | 0 | 0 |
 | 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 134 | 0 | 0 | 4 |
@@ -42,6 +42,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /public/offices` | W | workflow | public |
 | `GET /public/policy/current` | W | platform | public |
 | `GET /public/schemes` | W | reporting | public |
+| `GET /public/service-standards` | W | reporting | public |
 | `GET /public/statistics` | W | reporting | public |
 | `POST /ai/knowledge/search` | W | intelligence | public |
 | `POST /public/demo-calculations/epf` | W | contribution | public |

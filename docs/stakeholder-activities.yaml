@@ -339,6 +339,7 @@ activities:
 
 # ─────────────────────────── F11 Inoperative accounts ───────────────────────────
   - {id: F11.public_search, actor: public, does: "Search an inoperative account with a demo CAPTCHA and verify an OTP before viewing the balance", api: ["POST /public/inoperative-accounts/searches"], next: [F11.verify], src: WSU, ev: D}
+  - {id: F13.charter, actor: public, does: "See the citizen's charter: each service standard and how each office is performing against it", api: ["GET /public/service-standards"], next: [], src: SOP-B, ev: D}
   - {id: F11.search, actor: member.exited, does: "Request reactivation / settlement (online, at FO or NAN camp)", api: ["POST /members/me/claims"], next: [F11.verify], src: WSU, ev: D}
   - {id: F11.nan, actor: fo.nan, does: "Help members at Nidhi Aapke Nikat camps", api: ["POST /office/outreach-camps/{campId}/assisted-requests"], next: [F11.verify], src: "WSU, PEN", ev: D}
   - {id: F11.verify, actor: fo.da_accounts, does: "Verify inoperative account (digital records, crowdsourcing through co-workers' logins)", api: ["GET /office/accounts/inoperative", "POST /office/accounts/{accountLinkId}/crowdsource-verifications"], next: [F11.approve], chain: inoperative_settlement, src: WSU, ev: D}

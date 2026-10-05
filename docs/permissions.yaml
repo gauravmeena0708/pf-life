@@ -14,6 +14,12 @@ stakeholders:
     step_up: false
     via:
     - F11.public_search
+  - endpoint: GET /public/service-standards
+    status: W
+    scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
+    step_up: false
+    via:
+    - F13.charter
   - endpoint: GET /public/schemes
     status: W
     scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)

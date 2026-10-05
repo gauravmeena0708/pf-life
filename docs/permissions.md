@@ -108,6 +108,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /public/offices` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/policy/current` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/schemes` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
+| `GET /public/service-standards` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `GET /public/statistics` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |
 | `POST /ai/knowledge/search` | W | caller's own permissions; advisory output only |  |
 | `POST /public/demo-calculations/epf` | W | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |  |

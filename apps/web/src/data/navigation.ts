@@ -17,6 +17,7 @@ export const PUBLIC_SERVICES: NavItem[] = [
   link("Claim status", "/public/claims#claim-status-heading"),
   link("Inoperative account search", "/public/inoperative-accounts"),
   link("Circulars", "/public/circulars#circulars-heading"),
+  link("Citizen's charter", "/public/service-standards"),
 ];
 
 const MEMBER: NavGroup[] = [

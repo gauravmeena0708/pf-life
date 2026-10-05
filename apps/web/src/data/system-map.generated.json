@@ -4,9 +4,9 @@
   "interfaces": 21,
   "stakeholders": 115,
   "stakeholders_with_access": 95,
-  "activities": 290,
+  "activities": 291,
   "endpoints": {
-   "W": 477,
+   "W": 478,
    "M": 24,
    "P": 1,
    "?": 5
@@ -21,7 +21,7 @@
    "coverage": "Working",
    "purpose": "Anyone, without a login: establishment search, e-Report Card, circulars, claim and grievance status, lodging a grievance.",
    "endpoints": {
-    "W": 16,
+    "W": 17,
     "M": 2,
     "P": 0,
     "?": 0
@@ -429,7 +429,7 @@
    "name": "Public visitor (establishment search, calculators, circulars)",
    "group": "A. Members, beneficiaries and the public",
    "endpoints": {
-    "W": 14,
+    "W": 15,
     "M": 2,
     "P": 0,
     "?": 0
@@ -442,6 +442,10 @@
     {
      "id": "F11.public_search",
      "does": "Search an inoperative account with a demo CAPTCHA and verify an OTP before viewing the balance"
+    },
+    {
+     "id": "F13.charter",
+     "does": "See the citizen's charter: each service standard and how each office is performing against it"
     },
     {
      "id": "F13.public",
@@ -5869,6 +5873,16 @@
    "status": "BUILT",
    "endpoints": 1,
    "src": "WSU"
+  },
+  {
+   "id": "F13.charter",
+   "flow": "F13",
+   "actor": "public",
+   "does": "See the citizen's charter: each service standard and how each office is performing against it",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "SOP-B"
   },
   {
    "id": "F11.search",

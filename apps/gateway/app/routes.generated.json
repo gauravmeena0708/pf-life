@@ -6357,6 +6357,22 @@
   },
   {
     "method": "GET",
+    "path_template": "/public/service-standards",
+    "regex": "^/public/service\\-standards$",
+    "status": "W",
+    "phase": 1,
+    "owner": "reporting",
+    "upstream": "http://reporting-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "public"
+    ],
+    "summary": "The citizen's charter: each service standard (statutory or target) with live performance per office — share within the standard, median and 90th percentile, still open past it; counts under 10 suppressed (P2.24)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/audit/concurrent/alerts",
     "regex": "^/audit/concurrent/alerts$",
     "status": "W",

@@ -455,6 +455,42 @@ paths:
       - public
       x-scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
       security: []
+  /public/service-standards:
+    get:
+      operationId: getPublicServiceStandards
+      summary: 'The citizen''s charter: each service standard (statutory or target) with live performance per office — share
+        within the s'
+      tags:
+      - Public information and establishment search
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: days
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: reporting
+      x-callers:
+      - public
+      x-scope: anyone (rate-limited; lookups need CAPTCHA/OTP proof)
+      security: []
+      description: 'The citizen''s charter: each service standard (statutory or target) with live performance per office —
+        share within the standard, median and 90th percentile, still open past it; counts under 10 suppressed (P2.24)'
   /public/statistics:
     get:
       operationId: getPublicStatistics

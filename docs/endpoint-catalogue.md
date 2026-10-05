@@ -49,6 +49,7 @@ Rules that apply to every row:
 | `POST /public/pension/status-enquiries` | Pension application / PPO status enquiry | W | 1 | pension |
 | `POST /public/claims/status-lookups` | Claim status by reference (OTP proof; no PII in response) | W | 1 | claim |
 | `POST /public/inoperative-accounts/searches` | Inoperative-account helpdesk search (step-up before any balance is shown) | W | 1 | contribution |
+| `GET /public/service-standards?days=` | The citizen's charter: each service standard (statutory or target) with live performance per office — share within the standard, median and 90th percentile, still open past it; counts under 10 suppressed (P2.24) | W | 1 | reporting |
 | `POST /public/grievances` | Grievance intake from a non-logged-in person (OTP-verified contact) | W | 1 | grievance |
 | `POST /public/grievances/status-lookups` | Grievance status by registration number (OTP proof) | W | 1 | grievance |
 

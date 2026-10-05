@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /do/dashboards', 'GET /governance/board-packs', 'GET /monitoring/claims', 'GET /monitoring/contributions', 'GET /monitoring/data-freshness', 'GET /monitoring/grievances', 'GET /public/schemes', 'GET /public/statistics', 'GET /zo/dashboards', 'GET /employers/me/compliance-summary', 'GET /employers/me/dashboard', 'GET /ho/finance/investments', 'POST /integrations/fund-managers/positions', 'GET /office/compliance/defaulters', 'GET /employers/me/contractors/{contractorId}/compliance', 'GET /public/establishments/{estId}/e-report-card']
+OPERATIONS = ['GET /do/dashboards', 'GET /governance/board-packs', 'GET /monitoring/claims', 'GET /monitoring/contributions', 'GET /monitoring/data-freshness', 'GET /monitoring/grievances', 'GET /public/schemes', 'GET /public/service-standards', 'GET /public/statistics', 'GET /zo/dashboards', 'GET /employers/me/compliance-summary', 'GET /employers/me/dashboard', 'GET /ho/finance/investments', 'POST /integrations/fund-managers/positions', 'GET /office/compliance/defaulters', 'GET /employers/me/contractors/{contractorId}/compliance', 'GET /public/establishments/{estId}/e-report-card']
 
 @router.api_route("/api/v1/do/dashboards", methods=["GET"], include_in_schema=False)
 async def get_do_dashboards(actor: Actor = Depends(require_actor)) -> None:
@@ -45,6 +45,11 @@ async def get_monitoring_grievances(actor: Actor = Depends(require_actor)) -> No
 @router.api_route("/api/v1/public/schemes", methods=["GET"], include_in_schema=False)
 async def get_public_schemes(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Scheme catalogue (EPF, EPS, EDLI) — illustrative text")
+
+
+@router.api_route("/api/v1/public/service-standards", methods=["GET"], include_in_schema=False)
+async def get_public_service_standards(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The citizen's charter: each service standard (statutory or target) with live performance per office ")
 
 
 @router.api_route("/api/v1/public/statistics", methods=["GET"], include_in_schema=False)

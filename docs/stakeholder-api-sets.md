@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 115 |
-| Activities | 290 |
+| Activities | 291 |
 | Stakeholders with at least one API | 95 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 3 |
@@ -22,7 +22,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 
 #### `public` — Public visitor (establishment search, calculators, circulars)
 
-Activities: **F04.receipt_check** Check that a claim receipt is genuine (a bank, an employer, a family member) from its QR code; **F11.public_search** Search an inoperative account with a demo CAPTCHA and verify an OTP before viewing the balance; **F13.public** Browse schemes, offices, statistics, circulars; search establishments; calculators; TRRN status
+Activities: **F04.receipt_check** Check that a claim receipt is genuine (a bank, an employer, a family member) from its QR code; **F11.public_search** Search an inoperative account with a demo CAPTCHA and verify an OTP before viewing the balance; **F13.charter** See the citizen's charter: each service standard and how each office is performing against it; **F13.public** Browse schemes, offices, statistics, circulars; search establishments; calculators; TRRN status
 
 | Endpoint | Status |
 |---|---|
@@ -34,6 +34,7 @@ Activities: **F04.receipt_check** Check that a claim receipt is genuine (a bank,
 | `GET /public/offices` | W |
 | `GET /public/policy/current` | W |
 | `GET /public/schemes` | W |
+| `GET /public/service-standards` | W |
 | `GET /public/statistics` | W |
 | `POST /ai/knowledge/search` | W |
 | `POST /public/demo-calculations/epf` | W |
@@ -2112,6 +2113,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
+  F13_charter["public<br/>See the citizen's charter: each service standard and how eac"]
   F13_public["public<br/>Browse schemes, offices, statistics, circulars; search estab"]
   F13_do["do.incharge<br/>District dashboard and jurisdiction-scoped queue"]
   F13_ro["fo.rpfc1<br/>RO-level monitoring (claims, grievances, compliance)"]
