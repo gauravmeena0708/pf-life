@@ -16,7 +16,21 @@ ACCOUNTS = ("AC01_EPF_EE", "AC01_EPF_ER", "AC10_EPS", "AC21_EDLI", "AC02_ADMIN",
 
 
 # The contribution split is shared with platform-service's policy preview, so both use the same arithmetic.
-from epfo_persistence.policy import capped_wages, round_rupee_half_up, section, split  # noqa: E402,F401
+from epfo_persistence.policy import capped_wages, round_rupee_half_up, section, split as _split  # noqa: E402
+
+
+def split(epf_wages_paise: int, eps_wages_paise: int, age_years: int, rules: dict[str, Any],
+          edli_wages_paise: int | None = None, employer_rate_bp: int | None = None) -> dict[str, int]:
+    """Production contribution split, optionally evaluating a proposed employer total rate."""
+    result = _split(epf_wages_paise, eps_wages_paise, age_years, rules, edli_wages_paise)
+    if employer_rate_bp is None:
+        return result
+    # EPF Act s.6: preserve the production rounding and pension allocation while changing the employer total rate.
+    employer_total = round_rupee_half_up(epf_wages_paise * employer_rate_bp)
+    employer_epf = employer_total - result["AC10_EPS"]
+    result["TOTAL"] += employer_epf - result["AC01_EPF_ER"]
+    result["AC01_EPF_ER"] = employer_epf
+    return result
 
 
 def _masked_uan(uan: str) -> str:
