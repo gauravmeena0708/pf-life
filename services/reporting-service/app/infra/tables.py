@@ -3,6 +3,15 @@ from sqlalchemy import BigInteger, Boolean, Column, Date, DateTime, ForeignKey, 
 
 metadata = MetaData()
 
+service_standards = Table(
+    "service_standards", metadata,
+    Column("code", String(40), primary_key=True),
+    Column("name", String(120), nullable=False),
+    Column("days", Integer, nullable=False),
+    Column("basis", String(20), nullable=False),
+    Column("source", String(160), nullable=False),
+)
+
 fund_positions = Table(
     "fund_positions", metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
