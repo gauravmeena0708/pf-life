@@ -837,6 +837,25 @@ tests produced, by role (after `python3 scripts/publish_manuals.py`).
    Form SE-6 total, propose.
 4. As `ro-apfc`, approve (step-up): *Reconciled*, nothing outstanding — or *still short* with the amount to come.
 
+## More edge cases, insolvency, the charter and risk (P2.19, P2.17, P2.24, P2.28)
+
+1. *Attachment orders* (an office's AO or legal officer): record a court's order attaching a member's PF for a loan →
+   refused under EPF Act s.10, the payment untouched. A claim whose payee account already serves three other members'
+   claims waits *on hold*; the AO checks the account and releases it (with a confirmation).
+2. *Insolvency (IBC)* (compliance desk): the watchlist scores establishments whose returns stopped or whose demands are
+   unpaid; record an IBBI announcement → the claim deadline (14 days) and a warning before it; while the moratorium
+   stands, an attachment is refused; a resolution plan offering less than the PF principal is marked non-compliant.
+3. *UAN merge* (`POST /office/uan-merges`, AO or APFC): a duplicate UAN with the same name, birth date and gender is
+   merged; its balance moves to the active UAN in one journal and the service stays continuous.
+4. *Citizen's charter* (public menu): each service standard, statutory or target, with each office's live performance.
+5. *Independent review*: a member not satisfied with a closed grievance asks, within 30 days, for a review; the zonal
+   reviewer (another office) upholds it or directs a fresh decision.
+6. *Rule-change simulation* (HO Finance): try 8.50% interest, or a 13% employee rate, and see who gains and who loses
+   in their own PF credit — nothing is posted.
+7. *Risk*: on a new device a member's passbook opens as usual; after an account recovery the same view first asks for
+   a one-time code (two signals together).
+8. Member E's pension estimate is ₹3,013: 13 years of service to 58 (₹2,786), plus 8.16% for deferring it to 60.
+
 ## Finding your way: side or top menu, Find a screen
 
 1. Log in as `ro-apfc`. The menu is down the side: the group holding the page is open, the item marked. Type

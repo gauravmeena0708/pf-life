@@ -98,6 +98,24 @@ must-deny 18 passed. Found on the way: a one-officer-per-claim rule would have s
 e-signing a PPO whose worksheet they approved, which the Pension Manual expects; the rule is now maker ≠ checker
 for each step. The DA (Pension) was not allowed by the gateway to propose the initial arrear; granted.
 
+## Update — P2.19 (the rest), P2.17, P2.24 (trimmed), P2.28 risk-based step-up (5 October 2026)
+
+Built in parallel by agy and codex, each piece reviewed before merging; the whole stack tested once at the end.
+Review caught and fixed: an employer endpoint that marked demands paid without money moving (removed; part payments are
+applied by contribution-service and tested there), an s.8A desk page that never called the API (removed; the contractor
+fields went on the real 7A order form), a hold release open to any officer and from UNDER_REVIEW (now an approver, that
+hold only, with a step-up), a rule simulation that crashed on real returns and measured total contributions instead of
+the member's PF credit, risk weights that would have challenged every new device (now two signals together), a web
+interceptor that would have replaced pages' own step-up dialogs, hard-coded colours (theme tokens). The pension now
+counts service only to 58 (EPS) with the deferment increase; member E's demo estimate is ₹3,013 instead of ₹3,214.
+
+Full pass on the rebuilt, migrated stack: end to end 113 of 115 (the two failures are this stack's spent balances —
+member A's and the TDS test's; a fresh stack or `make reset` runs them); consistency: every copy agrees; must-deny 18;
+UI smoke 2. Unit: audit 18, claim 101, compliance 36, contribution 141, employer 34, grievance 27, intelligence 29,
+international 23, member 81, mock integrations 11, payment simulator 15, pension 58, platform 31, reporting 77,
+workflow 59, gateway 27, shared 35; web 388 (type check and lint clean). Workflow's out-of-order tests had fixed event
+times at 10:00 UTC that broke once that hour passed; they are now dated after the case they act on.
+
 ## Update — P2.30: order-safe copies (5 October 2026)
 
 The shared consumer now applies the events about one record in arrival order and retries a failure in place (tests: one
