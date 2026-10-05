@@ -89,7 +89,7 @@ class McaStatusInput(BaseModel):
     mca_status: Literal["ACTIVE", "UNDER_CIRP", "LIQUIDATION", "STRIKE_OFF"]
 
 
-@router.post("/api/v1/office/compliance/establishments/{establishment_id}/mca-status")
+@router.post("/api/v1/office/compliance/establishments/{establishment_id}/mca-statuses")
 async def update_mca_status(
     establishment_id: str,
     body: McaStatusInput,

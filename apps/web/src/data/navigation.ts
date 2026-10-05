@@ -99,6 +99,7 @@ function fieldOffice(role: string): NavGroup[] {
       ...(["fo.legal", "fo.oic", "fo.apfc"].includes(role) ? [link("Legal cases (appeals, writs, prosecutions)", "/office/legal")] : []),
       ...(["fo.recovery_officer", "fo.oic", "fo.apfc"].includes(role) ? [link("Recovery certificates", "/office/recovery")] : []),
       ...(["fo.legal", "fo.recovery_officer", "fo.ao", "fo.oic", "fo.apfc"].includes(role) ? [link("Attachment orders and held claims", "/office/attachment-orders")] : []),
+      ...(["fo.da_compliance", "fo.ss", "fo.recovery_officer", "fo.oic", "fo.apfc"].includes(role) ? [link("Insolvency (IBC)", "/office/compliance/insolvency")] : []),
       link("7Q & 14B", ["fo.da_compliance", "fo.ss"].includes(role) ? "/office/returns#knock-off-heading" : undefined),
       link("Establishment", ["fo.oic", "fo.apfc"].includes(role) ? "/office/work-queue" : undefined),
       link("OLRE", ["fo.da_compliance", "fo.apfc"].includes(role) ? "/office/olre" : undefined),

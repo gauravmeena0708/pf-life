@@ -2607,6 +2607,37 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /employers/me/insolvency-cases:
+    get:
+      operationId: getEmployersInsolvencyCases
+      summary: 'The establishment''s insolvency case: stage, claim deadline, moratorium (P2.17)'
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/EstablishmentId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - employer.owner
+      - employer.signatory
+      x-scope: own establishment (X-Establishment-Id validated against grants)
+      security:
+      - bffSession: []
   /employers/me/joint-declarations:
     get:
       operationId: getEmployersJointDeclarations
@@ -11865,6 +11896,404 @@ paths:
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+  /office/compliance/establishments/{establishmentId}/mca-statuses:
+    post:
+      operationId: postOfficeComplianceEstablishmentsEstablishmentIdMcaStatuses
+      summary: Record an establishment's MCA status (synthetic)
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: establishmentId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - fo.apfc
+      - fo.da_compliance
+      - fo.oic
+      - fo.ss
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/compliance/insolvency-cases:
+    get:
+      operationId: getOfficeComplianceInsolvencyCases
+      summary: Insolvency cases with the claim deadline and a warning before it
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - do.staff
+      - fo.apfc
+      - fo.da_compliance
+      - fo.oic
+      - fo.recovery_officer
+      - fo.ss
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+    post:
+      operationId: postOfficeComplianceInsolvencyCases
+      summary: 'Record an IBBI announcement (CIRP or liquidation, the IRP / RP / liquidator, the last date for claims: 14
+        days) (P2.17)'
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - do.staff
+      - fo.apfc
+      - fo.da_compliance
+      - fo.oic
+      - fo.recovery_officer
+      - fo.ss
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/compliance/insolvency-cases/{caseId}:
+    get:
+      operationId: getOfficeComplianceInsolvencyCasesCaseId
+      summary: One insolvency case
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - do.staff
+      - fo.apfc
+      - fo.da_compliance
+      - fo.oic
+      - fo.recovery_officer
+      - fo.ss
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+  /office/compliance/insolvency-cases/{caseId}/claims:
+    post:
+      operationId: postOfficeComplianceInsolvencyCasesCaseIdClaims
+      summary: File EPFO's claim with the IRP / RP / liquidator, PF principal kept apart (P2.17)
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - fo.apfc
+      - fo.da_compliance
+      - fo.oic
+      - fo.recovery_officer
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/compliance/insolvency-cases/{caseId}/dues-summary:
+    get:
+      operationId: getOfficeComplianceInsolvencyCasesCaseIdDuesSummary
+      summary: 'Dues frozen by the moratorium: PF principal apart from s.14B damages and s.7Q interest'
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - do.staff
+      - fo.apfc
+      - fo.da_compliance
+      - fo.oic
+      - fo.recovery_officer
+      - fo.ss
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+  /office/compliance/insolvency-cases/{caseId}/realisations:
+    post:
+      operationId: postOfficeComplianceInsolvencyCasesCaseIdRealisations
+      summary: Record what was recovered in the insolvency; recovery % per case (P2.17)
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - fo.apfc
+      - fo.oic
+      - fo.recovery_officer
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/compliance/insolvency-cases/{caseId}/resolution-plans:
+    post:
+      operationId: postOfficeComplianceInsolvencyCasesCaseIdResolutionPlans
+      summary: 'Check a resolution plan: non-compliant unless PF principal is paid in full (IBC s.36(4)(a)(iii)) (P2.17)'
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: caseId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - fo.apfc
+      - fo.oic
+      - fo.recovery_officer
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/compliance/insolvency/summary:
+    get:
+      operationId: getOfficeComplianceInsolvencySummary
+      summary: The office's insolvency cases, recovery % and plan compliance (P2.17)
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - do.staff
+      - fo.apfc
+      - fo.da_compliance
+      - fo.oic
+      - fo.recovery_officer
+      - fo.ss
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+  /office/compliance/insolvency/watchlist:
+    get:
+      operationId: getOfficeComplianceInsolvencyWatchlist
+      summary: Establishments at risk of insolvency from EPFO's own signals — returns stopped, demands in default, an MCA
+        status of CIR
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: compliance
+      x-callers:
+      - do.staff
+      - fo.apfc
+      - fo.da_compliance
+      - fo.oic
+      - fo.recovery_officer
+      - fo.ss
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: Establishments at risk of insolvency from EPFO's own signals — returns stopped, demands in default, an
+        MCA status of CIRP or liquidation — scored with reasons (P2.17)
   /office/compliance/inspections:
     get:
       operationId: getOfficeComplianceInspections

@@ -9,7 +9,7 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 | Measure | Count |
 |---|---|
 | Stakeholders | 115 |
-| Activities | 303 |
+| Activities | 311 |
 | Stakeholders with at least one API | 95 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 3 |
@@ -229,7 +229,7 @@ Integration adapters: `rti_portal`
 
 #### `employer.owner` — Establishment owner / employer (legal entity)
 
-Activities: **F01.register** Register establishment online and submit verification evidence; **F01.dsc_register** Register DSC or e-sign of an authorised signatory and submit the request letter; **F01.signatories** View the establishment; authorise or revoke signatories; **F01.operators** Invite, scope and revoke employer sub-users (User / Admin menus); **F01.establishment_owner** Keep the establishment record: KYC, branches (Form 2A), Form 5A, contractors; ask the office for profile or configuration changes; **F06.contractor_recovery_owner** Record what the establishment recovered from a contractor whose workers' dues it was assessed for (EPF Act s.8A); **F01.payroll_providers** Authorise or revoke payroll software that sends pay runs for the establishment; **F06.employer_owner_reply** Follow the establishment's inquiries (diary number, summons, daily orders, the order) and reply; **F06.employer_scn** Reply to a prosecution show-cause notice; **F13.pmvbry_employer** PMVBRY Part B: exercise the option; see baseline, eligibility, net additional employment and incentive cycles
+Activities: **F01.register** Register establishment online and submit verification evidence; **F01.dsc_register** Register DSC or e-sign of an authorised signatory and submit the request letter; **F01.signatories** View the establishment; authorise or revoke signatories; **F01.operators** Invite, scope and revoke employer sub-users (User / Admin menus); **F01.establishment_owner** Keep the establishment record: KYC, branches (Form 2A), Form 5A, contractors; ask the office for profile or configuration changes; **F06.insolvency_view_owner** See the establishment's insolvency case: stage, claim deadline and moratorium; **F06.contractor_recovery_owner** Record what the establishment recovered from a contractor whose workers' dues it was assessed for (EPF Act s.8A); **F01.payroll_providers** Authorise or revoke payroll software that sends pay runs for the establishment; **F06.employer_owner_reply** Follow the establishment's inquiries (diary number, summons, daily orders, the order) and reply; **F06.employer_scn** Reply to a prosecution show-cause notice; **F13.pmvbry_employer** PMVBRY Part B: exercise the option; see baseline, eligibility, net additional employment and incentive cycles
 
 | Endpoint | Status |
 |---|---|
@@ -244,6 +244,7 @@ Activities: **F01.register** Register establishment online and submit verificati
 | `GET /employers/me/contractors/{contractorId}/compliance` | W |
 | `GET /employers/me/demands` | W |
 | `GET /employers/me/exemption` | W |
+| `GET /employers/me/insolvency-cases` | W |
 | `GET /employers/me/kyc` | W |
 | `GET /employers/me/operators` | W |
 | `GET /employers/me/ownership-declaration` | W |
@@ -283,7 +284,7 @@ Activities: **F01.register** Register establishment online and submit verificati
 
 #### `employer.signatory` — Authorised signatory (registered DSC / e-sign)
 
-Activities: **F01.form5a** File / update Form 5A ownership return and branches (Form 2A), signed with DSC / e-sign; **F01.signatory_profile** View the establishment and what waits for its signature before approving returns and payments; **F01.change_request** Request configuration change, closure / deregistration or office transfer; **F06.contractor_recovery_signatory** Record what the establishment recovered from a contractor whose workers' dues it was assessed for (EPF Act s.8A); **F02.kyc_approve** Approve KYC seeded by member / pending for digital signature, with DSC or e-sign; **F02.employer_approvals** Approve queued member changes (Member > Approvals); **F02.jd_attest** Attest, return or reject the Joint Declaration; employer-initiated JD; **F03.ecr_approve** Review, approve and submit ECR (generates TRRN); cancel an unpaid TRRN; **F03.pay** Pay challan online (or via bank counter where allowed) and download the payment receipt; **F03.direct_challan** Create a Direct Challan: administrative / inspection charges, or miscellaneous challan for 14B damages and 7Q interest; pay demands; **F04.attest** Attest claims that need employer attestation; **F04.transfer_attest** Attest pending transfer claims (Online Services > Transfer Claims); **F05.higher_employer** Validate joint options and upload wage details; **F06.employer_reply** Reply and submit evidence in proceedings; **F06.vishwas_apply** Apply under VISHWAS to settle a 14B damages / penalty dispute at reduced rates; **F06.eec_declare** Enrol employees left out of EPF under EEC, 2026: register them (face-authenticated UAN), declare them, pay the past dues; **F06.signatory_scn** Reply to a prosecution show-cause notice; **F10.apply** Apply for / extend CoC for a posted worker (IWU portal EMPLOYER login); upload signed application; download CoC
+Activities: **F01.form5a** File / update Form 5A ownership return and branches (Form 2A), signed with DSC / e-sign; **F01.signatory_profile** View the establishment and what waits for its signature before approving returns and payments; **F01.change_request** Request configuration change, closure / deregistration or office transfer; **F06.contractor_recovery_signatory** Record what the establishment recovered from a contractor whose workers' dues it was assessed for (EPF Act s.8A); **F06.insolvency_view_signatory** See the establishment's insolvency case: stage, claim deadline and moratorium; **F02.kyc_approve** Approve KYC seeded by member / pending for digital signature, with DSC or e-sign; **F02.employer_approvals** Approve queued member changes (Member > Approvals); **F02.jd_attest** Attest, return or reject the Joint Declaration; employer-initiated JD; **F03.ecr_approve** Review, approve and submit ECR (generates TRRN); cancel an unpaid TRRN; **F03.pay** Pay challan online (or via bank counter where allowed) and download the payment receipt; **F03.direct_challan** Create a Direct Challan: administrative / inspection charges, or miscellaneous challan for 14B damages and 7Q interest; pay demands; **F04.attest** Attest claims that need employer attestation; **F04.transfer_attest** Attest pending transfer claims (Online Services > Transfer Claims); **F05.higher_employer** Validate joint options and upload wage details; **F06.employer_reply** Reply and submit evidence in proceedings; **F06.vishwas_apply** Apply under VISHWAS to settle a 14B damages / penalty dispute at reduced rates; **F06.eec_declare** Enrol employees left out of EPF under EEC, 2026: register them (face-authenticated UAN), declare them, pay the past dues; **F06.signatory_scn** Reply to a prosecution show-cause notice; **F10.apply** Apply for / extend CoC for a posted worker (IWU portal EMPLOYER login); upload signed application; download CoC
 
 | Endpoint | Status |
 |---|---|
@@ -302,6 +303,7 @@ Activities: **F01.form5a** File / update Form 5A ownership return and branches (
 | `GET /employers/me/eec-declarations` | W |
 | `GET /employers/me/eec-declarations/dues` | W |
 | `GET /employers/me/higher-pension-options` | W |
+| `GET /employers/me/insolvency-cases` | W |
 | `GET /employers/me/joint-declarations` | W |
 | `GET /employers/me/kyc-approvals` | W |
 | `GET /employers/me/ownership-declaration` | W |
@@ -521,18 +523,26 @@ Integration adapters: `income_tax`
 
 #### `fo.da_compliance` — Dealing Assistant (Compliance) — establishment files, inspections, 14B/7Q knock-off
 
-Activities: **F01.olre_scrutiny** Scrutinise documents of a newly registered establishment (FO-interface >> OLRE >> View Documents) and open the compliance e-file; **F03.knock_off** Knock off auto-calculated 14B / 7Q against a miscellaneous challan (FO INTERFACE >> 14B/7Q Knock Off); **F06.defaulters** Identify non-filers / short payers; open compliance case; **F06.damages_notice** Periodic desk review: draft the 14B / 7Q notice from the auto-calculated demands of delayed remittances (T+1); **F06.report_process** Process the inspection report (DA T+3, SS T+5); register the inquiry the circle officer decides on; **F07.verify_est** Verify the frozen establishment
+Activities: **F01.olre_scrutiny** Scrutinise documents of a newly registered establishment (FO-interface >> OLRE >> View Documents) and open the compliance e-file; **F06.insolvency_da_compliance** Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured; **F03.knock_off** Knock off auto-calculated 14B / 7Q against a miscellaneous challan (FO INTERFACE >> 14B/7Q Knock Off); **F06.defaulters** Identify non-filers / short payers; open compliance case; **F06.damages_notice** Periodic desk review: draft the 14B / 7Q notice from the auto-calculated demands of delayed remittances (T+1); **F06.report_process** Process the inspection report (DA T+3, SS T+5); register the inquiry the circle officer decides on; **F07.verify_est** Verify the frozen establishment
 
 | Endpoint | Status |
 |---|---|
 | `GET /office/compliance/cases` | W |
 | `GET /office/compliance/cases/{caseId}` | W |
 | `GET /office/compliance/defaulters` | W |
+| `GET /office/compliance/insolvency-cases` | W |
+| `GET /office/compliance/insolvency-cases/{caseId}` | W |
+| `GET /office/compliance/insolvency-cases/{caseId}/dues-summary` | W |
+| `GET /office/compliance/insolvency/summary` | W |
+| `GET /office/compliance/insolvency/watchlist` | W |
 | `GET /office/compliance/inspections` | W |
 | `GET /office/damages-knock-offs` | W |
 | `GET /office/establishment-registrations` | W |
 | `GET /office/establishment-registrations/{reqId}/documents` | W |
 | `POST /office/compliance/cases` | W |
+| `POST /office/compliance/establishments/{establishmentId}/mca-statuses` | W |
+| `POST /office/compliance/insolvency-cases` | W |
+| `POST /office/compliance/insolvency-cases/{caseId}/claims` | W |
 | `POST /office/compliance/inspections/{inspectionId}/processing-notes` | W |
 | `POST /office/establishment-registrations/{reqId}/scrutiny-notes` | W |
 | `POST /office/establishments/{estId}/damages-knock-offs` | W |
@@ -540,7 +550,7 @@ Activities: **F01.olre_scrutiny** Scrutinise documents of a newly registered est
 
 #### `fo.ss` — Section Supervisor (Accounts / Compliance)
 
-Activities: **F02.jd_verify** Verifier (SS route): cross-check and recommend; **F03.knock_off_approve** Approve the knock-off (14B/7Q Knock Off >> Approve); **F04.approve_ss** Approve claims in the SS band; **F04.attachment_ss** Record a court's attachment order on a member's balance and refuse it (EPF Act s.10); **F06.ss_note** Section Supervisor puts the report up to the circle officer (T+5) and registers the inquiry on e-Proceedings within 2 working days of approval; **F07.verify_ss** Review verification (SS route)
+Activities: **F06.insolvency_ss** Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured; **F02.jd_verify** Verifier (SS route): cross-check and recommend; **F03.knock_off_approve** Approve the knock-off (14B/7Q Knock Off >> Approve); **F04.approve_ss** Approve claims in the SS band; **F04.attachment_ss** Record a court's attachment order on a member's balance and refuse it (EPF Act s.10); **F06.ss_note** Section Supervisor puts the report up to the circle officer (T+5) and registers the inquiry on e-Proceedings within 2 working days of approval; **F07.verify_ss** Review verification (SS route)
 
 | Endpoint | Status |
 |---|---|
@@ -550,6 +560,11 @@ Activities: **F02.jd_verify** Verifier (SS route): cross-check and recommend; **
 | `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/compliance/cases` | W |
 | `GET /office/compliance/cases/{caseId}` | W |
+| `GET /office/compliance/insolvency-cases` | W |
+| `GET /office/compliance/insolvency-cases/{caseId}` | W |
+| `GET /office/compliance/insolvency-cases/{caseId}/dues-summary` | W |
+| `GET /office/compliance/insolvency/summary` | W |
+| `GET /office/compliance/insolvency/watchlist` | W |
 | `GET /office/compliance/inspections` | W |
 | `GET /office/damages-knock-offs` | W |
 | `GET /office/work-queue` | W |
@@ -558,6 +573,8 @@ Activities: **F02.jd_verify** Verifier (SS route): cross-check and recommend; **
 | `POST /office/claims/{claimId}/cad` | W |
 | `POST /office/compliance/cases` | W |
 | `POST /office/compliance/cases/{caseId}/approvals` | W |
+| `POST /office/compliance/establishments/{establishmentId}/mca-statuses` | W |
+| `POST /office/compliance/insolvency-cases` | W |
 | `POST /office/compliance/inspections/{inspectionId}/processing-notes` | W |
 | `POST /office/compliance/membership-disputes` | W |
 | `POST /office/damages-knock-offs/{knockOffId}/approvals` | W |
@@ -604,7 +621,7 @@ Activities: **F04.cad** View the Claim Approval Docket each level generated (int
 
 #### `fo.apfc` — APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)
 
-Activities: **F01.circle_review** Circle officer reviews coverage of the new establishment; **F01.dsc_approve** Approve the DSC / e-sign registration at the PF office; **F01.change_decide** Decide establishment change, closure or transfer requests; **F01.merger_apfc** Record an amalgamation of two establishments (APFC); **F02.jd_approve** Approver for major changes (APFC / RPFC-II / RPFC-I per JD Table 3): approve / reject / return; **F03.eps_rectify_approve** Approve an EPS rectification: A/c 10 to A/c 1 or the trust (EPS wrongly allowed), A/c 1 to A/c 10 (EPS wrongly denied); **F03.ledger_exception_approve** Approve an exceptional ledger adjustment (RPFC-II F&A); **F03.ecr_office_approval** Approve ECRs held for office approval (ECR Approval menu on the APFC login; scope to be confirmed); **F04.approve_apfc** Approve claims in the APFC / RPFC-II band; **F04.redisburse_approve** Authorise a new payment after a return without reopening adjudication; **F04.attachment_apfc** Record a court's attachment order on a member's balance and refuse it (EPF Act s.10), and release a claim held for a shared payee account after checking it; **F04.shares** Amend beneficiary shares (legacy-settled share, deceased nominee, court order) and check the share summary; **F06.schedule** Circle officer schedules inspection (incl. CAIU-allocated); **F06.decide_report** Circle officer decides on the inspection report (T+7): initiate a 7A inquiry or no action; **F06.proceed** Quasi-judicial authority: issue notice / summons, hold hearings (e-Proceedings Cause List, Daily Order); **F06.order** Pass 7A / 14B / 7Q order (e-Proceedings Final Order); 7B review; 7C; 26B disputes; **F06.vishwas_decide** Recalculate damages under VISHWAS and decide; revised demand is paid through a direct challan; **F06.garnishee** 8F notice to a bank or debtor of the employer to pay EPFO (the CPFC's authorised officer); **F06.prosecution** Initiate prosecution; **F07.freeze_ro_member** Order freezing of MID / UAN (Categories B / C); **F07.verify_apfc** Validate verification; **F07.defreeze_est_maker** Recommend de-freezing an establishment (maker); the OIC orders it (checker); **F09.past_accum_approve** APFC approves the past-accumulation reconciliation: each receipt clears the trust transfer receivable; **F11.approve_apfc** Approve inoperative-account settlement in higher amount bands; **F11.scwf_transfer_apfc** Transfer balances to the Senior Citizens' Welfare Fund and record reclaims (higher authority)
+Activities: **F01.circle_review** Circle officer reviews coverage of the new establishment; **F01.dsc_approve** Approve the DSC / e-sign registration at the PF office; **F01.change_decide** Decide establishment change, closure or transfer requests; **F01.merger_apfc** Record an amalgamation of two establishments (APFC); **F06.insolvency_apfc** Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured; **F02.jd_approve** Approver for major changes (APFC / RPFC-II / RPFC-I per JD Table 3): approve / reject / return; **F03.eps_rectify_approve** Approve an EPS rectification: A/c 10 to A/c 1 or the trust (EPS wrongly allowed), A/c 1 to A/c 10 (EPS wrongly denied); **F03.ledger_exception_approve** Approve an exceptional ledger adjustment (RPFC-II F&A); **F03.ecr_office_approval** Approve ECRs held for office approval (ECR Approval menu on the APFC login; scope to be confirmed); **F04.approve_apfc** Approve claims in the APFC / RPFC-II band; **F04.redisburse_approve** Authorise a new payment after a return without reopening adjudication; **F04.attachment_apfc** Record a court's attachment order on a member's balance and refuse it (EPF Act s.10), and release a claim held for a shared payee account after checking it; **F04.shares** Amend beneficiary shares (legacy-settled share, deceased nominee, court order) and check the share summary; **F06.schedule** Circle officer schedules inspection (incl. CAIU-allocated); **F06.decide_report** Circle officer decides on the inspection report (T+7): initiate a 7A inquiry or no action; **F06.proceed** Quasi-judicial authority: issue notice / summons, hold hearings (e-Proceedings Cause List, Daily Order); **F06.order** Pass 7A / 14B / 7Q order (e-Proceedings Final Order); 7B review; 7C; 26B disputes; **F06.vishwas_decide** Recalculate damages under VISHWAS and decide; revised demand is paid through a direct challan; **F06.garnishee** 8F notice to a bank or debtor of the employer to pay EPFO (the CPFC's authorised officer); **F06.prosecution** Initiate prosecution; **F07.freeze_ro_member** Order freezing of MID / UAN (Categories B / C); **F07.verify_apfc** Validate verification; **F07.defreeze_est_maker** Recommend de-freezing an establishment (maker); the OIC orders it (checker); **F09.past_accum_approve** APFC approves the past-accumulation reconciliation: each receipt clears the trust transfer receivable; **F11.approve_apfc** Approve inoperative-account settlement in higher amount bands; **F11.scwf_transfer_apfc** Transfer balances to the Senior Citizens' Welfare Fund and record reclaims (higher authority)
 
 | Endpoint | Status |
 |---|---|
@@ -615,6 +632,11 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/compliance/cases` | W |
 | `GET /office/compliance/cases/{caseId}` | W |
+| `GET /office/compliance/insolvency-cases` | W |
+| `GET /office/compliance/insolvency-cases/{caseId}` | W |
+| `GET /office/compliance/insolvency-cases/{caseId}/dues-summary` | W |
+| `GET /office/compliance/insolvency/summary` | W |
+| `GET /office/compliance/insolvency/watchlist` | W |
 | `GET /office/compliance/inspections` | W |
 | `GET /office/compliance/prosecutions` | W |
 | `GET /office/compliance/scrutinies` | W |
@@ -649,6 +671,11 @@ Activities: **F01.circle_review** Circle officer reviews coverage of the new est
 | `POST /office/compliance/cases/{caseId}/reviews-7b` | W |
 | `POST /office/compliance/cases/{caseId}/scrutinies` | W |
 | `POST /office/compliance/cases/{caseId}/set-asides` | W |
+| `POST /office/compliance/establishments/{establishmentId}/mca-statuses` | W |
+| `POST /office/compliance/insolvency-cases` | W |
+| `POST /office/compliance/insolvency-cases/{caseId}/claims` | W |
+| `POST /office/compliance/insolvency-cases/{caseId}/realisations` | W |
+| `POST /office/compliance/insolvency-cases/{caseId}/resolution-plans` | W |
 | `POST /office/compliance/inspections` | W |
 | `POST /office/compliance/inspections/{inspectionId}/processing-notes` | W |
 | `POST /office/compliance/membership-disputes` | W |
@@ -683,7 +710,7 @@ Activities: **F02.jd_monitor** Monitor JD pendency across the RO; **F13.ro** RO-
 
 #### `fo.oic` — Officer-in-Charge of the office
 
-Activities: **F01.merger** Record an amalgamation of two establishments: members continue without a break in service; the transferor's dues follow to the transferee; **F04.approve_oic** Approve claims above the top threshold; **F04.lock_admin** Inspect member-ledger locks and release an orphaned one with a recorded reason; **F04.attachment_oic** Record a court's attachment order on a member's balance and refuse it (EPF Act s.10); **F06.allocate** Officer in charge: inquiries allocated at random by size; reassign on transfer, a sensitive-post bar or an officer earlier in the case; **F06.proceed_large** RPFC-I / officer in charge conducts inquiries of establishments above 1,000 contributory members: summons, hearings, the 7A order; **F06.sanction** RPFC sanctions a prosecution after the employer's reply to the show-cause notice; **F07.freeze_ro_est** Order freezing of an establishment (Category B); report to fraud committee; **F07.issue_raise** Raise an Issue Tracker request (freeze / de-freeze a member account, or a login notice) with the order; **F07.defreeze** Recommend / order de-freezing; post-defreeze claims use the higher chain; **F09.permit** RPFC-I permits compliance as an un-exempted establishment (SE-5); **F11.oic_monitor** Trigger verification of suspicious inoperative-account requests and monitor unblocking daily; **F12.reply** Reply to concurrent-audit alerts within 3 days; **F12.para_reply** Comply with audit paras; request dropping; **F13.oic** Office-level pendency and daily unblocking monitoring
+Activities: **F01.merger** Record an amalgamation of two establishments: members continue without a break in service; the transferor's dues follow to the transferee; **F06.insolvency_oic** Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured; **F04.approve_oic** Approve claims above the top threshold; **F04.lock_admin** Inspect member-ledger locks and release an orphaned one with a recorded reason; **F04.attachment_oic** Record a court's attachment order on a member's balance and refuse it (EPF Act s.10); **F06.allocate** Officer in charge: inquiries allocated at random by size; reassign on transfer, a sensitive-post bar or an officer earlier in the case; **F06.proceed_large** RPFC-I / officer in charge conducts inquiries of establishments above 1,000 contributory members: summons, hearings, the 7A order; **F06.sanction** RPFC sanctions a prosecution after the employer's reply to the show-cause notice; **F07.freeze_ro_est** Order freezing of an establishment (Category B); report to fraud committee; **F07.issue_raise** Raise an Issue Tracker request (freeze / de-freeze a member account, or a login notice) with the order; **F07.defreeze** Recommend / order de-freezing; post-defreeze claims use the higher chain; **F09.permit** RPFC-I permits compliance as an un-exempted establishment (SE-5); **F11.oic_monitor** Trigger verification of suspicious inoperative-account requests and monitor unblocking daily; **F12.reply** Reply to concurrent-audit alerts within 3 days; **F12.para_reply** Comply with audit paras; request dropping; **F13.oic** Office-level pendency and daily unblocking monitoring
 
 | Endpoint | Status |
 |---|---|
@@ -698,6 +725,11 @@ Activities: **F01.merger** Record an amalgamation of two establishments: members
 | `GET /office/claims/{claimId}/cad` | W |
 | `GET /office/compliance/cases` | W |
 | `GET /office/compliance/cases/{caseId}` | W |
+| `GET /office/compliance/insolvency-cases` | W |
+| `GET /office/compliance/insolvency-cases/{caseId}` | W |
+| `GET /office/compliance/insolvency-cases/{caseId}/dues-summary` | W |
+| `GET /office/compliance/insolvency/summary` | W |
+| `GET /office/compliance/insolvency/watchlist` | W |
 | `GET /office/compliance/prosecutions` | W |
 | `GET /office/compliance/scrutinies` | W |
 | `GET /office/exempted/proceedings` | W |
@@ -721,6 +753,11 @@ Activities: **F01.merger** Record an amalgamation of two establishments: members
 | `POST /office/compliance/cases/{caseId}/reviews-7b` | W |
 | `POST /office/compliance/cases/{caseId}/scrutinies` | W |
 | `POST /office/compliance/cases/{caseId}/set-asides` | W |
+| `POST /office/compliance/establishments/{establishmentId}/mca-statuses` | W |
+| `POST /office/compliance/insolvency-cases` | W |
+| `POST /office/compliance/insolvency-cases/{caseId}/claims` | W |
+| `POST /office/compliance/insolvency-cases/{caseId}/realisations` | W |
+| `POST /office/compliance/insolvency-cases/{caseId}/resolution-plans` | W |
 | `POST /office/compliance/prosecutions/{prosecutionId}/steps` | W |
 | `POST /office/establishments/mergers` | W |
 | `POST /office/establishments/{estId}/defreezes` | W |
@@ -854,14 +891,23 @@ Integration adapters: `shram_suvidha`
 
 #### `fo.recovery_officer` — Recovery Officer (8B–8G recovery, attachment, arrest warrants)
 
-Activities: **F04.attachment_recovery_officer** Record a court's attachment order on a member's balance and refuse it (EPF Act s.10); **F06.recovery** Execute the recovery certificate: demand notice (EPFCP-1), collections, attachment and sale, receiver, arrest; **F06.attach** Attach movable / immovable property (demo record only); **F06.sale** Sale of attached property (demo record only); **F06.receiver** Appoint receiver for business / property (demo record only); **F06.arrest** Arrest and detention of defaulter as last resort (demo record only)
+Activities: **F06.insolvency_recovery_officer** Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured; **F04.attachment_recovery_officer** Record a court's attachment order on a member's balance and refuse it (EPF Act s.10); **F06.recovery** Execute the recovery certificate: demand notice (EPFCP-1), collections, attachment and sale, receiver, arrest; **F06.attach** Attach movable / immovable property (demo record only); **F06.sale** Sale of attached property (demo record only); **F06.receiver** Appoint receiver for business / property (demo record only); **F06.arrest** Arrest and detention of defaulter as last resort (demo record only)
 
 | Endpoint | Status |
 |---|---|
 | `GET /office/attachment-orders` | W |
 | `GET /office/attachment-orders/{orderId}` | W |
+| `GET /office/compliance/insolvency-cases` | W |
+| `GET /office/compliance/insolvency-cases/{caseId}` | W |
+| `GET /office/compliance/insolvency-cases/{caseId}/dues-summary` | W |
+| `GET /office/compliance/insolvency/summary` | W |
+| `GET /office/compliance/insolvency/watchlist` | W |
 | `GET /office/recovery/cases` | W |
 | `POST /office/attachment-orders` | W |
+| `POST /office/compliance/insolvency-cases` | W |
+| `POST /office/compliance/insolvency-cases/{caseId}/claims` | W |
+| `POST /office/compliance/insolvency-cases/{caseId}/realisations` | W |
+| `POST /office/compliance/insolvency-cases/{caseId}/resolution-plans` | W |
 | `POST /office/recovery/{caseId}/arrest-warrants` | W |
 | `POST /office/recovery/{caseId}/attachments` | W |
 | `POST /office/recovery/{caseId}/demand-notices` | W |
@@ -976,12 +1022,18 @@ Activities: **F13.do** District dashboard and jurisdiction-scoped queue
 
 #### `do.staff` — District Office facilitation and compliance staff
 
-Activities: **F06.district** District-level compliance follow-up and facilitation
+Activities: **F06.insolvency_staff** Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured; **F06.district** District-level compliance follow-up and facilitation
 
 | Endpoint | Status |
 |---|---|
 | `GET /office/compliance/cases` | W |
+| `GET /office/compliance/insolvency-cases` | W |
+| `GET /office/compliance/insolvency-cases/{caseId}` | W |
+| `GET /office/compliance/insolvency-cases/{caseId}/dues-summary` | W |
+| `GET /office/compliance/insolvency/summary` | W |
+| `GET /office/compliance/insolvency/watchlist` | W |
 | `GET /office/work-queue` | W |
+| `POST /office/compliance/insolvency-cases` | W |
 
 ### E. Zonal Office (ZO)
 
@@ -1913,6 +1965,14 @@ flowchart LR
 ```mermaid
 flowchart LR
   F06_contractor_recovery_signatory["employer.signatory<br/>Record what the establishment recovered from a contractor wh"]
+  F06_insolvency_da_compliance["fo.da_compliance<br/>Watch for insolvency and act in it (IBC): the watchlist, the"]
+  F06_insolvency_ss["fo.ss<br/>Watch for insolvency and act in it (IBC): the watchlist, the"]
+  F06_insolvency_apfc["fo.apfc<br/>Watch for insolvency and act in it (IBC): the watchlist, the"]
+  F06_insolvency_oic["fo.oic<br/>Watch for insolvency and act in it (IBC): the watchlist, the"]
+  F06_insolvency_recovery_officer["fo.recovery_officer<br/>Watch for insolvency and act in it (IBC): the watchlist, the"]
+  F06_insolvency_staff["do.staff<br/>Watch for insolvency and act in it (IBC): the watchlist, the"]
+  F06_insolvency_view_owner["employer.owner<br/>See the establishment's insolvency case: stage, claim deadli"]
+  F06_insolvency_view_signatory["employer.signatory<br/>See the establishment's insolvency case: stage, claim deadli"]
   F06_contractor_recovery_owner["employer.owner<br/>Record what the establishment recovered from a contractor wh"]
   F06_detect["ho.caiu<br/>Analyse data and allocate risk-based inspections / risk sign"]
   F06_defaulters["fo.da_compliance<br/>Identify non-filers / short payers; open compliance case"]

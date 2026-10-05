@@ -987,6 +987,12 @@ stakeholders:
     step_up: false
     via:
     - F01.establishment_owner
+  - endpoint: GET /employers/me/insolvency-cases
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.insolvency_view_owner
   - endpoint: POST /employers/me/contractor-recoveries
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
@@ -1162,6 +1168,12 @@ stakeholders:
     step_up: false
     via:
     - F06.contractor_recovery_signatory
+  - endpoint: GET /employers/me/insolvency-cases
+    status: W
+    scope: own establishment (X-Establishment-Id validated against grants)
+    step_up: false
+    via:
+    - F06.insolvency_view_signatory
   - endpoint: GET /employers/me/kyc-approvals
     status: W
     scope: own establishment (X-Establishment-Id validated against grants)
@@ -2081,6 +2093,54 @@ stakeholders:
     step_up: false
     via:
     - F01.olre_scrutiny
+  - endpoint: GET /office/compliance/insolvency/watchlist
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_da_compliance
+  - endpoint: GET /office/compliance/insolvency-cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_da_compliance
+  - endpoint: GET /office/compliance/insolvency-cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_da_compliance
+  - endpoint: GET /office/compliance/insolvency-cases/{caseId}/dues-summary
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_da_compliance
+  - endpoint: GET /office/compliance/insolvency/summary
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_da_compliance
+  - endpoint: POST /office/compliance/establishments/{establishmentId}/mca-statuses
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_da_compliance
+  - endpoint: POST /office/compliance/insolvency-cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_da_compliance
+  - endpoint: POST /office/compliance/insolvency-cases/{caseId}/claims
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_da_compliance
   - endpoint: GET /office/damages-knock-offs
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2139,6 +2199,48 @@ stakeholders:
     via:
     - F07.verify_est
   fo.ss:
+  - endpoint: GET /office/compliance/insolvency/watchlist
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_ss
+  - endpoint: GET /office/compliance/insolvency-cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_ss
+  - endpoint: GET /office/compliance/insolvency-cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_ss
+  - endpoint: GET /office/compliance/insolvency-cases/{caseId}/dues-summary
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_ss
+  - endpoint: GET /office/compliance/insolvency/summary
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_ss
+  - endpoint: POST /office/compliance/establishments/{establishmentId}/mca-statuses
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_ss
+  - endpoint: POST /office/compliance/insolvency-cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_ss
   - endpoint: POST /office/member-change-requests/{requestId}/verifications
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2448,6 +2550,66 @@ stakeholders:
     step_up: true
     via:
     - F01.merger_apfc
+  - endpoint: GET /office/compliance/insolvency/watchlist
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_apfc
+  - endpoint: GET /office/compliance/insolvency-cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_apfc
+  - endpoint: GET /office/compliance/insolvency-cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_apfc
+  - endpoint: GET /office/compliance/insolvency-cases/{caseId}/dues-summary
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_apfc
+  - endpoint: GET /office/compliance/insolvency/summary
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_apfc
+  - endpoint: POST /office/compliance/establishments/{establishmentId}/mca-statuses
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_apfc
+  - endpoint: POST /office/compliance/insolvency-cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_apfc
+  - endpoint: POST /office/compliance/insolvency-cases/{caseId}/claims
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_apfc
+  - endpoint: POST /office/compliance/insolvency-cases/{caseId}/resolution-plans
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_apfc
+  - endpoint: POST /office/compliance/insolvency-cases/{caseId}/realisations
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_apfc
   - endpoint: POST /office/member-change-requests/{requestId}/decisions
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2800,6 +2962,66 @@ stakeholders:
     step_up: true
     via:
     - F01.merger
+  - endpoint: GET /office/compliance/insolvency/watchlist
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_oic
+  - endpoint: GET /office/compliance/insolvency-cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_oic
+  - endpoint: GET /office/compliance/insolvency-cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_oic
+  - endpoint: GET /office/compliance/insolvency-cases/{caseId}/dues-summary
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_oic
+  - endpoint: GET /office/compliance/insolvency/summary
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_oic
+  - endpoint: POST /office/compliance/establishments/{establishmentId}/mca-statuses
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_oic
+  - endpoint: POST /office/compliance/insolvency-cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_oic
+  - endpoint: POST /office/compliance/insolvency-cases/{caseId}/claims
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_oic
+  - endpoint: POST /office/compliance/insolvency-cases/{caseId}/resolution-plans
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_oic
+  - endpoint: POST /office/compliance/insolvency-cases/{caseId}/realisations
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_oic
   - endpoint: GET /office/work-queue
     status: W
     scope: office jurisdiction of the caller's posting
@@ -3389,6 +3611,60 @@ stakeholders:
     via:
     - F06.inspect
   fo.recovery_officer:
+  - endpoint: GET /office/compliance/insolvency/watchlist
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_recovery_officer
+  - endpoint: GET /office/compliance/insolvency-cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_recovery_officer
+  - endpoint: GET /office/compliance/insolvency-cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_recovery_officer
+  - endpoint: GET /office/compliance/insolvency-cases/{caseId}/dues-summary
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_recovery_officer
+  - endpoint: GET /office/compliance/insolvency/summary
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_recovery_officer
+  - endpoint: POST /office/compliance/insolvency-cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_recovery_officer
+  - endpoint: POST /office/compliance/insolvency-cases/{caseId}/claims
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_recovery_officer
+  - endpoint: POST /office/compliance/insolvency-cases/{caseId}/resolution-plans
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_recovery_officer
+  - endpoint: POST /office/compliance/insolvency-cases/{caseId}/realisations
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_recovery_officer
   - endpoint: POST /office/attachment-orders
     status: W
     scope: office jurisdiction of the caller's posting
@@ -3741,6 +4017,42 @@ stakeholders:
     via:
     - F13.do
   do.staff:
+  - endpoint: GET /office/compliance/insolvency/watchlist
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_staff
+  - endpoint: GET /office/compliance/insolvency-cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_staff
+  - endpoint: GET /office/compliance/insolvency-cases/{caseId}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_staff
+  - endpoint: GET /office/compliance/insolvency-cases/{caseId}/dues-summary
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_staff
+  - endpoint: GET /office/compliance/insolvency/summary
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_staff
+  - endpoint: POST /office/compliance/insolvency-cases
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F06.insolvency_staff
   - endpoint: GET /office/work-queue
     status: W
     scope: office jurisdiction of the caller's posting

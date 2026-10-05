@@ -404,6 +404,17 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/freeze-cases/{caseId}/verifications` | Freeze-case verification step (DA → SS/AO → APFC/RPFC-II → OIC; tier-2 process `member_freeze`) | W | 1 | workflow |
 | `POST /office/establishments/{estId}/freezes` 🔐 | Freeze an establishment | W | 1 | employer |
 | `POST /office/establishments/mergers` 🔐 | Record an amalgamation: the transferee takes over the transferor's members without a break in service and its dues (P2.19) | W | 1 | contribution |
+| `GET /office/compliance/insolvency/watchlist` | Establishments at risk of insolvency from EPFO's own signals — returns stopped, demands in default, an MCA status of CIRP or liquidation — scored with reasons (P2.17) | W | 1 | compliance |
+| `POST /office/compliance/establishments/{establishmentId}/mca-statuses` | Record an establishment's MCA status (synthetic) | W | 1 | compliance |
+| `POST /office/compliance/insolvency-cases` | Record an IBBI announcement (CIRP or liquidation, the IRP / RP / liquidator, the last date for claims: 14 days) (P2.17) | W | 1 | compliance |
+| `GET /office/compliance/insolvency-cases` | Insolvency cases with the claim deadline and a warning before it | W | 1 | compliance |
+| `GET /office/compliance/insolvency-cases/{caseId}` | One insolvency case | W | 1 | compliance |
+| `GET /office/compliance/insolvency-cases/{caseId}/dues-summary` | Dues frozen by the moratorium: PF principal apart from s.14B damages and s.7Q interest | W | 1 | compliance |
+| `POST /office/compliance/insolvency-cases/{caseId}/claims` | File EPFO's claim with the IRP / RP / liquidator, PF principal kept apart (P2.17) | W | 1 | compliance |
+| `POST /office/compliance/insolvency-cases/{caseId}/resolution-plans` | Check a resolution plan: non-compliant unless PF principal is paid in full (IBC s.36(4)(a)(iii)) (P2.17) | W | 1 | compliance |
+| `POST /office/compliance/insolvency-cases/{caseId}/realisations` | Record what was recovered in the insolvency; recovery % per case (P2.17) | W | 1 | compliance |
+| `GET /office/compliance/insolvency/summary` | The office's insolvency cases, recovery % and plan compliance (P2.17) | W | 1 | compliance |
+| `GET /employers/me/insolvency-cases` | The establishment's insolvency case: stage, claim deadline, moratorium (P2.17) | W | 1 | compliance |
 | `POST /employers/me/contractor-recoveries` | A principal employer records what it recovered from a contractor whose dues it was assessed for — by deduction or as a debt (EPF Act s.8A) (P2.19) | W | 1 | compliance |
 | `GET /employers/me/contractor-recoveries` | The principal employer's recoveries from contractors | W | 1 | compliance |
 | `POST /office/establishments/{estId}/defreezes` 🔐 | De-freeze an establishment, maker-checker | W | 1 | employer |

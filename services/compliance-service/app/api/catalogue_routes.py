@@ -10,7 +10,7 @@ from epfo_observability import Problem
 
 router = APIRouter()
 
-OPERATIONS = ['GET /public/defaulting-establishments', 'GET /employers/me/contractor-recoveries', 'POST /employers/me/contractor-recoveries', 'GET /employers/me/proceedings', 'GET /employers/me/prosecutions', 'GET /employers/me/recovery-cases', 'GET /employers/me/vishwas-applications', 'POST /employers/me/vishwas-applications', 'GET /ho/reports/proceedings', 'GET /ho/reports/recovery', 'GET /office/compliance/cases', 'POST /office/compliance/cases', 'GET /office/compliance/inspections', 'POST /office/compliance/inspections', 'POST /office/compliance/membership-disputes', 'GET /office/compliance/prosecutions', 'GET /office/compliance/scrutinies', 'GET /office/compliance/vishwas-applications', 'GET /office/legal/cases', 'POST /office/legal/cases', 'GET /office/recovery/cases', 'GET /zo/recovery/instalment-referrals', 'GET /office/compliance/cases/{caseId}', 'POST /employers/me/proceedings/{caseId}/applications', 'POST /employers/me/proceedings/{caseId}/submissions', 'POST /employers/me/prosecutions/{prosecutionId}/replies', 'POST /office/compliance/cases/{caseId}/allocations', 'POST /office/compliance/cases/{caseId}/appeals', 'POST /office/compliance/cases/{caseId}/approvals', 'POST /office/compliance/cases/{caseId}/escaped-assessments-7c', 'POST /office/compliance/cases/{caseId}/hearings', 'POST /office/compliance/cases/{caseId}/notices', 'POST /office/compliance/cases/{caseId}/orders', 'POST /office/compliance/cases/{caseId}/prosecutions', 'POST /office/compliance/cases/{caseId}/recovery-8f', 'POST /office/compliance/cases/{caseId}/recovery-certificates', 'POST /office/compliance/cases/{caseId}/reviews-7b', 'POST /office/compliance/cases/{caseId}/scrutinies', 'POST /office/compliance/cases/{caseId}/set-asides', 'POST /office/compliance/inspections/{inspectionId}/processing-notes', 'POST /office/compliance/inspections/{inspectionId}/reports', 'POST /office/compliance/prosecutions/{prosecutionId}/steps', 'POST /office/compliance/vishwas-applications/{applicationId}/decisions', 'POST /office/legal/cases/{caseId}/orders', 'POST /zo/recovery/instalment-referrals/{caseId}/refusals', 'POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposit-waivers', 'POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposits', 'POST /office/recovery/{caseId}/arrest-warrants', 'POST /office/recovery/{caseId}/attachments', 'POST /office/recovery/{caseId}/demand-notices', 'POST /office/recovery/{caseId}/instalment-defaults', 'POST /office/recovery/{caseId}/instalment-referrals', 'POST /office/recovery/{caseId}/instalments', 'POST /office/recovery/{caseId}/payments', 'POST /office/recovery/{caseId}/receivers', 'POST /office/recovery/{caseId}/sales']
+OPERATIONS = ['GET /public/defaulting-establishments', 'GET /employers/me/contractor-recoveries', 'POST /employers/me/contractor-recoveries', 'GET /employers/me/insolvency-cases', 'GET /employers/me/proceedings', 'GET /employers/me/prosecutions', 'GET /employers/me/recovery-cases', 'GET /employers/me/vishwas-applications', 'POST /employers/me/vishwas-applications', 'GET /ho/reports/proceedings', 'GET /ho/reports/recovery', 'GET /office/compliance/cases', 'POST /office/compliance/cases', 'GET /office/compliance/insolvency-cases', 'POST /office/compliance/insolvency-cases', 'GET /office/compliance/inspections', 'POST /office/compliance/inspections', 'POST /office/compliance/membership-disputes', 'GET /office/compliance/prosecutions', 'GET /office/compliance/scrutinies', 'GET /office/compliance/vishwas-applications', 'GET /office/legal/cases', 'POST /office/legal/cases', 'GET /office/recovery/cases', 'GET /zo/recovery/instalment-referrals', 'GET /office/compliance/insolvency/summary', 'GET /office/compliance/insolvency/watchlist', 'GET /office/compliance/cases/{caseId}', 'GET /office/compliance/insolvency-cases/{caseId}', 'POST /employers/me/proceedings/{caseId}/applications', 'POST /employers/me/proceedings/{caseId}/submissions', 'POST /employers/me/prosecutions/{prosecutionId}/replies', 'POST /office/compliance/cases/{caseId}/allocations', 'POST /office/compliance/cases/{caseId}/appeals', 'POST /office/compliance/cases/{caseId}/approvals', 'POST /office/compliance/cases/{caseId}/escaped-assessments-7c', 'POST /office/compliance/cases/{caseId}/hearings', 'POST /office/compliance/cases/{caseId}/notices', 'POST /office/compliance/cases/{caseId}/orders', 'POST /office/compliance/cases/{caseId}/prosecutions', 'POST /office/compliance/cases/{caseId}/recovery-8f', 'POST /office/compliance/cases/{caseId}/recovery-certificates', 'POST /office/compliance/cases/{caseId}/reviews-7b', 'POST /office/compliance/cases/{caseId}/scrutinies', 'POST /office/compliance/cases/{caseId}/set-asides', 'POST /office/compliance/establishments/{establishmentId}/mca-statuses', 'POST /office/compliance/insolvency-cases/{caseId}/claims', 'GET /office/compliance/insolvency-cases/{caseId}/dues-summary', 'POST /office/compliance/insolvency-cases/{caseId}/realisations', 'POST /office/compliance/insolvency-cases/{caseId}/resolution-plans', 'POST /office/compliance/inspections/{inspectionId}/processing-notes', 'POST /office/compliance/inspections/{inspectionId}/reports', 'POST /office/compliance/prosecutions/{prosecutionId}/steps', 'POST /office/compliance/vishwas-applications/{applicationId}/decisions', 'POST /office/legal/cases/{caseId}/orders', 'POST /zo/recovery/instalment-referrals/{caseId}/refusals', 'POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposit-waivers', 'POST /office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposits', 'POST /office/recovery/{caseId}/arrest-warrants', 'POST /office/recovery/{caseId}/attachments', 'POST /office/recovery/{caseId}/demand-notices', 'POST /office/recovery/{caseId}/instalment-defaults', 'POST /office/recovery/{caseId}/instalment-referrals', 'POST /office/recovery/{caseId}/instalments', 'POST /office/recovery/{caseId}/payments', 'POST /office/recovery/{caseId}/receivers', 'POST /office/recovery/{caseId}/sales']
 
 @router.api_route("/api/v1/public/defaulting-establishments", methods=["GET"], include_in_schema=False)
 async def get_public_defaulting_establishments(actor: Actor = Depends(require_actor)) -> None:
@@ -25,6 +25,11 @@ async def get_employers_me_contractor_recoveries(actor: Actor = Depends(require_
 @router.api_route("/api/v1/employers/me/contractor-recoveries", methods=["POST"], include_in_schema=False)
 async def post_employers_me_contractor_recoveries(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "A principal employer records what it recovered from a contractor whose dues it was assessed for — by")
+
+
+@router.api_route("/api/v1/employers/me/insolvency-cases", methods=["GET"], include_in_schema=False)
+async def get_employers_me_insolvency_cases(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The establishment's insolvency case: stage, claim deadline, moratorium (P2.17)")
 
 
 @router.api_route("/api/v1/employers/me/proceedings", methods=["GET"], include_in_schema=False)
@@ -70,6 +75,16 @@ async def get_office_compliance_cases(actor: Actor = Depends(require_actor)) -> 
 @router.api_route("/api/v1/office/compliance/cases", methods=["POST"], include_in_schema=False)
 async def post_office_compliance_cases(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Open a case, or register a 7A inquiry (diary number; allocated at random to an officer of the rank i")
+
+
+@router.api_route("/api/v1/office/compliance/insolvency-cases", methods=["GET"], include_in_schema=False)
+async def get_office_compliance_insolvency_cases(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Insolvency cases with the claim deadline and a warning before it")
+
+
+@router.api_route("/api/v1/office/compliance/insolvency-cases", methods=["POST"], include_in_schema=False)
+async def post_office_compliance_insolvency_cases(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Record an IBBI announcement (CIRP or liquidation, the IRP / RP / liquidator, the last date for claim")
 
 
 @router.api_route("/api/v1/office/compliance/inspections", methods=["GET"], include_in_schema=False)
@@ -122,9 +137,24 @@ async def get_zo_recovery_instalment_referrals(actor: Actor = Depends(require_ac
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Instalment referrals waiting for the zone's ACC or the CPFC: the certificate, arrears outstanding, i")
 
 
+@router.api_route("/api/v1/office/compliance/insolvency/summary", methods=["GET"], include_in_schema=False)
+async def get_office_compliance_insolvency_summary(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "The office's insolvency cases, recovery % and plan compliance (P2.17)")
+
+
+@router.api_route("/api/v1/office/compliance/insolvency/watchlist", methods=["GET"], include_in_schema=False)
+async def get_office_compliance_insolvency_watchlist(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Establishments at risk of insolvency from EPFO's own signals — returns stopped, demands in default, ")
+
+
 @router.api_route("/api/v1/office/compliance/cases/{caseId}", methods=["GET"], include_in_schema=False)
 async def get_office_compliance_cases_caseId(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Case detail with full proceeding history")
+
+
+@router.api_route("/api/v1/office/compliance/insolvency-cases/{caseId}", methods=["GET"], include_in_schema=False)
+async def get_office_compliance_insolvency_cases_caseId(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "One insolvency case")
 
 
 @router.api_route("/api/v1/employers/me/proceedings/{caseId}/applications", methods=["POST"], include_in_schema=False)
@@ -205,6 +235,31 @@ async def post_office_compliance_cases_caseId_scrutinies(actor: Actor = Depends(
 @router.api_route("/api/v1/office/compliance/cases/{caseId}/set-asides", methods=["POST"], include_in_schema=False)
 async def post_office_compliance_cases_caseId_set_asides(actor: Actor = Depends(require_actor)) -> None:
     raise Problem(501, "/problems/not-yet-built", "Not built yet", "Decide an application to set aside an ex-parte order (s.7A(4)): set aside — the demand withdrawn and")
+
+
+@router.api_route("/api/v1/office/compliance/establishments/{establishmentId}/mca-statuses", methods=["POST"], include_in_schema=False)
+async def post_office_compliance_establishments_establishmentId_mca_statuses(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Record an establishment's MCA status (synthetic)")
+
+
+@router.api_route("/api/v1/office/compliance/insolvency-cases/{caseId}/claims", methods=["POST"], include_in_schema=False)
+async def post_office_compliance_insolvency_cases_caseId_claims(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "File EPFO's claim with the IRP / RP / liquidator, PF principal kept apart (P2.17)")
+
+
+@router.api_route("/api/v1/office/compliance/insolvency-cases/{caseId}/dues-summary", methods=["GET"], include_in_schema=False)
+async def get_office_compliance_insolvency_cases_caseId_dues_summary(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Dues frozen by the moratorium: PF principal apart from s.14B damages and s.7Q interest")
+
+
+@router.api_route("/api/v1/office/compliance/insolvency-cases/{caseId}/realisations", methods=["POST"], include_in_schema=False)
+async def post_office_compliance_insolvency_cases_caseId_realisations(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Record what was recovered in the insolvency; recovery % per case (P2.17)")
+
+
+@router.api_route("/api/v1/office/compliance/insolvency-cases/{caseId}/resolution-plans", methods=["POST"], include_in_schema=False)
+async def post_office_compliance_insolvency_cases_caseId_resolution_plans(actor: Actor = Depends(require_actor)) -> None:
+    raise Problem(501, "/problems/not-yet-built", "Not built yet", "Check a resolution plan: non-compliant unless PF principal is paid in full (IBC s.36(4)(a)(iii)) (P2")
 
 
 @router.api_route("/api/v1/office/compliance/inspections/{inspectionId}/processing-notes", methods=["POST"], include_in_schema=False)

@@ -4,9 +4,9 @@
   "interfaces": 21,
   "stakeholders": 115,
   "stakeholders_with_access": 95,
-  "activities": 303,
+  "activities": 311,
   "endpoints": {
-   "W": 489,
+   "W": 500,
    "M": 24,
    "P": 1,
    "?": 5
@@ -39,7 +39,7 @@
    "coverage": "Working",
    "purpose": "Employers: registration, members and KYC, monthly returns and challans, demands, attestations, exits.",
    "endpoints": {
-    "W": 111,
+    "W": 112,
     "M": 5,
     "P": 1,
     "?": 0
@@ -84,7 +84,7 @@
    "coverage": "Working",
    "purpose": "Field-office sections: claim scrutiny and payment, compliance, pension, EDLI, exemption, PRO counter.",
    "endpoints": {
-    "W": 138,
+    "W": 148,
     "M": 0,
     "P": 0,
     "?": 4
@@ -154,7 +154,7 @@
    "coverage": "Working",
    "purpose": "District offices: the district dashboard and a jurisdiction-scoped queue.",
    "endpoints": {
-    "W": 3,
+    "W": 9,
     "M": 0,
     "P": 0,
     "?": 0
@@ -171,7 +171,7 @@
    "coverage": "Working",
    "purpose": "Regional office officers: approvals above the dealing level, freezes, ledger decisions.",
    "endpoints": {
-    "W": 79,
+    "W": 89,
     "M": 0,
     "P": 0,
     "?": 1
@@ -766,7 +766,7 @@
    "name": "Establishment owner / employer (legal entity)",
    "group": "B. Employers and intermediaries",
    "endpoints": {
-    "W": 43,
+    "W": 44,
     "M": 4,
     "P": 0,
     "?": 0
@@ -791,6 +791,10 @@
     {
      "id": "F01.establishment_owner",
      "does": "Keep the establishment record: KYC, branches (Form 2A), Form 5A, contractors; ask the office for profile or configuration changes"
+    },
+    {
+     "id": "F06.insolvency_view_owner",
+     "does": "See the establishment's insolvency case: stage, claim deadline and moratorium"
     },
     {
      "id": "F06.contractor_recovery_owner",
@@ -823,7 +827,7 @@
    "name": "Authorised signatory (registered DSC / e-sign)",
    "group": "B. Employers and intermediaries",
    "endpoints": {
-    "W": 60,
+    "W": 61,
     "M": 2,
     "P": 0,
     "?": 0
@@ -844,6 +848,10 @@
     {
      "id": "F06.contractor_recovery_signatory",
      "does": "Record what the establishment recovered from a contractor whose workers' dues it was assessed for (EPF Act s.8A)"
+    },
+    {
+     "id": "F06.insolvency_view_signatory",
+     "does": "See the establishment's insolvency case: stage, claim deadline and moratorium"
     },
     {
      "id": "F02.kyc_approve",
@@ -1203,7 +1211,7 @@
    "name": "Dealing Assistant (Compliance) — establishment files, inspections, 14B/7Q knock-off",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 12,
+    "W": 20,
     "M": 0,
     "P": 0,
     "?": 0
@@ -1212,6 +1220,10 @@
     {
      "id": "F01.olre_scrutiny",
      "does": "Scrutinise documents of a newly registered establishment (FO-interface >> OLRE >> View Documents) and open the compliance e-file"
+    },
+    {
+     "id": "F06.insolvency_da_compliance",
+     "does": "Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured"
     },
     {
      "id": "F03.knock_off",
@@ -1242,12 +1254,16 @@
    "name": "Section Supervisor (Accounts / Compliance)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 19,
+    "W": 26,
     "M": 0,
     "P": 0,
     "?": 0
    },
    "activities": [
+    {
+     "id": "F06.insolvency_ss",
+     "does": "Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured"
+    },
     {
      "id": "F02.jd_verify",
      "does": "Verifier (SS route): cross-check and recommend"
@@ -1351,7 +1367,7 @@
    "name": "APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 60,
+    "W": 70,
     "M": 0,
     "P": 0,
     "?": 1
@@ -1372,6 +1388,10 @@
     {
      "id": "F01.merger_apfc",
      "does": "Record an amalgamation of two establishments (APFC)"
+    },
+    {
+     "id": "F06.insolvency_apfc",
+     "does": "Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured"
     },
     {
      "id": "F02.jd_approve",
@@ -1488,7 +1508,7 @@
    "name": "Officer-in-Charge of the office",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 44,
+    "W": 54,
     "M": 0,
     "P": 0,
     "?": 0
@@ -1497,6 +1517,10 @@
     {
      "id": "F01.merger",
      "does": "Record an amalgamation of two establishments: members continue without a break in service; the transferor's dues follow to the transferee"
+    },
+    {
+     "id": "F06.insolvency_oic",
+     "does": "Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured"
     },
     {
      "id": "F04.approve_oic",
@@ -1786,12 +1810,16 @@
    "name": "Recovery Officer (8B–8G recovery, attachment, arrest warrants)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 11,
+    "W": 20,
     "M": 0,
     "P": 0,
     "?": 0
    },
    "activities": [
+    {
+     "id": "F06.insolvency_recovery_officer",
+     "does": "Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured"
+    },
     {
      "id": "F04.attachment_recovery_officer",
      "does": "Record a court's attachment order on a member's balance and refuse it (EPF Act s.10)"
@@ -1999,12 +2027,16 @@
    "name": "District Office facilitation and compliance staff",
    "group": "D. District Office (DO)",
    "endpoints": {
-    "W": 2,
+    "W": 8,
     "M": 0,
     "P": 0,
     "?": 0
    },
    "activities": [
+    {
+     "id": "F06.insolvency_staff",
+     "does": "Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured"
+    },
     {
      "id": "F06.district",
      "does": "District-level compliance follow-up and facilitation"
@@ -3495,6 +3527,86 @@
    "status": "BUILT",
    "endpoints": 2,
    "src": "CMP"
+  },
+  {
+   "id": "F06.insolvency_da_compliance",
+   "flow": "F06",
+   "actor": "fo.da_compliance",
+   "does": "Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 8,
+   "src": "REC"
+  },
+  {
+   "id": "F06.insolvency_ss",
+   "flow": "F06",
+   "actor": "fo.ss",
+   "does": "Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 7,
+   "src": "REC"
+  },
+  {
+   "id": "F06.insolvency_apfc",
+   "flow": "F06",
+   "actor": "fo.apfc",
+   "does": "Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 10,
+   "src": "REC"
+  },
+  {
+   "id": "F06.insolvency_oic",
+   "flow": "F06",
+   "actor": "fo.oic",
+   "does": "Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 10,
+   "src": "REC"
+  },
+  {
+   "id": "F06.insolvency_recovery_officer",
+   "flow": "F06",
+   "actor": "fo.recovery_officer",
+   "does": "Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 9,
+   "src": "REC"
+  },
+  {
+   "id": "F06.insolvency_staff",
+   "flow": "F06",
+   "actor": "do.staff",
+   "does": "Watch for insolvency and act in it (IBC): the watchlist, the IBBI announcement and claim deadline, the moratorium, EPFO's claim with PF principal apart, the resolution plan checked, recovery measured",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 6,
+   "src": "REC"
+  },
+  {
+   "id": "F06.insolvency_view_owner",
+   "flow": "F06",
+   "actor": "employer.owner",
+   "does": "See the establishment's insolvency case: stage, claim deadline and moratorium",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "REC"
+  },
+  {
+   "id": "F06.insolvency_view_signatory",
+   "flow": "F06",
+   "actor": "employer.signatory",
+   "does": "See the establishment's insolvency case: stage, claim deadline and moratorium",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "REC"
   },
   {
    "id": "F06.contractor_recovery_owner",

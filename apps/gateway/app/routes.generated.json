@@ -161,6 +161,25 @@
   },
   {
     "method": "POST",
+    "path_template": "/office/compliance/establishments/{establishmentId}/mca-statuses",
+    "regex": "^/office/compliance/establishments/[^/]+/mca\\-statuses$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc",
+      "fo.da_compliance",
+      "fo.oic",
+      "fo.ss"
+    ],
+    "summary": "Record an establishment's MCA status (synthetic)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/office/compliance/cases/{caseId}/appeals/{appealId}/pre-deposits",
     "regex": "^/office/compliance/cases/[^/]+/appeals/[^/]+/pre\\-deposits$",
     "status": "W",
@@ -271,6 +290,24 @@
       "employer.signatory"
     ],
     "summary": "Dues the uploaded wages give, before the signatory confirms",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/insolvency-cases/{caseId}/resolution-plans",
+    "regex": "^/office/compliance/insolvency\\-cases/[^/]+/resolution\\-plans$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc",
+      "fo.oic",
+      "fo.recovery_officer"
+    ],
+    "summary": "Check a resolution plan: non-compliant unless PF principal is paid in full (IBC s.36(4)(a)(iii)) (P2.17)",
     "revocation": false
   },
   {
@@ -447,6 +484,45 @@
       "fo.da_accounts"
     ],
     "summary": "ANNEXURE K VDR RECO — match the Annexure K amount with the VDR receipt",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/compliance/insolvency-cases/{caseId}/dues-summary",
+    "regex": "^/office/compliance/insolvency\\-cases/[^/]+/dues\\-summary$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "do.staff",
+      "fo.apfc",
+      "fo.da_compliance",
+      "fo.oic",
+      "fo.recovery_officer",
+      "fo.ss"
+    ],
+    "summary": "Dues frozen by the moratorium: PF principal apart from s.14B damages and s.7Q interest",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/insolvency-cases/{caseId}/realisations",
+    "regex": "^/office/compliance/insolvency\\-cases/[^/]+/realisations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc",
+      "fo.oic",
+      "fo.recovery_officer"
+    ],
+    "summary": "Record what was recovered in the insolvency; recovery % per case (P2.17)",
     "revocation": false
   },
   {
@@ -922,6 +998,25 @@
       "member"
     ],
     "summary": "Record the financial literacy course as completed (mock module)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/insolvency-cases/{caseId}/claims",
+    "regex": "^/office/compliance/insolvency\\-cases/[^/]+/claims$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.apfc",
+      "fo.da_compliance",
+      "fo.oic",
+      "fo.recovery_officer"
+    ],
+    "summary": "File EPFO's claim with the IRP / RP / liquidator, PF principal kept apart (P2.17)",
     "revocation": false
   },
   {
@@ -2062,6 +2157,27 @@
   },
   {
     "method": "GET",
+    "path_template": "/office/compliance/insolvency-cases/{caseId}",
+    "regex": "^/office/compliance/insolvency\\-cases/[^/]+$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "do.staff",
+      "fo.apfc",
+      "fo.da_compliance",
+      "fo.oic",
+      "fo.recovery_officer",
+      "fo.ss"
+    ],
+    "summary": "One insolvency case",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/office/pensions/life-certificates/overdue",
     "regex": "^/office/pensions/life\\-certificates/overdue$",
     "status": "W",
@@ -2579,6 +2695,27 @@
       "fo.oic"
     ],
     "summary": "Summons / notice of the inquiry: scope, period, virtual hearing date and link; served by e-mail and speed post (mock)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/compliance/insolvency/watchlist",
+    "regex": "^/office/compliance/insolvency/watchlist$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "do.staff",
+      "fo.apfc",
+      "fo.da_compliance",
+      "fo.oic",
+      "fo.recovery_officer",
+      "fo.ss"
+    ],
+    "summary": "Establishments at risk of insolvency from EPFO's own signals — returns stopped, demands in default, an MCA status of CIRP or liquidation — scored with reasons (P2.17)",
     "revocation": false
   },
   {
@@ -3101,6 +3238,27 @@
     "revocation": false
   },
   {
+    "method": "GET",
+    "path_template": "/office/compliance/insolvency/summary",
+    "regex": "^/office/compliance/insolvency/summary$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "do.staff",
+      "fo.apfc",
+      "fo.da_compliance",
+      "fo.oic",
+      "fo.recovery_officer",
+      "fo.ss"
+    ],
+    "summary": "The office's insolvency cases, recovery % and plan compliance (P2.17)",
+    "revocation": false
+  },
+  {
     "method": "POST",
     "path_template": "/office/edli-claims/{claimId}/decisions",
     "regex": "^/office/edli\\-claims/[^/]+/decisions$",
@@ -3604,6 +3762,48 @@
       "tech.ndc"
     ],
     "summary": "Replay a dead-lettered event (idempotent consumers)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/compliance/insolvency-cases",
+    "regex": "^/office/compliance/insolvency\\-cases$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "do.staff",
+      "fo.apfc",
+      "fo.da_compliance",
+      "fo.oic",
+      "fo.recovery_officer",
+      "fo.ss"
+    ],
+    "summary": "Insolvency cases with the claim deadline and a warning before it",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/compliance/insolvency-cases",
+    "regex": "^/office/compliance/insolvency\\-cases$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "do.staff",
+      "fo.apfc",
+      "fo.da_compliance",
+      "fo.oic",
+      "fo.recovery_officer",
+      "fo.ss"
+    ],
+    "summary": "Record an IBBI announcement (CIRP or liquidation, the IRP / RP / liquidator, the last date for claims: 14 days) (P2.17)",
     "revocation": false
   },
   {
@@ -4903,6 +5103,23 @@
       "employer.signatory"
     ],
     "summary": "EEC, 2026 (Employees' Enrolment Campaign): declare an employee left out between April 2009 and March 2026 — the past dues month by month at each month's ceiling, the employee's share waived if not deducted, ₹100 damages, one challan that credits the member",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/employers/me/insolvency-cases",
+    "regex": "^/employers/me/insolvency\\-cases$",
+    "status": "W",
+    "phase": 1,
+    "owner": "compliance",
+    "upstream": "http://compliance-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "employer.owner",
+      "employer.signatory"
+    ],
+    "summary": "The establishment's insolvency case: stage, claim deadline, moratorium (P2.17)",
     "revocation": false
   },
   {

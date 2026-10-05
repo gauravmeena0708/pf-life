@@ -59,7 +59,7 @@ def test_watchlist_signals_scoring_and_reasons(ctx):
     })
 
     # Set synthetic MCA status on EST-DEMO-0003 as "UNDER_CIRP"
-    client.post(f"{BASE}/establishments/EST-DEMO-0003/mca-status",
+    client.post(f"{BASE}/establishments/EST-DEMO-0003/mca-statuses",
                 json={"mca_status": "UNDER_CIRP"}, headers=apfc())
 
     r = client.get(f"{INS_BASE}/watchlist", headers=apfc())

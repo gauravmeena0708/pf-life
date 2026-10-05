@@ -98,6 +98,7 @@ import { IndependentReviewMemberPage } from "./features/p224/IndependentReviewMe
 import { IndependentReviewQueuePage } from "./features/p224/IndependentReviewQueuePage";
 import { RuleChangeSimulation } from "./features/p224/RuleChangeSimulation";
 import { AttachmentOrdersPage } from "./features/p219/AttachmentOrders";
+import { InsolvencyManagementPage } from "./features/p217/InsolvencyManagement";
 import { PublicCircularsPage } from "./features/public/CircularsList";
 import { EReportCardPage } from "./features/public/EReportCardPage";
 import { PublicLookups } from "./pages/PublicLookups";
@@ -243,6 +244,7 @@ export function App() {
             <Route path="/office/grievance-reviews" element={<IndependentReviewQueuePage />} />
             <Route path="/finance/rule-simulation" element={<RuleChangeSimulation />} />
             <Route path="/office/attachment-orders" element={<AttachmentOrdersPage />} />
+            <Route path="/office/compliance/insolvency" element={<InsolvencyManagementPage />} />
             <Route path="/public/circulars" element={<PublicCircularsPage />} />
             <Route path="/public/establishments/:estId/e-report-card" element={<EReportCardPage />} />
             <Route path="/ho/circulars" element={<CircularsPage />} />
