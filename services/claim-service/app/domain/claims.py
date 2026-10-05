@@ -9,10 +9,10 @@ from epfo_persistence.policy import approval_chain as chain_for, auto_settle_lim
 
 OPEN_STATES = {"AWAITING_CONFIRMATION", "SUBMITTED", "PENDING_EMPLOYER_ATTESTATION", "PENDING_EDLI_DECISION", "UNDER_REVIEW", "RECOMMENDED", "AWAITING_NEXT_APPROVAL",
                "APPROVED", "AUTO_APPROVED", "PAYMENT_PENDING", "PAYMENT_RETURNED", "CORRECTION_PENDING",
-               "REISSUE_APPROVED", "ON_HOLD_FROZEN"}
+               "REISSUE_APPROVED", "ON_HOLD_FROZEN", "ON_HOLD_OFFICE_REVIEW"}
 # Held while the account is frozen: any state before the payment has gone to the bank (init.md §7).
 HOLDABLE = {"SUBMITTED", "PENDING_EMPLOYER_ATTESTATION", "PENDING_EDLI_DECISION", "UNDER_REVIEW", "RECOMMENDED", "AWAITING_NEXT_APPROVAL", "APPROVED", "AUTO_APPROVED",
-            "PAYMENT_RETURNED", "CORRECTION_PENDING", "REISSUE_APPROVED"}
+            "PAYMENT_RETURNED", "CORRECTION_PENDING", "REISSUE_APPROVED", "ON_HOLD_OFFICE_REVIEW"}
 
 ROLE_LABELS = {
     "member": "You", "system": "EPFO system (automatic)", "fo.da_accounts": "Dealing assistant (accounts)",
@@ -43,6 +43,7 @@ NEXT_STEP = {
     "CORRECTION_PENDING": "Your new bank details are with an APFC for approval.",
     "REISSUE_APPROVED": "The re-payment is approved; the cash section will send it to your new account.",
     "ON_HOLD_FROZEN": "Your claim is on hold while your account is being verified. You do not need to do anything.",
+    "ON_HOLD_OFFICE_REVIEW": "Your claim is held for office review due to a shared bank account check. An officer will review it.",
     "REJECTED_WITH_REASON": "Your claim was rejected. The reason is shown above; you can file a new claim once it is resolved.",
     "CANCELLED": "You withdrew this claim. You can file a new one.",
 }
