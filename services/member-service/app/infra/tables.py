@@ -278,3 +278,18 @@ uan_merges = Table(
     Column("merged_by", String(80), nullable=False),
     Column("merged_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
 )
+
+# P2.24: Authorised representatives
+representatives = Table(
+    "representatives", metadata,
+    Column("grant_id", String(40), primary_key=True),
+    Column("member_subject", String(80), nullable=False, index=True),
+    Column("uan", String(12), nullable=False, index=True),
+    Column("representative_subject", String(80), nullable=False, index=True),
+    Column("relation", String(20), nullable=False),
+    Column("scopes", JSON, nullable=False),
+    Column("valid_until", Date, nullable=False),
+    Column("state", String(20), nullable=False, server_default="ACTIVE"),
+    Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+    Column("revoked_at", DateTime(timezone=True)),
+)

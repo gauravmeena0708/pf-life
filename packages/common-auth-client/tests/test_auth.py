@@ -135,3 +135,17 @@ def test_require_grant_and_step_up():
     with pytest.raises(Problem) as e:
         require_step_up(Actor(subject="s", stakeholder="x", correlation_id="c"), "approve-ecr", "F1")
     assert e.value.status == 428
+
+
+def test_token_with_acted_by():
+    acted_by_data = {"subject": "rep-1", "grant_id": "REP-123", "relation": "GUARDIAN"}
+    t = token(acted_by=acted_by_data)
+    actor = epfo_auth.verify(t)
+    assert actor.subject == "user-1"
+    assert actor.stakeholder == "member"
+    assert actor.acted_by == acted_by_data
+
+    # Default is None
+    t_normal = token()
+    actor_normal = epfo_auth.verify(t_normal)
+    assert actor_normal.acted_by is None

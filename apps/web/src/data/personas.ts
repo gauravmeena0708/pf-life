@@ -32,6 +32,7 @@ export const PERSONAS: Persona[] = [
   { username: "pensioner-a", label: "Pensioner A", role: "pensioner", group: "Members and public", description: "Pension payments, life certificates, bank changes and declarations." },
   { username: "claimant-a", label: "Claimant (nominee of a deceased member)", role: "claimant", group: "Members and public", description: "Nominee of a deceased member — PF, family pension and EDLI claims." },
   { username: "claimant-b", label: "MEENA DEMO (nominee, death from the registry)", role: "claimant", group: "Members and public", description: "Wife and nominee of VIJAY DEMO, whose death EPFO learns from the civil registry — her claims are offered worked out." },
+  { username: "rep-demo", label: "Representative Demo", role: "member.representative", group: "Members and public", description: "Authorised representative — act for members within consented scopes." },
   { username: "emp-owner", label: "Employer owner", role: "employer.owner", group: "Employers", description: "Verify an establishment, manage operators and signatories, and register changes." },
   { username: "emp-preparer", label: "Payroll preparer", role: "employer.operator", group: "Employers", description: "Prepare and validate monthly, arrear and supplementary returns." },
   { username: "emp-signatory", label: "Authorised signatory", role: "employer.signatory", group: "Employers", description: "Approve and submit returns, pay challans and attest member requests." },

@@ -24,10 +24,21 @@ function csrfToken(): string | undefined {
     ?.split("=")[1];
 }
 
+const ACTING_FOR_KEY = "epfo-acting-for";
+
+export function setActingFor(grantId: string | null): void {
+  if (grantId) sessionStorage.setItem(ACTING_FOR_KEY, grantId);
+  else sessionStorage.removeItem(ACTING_FOR_KEY);
+}
+
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const method = (init.method ?? "GET").toUpperCase();
   const headers = new Headers(init.headers);
   headers.set("Accept", "application/json");
+  if (/^\/api\/v1\/members\/me(?:\/|$)/.test(path)) {
+    const grantId = sessionStorage.getItem(ACTING_FOR_KEY);
+    if (grantId) headers.set("X-Acting-For", grantId);
+  }
   if (!["GET", "HEAD"].includes(method)) {
     const token = csrfToken();
     if (token) headers.set("X-CSRF-Token", token);

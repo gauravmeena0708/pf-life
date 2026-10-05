@@ -1452,6 +1452,114 @@ paths:
       x-scope: self — caller's own member record only
       security:
       - bffSession: []
+  /members/me/representatives:
+    get:
+      operationId: getMembersRepresentatives
+      summary: 'My authorised representatives: who, guardian or agent, which scopes, until when (P2.24)'
+      tags:
+      - Member self-service
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: member
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+    post:
+      operationId: postMembersRepresentatives
+      summary: 'Authorise a representative (a guardian or an agent) for chosen read and grievance scopes, for up to a year;
+        never money '
+      tags:
+      - Member self-service
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: member
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+      description: Authorise a representative (a guardian or an agent) for chosen read and grievance scopes, for up to a year;
+        never money or anything needing confirmation (P2.24)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /members/me/representatives/{grantId}/revocations:
+    post:
+      operationId: postMembersRepresentativesGrantIdRevocations
+      summary: Revoke a representative at once (P2.24)
+      tags:
+      - Member self-service
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: grantId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: member
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /members/me/security-reports:
     post:
       operationId: postMembersSecurityReports
@@ -2232,6 +2340,35 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /representatives/me/members:
+    get:
+      operationId: getRepresentativesMembers
+      summary: The members I may act for, with the scopes each allowed (P2.24)
+      tags:
+      - Member self-service
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: member
+      x-callers:
+      - member.representative
+      x-scope: to be defined
+      security:
+      - bffSession: []
   /security/account-recovery-requests:
     get:
       operationId: getSecurityAccountRecoveryRequests

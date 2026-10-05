@@ -147,6 +147,24 @@ stakeholders:
     step_up: false
     via:
     - F02.identity_check
+  - endpoint: GET /members/me/representatives
+    status: W
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F02.representatives
+  - endpoint: POST /members/me/representatives
+    status: W
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F02.representatives
+  - endpoint: POST /members/me/representatives/{grantId}/revocations
+    status: W
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F02.representatives
   - endpoint: GET /members/me
     status: W
     scope: self — caller's own member record only
@@ -754,6 +772,13 @@ stakeholders:
     step_up: false
     via:
     - F05.family_apply_claimant
+  member.representative:
+  - endpoint: GET /representatives/me/members
+    status: W
+    scope: to be defined
+    step_up: false
+    via:
+    - F02.represent
   claimant.nominee:
   - endpoint: POST /claimants/death-claims/{claimId}/beneficiaries
     status: W

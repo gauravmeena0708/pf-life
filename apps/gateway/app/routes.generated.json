@@ -1199,6 +1199,22 @@
   },
   {
     "method": "POST",
+    "path_template": "/members/me/representatives/{grantId}/revocations",
+    "regex": "^/members/me/representatives/[^/]+/revocations$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Revoke a representative at once (P2.24)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/office/damages-knock-offs/{knockOffId}/approvals",
     "regex": "^/office/damages\\-knock\\-offs/[^/]+/approvals$",
     "status": "W",
@@ -5946,6 +5962,38 @@
   },
   {
     "method": "GET",
+    "path_template": "/members/me/representatives",
+    "regex": "^/members/me/representatives$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "My authorised representatives: who, guardian or agent, which scopes, until when (P2.24)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/representatives",
+    "regex": "^/members/me/representatives$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Authorise a representative (a guardian or an agent) for chosen read and grievance scopes, for up to a year; never money or anything needing confirmation (P2.24)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
     "path_template": "/members/me/service-history",
     "regex": "^/members/me/service\\-history$",
     "status": "W",
@@ -6090,6 +6138,22 @@
       "public"
     ],
     "summary": "TRRN / challan status lookup with wage month, issue/payment times and next step; one-use synthetic demo proof (production CAPTCHA pending)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/representatives/me/members",
+    "regex": "^/representatives/me/members$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member.representative"
+    ],
+    "summary": "The members I may act for, with the scopes each allowed (P2.24)",
     "revocation": false
   },
   {

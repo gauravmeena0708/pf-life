@@ -865,7 +865,8 @@
     "ho-compliance": "00000000-0000-4000-8000-000000000078",
     "ho-recovery": "00000000-0000-4000-8000-000000000079",
     "member-disabled": "00000000-0000-4000-8000-000000000080",
-    "claimant-b": "00000000-0000-4000-8000-000000000081"
+    "claimant-b": "00000000-0000-4000-8000-000000000081",
+    "rep-demo": "00000000-0000-4000-8000-000000000083"
   },
   "opening_balances": {
     "_comment": "Balances brought forward on 2025-03-31 (synthetic): held through financial year 2025-26, so annual interest for that year is easy to check, and large enough for Journey B to exercise the higher approval bands repeatedly.",

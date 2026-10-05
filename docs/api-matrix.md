@@ -8,7 +8,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 |---|---|---|---|---|---|---|---|
 | 1 | Public | **Working** | `public`, `complainant`, `rti_applicant` | 17 | 2 | 0 | 0 |
 | 2 | Employer | **Working** | `employer.owner`, `employer.signatory`, `employer.operator`, `principal_employer`, `contractor`, `exempted.trust`, `trust_auditor`, `liquidator` | 112 | 5 | 1 | 0 |
-| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 95 | 7 | 0 | 0 |
+| 3 | Member | **Working** | `member`, `member.exited`, `member.disabled`, `pensioner`, `family_pensioner`, `claimant`, `csc_operator` | 98 | 7 | 0 | 0 |
 | 4 | Office | **Working** | `fo.da_accounts`, `fo.da_compliance`, `fo.ss`, `fo.ao`, `fo.cash`, `fo.diary`, `fo.da_pension`, `fo.ss_pension`, `fo.apfc_pension`, `fo.pension_disbursement`, `fo.eo`, `fo.icf`, `fo.recovery_officer`, `fo.legal`, `fo.exemption`, `fo.edli`, `fo.nan`, `fo.admin` | 150 | 0 | 0 | 4 |
 | 5 | Grievance | **Working** | `fo.pro`, `ho.customer_service`, `ext.cpgrams` | 18 | 1 | 0 | 0 |
 | 6 | International worker | **Working** | `intl_worker`, `fo.iw`, `ho.iwu`, `ext.foreign_ss` | 6 | 0 | 0 | 0 |
@@ -214,6 +214,7 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `GET /members/me/pension-scheme-certificate` | W | pension | member |
 | `GET /members/me/pmvbry` | W | contribution | member |
 | `GET /members/me/privacy-requests` | W | audit | member |
+| `GET /members/me/representatives` | W | member | member |
 | `GET /members/me/retirement-forecast` | W | contribution | member |
 | `GET /members/me/service-history` | W | member | member |
 | `GET /members/me/sessions` | W | gateway | member |
@@ -260,6 +261,8 @@ Coverage rule: **Working** if any Working endpoint serves the interface's stakeh
 | `POST /members/me/pension-scheme-certificates/{certId}/surrenders` | W | pension | member |
 | `POST /members/me/pmvbry/financial-literacy-completions` | W | contribution | member |
 | `POST /members/me/privacy-requests` | W | audit | member |
+| `POST /members/me/representatives` | W | member | member |
+| `POST /members/me/representatives/{grantId}/revocations` | W | member | member |
 | `POST /members/me/security-reports` | W | member | member |
 | `POST /members/me/tax/form-15g-15h` | W | claim | member |
 | `POST /members/me/transfers` | W | claim | member |

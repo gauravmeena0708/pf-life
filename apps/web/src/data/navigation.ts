@@ -22,7 +22,7 @@ export const PUBLIC_SERVICES: NavItem[] = [
 
 const MEMBER: NavGroup[] = [
   { label: "View", items: [
-    link("Profile", "/member/profile#member-profile-heading"), link("Service History", "/member/service#service-heading"),
+    link("Profile", "/member/profile#member-profile-heading"), link("Service History", "/member/service#service-heading"), link("My representatives", "/member/representatives"),
     link("UAN Card", "/member/uan-card"), link("Passbook", "/member/passbook"), link("Annual statement and taxable interest", "/member/passbook#annual-statement-heading"), link("Pension estimate", "/member/profile#pension-estimate-heading"), link("Retirement view (PF and pension at 58)", "/member/retirement")] },
   { label: "Manage", items: [
     link("Basic Details (Joint Declaration)", "/member/profile#correction-heading"), link("Contact Details", "/member/security#contact-heading"),
@@ -184,6 +184,7 @@ function poc(role: string): NavGroup[] {
 export function menusFor(role: string | undefined): NavGroup[] {
   if (!role || role === "public") return [{ labelKey: "navigation.publicLookups", items: PUBLIC_SERVICES }];
   if (role === "member") return MEMBER;
+  if (role === "member.representative") return [{ label: "Members I act for", to: "/representative" }];
   if (role === "exempted.trust") return [{ label: "Trust", to: "/exempted" }];
   if (role === "ho.compliance" || role === "ho.recovery") return [{ label: "Proceedings and recovery", to: "/ho/compliance-reports" }];
   if (role === "ho.exemption") return [{ label: "Exempted establishments ranking", to: "/ho/exempted-rankings" }, { label: "Exemption proceedings", to: "/exemption-proceedings" }];
@@ -230,6 +231,7 @@ export function homeFor(role: string | undefined): string {
   if (role === "do.incharge") return "/do/dashboard";
   if (role === "ho.hr") return "/i/hrm";
   if (role === "member") return "/member";
+  if (role === "member.representative") return "/representative";
   if (role?.startsWith("employer.")) return "/employer";
   if (role === "pensioner") return "/pensioner";
   if (role === "claimant") return "/claimant";
