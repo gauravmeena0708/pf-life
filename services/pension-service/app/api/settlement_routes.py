@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.pension import age_on, catch_up_payments, month_of, months, today
+from app.domain.pension import age_on, catch_up_payments, month_of, months, pension_at_start, today
 from app.infra.db import sessions
 from app.infra.tables import (brs_statements, disbursement_runs, eps_accounts, member_service, office_staff, pension_claims, pension_payments,
                               pensioners, scheme_certificates)
@@ -159,8 +159,9 @@ async def apply(body: PensionApplication, actor: Actor = Depends(MEMBER), sessio
             raise Problem(422, "/problems/not-eligible", "Not a member of the pension scheme for this service",
                           "The pension contributions were returned to your PF with interest (HO circular WSU/2025/E-961539). "
                           "Claim the PF (Form 19) instead.")
-        service = months_between(m["date_of_joining"], m["date_of_exit"])
-        check = pension_on(m["eps_wages_paise"], service, age_on(m["date_of_birth"], start), rules, disablement=disabled)
+        # EPS para 6A: pensionable service ends at 58 even when employment continues.
+        service = months_between(m["date_of_joining"], min(m["date_of_exit"], at58))
+        check = pension_at_start(m["eps_wages_paise"], service, m["date_of_birth"], start, rules, disablement=disabled)
         if not check["eligible"]:
             raise Problem(422, "/problems/not-eligible", "Not eligible for a monthly pension", check["reason"] +
                           (" You can ask for a scheme certificate instead." if "years of service" in check["reason"] else ""))
@@ -356,8 +357,9 @@ async def worksheet(body: WorksheetInput, actor: Actor = Depends(require_stakeho
         rules = await rules_on(session, c["pension_from"])            # the formula in force when the pension starts
         total = c["service_months"] + sum(a["service_months"] for a in c["aggregated"])
         kind = c.get("kind", "MEMBER")
-        r = (pension_on(c["pensionable_salary_paise"], total, age_on(c["date_of_birth"], c["pension_from"]), rules, disablement=kind == "DISABLED")
-             if kind in ("MEMBER", "DISABLED") else family_pension_on(c["pensionable_salary_paise"], total, kind, rules))
+        r = (pension_at_start(c["pensionable_salary_paise"], total, c["date_of_birth"], c["pension_from"], rules, disablement=kind == "DISABLED")
+             if kind in ("MEMBER", "DISABLED") else family_pension_on(c["pensionable_salary_paise"], total,
+                "SPOUSE" if kind in ("NOMINEE", "FATHER", "MOTHER") else kind, rules))
         if not r["eligible"]:
             raise Problem(422, "/problems/not-eligible", "Not eligible on these data", r["reason"])
         ws = {"worksheet_id": f"WS-{secrets.token_hex(3).upper()}", "service_months": total, "monthly_paise": r["monthly_paise"],
@@ -397,7 +399,7 @@ async def issue_ppo(body: ClaimRef, actor: Actor = Depends(require_stakeholder("
         await session.execute(insert(pensioners).values(
             ppo_id=ppo_id, subject=c["member_subject"] if c.get("kind", "MEMBER") not in ("MEMBER", "DISABLED") else None,
             pension_kind=("DISABLED" if c.get("kind") == "DISABLED" else
-                          ("DIS_CHILD" if (c.get("family") or {}).get("disabled_child") else "CHILD") if c.get("kind") == "CHILD" else "MEMBER"), name=c["name"], uan=c["uan"], date_of_birth=c["date_of_birth"], pension_start=c["pension_from"],
+                          ("DIS_CHILD" if (c.get("family") or {}).get("disabled_child") else "CHILD") if c.get("kind") == "CHILD" else c.get("kind", "MEMBER")), name=c["name"], uan=c["uan"], date_of_birth=c["date_of_birth"], pension_start=c["pension_from"],
             service_months=ws["service_months"], pensionable_salary_paise=c["pensionable_salary_paise"], age_at_start=ws["age_at_start"],
             office_id=c["office_id"], bank_ifsc="DEMO0000000", bank_account_last4=(m["account_link_id"] or "0000")[-4:] if m else "0000",
             original_monthly_paise=ws["monthly_paise"], original_rule_version=ws["rule_version"], original_working=ws["working"],

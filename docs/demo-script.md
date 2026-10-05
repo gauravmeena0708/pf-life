@@ -224,7 +224,7 @@ simulation; point out that the dialog says exactly what is being authorised (act
 *Tests: `tests/e2e/test_pension_settlement.py`, `services/pension-service/tests/test_settlement.py`*
 
 1. **`member-e` → Online Services › Pension (Form 10D).** Retired on 31 January 2026 after 15 years 5 months:
-   *Apply* → pension from 1 February, estimated ₹3,214 a month (₹15,000 × 15 / 70).
+   *Apply* → pension from 1 February, estimated ₹3,013 a month (₹15,000 × 13 years of service to 58 / 70 = ₹2,786, plus 8.16% for deferring it from 58 to 60).
 2. **`do-caseworker`** prepares the Input Data Sheet; **`ro-ao`** approves it (one-time code).
 3. **`ro-da-pension`** generates the worksheet (the formula in force when the pension starts; past service from a
    cancelled scheme certificate can be added first); **`ro-pension`** approves it.

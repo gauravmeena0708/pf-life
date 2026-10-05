@@ -23,11 +23,11 @@ def test_form_10d_goes_through_every_desk_and_the_pension_is_paid_with_its_arrea
     r = step(client, "POST", "/api/v1/members/me/pension-applications", MEMBER_E, "member", {})
     assert r.status_code == 201, r.json()
     c = r.json()["data"]
-    assert c["pension_from"] == "2026-02-01" and c["estimate"]["monthly_paise"] == 321400      # ₹15,000 x 15 / 70
+    assert c["pension_from"] == "2026-02-01" and c["estimate"]["monthly_paise"] == 301333      # ₹15,000 x 13 / 70 (service to 58) = ₹2,786, deferred to 60: +8.16%
     assert step(client, "POST", "/api/v1/members/me/pension-applications", MEMBER_E, "member", {}).status_code == 409
     cid = c["claim_id"]
     c = step(client, "POST", f"/api/v1/office/pension-claims/{cid}/input-data-sheets", DA_ACC, "fo.da_accounts",
-             {"service_months": 185, "pensionable_salary_paise": 1500000, "note": "Service and wages checked with the ledger"}).json()["data"]
+             {"service_months": 161, "pensionable_salary_paise": 1500000, "note": "Service to 58 and wages checked with the ledger"}).json()["data"]
     ids = c["ids"]["ids_id"]
     assert step(client, "POST", f"/api/v1/office/pension-claims/{cid}/input-data-sheets/{ids}/approvals", AO, "fo.ao",
                 {"decision": "APPROVE", "note": "IDS in order"}).status_code == 428
@@ -36,7 +36,7 @@ def test_form_10d_goes_through_every_desk_and_the_pension_is_paid_with_its_arrea
     assert c["state"] == "IDS_APPROVED"
     c = step(client, "POST", "/api/v1/office/pensions/worksheets", DA_P, "fo.da_pension", {"claim_id": cid}).json()["data"]
     ws = c["worksheet"]
-    assert ws["monthly_paise"] == 321400 and ws["rule_version"] == "demo-rules-2026.1"
+    assert ws["monthly_paise"] == 301333 and ws["rule_version"] == "demo-rules-2026.1"
     c = step(client, "POST", f"/api/v1/office/pensions/worksheets/{ws['worksheet_id']}/approvals", APFC_P, "fo.apfc_pension",
              {"decision": "APPROVE", "note": "Worksheet checked"}, "approve-worksheet", ws["worksheet_id"]).json()["data"]
     c = step(client, "POST", "/api/v1/office/pensions/ppo-issuances", DA_P, "fo.da_pension", {"claim_id": cid}, "issue-ppo", cid).json()["data"]
@@ -44,13 +44,13 @@ def test_form_10d_goes_through_every_desk_and_the_pension_is_paid_with_its_arrea
     assert ppo == "PPO-DEMO-0003"
     c = step(client, "POST", f"/api/v1/office/pensions/ppos/{ppo}/initial-arrears", DA_P, "fo.da_pension", {"action": "PROPOSE", "note": "Arrear from February"}).json()["data"]
     assert c["arrears"]["months"] == ["2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08"]
-    assert c["arrears"]["amount_paise"] == 7 * 321400
+    assert c["arrears"]["amount_paise"] == 7 * 301333
     assert step(client, "POST", f"/api/v1/office/pensions/ppos/{ppo}/initial-arrears", DA_P, "fo.da_pension", {"action": "CHECK", "note": "x" * 5}).status_code == 403
     c = step(client, "POST", f"/api/v1/office/pensions/ppos/{ppo}/initial-arrears", SS_P, "fo.ss_pension", {"action": "CHECK", "note": "Arrear checked"}).json()["data"]
     assert step(client, "POST", f"/api/v1/office/pensions/ppos/{ppo}/e-signatures", APFC_P, "fo.apfc_pension", {"decision": "APPROVE", "note": "e-signed"},
                 "esign-ppo", ppo, 1).status_code == 403                                   # bound to the arrear amount
     c = step(client, "POST", f"/api/v1/office/pensions/ppos/{ppo}/e-signatures", APFC_P, "fo.apfc_pension", {"decision": "APPROVE", "note": "e-signed"},
-             "esign-ppo", ppo, 7 * 321400).json()["data"]
+             "esign-ppo", ppo, 7 * 301333).json()["data"]
     assert c["state"] == "PPO_SIGNED"
     c = step(client, "POST", f"/api/v1/office/pensions/ppos/{ppo}/dispatches", DA_P, "fo.da_pension").json()["data"]
     assert c["state"] == "DISPATCHED"
