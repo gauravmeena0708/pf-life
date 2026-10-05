@@ -13,6 +13,7 @@ import time
 from fastapi import Request
 
 from .problems import problem
+from .risk import remember_device
 
 TTL_SECONDS = 300
 MAX_ATTEMPTS = 3
@@ -63,6 +64,9 @@ async def verify_challenge(request: Request, principal: dict, challenge_id: str)
     binding = {k: record[k] for k in ("subject", "action", "resource_id", "resource_version", "amount_paise")}
     binding["confirmed_at"] = int(time.time())
     await request.app.state.redis.setex(f"stepup:token:{token}", TTL_SECONDS, json.dumps(binding))
+    # P2.28: a completed confirmation recognises this member's network/device combination for 30 days.
+    if principal["stakeholder"] == "member":
+        await remember_device(request, principal["subject"])
     return {"data": {"step_up_token": token, "expires_in_seconds": TTL_SECONDS}}
 
 
