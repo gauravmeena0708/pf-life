@@ -11,13 +11,21 @@ from typing import Any
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import func, insert, select, update
+from sqlalchemy.dialects.postgresql import insert as pg_insert
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra.db import sessions
-from app.infra.tables import claim_facts, contribution_facts, event_freshness, grievance_facts, principal_employer_tags
+from app.infra.tables import (challan_payments, claim_facts, contribution_facts, event_freshness,
+                              grievance_facts, principal_employer_tags)
 from epfo_auth import Actor, require_stakeholder
 from epfo_observability import envelope
 from epfo_persistence.policy import on_policy_published
+
+
+def _upsert(table: Any, session: AsyncSession) -> Any:
+    return pg_insert(table) if session.bind.dialect.name == "postgresql" else sqlite_insert(table)
+
 
 router = APIRouter()
 MONITORS = require_stakeholder("fo.rpfc1", "ho.cpfc", "ho.customer_service", "zo.acc")
@@ -68,32 +76,63 @@ async def on_grievance_resolved(session: AsyncSession, event: dict[str, Any]) ->
 
 async def on_claim_submitted(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
-    if (await session.execute(select(claim_facts.c.claim_id).where(claim_facts.c.claim_id == p["claim_id"]))).first():
-        return
-    await session.execute(insert(claim_facts).values(
+    at = _at(event)
+    stmt = _upsert(claim_facts, session).values(
         claim_id=p["claim_id"], office_id=p["office_id"], form_type=p["form_type"],
-        amount_paise=p["amount_paise"], route=p["route"], submitted_at=_at(event)))
+        amount_paise=p["amount_paise"], route=p["route"], submitted_at=at
+    ).on_conflict_do_update(
+        index_elements=[claim_facts.c.claim_id],
+        set_={
+            "office_id": p["office_id"],
+            "form_type": p["form_type"],
+            "amount_paise": p["amount_paise"],
+            "route": p["route"],
+            "submitted_at": func.coalesce(claim_facts.c.submitted_at, at),
+        }
+    )
+    await session.execute(stmt)
 
 
 async def on_claim_decision(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
-    await session.execute(update(claim_facts).where(
-        claim_facts.c.claim_id == p["claim_id"], claim_facts.c.decided_at.is_(None)
-    ).values(decided_at=_at(event), decision=p["decision"]))
+    at = _at(event)
+    stmt = _upsert(claim_facts, session).values(
+        claim_id=p["claim_id"], decided_at=at, decision=p["decision"]
+    ).on_conflict_do_update(
+        index_elements=[claim_facts.c.claim_id],
+        set_={
+            "decided_at": func.coalesce(claim_facts.c.decided_at, at),
+            "decision": func.coalesce(claim_facts.c.decision, p["decision"]),
+        }
+    )
+    await session.execute(stmt)
 
 
 async def on_payment_confirmed(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
+    at = _at(event)
     if p["purpose"] == "CLAIM_SETTLEMENT":
-        await session.execute(update(claim_facts).where(
-            claim_facts.c.claim_id == p["reference_id"], claim_facts.c.settled_at.is_(None)
-        ).values(settled_at=_at(event)))
+        stmt = _upsert(claim_facts, session).values(
+            claim_id=p["reference_id"], settled_at=at
+        ).on_conflict_do_update(
+            index_elements=[claim_facts.c.claim_id],
+            set_={"settled_at": func.coalesce(claim_facts.c.settled_at, at)}
+        )
+        await session.execute(stmt)
     elif p["purpose"] == "CHALLAN":
+        trrn = p["reference_id"]
+        stmt = _upsert(challan_payments, session).values(
+            trrn=trrn, paid_at=at
+        ).on_conflict_do_update(
+            index_elements=[challan_payments.c.trrn],
+            set_={"paid_at": func.coalesce(challan_payments.c.paid_at, at)}
+        )
+        await session.execute(stmt)
         filing = (await session.execute(select(contribution_facts.c.filing_id).where(
-            contribution_facts.c.trrn == p["reference_id"]))).scalar_one_or_none()
+            contribution_facts.c.trrn == trrn))).scalar_one_or_none()
         await session.execute(update(contribution_facts).where(
-            contribution_facts.c.trrn == p["reference_id"], contribution_facts.c.paid_at.is_(None)
-        ).values(paid_at=_at(event)))
+            contribution_facts.c.trrn == trrn, contribution_facts.c.paid_at.is_(None)
+        ).values(paid_at=at))
         if filing is not None:
             await session.execute(update(principal_employer_tags).where(
                 principal_employer_tags.c.filing_id == filing,
@@ -103,41 +142,76 @@ async def on_payment_confirmed(session: AsyncSession, event: dict[str, Any]) -> 
 async def on_payment_returned(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
     if p["purpose"] == "CLAIM_SETTLEMENT":
-        await session.execute(update(claim_facts).where(claim_facts.c.claim_id == p["reference"]).values(
-            returned_count=claim_facts.c.returned_count + 1))
+        stmt = _upsert(claim_facts, session).values(
+            claim_id=p["reference"], returned_count=1
+        ).on_conflict_do_update(
+            index_elements=[claim_facts.c.claim_id],
+            set_={"returned_count": claim_facts.c.returned_count + 1}
+        )
+        await session.execute(stmt)
 
 
 async def on_ecr_validated(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
-    row = (await session.execute(select(contribution_facts.c.wage_month).where(
-        contribution_facts.c.filing_id == p["filing_id"]))).first()
-    if row is None:
-        await session.execute(insert(contribution_facts).values(
-            filing_id=p["filing_id"], establishment_id=p["establishment_id"], wage_month=p["wage_month"]))
-    elif row.wage_month is None:
-        await session.execute(update(contribution_facts).where(
-            contribution_facts.c.filing_id == p["filing_id"]).values(wage_month=p["wage_month"]))
+    stmt = _upsert(contribution_facts, session).values(
+        filing_id=p["filing_id"], establishment_id=p["establishment_id"], wage_month=p["wage_month"]
+    ).on_conflict_do_update(
+        index_elements=[contribution_facts.c.filing_id],
+        set_={
+            "establishment_id": func.coalesce(contribution_facts.c.establishment_id, p["establishment_id"]),
+            "wage_month": func.coalesce(contribution_facts.c.wage_month, p["wage_month"]),
+        }
+    )
+    await session.execute(stmt)
 
 
 async def on_ecr_submitted(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
-    row = (await session.execute(select(contribution_facts.c.submitted_at).where(
-        contribution_facts.c.filing_id == p["filing_id"]))).first()
-    if row is None:
-        await session.execute(insert(contribution_facts).values(
-            filing_id=p["filing_id"], establishment_id=p["establishment_id"], trrn=p["trrn"],
-            total_paise=p["total_paise"], submitted_at=_at(event)))
-    elif row.submitted_at is None:
-        await session.execute(update(contribution_facts).where(
-            contribution_facts.c.filing_id == p["filing_id"]
-        ).values(trrn=p["trrn"], total_paise=p["total_paise"], submitted_at=_at(event)))
+    at = _at(event)
+    paid_at = (await session.execute(select(challan_payments.c.paid_at).where(
+        challan_payments.c.trrn == p["trrn"]))).scalar_one_or_none()
+    values: dict[str, Any] = {
+        "establishment_id": p["establishment_id"],
+        "trrn": p["trrn"],
+        "total_paise": p["total_paise"],
+        "submitted_at": at,
+    }
+    if paid_at is not None:
+        values["paid_at"] = paid_at
+    stmt = _upsert(contribution_facts, session).values(
+        filing_id=p["filing_id"], **values
+    ).on_conflict_do_update(
+        index_elements=[contribution_facts.c.filing_id],
+        set_={
+            "establishment_id": p["establishment_id"],
+            "trrn": p["trrn"],
+            "total_paise": p["total_paise"],
+            "submitted_at": func.coalesce(contribution_facts.c.submitted_at, at),
+            **({"paid_at": func.coalesce(contribution_facts.c.paid_at, paid_at)} if paid_at is not None else {}),
+        }
+    )
+    await session.execute(stmt)
+    if paid_at is not None:
+        await session.execute(update(principal_employer_tags).where(
+            principal_employer_tags.c.filing_id == p["filing_id"],
+            principal_employer_tags.c.paid.is_(False)).values(paid=True))
 
 
 async def on_contribution_posted(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
-    await session.execute(update(contribution_facts).where(
-        contribution_facts.c.filing_id == p["filing_id"], contribution_facts.c.posted_at.is_(None)
-    ).values(posted_at=_at(event), wage_month=p["wage_month"]))
+    at = _at(event)
+    stmt = _upsert(contribution_facts, session).values(
+        filing_id=p["filing_id"], posted_at=at, wage_month=p["wage_month"],
+        establishment_id=p.get("establishment_id")
+    ).on_conflict_do_update(
+        index_elements=[contribution_facts.c.filing_id],
+        set_={
+            "posted_at": func.coalesce(contribution_facts.c.posted_at, at),
+            "wage_month": func.coalesce(contribution_facts.c.wage_month, p["wage_month"]),
+        }
+    )
+    await session.execute(stmt)
+
 
 
 async def on_principal_employer_tagged(session: AsyncSession, event: dict[str, Any]) -> None:
@@ -246,14 +320,14 @@ async def grievance_monitoring(actor: Actor = Depends(MONITORS), session: AsyncS
 
 def _claim_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     settled_days = [(_utc(r["settled_at"]) - _utc(r["submitted_at"])).total_seconds() / 86400
-                    for r in rows if r["settled_at"] is not None]
+                    for r in rows if r["settled_at"] is not None and r["submitted_at"] is not None]
     pending_by_form: dict[str, int] = {}
     for row in rows:
-        if row["decision"] is None:
+        if row["decision"] is None and row.get("form_type") is not None:
             form = row["form_type"]
             pending_by_form[form] = pending_by_form.get(form, 0) + 1
     return {
-        "submitted": len(rows),
+        "submitted": sum(1 for r in rows if r["submitted_at"] is not None),
         "auto_approved": sum(r["decision"] == "AUTO_APPROVED" for r in rows),
         "under_officer_review": sum(r["route"] == "REVIEW" and r["decision"] is None for r in rows),
         "approved": sum(r["decision"] == "APPROVED" for r in rows),
@@ -269,7 +343,7 @@ async def _claim_offices(session: AsyncSession, office_ids: set[str] | None = No
     rows = [dict(row) for row in (await session.execute(select(claim_facts))).mappings()]
     if office_ids is not None:
         rows = [row for row in rows if row["office_id"] in office_ids]
-    offices = sorted(office_ids if office_ids is not None else {row["office_id"] for row in rows})
+    offices = sorted(office_ids if office_ids is not None else {row["office_id"] for row in rows if row["office_id"] is not None})
     return ([{"office_id": office_id, **_claim_summary([r for r in rows if r["office_id"] == office_id])}
              for office_id in offices], _claim_summary(rows))
 

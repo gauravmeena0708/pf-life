@@ -44,11 +44,11 @@ grievance_facts = Table(
 claim_facts = Table(
     "claim_facts", metadata,
     Column("claim_id", String(40), primary_key=True),
-    Column("office_id", String(40), nullable=False, index=True),
-    Column("form_type", String(40), nullable=False),
-    Column("amount_paise", BigInteger, nullable=False),
-    Column("route", String(12), nullable=False),
-    Column("submitted_at", DateTime(timezone=True), nullable=False),
+    Column("office_id", String(40), index=True),
+    Column("form_type", String(40)),
+    Column("amount_paise", BigInteger),
+    Column("route", String(12)),
+    Column("submitted_at", DateTime(timezone=True)),
     Column("decided_at", DateTime(timezone=True)),
     Column("decision", String(20)),
     Column("settled_at", DateTime(timezone=True)),
@@ -58,7 +58,7 @@ claim_facts = Table(
 contribution_facts = Table(
     "contribution_facts", metadata,
     Column("filing_id", String(40), primary_key=True),
-    Column("establishment_id", String(40), nullable=False),
+    Column("establishment_id", String(40)),
     Column("trrn", String(40), unique=True),
     Column("wage_month", String(7), index=True),
     Column("total_paise", BigInteger),
@@ -66,6 +66,13 @@ contribution_facts = Table(
     Column("paid_at", DateTime(timezone=True)),
     Column("posted_at", DateTime(timezone=True)),
 )
+
+challan_payments = Table(
+    "challan_payments", metadata,
+    Column("trrn", String(40), primary_key=True),
+    Column("paid_at", DateTime(timezone=True), nullable=False),
+)
+
 
 principal_employer_tags = Table(
     "principal_employer_tags", metadata,
