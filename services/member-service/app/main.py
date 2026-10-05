@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from sqlalchemy import update
 
 import epfo_auth
-from app.api import catalogue_routes, inoperative_routes, life_event_routes, nomination_routes, onboarding_routes, routes
+from app.api import catalogue_routes, inoperative_routes, life_event_routes, nomination_routes, onboarding_routes, routes, uan_merge_routes
 from app.config import settings
 from app.domain.notifications import handle_notification_requested, deliver_due
 from app.domain.life_events import on_ppo_issued, push_documents_due
@@ -82,6 +82,7 @@ def create_app() -> FastAPI:
     app.include_router(inoperative_routes.router)
     app.include_router(nomination_routes.router)
     app.include_router(life_event_routes.router)
+    app.include_router(uan_merge_routes.router)
     handled = {(m, r.path) for r in app.router.routes for m in getattr(r, "methods", set())}
     for route in catalogue_routes.router.routes:
         if not any((m, route.path) in handled for m in route.methods):

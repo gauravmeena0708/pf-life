@@ -27,6 +27,7 @@ Every event uses the same envelope (event ID, type, schema version, aggregate, p
 | `RiskSignalRaised.v1` | intelligence | claim, workflow, reporting, audit | risk_signal | 1 |
 | `ProcessTransitioned.v1` | workflow | member, contribution, employer, audit | process_instance | 1 |
 | `PrimaryMemberIdChanged.v1` | member | claim, workflow, pension, audit | member | 1 |
+| `UanMerged.v1` | member | contribution, audit | member | 1 |
 | `MemberExitMarked.v1` | member | contribution, claim, workflow, pension, audit | member_account | 1 |
 | `NominationRegistered.v1` | member | claim, audit | member | 1 |
 | `MemberDeathRecorded.v1` | member | claim, pension, audit | member | 1 |

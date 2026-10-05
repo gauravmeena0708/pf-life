@@ -8,15 +8,17 @@ from epfo_persistence.policy import rules_by_version
 from epfo_persistence import add_event
 
 from app.infra.claims_ledger import on_higher_pension_transfer
-from app.infra.transfers import on_trust_annexure_k, on_eps_service_transferred
+from app.infra.transfers import on_trust_annexure_k, on_eps_service_transferred, on_uan_merged
 
 BINDINGS = ["pension-service.HigherPensionDuesTransferRequested.v1",
             "claim-service.TrustAnnexureKReconciled.v1", "pension-service.EpsServiceTransferred.v1",
-            "workflow-service.StaffPostingChanged.v1", "pension-service.PpoIssued.v1"]
+            "workflow-service.StaffPostingChanged.v1", "pension-service.PpoIssued.v1",
+            "member-service.UanMerged.v1"]
 HANDLERS = {"HigherPensionDuesTransferRequested.v1": on_higher_pension_transfer,
             "TrustAnnexureKReconciled.v1": on_trust_annexure_k,
             "EpsServiceTransferred.v1": on_eps_service_transferred,
-            "PpoIssued.v1": lambda session, event: on_ppo_issued(session, event)}
+            "PpoIssued.v1": lambda session, event: on_ppo_issued(session, event),
+            "UanMerged.v1": on_uan_merged}
 
 
 async def on_staff_posting(session, event):

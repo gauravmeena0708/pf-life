@@ -25,6 +25,9 @@ members = Table(
     Column("primary_account_link_id", String(40)),           # the primary member ID of the member's set (P2.7d)
     Column("international", JSON),                           # P2.9a: an international worker — {nationality, passport_masked}
     Column("activated_at", DateTime(timezone=True)),          # mock OTP activation (P2.12a)
+    Column("merged_into", String(12)),
+    Column("merged_at", DateTime(timezone=True)),
+    Column("merged_by", String(80)),
 )
 
 employments = Table(
@@ -262,4 +265,16 @@ digilocker_documents = Table(
     Column("next_attempt_at", DateTime(timezone=True)),
     Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
     Column("updated_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
+)
+
+# P2.19: duplicate UAN merges (active UAN absorbs duplicate UAN).
+uan_merges = Table(
+    "uan_merges", metadata,
+    Column("merge_id", String(40), primary_key=True),
+    Column("active_uan", String(12), nullable=False, index=True),
+    Column("duplicate_uan", String(12), nullable=False, unique=True),
+    Column("account_link_ids", JSON, nullable=False),
+    Column("note", String(1000), nullable=False),
+    Column("merged_by", String(80), nullable=False),
+    Column("merged_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
 )
