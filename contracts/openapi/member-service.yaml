@@ -1110,6 +1110,45 @@ paths:
       x-scope: self — caller's own member record only
       security:
       - bffSession: []
+  /members/me/identity-checks:
+    post:
+      operationId: postMembersIdentityChecks
+      summary: Compare the identity on the e-KYC with the member record field by field (name, date of birth, gender); a mismatch
+        is rou
+      tags:
+      - Member self-service
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: member
+      x-callers:
+      - member
+      x-scope: self — caller's own member record only
+      security:
+      - bffSession: []
+      description: Compare the identity on the e-KYC with the member record field by field (name, date of birth, gender);
+        a mismatch is routed to the Joint Declaration, never a silent refusal (P2.19)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /members/me/joint-declarations:
     post:
       operationId: postMembersJointDeclarations

@@ -1476,6 +1476,23 @@
   },
   {
     "method": "POST",
+    "path_template": "/office/scwf/transfers/{accountLinkId}/reclaims",
+    "regex": "^/office/scwf/transfers/[^/]+/reclaims$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.ao",
+      "fo.apfc"
+    ],
+    "summary": "A member's claim of a balance in the SCWF within 25 years of the transfer; after 25 years the escheat to the Central Government is recorded (P2.19)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/office/vdr-entries/{vdrId}/ecr-reconciliations",
     "regex": "^/office/vdr\\-entries/[^/]+/ecr\\-reconciliations$",
     "status": "?",
@@ -3053,6 +3070,22 @@
   },
   {
     "method": "POST",
+    "path_template": "/office/pensions/family-beneficiaries",
+    "regex": "^/office/pensions/family\\-beneficiaries$",
+    "status": "W",
+    "phase": 1,
+    "owner": "pension",
+    "upstream": "http://pension-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.da_pension"
+    ],
+    "summary": "Record a verified dependent parent (father, then mother) or the EPS nominee of a member who left no family (EPS para 16) (P2.19)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
     "path_template": "/office/pensions/service-aggregations",
     "regex": "^/office/pensions/service\\-aggregations$",
     "status": "W",
@@ -3931,6 +3964,24 @@
       "fo.recovery_officer"
     ],
     "summary": "Appoint a receiver for the business or immovable property (record only)",
+    "revocation": false
+  },
+  {
+    "method": "GET",
+    "path_template": "/office/scwf/identifications/{year}",
+    "regex": "^/office/scwf/identifications/[^/]+$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "fo.ao",
+      "fo.apfc",
+      "fo.da_accounts"
+    ],
+    "summary": "Accounts unclaimed seven years after becoming inoperative, identified by 30 September for transfer to the Senior Citizens' Welfare Fund — a listing, nothing moved (P2.19)",
     "revocation": false
   },
   {
@@ -4885,6 +4936,23 @@
     "revocation": false
   },
   {
+    "method": "POST",
+    "path_template": "/office/establishments/mergers",
+    "regex": "^/office/establishments/mergers$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": false,
+    "step_up": true,
+    "callers": [
+      "fo.apfc",
+      "fo.oic"
+    ],
+    "summary": "Record an amalgamation: the transferee takes over the transferor's members without a break in service and its dues (P2.19)",
+    "revocation": false
+  },
+  {
     "method": "GET",
     "path_template": "/office/exempted/{estId}/returns",
     "regex": "^/office/exempted/[^/]+/returns$",
@@ -5504,6 +5572,22 @@
       "member"
     ],
     "summary": "Change mobile / email (Journey D1)",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/members/me/identity-checks",
+    "regex": "^/members/me/identity\\-checks$",
+    "status": "W",
+    "phase": 1,
+    "owner": "member",
+    "upstream": "http://member-service:8000",
+    "money": false,
+    "step_up": false,
+    "callers": [
+      "member"
+    ],
+    "summary": "Compare the identity on the e-KYC with the member record field by field (name, date of birth, gender); a mismatch is routed to the Joint Declaration, never a silent refusal (P2.19)",
     "revocation": false
   },
   {
@@ -7003,6 +7087,23 @@
       "fo.recovery_officer"
     ],
     "summary": "Recovery certificates of the office with their actions, realisations, stay",
+    "revocation": false
+  },
+  {
+    "method": "POST",
+    "path_template": "/office/scwf/transfers",
+    "regex": "^/office/scwf/transfers$",
+    "status": "W",
+    "phase": 1,
+    "owner": "contribution",
+    "upstream": "http://contribution-service:8000",
+    "money": true,
+    "step_up": true,
+    "callers": [
+      "fo.ao",
+      "fo.apfc"
+    ],
+    "summary": "Transfer the identified balances to the Senior Citizens' Welfare Fund by 1 March, a record per member (P2.19)",
     "revocation": false
   },
   {

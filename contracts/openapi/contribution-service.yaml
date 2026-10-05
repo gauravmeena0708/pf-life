@@ -1969,6 +1969,47 @@ paths:
             schema:
               type: object
               description: Defined when implemented
+  /office/establishments/mergers:
+    post:
+      operationId: postOfficeEstablishmentsMergers
+      summary: 'Record an amalgamation: the transferee takes over the transferor''s members without a break in service and
+        its dues (P2.1'
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - fo.apfc
+      - fo.oic
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: 'Record an amalgamation: the transferee takes over the transferor''s members without a break in service
+        and its dues (P2.19)'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/establishments/{estId}/damages-knock-offs:
     post:
       operationId: postOfficeEstablishmentsEstIdDamagesKnockOffs
@@ -2529,6 +2570,133 @@ paths:
       x-scope: office jurisdiction of the caller's posting
       security:
       - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/scwf/identifications/{year}:
+    get:
+      operationId: getOfficeScwfIdentificationsYear
+      summary: Accounts unclaimed seven years after becoming inoperative, identified by 30 September for transfer to the Senior
+        Citizen
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: year
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/Ok'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - fo.ao
+      - fo.apfc
+      - fo.da_accounts
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: Accounts unclaimed seven years after becoming inoperative, identified by 30 September for transfer to the
+        Senior Citizens' Welfare Fund — a listing, nothing moved (P2.19)
+  /office/scwf/transfers:
+    post:
+      operationId: postOfficeScwfTransfers
+      summary: Transfer the identified balances to the Senior Citizens' Welfare Fund by 1 March, a record per member (P2.19)
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - fo.ao
+      - fo.apfc
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
+  /office/scwf/transfers/{accountLinkId}/reclaims:
+    post:
+      operationId: postOfficeScwfTransfersAccountLinkIdReclaims
+      summary: A member's claim of a balance in the SCWF within 25 years of the transfer; after 25 years the escheat to the
+        Central Gov
+      tags:
+      - Office claim processing and member accounts
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - name: accountLinkId
+        in: path
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: contribution
+      x-callers:
+      - fo.ao
+      - fo.apfc
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: A member's claim of a balance in the SCWF within 25 years of the transfer; after 25 years the escheat to
+        the Central Government is recorded (P2.19)
       requestBody:
         required: false
         content:

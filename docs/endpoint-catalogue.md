@@ -242,6 +242,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /members/uan-lookups` | **Know your UAN** (OTP-verified) | W | 1 | member |
 | `GET /members/me` | Profile | W | 1 | member |
 | `GET /members/me/identity-assurance` | Assurance level | W | 1 | member |
+| `POST /members/me/identity-checks` | Compare the identity on the e-KYC with the member record field by field (name, date of birth, gender); a mismatch is routed to the Joint Declaration, never a silent refusal (P2.19) | W | 1 | member |
 | `GET /members/me/notification-preferences` | SMS and e-mail preferences and the language of messages (P2.15b) | W | 1 | member |
 | `PUT /members/me/notification-preferences` | Change them (essential messages always go by SMS) | W | 1 | member |
 | `PATCH /members/me/contact-details` 🔐 | Change mobile / email (Journey D1) | W | 1 | member |
@@ -378,6 +379,9 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/accounts/interest-postings` 💰🔐 | Annual interest crediting run (illustrative rate) | W | 1 | contribution |
 | `GET /office/accounts/interest-postings?financialYear=` | Interest run preview: the rate in the rule set in force, interest due per account (monthly running balance), already credited, the difference to credit, and earlier runs | W | 1 | contribution |
 | `GET /office/accounts/inoperative` | **Inoperative account** identification | W | 1 | contribution |
+| `GET /office/scwf/identifications/{year}` | Accounts unclaimed seven years after becoming inoperative, identified by 30 September for transfer to the Senior Citizens' Welfare Fund — a listing, nothing moved (P2.19) | W | 1 | contribution |
+| `POST /office/scwf/transfers` 💰🔐 | Transfer the identified balances to the Senior Citizens' Welfare Fund by 1 March, a record per member (P2.19) | W | 1 | contribution |
+| `POST /office/scwf/transfers/{accountLinkId}/reclaims` 💰🔐 | A member's claim of a balance in the SCWF within 25 years of the transfer; after 25 years the escheat to the Central Government is recorded (P2.19) | W | 1 | contribution |
 | `POST /office/accounts/{accountLinkId}/reactivations` 🔐 | Inoperative account reactivation | W | 1 | contribution |
 | `POST /office/tds/computations` | TDS on withdrawal (illustrative rules) | W | 1 | claim |
 
@@ -393,6 +397,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /office/member-change-requests/pendency` | RPFC-I monitors JD pendency (tier-2 process `joint_declaration`) | W | 1 | member |
 | `POST /office/freeze-cases/{caseId}/verifications` | Freeze-case verification step (DA → SS/AO → APFC/RPFC-II → OIC; tier-2 process `member_freeze`) | W | 1 | workflow |
 | `POST /office/establishments/{estId}/freezes` 🔐 | Freeze an establishment | W | 1 | employer |
+| `POST /office/establishments/mergers` 🔐 | Record an amalgamation: the transferee takes over the transferor's members without a break in service and its dues (P2.19) | W | 1 | contribution |
 | `POST /office/establishments/{estId}/defreezes` 🔐 | De-freeze an establishment, maker-checker | W | 1 | employer |
 | `POST /office/accounts/{accountLinkId}/crowdsource-verifications` | Inoperative-account crowdsourcing verification through co-workers' logins | W | 1 | member |
 | `POST /office/outreach-camps/{campId}/assisted-requests` | Requests taken at Nidhi Aapke Nikat camps | W | 1 | workflow |
@@ -448,6 +453,7 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `POST /office/physical-claims` (`formType=PPO_AMENDMENT_BENEFICIARY` \| `PPO_AMENDMENT_SERVICE` \| `PPO_AMENDMENT_POHW`) | PRO counter intake of a **PPO amendment** (beneficiary, service, pension on higher wages) | W | 1 | pension |
 | `POST /office/physical-claims` (`formType=DEATH_UPDATION` \| `PHYSICAL_LC_UPDATION` \| `SPOUSE_REMARRIAGE_UPDATION`) | PRO counter intake of a pensioner **death**, **physical life certificate** or **spouse remarriage** updation | W | 1 | pension |
 | `POST /office/pensions/ppo-issuances` 🔐 | Issue PPO after Form 10D settlement | W | 1 | pension |
+| `POST /office/pensions/family-beneficiaries` 🔐 | Record a verified dependent parent (father, then mother) or the EPS nominee of a member who left no family (EPS para 16) (P2.19) | W | 1 | pension |
 | `GET /office/pension-claims?state=` | Pension claims (Form 10D) of the office by state: each desk sees what is waiting for it | W | 1 | pension |
 | `POST /office/pensions/{ppoId}/revisions` 💰🔐 | Pension revision (incl. higher-pension outcome) | W | 1 | pension |
 | `GET /office/pensions/revisions?state=` | Pension revisions proposed when a published formula change raises pensions in payment, with arrears to date | W | 1 | pension |

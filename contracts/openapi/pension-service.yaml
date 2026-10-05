@@ -974,6 +974,46 @@ paths:
       - bffSession: []
       description: Pension Enquiry Details — PPO, beneficiaries, pension payments, scheme certificate issue, service, arrears
         adjustment, recovery and TDS (restricted to the officer's office)
+  /office/pensions/family-beneficiaries:
+    post:
+      operationId: postOfficePensionsFamilyBeneficiaries
+      summary: Record a verified dependent parent (father, then mother) or the EPS nominee of a member who left no family
+        (EPS para 16)
+      tags:
+      - Pension (EPS) and pensioners
+      parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/StepUpToken'
+      responses:
+        '201':
+          $ref: '#/components/responses/Created'
+        '400':
+          $ref: '#/components/responses/Problem'
+        '401':
+          $ref: '#/components/responses/Problem'
+        '403':
+          $ref: '#/components/responses/Problem'
+        '404':
+          $ref: '#/components/responses/Problem'
+        '409':
+          $ref: '#/components/responses/Problem'
+      x-status: working
+      x-phase: 1
+      x-owner-service: pension
+      x-callers:
+      - fo.da_pension
+      x-scope: office jurisdiction of the caller's posting
+      security:
+      - bffSession: []
+      description: Record a verified dependent parent (father, then mother) or the EPS nominee of a member who left no family
+        (EPS para 16) (P2.19)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Defined when implemented
   /office/pensions/higher-pension-options:
     get:
       operationId: getOfficePensionsHigherPensionOptions

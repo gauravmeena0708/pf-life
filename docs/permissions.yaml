@@ -135,6 +135,12 @@ stakeholders:
     step_up: true
     via:
     - F02.kyc_seed
+  - endpoint: POST /members/me/identity-checks
+    status: W
+    scope: self — caller's own member record only
+    step_up: false
+    via:
+    - F02.identity_check
   - endpoint: GET /members/me
     status: W
     scope: self — caller's own member record only
@@ -1990,6 +1996,12 @@ stakeholders:
     step_up: false
     via:
     - F11.verify
+  - endpoint: GET /office/scwf/identifications/{year}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F11.scwf_identify
   fo.da_compliance:
   - endpoint: GET /office/establishment-registrations
     status: W
@@ -2254,6 +2266,24 @@ stakeholders:
     step_up: true
     via:
     - F11.approve
+  - endpoint: GET /office/scwf/identifications/{year}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F11.scwf_transfer
+  - endpoint: POST /office/scwf/transfers
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F11.scwf_transfer
+  - endpoint: POST /office/scwf/transfers/{accountLinkId}/reclaims
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F11.scwf_transfer
   fo.fa_accounts:
   - endpoint: GET /office/claims/{claimId}/cad
     status: W
@@ -2310,6 +2340,12 @@ stakeholders:
     step_up: true
     via:
     - F01.change_decide
+  - endpoint: POST /office/establishments/mergers
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F01.merger_apfc
   - endpoint: POST /office/member-change-requests/{requestId}/decisions
     status: W
     scope: office jurisdiction of the caller's posting
@@ -2588,6 +2624,24 @@ stakeholders:
     step_up: true
     via:
     - F11.approve_apfc
+  - endpoint: GET /office/scwf/identifications/{year}
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: false
+    via:
+    - F11.scwf_transfer_apfc
+  - endpoint: POST /office/scwf/transfers
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F11.scwf_transfer_apfc
+  - endpoint: POST /office/scwf/transfers/{accountLinkId}/reclaims
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F11.scwf_transfer_apfc
   fo.rpfc1:
   - endpoint: GET /office/member-change-requests/pendency
     status: W
@@ -2614,6 +2668,12 @@ stakeholders:
     via:
     - F13.ro
   fo.oic:
+  - endpoint: POST /office/establishments/mergers
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F01.merger
   - endpoint: GET /office/work-queue
     status: W
     scope: office jurisdiction of the caller's posting
@@ -3017,6 +3077,12 @@ stakeholders:
     step_up: false
     via:
     - F05.dispatch
+  - endpoint: POST /office/pensions/family-beneficiaries
+    status: W
+    scope: office jurisdiction of the caller's posting
+    step_up: true
+    via:
+    - F05.family_beneficiary
   - endpoint: GET /office/pensions/enquiries
     status: W
     scope: office jurisdiction of the caller's posting

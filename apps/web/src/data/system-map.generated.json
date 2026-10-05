@@ -4,9 +4,9 @@
   "interfaces": 21,
   "stakeholders": 115,
   "stakeholders_with_access": 95,
-  "activities": 283,
+  "activities": 290,
   "endpoints": {
-   "W": 471,
+   "W": 477,
    "M": 24,
    "P": 1,
    "?": 5
@@ -62,7 +62,7 @@
    "coverage": "Working",
    "purpose": "Members, pensioners and claimants: passbook, claims, transfers, nomination, pension and death claims.",
    "endpoints": {
-    "W": 92,
+    "W": 93,
     "M": 7,
     "P": 0,
     "?": 0
@@ -84,7 +84,7 @@
    "coverage": "Working",
    "purpose": "Field-office sections: claim scrutiny and payment, compliance, pension, EDLI, exemption, PRO counter.",
    "endpoints": {
-    "W": 130,
+    "W": 134,
     "M": 0,
     "P": 0,
     "?": 4
@@ -171,7 +171,7 @@
    "coverage": "Working",
    "purpose": "Regional office officers: approvals above the dealing level, freezes, ledger decisions.",
    "endpoints": {
-    "W": 71,
+    "W": 75,
     "M": 0,
     "P": 0,
     "?": 1
@@ -454,7 +454,7 @@
    "name": "Member — active contributor (UAN holder)",
    "group": "A. Members, beneficiaries and the public",
    "endpoints": {
-    "W": 76,
+    "W": 77,
     "M": 4,
     "P": 0,
     "?": 0
@@ -467,6 +467,10 @@
     {
      "id": "F02.kyc_seed",
      "does": "Seed KYC (Aadhaar, bank, PAN)"
+    },
+    {
+     "id": "F02.identity_check",
+     "does": "Compare my identity on the e-KYC with my member record; a differing name, date of birth or gender is named and routed to the Joint Declaration"
     },
     {
      "id": "F02.self_service",
@@ -1092,7 +1096,7 @@
    "name": "Dealing Assistant / SSA (Accounts) — claims, IDS, member records, VDR, Appendix-E",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 46,
+    "W": 47,
     "M": 0,
     "P": 0,
     "?": 3
@@ -1165,6 +1169,10 @@
     {
      "id": "F11.verify",
      "does": "Verify inoperative account (digital records, crowdsourcing through co-workers' logins)"
+    },
+    {
+     "id": "F11.scwf_identify",
+     "does": "List the accounts unclaimed seven years after becoming inoperative, for transfer to the Senior Citizens' Welfare Fund (identified by 30 September)"
     }
    ],
    "personas": [
@@ -1249,7 +1257,7 @@
    "name": "Accounts Officer",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 15,
+    "W": 18,
     "M": 0,
     "P": 0,
     "?": 0
@@ -1282,6 +1290,10 @@
     {
      "id": "F11.approve",
      "does": "Approve reactivation / settlement in the AO band; forward higher bands"
+    },
+    {
+     "id": "F11.scwf_transfer",
+     "does": "Transfer the identified balances to the Senior Citizens' Welfare Fund by 1 March; record a member's reclaim within 25 years"
     }
    ],
    "personas": [
@@ -1311,7 +1323,7 @@
    "name": "APFC / RPFC-II — circle officer, accounts or compliance head, quasi-judicial authority (7A, 14B, 7Q)",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 52,
+    "W": 56,
     "M": 0,
     "P": 0,
     "?": 1
@@ -1328,6 +1340,10 @@
     {
      "id": "F01.change_decide",
      "does": "Decide establishment change, closure or transfer requests"
+    },
+    {
+     "id": "F01.merger_apfc",
+     "does": "Record an amalgamation of two establishments (APFC)"
     },
     {
      "id": "F02.jd_approve",
@@ -1404,6 +1420,10 @@
     {
      "id": "F11.approve_apfc",
      "does": "Approve inoperative-account settlement in higher amount bands"
+    },
+    {
+     "id": "F11.scwf_transfer_apfc",
+     "does": "Transfer balances to the Senior Citizens' Welfare Fund and record reclaims (higher authority)"
     }
    ],
    "personas": [
@@ -1436,12 +1456,16 @@
    "name": "Officer-in-Charge of the office",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 40,
+    "W": 41,
     "M": 0,
     "P": 0,
     "?": 0
    },
    "activities": [
+    {
+     "id": "F01.merger",
+     "does": "Record an amalgamation of two establishments: members continue without a break in service; the transferor's dues follow to the transferee"
+    },
     {
      "id": "F04.approve_oic",
      "does": "Approve claims above the top threshold"
@@ -1570,7 +1594,7 @@
    "name": "DA (Pension) — worksheet, PPO, transfer-in, Special 10D",
    "group": "C. Field office — Regional Office (RO) and Sub-Regional Office",
    "endpoints": {
-    "W": 14,
+    "W": 15,
     "M": 0,
     "P": 0,
     "?": 0
@@ -1599,6 +1623,10 @@
     {
      "id": "F05.dispatch",
      "does": "Dispatch PPO and scroll to the bank"
+    },
+    {
+     "id": "F05.family_beneficiary",
+     "does": "Record a verified dependent parent (father, then mother) or the EPS nominee of a member who left no family (EPS para 16)"
     },
     {
      "id": "F05.updation",
@@ -3387,6 +3415,26 @@
    "src": "MAP"
   },
   {
+   "id": "F01.merger",
+   "flow": "F01",
+   "actor": "fo.oic",
+   "does": "Record an amalgamation of two establishments: members continue without a break in service; the transferor's dues follow to the transferee",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "CMP"
+  },
+  {
+   "id": "F01.merger_apfc",
+   "flow": "F01",
+   "actor": "fo.apfc",
+   "does": "Record an amalgamation of two establishments (APFC)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "CMP"
+  },
+  {
    "id": "F01.contractors",
    "flow": "F01",
    "actor": "principal_employer",
@@ -3507,6 +3555,16 @@
    "status": "BUILT",
    "endpoints": 2,
    "src": "MAP"
+  },
+  {
+   "id": "F02.identity_check",
+   "flow": "F02",
+   "actor": "member",
+   "does": "Compare my identity on the e-KYC with my member record; a differing name, date of birth or gender is named and routed to the Joint Declaration",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "JD"
   },
   {
    "id": "F02.missing_details",
@@ -4619,6 +4677,16 @@
    "next": [],
    "status": "BUILT",
    "endpoints": 2,
+   "src": "PEN"
+  },
+  {
+   "id": "F05.family_beneficiary",
+   "flow": "F05",
+   "actor": "fo.da_pension",
+   "does": "Record a verified dependent parent (father, then mother) or the EPS nominee of a member who left no family (EPS para 16)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 1,
    "src": "PEN"
   },
   {
@@ -5872,6 +5940,38 @@
    ],
    "status": "BUILT",
    "endpoints": 1,
+   "src": "WSU"
+  },
+  {
+   "id": "F11.scwf_identify",
+   "flow": "F11",
+   "actor": "fo.da_accounts",
+   "does": "List the accounts unclaimed seven years after becoming inoperative, for transfer to the Senior Citizens' Welfare Fund (identified by 30 September)",
+   "next": [
+    "F11.scwf_transfer"
+   ],
+   "status": "BUILT",
+   "endpoints": 1,
+   "src": "WSU"
+  },
+  {
+   "id": "F11.scwf_transfer",
+   "flow": "F11",
+   "actor": "fo.ao",
+   "does": "Transfer the identified balances to the Senior Citizens' Welfare Fund by 1 March; record a member's reclaim within 25 years",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
+   "src": "WSU"
+  },
+  {
+   "id": "F11.scwf_transfer_apfc",
+   "flow": "F11",
+   "actor": "fo.apfc",
+   "does": "Transfer balances to the Senior Citizens' Welfare Fund and record reclaims (higher authority)",
+   "next": [],
+   "status": "BUILT",
+   "endpoints": 3,
    "src": "WSU"
   },
   {
