@@ -29,6 +29,7 @@ class Actor:
     correlation_id: str
     establishment_id: str | None = None
     step_up: dict[str, Any] | None = None
+    acted_by: dict[str, Any] | None = None
     claims: dict[str, Any] = field(default_factory=dict, repr=False)
 
 
@@ -99,7 +100,8 @@ def verify(token: str) -> Actor:
         raise _unauthorised("Internal token has no stakeholder.")
     return Actor(
         subject=claims["sub"], stakeholder=claims["stakeholder"], correlation_id=claims.get("correlation_id", ""),
-        establishment_id=claims.get("establishment_id"), step_up=claims.get("step_up"), claims=claims,
+        establishment_id=claims.get("establishment_id"), step_up=claims.get("step_up"),
+        acted_by=claims.get("acted_by"), claims=claims,
     )
 
 

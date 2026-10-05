@@ -248,6 +248,10 @@ ECR **types** (regular / arrear / supplementary) are a field on one ECR resource
 | `GET /members/me` | Profile | W | 1 | member |
 | `GET /members/me/identity-assurance` | Assurance level | W | 1 | member |
 | `POST /members/me/identity-checks` | Compare the identity on the e-KYC with the member record field by field (name, date of birth, gender); a mismatch is routed to the Joint Declaration, never a silent refusal (P2.19) | W | 1 | member |
+| `GET /members/me/representatives` | My authorised representatives: who, guardian or agent, which scopes, until when (P2.24) | W | 1 | member |
+| `POST /members/me/representatives` | Authorise a representative (a guardian or an agent) for chosen read and grievance scopes, for up to a year; never money or anything needing confirmation (P2.24) | W | 1 | member |
+| `POST /members/me/representatives/{grantId}/revocations` | Revoke a representative at once (P2.24) | W | 1 | member |
+| `GET /representatives/me/members` | The members I may act for, with the scopes each allowed (P2.24) | W | 1 | member |
 | `GET /members/me/notification-preferences` | SMS and e-mail preferences and the language of messages (P2.15b) | W | 1 | member |
 | `PUT /members/me/notification-preferences` | Change them (essential messages always go by SMS) | W | 1 | member |
 | `PATCH /members/me/contact-details` 🔐 | Change mobile / email (Journey D1) | W | 1 | member |

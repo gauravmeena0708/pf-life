@@ -50,6 +50,8 @@ TEMPLATES = {
     "KYC_REJECTED": ("KYC not approved", "Your employer did not approve your {parameter} KYC ({reference_id}): {reason}"),
     "ACCOUNT_RECOVERY_REJECTED": ("Account recovery not approved", "Your account recovery request {reference_id} was not approved. Please contact your regional office."),
     "AUTO_TRANSFER_STARTED": ("Your earlier PF is moving to your new member ID", "The balance of your earlier member ID{amount} is being moved to your current one ({reference_id}). You need not do anything."),
+    "REPRESENTATIVE_GRANTED": ("Representative authorised", "You authorised representative {reference_id} to act on your behalf."),
+    "REPRESENTATIVE_REVOKED": ("Representative authorisation revoked", "Authorisation for representative {reference_id} was revoked."),
 }
 
 HI_TEMPLATES = {
@@ -84,6 +86,8 @@ HI_TEMPLATES = {
     "KYC_REJECTED": ("केवाईसी स्वीकृत नहीं", "आपके नियोक्ता ने {parameter} केवाईसी ({reference_id}) स्वीकृत नहीं किया है: {reason}"),
     "ACCOUNT_RECOVERY_REJECTED": ("खाता पुनर्प्राप्ति अस्वीकृत", "आपका खाता पुनर्प्राप्ति अनुरोध {reference_id} स्वीकृत नहीं हुआ है। कृपया क्षेत्रीय कार्यालय से संपर्क करें।"),
     "AUTO_TRANSFER_STARTED": ("आपका पुराना पीएफ नई सदस्य आईडी में जा रहा है", "आपकी पिछली सदस्य आईडी की राशि{amount} आपकी वर्तमान सदस्य आईडी में भेजी जा रही है ({reference_id})। आपको कुछ नहीं करना है।"),
+    "REPRESENTATIVE_GRANTED": ("अधिकृत प्रतिनिधि नियुक्त", "आपने प्रतिनिधि {reference_id} को अपनी ओर से कार्य करने के लिए अधिकृत किया है।"),
+    "REPRESENTATIVE_REVOKED": ("प्रतिनिधि अधिकार निरस्त", "प्रतिनिधि {reference_id} का अधिकार निरस्त कर दिया गया है।"),
 }
 
 

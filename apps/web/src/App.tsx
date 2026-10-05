@@ -93,6 +93,7 @@ import { ProceedingsPage } from "./features/exempted/ProceedingsPage";
 import { RankingsPage } from "./features/exempted/RankingsPage";
 import { PublicGrievancesPage, PublicClaimStatusPage } from "./features/public/PublicGrievancesPage";
 import { VerifyReceiptPage } from "./features/public/VerifyReceiptPage";
+import { MyRepresentatives, RepresentativeHome } from "./features/p224/Representatives";
 import { ServiceStandardsPage } from "./features/p224/ServiceStandardsPage";
 import { IndependentReviewMemberPage } from "./features/p224/IndependentReviewMemberPage";
 import { IndependentReviewQueuePage } from "./features/p224/IndependentReviewQueuePage";
@@ -189,6 +190,8 @@ export function App() {
             <Route path="/member/pmvbry" element={<MemberPmvbryPage />} />
             <Route path="/csc" element={<CscPage />} />
             <Route path="/member/passbook" element={<PassbookPage />} />
+            <Route path="/member/representatives" element={<MyRepresentatives />} />
+            <Route path="/representative" element={<RepresentativeHome />} />
             <Route path="/member/claims" element={<ClaimsPage />} />
             <Route path="/member/claims/new" element={<ClaimJourneyPage />} />
             <Route path="/member/claims/:claimId/receipt" element={<ReceiptPage />} />

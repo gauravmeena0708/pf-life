@@ -91,6 +91,10 @@
         "description": "Stakeholder member (docs/stakeholders.md)"
       },
       {
+        "name": "member.representative",
+        "description": "Stakeholder member.representative (docs/stakeholders.md)"
+      },
+      {
         "name": "payroll_provider",
         "description": "Stakeholder payroll_provider (docs/stakeholders.md)"
       },
@@ -1923,6 +1927,25 @@
         "claimant"
       ],
       "id": "00000000-0000-4000-8000-000000000081"
+    },
+    {
+      "username": "rep-demo",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Representative",
+      "lastName": "Demo",
+      "email": "rep-demo@demo.invalid",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Demo@2026!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "member.representative"
+      ],
+      "id": "00000000-0000-4000-8000-000000000083"
     }
   ]
 }

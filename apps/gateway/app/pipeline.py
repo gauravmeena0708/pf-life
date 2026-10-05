@@ -7,6 +7,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse, Response
 
 from . import grants as grant_resolver
+from . import representation
 from .internal_jwt import mint
 from .stepup import consume_token, create_challenge, verify_challenge
 from .oidc import session_context, verify_token
@@ -96,9 +97,22 @@ async def handle_api(request: Request, path: str):
         except Exception:
             return problem(request, 503, "revocation-unavailable", "Authorization state unavailable")
 
+    acting_grant = None
+    effective_principal = principal
+    if principal["stakeholder"] == "member.representative" and route["path_template"].startswith("/members/me"):
+        try:
+            acting_grant = await representation.resolve(request, principal, route)
+        except Exception:
+            return problem(request, 503, "representation-unavailable", "Representative grants unavailable")
+        if not acting_grant:
+            return problem(request, 403, "representative-not-allowed", "Representative access not allowed")
+        effective_principal = {**principal, "subject": acting_grant["member_subject"], "stakeholder": "member"}
+        request.state.acting_for = {"grant_id": acting_grant["grant_id"],
+                                    "member_subject": acting_grant["member_subject"]}
+
     # Check grants before revealing that a protected contract is planned.
     callers = route.get("callers", [])
-    if not is_public and "*" not in callers and principal["stakeholder"] not in callers:
+    if not is_public and "*" not in callers and effective_principal["stakeholder"] not in callers:
         return problem(request, 403, "forbidden", "Forbidden")
 
     if route["status"] in ("P", "?") or int(route.get("phase", 1)) > 1:
@@ -109,7 +123,15 @@ async def handle_api(request: Request, path: str):
             return rejected
     step_up = None
     risk_reasons = []
-    if principal["stakeholder"] == "member" and not route["step_up"]:
+    if acting_grant and request.headers.get("x-step-up-token"):
+        return problem(request, 403, "representative-not-allowed", "Representatives cannot use confirmation tokens")
+    if acting_grant and (method, route["path_template"]) in SENSITIVE_ROUTES:
+        try:
+            if await assess_risk(request, effective_principal["subject"], route):
+                return problem(request, 403, "representative-not-allowed", "Confirmation is required for this action")
+        except Exception:
+            return problem(request, 503, "risk-unavailable", "Confirmation state unavailable")
+    if effective_principal["stakeholder"] == "member" and not acting_grant and not route["step_up"]:
         try:
             risk_reasons = await assess_risk(request, principal["subject"], route)
         except Exception:
@@ -178,12 +200,14 @@ async def handle_api(request: Request, path: str):
         except Exception:
             return problem(request, 503, "grants-unavailable", "Permissions could not be checked",
                            "Try again in a moment.")
-    token = mint(request.app.state.signing_key, principal["subject"], principal["stakeholder"],
-                 service_name, request.state.correlation_id, establishment_id, grants, step_up)
+    acted_by = ({"subject": principal["subject"], "grant_id": acting_grant["grant_id"],
+                 "relation": acting_grant["relation"]} if acting_grant else None)
+    token = mint(request.app.state.signing_key, effective_principal["subject"], effective_principal["stakeholder"],
+                 service_name, request.state.correlation_id, establishment_id, grants, step_up, acted_by)
     headers = {}
     for name, value in request.headers.items():
         lower = name.lower()
-        if lower.startswith("x-actor-") or lower in {"authorization", "cookie", "host", "content-length", "x-csrf-token", "x-step-up-token"}:
+        if lower.startswith("x-actor-") or lower in {"authorization", "cookie", "host", "content-length", "x-csrf-token", "x-step-up-token", "x-acting-for"}:
             continue
         headers[name] = value
     headers["Authorization"] = f"Bearer {token}"
@@ -199,6 +223,11 @@ async def handle_api(request: Request, path: str):
 
     if 200 <= upstream.status_code < 300:
         after_action(request, method, route["path_template"], principal)
+        if route["path_template"] in ("/members/me/representatives", "/members/me/representatives/{grantId}/revocations") and method == "POST":
+            try:
+                representation.forget(upstream.json()["data"]["representative_subject"])
+            except (ValueError, KeyError, TypeError):
+                representation.forget()
     if route.get("revocation") and 200 <= upstream.status_code < 300:
         try:
             data = upstream.json().get("data", {}).get("revocation")

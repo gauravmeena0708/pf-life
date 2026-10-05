@@ -186,7 +186,9 @@ async def register(body: GrievanceInput, actor: Actor = Depends(MEMBER), session
         g = await move(session, g, "ROUTED", "system", f"Sent to your regional office {home['office_id']}.")
         await notify(session, g, "GRIEVANCE_REGISTERED", actor.correlation_id, office_id=home["office_id"])
         await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action="grievance.register",
-                    target_type="grievance", target_id=gid, detail=body.category)
+                    target_type="grievance", target_id=gid,
+                    detail=body.category + (f"; acted_by={actor.acted_by['subject']}; grant_id={actor.acted_by['grant_id']}"
+                                            if actor.acted_by else ""))
         result = await view(session, g)
     return envelope(result)
 
@@ -332,4 +334,3 @@ async def reopen(grievance_id: str, body: ReopenInput, actor: Actor = Depends(ME
         g = await move(session, g, "REOPEN_REQUESTED", "member", f"Reopen requested: {body.reason}", sla_due_at=await sla(session, g["tier"]))
         result = await view(session, g)
     return envelope(result)
-

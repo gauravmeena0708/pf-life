@@ -34,6 +34,7 @@ Default is **deny**. A stakeholder may call only the endpoints listed for it, on
 | `/pensioners/me` | self — caller's own PPO only |
 | `/privacy/` | data-protection officer only |
 | `/public/` | anyone (rate-limited; lookups need CAPTCHA/OTP proof) |
+| `/representatives/me/members` | to be defined |
 | `/security/` | security analyst |
 | `/security/me` | self — open to every authenticated caller (own data only) |
 | `/security/step-up` | self — challenge bound to one action and resource version |
@@ -152,6 +153,7 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `GET /members/me/pension-scheme-certificate` | W | self — caller's own member record only |  |
 | `GET /members/me/pmvbry` | W | self — caller's own member record only |  |
 | `GET /members/me/privacy-requests` | W | self — caller's own member record only |  |
+| `GET /members/me/representatives` | W | self — caller's own member record only |  |
 | `GET /members/me/retirement-forecast` | W | self — caller's own member record only |  |
 | `GET /members/me/service-history` | W | self — caller's own member record only |  |
 | `GET /members/me/sessions` | W | self — caller's own member record only |  |
@@ -191,6 +193,8 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /members/me/pension-scheme-certificates/{certId}/surrenders` | W | self — caller's own member record only | yes |
 | `POST /members/me/pmvbry/financial-literacy-completions` | W | self — caller's own member record only |  |
 | `POST /members/me/privacy-requests` | W | self — caller's own member record only |  |
+| `POST /members/me/representatives` | W | self — caller's own member record only |  |
+| `POST /members/me/representatives/{grantId}/revocations` | W | self — caller's own member record only |  |
 | `POST /members/me/security-reports` | W | self — caller's own member record only |  |
 | `POST /members/me/tax/form-15g-15h` | W | self — caller's own member record only |  |
 | `POST /members/me/transfers` | W | self — caller's own member record only | yes |
@@ -254,6 +258,12 @@ Each row is a required negative or idempotency test in `tests/security/`.
 | `POST /claimants/death-claims` | W | self — claimant's own claims only | yes |
 | `POST /claimants/death-claims/{claimId}/beneficiaries` | W | self — claimant's own claims only |  |
 | `POST /claimants/family-pension-applications` | W | self — claimant's own claims only | yes |
+
+**`member.representative`** — A guardian or agent a member has authorised, within the scopes and until the date the member chose (P2.24)
+
+| Endpoint | Status | Scope | Step-up |
+|---|---|---|---|
+| `GET /representatives/me/members` | W | to be defined |  |
 
 **`claimant.nominee`** — Co-beneficiary on a multi-beneficiary death claim (PF / EDLI / pension) holding an allocated percentage share, including shares already settled in the legacy system
 

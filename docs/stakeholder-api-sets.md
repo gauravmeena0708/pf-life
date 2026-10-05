@@ -8,9 +8,9 @@ Status of each endpoint: **W** working POC · **M** mock integration · **P** pl
 
 | Measure | Count |
 |---|---|
-| Stakeholders | 115 |
-| Activities | 313 |
-| Stakeholders with at least one API | 95 |
+| Stakeholders | 116 |
+| Activities | 315 |
+| Stakeholders with at least one API | 96 |
 | Stakeholders with activities but no API (external systems via adapters, or oversight bodies) | 17 |
 | Stakeholders with no activity yet | 3 |
 | **NEW endpoints to add to the catalogue** | **0** |
@@ -46,7 +46,7 @@ Activities: **F04.receipt_check** Check that a claim receipt is genuine (a bank,
 
 #### `member` — Member — active contributor (UAN holder)
 
-Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP; **F02.kyc_seed** Seed KYC (Aadhaar, bank, PAN); **F02.identity_check** Compare my identity on the e-KYC with my member record; a differing name, date of birth or gender is named and routed to the Joint Declaration; **F02.self_service** View profile, service history, UAN card; change contact details; e-nomination; self-marked exit; **F02.jd_submit** Submit Joint Declaration to correct one of 12 profile parameters; **F03.passbook** View passbook, annual statement and taxable-interest split; **F04.preflight** Pre-flight before filing: check account readiness (blockers), service history and eligibility for the chosen form; **F04.claim_file** Check eligibility and file a claim (Form 31 / 19 / 10C); confirm intent; upload documents; **F04.post_submission** After filing: follow the claim's audit trail, cancel it before a decision, or switch to another KYC-verified bank account before payment; **F04.redisburse_request** Submit corrected bank details after a payment return; **F04.receipt** View and print my claim's receipt with a QR code anyone can use to check it; **F04.track** Track claims and notifications; download Form 16A; **F04.transfer** Request Form 13 transfer; confirm auto-transfer; view Annexure K; **F05.apply** Apply for monthly pension (Form 10D) or scheme certificate; **F05.preview** Pre-check pension eligibility across all member IDs; see untransferred service to fix first (Form 13); **F05.sc_surrender** Surrender a Scheme Certificate for monthly pension or withdrawal benefit; **F05.higher_member** Apply for pension on higher wages (joint option); track status; **F07.member_report** Report suspicious activity; account recovery; view sessions; **F08.member_file** Register, track, reopen, remind and give feedback on grievances; **F08.review_ask** Ask once, within 30 days of closure, for an independent review of a grievance's resolution, and see its outcome; **F10.worker** An international worker is a member: views their coverage under the international-worker rules (P2.9a); **F13.pmvbry_member** PMVBRY Part A: first-timer incentive in two instalments; complete the financial literacy course; **F13.notify_member** Choose SMS / e-mail and the language of messages; see each notice's delivery; **F14.step_up** Complete step-up confirmation for sensitive actions; **F14.privacy_request** Ask EPFO about my personal data: access, correction, erasure or a grievance (DPDP Act); **F05.retirement_view** See my retirement in one view: PF corpus and pension at 58, the income they give against my wages, and what VPF would add; **F14.digilocker_member** See the e-UAN card and e-PPO issued to my DigiLocker; ask for the e-UAN card
+Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face authentication (UMANG) or OTP; **F02.kyc_seed** Seed KYC (Aadhaar, bank, PAN); **F02.identity_check** Compare my identity on the e-KYC with my member record; a differing name, date of birth or gender is named and routed to the Joint Declaration; **F02.representatives** Authorise a guardian or an agent to act for me within the scopes I choose (view my profile, passbook, claims, service, grievances; raise a grievance), until a date; revoke at any time; **F02.self_service** View profile, service history, UAN card; change contact details; e-nomination; self-marked exit; **F02.jd_submit** Submit Joint Declaration to correct one of 12 profile parameters; **F03.passbook** View passbook, annual statement and taxable-interest split; **F04.preflight** Pre-flight before filing: check account readiness (blockers), service history and eligibility for the chosen form; **F04.claim_file** Check eligibility and file a claim (Form 31 / 19 / 10C); confirm intent; upload documents; **F04.post_submission** After filing: follow the claim's audit trail, cancel it before a decision, or switch to another KYC-verified bank account before payment; **F04.redisburse_request** Submit corrected bank details after a payment return; **F04.receipt** View and print my claim's receipt with a QR code anyone can use to check it; **F04.track** Track claims and notifications; download Form 16A; **F04.transfer** Request Form 13 transfer; confirm auto-transfer; view Annexure K; **F05.apply** Apply for monthly pension (Form 10D) or scheme certificate; **F05.preview** Pre-check pension eligibility across all member IDs; see untransferred service to fix first (Form 13); **F05.sc_surrender** Surrender a Scheme Certificate for monthly pension or withdrawal benefit; **F05.higher_member** Apply for pension on higher wages (joint option); track status; **F07.member_report** Report suspicious activity; account recovery; view sessions; **F08.member_file** Register, track, reopen, remind and give feedback on grievances; **F08.review_ask** Ask once, within 30 days of closure, for an independent review of a grievance's resolution, and see its outcome; **F10.worker** An international worker is a member: views their coverage under the international-worker rules (P2.9a); **F13.pmvbry_member** PMVBRY Part A: first-timer incentive in two instalments; complete the financial literacy course; **F13.notify_member** Choose SMS / e-mail and the language of messages; see each notice's delivery; **F14.step_up** Complete step-up confirmation for sensitive actions; **F14.privacy_request** Ask EPFO about my personal data: access, correction, erasure or a grievance (DPDP Act); **F05.retirement_view** See my retirement in one view: PF corpus and pension at 58, the income they give against my wages, and what VPF would add; **F14.digilocker_member** See the e-UAN card and e-PPO issued to my DigiLocker; ask for the e-UAN card
 
 | Endpoint | Status |
 |---|---|
@@ -80,6 +80,7 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `GET /members/me/pension-scheme-certificate` | W |
 | `GET /members/me/pmvbry` | W |
 | `GET /members/me/privacy-requests` | W |
+| `GET /members/me/representatives` | W |
 | `GET /members/me/retirement-forecast` | W |
 | `GET /members/me/service-history` | W |
 | `GET /members/me/sessions` | W |
@@ -119,6 +120,8 @@ Activities: **F02.uan_self** Self-generate / activate UAN with Aadhaar face auth
 | `POST /members/me/pension-scheme-certificates/{certId}/surrenders` | W |
 | `POST /members/me/pmvbry/financial-literacy-completions` | W |
 | `POST /members/me/privacy-requests` | W |
+| `POST /members/me/representatives` | W |
+| `POST /members/me/representatives/{grantId}/revocations` | W |
 | `POST /members/me/security-reports` | W |
 | `POST /members/me/tax/form-15g-15h` | W |
 | `POST /members/me/transfers` | W |
@@ -196,6 +199,14 @@ Activities: **F04.death_offer** See what can be claimed on a member's recorded d
 | `POST /claimants/death-claims` | W |
 | `POST /claimants/death-claims/{claimId}/beneficiaries` | W |
 | `POST /claimants/family-pension-applications` | W |
+
+#### `member.representative` — A guardian or agent a member has authorised, within the scopes and until the date the member chose (P2.24)
+
+Activities: **F02.represent** Act for a member who authorised me, only within the scopes allowed: every request carries the authorisation and is recorded as mine
+
+| Endpoint | Status |
+|---|---|
+| `GET /representatives/me/members` | W |
 
 #### `claimant.nominee` — Co-beneficiary on a multi-beneficiary death claim (PF / EDLI / pension) holding an allocated percentage share, including shares already settled in the legacy system
 
@@ -1727,6 +1738,8 @@ flowchart LR
   F02_pan_verify["ext.income_tax<br/>Verify PAN"]
   F02_kyc_bulk["employer.operator<br/>Bulk KYC upload; KYC and PAN verification"]
   F02_identity_check["member<br/>Compare my identity on the e-KYC with my member record; a di"]
+  F02_representatives["member<br/>Authorise a guardian or an agent to act for me within the sc"]
+  F02_represent["member.representative<br/>Act for a member who authorised me, only within the scopes a"]
   F02_uan_merge_ao["fo.ao<br/>Merge a duplicate UAN into the member's active UAN once the "]
   F02_uan_merge_apfc["fo.apfc<br/>Merge a duplicate UAN into the member's active UAN once the "]
   F02_missing_details["employer.operator<br/>Fill missing member details; member location mapping; downlo"]
@@ -1745,6 +1758,7 @@ flowchart LR
   F02_uan_self --> F02_kyc_seed
   F02_kyc_seed --> F02_kyc_approve
   F02_kyc_bulk --> F02_kyc_approve
+  F02_representatives --> F02_represent
   F02_exit --> F02_employer_approvals
   F02_jd_submit --> F02_jd_attest
   F02_jd_attest --> F02_jd_initiate

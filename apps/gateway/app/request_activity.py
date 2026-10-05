@@ -51,6 +51,7 @@ async def record_activity(request: Request, status_code: int, elapsed_ms: int) -
         "peer_kind": "gateway-socket-peer",
         "actor": getattr(state, "actor_subject", "anonymous"),
         "stakeholder": getattr(state, "actor_stakeholder", "public"),
+        "acting_for": getattr(state, "acting_for", None),
         "query_fields": sorted(str(key)[:64] for key in request.query_params.keys())[:20],
         "body_fields": getattr(state, "body_fields", []),
         "body_bytes": getattr(state, "body_bytes", None),

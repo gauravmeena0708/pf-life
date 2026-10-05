@@ -57,6 +57,10 @@ def create_app(*, redis_client=None, settings=None) -> FastAPI:
     app.state.settings = settings or get_settings()
     app.state.routes = load_routes()
     app.state.permissions = load_permissions()
+    app.state.permissions.setdefault("member.representative", [{
+        "endpoint": "GET /representatives/me/members", "status": "W", "scope": "own grants",
+        "step_up": False,
+    }])
     app.state.stakeholder_for_claims = lambda claims: stakeholder_for_claims(
         claims, set(app.state.permissions.keys()))
     app.state.redis = redis_client or redis.from_url(app.state.settings.redis_url, decode_responses=False)
