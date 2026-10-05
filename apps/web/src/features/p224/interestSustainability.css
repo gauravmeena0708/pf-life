@@ -1,0 +1,159 @@
+.sustain-container {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.sustain-header {
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.sustain-header h1 {
+  color: var(--navy);
+  margin: 0 0 0.25rem 0;
+  font-size: 1.8rem;
+}
+
+.sustain-subtitle {
+  color: var(--muted);
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.sustain-lang-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.sustain-form-card {
+  border-left: 4px solid var(--accent);
+}
+
+.sustain-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.sustain-help-text {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+.sustain-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.sustain-metric-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px color-mix(in srgb, var(--navy) 5%, transparent);
+}
+
+.sustain-metric-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.sustain-metric-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.sustain-negative { color: var(--q); }
+.sustain-current-card { background: var(--bg); }
+.sustain-current-title { margin: 0; font-size: 1.1rem; color: var(--navy); }
+
+.sustain-metric-sub {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 0.25rem;
+}
+
+.sustain-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+}
+
+.sustain-badge-sustainable {
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  color: var(--navy);
+  border: 1px solid var(--accent);
+}
+
+.sustain-badge-deficit {
+  background: color-mix(in srgb, var(--q) 10%, var(--surface));
+  color: var(--q);
+  border: 1px solid var(--q);
+}
+
+.sustain-sensitivity-box {
+  background: color-mix(in srgb, var(--gold) 5%, var(--surface));
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 1rem;
+}
+
+.sustain-sensitivity-title {
+  color: var(--navy);
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.sustain-sensitivity-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.88rem;
+  padding: 0.25rem 0;
+}
+
+.sustain-alert {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+
+.sustain-alert-error {
+  background: color-mix(in srgb, var(--q) 8%, var(--surface));
+  color: var(--q);
+  border: 1px solid var(--q);
+}
+
+.sustain-alert-success {
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  color: var(--navy);
+  border: 1px solid var(--accent);
+}
+
+.sustain-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}

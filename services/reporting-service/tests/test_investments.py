@@ -39,7 +39,19 @@ def test_signed_feed_replacement_and_investment_flags(ctx):
         async with sessions()() as session:
             return (await session.execute(select(Outbox).where(
                 Outbox.event_type == "FundPositionsReceived.v1"))).scalars().all()
-    assert len(asyncio.run(events())) == 2
+    evs = asyncio.run(events())
+    assert len(evs) == 2
+    def get_payload(ev):
+        raw = ev.payload if isinstance(ev.payload, dict) else json.loads(ev.payload)
+        return raw.get("envelope", {}).get("payload", raw)
+    assert get_payload(evs[0])["by_asset_class"] == [
+        {"asset_class": "DEBT", "book_value_paise": 50},
+        {"asset_class": "GOVT_SECURITIES", "book_value_paise": 50},
+    ]
+    assert get_payload(evs[1])["by_asset_class"] == [
+        {"asset_class": "DEBT", "book_value_paise": 70},
+        {"asset_class": "EQUITY", "book_value_paise": 30},
+    ]
     data = client.get("/api/v1/ho/finance/investments?as_of=2026-10-01", headers=hdr("gov.fiac")).json()["data"]
     fund = data["funds"][0]
     classes = {item["asset_class"]: item for item in fund["asset_classes"]}

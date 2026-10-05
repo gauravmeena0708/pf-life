@@ -121,6 +121,32 @@ async def seed() -> None:
                 await session.execute(text("""INSERT INTO journal_lines (journal_id,account_code,side,amount_paise,account_link_id,share)
                   VALUES (:j,:a,:s,:n,:l,:h)"""), {"j": journal_id, "a": code, "s": side, "n": amount, "l": link, "h": share})
 
+        # P2.24: Illustrative expected yields per asset class (bp)
+        yields = [
+            ("central govt securities", 720, "Central govt securities (illustrative)"),
+            ("state development loans", 740, "State development loans (illustrative)"),
+            ("corporate bonds", 760, "Corporate bonds (illustrative)"),
+            ("equity ETFs", 650, "Equity ETFs (dividend+realised, illustrative)"),
+            ("money market", 650, "Money market (illustrative)"),
+            ("CENTRAL_GOVT_SECURITIES", 720, "Central govt securities (illustrative)"),
+            ("STATE_DEVELOPMENT_LOANS", 740, "State development loans (illustrative)"),
+            ("CORPORATE_BONDS", 760, "Corporate bonds (illustrative)"),
+            ("EQUITY_ETFS", 650, "Equity ETFs (dividend+realised, illustrative)"),
+            ("MONEY_MARKET", 650, "Money market (illustrative)"),
+            ("GOVT_SECURITIES", 720, "Central govt securities (illustrative)"),
+            ("DEBT", 760, "Corporate bonds (illustrative)"),
+            ("SHORT_TERM_DEBT", 650, "Money market (illustrative)"),
+            ("EQUITY", 650, "Equity ETFs (dividend+realised, illustrative)"),
+            ("ASSET_BACKED", 760, "Asset-backed securities (illustrative)"),
+        ]
+        for ac, y_bp, lbl in yields:
+            await session.execute(
+                text("INSERT INTO yield_assumptions (asset_class, yield_bp, label, illustrative) "
+                     "VALUES (:ac, :y, :l, true) ON CONFLICT (asset_class) DO NOTHING"),
+                {"ac": ac, "y": y_bp, "l": lbl}
+            )
+
+
 
 if __name__ == "__main__":
     asyncio.run(seed())
