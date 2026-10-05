@@ -50,6 +50,22 @@ grievances = Table(
     Column("cpgrams_registration_no", String(80), unique=True),
 )
 
+# One independent review per grievance; the unique key also guards concurrent requests.
+grievance_reviews = Table(
+    "grievance_reviews", metadata,
+    Column("grievance_id", String(40), primary_key=True),
+    Column("reason", Text, nullable=False),
+    Column("original_resolution", Text, nullable=False),
+    Column("requested_at", DateTime(timezone=True), nullable=False),
+    Column("request_deadline", DateTime(timezone=True), nullable=False),
+    Column("decision_due_at", DateTime(timezone=True), nullable=False),
+    Column("state", String(20), nullable=False),
+    Column("outcome", String(20)),
+    Column("reasons", Text),
+    Column("reviewer_subject", String(80)),
+    Column("decided_at", DateTime(timezone=True)),
+)
+
 rti_requests = Table(
     "rti_requests", metadata,
     Column("request_id", String(40), primary_key=True),
