@@ -197,6 +197,7 @@ async def my_grievances(actor: Actor = Depends(MEMBER), session: AsyncSession = 
                                   .order_by(grievances.c.created_at.desc()))).mappings().all()
     return envelope([{"grievance_id": r["grievance_id"], "category": r["category"], "subject": r["subject_line"],
                       "state": r["state"], "tier": r["tier"], "linked_claim_id": r["linked_claim_id"],
+                      "resolution": r["resolution"],                     # the member's own answer (P2.24 review)
                       "sla_due_at": r["sla_due_at"].isoformat() if r["sla_due_at"] else None,
                       "created_at": r["created_at"].isoformat() if r["created_at"] else None} for r in rows])
 
