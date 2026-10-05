@@ -48,6 +48,24 @@ demands = Table(
     Column("source_at", DateTime(timezone=True)),   # when contribution-service changed it: an older event never overwrites a newer state
 )
 
+# P2.19: a principal employer's recoveries from a contractor whose dues it was assessed for (EPF Act s.8A).
+contractor_recoveries = Table(
+    "contractor_recoveries", metadata,
+    Column("recovery_id", String(40), primary_key=True),
+    Column("establishment_id", String(40), nullable=False, index=True),
+    Column("case_id", String(40), nullable=False, index=True),
+    Column("contractor_name", String(200), nullable=False),
+    Column("contractor_establishment_id", String(40)),
+    Column("work_order_ref", String(120)),
+    Column("mode", String(40), nullable=False),
+    Column("amount_paise", BigInteger, nullable=False),
+    Column("reference", String(120), nullable=False),
+    Column("recovered_on", String(10), nullable=False),
+    Column("note", Text),
+    Column("recorded_by", String(80), nullable=False),
+    Column("created_at", DateTime(timezone=True), nullable=False),
+)
+
 # VISHWAS: settling disputed 14B damages (illustrative share in the rules).
 vishwas_applications = Table(
     "vishwas_applications", metadata,

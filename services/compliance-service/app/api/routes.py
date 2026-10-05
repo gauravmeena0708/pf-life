@@ -6,7 +6,7 @@ import json
 import re
 import secrets
 from datetime import UTC, date, datetime
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
@@ -14,7 +14,7 @@ from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infra.db import sessions
-from app.infra.tables import compliance_cases, demands, establishments, office_staff, vishwas_applications
+from app.infra.tables import compliance_cases, contractor_recoveries, demands, establishments, office_staff, vishwas_applications
 from epfo_auth import Actor, require_stakeholder, require_step_up
 from epfo_observability import Problem, envelope
 from epfo_persistence import add_event, audit
@@ -350,3 +350,78 @@ async def decide(applicationId: str, body: Decision, actor: Actor = Depends(requ
         await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder, action=f"vishwas.{state.lower()}",
                     target_type="vishwas_application", target_id=applicationId, detail=body.note)
     return envelope(_application({**dict(a), "state": state, "revised_paise": revised if state == "APPROVED" else None, "decision_note": body.note}))
+
+
+# ── P2.19a: Contractor recoveries (EPF Act s.8A) ─────────────────────────────────────────────────────────────
+class ContractorRecoveryInput(BaseModel):
+    case_id: str = Field(min_length=1)
+    contractor_name: str = Field(min_length=1)
+    contractor_establishment_id: str | None = None
+    work_order_ref: str | None = None
+    mode: Literal["DEDUCTION_FROM_BILLS", "DEBT_RECOVERY", "OTHER"] = "DEDUCTION_FROM_BILLS"
+    amount_paise: int = Field(gt=0)
+    reference: str = Field(min_length=1)
+    recovered_on: date
+    note: str | None = None
+
+
+@router.post("/api/v1/employers/me/contractor-recoveries", status_code=201)
+async def record_contractor_recovery(
+    body: ContractorRecoveryInput,
+    actor: Actor = Depends(require_stakeholder("employer.owner", "employer.signatory")),
+    session: AsyncSession = Depends(db)
+) -> dict:
+    eid = actor.establishment_id
+    if not eid:
+        raise Problem(403, "/problems/forbidden", "Establishment ID required in session")
+    async with session.begin():
+        # EPF Act s.8A: Principal employer records recovery from contractor as information (deduction from bills or debt).
+        recovery_id = f"REC-CTR-{secrets.token_hex(6).upper()}"
+        now_dt = datetime.now(UTC)
+        row = {
+            "recovery_id": recovery_id,
+            "establishment_id": eid,
+            "case_id": body.case_id,
+            "contractor_name": body.contractor_name,
+            "contractor_establishment_id": body.contractor_establishment_id,
+            "work_order_ref": body.work_order_ref,
+            "mode": body.mode,
+            "amount_paise": body.amount_paise,
+            "reference": body.reference,
+            "recovered_on": body.recovered_on.isoformat(),
+            "note": body.note,
+            "recorded_by": actor.subject,
+            "created_at": now_dt,
+        }
+        await session.execute(insert(contractor_recoveries).values(**row))
+        await audit(session, actor_subject=actor.subject, actor_stakeholder=actor.stakeholder,
+                    action="contractor_recovery.recorded", target_type="contractor_recovery",
+                    target_id=recovery_id,
+                    detail=f"EPF Act s.8A: Recorded {body.mode} recovery of ₹{body.amount_paise / 100:.2f} from {body.contractor_name}")
+        row["created_at"] = row["created_at"].isoformat()
+    return envelope(row)
+
+
+@router.get("/api/v1/employers/me/contractor-recoveries")
+async def list_contractor_recoveries(
+    actor: Actor = Depends(require_stakeholder("employer.owner", "employer.signatory")),
+    session: AsyncSession = Depends(db)
+) -> dict:
+    eid = actor.establishment_id
+    if not eid:
+        raise Problem(403, "/problems/forbidden", "Establishment ID required in session")
+    rows = (await session.execute(
+        select(contractor_recoveries)
+        .where(contractor_recoveries.c.establishment_id == eid)
+        .order_by(contractor_recoveries.c.created_at.desc())
+    )).mappings().all()
+    result = []
+    for r in rows:
+        d = dict(r)
+        if isinstance(d.get("created_at"), datetime):
+            d["created_at"] = d["created_at"].isoformat()
+        result.append(d)
+    return envelope(result)
+
+
+# ── P2.19b: Demand payments in statutory order (EPF Act s.8A, s.7Q, s.14B) ──────────────────────────────────

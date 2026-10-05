@@ -158,6 +158,16 @@ async def list_inspections(state: str | None = Query(None), actor: Actor = Depen
     return envelope([await inspection_view(session, dict(row)) for row in rows])
 
 
+class ContractorFinding(BaseModel):
+    contractor_name: str = Field(min_length=1)
+    contractor_establishment_id: str | None = None
+    traceable: bool = True
+    unpaid_dues_paise: int = Field(default=0, ge=0)
+    workers_count: int = Field(default=0, ge=0)
+    work_order_ref: str | None = None
+    findings: str | None = None
+
+
 class ReportInput(BaseModel):
     visited_on: date
     employees_found: int = Field(ge=0)
@@ -167,6 +177,7 @@ class ReportInput(BaseModel):
     dues_estimate_paise: int = Field(ge=0)
     recommendation: Literal["INITIATE_7A_DUES", "INITIATE_7A_APPLICABILITY", "NO_ACTION"]
     documents: list[str] = Field(default_factory=list)
+    contractors: list[ContractorFinding] = Field(default_factory=list)
 
 
 @router.post(BASE + "/inspections/{inspection_id}/reports")
@@ -486,6 +497,13 @@ class MemberDecision(BaseModel):
     from_date: date | None = None                  # membership from this date when eligible
 
 
+class ContractorLiability(BaseModel):
+    contractor_name: str = Field(min_length=1)
+    contractor_establishment_id: str | None = None
+    traceable: bool = True
+    work_order_ref: str | None = None
+
+
 class OrderInput(BaseModel):
     kind: Literal["7A", "14B", "7Q", "26B"]
     decisions: list[MemberDecision] = Field(default_factory=list)   # 26B: each disputed employee's membership
@@ -494,6 +512,7 @@ class OrderInput(BaseModel):
     lump_sum_reason: str | None = None
     reasoning: str = Field(min_length=1)
     ex_parte: bool
+    contractor: ContractorLiability | None = None
 
 
 DEMAND_KIND = {"14B": "DAMAGES_14B", "7Q": "INTEREST_7Q"}
@@ -504,6 +523,13 @@ async def order(case_id: str, body: OrderInput, actor: Actor = Depends(require_s
                 session: AsyncSession = Depends(db)):
     async with session.begin():
         row = await assigned(session, case_id, actor)
+        if body.contractor:
+            # EPF Act s.8A: A contractor with its own EPF code number who is traceable is liable itself — dues cannot be assessed against principal.
+            if body.contractor.contractor_establishment_id and body.contractor.traceable:
+                raise Problem(422, "/problems/validation",
+                              "Contractor liable itself",
+                              "A contractor with its own EPF code number who is traceable is liable itself — "
+                              "dues cannot be assessed against the principal employer under EPF Act s.8A")
         section = row.get("section") or "7A"
         takes = {"7A": {"7A"}, "7C": {"7A"}, "14B": {"14B", "7Q"}, "26B": {"26B"}}[section]
         if body.kind not in takes:
@@ -584,14 +610,27 @@ async def order(case_id: str, body: OrderInput, actor: Actor = Depends(require_s
             lines, working = dues, json.dumps(dues)
         require_step_up(actor, "pass-order", case_id, None, total)
         review = " (order passed under review, section 7B)" if earlier and section != "14B" else ""
+        contractor_note = ""
+        if body.contractor:
+            # EPF Act s.8A: Contractor dues assessed against principal employer when contractor is not traceable.
+            # Principal employer may recover from contractor by deduction from amounts payable or as a debt.
+            contractor_note = (
+                f"\nContractor liability (EPF Act s.8A): Contractor '{body.contractor.contractor_name}' "
+                f"({'code: ' + body.contractor.contractor_establishment_id if body.contractor.contractor_establishment_id else 'no EPF code'}) "
+                f"is not traceable at site. Dues are assessed against the principal employer under EPF Act s.8A, who may recover them "
+                f"from the contractor by deduction from amounts payable or as a debt."
+            )
         text = (f"{heading}{review} — {row['diary_no']}\nParties: EPFO and {name} ({row['establishment_id']}).\n"
                 f"Period: {row['period_from']} to {row['period_to']}.\nNotice served by e-mail and speed post; "
                 f"hearings: {', '.join(a['detail']['held_at'] for a in hearings)}.\nFindings and reasons: {body.reasoning}\n"
                 f"{'Dues by account and month' if section != '14B' else 'Delayed remittances'}:\n{table}\n"
-                f"Total: {rupees(total)}. The establishment is directed to pay within 15 days.")
+                f"Total: {rupees(total)}. The establishment is directed to pay within 15 days."
+                f"{contractor_note}")
         late = now() > dt(row["order_due_at"])
         detail = {"kind": body.kind, "diary_no": row["diary_no"], "dues": lines, "total_paise": total, "reasoning": body.reasoning,
                   "ex_parte": body.ex_parte, "late": late, "order_due_at": iso(row["order_due_at"]), "text": text, "demand_id": demand_id}
+        if body.contractor:
+            detail["contractor_liability"] = body.contractor.model_dump(mode="json")
         for a in earlier:                                                                     # a 7A order replaced under review
             if section != "14B" and not a["detail"].get("superseded"):
                 await session.execute(update(inquiry_actions).where(inquiry_actions.c.case_id == case_id,
