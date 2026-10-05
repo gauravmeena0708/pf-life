@@ -114,7 +114,8 @@ async def post_transfer(session: AsyncSession, transfer_id: str, uan: str, frm: 
 
 async def on_trust_annexure_k(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
-    leg = (await session.execute(text("SELECT * FROM transfer_legs WHERE transfer_id=:t"),
+    lock = " FOR UPDATE" if session.bind.dialect.name == "postgresql" else ""
+    leg = (await session.execute(text("SELECT * FROM transfer_legs WHERE transfer_id=:t" + lock),
                                  {"t": p["transfer_id"]})).mappings().first()
     if not leg or leg["direction"] != "TRUST_TO_EPFO" or leg["to_account_link_id"] != p["to_account_link_id"]:
         raise ValueError("Annexure K does not match an awaiting trust transfer")
@@ -148,15 +149,22 @@ async def on_trust_annexure_k(session: AsyncSession, event: dict[str, Any]) -> N
 
 async def on_eps_service_transferred(session: AsyncSession, event: dict[str, Any]) -> None:
     p = event["payload"]
-    leg = (await session.execute(text("SELECT detail FROM transfer_legs WHERE transfer_id=:t AND from_account_link_id=:f "
-                                      "AND to_account_link_id=:to"), {"t": p["transfer_id"],
-                                      "f": p["from_account_link_id"], "to": p["to_account_link_id"]})).scalar_one_or_none()
-    if leg is None:
+    lock = " FOR UPDATE" if session.bind.dialect.name == "postgresql" else ""
+    exists = (await session.execute(text("SELECT 1 FROM transfer_legs WHERE transfer_id=:t AND from_account_link_id=:f "
+                                         "AND to_account_link_id=:to" + lock), {"t": p["transfer_id"],
+                                         "f": p["from_account_link_id"], "to": p["to_account_link_id"]})).first()
+    if not exists:
         return
-    detail = leg if isinstance(leg, dict) else json.loads(leg)
-    detail.update({"service_months": int(p["service_months"]), "eps_breaks_months": int(p["breaks_months"])})
-    await session.execute(text("UPDATE transfer_legs SET eps_leg='COMPLETED',detail=:d,updated_at=:at WHERE transfer_id=:t"),
-                          {"d": json.dumps(detail), "at": datetime.now(UTC), "t": p["transfer_id"]})
+    eps_detail = {
+        "service_months": int(p["service_months"]),
+        "breaks_months": int(p["breaks_months"]),
+        "eps_breaks_months": int(p["breaks_months"]),
+    }
+    await session.execute(text(
+        "UPDATE transfer_legs SET eps_leg='COMPLETED',eps_detail=:ed,updated_at=:at "
+        "WHERE transfer_id=:t AND from_account_link_id=:f AND to_account_link_id=:to"
+    ), {"ed": json.dumps(eps_detail), "at": datetime.now(UTC), "t": p["transfer_id"],
+        "f": p["from_account_link_id"], "to": p["to_account_link_id"]})
 
 
 async def on_member_registered(session: AsyncSession, event: dict[str, Any]) -> None:

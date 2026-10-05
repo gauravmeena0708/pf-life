@@ -15,17 +15,21 @@ OFFICE = require_stakeholder("fo.da_accounts", "fo.ao")
 
 def present(row) -> dict:
     detail = row["detail"] if isinstance(row["detail"], dict) else json.loads(row["detail"] or "{}")
+    raw_eps = row["eps_detail"] if "eps_detail" in row and row["eps_detail"] else None
+    eps_detail = (raw_eps if isinstance(raw_eps, dict) else json.loads(raw_eps)) if raw_eps else {}
     trust = detail.get("trust_name") or "the trust"
     pf_labels = {"COMPLETED": "Completed", "SENT_TO_TRUST": f"Sent to {trust}",
                  "AWAITING_TRUST": f"Waiting for the PF from {trust}",
                  "ANNEXURE_K_RECEIVED": "Annexure K received from the trust"}
     eps_labels = {"WAITING_FOR_PF": "Waiting for the PF transfer to complete", "COMPLETED": "Completed"}
+    service_months = eps_detail.get("service_months") if eps_detail else detail.get("service_months")
+    breaks_months = (eps_detail.get("breaks_months") or eps_detail.get("eps_breaks_months")) if eps_detail else detail.get("eps_breaks_months")
     return {"transfer_id": row["transfer_id"], "direction": row["direction"],
             "from_account_link_id": row["from_account_link_id"], "to_account_link_id": row["to_account_link_id"],
             "pf_leg": {"state": row["pf_leg"], "label": pf_labels[row["pf_leg"]], "detail": detail},
             "eps_leg": {"state": row["eps_leg"], "label": eps_labels[row["eps_leg"]],
-                        "detail": {"service_months": detail.get("service_months"),
-                                   "breaks_months": detail.get("eps_breaks_months")}}}
+                        "detail": {"service_months": service_months,
+                                   "breaks_months": breaks_months}}}
 
 
 @router.get("/api/v1/members/me/transfer-legs")
