@@ -18,6 +18,20 @@ DDL = [
 
 
 @pytest.fixture
+def separate_sessions(tmp_path):
+    """A file database where each session has its own connection, as on Postgres: concurrent transactions do not commit
+    each other's work (the in-memory fixture shares one connection)."""
+    engine = create_async_engine(f"sqlite+aiosqlite:///{tmp_path}/c.db")
+
+    async def setup():
+        async with engine.begin() as conn:
+            for ddl in DDL:
+                await conn.execute(text(ddl))
+    asyncio.run(setup())
+    return async_sessionmaker(engine, expire_on_commit=False)
+
+
+@pytest.fixture
 def sessions():
     engine = create_async_engine("sqlite+aiosqlite:///:memory:")
 
@@ -116,3 +130,65 @@ def test_audit_row(sessions):
             async with s.begin():
                 return (await s.execute(text("SELECT action FROM audit_local"))).scalar()
     assert run(go()) == "X"
+
+
+class _Message:
+    """Enough of an aio_pika message for the consumer: a body, ack and reject."""
+    def __init__(self, event):
+        self.body, self.headers, self.outcome = __import__("json").dumps(event).encode(), {}, None
+
+    async def ack(self):
+        self.outcome = "ack"
+
+    async def reject(self, requeue=False):
+        self.outcome = "dead-letter"
+
+
+def test_same_record_events_apply_in_arrival_order_even_when_the_first_fails_once(separate_sessions, monkeypatch):
+    """P2.30 — CI's bug: a new demand's OPEN and WITHDRAWN events handled at once; OPEN failed, was re-queued behind
+    WITHDRAWN and applied last, leaving the copy OPEN. Now the same record's events wait their turn and a failure is
+    retried in place; another record's event does not wait."""
+    from epfo_persistence import consumer as c
+    real_sleep = asyncio.sleep
+    monkeypatch.setattr(c.asyncio, "sleep", lambda *_: real_sleep(0))
+    order, failed_once = [], set()
+    opened = envelope(producer="contribution", event_type="DemandStateChanged.v1", aggregate_type="demand", aggregate_id="D1",
+                      payload={"state": "OPEN"}, correlation_id="c")
+    withdrawn = envelope(producer="contribution", event_type="DemandStateChanged.v1", aggregate_type="demand", aggregate_id="D1",
+                         payload={"state": "WITHDRAWN"}, correlation_id="c")
+    other = envelope(producer="contribution", event_type="DemandStateChanged.v1", aggregate_type="demand", aggregate_id="D2",
+                     payload={"state": "OPEN"}, correlation_id="c")
+
+    async def handler(session, e):
+        if e["event_id"] == opened["event_id"] and e["event_id"] not in failed_once:
+            failed_once.add(e["event_id"])
+            await asyncio.sleep(0)
+            raise RuntimeError("insert collided")              # what happened on CI
+        order.append((e["aggregate_id"], e["payload"]["state"]))
+
+    consumer = c.Consumer.__new__(c.Consumer)
+    consumer.queue_name, consumer.handler, consumer.sessions, consumer._locks, consumer._holders = "q", handler, separate_sessions, {}, {}
+    messages = [_Message(opened), _Message(withdrawn), _Message(other)]
+
+    async def go():
+        await asyncio.gather(*(consumer._on_message(m) for m in messages))
+    run(go())
+    d1 = [state for agg, state in order if agg == "D1"]
+    assert d1 == ["OPEN", "WITHDRAWN"]                          # the later state is applied last
+    assert ("D2", "OPEN") in order and order.index(("D2", "OPEN")) < order.index(("D1", "OPEN"))   # D2 did not wait for D1's retry
+    assert [m.outcome for m in messages] == ["ack", "ack", "ack"] and not consumer._locks       # locks forgotten once idle
+
+
+def test_an_event_failing_every_time_goes_to_the_dead_letter_queue(sessions, monkeypatch):
+    from epfo_persistence import consumer as c
+    real_sleep = asyncio.sleep
+    monkeypatch.setattr(c.asyncio, "sleep", lambda *_: real_sleep(0))
+    event = envelope(producer="p", event_type="X.v1", aggregate_type="a", aggregate_id="9", payload={}, correlation_id="c")
+
+    async def failing(session, e):
+        raise RuntimeError("always")
+    consumer = c.Consumer.__new__(c.Consumer)
+    consumer.queue_name, consumer.handler, consumer.sessions, consumer._locks, consumer._holders = "q", failing, sessions, {}, {}
+    m = _Message(event)
+    run(consumer._on_message(m))
+    assert m.outcome == "dead-letter"

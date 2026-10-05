@@ -2,6 +2,11 @@
 
 The handler runs in one database transaction together with the inbox insert, so an event is applied
 exactly once even though RabbitMQ delivers at least once.
+
+Order (P2.30): up to ten messages are handled at once, but events about the same record — the same aggregate — are
+applied one after another in the order they arrived (a first-in-first-out lock per aggregate), and a failed event is
+retried in place rather than re-queued behind later ones. A producer publishes its outbox in order, so a copy kept from
+one producer's events sees them in the order they happened.
 """
 import asyncio
 import json
@@ -32,30 +37,60 @@ async def apply_once(sessions: async_sessionmaker, event: dict[str, Any], handle
     return True
 
 
+def order_key(event: dict[str, Any]) -> str:
+    """The record an event is about: its aggregate (an event without one is ordered by nothing but itself)."""
+    if event.get("aggregate_id"):
+        return f"{event.get('aggregate_type', '')}:{event['aggregate_id']}"
+    return f"event:{event.get('event_id')}"
+
+
 class Consumer:
     def __init__(self, engine: AsyncEngine, rabbitmq_url: str, queue: str, bindings: list[str], handler: Handler) -> None:
         self.url, self.queue_name, self.bindings, self.handler = rabbitmq_url, queue, bindings, handler
         self.sessions = async_sessionmaker(engine, expire_on_commit=False)
         self._task: asyncio.Task | None = None
+        self._locks: dict[str, asyncio.Lock] = {}
+        self._holders: dict[str, int] = {}
+
+    def _lock_for(self, key: str) -> asyncio.Lock:
+        lock = self._locks.get(key)
+        if lock is None:
+            lock = self._locks[key] = asyncio.Lock()
+        self._holders[key] = self._holders.get(key, 0) + 1
+        return lock
+
+    def _release(self, key: str) -> None:
+        self._holders[key] -= 1
+        if not self._holders[key]:                       # nobody waiting: forget the lock
+            del self._holders[key], self._locks[key]
 
     async def _on_message(self, message: aio_pika.abc.AbstractIncomingMessage) -> None:
-        attempts = int((message.headers or {}).get("x-attempts", 0)) + 1
         try:
             event = json.loads(message.body)
-            applied = await apply_once(self.sessions, event, self.handler)
-            log.info("event_consumed", event_type=event.get("event_type"), event_id=event.get("event_id"), applied=applied)
-            await message.ack()
-        except Exception:
-            log.exception("event_handler_failed", queue=self.queue_name, attempts=attempts)
-            if attempts >= MAX_ATTEMPTS:
-                await message.reject(requeue=False)  # -> dead-letter queue
-            else:
-                await asyncio.sleep(min(2 ** attempts, 30) / 10)
-                await self._channel.default_exchange.publish(
-                    aio_pika.Message(message.body, headers={**(message.headers or {}), "x-attempts": attempts},
-                                     content_type="application/json", delivery_mode=aio_pika.DeliveryMode.PERSISTENT),
-                    routing_key=self.queue_name)
+        except (ValueError, TypeError):
+            log.exception("event_unreadable", queue=self.queue_name)
+            await message.reject(requeue=False)          # -> dead-letter queue
+            return
+        key = order_key(event)
+        lock = self._lock_for(key)
+        try:
+            async with lock:                             # the same record's events, one at a time, in arrival order
+                await self._apply_with_retries(message, event)
+        finally:
+            self._release(key)
+
+    async def _apply_with_retries(self, message: aio_pika.abc.AbstractIncomingMessage, event: dict[str, Any]) -> None:
+        for attempt in range(1, MAX_ATTEMPTS + 1):
+            try:
+                applied = await apply_once(self.sessions, event, self.handler)
+                log.info("event_consumed", event_type=event.get("event_type"), event_id=event.get("event_id"), applied=applied)
                 await message.ack()
+                return
+            except Exception:
+                log.exception("event_handler_failed", queue=self.queue_name, attempts=attempt)
+                if attempt < MAX_ATTEMPTS:
+                    await asyncio.sleep(min(2 ** attempt, 30) / 10)   # retried here, not behind later events
+        await message.reject(requeue=False)              # -> dead-letter queue
 
     async def _run(self) -> None:
         while True:
