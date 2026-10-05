@@ -42,6 +42,21 @@ def age_on(born: date, day: date) -> int:
     return day.year - born.year - ((day.month, day.day) < (born.month, born.day))
 
 
+def pension_at_start(salary_paise: int, service_months: int, born: date, start: date,
+                     rules: dict[str, Any], disablement: bool = False) -> dict[str, Any]:
+    """Settle from service ending at 58, with the elected deferred start up to 60."""
+    normal_age = section(rules, "pension")["normal_age_years"]
+    result = pension_on(salary_paise, service_months, age_on(born, start), rules, disablement=disablement)
+    if not result["eligible"] or disablement:
+        return result
+    years = min(2, max(0, age_on(born, start) - normal_age))
+    if years:
+        # EPS para 12(7B): 4% per completed deferred year, compounded (8.16% at 60).
+        result["monthly_paise"] = result["monthly_paise"] * 104 ** years // 100 ** years
+        result["working"] += f"; deferred {years} year(s), plus {'4' if years == 1 else '8.16'}%"
+    return result
+
+
 async def approved(session: AsyncSession, ppo_id: str) -> list[dict[str, Any]]:
     rows = (await session.execute(select(pension_revisions).where(pension_revisions.c.ppo_id == ppo_id,
                                                                   pension_revisions.c.state == "APPROVED")

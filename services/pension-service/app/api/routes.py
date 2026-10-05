@@ -132,14 +132,14 @@ async def decide_revision(ppo_id: str, body: RevisionDecision, actor: Actor = De
     return envelope(_revision(r))
 
 
-def eps_service(spells: list[dict[str, Any]], day: date) -> tuple[int, list[dict[str, Any]]]:
+def eps_service(spells: list[dict[str, Any]], day: date, end_of_membership: date | None = None) -> tuple[int, list[dict[str, Any]]]:
     """Pensionable service across a member's IDs (P2.9b): the union of the spells — overlapping jobs count once — less the
     breaks without contributions (EPS para 9), in completed months; and each member ID's own months."""
     def months(a: date, b: date) -> int:
         return max(0, (b.year - a.year) * 12 + b.month - a.month - (b.day < a.day))
     by_id, merged = [], []
     for sp in sorted(spells, key=lambda x: x["date_of_joining"]):
-        start, end = sp["date_of_joining"], min(sp["date_of_exit"] or day, day)
+        start, end = sp["date_of_joining"], min(sp["date_of_exit"] or day, day, end_of_membership or day)
         if sp.get("eps_member") is False:                   # P2.19c: not eligible for EPS — no pension service here
             by_id.append({"account_link_id": sp["account_link_id"], "establishment_id": sp.get("establishment_id"), "from": start.isoformat(),
                           "to": sp["date_of_exit"].isoformat() if sp["date_of_exit"] else None, "months": 0, "breaks_months": 0,
@@ -149,6 +149,8 @@ def eps_service(spells: list[dict[str, Any]], day: date) -> tuple[int, list[dict
                       "to": sp["date_of_exit"].isoformat() if sp["date_of_exit"] else None, "months": months(start, end),
                       "breaks_months": int(sp.get("breaks_months") or 0), "pf_with": sp.get("pf_with", "EPFO"),
                       "eps_transferred_to": sp.get("transferred_to")})
+        if end <= start:
+            continue
         if merged and start <= merged[-1][1]:
             merged[-1][1] = max(merged[-1][1], end)
         else:
@@ -183,7 +185,8 @@ async def my_estimate(actor: Actor = Depends(MEMBER), session: AsyncSession = De
                 (exemption["status"] == "ACTIVE" or exemption["ended_on"] is not None and exemption["ended_on"] > spell_end)
                 and spell_end >= exemption["effective_from"]):
             sp["pf_with"] = "TRUST " + exemption["trust_name"]
-    served, by_id = eps_service(spells, day)
+    # EPS para 6A: wages after 58 go to EPF, and add no EPS service.
+    served, by_id = eps_service(spells, day, normal)
     in_service = any(sp["date_of_exit"] is None for sp in spells)
     to_normal = served + max(0, (normal - day).days * 12 // 365) if in_service else served
     scenarios = [

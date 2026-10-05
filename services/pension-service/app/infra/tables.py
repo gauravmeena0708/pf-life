@@ -145,6 +145,10 @@ family_members = Table(
     Column("relation", String(20), nullable=False),
     Column("date_of_birth", Date, nullable=False),
     Column("disabled", Boolean, nullable=False, server_default=false()),   # a disabled child: pension for life (2.13.10)
+    Column("dependent", Boolean, nullable=False, server_default=false()),  # dependent parent (EPS para 16(5)(aa))
+    Column("nomination_valid", Boolean, nullable=False, server_default=false()),
+    Column("date_of_death", Date),
+    Column("evidence_ref", String(120)),
     Column("subject", String(80)),
 )
 

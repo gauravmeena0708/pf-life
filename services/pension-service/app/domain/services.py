@@ -13,7 +13,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.pension import catch_up_payments, today
-from app.infra.tables import pensioners
+from app.infra.tables import family_members, pensioners
 
 LC_VALIDITY_DAYS = 365
 DA_ACTIVITIES = {"BASIC_DETAILS", "PENSION_START", "PENSION_STOP", "DLC_REVALIDATION", "UNHOLD_TRANSACTIONS"}
@@ -65,6 +65,11 @@ async def apply_activity(session: AsyncSession, activity: dict[str, Any]) -> str
         return "Pension stopped."
     if kind == "DEATH":
         await set_status(session, p, "STOPPED", f"Death on {d.get('date_of_death', '—')}; family pension to be settled")
+        if p.get("pension_kind") == "FATHER" and d.get("date_of_death"):
+            # EPS para 16(5)(aa): the dependent mother succeeds the father after his death.
+            await session.execute(update(family_members).where(family_members.c.uan == p["uan"],
+                              family_members.c.subject == p["subject"], family_members.c.relation == "FATHER").values(
+                              date_of_death=date.fromisoformat(d["date_of_death"])))
         return "Pension stopped on the pensioner's death."
     if kind == "BASIC_DETAILS":
         values = {k: v for k, v in (("bank_ifsc", d.get("bank_ifsc")), ("bank_account_last4", d.get("bank_account_last4"))) if v}
