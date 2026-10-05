@@ -167,6 +167,28 @@ class AccountReactivation(Base):
     reactivated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class ScwfTransfer(Base):
+    __tablename__ = "scwf_transfers"
+    account_link_id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    uan: Mapped[str] = mapped_column(String(32))
+    identification_year: Mapped[int] = mapped_column(Integer)
+    amount_paise: Mapped[int] = mapped_column(BigInteger)
+    transferred_on: Mapped[date] = mapped_column(Date)
+    state: Mapped[str] = mapped_column(String(20))
+    reclaimed_on: Mapped[date | None] = mapped_column(Date)
+    escheated_on: Mapped[date | None] = mapped_column(Date)
+    journal_id: Mapped[str] = mapped_column(ForeignKey("journals.id"))
+
+
+class EstablishmentMerger(Base):
+    __tablename__ = "establishment_mergers"
+    from_establishment_id: Mapped[str] = mapped_column(ForeignKey("establishments.id"), primary_key=True)
+    to_establishment_id: Mapped[str] = mapped_column(ForeignKey("establishments.id"))
+    effective_on: Mapped[date] = mapped_column(Date)
+    recorded_by: Mapped[str] = mapped_column(String(80))
+    recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class InoperativeSearchRef(Base):
     __tablename__ = "inoperative_search_refs"
     search_ref: Mapped[str] = mapped_column(String(80), primary_key=True)
@@ -584,4 +606,3 @@ class PayRun(Base):
     state: Mapped[str] = mapped_column(String(20), default="ACCEPTED")
     filing_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-
